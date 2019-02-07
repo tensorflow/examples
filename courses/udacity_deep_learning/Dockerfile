@@ -1,4 +1,4 @@
-FROM gcr.io/tensorflow/tensorflow:latest
+FROM gcr.io/tensorflow/tensorflow:1.0.0
 LABEL maintainer="Vincent Vanhoucke <vanhoucke@google.com>"
 
 # Pillow needs libjpeg by default as of 3.0.
