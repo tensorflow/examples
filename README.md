@@ -4,15 +4,32 @@
   <img src="https://www.tensorflow.org/images/tf_logo_transp.png"><br><br>
 </div>
 
-We welcome contributions to the TensorFlow examples from the community. See the
-[Contributing to TensorFlow](https://www.tensorflow.org/community/contributing)
+<h2>Most important links!</h2>
+
+* [Community examples](./community)
+* [Course materials](./courses/udacity_deep_learning) for the [Deep Learning](https://www.udacity.com/course/deep-learning--ud730) class on Udacity
+
+If you are looking to learn TensorFlow, don't miss the
+[core TensorFlow documentation](http://github.com/tensorflow/docs)
+which is largely runnable code.
+Those notebooks can be opened in Colab from
+[tensorflow.org](tensorflow.org).
+
+<h2>What is this repo?</h2>
+
+This is the TensorFlow example repo.  It has several classes of material:
+
+* Showcase examples and documentation for our fantastic [TensorFlow Community](tensorflow.org/community)
+* Provide examples mentioned on TensorFlow.org
+* Publish material supporting official TensorFlow courses
+* Publish supporting material for [blog.tensorflow.org](blog.tensorflow.org) and [youtube.com/tensorflow](youtube.com/tensorflow)
+
+We welcome community contributions, see [CONTRIBUTING.md](CONTRIBUTING.md) and, for style help,
+[Writing TensorFlow documentation](https://www.tensorflow.org/community/documentation)
 guide.
 
-To file an issue, use the tracker in the [tensorflow/tensorflow](https://github.com/tensorflow/tensorflow/issues/new?template=20-documentation-issue.md) repo and add the label `type:docs`.
-
-## Contribution guidelines
-
-To contribute documentation, review the [contribution guidelines](CONTRIBUTING.md).
+To file an issue, use the tracker in the
+[tensorflow/tensorflow](https://github.com/tensorflow/tensorflow/issues/new?template=20-documentation-issue.md) repo.
 
 ## License
 
