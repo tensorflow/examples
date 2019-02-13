@@ -13,16 +13,16 @@ If you are looking to learn TensorFlow, don't miss the
 [core TensorFlow documentation](http://github.com/tensorflow/docs)
 which is largely runnable code.
 Those notebooks can be opened in Colab from
-[tensorflow.org](tensorflow.org).
+[tensorflow.org](https://tensorflow.org).
 
 <h2>What is this repo?</h2>
 
 This is the TensorFlow example repo.  It has several classes of material:
 
-* Showcase examples and documentation for our fantastic [TensorFlow Community](tensorflow.org/community)
+* Showcase examples and documentation for our fantastic [TensorFlow Community](https://tensorflow.org/community)
 * Provide examples mentioned on TensorFlow.org
 * Publish material supporting official TensorFlow courses
-* Publish supporting material for [blog.tensorflow.org](blog.tensorflow.org) and [youtube.com/tensorflow](youtube.com/tensorflow)
+* Publish supporting material for the [TensorFlow Blog](https://blog.tensorflow.org) and [TensorFlow YouTube Channel](https://youtube.com/tensorflow)
 
 We welcome community contributions, see [CONTRIBUTING.md](CONTRIBUTING.md) and, for style help,
 [Writing TensorFlow documentation](https://www.tensorflow.org/community/documentation)
