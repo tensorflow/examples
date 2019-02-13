@@ -22,7 +22,7 @@ This is the TensorFlow example repo.  It has several classes of material:
 * Showcase examples and documentation for our fantastic [TensorFlow Community](https://tensorflow.org/community)
 * Provide examples mentioned on TensorFlow.org
 * Publish material supporting official TensorFlow courses
-* Publish supporting material for [TensorFlow Blog](https://blog.tensorflow.org) and [TensorFlow YouTube Channel](https://youtube.com/tensorflow)
+* Publish supporting material for the [TensorFlow Blog](https://blog.tensorflow.org) and [TensorFlow YouTube Channel](https://youtube.com/tensorflow)
 
 We welcome community contributions, see [CONTRIBUTING.md](CONTRIBUTING.md) and, for style help,
 [Writing TensorFlow documentation](https://www.tensorflow.org/community/documentation)
