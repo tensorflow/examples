@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import time
 from absl import flags
-import tensorflow.compat.v2 as tf
+import tensorflow as tf # TF2
 from tensorflow_examples.test_models.Pix2Pix import data_download
 from tensorflow_examples.test_models.Pix2Pix import pix2pix
 
@@ -54,5 +54,5 @@ class Pix2PixBenchmark(tf.test.Benchmark):
     self.report_benchmark(wall_time=wall_time_sec)
 
 if __name__ == "__main__":
-  tf.enable_v2_behavior()
+  assert tf.__version__.startswith('2')
   tf.test.main()

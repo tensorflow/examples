@@ -8,8 +8,8 @@ from __future__ import print_function
 import os
 from absl import app
 from absl import flags
-import tensorflow.compat.v2 as tf
-tf.enable_v2_behavior()
+import tensorflow as tf # TF2
+assert tf.__version__.startswith('2')
 
 FLAGS = flags.FLAGS
 
