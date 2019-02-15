@@ -1,0 +1,422 @@
+"""Pix2pix.
+"""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import os
+from absl import app
+from absl import flags
+import tensorflow.compat.v2 as tf
+tf.enable_v2_behavior()
+
+FLAGS = flags.FLAGS
+
+flags.DEFINE_integer('buffer_size', 400, 'Shuffle buffer size')
+flags.DEFINE_integer('batch_size', 1, 'Batch Size')
+flags.DEFINE_integer('epochs', 1, 'Number of epochs')
+flags.DEFINE_string('path', None, 'Path to the data folder')
+flags.DEFINE_boolean('enable_function', True, 'Enable Function?')
+
+IMG_WIDTH = 256
+IMG_HEIGHT = 256
+OUTPUT_CHANNELS = 3
+LAMBDA = 100
+AUTOTUNE = tf.data.experimental.AUTOTUNE
+loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+
+
+def load(image_file):
+  """Loads the image and generates input and target image.
+
+  Args:
+    image_file: .jpeg file
+
+  Returns:
+    Input image, target image
+  """
+  image = tf.io.read_file(image_file)
+  image = tf.image.decode_jpeg(image)
+
+  w = tf.shape(image)[1]
+
+  w = w // 2
+  real_image = image[:, :w, :]
+  input_image = image[:, w:, :]
+
+  input_image = tf.cast(input_image, tf.float32)
+  real_image = tf.cast(real_image, tf.float32)
+
+  return input_image, real_image
+
+
+def resize(input_image, real_image, height, width):
+  input_image = tf.image.resize(input_image, [height, width],
+                                align_corners=True,
+                                method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+  real_image = tf.image.resize(real_image, [height, width],
+                               align_corners=True,
+                               method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+
+  return input_image, real_image
+
+
+def random_crop(input_image, real_image):
+  stacked_image = tf.stack([input_image, real_image], axis=0)
+  cropped_image = tf.image.random_crop(
+      stacked_image, size=[2, IMG_HEIGHT, IMG_WIDTH, 3])
+
+  return cropped_image[0], cropped_image[1]
+
+
+def normalize(input_image, real_image):
+  input_image = (input_image / 127.5) - 1
+  real_image = (real_image / 127.5) - 1
+
+  return input_image, real_image
+
+
+@tf.function
+def random_jitter(input_image, real_image):
+  """Random jittering.
+
+  Resizes to 286 x 286 and then randomly crops to IMG_HEIGHT x IMG_WIDTH.
+
+  Args:
+    input_image: Input Image
+    real_image: Real Image
+
+  Returns:
+    Input Image, real image
+  """
+  # resizing to 286 x 286 x 3
+  input_image, real_image = resize(input_image, real_image, 286, 286)
+
+  # randomly cropping to 256 x 256 x 3
+  input_image, real_image = random_crop(input_image, real_image)
+
+  if tf.random.uniform(()) > 0.5:
+    # random mirroring
+    input_image = tf.image.flip_left_right(input_image)
+    real_image = tf.image.flip_left_right(real_image)
+
+  return input_image, real_image
+
+
+def load_image_train(image_file):
+  input_image, real_image = load(image_file)
+  input_image, real_image = random_jitter(input_image, real_image)
+  input_image, real_image = normalize(input_image, real_image)
+
+  return input_image, real_image
+
+
+def load_image_test(image_file):
+  input_image, real_image = load(image_file)
+  input_image, real_image = resize(input_image, real_image,
+                                   IMG_HEIGHT, IMG_WIDTH)
+  input_image, real_image = normalize(input_image, real_image)
+
+  return input_image, real_image
+
+
+def create_dataset(path_to_train_images, path_to_test_images,
+                   buffer_size, batch_size):
+  """Creates a tf.data Dataset.
+
+  Args:
+    path_to_train_images: Path to train images folder.
+    path_to_test_images: Path to test images folder.
+    buffer_size: Buffer size for shuffling the dataset.
+    batch_size: Batch size for batching the dataset.
+
+  Returns:
+    train dataset, test dataset
+  """
+  train_dataset = tf.data.Dataset.list_files(path_to_train_images)
+  train_dataset = train_dataset.shuffle(buffer_size)
+  train_dataset = train_dataset.map(load_image_train,
+                                    num_parallel_calls=AUTOTUNE)
+  train_dataset = train_dataset.batch(batch_size)
+
+  test_dataset = tf.data.Dataset.list_files(path_to_test_images)
+  test_dataset = test_dataset.map(load_image_test, num_parallel_calls=AUTOTUNE)
+  test_dataset = test_dataset.batch(batch_size)
+
+  return train_dataset, test_dataset
+
+
+def downsample(filters, size, apply_batchnorm=True):
+  """Downsamples an input.
+
+  Conv2D => Batchnorm => LeakyRelu
+
+  Args:
+    filters: number of filters
+    size: filter size
+    apply_batchnorm: If True, adds the batchnorm layer
+
+  Returns:
+    Downsample Sequential Model
+  """
+  initializer = tf.random_normal_initializer(0., 0.02)
+
+  result = tf.keras.Sequential()
+  result.add(
+      tf.keras.layers.Conv2D(filters, size, strides=2, padding='same',
+                             kernel_initializer=initializer, use_bias=False))
+
+  if apply_batchnorm:
+    result.add(tf.keras.layers.BatchNormalization())
+
+  result.add(tf.keras.layers.LeakyReLU())
+
+  return result
+
+
+def upsample(filters, size, apply_dropout=False):
+  """Upsamples an input.
+
+  Conv2DTranspose => Batchnorm => Dropout => Relu
+
+  Args:
+    filters: number of filters
+    size: filter size
+    apply_dropout: If True, adds the dropout layer
+
+  Returns:
+    Upsample Sequential Model
+  """
+  initializer = tf.random_normal_initializer(0., 0.02)
+
+  result = tf.keras.Sequential()
+  result.add(
+      tf.keras.layers.Conv2DTranspose(filters, size, strides=2,
+                                      padding='same',
+                                      kernel_initializer=initializer,
+                                      use_bias=False))
+
+  result.add(tf.keras.layers.BatchNormalization())
+
+  if apply_dropout:
+    result.add(tf.keras.layers.Dropout(0.5))
+
+  result.add(tf.keras.layers.ReLU())
+
+  return result
+
+
+def generator_model():
+  """Modified u-net generator model.
+
+  Returns:
+    Generator model
+  """
+  down_stack = [
+      downsample(64, 4, apply_batchnorm=False),  # (bs, 128, 128, 64)
+      downsample(128, 4),  # (bs, 64, 64, 128)
+      downsample(256, 4),  # (bs, 32, 32, 256)
+      downsample(512, 4),  # (bs, 16, 16, 512)
+      downsample(512, 4),  # (bs, 8, 8, 512)
+      downsample(512, 4),  # (bs, 4, 4, 512)
+      downsample(512, 4),  # (bs, 2, 2, 512)
+      downsample(512, 4),  # (bs, 1, 1, 512)
+  ]
+
+  up_stack = [
+      upsample(512, 4, apply_dropout=True),  # (bs, 2, 2, 1024)
+      upsample(512, 4, apply_dropout=True),  # (bs, 4, 4, 1024)
+      upsample(512, 4, apply_dropout=True),  # (bs, 8, 8, 1024)
+      upsample(512, 4),  # (bs, 16, 16, 1024)
+      upsample(256, 4),  # (bs, 32, 32, 512)
+      upsample(128, 4),  # (bs, 64, 64, 256)
+      upsample(64, 4),  # (bs, 128, 128, 128)
+  ]
+
+  initializer = tf.random_normal_initializer(0., 0.02)
+  last = tf.keras.layers.Conv2DTranspose(OUTPUT_CHANNELS, 4,
+                                         strides=2,
+                                         padding='same',
+                                         kernel_initializer=initializer,
+                                         activation='tanh')  # (bs, 256, 256, 3)
+
+  concat = tf.keras.layers.Concatenate()
+
+  inputs = tf.keras.layers.Input(shape=[None, None, 3])
+  x = inputs
+
+  # Downsampling through the model
+  skips = []
+  for down in down_stack:
+    x = down(x)
+    skips.append(x)
+
+  skips = reversed(skips[:-1])
+
+  # Upsampling and establishing the skip connections
+  for up, skip in zip(up_stack, skips):
+    x = up(x)
+    x = concat([x, skip])
+
+  x = last(x)
+
+  return tf.keras.Model(inputs=inputs, outputs=x)
+
+
+def discriminator_model():
+  """PatchGan discriminator model.
+
+  Returns:
+    Discriminator model
+  """
+  initializer = tf.random_normal_initializer(0., 0.02)
+
+  inp = tf.keras.layers.Input(shape=[None, None, 3], name='input_image')
+  tar = tf.keras.layers.Input(shape=[None, None, 3], name='target_image')
+
+  x = tf.keras.layers.concatenate([inp, tar])  # (bs, 256, 256, channels*2)
+
+  down1 = downsample(64, 4, False)(x)  # (bs, 128, 128, 64)
+  down2 = downsample(128, 4)(down1)  # (bs, 64, 64, 128)
+  down3 = downsample(256, 4)(down2)  # (bs, 32, 32, 256)
+
+  zero_pad1 = tf.keras.layers.ZeroPadding2D()(down3)  # (bs, 34, 34, 256)
+  conv = tf.keras.layers.Conv2D(512, 4, strides=1,
+                                kernel_initializer=initializer,
+                                use_bias=False)(zero_pad1)  # (bs, 31, 31, 512)
+
+  batchnorm1 = tf.keras.layers.BatchNormalization()(conv)
+
+  leaky_relu = tf.keras.layers.LeakyReLU()(batchnorm1)
+
+  zero_pad2 = tf.keras.layers.ZeroPadding2D()(leaky_relu)  # (bs, 33, 33, 512)
+
+  last = tf.keras.layers.Conv2D(
+      1, 4, strides=1,
+      kernel_initializer=initializer)(zero_pad2)  # (bs, 30, 30, 1)
+
+  return tf.keras.Model(inputs=[inp, tar], outputs=last)
+
+
+def discriminator_loss(disc_real_output, disc_generated_output):
+  real_loss = loss_object(tf.ones_like(disc_real_output), disc_real_output)
+
+  generated_loss = loss_object(tf.zeros_like(
+      disc_generated_output), disc_generated_output)
+
+  total_disc_loss = real_loss + generated_loss
+
+  return total_disc_loss
+
+
+def generator_loss(disc_generated_output, gen_output, target):
+  gan_loss = loss_object(tf.ones_like(
+      disc_generated_output), disc_generated_output)
+
+  # mean absolute error
+  l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
+  total_gen_loss = gan_loss + (LAMBDA * l1_loss)
+  return total_gen_loss
+
+
+def get_checkpoint(generator, discriminator):
+  checkpoint_dir = './training_checkpoints'
+  checkpoint_prefix = os.path.join(checkpoint_dir, 'ckpt')
+  checkpoint = tf.train.Checkpoint(
+      generator_optimizer=generator_optimizer,
+      discriminator_optimizer=discriminator_optimizer,
+      generator=generator,
+      discriminator=discriminator)
+  return checkpoint, checkpoint_prefix
+
+
+def train_step(generator, discriminator, input_image, target_image):
+  """One train step over the generator and discriminator model.
+
+  Args:
+    generator: Generator model.
+    discriminator: Discriminator model.
+    input_image: Input Image.
+    target_image: Target image.
+
+  Returns:
+    generator loss, discriminator loss.
+  """
+  with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+    gen_output = generator(input_image, training=True)
+
+    disc_real_output = discriminator(
+        [input_image, target_image], training=True)
+    disc_generated_output = discriminator(
+        [input_image, gen_output], training=True)
+
+    gen_loss = generator_loss(disc_generated_output
+                              , gen_output, target_image)
+    disc_loss = discriminator_loss(disc_real_output, disc_generated_output)
+
+  generator_gradients = gen_tape.gradient(
+      gen_loss, generator.trainable_variables)
+  discriminator_gradients = disc_tape.gradient(
+      disc_loss, discriminator.trainable_variables)
+
+  generator_optimizer.apply_gradients(zip(
+      generator_gradients, generator.trainable_variables))
+  discriminator_optimizer.apply_gradients(zip(
+      discriminator_gradients, discriminator.trainable_variables))
+
+  return gen_loss, disc_loss
+
+
+def train(dataset, generator, discriminator, checkpoint, checkpoint_pr, epochs):
+  """Train the GAN for x number of epochs.
+
+  Args:
+    dataset: train dataset.
+    generator: Generator model.
+    discriminator: Discriminator model.
+    checkpoint: checkpoint object.
+    checkpoint_pr: prefix in which the checkpoints are stored.
+    epochs: number of epochs.
+  """
+  for epoch in range(epochs):
+    for input_image, target_image in dataset:
+      gen_loss, disc_loss = train_step(
+          generator, discriminator, input_image, target_image)
+
+    # saving (checkpoint) the model every 20 epochs
+    if (epoch + 1) % 20 == 0:
+      checkpoint.save(file_prefix=checkpoint_pr)
+
+    template = 'Epoch {}, Generator loss {}, Discriminator Loss {}'
+    print (template.format(epoch, gen_loss, disc_loss))
+
+
+def _main(argv):
+  del argv
+  kwargs = {'epochs': FLAGS.epochs, 'enable_function': FLAGS.enable_function,
+            'path': FLAGS.path, 'buffer_size': FLAGS.buffer_size,
+            'batch_size': FLAGS.batch_size}
+  main(**kwargs)
+
+
+def main(epochs, enable_function, path, buffer_size, batch_size):
+  global train_step  # pylint: disable=global-variable-undefined
+  if enable_function:
+    train_step = tf.function(train_step)
+  path_to_folder = path
+  train_dataset, test_dataset = create_dataset(  # pylint: disable=unused-variable
+      os.path.join(path_to_folder, 'train/*.jpg'),
+      os.path.join(path_to_folder, 'test/*.jpg'), buffer_size, batch_size)
+  generator = generator_model()
+  discriminator = discriminator_model()
+  checkpoint, checkpoint_pr = get_checkpoint(generator, discriminator)
+  print ('Training ...')
+  train(train_dataset, generator, discriminator, checkpoint, checkpoint_pr,
+        epochs)
+
+
+if __name__ == '__main__':
+  app.run(_main)
