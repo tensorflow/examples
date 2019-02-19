@@ -1,8 +1,8 @@
-# Contributing
+﻿# Contributing
 
 You don't need to be a developer to make a significant
 impact on TensorFlow documentation and examples-—just a
-[GitHubaccount](https://github.com/). 
+[GitHub account](https://github.com/). 
 
 Questions about TensorFlow usage are best addressed on
 [StackOverflow](https://stackoverflow.com/questions/tagged/tensorflow) or the
