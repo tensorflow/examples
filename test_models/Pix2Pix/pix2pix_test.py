@@ -15,18 +15,36 @@ FLAGS = flags.FLAGS
 
 class Pix2pixTest(tf.test.TestCase):
 
-  def test_one_step(self):
+  def test_one_step_with_function(self):
     epochs = 1
+    batch_size = 1
+    enable_function = True
+
     input_image = tf.random.uniform((256, 256, 3))
     target_image = tf.random.uniform((256, 256, 3))
 
     train_dataset = tf.data.Dataset.from_tensors(
-        (input_image, target_image)).batch(1)
+        (input_image, target_image)).batch(batch_size)
+    checkpoint_pr = pix2pix.get_checkpoint_prefix()
 
-    gen = pix2pix.generator_model()
-    disc = pix2pix.discriminator_model()
-    checkpoint, checkpoint_pr = pix2pix.get_checkpoint(gen, disc)
-    pix2pix.train(train_dataset, gen, disc, checkpoint, checkpoint_pr, epochs)
+    pix2pix_obj = pix2pix.Pix2pix(epochs, enable_function)
+    pix2pix_obj.train(train_dataset, checkpoint_pr)
+
+  def test_one_step_without_function(self):
+    epochs = 1
+    batch_size = 1
+    enable_function = False
+
+    input_image = tf.random.uniform((256, 256, 3))
+    target_image = tf.random.uniform((256, 256, 3))
+
+    train_dataset = tf.data.Dataset.from_tensors(
+        (input_image, target_image)).batch(batch_size)
+
+    pix2pix_obj = pix2pix.Pix2pix(epochs, enable_function)
+
+    checkpoint_pr = pix2pix.get_checkpoint_prefix()
+    pix2pix_obj.train(train_dataset, checkpoint_pr)
 
 
 class Pix2PixBenchmark(tf.test.Benchmark):

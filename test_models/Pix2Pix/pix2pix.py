@@ -21,12 +21,7 @@ flags.DEFINE_boolean('enable_function', True, 'Enable Function?')
 
 IMG_WIDTH = 256
 IMG_HEIGHT = 256
-OUTPUT_CHANNELS = 3
-LAMBDA = 100
 AUTOTUNE = tf.data.experimental.AUTOTUNE
-loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
-discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
 
 
 def load(image_file):
@@ -123,27 +118,28 @@ def load_image_test(image_file):
   return input_image, real_image
 
 
-def create_dataset(path_to_train_images, path_to_test_images,
-                   buffer_size, batch_size):
+def create_dataset(path_to_train_images, path_to_test_images, buffer_size,
+                   batch_size):
   """Creates a tf.data Dataset.
 
   Args:
     path_to_train_images: Path to train images folder.
     path_to_test_images: Path to test images folder.
-    buffer_size: Buffer size for shuffling the dataset.
-    batch_size: Batch size for batching the dataset.
+    buffer_size: Shuffle buffer size.
+    batch_size: Batch size
 
   Returns:
     train dataset, test dataset
   """
   train_dataset = tf.data.Dataset.list_files(path_to_train_images)
   train_dataset = train_dataset.shuffle(buffer_size)
-  train_dataset = train_dataset.map(load_image_train,
-                                    num_parallel_calls=AUTOTUNE)
+  train_dataset = train_dataset.map(
+      load_image_train, num_parallel_calls=AUTOTUNE)
   train_dataset = train_dataset.batch(batch_size)
 
   test_dataset = tf.data.Dataset.list_files(path_to_test_images)
-  test_dataset = test_dataset.map(load_image_test, num_parallel_calls=AUTOTUNE)
+  test_dataset = test_dataset.map(
+      load_image_test, num_parallel_calls=AUTOTUNE)
   test_dataset = test_dataset.batch(batch_size)
 
   return train_dataset, test_dataset
@@ -209,9 +205,11 @@ def upsample(filters, size, apply_dropout=False):
   return result
 
 
-def generator_model():
+def generator_model(output_channels):
   """Modified u-net generator model.
 
+  Args:
+    output_channels: Output channels
   Returns:
     Generator model
   """
@@ -237,11 +235,10 @@ def generator_model():
   ]
 
   initializer = tf.random_normal_initializer(0., 0.02)
-  last = tf.keras.layers.Conv2DTranspose(OUTPUT_CHANNELS, 4,
-                                         strides=2,
-                                         padding='same',
-                                         kernel_initializer=initializer,
-                                         activation='tanh')  # (bs, 256, 256, 3)
+  last = tf.keras.layers.Conv2DTranspose(
+      output_channels, 4, strides=2,
+      padding='same', kernel_initializer=initializer,
+      activation='tanh')  # (bs, 256, 256, 3)
 
   concat = tf.keras.layers.Concatenate()
 
@@ -284,9 +281,9 @@ def discriminator_model():
   down3 = downsample(256, 4)(down2)  # (bs, 32, 32, 256)
 
   zero_pad1 = tf.keras.layers.ZeroPadding2D()(down3)  # (bs, 34, 34, 256)
-  conv = tf.keras.layers.Conv2D(512, 4, strides=1,
-                                kernel_initializer=initializer,
-                                use_bias=False)(zero_pad1)  # (bs, 31, 31, 512)
+  conv = tf.keras.layers.Conv2D(
+      512, 4, strides=1, kernel_initializer=initializer,
+      use_bias=False)(zero_pad1)  # (bs, 31, 31, 512)
 
   batchnorm1 = tf.keras.layers.BatchNormalization()(conv)
 
@@ -301,100 +298,116 @@ def discriminator_model():
   return tf.keras.Model(inputs=[inp, tar], outputs=last)
 
 
-def discriminator_loss(disc_real_output, disc_generated_output):
-  real_loss = loss_object(tf.ones_like(disc_real_output), disc_real_output)
-
-  generated_loss = loss_object(tf.zeros_like(
-      disc_generated_output), disc_generated_output)
-
-  total_disc_loss = real_loss + generated_loss
-
-  return total_disc_loss
-
-
-def generator_loss(disc_generated_output, gen_output, target):
-  gan_loss = loss_object(tf.ones_like(
-      disc_generated_output), disc_generated_output)
-
-  # mean absolute error
-  l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
-  total_gen_loss = gan_loss + (LAMBDA * l1_loss)
-  return total_gen_loss
-
-
-def get_checkpoint(generator, discriminator):
+def get_checkpoint_prefix():
   checkpoint_dir = './training_checkpoints'
   checkpoint_prefix = os.path.join(checkpoint_dir, 'ckpt')
-  checkpoint = tf.train.Checkpoint(
-      generator_optimizer=generator_optimizer,
-      discriminator_optimizer=discriminator_optimizer,
-      generator=generator,
-      discriminator=discriminator)
-  return checkpoint, checkpoint_prefix
+
+  return checkpoint_prefix
 
 
-def train_step(generator, discriminator, input_image, target_image):
-  """One train step over the generator and discriminator model.
+class Pix2pix(object):
+  """Pix2pix class.
 
   Args:
-    generator: Generator model.
-    discriminator: Discriminator model.
-    input_image: Input Image.
-    target_image: Target image.
-
-  Returns:
-    generator loss, discriminator loss.
+    epochs: Number of epochs.
+    enable_function: If true, train step is decorated with tf.function.
+    buffer_size: Shuffle buffer size..
+    batch_size: Batch size.
   """
-  with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-    gen_output = generator(input_image, training=True)
 
-    disc_real_output = discriminator(
-        [input_image, target_image], training=True)
-    disc_generated_output = discriminator(
-        [input_image, gen_output], training=True)
+  def __init__(self, epochs, enable_function):
+    self.epochs = epochs
+    self.enable_function = enable_function
+    self.lambda_value = 100
+    self.loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    self.generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+    self.discriminator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+    self.generator = generator_model(output_channels=3)
+    self.discriminator = discriminator_model()
+    self.checkpoint = tf.train.Checkpoint(
+        generator_optimizer=self.generator_optimizer,
+        discriminator_optimizer=self.discriminator_optimizer,
+        generator=self.generator,
+        discriminator=self.discriminator)
 
-    gen_loss = generator_loss(disc_generated_output
-                              , gen_output, target_image)
-    disc_loss = discriminator_loss(disc_real_output, disc_generated_output)
+  def discriminator_loss(self, disc_real_output, disc_generated_output):
+    real_loss = self.loss_object(
+        tf.ones_like(disc_real_output), disc_real_output)
 
-  generator_gradients = gen_tape.gradient(
-      gen_loss, generator.trainable_variables)
-  discriminator_gradients = disc_tape.gradient(
-      disc_loss, discriminator.trainable_variables)
+    generated_loss = self.loss_object(tf.zeros_like(
+        disc_generated_output), disc_generated_output)
 
-  generator_optimizer.apply_gradients(zip(
-      generator_gradients, generator.trainable_variables))
-  discriminator_optimizer.apply_gradients(zip(
-      discriminator_gradients, discriminator.trainable_variables))
+    total_disc_loss = real_loss + generated_loss
 
-  return gen_loss, disc_loss
+    return total_disc_loss
+
+  def generator_loss(self, disc_generated_output, gen_output, target):
+    gan_loss = self.loss_object(tf.ones_like(
+        disc_generated_output), disc_generated_output)
+
+    # mean absolute error
+    l1_loss = tf.reduce_mean(tf.abs(target - gen_output))
+    total_gen_loss = gan_loss + (self.lambda_value * l1_loss)
+    return total_gen_loss
+
+  def train_step(self, input_image, target_image):
+    """One train step over the generator and discriminator model.
+
+    Args:
+      input_image: Input Image.
+      target_image: Target image.
+
+    Returns:
+      generator loss, discriminator loss.
+    """
+    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+      gen_output = self.generator(input_image, training=True)
+
+      disc_real_output = self.discriminator(
+          [input_image, target_image], training=True)
+      disc_generated_output = self.discriminator(
+          [input_image, gen_output], training=True)
+
+      gen_loss = self.generator_loss(
+          disc_generated_output, gen_output, target_image)
+      disc_loss = self.discriminator_loss(
+          disc_real_output, disc_generated_output)
+
+    generator_gradients = gen_tape.gradient(
+        gen_loss, self.generator.trainable_variables)
+    discriminator_gradients = disc_tape.gradient(
+        disc_loss, self.discriminator.trainable_variables)
+
+    self.generator_optimizer.apply_gradients(zip(
+        generator_gradients, self.generator.trainable_variables))
+    self.discriminator_optimizer.apply_gradients(zip(
+        discriminator_gradients, self.discriminator.trainable_variables))
+
+    return gen_loss, disc_loss
+
+  def train(self, dataset, checkpoint_pr):
+    """Train the GAN for x number of epochs.
+
+    Args:
+      dataset: train dataset.
+      checkpoint_pr: prefix in which the checkpoints are stored.
+    """
+    if self.enable_function:
+      self.train_step = tf.function(self.train_step)
+
+    for epoch in range(self.epochs):
+      for input_image, target_image in dataset:
+        gen_loss, disc_loss = self.train_step(input_image, target_image)
+
+      # saving (checkpoint) the model every 20 epochs
+      if (epoch + 1) % 20 == 0:
+        self.checkpoint.save(file_prefix=checkpoint_pr)
+
+      template = 'Epoch {}, Generator loss {}, Discriminator Loss {}'
+      print (template.format(epoch, gen_loss, disc_loss))
 
 
-def train(dataset, generator, discriminator, checkpoint, checkpoint_pr, epochs):
-  """Train the GAN for x number of epochs.
-
-  Args:
-    dataset: train dataset.
-    generator: Generator model.
-    discriminator: Discriminator model.
-    checkpoint: checkpoint object.
-    checkpoint_pr: prefix in which the checkpoints are stored.
-    epochs: number of epochs.
-  """
-  for epoch in range(epochs):
-    for input_image, target_image in dataset:
-      gen_loss, disc_loss = train_step(
-          generator, discriminator, input_image, target_image)
-
-    # saving (checkpoint) the model every 20 epochs
-    if (epoch + 1) % 20 == 0:
-      checkpoint.save(file_prefix=checkpoint_pr)
-
-    template = 'Epoch {}, Generator loss {}, Discriminator Loss {}'
-    print (template.format(epoch, gen_loss, disc_loss))
-
-
-def _main(argv):
+def run_main(argv):
   del argv
   kwargs = {'epochs': FLAGS.epochs, 'enable_function': FLAGS.enable_function,
             'path': FLAGS.path, 'buffer_size': FLAGS.buffer_size,
@@ -403,20 +416,18 @@ def _main(argv):
 
 
 def main(epochs, enable_function, path, buffer_size, batch_size):
-  global train_step  # pylint: disable=global-variable-undefined
-  if enable_function:
-    train_step = tf.function(train_step)
   path_to_folder = path
-  train_dataset, test_dataset = create_dataset(  # pylint: disable=unused-variable
+
+  pix2pix_object = Pix2pix(epochs, enable_function)
+
+  train_dataset, _ = create_dataset(
       os.path.join(path_to_folder, 'train/*.jpg'),
-      os.path.join(path_to_folder, 'test/*.jpg'), buffer_size, batch_size)
-  generator = generator_model()
-  discriminator = discriminator_model()
-  checkpoint, checkpoint_pr = get_checkpoint(generator, discriminator)
+      os.path.join(path_to_folder, 'test/*.jpg'),
+      buffer_size, batch_size)
+  checkpoint_pr = get_checkpoint_prefix()
   print ('Training ...')
-  train(train_dataset, generator, discriminator, checkpoint, checkpoint_pr,
-        epochs)
+  pix2pix_object.train(train_dataset, checkpoint_pr)
 
 
 if __name__ == '__main__':
-  app.run(_main)
+  app.run(run_main)
