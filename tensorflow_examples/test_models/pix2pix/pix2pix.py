@@ -6,6 +6,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import time
 from absl import app
 from absl import flags
 import tensorflow as tf # TF2
@@ -391,13 +392,21 @@ class Pix2pix(object):
     Args:
       dataset: train dataset.
       checkpoint_pr: prefix in which the checkpoints are stored.
+
+    Returns:
+      Time for each epoch.
     """
+    time_list = []
     if self.enable_function:
       self.train_step = tf.function(self.train_step)
 
     for epoch in range(self.epochs):
+      start_time = time.time()
       for input_image, target_image in dataset:
         gen_loss, disc_loss = self.train_step(input_image, target_image)
+
+      wall_time_sec = time.time() - start_time
+      time_list.append(wall_time_sec)
 
       # saving (checkpoint) the model every 20 epochs
       if (epoch + 1) % 20 == 0:
@@ -405,6 +414,8 @@ class Pix2pix(object):
 
       template = 'Epoch {}, Generator loss {}, Discriminator Loss {}'
       print (template.format(epoch, gen_loss, disc_loss))
+
+    return time_list
 
 
 def run_main(argv):
@@ -426,7 +437,7 @@ def main(epochs, enable_function, path, buffer_size, batch_size):
       buffer_size, batch_size)
   checkpoint_pr = get_checkpoint_prefix()
   print ('Training ...')
-  pix2pix_object.train(train_dataset, checkpoint_pr)
+  return pix2pix_object.train(train_dataset, checkpoint_pr)
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import time
 from absl import app
 from absl import flags
 import tensorflow as tf # TF2
@@ -167,13 +168,21 @@ class Dcgan(object):
     Args:
       dataset: train dataset.
       checkpoint_pr: prefix in which the checkpoints are stored.
+
+    Returns:
+      Time for each epoch.
     """
+    time_list = []
     if self.enable_function:
       self.train_step = tf.function(self.train_step)
 
     for epoch in range(self.epochs):
+      start_time = time.time()
       for image, _ in dataset:
         gen_loss, disc_loss = self.train_step(image)
+
+      wall_time_sec = time.time() - start_time
+      time_list.append(wall_time_sec)
 
       # saving (checkpoint) the model every 15 epochs
       if (epoch + 1) % 15 == 0:
@@ -181,6 +190,8 @@ class Dcgan(object):
 
       template = 'Epoch {}, Generator loss {}, Discriminator Loss {}'
       print (template.format(epoch, gen_loss, disc_loss))
+
+    return time_list
 
 
 def run_main(argv):
@@ -196,7 +207,7 @@ def main(epochs, enable_function, buffer_size, batch_size):
 
   dcgan_obj = Dcgan(epochs, enable_function, batch_size)
   print ('Training ...')
-  dcgan_obj.train(train_dataset, checkpoint_pr)
+  return dcgan_obj.train(train_dataset, checkpoint_pr)
 
 if __name__ == '__main__':
   app.run(run_main)

@@ -4,10 +4,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import time
 from absl import flags
 import tensorflow as tf # TF2
-from tensorflow_examples.test_models.DCGAN import dcgan
+from tensorflow_examples.test_models.dcgan import dcgan
 
 FLAGS = flags.FLAGS
 
@@ -49,21 +48,19 @@ class DCGANBenchmark(tf.test.Benchmark):
     self.output_dir = output_dir
 
   def benchmark_with_function(self):
-    kwargs = {"epochs": 1, "enable_function": True,
+    kwargs = {"epochs": 6, "enable_function": True,
               "buffer_size": 10000, "batch_size": 64}
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_without_function(self):
-    kwargs = {"epochs": 1, "enable_function": False,
+    kwargs = {"epochs": 6, "enable_function": False,
               "buffer_size": 10000, "batch_size": 64}
     self._run_and_report_benchmark(**kwargs)
 
   def _run_and_report_benchmark(self, **kwargs):
-    start_time_sec = time.time()
-    dcgan.main(**kwargs)
-    wall_time_sec = time.time() - start_time_sec
-
-    self.report_benchmark(wall_time=wall_time_sec)
+    time_list = dcgan.main(**kwargs)
+    # 1st epoch is the warmup epoch hence skipping it for calculating time.
+    self.report_benchmark(wall_time=tf.reduce_mean(time_list[1:]))
 
 if __name__ == "__main__":
   assert tf.__version__.startswith('2')
