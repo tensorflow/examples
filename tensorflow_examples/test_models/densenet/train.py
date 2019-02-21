@@ -100,7 +100,8 @@ class Train(object):
     model.compile(
         optimizer=self.optimizer, loss=self.loss_object, metrics=['accuracy'])
     history = model.fit(
-        train_dataset, epochs=self.epochs, validation_data=test_dataset)
+        train_dataset, epochs=self.epochs, validation_data=test_dataset,
+        verbose=2)
     return (history.history['loss'][-1],
             history.history['accuracy'][-1],
             history.history['val_loss'][-1],
