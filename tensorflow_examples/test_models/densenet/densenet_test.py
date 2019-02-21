@@ -104,16 +104,16 @@ class DenseNetBenchmark(tf.test.Benchmark):
               'train_mode': 'keras_fit'}
     self._run_and_report_benchmark(**kwargs)
 
-  def benchmark_with_function_custom_loops_100_epochs(self):
-    kwargs = {'epochs': 100, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
+  def benchmark_with_function_custom_loops_300_epochs(self):
+    kwargs = {'epochs': 300, 'enable_function': True, 'buffer_size': 50000,
+              'batch_size': 64, 'depth_of_model': 100, 'growth_rate': 12,
               'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
               'data_format': 'channels_last', 'dropout_rate': 0.2}
     self._run_and_report_benchmark(**kwargs)
 
-  def benchmark_with_keras_fit_100_epochs(self):
-    kwargs = {'epochs': 100, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
+  def benchmark_with_keras_fit_300_epochs(self):
+    kwargs = {'epochs': 300, 'enable_function': True, 'buffer_size': 50000,
+              'batch_size': 64, 'depth_of_model': 100, 'growth_rate': 12,
               'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
               'data_format': 'channels_last', 'dropout_rate': 0.2,
               'train_mode': 'keras_fit'}
@@ -124,8 +124,8 @@ class DenseNetBenchmark(tf.test.Benchmark):
     train_loss, train_acc, test_loss, test_acc = train.main(**kwargs)
     wall_time_sec = time.time() - start_time_sec
 
-    extras = {'train_loss': train_loss, 'train_acc': train_acc,
-              'test_loss': test_loss, 'test_acc': test_acc}
+    extras = {'top_1_train_loss': train_loss, 'top_1_train_accuracy': train_acc,
+              'top_1_test_loss': test_loss, 'top_1_test_accuracy': test_acc}
 
     self.report_benchmark(
         wall_time=wall_time_sec, extras=extras)

@@ -111,6 +111,7 @@ class Train(object):
     with tf.GradientTape() as tape:
       predictions = model(image, training=True)
       loss = self.loss_object(label, predictions)
+      loss += sum(model.losses)
     gradients = tape.gradient(loss, model.trainable_variables)
     self.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
