@@ -101,8 +101,10 @@ class Train(object):
         optimizer=self.optimizer, loss=self.loss_object, metrics=['accuracy'])
     history = model.fit(
         train_dataset, epochs=self.epochs, validation_data=test_dataset)
-    return (history.history['loss'][-1], history.history['acc'][-1],
-            history.history['val_loss'][-1], history.history['val_acc'][-1])
+    return (history.history['loss'][-1],
+            history.history['accuracy'][-1],
+            history.history['val_loss'][-1],
+            history.history['val_accuracy'][-1])
 
   def train_step(self, image, label, model):
     with tf.GradientTape() as tape:
