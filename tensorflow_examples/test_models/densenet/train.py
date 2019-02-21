@@ -42,10 +42,15 @@ flags.DEFINE_string('train_mode', 'custom_loop',
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
+MEAN = [125.3, 123.0, 113.9]
+STD = [63.0, 62.1, 66.7]
+
 
 def scale(image, label):
   image = tf.cast(image, tf.float32)
-  image /= 255
+  image = tf.image.random_flip_left_right(image)
+
+  image = (image - MEAN) / STD
 
   return image, label
 

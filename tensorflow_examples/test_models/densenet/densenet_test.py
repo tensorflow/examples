@@ -106,17 +106,18 @@ class DenseNetBenchmark(tf.test.Benchmark):
 
   def benchmark_with_function_custom_loops_300_epochs(self):
     kwargs = {'epochs': 300, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 100, 'growth_rate': 12,
+              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
               'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-              'data_format': 'channels_last', 'dropout_rate': 0.2}
+              'data_format': 'channels_last', 'dropout_rate': 0.2,
+              'bottleneck': False, 'compression': 1.}
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_keras_fit_300_epochs(self):
     kwargs = {'epochs': 300, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 100, 'growth_rate': 12,
+              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
               'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
               'data_format': 'channels_last', 'dropout_rate': 0.2,
-              'train_mode': 'keras_fit'}
+              'train_mode': 'keras_fit', 'bottleneck': False, 'compression': 1.}
     self._run_and_report_benchmark(**kwargs)
 
   def _run_and_report_benchmark(self, **kwargs):
