@@ -45,8 +45,8 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 CIFAR_MEAN = [125.3, 123.0, 113.9]
 CIFAR_STD = [63.0, 62.1, 66.7]
 
-RESIZE_HEIGHT = 36
-RESIZE_WIDTH = 36
+HEIGHT = 32
+WIDTH = 32
 
 
 class Preprocess(object):
@@ -61,8 +61,9 @@ class Preprocess(object):
 
   def __call__(self, image, label):
     image = tf.cast(image, tf.float32)
-    image = tf.image.random_flip_left_right(image)
     image = self.random_jitter(image)
+    image = tf.image.random_flip_left_right(image)
+
     image = (image - CIFAR_MEAN) / CIFAR_STD
 
     if self.data_format == 'channels_first':
@@ -71,10 +72,12 @@ class Preprocess(object):
     return image, label
 
   def random_jitter(self, image):
-    image = tf.image.resize(image, [RESIZE_HEIGHT, RESIZE_WIDTH],
-                            align_corners=True,
-                            method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-    image = tf.image.random_crop(image, size=[32, 32, 3])
+    # add 4 pixels on each side; image_size == (36 x 36)
+    image = tf.image.resize_image_with_crop_or_pad(
+        image, HEIGHT + 8, WIDTH + 8)
+
+    image = tf.image.random_crop(image, size=[HEIGHT, WIDTH, 3])
+
     return image
 
 
