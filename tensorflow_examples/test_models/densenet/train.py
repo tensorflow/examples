@@ -42,39 +42,55 @@ flags.DEFINE_string('train_mode', 'custom_loop',
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-MEAN = [125.3, 123.0, 113.9]
-STD = [63.0, 62.1, 66.7]
+CIFAR_MEAN = [125.3, 123.0, 113.9]
+CIFAR_STD = [63.0, 62.1, 66.7]
 
 
-def scale(image, label):
-  image = tf.cast(image, tf.float32)
-  image = tf.image.random_flip_left_right(image)
+class Preprocess(object):
+  """Preprocess images.
 
-  image = (image - MEAN) / STD
+  Args:
+    data_format: channels_first or channels_last
+  """
 
-  return image, label
+  def __init__(self, data_format):
+    self.data_format = data_format
+
+  def __call__(self, image, label):
+    image = tf.cast(image, tf.float32)
+    image = tf.image.random_flip_left_right(image)
+    image = (image - CIFAR_MEAN) / CIFAR_STD
+
+    if self.data_format == 'channels_first':
+      image = tf.transpose(image, [2, 0, 1])
+
+    return image, label
 
 
-def create_dataset(buffer_size, batch_size, data_dir=None):
+def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
   """Creates a tf.data Dataset.
 
   Args:
     buffer_size: Shuffle buffer size.
     batch_size: Batch size
+    data_format: channels_first or channels_last
     data_dir: directory to store the dataset.
 
   Returns:
     train dataset, test dataset
   """
+
+  preprocess_obj = Preprocess(data_format)
+
   dataset, _ = tfds.load(
       'cifar10', data_dir=data_dir, as_supervised=True, with_info=True)
   train_dataset, test_dataset = dataset['train'], dataset['test']
 
-  train_dataset = train_dataset.map(scale, num_parallel_calls=AUTOTUNE)
+  train_dataset = train_dataset.map(preprocess_obj, num_parallel_calls=AUTOTUNE)
   train_dataset = train_dataset.shuffle(buffer_size).batch(batch_size)
 
   test_dataset = test_dataset.map(
-      scale, num_parallel_calls=AUTOTUNE).batch(batch_size)
+      preprocess_obj, num_parallel_calls=AUTOTUNE).batch(batch_size)
 
   return train_dataset, test_dataset
 
@@ -223,7 +239,7 @@ def main(epochs,
 
   train_obj = Train(epochs, enable_function)
   train_dataset, test_dataset = create_dataset(buffer_size, batch_size,
-                                               data_dir)
+                                               data_format, data_dir)
   model = densenet.DenseNet(mode, growth_rate, output_classes, depth_of_model,
                             num_of_blocks, num_layers_in_each_block,
                             data_format, bottleneck, compression, weight_decay,
