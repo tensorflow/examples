@@ -44,7 +44,7 @@ class DcganTest(tf.test.TestCase):
 
 class DCGANBenchmark(tf.test.Benchmark):
 
-  def __init__(self, output_dir=None):
+  def __init__(self, output_dir=None, **kwargs):
     self.output_dir = output_dir
 
   def benchmark_with_function(self):

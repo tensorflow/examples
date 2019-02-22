@@ -79,7 +79,7 @@ class DensenetTest(tf.test.TestCase):
 
 class DenseNetBenchmark(tf.test.Benchmark):
 
-  def __init__(self, output_dir=None):
+  def __init__(self, output_dir=None, **kwargs):
     self.output_dir = output_dir
 
   def benchmark_with_function_custom_loops(self):

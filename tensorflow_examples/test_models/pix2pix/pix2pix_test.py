@@ -48,7 +48,7 @@ class Pix2PixTest(tf.test.TestCase):
 
 class Pix2PixBenchmark(tf.test.Benchmark):
 
-  def __init__(self, output_dir=None):
+  def __init__(self, output_dir=None, **kwargs):
     self.output_dir = output_dir
 
   def benchmark_with_function(self):
