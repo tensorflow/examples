@@ -45,6 +45,9 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 CIFAR_MEAN = [125.3, 123.0, 113.9]
 CIFAR_STD = [63.0, 62.1, 66.7]
 
+RESIZE_HEIGHT = 36
+RESIZE_WIDTH = 36
+
 
 class Preprocess(object):
   """Preprocess images.
@@ -59,12 +62,20 @@ class Preprocess(object):
   def __call__(self, image, label):
     image = tf.cast(image, tf.float32)
     image = tf.image.random_flip_left_right(image)
+    image = self.random_jitter(image)
     image = (image - CIFAR_MEAN) / CIFAR_STD
 
     if self.data_format == 'channels_first':
       image = tf.transpose(image, [2, 0, 1])
 
     return image, label
+
+  def random_jitter(self, image):
+    image = tf.image.resize(image, [RESIZE_HEIGHT, RESIZE_WIDTH],
+                            align_corners=True,
+                            method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+    image = tf.image.random_crop(image, size=[32, 32, 3])
+    return image
 
 
 def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
@@ -109,7 +120,8 @@ class Train(object):
     self.autotune = tf.data.experimental.AUTOTUNE
     self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
         from_logits=True)
-    self.optimizer = tf.keras.optimizers.Adam(1e-4)
+    self.optimizer = tf.keras.optimizers.SGD(learning_rate=0.1,
+                                             momentum=0.9, nesterov=True)
     self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
     self.train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='train_accuracy')
@@ -117,12 +129,21 @@ class Train(object):
     self.test_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='test_accuracy')
 
+  def decay(self, epoch):
+    if epoch < 150:
+      return 0.1
+    if epoch >= 150 and epoch < 225:
+      return 0.01
+    if epoch >= 225:
+      return 0.001
+
   def keras_fit(self, train_dataset, test_dataset, model):
     model.compile(
         optimizer=self.optimizer, loss=self.loss_object, metrics=['accuracy'])
     history = model.fit(
         train_dataset, epochs=self.epochs, validation_data=test_dataset,
-        verbose=2)
+        verbose=2, callbacks=[tf.keras.callbacks.LearningRateScheduler(
+            self.decay)])
     return (history.history['loss'][-1],
             history.history['accuracy'][-1],
             history.history['val_loss'][-1],
@@ -162,6 +183,8 @@ class Train(object):
       self.test_step = tf.function(self.test_step)
 
     for epoch in range(self.epochs):
+      self.optimizer.learning_rate = self.decay(epoch)
+
       for image, label in train_dataset:
         self.train_step(image, label, model)
 
