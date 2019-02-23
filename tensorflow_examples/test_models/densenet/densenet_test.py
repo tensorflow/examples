@@ -122,10 +122,10 @@ class DenseNetBenchmark(tf.test.Benchmark):
 
   def _run_and_report_benchmark(self, **kwargs):
     start_time_sec = time.time()
-    train_loss, train_acc, test_loss, test_acc = train.main(**kwargs)
+    train_loss, train_acc, _, test_acc = train.main(**kwargs)
     wall_time_sec = time.time() - start_time_sec
 
-    extras = {'loss': train_loss,
+    extras = {'train_loss': train_loss,
               'training_accuracy_top_1': train_acc,
               'accuracy_top_1': test_acc}
 

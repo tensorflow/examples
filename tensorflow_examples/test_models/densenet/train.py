@@ -56,13 +56,16 @@ class Preprocess(object):
     data_format: channels_first or channels_last
   """
 
-  def __init__(self, data_format):
+  def __init__(self, data_format, train):
     self.data_format = data_format
+    self.train = train
 
   def __call__(self, image, label):
     image = tf.cast(image, tf.float32)
-    image = self.random_jitter(image)
-    image = tf.image.random_flip_left_right(image)
+
+    if self.train:
+      image = tf.image.random_flip_left_right(image)
+      image = self.random_jitter(image)
 
     image = (image - CIFAR_MEAN) / CIFAR_STD
 
@@ -94,17 +97,21 @@ def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
     train dataset, test dataset
   """
 
-  preprocess_obj = Preprocess(data_format)
+  preprocess_train = Preprocess(data_format, train=True)
+  preprocess_test = Preprocess(data_format, train=False)
 
   dataset, _ = tfds.load(
       'cifar10', data_dir=data_dir, as_supervised=True, with_info=True)
   train_dataset, test_dataset = dataset['train'], dataset['test']
 
-  train_dataset = train_dataset.map(preprocess_obj, num_parallel_calls=AUTOTUNE)
+  train_dataset = train_dataset.map(
+      preprocess_train, num_parallel_calls=AUTOTUNE)
   train_dataset = train_dataset.shuffle(buffer_size).batch(batch_size)
+  train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
 
   test_dataset = test_dataset.map(
-      preprocess_obj, num_parallel_calls=AUTOTUNE).batch(batch_size)
+      preprocess_test, num_parallel_calls=AUTOTUNE).batch(batch_size)
+  test_dataset = test_dataset.prefetch(buffer_size=AUTOTUNE)
 
   return train_dataset, test_dataset
 
