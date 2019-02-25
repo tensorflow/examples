@@ -24,8 +24,8 @@ from __future__ import print_function
 
 import time
 import tensorflow as tf # TF2
-from tensorflow_examples.test_models.densenet import densenet
-from tensorflow_examples.test_models.densenet import train
+from tensorflow_examples.models.densenet import densenet
+from tensorflow_examples.models.densenet import train
 
 
 def create_sample_dataset(batch_size):
