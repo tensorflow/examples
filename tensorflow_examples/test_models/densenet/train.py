@@ -216,8 +216,10 @@ class Train(object):
         self.test_loss_metric.reset_states()
         self.test_acc_metric.reset_states()
 
-    return (self.train_loss_metric.result(), self.train_acc_metric.result(),
-            self.test_loss_metric.result(), self.test_acc_metric.result())
+    return (self.train_loss_metric.result().numpy(),
+            self.train_acc_metric.result().numpy(),
+            self.test_loss_metric.result().numpy(),
+            self.test_acc_metric.result().numpy())
 
 
 def run_main(argv):
