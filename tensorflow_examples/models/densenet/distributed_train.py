@@ -212,10 +212,11 @@ class Train(object):
     """
 
     # this code is expected to change.
-    distributed_train = lambda it: strategy.experimental_run(  # pylint: disable=g-long-lambda
-        self.train_step, it)
-    distributed_test = lambda it: strategy.experimental_run(  # pylint: disable=g-long-lambda
-        self.test_step, it)
+    def distributed_train():
+      return strategy.experimental_run(self.train_step, train_iterator)
+
+    def distributed_test():
+      return strategy.experimental_run(self.test_step, test_iterator)
 
     if self.enable_function:
       distributed_train = tf.function(distributed_train)
@@ -226,11 +227,11 @@ class Train(object):
 
       train_iterator.initialize()
       for _ in range(num_train_steps_per_epoch):
-        distributed_train(train_iterator)
+        distributed_train()
 
       test_iterator.initialize()
       for _ in range(num_test_steps_per_epoch):
-        distributed_test(test_iterator)
+        distributed_test()
 
       template = ('Epoch: {}, Train Loss: {}, Train Accuracy: {}, '
                   'Test Loss: {}, Test Accuracy: {}')
