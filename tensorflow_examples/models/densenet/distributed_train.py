@@ -138,9 +138,10 @@ class Train(object):
     epochs: Number of epochs
     enable_function: If True, wraps the train_step and test_step in tf.function
     model: Densenet model.
+    num_gpu: Number of GPUs.
   """
 
-  def __init__(self, epochs, enable_function, model):
+  def __init__(self, epochs, enable_function, model, num_gpu):
     self.epochs = epochs
     self.enable_function = enable_function
     self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -154,14 +155,15 @@ class Train(object):
     self.test_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='test_accuracy')
     self.model = model
+    self.num_gpu = num_gpu
 
   def decay(self, epoch):
     if epoch < 150:
-      return 0.1
+      return 0.1 * self.num_gpu
     if epoch >= 150 and epoch < 225:
-      return 0.01
+      return 0.01 * self.num_gpu
     if epoch >= 225:
-      return 0.001
+      return 0.001 * self.num_gpu
 
   def train_step(self, inputs):
     """One train step.
@@ -315,7 +317,7 @@ def main(epochs,
         num_layers_in_each_block, data_format, bottleneck, compression,
         weight_decay, dropout_rate, pool_initial, include_top)
 
-    trainer = Train(epochs, enable_function, model)
+    trainer = Train(epochs, enable_function, model, num_gpu)
 
     train_dataset, test_dataset, metadata = create_dataset(
         buffer_size, batch_size, data_format, data_dir)

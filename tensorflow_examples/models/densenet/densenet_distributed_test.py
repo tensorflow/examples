@@ -46,14 +46,16 @@ class DenseNetDistributedBenchmark(tf.test.Benchmark):
   def benchmark_with_function_custom_loops_300_epochs_2_gpus(self):
     kwargs = get_cifar10_kwargs()
     kwargs.update({'epochs': 300, 'data_format': 'channels_first',
-                   'bottleneck': False, 'compression': 1., 'num_gpu': 2})
+                   'bottleneck': False, 'compression': 1., 'num_gpu': 2,
+                   'batch_size': 128})
 
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_function_custom_loops_300_epochs_8_gpus(self):
     kwargs = get_cifar10_kwargs()
     kwargs.update({'epochs': 300, 'data_format': 'channels_first',
-                   'bottleneck': False, 'compression': 1., 'num_gpu': 8})
+                   'bottleneck': False, 'compression': 1., 'num_gpu': 8,
+                   'batch_size': 512})
 
     self._run_and_report_benchmark(**kwargs)
 
