@@ -1,0 +1,6 @@
+Keras==2.2.0
+pandas==0.22.0
+pandas-ml==0.5.0
+tensorflow==1.10.0
+tensorflow-gpu==1.10.0
+wget==3.2

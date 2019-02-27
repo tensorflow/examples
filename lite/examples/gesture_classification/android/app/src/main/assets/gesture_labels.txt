@@ -1,0 +1,8 @@
+up
+down
+left
+right
+leftclick
+rightclick
+scrollup
+scrolldown
