@@ -65,10 +65,8 @@ def load(image_file):
 
 def resize(input_image, real_image, height, width):
   input_image = tf.image.resize(input_image, [height, width],
-                                align_corners=True,
                                 method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
   real_image = tf.image.resize(real_image, [height, width],
-                               align_corners=True,
                                method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
 
   return input_image, real_image
