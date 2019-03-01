@@ -37,7 +37,8 @@ class Pix2PixTest(tf.test.TestCase):
     target_image = tf.random.uniform((256, 256, 3))
 
     train_dataset = tf.data.Dataset.from_tensors(
-        (input_image, target_image)).batch(batch_size)
+        (input_image, target_image)).map(pix2pix.random_jitter).batch(
+            batch_size)
     checkpoint_pr = pix2pix.get_checkpoint_prefix()
 
     pix2pix_obj = pix2pix.Pix2pix(epochs, enable_function)
@@ -52,7 +53,8 @@ class Pix2PixTest(tf.test.TestCase):
     target_image = tf.random.uniform((256, 256, 3))
 
     train_dataset = tf.data.Dataset.from_tensors(
-        (input_image, target_image)).batch(batch_size)
+        (input_image, target_image)).map(pix2pix.random_jitter).batch(
+            batch_size)
 
     pix2pix_obj = pix2pix.Pix2pix(epochs, enable_function)
 
