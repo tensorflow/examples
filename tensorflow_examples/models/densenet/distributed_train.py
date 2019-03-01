@@ -21,114 +21,14 @@ from __future__ import print_function
 from absl import app
 from absl import flags
 import tensorflow as tf # TF2
-import tensorflow_datasets as tfds
 from tensorflow_examples.models.densenet import densenet
+from tensorflow_examples.models.densenet import utils
 assert tf.__version__.startswith('2')
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('buffer_size', 50000, 'Shuffle buffer size')
-flags.DEFINE_integer('batch_size', 64, 'Batch Size')
-flags.DEFINE_integer('epochs', 1, 'Number of epochs')
-flags.DEFINE_boolean('enable_function', True, 'Enable Function?')
-flags.DEFINE_string('data_dir', None, 'Directory to store the dataset')
-flags.DEFINE_string('mode', 'from_depth', 'Deciding how to build the model')
-flags.DEFINE_integer('depth_of_model', 3, 'Number of layers in the model')
-flags.DEFINE_integer('growth_rate', 12, 'Filters to add per dense block')
-flags.DEFINE_integer('num_of_blocks', 3, 'Number of dense blocks')
-flags.DEFINE_integer('output_classes', 10, 'Number of classes in the dataset')
-flags.DEFINE_integer('num_layers_in_each_block', -1,
-                     'Number of layers in each dense block')
-flags.DEFINE_string('data_format', 'channels_last',
-                    'channels_last or channels_first')
-flags.DEFINE_boolean('bottleneck', True, 'Add bottleneck blocks between layers')
-flags.DEFINE_float(
-    'compression', 0.5,
-    'reducing the number of inputs(filters) to the transition block.')
-flags.DEFINE_float('weight_decay', 1e-4, 'weight decay')
-flags.DEFINE_float('dropout_rate', 0., 'dropout rate')
-flags.DEFINE_boolean(
-    'pool_initial', False,
-    'If True add a conv => maxpool block at the start. Used for Imagenet')
-flags.DEFINE_boolean('include_top', True, 'Include the classifier layer')
-flags.DEFINE_string('train_mode', 'custom_loop',
-                    'Use either "keras_fit" or "custom_loop"')
+# if additional flags are needed, define it here.
 flags.DEFINE_integer('num_gpu', 1, 'Number of GPUs to use')
-
-AUTOTUNE = tf.data.experimental.AUTOTUNE
-
-CIFAR_MEAN = [125.3, 123.0, 113.9]
-CIFAR_STD = [63.0, 62.1, 66.7]
-
-HEIGHT = 32
-WIDTH = 32
-
-
-class Preprocess(object):
-  """Preprocess images.
-
-  Args:
-    data_format: channels_first or channels_last
-  """
-
-  def __init__(self, data_format, train):
-    self.data_format = data_format
-    self.train = train
-
-  def __call__(self, image, label):
-    image = tf.cast(image, tf.float32)
-
-    if self.train:
-      image = tf.image.random_flip_left_right(image)
-      image = self.random_jitter(image)
-
-    image = (image - CIFAR_MEAN) / CIFAR_STD
-
-    if self.data_format == 'channels_first':
-      image = tf.transpose(image, [2, 0, 1])
-
-    return image, label
-
-  def random_jitter(self, image):
-    # add 4 pixels on each side; image_size == (36 x 36)
-    image = tf.image.resize_image_with_crop_or_pad(
-        image, HEIGHT + 8, WIDTH + 8)
-
-    image = tf.image.random_crop(image, size=[HEIGHT, WIDTH, 3])
-
-    return image
-
-
-def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
-  """Creates a tf.data Dataset.
-
-  Args:
-    buffer_size: Shuffle buffer size.
-    batch_size: Batch size
-    data_format: channels_first or channels_last
-    data_dir: directory to store the dataset.
-
-  Returns:
-    train dataset, test dataset, metadata
-  """
-
-  preprocess_train = Preprocess(data_format, train=True)
-  preprocess_test = Preprocess(data_format, train=False)
-
-  dataset, metadata = tfds.load(
-      'cifar10', data_dir=data_dir, as_supervised=True, with_info=True)
-  train_dataset, test_dataset = dataset['train'], dataset['test']
-
-  train_dataset = train_dataset.map(
-      preprocess_train, num_parallel_calls=AUTOTUNE)
-  train_dataset = train_dataset.shuffle(buffer_size).batch(batch_size)
-  train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
-
-  test_dataset = test_dataset.map(
-      preprocess_test, num_parallel_calls=AUTOTUNE).batch(batch_size)
-  test_dataset = test_dataset.prefetch(buffer_size=AUTOTUNE)
-
-  return train_dataset, test_dataset, metadata
 
 
 class Train(object):
@@ -138,10 +38,9 @@ class Train(object):
     epochs: Number of epochs
     enable_function: If True, wraps the train_step and test_step in tf.function
     model: Densenet model.
-    num_gpu: Number of GPUs.
   """
 
-  def __init__(self, epochs, enable_function, model, num_gpu):
+  def __init__(self, epochs, enable_function, model):
     self.epochs = epochs
     self.enable_function = enable_function
     self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -155,15 +54,14 @@ class Train(object):
     self.test_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='test_accuracy')
     self.model = model
-    self.num_gpu = num_gpu
 
   def decay(self, epoch):
     if epoch < 150:
-      return 0.1 * self.num_gpu
+      return 0.1
     if epoch >= 150 and epoch < 225:
-      return 0.01 * self.num_gpu
+      return 0.01
     if epoch >= 225:
-      return 0.001 * self.num_gpu
+      return 0.001
 
   def train_step(self, inputs):
     """One train step.
@@ -263,27 +161,8 @@ def run_main(argv):
     argv: argv
   """
   del argv
-  kwargs = {
-      'epochs': FLAGS.epochs,
-      'enable_function': FLAGS.enable_function,
-      'buffer_size': FLAGS.buffer_size,
-      'batch_size': FLAGS.batch_size,
-      'mode': FLAGS.mode,
-      'depth_of_model': FLAGS.depth_of_model,
-      'growth_rate': FLAGS.growth_rate,
-      'num_of_blocks': FLAGS.num_of_blocks,
-      'output_classes': FLAGS.output_classes,
-      'num_layers_in_each_block': FLAGS.num_layers_in_each_block,
-      'data_format': FLAGS.data_format,
-      'bottleneck': FLAGS.bottleneck,
-      'compression': FLAGS.compression,
-      'weight_decay': FLAGS.weight_decay,
-      'dropout_rate': FLAGS.dropout_rate,
-      'pool_initial': FLAGS.pool_initial,
-      'include_top': FLAGS.include_top,
-      'train_mode': FLAGS.train_mode,
-      'num_gpu': FLAGS.num_gpu
-  }
+  kwargs = utils.flags_dict()
+  kwargs.update({'num_gpu': FLAGS.num_gpu})
   main(**kwargs)
 
 
@@ -317,9 +196,9 @@ def main(epochs,
         num_layers_in_each_block, data_format, bottleneck, compression,
         weight_decay, dropout_rate, pool_initial, include_top)
 
-    trainer = Train(epochs, enable_function, model, num_gpu)
+    trainer = Train(epochs, enable_function, model)
 
-    train_dataset, test_dataset, metadata = create_dataset(
+    train_dataset, test_dataset, metadata = utils.create_dataset(
         buffer_size, batch_size, data_format, data_dir)
 
     num_train_steps_per_epoch = metadata.splits[
@@ -346,4 +225,5 @@ def main(epochs,
 
 
 if __name__ == '__main__':
+  utils.define_densenet_flags()
   app.run(run_main)

@@ -25,13 +25,7 @@ from __future__ import print_function
 import time
 import tensorflow as tf # TF2
 from tensorflow_examples.models.densenet import distributed_train
-
-
-def get_cifar10_kwargs():
-  return {'epochs': 1, 'enable_function': True, 'buffer_size': 50000,
-          'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
-          'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-          'data_format': 'channels_last', 'dropout_rate': 0.}
+from tensorflow_examples.models.densenet import utils
 
 
 class DenseNetDistributedBenchmark(tf.test.Benchmark):
@@ -40,11 +34,11 @@ class DenseNetDistributedBenchmark(tf.test.Benchmark):
     self.output_dir = output_dir
 
   def benchmark_with_function_custom_loops(self):
-    kwargs = get_cifar10_kwargs()
+    kwargs = utils.get_cifar10_kwargs()
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_function_custom_loops_300_epochs_2_gpus(self):
-    kwargs = get_cifar10_kwargs()
+    kwargs = utils.get_cifar10_kwargs()
     kwargs.update({'epochs': 300, 'data_format': 'channels_first',
                    'bottleneck': False, 'compression': 1., 'num_gpu': 2,
                    'batch_size': 128})
@@ -52,7 +46,7 @@ class DenseNetDistributedBenchmark(tf.test.Benchmark):
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_function_custom_loops_300_epochs_8_gpus(self):
-    kwargs = get_cifar10_kwargs()
+    kwargs = utils.get_cifar10_kwargs()
     kwargs.update({'epochs': 300, 'data_format': 'channels_first',
                    'bottleneck': False, 'compression': 1., 'num_gpu': 8,
                    'batch_size': 512})

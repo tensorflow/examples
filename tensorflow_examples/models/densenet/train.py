@@ -19,115 +19,10 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import app
-from absl import flags
 import tensorflow as tf # TF2
-import tensorflow_datasets as tfds
 from tensorflow_examples.models.densenet import densenet
+from tensorflow_examples.models.densenet import utils
 assert tf.__version__.startswith('2')
-
-FLAGS = flags.FLAGS
-
-flags.DEFINE_integer('buffer_size', 50000, 'Shuffle buffer size')
-flags.DEFINE_integer('batch_size', 64, 'Batch Size')
-flags.DEFINE_integer('epochs', 1, 'Number of epochs')
-flags.DEFINE_boolean('enable_function', True, 'Enable Function?')
-flags.DEFINE_string('data_dir', None, 'Directory to store the dataset')
-flags.DEFINE_string('mode', 'from_depth', 'Deciding how to build the model')
-flags.DEFINE_integer('depth_of_model', 3, 'Number of layers in the model')
-flags.DEFINE_integer('growth_rate', 12, 'Filters to add per dense block')
-flags.DEFINE_integer('num_of_blocks', 3, 'Number of dense blocks')
-flags.DEFINE_integer('output_classes', 10, 'Number of classes in the dataset')
-flags.DEFINE_integer('num_layers_in_each_block', -1,
-                     'Number of layers in each dense block')
-flags.DEFINE_string('data_format', 'channels_last',
-                    'channels_last or channels_first')
-flags.DEFINE_boolean('bottleneck', True, 'Add bottleneck blocks between layers')
-flags.DEFINE_float(
-    'compression', 0.5,
-    'reducing the number of inputs(filters) to the transition block.')
-flags.DEFINE_float('weight_decay', 1e-4, 'weight decay')
-flags.DEFINE_float('dropout_rate', 0., 'dropout rate')
-flags.DEFINE_boolean(
-    'pool_initial', False,
-    'If True add a conv => maxpool block at the start. Used for Imagenet')
-flags.DEFINE_boolean('include_top', True, 'Include the classifier layer')
-flags.DEFINE_string('train_mode', 'custom_loop',
-                    'Use either keras fit or custom loops')
-
-AUTOTUNE = tf.data.experimental.AUTOTUNE
-
-CIFAR_MEAN = [125.3, 123.0, 113.9]
-CIFAR_STD = [63.0, 62.1, 66.7]
-
-HEIGHT = 32
-WIDTH = 32
-
-
-class Preprocess(object):
-  """Preprocess images.
-
-  Args:
-    data_format: channels_first or channels_last
-  """
-
-  def __init__(self, data_format, train):
-    self.data_format = data_format
-    self.train = train
-
-  def __call__(self, image, label):
-    image = tf.cast(image, tf.float32)
-
-    if self.train:
-      image = tf.image.random_flip_left_right(image)
-      image = self.random_jitter(image)
-
-    image = (image - CIFAR_MEAN) / CIFAR_STD
-
-    if self.data_format == 'channels_first':
-      image = tf.transpose(image, [2, 0, 1])
-
-    return image, label
-
-  def random_jitter(self, image):
-    # add 4 pixels on each side; image_size == (36 x 36)
-    image = tf.image.resize_image_with_crop_or_pad(
-        image, HEIGHT + 8, WIDTH + 8)
-
-    image = tf.image.random_crop(image, size=[HEIGHT, WIDTH, 3])
-
-    return image
-
-
-def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
-  """Creates a tf.data Dataset.
-
-  Args:
-    buffer_size: Shuffle buffer size.
-    batch_size: Batch size
-    data_format: channels_first or channels_last
-    data_dir: directory to store the dataset.
-
-  Returns:
-    train dataset, test dataset
-  """
-
-  preprocess_train = Preprocess(data_format, train=True)
-  preprocess_test = Preprocess(data_format, train=False)
-
-  dataset, _ = tfds.load(
-      'cifar10', data_dir=data_dir, as_supervised=True, with_info=True)
-  train_dataset, test_dataset = dataset['train'], dataset['test']
-
-  train_dataset = train_dataset.map(
-      preprocess_train, num_parallel_calls=AUTOTUNE)
-  train_dataset = train_dataset.shuffle(buffer_size).batch(batch_size)
-  train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
-
-  test_dataset = test_dataset.map(
-      preprocess_test, num_parallel_calls=AUTOTUNE).batch(batch_size)
-  test_dataset = test_dataset.prefetch(buffer_size=AUTOTUNE)
-
-  return train_dataset, test_dataset
 
 
 class Train(object):
@@ -138,7 +33,7 @@ class Train(object):
     enable_function: If True, wraps the train_step and test_step in tf.function
   """
 
-  def __init__(self, epochs, enable_function):
+  def __init__(self, epochs, enable_function, model):
     self.epochs = epochs
     self.enable_function = enable_function
     self.autotune = tf.data.experimental.AUTOTUNE
@@ -152,6 +47,7 @@ class Train(object):
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
     self.test_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='test_accuracy')
+    self.model = model
 
   def decay(self, epoch):
     if epoch < 150:
@@ -161,10 +57,10 @@ class Train(object):
     if epoch >= 225:
       return 0.001
 
-  def keras_fit(self, train_dataset, test_dataset, model):
-    model.compile(
+  def keras_fit(self, train_dataset, test_dataset):
+    self.model.compile(
         optimizer=self.optimizer, loss=self.loss_object, metrics=['accuracy'])
-    history = model.fit(
+    history = self.model.fit(
         train_dataset, epochs=self.epochs, validation_data=test_dataset,
         verbose=2, callbacks=[tf.keras.callbacks.LearningRateScheduler(
             self.decay)])
@@ -173,31 +69,45 @@ class Train(object):
             history.history['val_loss'][-1],
             history.history['val_accuracy'][-1])
 
-  def train_step(self, image, label, model):
+  def train_step(self, image, label):
+    """One train step.
+
+    Args:
+      image: Batch of images.
+      label: corresponding label for the batch of images.
+    """
+
     with tf.GradientTape() as tape:
-      predictions = model(image, training=True)
+      predictions = self.model(image, training=True)
       loss = self.loss_object(label, predictions)
-      loss += sum(model.losses)
-    gradients = tape.gradient(loss, model.trainable_variables)
-    self.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+      loss += sum(self.model.losses)
+    gradients = tape.gradient(loss, self.model.trainable_variables)
+    self.optimizer.apply_gradients(
+        zip(gradients, self.model.trainable_variables))
 
     self.train_loss_metric(loss)
     self.train_acc_metric(label, predictions)
 
-  def test_step(self, image, label, model):
-    predictions = model(image, training=False)
+  def test_step(self, image, label):
+    """One test step.
+
+    Args:
+      image: Batch of images.
+      label: corresponding label for the batch of images.
+    """
+
+    predictions = self.model(image, training=False)
     loss = self.loss_object(label, predictions)
 
     self.test_loss_metric(loss)
     self.test_acc_metric(label, predictions)
 
-  def custom_loop(self, train_dataset, test_dataset, model):
+  def custom_loop(self, train_dataset, test_dataset):
     """Custom training and testing loop.
 
     Args:
       train_dataset: Training dataset
       test_dataset: Testing dataset
-      model: Model to train and test
 
     Returns:
       train_loss, train_accuracy, test_loss, test_accuracy
@@ -210,10 +120,10 @@ class Train(object):
       self.optimizer.learning_rate = self.decay(epoch)
 
       for image, label in train_dataset:
-        self.train_step(image, label, model)
+        self.train_step(image, label)
 
       for test_image, test_label in test_dataset:
-        self.test_step(test_image, test_label, model)
+        self.test_step(test_image, test_label)
 
       template = ('Epoch: {}, Train Loss: {}, Train Accuracy: {}, '
                   'Test Loss: {}, Test Accuracy: {}')
@@ -243,26 +153,8 @@ def run_main(argv):
     argv: argv
   """
   del argv
-  kwargs = {
-      'epochs': FLAGS.epochs,
-      'enable_function': FLAGS.enable_function,
-      'buffer_size': FLAGS.buffer_size,
-      'batch_size': FLAGS.batch_size,
-      'mode': FLAGS.mode,
-      'depth_of_model': FLAGS.depth_of_model,
-      'growth_rate': FLAGS.growth_rate,
-      'num_of_blocks': FLAGS.num_of_blocks,
-      'output_classes': FLAGS.output_classes,
-      'num_layers_in_each_block': FLAGS.num_layers_in_each_block,
-      'data_format': FLAGS.data_format,
-      'bottleneck': FLAGS.bottleneck,
-      'compression': FLAGS.compression,
-      'weight_decay': FLAGS.weight_decay,
-      'dropout_rate': FLAGS.dropout_rate,
-      'pool_initial': FLAGS.pool_initial,
-      'include_top': FLAGS.include_top,
-      'train_mode': FLAGS.train_mode
-  }
+  kwargs = utils.flags_dict()
+  print (kwargs)
   main(**kwargs)
 
 
@@ -286,19 +178,21 @@ def main(epochs,
          train_mode='custom_loop',
          data_dir=None):
 
-  train_obj = Train(epochs, enable_function)
-  train_dataset, test_dataset = create_dataset(buffer_size, batch_size,
-                                               data_format, data_dir)
   model = densenet.DenseNet(mode, growth_rate, output_classes, depth_of_model,
                             num_of_blocks, num_layers_in_each_block,
                             data_format, bottleneck, compression, weight_decay,
                             dropout_rate, pool_initial, include_top)
+  train_obj = Train(epochs, enable_function, model)
+  train_dataset, test_dataset, _ = utils.create_dataset(
+      buffer_size, batch_size, data_format, data_dir)
+
   print('Training...')
   if train_mode == 'custom_loop':
-    return train_obj.custom_loop(train_dataset, test_dataset, model)
+    return train_obj.custom_loop(train_dataset, test_dataset)
   elif train_mode == 'keras_fit':
-    return train_obj.keras_fit(train_dataset, test_dataset, model)
+    return train_obj.keras_fit(train_dataset, test_dataset)
 
 
 if __name__ == '__main__':
+  utils.define_densenet_flags()
   app.run(run_main)

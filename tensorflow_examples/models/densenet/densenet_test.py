@@ -26,6 +26,7 @@ import time
 import tensorflow as tf # TF2
 from tensorflow_examples.models.densenet import densenet
 from tensorflow_examples.models.densenet import train
+from tensorflow_examples.models.densenet import utils
 
 
 def create_sample_dataset(batch_size):
@@ -51,11 +52,11 @@ class DensenetTest(tf.test.TestCase):
     train_dataset = create_sample_dataset(batch_size=1)
     test_dataset = create_sample_dataset(batch_size=1)
 
-    train_obj = train.Train(epochs, enable_function)
     model = densenet.DenseNet(
         mode, growth_rate, output_classes, depth_of_model, num_of_blocks,
         data_format)
-    train_obj.custom_loop(train_dataset, test_dataset, model)
+    train_obj = train.Train(epochs, enable_function, model)
+    train_obj.custom_loop(train_dataset, test_dataset)
 
   def test_one_epoch_with_keras_fit(self):
     epochs = 1
@@ -70,11 +71,11 @@ class DensenetTest(tf.test.TestCase):
     train_dataset = create_sample_dataset(batch_size=1)
     test_dataset = create_sample_dataset(batch_size=1)
 
-    train_obj = train.Train(epochs, enable_function)
     model = densenet.DenseNet(
         mode, growth_rate, output_classes, depth_of_model, num_of_blocks,
         data_format)
-    train_obj.keras_fit(train_dataset, test_dataset, model)
+    train_obj = train.Train(epochs, enable_function, model)
+    train_obj.keras_fit(train_dataset, test_dataset)
 
 
 class DenseNetBenchmark(tf.test.Benchmark):
@@ -83,41 +84,30 @@ class DenseNetBenchmark(tf.test.Benchmark):
     self.output_dir = output_dir
 
   def benchmark_with_function_custom_loops(self):
-    kwargs = {'epochs': 1, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
-              'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-              'data_format': 'channels_last', 'dropout_rate': 0.}
+    kwargs = utils.get_cifar10_kwargs()
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_without_function_custom_loops(self):
-    kwargs = {'epochs': 1, 'enable_function': False, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
-              'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-              'data_format': 'channels_last', 'dropout_rate': 0.}
+    kwargs = utils.get_cifar10_kwargs()
+    kwargs.update({'enable_function': False})
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_keras_fit(self):
-    kwargs = {'epochs': 1, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
-              'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-              'data_format': 'channels_last', 'dropout_rate': 0.,
-              'train_mode': 'keras_fit'}
+    kwargs = utils.get_cifar10_kwargs()
+    kwargs.update({'train_mode': 'keras_fit'})
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_function_custom_loops_300_epochs(self):
-    kwargs = {'epochs': 300, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
-              'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-              'data_format': 'channels_first', 'dropout_rate': 0.,
-              'bottleneck': False, 'compression': 1.}
+    kwargs = utils.get_cifar10_kwargs()
+    kwargs.update({'epochs': 300, 'data_format': 'channels_first',
+                   'bottleneck': False, 'compression': 1.})
     self._run_and_report_benchmark(**kwargs)
 
   def benchmark_with_keras_fit_300_epochs(self):
-    kwargs = {'epochs': 300, 'enable_function': True, 'buffer_size': 50000,
-              'batch_size': 64, 'depth_of_model': 40, 'growth_rate': 12,
-              'num_of_blocks': 3, 'output_classes': 10, 'mode': 'from_depth',
-              'data_format': 'channels_first', 'dropout_rate': 0.,
-              'train_mode': 'keras_fit', 'bottleneck': False, 'compression': 1.}
+    kwargs = utils.get_cifar10_kwargs()
+    kwargs.update({'epochs': 300, 'data_format': 'channels_first',
+                   'train_mode': 'keras_fit', 'bottleneck': False,
+                   'compression': 1.})
     self._run_and_report_benchmark(**kwargs)
 
   def _run_and_report_benchmark(self, **kwargs):
