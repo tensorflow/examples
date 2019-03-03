@@ -1,6 +1,11 @@
 Assignments for Udacity Deep Learning class with TensorFlow
 ===========================================================
 
+
+Warning: These files DEPRECATED. see https://tensorflow.org/tutorials for
+modern examples of how to use tensorflow.
+
+
 Course information can be found at https://www.udacity.com/course/deep-learning--ud730
 
 ## Getting Started with Docker
