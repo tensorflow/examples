@@ -14,6 +14,10 @@
 # ==============================================================================
 """tensorflow_examples is a package of tensorflow example code."""
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import datetime
 import subprocess
 import sys
@@ -68,7 +72,6 @@ setup(
     download_url='https://github.com/tensorflow/examples/tags',
     license='Apache 2.0',
     packages=['tensorflow_examples'],
-    package_dir={'tensorflow_examples': '.'},
     scripts=[],
     install_requires=REQUIRED_PKGS,
     extras_require={
