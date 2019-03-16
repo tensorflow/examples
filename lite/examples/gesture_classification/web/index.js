@@ -29,7 +29,7 @@ let model;
 // Loads mobilenet and returns a model that returns the internal activation
 // we'll use as input to our classifier model.
 async function loadMobilenet() {
-  const mobilenet = await tf.loadModel(
+  const mobilenet = await tf.loadLayersModel(
       'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json');
 
   // Return a model that outputs an internal activation.
@@ -117,7 +117,8 @@ async function train() {
         document.getElementById('train').className =
             'train-model-button train-status';
         loss = logs.loss.toFixed(5);
-        ui.trainStatus('LOSS: ' + logs.loss.toFixed(5));
+        //console.log(logs);
+        ui.trainStatus('LOSS: ' + loss);
       },
       onTrainEnd: () => {
         if (loss > 1) {

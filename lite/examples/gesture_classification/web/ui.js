@@ -148,7 +148,9 @@ ui.predictClass =
   document.getElementById('stop-predict').className = 'stop-button';
   document.getElementById('bottom-section').style.pointerEvents = 'none';
   downloadModel.className = 'disabled';
-} ui.donePredicting =
+};
+
+ui.donePredicting =
             function() {
   document.getElementById('predict').className = 'test-button';
   document.getElementById('webcam-outer-wrapper').style.border =
@@ -178,7 +180,8 @@ var addExampleHandler;
 
 ui.setExampleHandler = function(handler) {
   addExampleHandler = handler;
-} let mouseDown = false;
+};
+let mouseDown = false;
 const totals = [0, 0, 0, 0, 0, 0, 0, 0];
 
 const upButton = document.getElementById('up');
