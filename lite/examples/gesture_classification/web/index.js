@@ -117,7 +117,6 @@ async function train() {
         document.getElementById('train').className =
             'train-model-button train-status';
         loss = logs.loss.toFixed(5);
-        //console.log(logs);
         ui.trainStatus('LOSS: ' + loss);
       },
       onTrainEnd: () => {
