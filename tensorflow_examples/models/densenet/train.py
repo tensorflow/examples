@@ -31,6 +31,7 @@ class Train(object):
   Args:
     epochs: Number of epochs
     enable_function: If True, wraps the train_step and test_step in tf.function
+    model: Densenet model.
   """
 
   def __init__(self, epochs, enable_function, model):
@@ -154,7 +155,6 @@ def run_main(argv):
   """
   del argv
   kwargs = utils.flags_dict()
-  print (kwargs)
   main(**kwargs)
 
 
