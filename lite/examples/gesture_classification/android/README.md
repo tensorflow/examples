@@ -45,5 +45,5 @@ Ensure that labels.txt and model.tflite files are added into the project which a
 
 [Gesture Web Application](../web/README.md)
 [Gesture ML Script](../ml/README.md)
-[Gesture iOS Example](../android/README.md)
+[Gesture iOS Example](../ios/README.md)
 
