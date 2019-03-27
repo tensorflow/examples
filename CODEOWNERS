@@ -3,4 +3,9 @@
 
 # Default owners for everything in repo.
 *  @wolffg @lamberta @MarkDaoust
+
+# TF Lite
 /lite/ @dansitu @jdduke
+
+# Community docs
+/community/ @adammichaelwood
