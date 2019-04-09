@@ -1,7 +1,7 @@
 # TensorFlow Lite Gesture Classification Android Example
 
-
 ### Overview
+
 This app performs gesture classification on live camera feed and displays the results in real-time on the screen.
 
 Application can run either on device or emulator.
@@ -19,9 +19,8 @@ Application can run either on device or emulator.
 * This is the  **[guide](../web/README.md)**  to generate TensorFlow.js model.
 * Name the .tflite file as **model.tflite** and the subset of labels should be named as **labels.txt**.
 
-
-
 ### Building
+
 * Open Android Studio, and from the Welcome screen, select Open an existing Android Studio project.
 
 * From the Open File or Project window that appears, navigate to and select the tensorflow-lite/examples/gesture_classification/android directory from wherever you cloned the TensorFlow Lite sample GitHub repo. Click OK.
@@ -39,11 +38,11 @@ Click the Run button (the green arrow) or select Run > Run 'android' from the to
 * Now once you get the TFLite and label file, put that into assets folder.
 
 ### Additional Note
+
 Ensure that labels.txt and model.tflite files are added into the project which are downloaded from [web app](../web/README.md). Also ensure gesture_labels.txt file is not deleted or modified from assets folder.
 
 ## See Also
 
-[Gesture Web Application](../web/README.md)
-[Gesture ML Script](../ml/README.md)
-[Gesture iOS Example](../android/README.md)
-
+* [Gesture Web Application](../web/README.md)
+* [Gesture ML Script](../ml/README.md)
+* [Gesture iOS Example](../ios/README.md)
