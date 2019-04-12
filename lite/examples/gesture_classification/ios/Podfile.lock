@@ -1,5 +1,5 @@
 PODS:
-  - TensorFlowLite (1.10.1)
+  - TensorFlowLite (1.13.1)
 
 DEPENDENCIES:
   - TensorFlowLite
