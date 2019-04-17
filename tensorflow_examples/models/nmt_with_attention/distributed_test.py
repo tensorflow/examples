@@ -41,7 +41,7 @@ class NmtDistributedBenchmark(tf.test.Benchmark):
 
   def benchmark_ten_epochs_2_gpus(self):
     kwargs = utils.get_common_kwargs()
-    kwargs.update({'epochs': 10, 'num_gpu': 2, 'batch_size': 128})
+    kwargs.update({'epochs': 10, 'num_gpu': 2, 'batch_size': 64})
     self._run_and_report_benchmark(**kwargs)
 
   def _run_and_report_benchmark(self, **kwargs):
