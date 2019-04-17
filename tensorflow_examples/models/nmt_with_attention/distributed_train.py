@@ -114,6 +114,7 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
 
   devices = ['/device:GPU:{}'.format(i) for i in range(num_gpu)]
   strategy = tf.distribute.MirroredStrategy(devices)
+  num_replicas = strategy.num_replicas_in_sync
 
   with strategy.scope():
     file_path = utils.download(download_path)
@@ -128,13 +129,19 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
     train_iterator = strategy.make_dataset_iterator(train_ds)
     test_iterator = strategy.make_dataset_iterator(test_ds)
 
-    local_bz = batch_size / strategy.num_replicas_in_sync
+    local_batch_size, remainder = divmod(batch_size, num_replicas)
 
-    encoder = nmt.Encoder(vocab_inp_size, embedding_dim, enc_units, local_bz)
+    template = ('Batch size ({}) must be divisible by the '
+                'number of replicas ({})')
+    if remainder:
+      raise ValueError(template.format(batch_size, num_replicas))
+
+    encoder = nmt.Encoder(vocab_inp_size, embedding_dim, enc_units,
+                          local_batch_size)
     decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
 
     train_obj = DistributedTrain(epochs, enable_function, encoder, decoder,
-                                 inp_lang, targ_lang, local_bz)
+                                 inp_lang, targ_lang, local_batch_size)
     print ('Training ...')
     return train_obj.training_loop(train_iterator,
                                    test_iterator,
