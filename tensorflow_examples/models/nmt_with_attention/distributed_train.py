@@ -134,7 +134,7 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
     decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
 
     train_obj = DistributedTrain(epochs, enable_function, encoder, decoder,
-                                 inp_lang, targ_lang, batch_size)
+                                 inp_lang, targ_lang, local_bz)
     print ('Training ...')
     return train_obj.training_loop(train_iterator,
                                    test_iterator,
