@@ -46,4 +46,15 @@ public class GpuDelegateHelper {
       throw new IllegalStateException(e);
     }
   }
+
+  /** Closes an instance of {@code GpuDelegate}. */
+  public static void close(Delegate delegate) {
+    try {
+      Class.forName("org.tensorflow.lite.experimental.GpuDelegate")
+          .getMethod("close")
+          .invoke(delegate);
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
 }

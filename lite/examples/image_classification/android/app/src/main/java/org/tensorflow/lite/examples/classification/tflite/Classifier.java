@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.util.Log;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,10 +35,24 @@ import java.util.List;
 import java.util.PriorityQueue;
 import org.tensorflow.lite.Delegate;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.examples.classification.env.Logger;
 
 /** A classifier specialized to label images using TensorFlow Lite. */
 public abstract class Classifier {
-  private static final String TAG = "Classifier";
+  private static final Logger LOGGER = new Logger();
+
+  /** The model type used for classification. */
+  public enum Model {
+    FLOAT,
+    QUANTIZED,
+  }
+
+  /** The runtime device type used for executing classification. */
+  public enum Device {
+    CPU,
+    NNAPI,
+    GPU
+  }
 
   /** Number of results to show in the UI. */
   private static final int MAX_RESULTS = 3;
@@ -50,7 +63,7 @@ public abstract class Classifier {
   private static final int DIM_PIXEL_SIZE = 3;
 
   /** Preallocated buffers for storing image data in. */
-  private int[] intValues = new int[getImageSizeX() * getImageSizeY()];
+  private final int[] intValues = new int[getImageSizeX() * getImageSizeY()];
 
   /** Options for configuring the Interpreter. */
   private final Interpreter.Options tfliteOptions = new Interpreter.Options();
@@ -70,7 +83,23 @@ public abstract class Classifier {
   /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
   protected ByteBuffer imgData = null;
 
-  private Classifier() {}
+  /**
+   * Creates a classifier with the provided configuration.
+   *
+   * @param activity The current Activity.
+   * @param model The model to use for classification.
+   * @param device The device to use for classification.
+   * @param numThreads The number of threads to use for classification.
+   * @return A classifier with the desired configuration.
+   */
+  public static Classifier create(Activity activity, Model model, Device device, int numThreads)
+      throws IOException {
+    if (model == Model.QUANTIZED) {
+      return new ClassifierQuantizedMobileNet(activity, device, numThreads);
+    } else {
+      return new ClassifierFloatMobileNet(activity, device, numThreads);
+    }
+  }
 
   /** An immutable result returned by a Classifier describing what was recognized. */
   public static class Recognition {
@@ -143,8 +172,20 @@ public abstract class Classifier {
   }
 
   /** Initializes a {@code Classifier}. */
-  Classifier(Activity activity) throws IOException {
+  protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
     tfliteModel = loadModelFile(activity);
+    switch (device) {
+      case NNAPI:
+        tfliteOptions.setUseNNAPI(true);
+        break;
+      case GPU:
+        gpuDelegate = GpuDelegateHelper.createGpuDelegate();
+        tfliteOptions.addDelegate(gpuDelegate);
+        break;
+      case CPU:
+        break;
+    }
+    tfliteOptions.setNumThreads(numThreads);
     tflite = new Interpreter(tfliteModel, tfliteOptions);
     labels = loadLabelList(activity);
     imgData =
@@ -155,7 +196,7 @@ public abstract class Classifier {
                 * DIM_PIXEL_SIZE
                 * getNumBytesPerChannel());
     imgData.order(ByteOrder.nativeOrder());
-    Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
+    LOGGER.d("Created a Tensorflow Lite Image Classifier.");
   }
 
   /** Reads label list from Assets. */
@@ -198,7 +239,7 @@ public abstract class Classifier {
       }
     }
     long endTime = SystemClock.uptimeMillis();
-    Log.d(TAG, "Timecost to put values into ByteBuffer: " + Long.toString(endTime - startTime));
+    LOGGER.v("Timecost to put values into ByteBuffer: " + (endTime - startTime));
   }
 
   /** Runs inference and returns the classification results. */
@@ -216,7 +257,7 @@ public abstract class Classifier {
     runInference();
     long endTime = SystemClock.uptimeMillis();
     Trace.endSection();
-    Log.d(TAG, "Timecost to run model inference: " + (endTime - startTime));
+    LOGGER.v("Timecost to run model inference: " + (endTime - startTime));
 
     // Find the best classifications.
     PriorityQueue<Recognition> pq =
@@ -246,47 +287,15 @@ public abstract class Classifier {
     return recognitions;
   }
 
-  /** Enables use of the GPU for inference, if available. */
-  public void useGpu() {
-    if (gpuDelegate == null && GpuDelegateHelper.isGpuDelegateAvailable()) {
-      gpuDelegate = GpuDelegateHelper.createGpuDelegate();
-      tfliteOptions.addDelegate(gpuDelegate);
-      recreateInterpreter();
-    }
-  }
-
-  /** Enables use of the CPU for inference. */
-  public void useCPU() {
-    tfliteOptions.setUseNNAPI(false);
-    recreateInterpreter();
-  }
-
-  /** Enables use of NNAPI for inference, if available. */
-  public void useNNAPI() {
-    tfliteOptions.setUseNNAPI(true);
-    recreateInterpreter();
-  }
-
-  /** Adjusts the number of threads used in CPU inference. */
-  public void setNumThreads(int numThreads) {
-    tfliteOptions.setNumThreads(numThreads);
-    recreateInterpreter();
-  }
-
-  private void recreateInterpreter() {
-    if (tflite != null) {
-      tflite.close();
-      // TODO(b/120679982)
-      // gpuDelegate.close();
-      tflite = new Interpreter(tfliteModel, tfliteOptions);
-    }
-  }
-
   /** Closes the interpreter and model to release resources. */
   public void close() {
     if (tflite != null) {
       tflite.close();
       tflite = null;
+    }
+    if (gpuDelegate != null) {
+      GpuDelegateHelper.close(gpuDelegate);
+      gpuDelegate = null;
     }
     tfliteModel = null;
   }

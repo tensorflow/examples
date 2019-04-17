@@ -32,8 +32,9 @@ public class ClassifierFloatMobileNet extends Classifier {
    *
    * @param activity
    */
-  public ClassifierFloatMobileNet(Activity activity) throws IOException {
-    super(activity);
+  public ClassifierFloatMobileNet(Activity activity, Device device, int numThreads)
+      throws IOException {
+    super(activity, device, numThreads);
     labelProbArray = new float[1][getNumLabels()];
   }
 

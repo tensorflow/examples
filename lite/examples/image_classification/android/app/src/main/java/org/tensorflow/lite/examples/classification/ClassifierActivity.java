@@ -25,13 +25,16 @@ import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
 import android.util.Size;
 import android.util.TypedValue;
+import android.widget.Toast;
 import java.io.IOException;
 import java.util.List;
 import org.tensorflow.lite.examples.classification.env.BorderedText;
 import org.tensorflow.lite.examples.classification.env.ImageUtils;
 import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier;
-import org.tensorflow.lite.examples.classification.tflite.ClassifierQuantizedMobileNet;
+import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
+import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
+import org.tensorflow.lite.examples.classification.tflite.GpuDelegateHelper;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -66,10 +69,9 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     borderedText = new BorderedText(textSizePx);
     borderedText.setTypeface(Typeface.MONOSPACE);
 
-    try {
-      classifier = new ClassifierQuantizedMobileNet(this);
-    } catch (IOException e) {
-      LOGGER.e(e, "Failed to load classifier.");
+    recreateClassifier(getModel(), getDevice(), getNumThreads());
+    if (classifier == null) {
+      LOGGER.e("No classifier on preview!");
       return;
     }
 
@@ -100,9 +102,6 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
   @Override
   protected void processImage() {
-    if (classifier == null) {
-      return;
-    }
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
     final Canvas canvas = new Canvas(croppedBitmap);
     canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
@@ -111,50 +110,74 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
         new Runnable() {
           @Override
           public void run() {
-            final long startTime = SystemClock.uptimeMillis();
-            final List<Classifier.Recognition> results = classifier.recognizeImage(croppedBitmap);
-            lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-            LOGGER.i("Detect: %s", results);
-            cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
+            if (classifier != null) {
+              final long startTime = SystemClock.uptimeMillis();
+              final List<Classifier.Recognition> results = classifier.recognizeImage(croppedBitmap);
+              lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
+              LOGGER.v("Detect: %s", results);
+              cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
 
-            runOnUiThread(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    showResultsInBottomSheet(results);
-                    showFrameInfo(previewWidth + "x" + previewHeight);
-                    showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
-                    showCameraResolution(canvas.getWidth() + "x" + canvas.getHeight());
-                    showRotationInfo(String.valueOf(sensorOrientation));
-                    showInference(lastProcessingTimeMs + "ms");
-                  }
-                });
-
+              runOnUiThread(
+                  new Runnable() {
+                    @Override
+                    public void run() {
+                      showResultsInBottomSheet(results);
+                      showFrameInfo(previewWidth + "x" + previewHeight);
+                      showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
+                      showCameraResolution(canvas.getWidth() + "x" + canvas.getHeight());
+                      showRotationInfo(String.valueOf(sensorOrientation));
+                      showInference(lastProcessingTimeMs + "ms");
+                    }
+                  });
+            }
             readyForNextImage();
           }
         });
   }
 
   @Override
-  protected void setUseNNAPI(final boolean isChecked) {
-    if (classifier == null) {
+  protected void onInferenceConfigurationChanged() {
+    if (croppedBitmap == null) {
+      // Defer creation until we're getting camera frames.
       return;
     }
-    runInBackground(
-        () -> {
-          if (isChecked) {
-            classifier.useNNAPI();
-          } else {
-            classifier.useCPU();
-          }
-        });
+    final Device device = getDevice();
+    final Model model = getModel();
+    final int numThreads = getNumThreads();
+    runInBackground(() -> recreateClassifier(model, device, numThreads));
   }
 
-  @Override
-  protected void setNumThreads(final int numThreads) {
-    if (classifier == null) {
-      return;
+  private void recreateClassifier(Model model, Device device, int numThreads) {
+    if (classifier != null) {
+      LOGGER.d("Closing classifier.");
+      classifier.close();
+      classifier = null;
     }
-    runInBackground(() -> classifier.setNumThreads(numThreads));
+    if (device == Device.GPU) {
+      if (!GpuDelegateHelper.isGpuDelegateAvailable()) {
+        LOGGER.d("Not creating classifier: GPU support unavailable.");
+        runOnUiThread(
+            () -> {
+              Toast.makeText(this, "GPU acceleration unavailable.", Toast.LENGTH_LONG).show();
+            });
+        return;
+      } else if (model == Model.QUANTIZED && device == Device.GPU) {
+        LOGGER.d("Not creating classifier: GPU doesn't support quantized models.");
+        runOnUiThread(
+            () -> {
+              Toast.makeText(
+                      this, "GPU does not yet supported quantized models.", Toast.LENGTH_LONG)
+                  .show();
+            });
+        return;
+      }
+    }
+    try {
+      LOGGER.d(
+          "Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
+      classifier = Classifier.create(this, model, device, numThreads);
+    } catch (IOException e) {
+      LOGGER.e(e, "Failed to create classifier.");
+    }
   }
 }
