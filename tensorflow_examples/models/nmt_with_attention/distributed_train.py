@@ -128,8 +128,10 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
     train_iterator = strategy.make_dataset_iterator(train_ds)
     test_iterator = strategy.make_dataset_iterator(test_ds)
 
-    encoder = nmt.Encoder(vocab_inp_size, embedding_dim, enc_units, batch_size)
-    decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units, batch_size)
+    local_bz = batch_size / strategy.num_replicas_in_sync
+
+    encoder = nmt.Encoder(vocab_inp_size, embedding_dim, enc_units, local_bz)
+    decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
 
     train_obj = DistributedTrain(epochs, enable_function, encoder, decoder,
                                  inp_lang, targ_lang, batch_size)

@@ -176,7 +176,7 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
   vocab_tar_size = len(targ_lang.word_index) + 1
 
   encoder = nmt.Encoder(vocab_inp_size, embedding_dim, enc_units, batch_size)
-  decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units, batch_size)
+  decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
 
   train_obj = Train(epochs, enable_function, encoder, decoder,
                     inp_lang, targ_lang, batch_size)
