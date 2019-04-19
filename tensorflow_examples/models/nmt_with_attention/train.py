@@ -37,10 +37,12 @@ class Train(object):
     inp_lang: Input language tokenizer.
     targ_lang: Target language tokenizer.
     batch_size: Batch size.
+    per_replica_batch_size: Batch size per replica for sync replicas. Same as
+      batch_size for non distributed training.
   """
 
   def __init__(self, epochs, enable_function, encoder, decoder, inp_lang,
-               targ_lang, batch_size):
+               targ_lang, batch_size, per_replica_batch_size):
     self.epochs = epochs
     self.enable_function = enable_function
     self.encoder = encoder
@@ -48,9 +50,10 @@ class Train(object):
     self.inp_lang = inp_lang
     self.targ_lang = targ_lang
     self.batch_size = batch_size
+    self.per_replica_batch_size = per_replica_batch_size
     self.optimizer = tf.keras.optimizers.Adam()
     self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
-        from_logits=True)
+        from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
     self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
 
@@ -61,7 +64,7 @@ class Train(object):
     mask = tf.cast(mask, dtype=loss_.dtype)
     loss_ *= mask
 
-    return tf.reduce_mean(loss_)
+    return tf.reduce_sum(loss_) * 1. / self.batch_size
 
   def train_step(self, inputs):
     """One train step.
@@ -79,7 +82,8 @@ class Train(object):
       enc_output, enc_hidden = self.encoder(inp, enc_hidden)
       dec_hidden = enc_hidden
       dec_input = tf.expand_dims(
-          [self.targ_lang.word_index['<start>']] * self.batch_size, 1)
+          [self.targ_lang.word_index['<start>']] * self.per_replica_batch_size,
+          1)
 
       for t in range(1, targ.shape[1]):
         # passing enc_output to the decoder
@@ -90,7 +94,8 @@ class Train(object):
         dec_input = tf.expand_dims(targ[:, t], 1)
 
     batch_loss = (loss / int(targ.shape[1]))
-    variables = self.encoder.trainable_variables + self.decoder.trainable_variables
+    variables = (self.encoder.trainable_variables +
+                 self.decoder.trainable_variables)
     gradients = tape.gradient(loss, variables)
     self.optimizer.apply_gradients(zip(gradients, variables))
 
@@ -111,7 +116,8 @@ class Train(object):
     enc_output, enc_hidden = self.encoder(inp_test, enc_hidden)
     dec_hidden = enc_hidden
     dec_input = tf.expand_dims(
-        [self.targ_lang.word_index['<start>']] * self.batch_size, 1)
+        [self.targ_lang.word_index['<start>']] * self.per_replica_batch_size,
+        1)
 
     for t in range(1, targ_test.shape[1]):
       predictions, dec_hidden, _ = self.decoder(
@@ -179,7 +185,7 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
   decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
 
   train_obj = Train(epochs, enable_function, encoder, decoder,
-                    inp_lang, targ_lang, batch_size)
+                    inp_lang, targ_lang, batch_size, batch_size)
   print ('Training ...')
   return train_obj.training_loop(train_ds, test_ds)
 

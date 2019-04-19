@@ -38,13 +38,15 @@ class Train(object):
     epochs: Number of epochs
     enable_function: If True, wraps the train_step and test_step in tf.function
     model: Densenet model.
+    batch_size: Batch size.
   """
 
-  def __init__(self, epochs, enable_function, model):
+  def __init__(self, epochs, enable_function, model, batch_size):
     self.epochs = epochs
+    self.batch_size = batch_size
     self.enable_function = enable_function
     self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
-        from_logits=True)
+        from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
     self.optimizer = tf.keras.optimizers.SGD(learning_rate=0.1,
                                              momentum=0.9, nesterov=True)
     self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
@@ -72,8 +74,9 @@ class Train(object):
     image, label = inputs
     with tf.GradientTape() as tape:
       predictions = self.model(image, training=True)
-      loss = self.loss_object(label, predictions)
+      loss = tf.reduce_sum(self.loss_object(label, predictions))
       loss += sum(self.model.losses)
+      loss = loss * (1. / self.batch_size)
     gradients = tape.gradient(loss, self.model.trainable_variables)
     self.optimizer.apply_gradients(zip(gradients,
                                        self.model.trainable_variables))
@@ -113,10 +116,12 @@ class Train(object):
 
     # this code is expected to change.
     def distributed_train():
-      return strategy.experimental_run(self.train_step, train_iterator)
+      return strategy.experimental_run(
+          self.train_step, train_iterator)
 
     def distributed_test():
-      return strategy.experimental_run(self.test_step, test_iterator)
+      return strategy.experimental_run(
+          self.test_step, test_iterator)
 
     if self.enable_function:
       distributed_train = tf.function(distributed_train)
@@ -196,7 +201,7 @@ def main(epochs,
         num_layers_in_each_block, data_format, bottleneck, compression,
         weight_decay, dropout_rate, pool_initial, include_top)
 
-    trainer = Train(epochs, enable_function, model)
+    trainer = Train(epochs, enable_function, model, batch_size)
 
     train_dataset, test_dataset, metadata = utils.create_dataset(
         buffer_size, batch_size, data_format, data_dir)

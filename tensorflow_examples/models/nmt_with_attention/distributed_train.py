@@ -44,13 +44,14 @@ class DistributedTrain(Train):
     inp_lang: Input language tokenizer.
     targ_lang: Target language tokenizer.
     batch_size: Batch size.
+    per_replica_batch_size: Batch size per replica for sync replicas.
   """
 
   def __init__(self, epochs, enable_function, encoder, decoder, inp_lang,
-               targ_lang, batch_size):
+               targ_lang, batch_size, per_replica_batch_size):
     Train.__init__(
         self, epochs, enable_function, encoder, decoder, inp_lang, targ_lang,
-        batch_size)
+        batch_size, per_replica_batch_size)
 
   def training_loop(self, train_iterator, test_iterator,
                     num_train_steps_per_epoch, num_test_steps_per_epoch,
@@ -141,7 +142,8 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
     decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
 
     train_obj = DistributedTrain(epochs, enable_function, encoder, decoder,
-                                 inp_lang, targ_lang, local_batch_size)
+                                 inp_lang, targ_lang, batch_size,
+                                 local_batch_size)
     print ('Training ...')
     return train_obj.training_loop(train_iterator,
                                    test_iterator,
