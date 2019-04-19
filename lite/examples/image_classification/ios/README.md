@@ -1,66 +1,87 @@
-# TensorFlow Lite Image Classification iOS Example Application
-
-**iOS Versions Supported:** iOS 12.0 and above.
-**Xcode Version Required:** 10.0 and above
+# TensorFlow Lite image classification iOS example application
 
 ## Overview
 
-This is a camera app that continuously classifies whatever it sees from your device's back camera, using a quantized MobileNet model. These instructions walk you through building and running the demo on an iOS device.
+This is an example application for [TensorFlow Lite](https://tensorflow.org/lite)
+on iOS. It uses [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview)
+to continuously classify whatever it sees from the device's back camera, using
+a quantized MobileNet model. The application must be run on device.
 
-The model files are downloaded via scripts in Xcode as part of the build process. You don't need to perform any additional steps to download TFLite models into the project.
+These instructions walk you through building and
+running the demo on an iOS device. For an explanation of the source, see
+[TensorFlow Lite iOS image classification example](https://www.tensorflow.org/lite/models/image_classification/ios).
 
 <!-- TODO(b/124116863): Add app screenshot. -->
 
-## Prerequisites
+### Model
+For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
 
-* You must have Xcode installed
+The model will be downloaded as part of the build process.
 
-* You must have a valid Apple Developer ID
+### iOS app details
 
-* The demo app requires a camera and must be executed on a real iOS device. You can build it and run with the iPhone Simulator but the app raises a camera not found exception.
+This app is written in both Swift and Objective-C. All application
+functionality, image processing and results formatting is developed in Swift.
+Objective-C is used via bridging to make the TensorFlow Lite C++ framework
+calls.
 
-* You don't need to build the entire TensorFlow library to run the demo, it uses CocoaPods to download the TensorFlow Lite library.
+## Requirements
 
-* You'll also need the Xcode command-line tools:
+*   Device with iOS 12.0 or above
 
-```xcode-select --install```
+*   Xcode 10.0 or above
 
-If this is a new install, you will need to run the Xcode application once to agree to the license before continuing.
+*   Valid Apple Developer ID
 
-## Building the iOS Demo App
-1. Install CocoaPods if you don't have it.
-```sudo gem install cocoapods```
+*   Xcode command-line tools (run `xcode-select --install`)
 
+*   [CocoaPods](https://cocoapods.org/) (run `bash sudo gem install cocoapods`)
 
-2. Install the pod to generate the workspace file:
-```cd examples/image_classification/ios```
-```pod install```
-If you have installed this pod before and that command doesn't work, try
-```pod update```
-At the end of this step you should have a file called ```ImageClassification.xcworkspace```
+If this is a new install, you will need to run the Xcode application once to
+agree to the license before continuing.
 
-3. Open the project in Xcode by typing this on the command line:
-```open ImageClassification.xcworkspace```
-This launches Xcode if it isn't open already and opens the ```ImageClassification``` project.
+Note: The demo app requires a camera and must be executed on a real iOS device.
+You can build it and run with the iPhone Simulator, but the app will raise a
+`Camera not found` exception.
 
-4. Please change the bundle identifier to a unique identifier and select your development team in **'General->Signing'** before building the application if you are using an iOS device.
+## Build and run
 
-5. Build and run the app in Xcode.
-You'll have to grant permissions for the app to use the device's camera. Point the camera at various objects and enjoy seeing how the model classifies things!
+1.  Clone this GitHub repository to your workstation. `bash git clone
+    https://github.com/tensorflow/examples.git`
 
-### Additional Note
-_Please do not delete the empty references_ to the .tflite and .txt files after you clone the repo and open the project. These references will be fulfilled once the model and label files are downloaded when the application is built and run for the first time. If you delete the references to them, you can still find that the .tflite and .txt files are downloaded to the Model folder, the next time you build the application. You will have to add the references to these files in the bundle separately in that case.
+2.  Install the pod to generate the workspace file: `bash cd
+    examples/lite/examples/image_classification/ios pod install`
 
-## Model Used
+Note: If you have installed this pod before and that command doesn't work, try
+`pod update`.
 
-This app uses [MobileNet](https://ai.googleblog.com/2017/06/mobilenets-open-source-models-for.html) v1 model trained on [ImageNet](http://www.image-net.org/) 1000 classes. It takes input images of dimension 224 X 224 X 3. The model will be downloaded to the app as part of the build process. If required you can download the TFLite models for image classification [here](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/lite/g3doc/models.md).
+At the end of this step you should have a directory called
+`ImageClassification.xcworkspace`.
 
-## iOS App Details
+1.  Open the project in Xcode with the following command: `bash open
+    ImageClassification.xcworkspace`
 
-This app is written in both Swift and Objective C. All application functionality, image processing and results formatting is developed in Swift.
-Objective C is used via bridging to make the TensorFlow Lite C++ framework calls.
+This launches Xcode and opens the `ImageClassification` project.
 
-## See Also
+1.  Select the `ImageClassification` project in the left hand navigation to open
+    the project configuration. In the **Signing** section of the **General**
+    tab, select your development team from the dropdown.
 
-* [Apple Developer Guide on Importing Objective C into Swift](https://developer.apple.com/documentation/swift/imported_c_and_objective-c_apis/importing_objective-c_into_swift)
-This documentation provides information on how to use code written in Objective C in an application written in Swift.
+2.  In order to build the project, you must modify the **Bundle Identifier** in
+    the **Identity** section so that it is unique across all Xcode projects. To
+    create a unique identifier, try adding your initials and a number to the end
+    of the string.
+
+3.  With an iOS device connected, build and run the app in Xcode.
+
+You'll have to grant permissions for the app to use the device's camera. Point
+the camera at various objects and enjoy seeing how the model classifies things!
+
+## Model references
+_Do not delete the empty references_ to the .tflite and .txt files after you
+clone the repo and open the project. These references will be fulfilled once the
+model and label files are downloaded when the application is built and run for
+the first time. If you delete the references to them, you can still find that
+the .tflite and .txt files are downloaded to the Model folder, the next time you
+build the application. You will have to add the references to these files in the
+bundle separately in that case.

@@ -120,8 +120,7 @@ class ModelDataHandler: NSObject {
         var b = 2
         for c in 0...(wantedInputChannels) - 1 {
 
-          // Pixel values are between 0-255. Model requires the values to be between -1 and 1.
-          // We are also reversing the order of pixels since the source pixel format is BGRA, but the model requires RGB format.
+          // We are reversing the order of pixels since the source pixel format is BGRA, but the model requires RGB format.
           out_pixel[c] = in_pixel[b]
           b = b - 1
         }
@@ -159,7 +158,7 @@ class ModelDataHandler: NSObject {
 
     var resultsArray: [Inference] = []
 
-    // Filters out results with confidence score < threshold and creates and Inference object for each class detected.
+    // Creates an Inference object for each class detected.
     for i in 0...predictionSize - 1 {
       let value = Double(prediction[i]) / 255.0
 
