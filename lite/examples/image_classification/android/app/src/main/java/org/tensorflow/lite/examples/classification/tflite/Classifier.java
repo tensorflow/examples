@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-import org.tensorflow.lite.Delegate;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.examples.classification.env.Logger;
+import org.tensorflow.lite.gpu.GpuDelegate;
 
 /** A classifier specialized to label images using TensorFlow Lite. */
 public abstract class Classifier {
@@ -75,7 +75,7 @@ public abstract class Classifier {
   private List<String> labels;
 
   /** Optional GPU delegate for accleration. */
-  private Delegate gpuDelegate = null;
+  private GpuDelegate gpuDelegate = null;
 
   /** An instance of the driver class to run model inference with Tensorflow Lite. */
   protected Interpreter tflite;
@@ -179,7 +179,7 @@ public abstract class Classifier {
         tfliteOptions.setUseNNAPI(true);
         break;
       case GPU:
-        gpuDelegate = GpuDelegateHelper.createGpuDelegate();
+        gpuDelegate = new GpuDelegate();
         tfliteOptions.addDelegate(gpuDelegate);
         break;
       case CPU:
@@ -294,7 +294,7 @@ public abstract class Classifier {
       tflite = null;
     }
     if (gpuDelegate != null) {
-      GpuDelegateHelper.close(gpuDelegate);
+      gpuDelegate.close();
       gpuDelegate = null;
     }
     tfliteModel = null;

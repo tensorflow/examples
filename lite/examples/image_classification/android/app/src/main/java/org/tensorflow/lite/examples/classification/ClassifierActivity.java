@@ -34,7 +34,6 @@ import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
-import org.tensorflow.lite.examples.classification.tflite.GpuDelegateHelper;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -153,24 +152,14 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
       classifier.close();
       classifier = null;
     }
-    if (device == Device.GPU) {
-      if (!GpuDelegateHelper.isGpuDelegateAvailable()) {
-        LOGGER.d("Not creating classifier: GPU support unavailable.");
-        runOnUiThread(
-            () -> {
-              Toast.makeText(this, "GPU acceleration unavailable.", Toast.LENGTH_LONG).show();
-            });
-        return;
-      } else if (model == Model.QUANTIZED && device == Device.GPU) {
-        LOGGER.d("Not creating classifier: GPU doesn't support quantized models.");
-        runOnUiThread(
-            () -> {
-              Toast.makeText(
-                      this, "GPU does not yet supported quantized models.", Toast.LENGTH_LONG)
-                  .show();
-            });
-        return;
-      }
+    if (device == Device.GPU && model == Model.QUANTIZED) {
+      LOGGER.d("Not creating classifier: GPU doesn't support quantized models.");
+      runOnUiThread(
+          () -> {
+            Toast.makeText(this, "GPU does not yet supported quantized models.", Toast.LENGTH_LONG)
+                .show();
+          });
+      return;
     }
     try {
       LOGGER.d(
