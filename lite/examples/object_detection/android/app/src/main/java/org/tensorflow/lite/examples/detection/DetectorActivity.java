@@ -107,7 +107,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
       cropSize = TF_OD_API_INPUT_SIZE;
     } catch (final IOException e) {
       e.printStackTrace();
-      LOGGER.e("Exception initializing classifier!", e);
+      LOGGER.e(e, "Exception initializing classifier!");
       Toast toast =
           Toast.makeText(
               getApplicationContext(), "Classifier could not be initialized", Toast.LENGTH_SHORT);
