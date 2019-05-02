@@ -6,5 +6,5 @@ target 'ImageClassification' do
   use_frameworks!
 
   # Pods for ImageClassification
-   pod 'TensorFlowLite'
+   pod 'TensorFlowLiteSwift'
 end

@@ -18,7 +18,6 @@
 		AAE79E5F213521DA00E7AC1F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AAE79E5D213521DA00E7AC1F /* Main.storyboard */; };
 		AAE79E61213521DB00E7AC1F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAE79E60213521DB00E7AC1F /* Assets.xcassets */; };
 		AAE79E64213521DB00E7AC1F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AAE79E62213521DB00E7AC1F /* LaunchScreen.storyboard */; };
-		AAE79E92213522E200E7AC1F /* TfliteWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = AAE79E91213522E200E7AC1F /* TfliteWrapper.mm */; };
 		AAE79E952135237A00E7AC1F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE79E942135237A00E7AC1F /* ViewController.swift */; };
 		AAE79E9A2135268800E7AC1F /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE79E982135268800E7AC1F /* PreviewView.swift */; };
 		AAE79E9B2135268800E7AC1F /* CameraFeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE79E992135268800E7AC1F /* CameraFeedManager.swift */; };
@@ -40,9 +39,6 @@
 		AAE79E60213521DB00E7AC1F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AAE79E63213521DB00E7AC1F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AAE79E65213521DB00E7AC1F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AAE79E8F213522E100E7AC1F /* ImageClassification-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ImageClassification-Bridging-Header.h"; sourceTree = "<group>"; };
-		AAE79E90213522E200E7AC1F /* TfliteWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TfliteWrapper.h; sourceTree = "<group>"; };
-		AAE79E91213522E200E7AC1F /* TfliteWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TfliteWrapper.mm; sourceTree = "<group>"; };
 		AAE79E942135237A00E7AC1F /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AAE79E982135268800E7AC1F /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		AAE79E992135268800E7AC1F /* CameraFeedManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraFeedManager.swift; sourceTree = "<group>"; };
@@ -148,7 +144,6 @@
 				AABFCBB0213FE05000C0A67B /* ModelDataHandler */,
 				AAE79E932135236700E7AC1F /* ViewControllers */,
 				AAE79E972135268800E7AC1F /* Camera Feed */,
-				AAE79E8E213522B800E7AC1F /* TensorflowLiteWrapper */,
 				AA5FEB7A21355CCC00F9BD4B /* Model */,
 				AA5FEB7F21355D0300F9BD4B /* Storyboards */,
 				AAE79E59213521DA00E7AC1F /* AppDelegate.swift */,
@@ -164,16 +159,6 @@
 				76ECA8E9608854455354DE8F /* Pods_ImageClassification.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		AAE79E8E213522B800E7AC1F /* TensorflowLiteWrapper */ = {
-			isa = PBXGroup;
-			children = (
-				AAE79E90213522E200E7AC1F /* TfliteWrapper.h */,
-				AAE79E91213522E200E7AC1F /* TfliteWrapper.mm */,
-				AAE79E8F213522E100E7AC1F /* ImageClassification-Bridging-Header.h */,
-			);
-			path = TensorflowLiteWrapper;
 			sourceTree = "<group>";
 		};
 		AAE79E932135236700E7AC1F /* ViewControllers */ = {
@@ -316,7 +301,6 @@
 				AA5B0EEC217E70000026FF23 /* CurvedView.swift in Sources */,
 				AAE79E9A2135268800E7AC1F /* PreviewView.swift in Sources */,
 				AAE79E9B2135268800E7AC1F /* CameraFeedManager.swift in Sources */,
-				AAE79E92213522E200E7AC1F /* TfliteWrapper.mm in Sources */,
 				AAAB096E218981FA0015A1F2 /* CVPixelBufferExtension.swift in Sources */,
 				AA16E5A22180843800D9E153 /* InfoCell.swift in Sources */,
 				AABFCBB2213FE0B100C0A67B /* ModelDataHandler.swift in Sources */,
@@ -404,6 +388,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -457,6 +442,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -487,9 +473,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.ImageClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "ImageClassification/TensorflowLiteWrapper/ImageClassification-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -520,8 +506,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.ImageClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "ImageClassification/TensorflowLiteWrapper/ImageClassification-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

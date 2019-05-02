@@ -43,7 +43,8 @@ class ViewController: UIViewController {
   private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
 
   // Handles all data preprocessing and makes calls to run inference through TfliteWrapper
-  private let modelDataHandler: ModelDataHandler? = ModelDataHandler(modelFileName: "mobilenet_quant_v1_224", labelsFileName: "labels", labelsFileExtension: "txt")
+  private var modelDataHandler: ModelDataHandler? =
+    ModelDataHandler(modelFileInfo: MobileNet.modelInfo, labelsFileInfo: MobileNet.labelsInfo)
 
   // Handles the presenting of results on the screen
   private var inferenceViewController: InferenceViewController?
@@ -52,7 +53,6 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    // Checks if ModelDataHandler initialization was successful to determine if execution should be continued or not.
     guard modelDataHandler != nil else {
       fatalError("Model set up failed")
     }
@@ -78,7 +78,11 @@ class ViewController: UIViewController {
   }
 
   func presentUnableToResumeSessionAlert() {
-    let alert = UIAlertController(title: "Unable to Resume Session", message: "There was an error while attempting to resume session.", preferredStyle: .alert)
+    let alert = UIAlertController(
+      title: "Unable to Resume Session",
+      message: "There was an error while attempting to resume session.",
+      preferredStyle: .alert
+    )
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
 
     self.present(alert, animated: true)
@@ -94,8 +98,8 @@ class ViewController: UIViewController {
         return
       }
       inferenceViewController = segue.destination as? InferenceViewController
-      inferenceViewController?.wantedInputHeight = tempModelDataHandler.wantedInputHeight
-      inferenceViewController?.wantedInputWidth = tempModelDataHandler.wantedInputWidth
+      inferenceViewController?.wantedInputHeight = tempModelDataHandler.inputHeight
+      inferenceViewController?.wantedInputWidth = tempModelDataHandler.inputWidth
       inferenceViewController?.maxResults = tempModelDataHandler.resultCount
       inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
       inferenceViewController?.delegate = self
@@ -109,7 +113,12 @@ class ViewController: UIViewController {
 extension ViewController: InferenceViewControllerDelegate {
 
   func didChangeThreadCount(to count: Int) {
-    modelDataHandler?.set(numberOfThreads: Int32(count))
+    if modelDataHandler?.threadCount == count { return }
+    modelDataHandler = ModelDataHandler(
+      modelFileInfo: MobileNet.modelInfo,
+      labelsFileInfo: MobileNet.labelsInfo,
+      threadCount: count
+    )
   }
 }
 
@@ -117,27 +126,19 @@ extension ViewController: InferenceViewControllerDelegate {
 extension ViewController: CameraFeedManagerDelegate {
 
   func didOutput(pixelBuffer: CVPixelBuffer) {
-
-    // Run the live camera pixelBuffer through tensorFlow to get the result
-
     let currentTimeMs = Date().timeIntervalSince1970 * 1000
-
-    guard  (currentTimeMs - previousInferenceTimeMs) >= delayBetweenInferencesMs else {
-      return
-    }
-
+    guard (currentTimeMs - previousInferenceTimeMs) >= delayBetweenInferencesMs else { return }
     previousInferenceTimeMs = currentTimeMs
+
+    // Pass the pixel buffer to TensorFlow Lite to perform inference.
     result = modelDataHandler?.runModel(onFrame: pixelBuffer)
 
+    // Display results by handing off to the InferenceViewController.
     DispatchQueue.main.async {
-
       let resolution = CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer))
-
-      // Display results by handing off to the InferenceViewController
       self.inferenceViewController?.inferenceResult = self.result
       self.inferenceViewController?.resolution = resolution
       self.inferenceViewController?.tableView.reloadData()
-
     }
   }
 
@@ -145,17 +146,14 @@ extension ViewController: CameraFeedManagerDelegate {
   func sessionWasInterrupted(canResumeManually resumeManually: Bool) {
 
     // Updates the UI when session is interupted.
-    if resumeManually == true {
+    if resumeManually {
       self.resumeButton.isHidden = false
-    }
-    else {
+    } else {
       self.cameraUnavailableLabel.isHidden = false
     }
   }
 
-
   func sessionInterruptionEnded() {
-
     // Updates UI once session interruption has ended.
     if !self.cameraUnavailableLabel.isHidden {
       self.cameraUnavailableLabel.isHidden = true
@@ -176,9 +174,8 @@ extension ViewController: CameraFeedManagerDelegate {
 
     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
     let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
-      UIApplication.shared.open(URL(string: UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+      UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
     }
-
     alertController.addAction(cancelAction)
     alertController.addAction(settingsAction)
 
@@ -327,7 +324,8 @@ extension ViewController {
 
 }
 
-
-
-
-
+#if !swift(>=4.2)
+extension UIApplication {
+  typealias openSettingsURLString = UIApplicationOpenSettingsURLString
+}
+#endif  // !swift(>=4.2)
