@@ -22,7 +22,8 @@ const CONTROLS = [
 ];
 var controlsCaptured = [], labelsCaptured = [];
 
-ui.init = function() {
+ui.init =
+    function() {
   document.getElementById('user-help').style.visibility = 'visible';
   document.getElementById('user-help-text').innerText =
       'Add images to the classes below by clicking or holding';
@@ -49,7 +50,8 @@ ui.init = function() {
 
 
 
-function hideAllDropdowns() {
+function
+hideAllDropdowns() {
   let dropdownLists = document.getElementsByClassName('custom-option-list');
   for (var j = 0; j < dropdownLists.length; j++) {
     dropdownLists[j].className = 'custom-option-list hide';
@@ -129,7 +131,8 @@ function removeActiveClass() {
   }
 }
 
-ui.predictClass = function(classId) {
+ui.predictClass =
+    function(classId) {
   removeActiveClass();
   classId = Math.floor(classId);
   document.getElementById(controlsCaptured[classId] + '-button').className =
@@ -137,16 +140,18 @@ ui.predictClass = function(classId) {
   document.body.setAttribute('data-active', controlsCaptured[classId]);
 }
 
-ui.isPredicting = function() {
+    ui.isPredicting =
+        function() {
   document.getElementById('predict').className = 'test-button hide';
   document.getElementById('webcam-outer-wrapper').style.border =
       '4px solid #00db8b';
   document.getElementById('stop-predict').className = 'stop-button';
   document.getElementById('bottom-section').style.pointerEvents = 'none';
   downloadModel.className = 'disabled';
-}
+};
 
-ui.donePredicting = function() {
+ui.donePredicting =
+            function() {
   document.getElementById('predict').className = 'test-button';
   document.getElementById('webcam-outer-wrapper').style.border =
       '2px solid #c8d0d8';
@@ -155,15 +160,19 @@ ui.donePredicting = function() {
   downloadModel.className = '';
   removeActiveClass();
 }
-ui.trainStatus = function(status) {
+
+            ui.trainStatus =
+                function(status) {
   trainStatusElement.innerText = status;
 }
 
-ui.enableModelDownload = function() {
+                ui.enableModelDownload =
+                    function() {
   downloadModel.className = '';
 }
 
-ui.enableModelTest = function() {
+                    ui.enableModelTest =
+                        function() {
   document.getElementById('predict').className = 'test-button';
 }
 
@@ -171,7 +180,7 @@ var addExampleHandler;
 
 ui.setExampleHandler = function(handler) {
   addExampleHandler = handler;
-}
+};
 let mouseDown = false;
 const totals = [0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -188,7 +197,8 @@ const thumbDisplayed = {};
 function timeout(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-ui.handler = async function(label) {
+ui.handler =
+    async function(label) {
   mouseDown = true;
   const id = CONTROLS[label];
   const button = document.getElementById(id);
@@ -259,7 +269,8 @@ scrollUpButton.addEventListener('mouseup', () => mouseDown = false);
 scrollDownButton.addEventListener('mousedown', () => ui.handler(7));
 scrollDownButton.addEventListener('mouseup', () => mouseDown = false);
 
-ui.drawThumb = function(img, label) {
+ui.drawThumb =
+    function(img, label) {
   if (thumbDisplayed[label] == null) {
     const thumbCanvas = document.getElementById(CONTROLS[label] + '-thumb');
     thumbCanvas.style.display = 'block';
