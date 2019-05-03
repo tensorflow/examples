@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "org.tensorflow.lite.examples.gesture"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }

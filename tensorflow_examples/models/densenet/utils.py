@@ -93,7 +93,7 @@ class Preprocess(object):
 
   def random_jitter(self, image):
     # add 4 pixels on each side; image_size == (36 x 36)
-    image = tf.image.resize_image_with_crop_or_pad(
+    image = tf.image.resize_with_crop_or_pad(
         image, HEIGHT + 8, WIDTH + 8)
 
     image = tf.image.random_crop(image, size=[HEIGHT, WIDTH, 3])

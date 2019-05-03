@@ -21,9 +21,9 @@
 #include <iostream>
 #include <queue>
 
-#include "tensorflow/contrib/lite/model.h"
-#include "tensorflow/contrib/lite/kernels/register.h"
-#include "tensorflow/contrib/lite/string_util.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/string_util.h"
 
 NSString* modelFileName;
 

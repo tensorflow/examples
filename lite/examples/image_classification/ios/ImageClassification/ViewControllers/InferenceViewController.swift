@@ -228,7 +228,7 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
 
     if row < tempResult.inferences.count {
       let inference = tempResult.inferences[row]
-      fieldName = inference.className
+      fieldName = inference.label
       info =  String(format: "%.2f", inference.confidence * 100.0) + "%"
     }
     else {

@@ -36,7 +36,7 @@ class Webcam {
   capture() {
     return tf.tidy(() => {
       // Reads the image as a Tensor from the webcam <video> element.
-      const webcamImage = tf.fromPixels(this.webcamElement);
+      const webcamImage = tf.browser.fromPixels(this.webcamElement);
 
       const reversedImage = webcamImage.reverse(1);
 

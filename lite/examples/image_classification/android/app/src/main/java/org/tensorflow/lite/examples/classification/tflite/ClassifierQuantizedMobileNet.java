@@ -32,8 +32,9 @@ public class ClassifierQuantizedMobileNet extends Classifier {
    *
    * @param activity
    */
-  public ClassifierQuantizedMobileNet(Activity activity) throws IOException {
-    super(activity);
+  public ClassifierQuantizedMobileNet(Activity activity, Device device, int numThreads)
+      throws IOException {
+    super(activity, device, numThreads);
     labelProbArray = new byte[1][getNumLabels()];
   }
 
