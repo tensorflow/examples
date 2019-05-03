@@ -64,7 +64,7 @@ constructor.  For example:
     <td><pre>
 tf.train.ClusterSpec({"local": ["localhost:2222", "localhost:2223"]})
 </pre></td>
-<td><code>/job:local/task:0<br/>/job:local/task:1</code></td>
+    <td><code>/job:local/task:0</code><br/><code>/job:local/task:1</code></td>
   </tr>
   <tr>
     <td><pre>
