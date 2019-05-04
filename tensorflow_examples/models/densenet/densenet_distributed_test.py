@@ -53,17 +53,31 @@ class DenseNetDistributedBenchmark(tf.test.Benchmark):
 
     self._run_and_report_benchmark(**kwargs)
 
-  def _run_and_report_benchmark(self, **kwargs):
+  def _run_and_report_benchmark(self, top_1_min=.944, top_1_max=.949, **kwargs):
+    """Run the benchmark and report metrics.report.
+
+    Args:
+      top_1_min: Min value for top_1 accuracy.  Default range is SOTA.
+      top_1_max: Max value for top_1 accuracy.
+      **kwargs: All args passed to the test.
+    """
     start_time_sec = time.time()
     train_loss, train_acc, _, test_acc = distributed_train.main(**kwargs)
     wall_time_sec = time.time() - start_time_sec
 
-    extras = {'train_loss': train_loss,
-              'training_accuracy_top_1': train_acc,
-              'accuracy_top_1': test_acc}
+    metrics = []
+    metrics.append({'name': 'accuracy_top_1',
+                    'value': test_acc,
+                    'min_value': top_1_min,
+                    'max_value': top_1_max})
 
-    self.report_benchmark(
-        wall_time=wall_time_sec, extras=extras)
+    metrics.append({'name': 'training_accuracy_top_1',
+                    'value': train_acc})
+
+    metrics.append({'name': 'train_loss',
+                    'value': train_loss})
+
+    self.report_benchmark(wall_time=wall_time_sec, metrics=metrics)
 
 if __name__ == '__main__':
   assert tf.__version__.startswith('2')

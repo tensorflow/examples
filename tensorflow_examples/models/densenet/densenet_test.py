@@ -111,16 +111,28 @@ class DenseNetBenchmark(tf.test.Benchmark):
     self._run_and_report_benchmark(**kwargs)
 
   def _run_and_report_benchmark(self, **kwargs):
+    """Run the benchmark and report metrics.report.
+
+    Args:
+      **kwargs: All args passed to the test.
+    """
     start_time_sec = time.time()
     train_loss, train_acc, _, test_acc = train.main(**kwargs)
     wall_time_sec = time.time() - start_time_sec
 
-    extras = {'train_loss': train_loss,
-              'training_accuracy_top_1': train_acc,
-              'accuracy_top_1': test_acc}
+    metrics = []
+    metrics.append({'name': 'accuracy_top_1',
+                    'value': test_acc,
+                    'min_value': .944,
+                    'max_value': .949})
 
-    self.report_benchmark(
-        wall_time=wall_time_sec, extras=extras)
+    metrics.append({'name': 'training_accuracy_top_1',
+                    'value': train_acc})
+
+    metrics.append({'name': 'train_loss',
+                    'value': train_loss})
+
+    self.report_benchmark(wall_time=wall_time_sec, metrics=metrics)
 
 if __name__ == '__main__':
   assert tf.__version__.startswith('2')
