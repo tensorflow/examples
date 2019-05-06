@@ -1,0 +1,6 @@
+[submodule "community/farmaid_bot/farmaid_bot"]
+	path = community/farmaid_bot/farmaid_bot
+	url = https://github.com/victory118/farmaid_bot
+[submodule "community/farmaid_bot/yolov3-tf2"]
+	path = community/farmaid_bot/yolov3-tf2
+	url = https://github.com/arifsohaib/yolov3-tf2
