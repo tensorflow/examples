@@ -48,6 +48,9 @@ The list is ordered in terms of importance
 The object detection code has been made to work only with the COCO dataset with 80 classes. I am currently rewriting it to work with less classes.
 </li>
 <li>
+Gather and train on more data
+</li>
+<li>
 We need to create a ros node to publish the object detection results
 </li>
 <li>
