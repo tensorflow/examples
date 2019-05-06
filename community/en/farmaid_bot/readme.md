@@ -28,6 +28,11 @@ I modified some code from https://github.com/zzh8829/yolov3-tf2 (wihch is under 
 This code is a port of YOLO object detection. The reason to use Yolo instead of the Tensorflow Object  Detection API is that the Object Detection API uses tensorflow slim which is deprecated in tensorflow 2.0<br>
 We collected our own dataset from videos at the WTMC greenhouse in Ann Arbor and labeled the data using Microsoft VOTT tool. <br>
 The labeled data was then exported to tfrecord format to train the model.<br>
+Currently the code can only use 80 classes and needs to be fixed to take a variable number of classes from the *.names file. CHanging this by adding a num_classes flag caused other issues with the size of the output <br>
+It also has an issue with training on multiple tfrecord files where it always returns nan values after 1 or 2 iterations <br>
+The original repo also had some issues with the video output which I have fixed<br>
+Dispite the above, when using a single tfrecord file for training, and without modifying anything else, the retraining instructions from the original repo works and the results can be seen in our video <br>
+
 #### robot software
 The robotic platform is run using Robot Operating System to communicate between components. The Arudino code for the bot was written by Victor Yu and can be found here: https://github.com/victory118/farmaid_bot/tree/master/robot_launch <br>
 This code contains ROS launch files to launch the various components used by the robot.<br>
@@ -40,6 +45,7 @@ We are also considering point cloud based navigation powered by the Intel RealSe
 ### Videos
 
 ### Bill of Materials
+https://docs.google.com/spreadsheets/d/1RrwixLaVbXh0Zh_sp3xbb5Equx7meZaMBgM6UH-9fX0/edit?usp=sharing
 
 ### Issues + To Do List
 The list is ordered in terms of importance
