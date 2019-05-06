@@ -23,6 +23,43 @@ Object Detection, for the diease detection we moved from classification in the o
 </ol>
 
 ### How it works
+#### object detection
+I modified some code from https://github.com/zzh8829/yolov3-tf2 (wihch is under MIT license) and added it to my fork of the repo here: https://github.com/arifsohaib/yolov3-tf2
+This code is a port of YOLO object detection. The reason to use Yolo instead of the Tensorflow Object  Detection API is that the Object Detection API uses tensorflow slim which is deprecated in tensorflow 2.0<br>
+We collected our own dataset from videos at the WTMC greenhouse in Ann Arbor and labeled the data using Microsoft VOTT tool. <br>
+The labeled data was then exported to tfrecord format to train the model.<br>
+#### robot software
+The robotic platform is run using Robot Operating System to communicate between components. The Arudino code for the bot was written by Victor Yu and can be found here: https://github.com/victory118/farmaid_bot/tree/master/robot_launch <br>
+This code contains ROS launch files to launch the various components used by the robot.<br>
+The main required node is the tele_op node which can be used to operate the robot.<br>
+Another important node is the usb_camera node which publishes camera output.<br>
+The fiducal node which detects Aruco markers that allow the robot to build a map. Additionally, it can allow the robot to navigate autonomusly without training a neural network which is feature we plan to add later.<br>
+This map will later be combined with a node that publishes the output of the tensorflow detections and the data can be combined to get a clear picture of diseases in the farm or greenhouse environment.<br>
+We are also considering point cloud based navigation powered by the Intel RealSense camera.<br>
 
+### Videos
 
-### External code used
+### Bill of Materials
+
+### Issues + To Do List
+The list is ordered in terms of importance
+<ul>
+<li>
+The object detection code has been made to work only with the COCO dataset with 80 classes. I am currently rewriting it to work with less classes.
+</li>
+<li>
+We need to create a ros node to publish the object detection results
+</li>
+<li>
+The training showed some "nan" loss values when training on several tfrecord files which need to be debugged.
+</li>
+<li>
+We need to add autonomous navigation while being careful not to damage the operating environment.
+</li>
+<li>
+Greenhouses tend to get warm quickly in the summer, we need to add a solution to coll the platform and the jetson.
+</li>
+<li>
+We plan to add additional functionality like weeding, watering, and harvesting
+</li>
+</ul>
