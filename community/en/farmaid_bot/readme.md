@@ -48,8 +48,7 @@ This map will later be combined with a node that publishes the output of the ten
 We are also considering point cloud based navigation powered by the Intel RealSense camera.<br>
 
 ### Videos
-[![Farmaid Rev2](https://img.youtube.com/vi/NipK8ffm_v0/0.jpg)](https://www.youtube.com/watch?v=NipK8ffm_v0)
-
+[![Farmaid Rev2](https://img.youtube.com/vi/eyuGeIcJONo/0.jpg)](https://www.youtube.com/watch?v=eyuGeIcJONo)
 ### Bill of Materials
 https://docs.google.com/spreadsheets/d/1RrwixLaVbXh0Zh_sp3xbb5Equx7meZaMBgM6UH-9fX0/edit?usp=sharing
 
