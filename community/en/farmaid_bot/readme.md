@@ -7,7 +7,7 @@ The original idea was inspired by one of the earliest videos on the tensorflow y
 
 The problems with the product described in the video was that it can be too time consuming for someone to actually walk the entire farm with such a phone. Additionally, it would either require a cloud connection to detect the diease, meaning an internet connection in the field is required the other option is to have a phone phone powerful enough to run Tensorflow Lite models and the model should work uniformly on every type of phone. To fix these issues, a simple solution is to have a standardized and cheap mobile computing platform that can run autonomously in the field and use tensorflow or tensorflow lite models to detect diseases.
 
-The version described here is a complete overhaul of the original bot using Tensorflow 2.0, ROS and Arduino made in response to the #PoweredByTF 2.0 Challenge. 
+The version described here is a complete overhaul of the original bot using Tensorflow 2.0, ROS and Arduino made in response to the <em>#PoweredByTF 2.0 Challenge</em>. 
 
 ### Main Components
 <ol>
@@ -48,6 +48,7 @@ This map will later be combined with a node that publishes the output of the ten
 We are also considering point cloud based navigation powered by the Intel RealSense camera.<br>
 
 ### Videos
+[![Farmaid Rev2](https://img.youtube.com/vi/NipK8ffm_v0/0.jpg)](https://www.youtube.com/watch?v=NipK8ffm_v0)
 
 ### Bill of Materials
 https://docs.google.com/spreadsheets/d/1RrwixLaVbXh0Zh_sp3xbb5Equx7meZaMBgM6UH-9fX0/edit?usp=sharing
