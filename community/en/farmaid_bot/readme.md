@@ -3,7 +3,8 @@
 The origina farmaid bot was made in response to the Arm Autonomous Robot Challange and was the winner in two categories, Best Use of AI and Most Fun Social Media Video.
 It is a robot that can detect diseases in plants to allow early detection and disease mitigation.
 The details can be found here https://www.hackster.io/teamato/farmaid-plant-disease-detection-robot-55eeb1
-The original idea was inspired by one of the earliest videos on the tensorflow youtube channel here: https://www.youtube.com/watch?v=NlpS-DhayQA
+The original idea was inspired by one of the earliest videos on the tensorflow youtube channel here: [![Cassava Video](https://img.youtube.com/vi/NlpS-DhayQA/0.jpg)](https://www.youtube.com/watch?v=NlpS-DhayQA "cassava classification")<br>
+
 The problems with the product described in the video was that it can be too time consuming for someone to actually walk the entire farm with such a phone. Additionally, it would either require a cloud connection to detect the diease, meaning an internet connection in the field is required the other option is to have a phone phone powerful enough to run Tensorflow Lite models and the model should work uniformly on every type of phone. To fix these issues, a simple solution is to have a standardized and cheap mobile computing platform that can run autonomously in the field and use tensorflow or tensorflow lite models to detect diseases.
 
 The version described here is a complete overhaul of the original bot using Tensorflow 2.0, ROS and Arduino made in response to the #PoweredByTF 2.0 Challenge. 
