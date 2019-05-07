@@ -32,7 +32,8 @@ Currently the code can only use 80 classes and needs to be fixed to take a varia
 It also has an issue with training on multiple tfrecord files where it always returns nan values after 1 or 2 iterations <br>
 The original repo also had some issues with the video output which I have fixed<br>
 Dispite the above, when using a single tfrecord file for training, and without modifying anything else, the retraining instructions from the original repo works and the results can be seen in our video <br>
-
+![Labeling the objects](https://i.imgur.com/KOCFGMb.jpg)
+![Video Output screen](https://i.imgur.com/CZhT82E.jpg)
 #### robot software
 The robotic platform is run using Robot Operating System to communicate between components. The Arudino code for the bot was written by Victor Yu and can be found here: https://github.com/victory118/farmaid_bot/tree/master/robot_launch <br>
 This code contains ROS launch files to launch the various components used by the robot.<br>
