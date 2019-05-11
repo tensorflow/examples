@@ -15,7 +15,7 @@
 import UIKit
 
 /**
- This structure holds the display parameters for the overlay to be drawon on a detected object.
+ This structure holds the display parameters for the overlay to be drawn on a detected object.
  */
 struct ObjectOverlay {
   let name: String
