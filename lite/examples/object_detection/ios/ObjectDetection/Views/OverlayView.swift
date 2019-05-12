@@ -83,7 +83,7 @@ class OverlayView: UIView {
     // Draws the string.
     let stringRect = CGRect(origin: objectOverlay.borderRect.origin, size: objectOverlay.nameStringSize)
       .offsetBy(dx: stringHorizontalSpacing, dy: stringVerticalSpacing)
-    let attributedString = NSAttributedString(string: objectOverlay.name, attributes: [NSAttributedStringKey.foregroundColor : stringFontColor, NSAttributedStringKey.font : objectOverlay.font])
+    let attributedString = NSAttributedString(string: objectOverlay.name, attributes: [.foregroundColor : stringFontColor, .font : objectOverlay.font])
     attributedString.draw(in: stringRect)
   }
 
