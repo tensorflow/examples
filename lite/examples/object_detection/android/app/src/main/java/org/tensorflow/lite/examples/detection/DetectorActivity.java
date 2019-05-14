@@ -80,8 +80,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   private MultiBoxTracker tracker;
 
-  private byte[] luminanceCopy;
-
   private BorderedText borderedText;
 
   @Override
@@ -145,20 +143,14 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             }
           }
         });
+
+    tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
   }
 
   @Override
   protected void processImage() {
     ++timestamp;
     final long currTimestamp = timestamp;
-    byte[] originalLuminance = getLuminance();
-    tracker.onFrame(
-        previewWidth,
-        previewHeight,
-        getLuminanceStride(),
-        sensorOrientation,
-        originalLuminance,
-        timestamp);
     trackingOverlay.postInvalidate();
 
     // No mutex needed as this method is not reentrant.
@@ -171,10 +163,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
-    if (luminanceCopy == null) {
-      luminanceCopy = new byte[originalLuminance.length];
-    }
-    System.arraycopy(originalLuminance, 0, luminanceCopy, 0, originalLuminance.length);
     readyForNextImage();
 
     final Canvas canvas = new Canvas(croppedBitmap);
@@ -222,7 +210,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
               }
             }
 
-            tracker.trackResults(mappedRecognitions, luminanceCopy, currTimestamp);
+            tracker.trackResults(mappedRecognitions, currTimestamp);
             trackingOverlay.postInvalidate();
 
             computingDetection = false;
