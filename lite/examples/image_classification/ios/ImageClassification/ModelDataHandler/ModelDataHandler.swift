@@ -88,7 +88,6 @@ class ModelDataHandler {
     self.threadCount = threadCount
     var options = InterpreterOptions()
     options.threadCount = threadCount
-    options.isErrorLoggingEnabled = true
     do {
       // Create the `Interpreter`.
       interpreter = try Interpreter(modelPath: modelPath, options: options)
