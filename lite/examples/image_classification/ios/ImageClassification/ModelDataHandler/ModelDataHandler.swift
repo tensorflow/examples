@@ -163,8 +163,8 @@ class ModelDataHandler {
       }
     case .float32:
       results = [Float32](unsafeData: outputTensor.data) ?? []
-    case .bool, .int16, .int32, .int64:
-      print("Output tensor data type \(outputTensor.dataType) is unsupported.")
+    default:
+      print("Output tensor data type \(outputTensor.dataType) is unsupported for this example app.")
       return nil
     }
 
