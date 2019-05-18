@@ -87,7 +87,6 @@ class InferenceViewController: UIViewController {
     threadStepper.maximumValue = Double(threadCountLimit)
     threadStepper.minimumValue = Double(minThreadCount)
     threadStepper.value = Double(currentThreadCount)
-
   }
 
   // MARK: Button Actions
@@ -160,7 +159,6 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
       let tuple = displayStringsForInferenceInfo(atRow: indexPath.row)
       fieldName = tuple.0
       info = tuple.1
-
     }
     cell.fieldNameLabel.font = infoFont
     cell.fieldNameLabel.textColor = infoTextColor
@@ -190,12 +188,9 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
     case .Crop:
       info = "\(wantedInputWidth)x\(wantedInputHeight)"
     case .InferenceTime:
-
       info = String(format: "%.2fms", inferenceTime)
     }
 
     return(fieldName, info)
   }
 }
-
-
