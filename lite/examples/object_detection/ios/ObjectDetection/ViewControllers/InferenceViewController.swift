@@ -173,15 +173,13 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
    */
   func displayStringsForInferenceInfo(atRow row: Int) -> (String, String) {
 
-    var fieldName: String = ""
-    var info: String = ""
-
     guard let inferenceInfo = InferenceInfo(rawValue: row) else {
-      return (fieldName, info)
+      return ("", "")
     }
 
-    fieldName = inferenceInfo.displayString()
+    let fieldName = inferenceInfo.displayString()
 
+    let info: String
     switch inferenceInfo {
     case .Resolution:
       info = "\(Int(resolution.width))x\(Int(resolution.height))"
@@ -191,6 +189,6 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
       info = String(format: "%.2fms", inferenceTime)
     }
 
-    return(fieldName, info)
+    return (fieldName, info)
   }
 }
