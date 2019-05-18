@@ -36,19 +36,14 @@ class InferenceViewController: UIViewController {
     case InferenceTime
 
     func displayString() -> String {
-
-      var toReturn = ""
-
       switch self {
       case .Resolution:
-        toReturn = "Resolution"
+        return "Resolution"
       case .Crop:
-        toReturn = "Crop"
+        return "Crop"
       case .InferenceTime:
-        toReturn = "Inference Time"
-
+        return "Inference Time"
       }
-      return toReturn
     }
   }
 
