@@ -84,7 +84,6 @@ class InferenceViewController: UIViewController {
     super.viewDidLoad()
 
     // Set up stepper
-    threadStepper.isUserInteractionEnabled = true
     threadStepper.maximumValue = Double(threadCountLimit)
     threadStepper.minimumValue = Double(minThreadCount)
     threadStepper.value = Double(currentThreadCount)
