@@ -91,7 +91,7 @@ class InferenceViewController: UIViewController {
 
   }
 
-  // MARK: Buttion Actions
+  // MARK: Button Actions
   /**
    Delegate the change of number of threads to View Controller and change the stepper display.
    */
@@ -172,7 +172,7 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
 
   // MARK: Format Display of information in the bottom sheet
   /**
-   This method formats the display of additional information relating to the inferences.
+   This method formats the display of additional information related to the inferences.
    */
   func displayStringsForInferenceInfo(atRow row: Int) -> (String, String) {
 
