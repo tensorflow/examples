@@ -67,7 +67,7 @@ class InferenceViewController: UIViewController {
   var inferenceTime: Double = 0
   var wantedInputWidth: Int = 0
   var wantedInputHeight: Int = 0
-  var resolution: CGSize = CGSize.zero
+  var resolution: CGSize = .zero
   var threadCountLimit: Int = 0
   var currentThreadCount: Int = 0
 
