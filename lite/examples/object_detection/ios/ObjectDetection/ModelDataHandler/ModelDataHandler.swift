@@ -216,7 +216,7 @@ class ModelDataHandler: NSObject {
     }
     do {
       let contents = try String(contentsOf: fileURL, encoding: .utf8)
-      self.labels = contents.components(separatedBy: .newlines)
+      labels = contents.components(separatedBy: .newlines)
     }
     catch {
       fatalError("Labels file named \(fileName).\(fileExtension) cannot be read. Please add a valid labels file and try again.")
