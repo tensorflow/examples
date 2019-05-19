@@ -228,7 +228,7 @@ class ModelDataHandler: NSObject {
  */
   private func colorForClass(withIndex index: Int) -> UIColor {
 
-    // We have a set of colors and the depending upon a stride, it assigns variations to of the base colors to each object based on it's index.
+    // We have a set of colors and depending upon a stride, it assigns variations of the base colors to each object based on its index.
     let baseColor = colors[index % colors.count]
 
     var colorToAssign = baseColor
