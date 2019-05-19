@@ -97,7 +97,7 @@ class ModelDataHandler: NSObject {
       return nil
     }
 
-    CVPixelBufferLockBaseAddress(thumbnailPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+    CVPixelBufferLockBaseAddress(thumbnailPixelBuffer, [])
 
     guard let sourceStartAddrss = CVPixelBufferGetBaseAddress(thumbnailPixelBuffer) else {
       return nil
@@ -149,7 +149,7 @@ class ModelDataHandler: NSObject {
 
     // Formats the results
     let resultArray = formatResults(withboundingBox: boundingBox, outputClasses: outputClasses, outputScores: outputScores, outputCount: Int(totalOutputCount), width: CGFloat(imageWidth), height: CGFloat(imageHeight))
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
     // Returns the inference time and inferences
     let result = Result(inferenceTime: inferenceTime, inferences: resultArray)
@@ -179,8 +179,7 @@ class ModelDataHandler: NSObject {
       var rect: CGRect = CGRect.zero
 
       // Translates the detected bounding box to CGRect.
-      rect.origin.y = CGFloat(boundingBox[4*i])
-      rect.origin.x = CGFloat(boundingBox[4*i+1])
+      rect.origin = CGPoint(x: CGFloat(boundingBox[4*i+1]), y: CGFloat(boundingBox[4*i]))
       rect.size.height = CGFloat(boundingBox[4*i+2]) - rect.origin.y
       rect.size.width = CGFloat(boundingBox[4*i+3]) - rect.origin.x
 
