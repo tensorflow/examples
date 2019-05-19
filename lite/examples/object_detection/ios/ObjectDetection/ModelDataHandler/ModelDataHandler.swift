@@ -231,14 +231,12 @@ class ModelDataHandler: NSObject {
     // We have a set of colors and depending upon a stride, it assigns variations of the base colors to each object based on its index.
     let baseColor = colors[index % colors.count]
 
-    var colorToAssign = baseColor
-
     let percentage = CGFloat((colorStrideValue / 2 - index / colors.count) * colorStrideValue)
 
     if let modifiedColor = baseColor.getModified(byPercentage: percentage) {
-      colorToAssign = modifiedColor
+      return modifiedColor
     }
 
-    return colorToAssign
+    return baseColor
   }
 }
