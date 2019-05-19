@@ -110,17 +110,17 @@ class ModelDataHandler: NSObject {
 
     let inputImageBaseAddress = sourceStartAddrss.assumingMemoryBound(to: UInt8.self)
 
-    for y in 0...wantedInputHeight - 1 {
+    for y in 0..<wantedInputHeight {
       let tensorInputRow = inputTensorBaseAddress.advanced(by: (y * wantedInputWidth * wantedInputChannels))
       let inputImageRow = inputImageBaseAddress.advanced(by: y * wantedInputWidth * imageChannels)
 
-      for x in 0...wantedInputWidth - 1 {
+      for x in 0..<wantedInputWidth {
 
         let out_pixel = tensorInputRow.advanced(by: x * wantedInputChannels)
         let in_pixel = inputImageRow.advanced(by: x * imageChannels)
 
         var b = 2
-        for c in 0...(wantedInputChannels) - 1 {
+        for c in 0..<wantedInputChannels {
 
           // Pixel values are between 0-255. Model requires the values to be between -1 and 1.
           // We are also reversing the order of pixels since the source pixel format is BGRA, but the model requires RGB format.
@@ -163,7 +163,7 @@ class ModelDataHandler: NSObject {
   func formatResults(withboundingBox boundingBox: UnsafeMutablePointer<Float>, outputClasses: UnsafeMutablePointer<Float>, outputScores: UnsafeMutablePointer<Float>, outputCount: Int, width: CGFloat, height: CGFloat) -> [Inference]{
 
     var resultsArray: [Inference] = []
-    for i in 0...outputCount - 1 {
+    for i in 0..<outputCount {
 
       let score = Double(outputScores[i])
 
