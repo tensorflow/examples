@@ -125,7 +125,7 @@ class ModelDataHandler: NSObject {
           // Pixel values are between 0-255. Model requires the values to be between -1 and 1.
           // We are also reversing the order of pixels since the source pixel format is BGRA, but the model requires RGB format.
           out_pixel[c] = in_pixel[b]
-          b = b - 1
+          b -= 1
         }
       }
     }
