@@ -152,8 +152,7 @@ class ModelDataHandler: NSObject {
     CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
     // Returns the inference time and inferences
-    let result = Result(inferenceTime: inferenceTime, inferences: resultArray)
-    return result
+    return Result(inferenceTime: inferenceTime, inferences: resultArray)
   }
 
   /**
