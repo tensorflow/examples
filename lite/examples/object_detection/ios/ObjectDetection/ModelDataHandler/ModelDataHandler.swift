@@ -141,7 +141,6 @@ class ModelDataHandler: NSObject {
 
     // Gets the output tensor at indices 0, 1, 2, 3 for respectively bounding boxes, detected output class indices, confidence scores and number of detected classes.
     guard let boundingBox = tfLiteWrapper.outputTensor(at: 0), let outputClasses = tfLiteWrapper.outputTensor(at: 1), let outputScores = tfLiteWrapper.outputTensor(at: 2), let outputCount = tfLiteWrapper.outputTensor(at: 3) else {
-
       return nil
     }
 
@@ -192,9 +191,7 @@ class ModelDataHandler: NSObject {
     }
 
     // Sort results in descending order of confidence.
-    resultsArray.sort { (first, second) -> Bool in
-      return first.confidence  > second.confidence
-    }
+    resultsArray.sort { $0.confidence  > $1.confidence }
 
     return resultsArray
   }
