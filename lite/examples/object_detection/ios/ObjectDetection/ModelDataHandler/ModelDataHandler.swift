@@ -145,10 +145,10 @@ class ModelDataHandler: NSObject {
       return nil
     }
 
-    let totalOutputCount = outputCount.pointee
+    let totalOutputCount = Int(outputCount.pointee)
 
     // Formats the results
-    let resultArray = formatResults(withboundingBox: boundingBox, outputClasses: outputClasses, outputScores: outputScores, outputCount: Int(totalOutputCount), width: CGFloat(imageWidth), height: CGFloat(imageHeight))
+    let resultArray = formatResults(withboundingBox: boundingBox, outputClasses: outputClasses, outputScores: outputScores, outputCount: totalOutputCount, width: CGFloat(imageWidth), height: CGFloat(imageHeight))
     CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 
     // Returns the inference time and inferences
