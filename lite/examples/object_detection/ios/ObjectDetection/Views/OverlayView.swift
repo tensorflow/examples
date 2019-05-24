@@ -15,7 +15,7 @@
 import UIKit
 
 /**
- This structure holds the display parameters for the overlay to be drawon on a detected object.
+ This structure holds the display parameters for the overlay to be drawn on a detected object.
  */
 struct ObjectOverlay {
   let name: String
@@ -32,9 +32,8 @@ class OverlayView: UIView {
 
   var objectOverlays: [ObjectOverlay] = []
   private let cornerRadius: CGFloat = 10.0
-  private let stringBgAlpha: CGFloat
-    = 0.7
-  private let lineWidth: CGFloat = 3
+  private let stringBgAlpha: CGFloat = 0.7
+  private let lineWidth: CGFloat = 3.0
   private let stringFontColor = UIColor.white
   private let stringHorizontalSpacing: CGFloat = 13.0
   private let stringVerticalSpacing: CGFloat = 7.0
@@ -67,8 +66,9 @@ class OverlayView: UIView {
    */
   func drawBackground(of objectOverlay: ObjectOverlay) {
 
-    let stringBgRect = CGRect(x: objectOverlay.borderRect.origin.x, y: objectOverlay.borderRect.origin.y , width: 2 * stringHorizontalSpacing + objectOverlay.nameStringSize.width, height: 2 * stringVerticalSpacing + objectOverlay.nameStringSize.height
-    )
+    let stringBgRect = CGRect(origin: objectOverlay.borderRect.origin, size: objectOverlay.nameStringSize)
+      .insetBy(dx: -stringHorizontalSpacing, dy: -stringVerticalSpacing)
+      .offsetBy(dx: stringHorizontalSpacing, dy: stringVerticalSpacing)
 
     let stringBgPath = UIBezierPath(rect: stringBgRect)
     objectOverlay.color.withAlphaComponent(stringBgAlpha).setFill()
@@ -81,9 +81,9 @@ class OverlayView: UIView {
   func drawName(of objectOverlay: ObjectOverlay) {
 
     // Draws the string.
-    let stringRect = CGRect(x: objectOverlay.borderRect.origin.x + stringHorizontalSpacing, y: objectOverlay.borderRect.origin.y + stringVerticalSpacing, width: objectOverlay.nameStringSize.width, height: objectOverlay.nameStringSize.height)
-
-    let attributedString = NSAttributedString(string: objectOverlay.name, attributes: [NSAttributedStringKey.foregroundColor : stringFontColor, NSAttributedStringKey.font : objectOverlay.font])
+    let stringRect = CGRect(origin: objectOverlay.borderRect.origin, size: objectOverlay.nameStringSize)
+      .offsetBy(dx: stringHorizontalSpacing, dy: stringVerticalSpacing)
+    let attributedString = NSAttributedString(string: objectOverlay.name, attributes: [.foregroundColor : stringFontColor, .font : objectOverlay.font])
     attributedString.draw(in: stringRect)
   }
 
