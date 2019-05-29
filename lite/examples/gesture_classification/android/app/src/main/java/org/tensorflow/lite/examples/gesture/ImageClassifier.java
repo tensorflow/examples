@@ -169,14 +169,14 @@ public abstract class ImageClassifier {
     List<String> labelList = new ArrayList<String>();
     BufferedReader reader =
         new BufferedReader(new InputStreamReader(activity.getAssets().open(getLabelPath())));
-    String line;
-    line = reader.readLine();
-    reader.close();
-
-    StringTokenizer tokenizer = new StringTokenizer(line, ",");
-    while (tokenizer.hasMoreTokens()) {
-      String token = tokenizer.nextToken();
-      labelList.add(token);
+    while (true){
+        String line = reader.readLine();
+        if (line==null){break;}
+        StringTokenizer tokenizer = new StringTokenizer(line, ",");
+        while (tokenizer.hasMoreTokens()) {
+          String token = tokenizer.nextToken();
+          labelList.add(token);
+        }
     }
     return labelList;
   }
