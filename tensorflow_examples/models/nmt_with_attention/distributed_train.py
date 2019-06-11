@@ -53,53 +53,54 @@ class DistributedTrain(Train):
         self, epochs, enable_function, encoder, decoder, inp_lang, targ_lang,
         batch_size, per_replica_batch_size)
 
-  def training_loop(self, train_iterator, test_iterator,
-                    num_train_steps_per_epoch, num_test_steps_per_epoch,
+  def training_loop(self, train_dist_dataset, test_dist_dataset,
                     strategy):
     """Custom training and testing loop.
 
     Args:
-      train_iterator: Training iterator created using strategy
-      test_iterator: Testing iterator created using strategy
-      num_train_steps_per_epoch: number of training steps in an epoch.
-      num_test_steps_per_epoch: number of test steps in an epoch.
+      train_dist_dataset: Training dataset created using strategy.
+      test_dist_dataset: Testing dataset created using strategy.
       strategy: Distribution strategy
 
     Returns:
       train_loss, test_loss
     """
 
-    # this code is expected to change.
-    def distributed_train():
-      return strategy.experimental_run(self.train_step, train_iterator)
+    def distributed_train_epoch(ds):
+      total_loss = 0.
+      num_train_batches = 0
+      for one_batch in ds:
+        per_replica_loss = strategy.experimental_run_v2(
+            self.train_step, args=(one_batch,))
+        total_loss += strategy.reduce(
+            tf.distribute.ReduceOp.SUM, per_replica_loss, axis=None)
+        num_train_batches += 1
+      return total_loss, num_train_batches
 
-    def distributed_test():
-      return strategy.experimental_run(self.test_step, test_iterator)
+    def distributed_test_epoch(ds):
+      for one_batch in ds:
+        strategy.experimental_run_v2(
+            self.test_step, args=(one_batch,))
+      return self.test_loss_metric.result()
 
     if self.enable_function:
-      distributed_train = tf.function(distributed_train)
-      distributed_test = tf.function(distributed_test)
+      distributed_train_epoch = tf.function(distributed_train_epoch)
+      distributed_test_epoch = tf.function(distributed_test_epoch)
 
     template = 'Epoch: {}, Train Loss: {}, Test Loss: {}'
 
     for epoch in range(self.epochs):
-      self.train_loss_metric.reset_states()
-      self.test_loss_metric.reset_states()
-
-      train_iterator.initialize()
-      for _ in range(num_train_steps_per_epoch):
-        distributed_train()
-
-      test_iterator.initialize()
-      for _ in range(num_test_steps_per_epoch):
-        distributed_test()
+      train_total_loss, num_train_batches = distributed_train_epoch(
+          train_dist_dataset)
+      test_total_loss = distributed_test_epoch(
+          test_dist_dataset)
 
       print (template.format(epoch,
-                             self.train_loss_metric.result().numpy(),
-                             self.test_loss_metric.result().numpy()))
+                             train_total_loss / num_train_batches,
+                             test_total_loss))
 
-    return (self.train_loss_metric.result().numpy(),
-            self.test_loss_metric.result().numpy())
+    return (train_total_loss / num_train_batches,
+            test_total_loss)
 
 
 def run_main(argv):
@@ -124,11 +125,8 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
     vocab_inp_size = len(inp_lang.word_index) + 1
     vocab_tar_size = len(targ_lang.word_index) + 1
 
-    num_train_steps_per_epoch = tf.data.experimental.cardinality(train_ds)
-    num_test_steps_per_epoch = tf.data.experimental.cardinality(test_ds)
-
-    train_iterator = strategy.make_dataset_iterator(train_ds)
-    test_iterator = strategy.make_dataset_iterator(test_ds)
+    train_dist_dataset = strategy.experimental_distribute_dataset(train_ds)
+    test_dist_dataset = strategy.experimental_distribute_dataset(test_ds)
 
     local_batch_size, remainder = divmod(batch_size, num_replicas)
 
@@ -145,10 +143,8 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
                                  inp_lang, targ_lang, batch_size,
                                  local_batch_size)
     print ('Training ...')
-    return train_obj.training_loop(train_iterator,
-                                   test_iterator,
-                                   num_train_steps_per_epoch,
-                                   num_test_steps_per_epoch,
+    return train_obj.training_loop(train_dist_dataset,
+                                   test_dist_dataset,
                                    strategy)
 
 if __name__ == '__main__':

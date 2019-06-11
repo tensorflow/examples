@@ -51,12 +51,11 @@ class Train(object):
         from_logits=True, reduction=tf.keras.losses.Reduction.NONE)
     self.optimizer = tf.keras.optimizers.SGD(learning_rate=0.1,
                                              momentum=0.9, nesterov=True)
-    self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
     self.train_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='train_accuracy')
-    self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
     self.test_acc_metric = tf.keras.metrics.SparseCategoricalAccuracy(
         name='test_accuracy')
+    self.test_loss_metric = tf.keras.metrics.Sum(name='test_loss')
     self.model = model
 
   def decay(self, epoch):
@@ -68,9 +67,13 @@ class Train(object):
       return 0.001
 
   def compute_loss(self, label, predictions):
-    loss = tf.reduce_sum(self.loss_object(label, predictions)) * (
-        1. / self.batch_size)
-    loss += (sum(self.model.losses) * 1. / self.strategy.num_replicas_in_sync)
+    pred_loss = tf.reduce_sum(self.loss_object(label, predictions))
+
+    categorical_loss = tf.nn.compute_average_loss(
+        pred_loss, global_batch_size=self.batch_size)
+    reg_loss = tf.nn.scale_regularization_loss(self.model.losses)
+
+    loss = categorical_loss + reg_loss
     return loss
 
   def train_step(self, inputs):
@@ -78,7 +81,11 @@ class Train(object):
 
     Args:
       inputs: one batch input.
+
+    Returns:
+      loss: Scaled loss.
     """
+
     image, label = inputs
     with tf.GradientTape() as tape:
       predictions = self.model(image, training=True)
@@ -87,8 +94,8 @@ class Train(object):
     self.optimizer.apply_gradients(zip(gradients,
                                        self.model.trainable_variables))
 
-    self.train_loss_metric(loss)
     self.train_acc_metric(label, predictions)
+    return loss
 
   def test_step(self, inputs):
     """One test step.
@@ -98,69 +105,74 @@ class Train(object):
     """
     image, label = inputs
     predictions = self.model(image, training=False)
-    loss = self.compute_loss(label, predictions)
 
-    self.test_loss_metric(loss)
+    unscaled_test_loss = self.loss_object(label, predictions) + sum(
+        self.model.losses)
+
     self.test_acc_metric(label, predictions)
+    self.test_loss_metric(unscaled_test_loss)
 
-  def custom_loop(self, train_iterator, test_iterator,
-                  num_train_steps_per_epoch, num_test_steps_per_epoch,
+  def custom_loop(self, train_dist_dataset, test_dist_dataset,
                   strategy):
     """Custom training and testing loop.
 
     Args:
-      train_iterator: Training iterator created using strategy
-      test_iterator: Testing iterator created using strategy
-      num_train_steps_per_epoch: number of training steps in an epoch.
-      num_test_steps_per_epoch: number of test steps in an epoch.
-      strategy: Distribution strategy
+      train_dist_dataset: Training dataset created using strategy.
+      test_dist_dataset: Testing dataset created using strategy.
+      strategy: Distribution strategy.
 
     Returns:
       train_loss, train_accuracy, test_loss, test_accuracy
     """
 
-    # this code is expected to change.
-    def distributed_train():
-      return strategy.experimental_run(
-          self.train_step, train_iterator)
+    def distributed_train_epoch(ds):
+      total_loss = 0.
+      num_train_batches = 0
+      for one_batch in ds:
+        per_replica_loss = strategy.experimental_run_v2(
+            self.train_step, args=(one_batch,))
+        total_loss += strategy.reduce(
+            tf.distribute.ReduceOp.SUM, per_replica_loss, axis=None)
+        num_train_batches += 1
+      return total_loss, num_train_batches
 
-    def distributed_test():
-      return strategy.experimental_run(
-          self.test_step, test_iterator)
+    def distributed_test_epoch(ds):
+      num_test_batches = 0
+      for one_batch in ds:
+        strategy.experimental_run_v2(
+            self.test_step, args=(one_batch,))
+        num_test_batches += 1
+      return self.test_loss_metric.result(), num_test_batches
 
     if self.enable_function:
-      distributed_train = tf.function(distributed_train)
-      distributed_test = tf.function(distributed_test)
+      distributed_train_epoch = tf.function(distributed_train_epoch)
+      distributed_test_epoch = tf.function(distributed_test_epoch)
 
     for epoch in range(self.epochs):
       self.optimizer.learning_rate = self.decay(epoch)
 
-      train_iterator.initialize()
-      for _ in range(num_train_steps_per_epoch):
-        distributed_train()
-
-      test_iterator.initialize()
-      for _ in range(num_test_steps_per_epoch):
-        distributed_test()
+      train_total_loss, num_train_batches = distributed_train_epoch(
+          train_dist_dataset)
+      test_total_loss, num_test_batches = distributed_test_epoch(
+          test_dist_dataset)
 
       template = ('Epoch: {}, Train Loss: {}, Train Accuracy: {}, '
                   'Test Loss: {}, Test Accuracy: {}')
 
       print(
-          template.format(epoch, self.train_loss_metric.result(),
+          template.format(epoch,
+                          train_total_loss / num_train_batches,
                           self.train_acc_metric.result(),
-                          self.test_loss_metric.result(),
+                          test_total_loss / num_test_batches,
                           self.test_acc_metric.result()))
 
       if epoch != self.epochs - 1:
-        self.train_loss_metric.reset_states()
         self.train_acc_metric.reset_states()
-        self.test_loss_metric.reset_states()
         self.test_acc_metric.reset_states()
 
-    return (self.train_loss_metric.result().numpy(),
+    return (train_total_loss / num_train_batches,
             self.train_acc_metric.result().numpy(),
-            self.test_loss_metric.result().numpy(),
+            test_total_loss / num_test_batches,
             self.test_acc_metric.result().numpy())
 
 
@@ -208,23 +220,16 @@ def main(epochs,
 
     trainer = Train(epochs, enable_function, model, batch_size, strategy)
 
-    train_dataset, test_dataset, metadata = utils.create_dataset(
+    train_dataset, test_dataset, _ = utils.create_dataset(
         buffer_size, batch_size, data_format, data_dir)
 
-    num_train_steps_per_epoch = metadata.splits[
-        'train'].num_examples // batch_size
-    num_test_steps_per_epoch = metadata.splits[
-        'test'].num_examples // batch_size
-
-    train_iterator = strategy.make_dataset_iterator(train_dataset)
-    test_iterator = strategy.make_dataset_iterator(test_dataset)
+    train_dist_dataset = strategy.experimental_distribute_dataset(train_dataset)
+    test_dist_dataset = strategy.experimental_distribute_dataset(test_dataset)
 
     print('Training...')
     if train_mode == 'custom_loop':
-      return trainer.custom_loop(train_iterator,
-                                 test_iterator,
-                                 num_train_steps_per_epoch,
-                                 num_test_steps_per_epoch,
+      return trainer.custom_loop(train_dist_dataset,
+                                 test_dist_dataset,
                                  strategy)
     elif train_mode == 'keras_fit':
       raise ValueError(

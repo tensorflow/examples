@@ -57,7 +57,7 @@ class Train(object):
     self.train_loss_metric = tf.keras.metrics.Mean(name='train_loss')
     self.test_loss_metric = tf.keras.metrics.Mean(name='test_loss')
 
-  def loss_function(self, real, pred):
+  def compute_loss(self, real, pred):
     mask = tf.math.logical_not(tf.math.equal(real, 0))
     loss_ = self.loss_object(real, pred)
 
@@ -71,6 +71,9 @@ class Train(object):
 
     Args:
       inputs: tuple of input tensor, target tensor.
+
+    Returns:
+      Loss value so that it can be used with `tf.distribute.Strategy`.
     """
 
     loss = 0
@@ -89,7 +92,7 @@ class Train(object):
         # passing enc_output to the decoder
         predictions, dec_hidden, _ = self.decoder(
             dec_input, dec_hidden, enc_output)
-        loss += self.loss_function(targ[:, t], predictions)
+        loss += self.compute_loss(targ[:, t], predictions)
         # using teacher forcing
         dec_input = tf.expand_dims(targ[:, t], 1)
 
@@ -101,11 +104,16 @@ class Train(object):
 
     self.train_loss_metric(batch_loss)
 
+    return batch_loss
+
   def test_step(self, inputs_test):
     """One test step.
 
     Args:
       inputs_test: tuple of input tensor, target tensor.
+
+    Returns:
+      Loss value so that it can be used with `tf.distribute.Strategy`.
     """
 
     loss = 0
@@ -122,7 +130,7 @@ class Train(object):
     for t in range(1, targ_test.shape[1]):
       predictions, dec_hidden, _ = self.decoder(
           dec_input, dec_hidden, enc_output)
-      loss += self.loss_function(targ_test[:, t], predictions)
+      loss += self.compute_loss(targ_test[:, t], predictions)
 
       prediction_id = tf.argmax(predictions, axis=1)
       # passing the predictions back to the model as the input.
@@ -154,7 +162,7 @@ class Train(object):
       self.test_loss_metric.reset_states()
 
       for inp, targ in train_ds:
-        self.train_step((inp, targ))
+        _ = self.train_step((inp, targ))
 
       for inp_test, targ_test in test_ds:
         self.test_step((inp_test, targ_test))
