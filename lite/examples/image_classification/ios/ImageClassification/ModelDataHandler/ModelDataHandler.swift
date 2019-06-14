@@ -42,7 +42,7 @@ enum MobileNet {
 /// results for a successful inference.
 class ModelDataHandler {
 
-  // MARK: - Public Properties
+  // MARK: - Internal Properties
 
   /// The current thread count used by the TensorFlow Lite Interpreter.
   let threadCount: Int
@@ -91,6 +91,8 @@ class ModelDataHandler {
     do {
       // Create the `Interpreter`.
       interpreter = try Interpreter(modelPath: modelPath, options: options)
+      // Allocate memory for the model's input `Tensor`s.
+      try interpreter.allocateTensors()
     } catch let error {
       print("Failed to create the interpreter with error: \(error.localizedDescription)")
       return nil
@@ -99,9 +101,9 @@ class ModelDataHandler {
     loadLabels(fileInfo: labelsFileInfo)
   }
 
-  // MARK: - Public Methods
+  // MARK: - Internal Methods
 
-  /// Performs image preprocessing, invokes the `Interpreter`, and process the inference results.
+  /// Performs image preprocessing, invokes the `Interpreter`, and processes the inference results.
   func runModel(onFrame pixelBuffer: CVPixelBuffer) -> Result? {
     let sourcePixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
     assert(sourcePixelFormat == kCVPixelFormatType_32ARGB ||
@@ -121,8 +123,6 @@ class ModelDataHandler {
     let interval: TimeInterval
     let outputTensor: Tensor
     do {
-      // Allocate memory for the model's input `Tensor`s.
-      try interpreter.allocateTensors()
       let inputTensor = try interpreter.input(at: 0)
 
       // Remove the alpha component from the image buffer to get the RGB data.

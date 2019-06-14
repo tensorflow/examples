@@ -16,9 +16,7 @@ import UIKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
   var window: UIWindow?
-
 
   func application(
     _ application: UIApplication,
@@ -27,9 +25,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 }
-
-#if !swift(>=4.2)
-extension UIApplication {
-  typealias LaunchOptionsKey = UIApplicationLaunchOptionsKey
-}
-#endif  // !swift(>=4.2)

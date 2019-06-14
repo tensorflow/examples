@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import UIKit
+import Foundation
 
 struct RecognizedCommand {
   var score: Float
@@ -24,7 +24,7 @@ struct RecognizedCommand {
  This class smoothes out the results by averaging them over a window duration and making sure the
  commands are not duplicated for display.
  */
-class RecognizeCommands: NSObject {
+class RecognizeCommands {
   // MARK: Structures that handles results.
   private struct Command {
     var score: Float
@@ -38,7 +38,7 @@ class RecognizeCommands: NSObject {
 
   // MARK: Constants
   private let averageWindowDuration: Double
-  private let supressionTime: Double
+  private let suppressionTime: Double
   private let minimumCount: Int
   private let minimumTimeBetweenSamples: Double
   private let detectionThreshold: Float
@@ -54,15 +54,13 @@ class RecognizeCommands: NSObject {
   /**
    Initializes RecognizeCommands with specified parameters.
    */
-  init(averageWindowDuration: Double, detectionThreshold: Float, minimumTimeBetweenSamples: Double, supressionTime: Double, minimumCount: Int, classLabels: [String]) {
+  init(averageWindowDuration: Double, detectionThreshold: Float, minimumTimeBetweenSamples: Double, suppressionTime: Double, minimumCount: Int, classLabels: [String]) {
     self.averageWindowDuration = averageWindowDuration
     self.detectionThreshold = detectionThreshold
     self.minimumTimeBetweenSamples = minimumTimeBetweenSamples
-    self.supressionTime = supressionTime
+    self.suppressionTime = suppressionTime
     self.minimumCount = minimumCount
     self.classLabels = classLabels
-
-    super.init()
   }
 
   /**
@@ -153,7 +151,7 @@ class RecognizeCommands: NSObject {
 
     // Return the results
     var isNew = false
-    if (averageScores[0].score > detectionThreshold && timeSinceLastTop > supressionTime) {
+    if (averageScores[0].score > detectionThreshold && timeSinceLastTop > suppressionTime) {
 
       previousTopScore = averageScores[0].score
       previousTopLabel = averageScores[0].name

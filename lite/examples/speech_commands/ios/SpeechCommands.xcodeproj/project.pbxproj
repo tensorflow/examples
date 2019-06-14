@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		95D336441B13D41E32073FD3 /* Pods_SpeechCommands.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F50DDD9EFB7E2C0A9065547F /* Pods_SpeechCommands.framework */; };
-		AA055D802161FCE400B25948 /* TfliteWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = AA055D7F2161FCE400B25948 /* TfliteWrapper.mm */; };
 		AA055D862162210E00B25948 /* conv_actions_labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = AA055D842162210E00B25948 /* conv_actions_labels.txt */; };
 		AA055D872162210E00B25948 /* conv_actions_frozen.tflite in Resources */ = {isa = PBXBuildFile; fileRef = AA055D852162210E00B25948 /* conv_actions_frozen.tflite */; };
 		AA1C17622186E2F0006F9564 /* WordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1C17612186E2F0006F9564 /* WordCell.swift */; };
@@ -25,11 +23,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		35173AB17FB6C476D26E805B /* Pods-SpeechCommands.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechCommands.release.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechCommands/Pods-SpeechCommands.release.xcconfig"; sourceTree = "<group>"; };
-		8D7599C8DD15510EDE175ABD /* Pods-SpeechCommands.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpeechCommands.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SpeechCommands/Pods-SpeechCommands.debug.xcconfig"; sourceTree = "<group>"; };
-		AA055D7D2161FCE400B25948 /* SpeechCommands-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SpeechCommands-Bridging-Header.h"; sourceTree = "<group>"; };
-		AA055D7E2161FCE400B25948 /* TfliteWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TfliteWrapper.h; sourceTree = "<group>"; };
-		AA055D7F2161FCE400B25948 /* TfliteWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TfliteWrapper.mm; sourceTree = "<group>"; };
 		AA055D842162210E00B25948 /* conv_actions_labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = conv_actions_labels.txt; sourceTree = "<group>"; };
 		AA055D852162210E00B25948 /* conv_actions_frozen.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = conv_actions_frozen.tflite; sourceTree = "<group>"; };
 		AA1C17612186E2F0006F9564 /* WordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordCell.swift; sourceTree = "<group>"; };
@@ -45,7 +38,6 @@
 		AA73C15D216120F90063142C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AA73C160216126B20063142C /* AudioInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputManager.swift; sourceTree = "<group>"; };
 		AAE67263215DFA1900C6E344 /* RecognizeCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecognizeCommands.swift; sourceTree = "<group>"; };
-		F50DDD9EFB7E2C0A9065547F /* Pods_SpeechCommands.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpeechCommands.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,22 +45,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				95D336441B13D41E32073FD3 /* Pods_SpeechCommands.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		26B4C3C3E1704E2967564A2C /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				8D7599C8DD15510EDE175ABD /* Pods-SpeechCommands.debug.xcconfig */,
-				35173AB17FB6C476D26E805B /* Pods-SpeechCommands.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		AA055D7A2161FC0100B25948 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -76,16 +58,6 @@
 				AA31546C21612AF7004B2732 /* ViewController.swift */,
 			);
 			path = ViewControllers;
-			sourceTree = "<group>";
-		};
-		AA055D7C2161FCE400B25948 /* TfliteWrapper */ = {
-			isa = PBXGroup;
-			children = (
-				AA055D7D2161FCE400B25948 /* SpeechCommands-Bridging-Header.h */,
-				AA055D7E2161FCE400B25948 /* TfliteWrapper.h */,
-				AA055D7F2161FCE400B25948 /* TfliteWrapper.mm */,
-			);
-			path = TfliteWrapper;
 			sourceTree = "<group>";
 		};
 		AA055D83216220E700B25948 /* Model */ = {
@@ -120,8 +92,6 @@
 			children = (
 				AA7006CE21526754003E34C0 /* SpeechCommands */,
 				AA7006CD21526754003E34C0 /* Products */,
-				FBD3F6741EDBC436E98FBBCD /* Frameworks */,
-				26B4C3C3E1704E2967564A2C /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -138,7 +108,6 @@
 			children = (
 				AA1C175D2186E2A2006F9564 /* Cells */,
 				AA055D83216220E700B25948 /* Model */,
-				AA055D7C2161FCE400B25948 /* TfliteWrapper */,
 				AA055D7A2161FC0100B25948 /* ViewControllers */,
 				AA73C15F2161269B0063142C /* AudioInputManager */,
 				AA3BF5DB2154CA9F00796012 /* ModelDataHandler */,
@@ -159,14 +128,6 @@
 			path = AudioInputManager;
 			sourceTree = "<group>";
 		};
-		FBD3F6741EDBC436E98FBBCD /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				F50DDD9EFB7E2C0A9065547F /* Pods_SpeechCommands.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -174,7 +135,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA7006F421526757003E34C0 /* Build configuration list for PBXNativeTarget "SpeechCommands" */;
 			buildPhases = (
-				ACB85E412F9906E31BE07B36 /* [CP] Check Pods Manifest.lock */,
 				AA31546E2161EE1F004B2732 /* ShellScript */,
 				AA7006C821526754003E34C0 /* Sources */,
 				AA7006C921526754003E34C0 /* Frameworks */,
@@ -256,28 +216,6 @@
 			shellPath = /bin/sh;
 			shellScript = "$SRCROOT/RunScripts/download_models.sh\n";
 		};
-		ACB85E412F9906E31BE07B36 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-SpeechCommands-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -292,7 +230,6 @@
 				AA3BF5DD2154CA9F00796012 /* ModelDataHandler.swift in Sources */,
 				AA1C17622186E2F0006F9564 /* WordCell.swift in Sources */,
 				AA73C161216126B20063142C /* AudioInputManager.swift in Sources */,
-				AA055D802161FCE400B25948 /* TfliteWrapper.mm in Sources */,
 				AA1C176C2186FA9E006F9564 /* InfoCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -376,6 +313,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = "";
 			};
 			name = Debug;
 		};
@@ -429,13 +367,13 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		AA7006F521526757003E34C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8D7599C8DD15510EDE175ABD /* Pods-SpeechCommands.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -449,16 +387,15 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.SpeechCommands;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SpeechCommands/TfliteWrapper/SpeechCommands-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		AA7006F621526757003E34C0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 35173AB17FB6C476D26E805B /* Pods-SpeechCommands.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -472,8 +409,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.SpeechCommands;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SpeechCommands/TfliteWrapper/SpeechCommands-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

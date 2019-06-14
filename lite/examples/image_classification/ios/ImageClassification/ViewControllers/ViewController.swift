@@ -42,7 +42,7 @@ class ViewController: UIViewController {
   // Handles all the camera related functionality
   private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
 
-  // Handles all data preprocessing and makes calls to run inference through TfliteWrapper
+  // Handles all data preprocessing and makes calls to run inference through the `Interpreter`.
   private var modelDataHandler: ModelDataHandler? =
     ModelDataHandler(modelFileInfo: MobileNet.modelInfo, labelsFileInfo: MobileNet.labelsInfo)
 
@@ -323,9 +323,3 @@ extension ViewController {
   }
 
 }
-
-#if !swift(>=4.2)
-extension UIApplication {
-  typealias openSettingsURLString = UIApplicationOpenSettingsURLString
-}
-#endif  // !swift(>=4.2)
