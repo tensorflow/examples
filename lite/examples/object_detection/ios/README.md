@@ -30,7 +30,7 @@ The model files are downloaded via scripts in Xcode when you build and run. You 
 ```sudo gem install cocoapods```
 
 2. Install the pod to generate the workspace file:
-```cd therepowithnoname/examples/object_detection/ios/```
+```cd lite/examples/object_detection/ios/```
 ```pod install```
   If you have installed this pod before and that command doesn't work, try
 ```pod update```
