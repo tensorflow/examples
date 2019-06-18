@@ -67,13 +67,9 @@ class Train(object):
       return 0.001
 
   def compute_loss(self, label, predictions):
-    pred_loss = tf.reduce_sum(self.loss_object(label, predictions))
-
-    categorical_loss = tf.nn.compute_average_loss(
-        pred_loss, global_batch_size=self.batch_size)
-    reg_loss = tf.nn.scale_regularization_loss(self.model.losses)
-
-    loss = categorical_loss + reg_loss
+    loss = tf.reduce_sum(self.loss_object(label, predictions)) * (
+        1. / self.batch_size)
+    loss += (sum(self.model.losses) * 1. / self.strategy.num_replicas_in_sync)
     return loss
 
   def train_step(self, inputs):
