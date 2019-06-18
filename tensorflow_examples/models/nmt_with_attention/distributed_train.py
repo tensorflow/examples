@@ -67,8 +67,8 @@ class DistributedTrain(Train):
     """
 
     def distributed_train_epoch(ds):
-      total_loss = 0.
-      num_train_batches = 0
+      total_loss = 0.0
+      num_train_batches = 0.0
       for one_batch in ds:
         per_replica_loss = strategy.experimental_run_v2(
             self.train_step, args=(one_batch,))

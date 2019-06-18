@@ -122,8 +122,8 @@ class Train(object):
     """
 
     def distributed_train_epoch(ds):
-      total_loss = 0.
-      num_train_batches = 0
+      total_loss = 0.0
+      num_train_batches = 0.0
       for one_batch in ds:
         per_replica_loss = strategy.experimental_run_v2(
             self.train_step, args=(one_batch,))
@@ -133,7 +133,7 @@ class Train(object):
       return total_loss, num_train_batches
 
     def distributed_test_epoch(ds):
-      num_test_batches = 0
+      num_test_batches = 0.0
       for one_batch in ds:
         strategy.experimental_run_v2(
             self.test_step, args=(one_batch,))
