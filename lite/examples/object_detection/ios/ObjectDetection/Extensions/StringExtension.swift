@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
 import UIKit
 
 extension String {
@@ -20,10 +19,8 @@ extension String {
   /**This method gets size of a string with a particular font.
    */
   func size(usingFont font: UIFont) -> CGSize {
-
-    let attributedString = NSAttributedString(string: self, attributes: [NSAttributedStringKey.font : font])
+    let attributedString = NSAttributedString(string: self, attributes: [NSAttributedString.Key.font : font])
     return attributedString.size()
-
   }
 
 }

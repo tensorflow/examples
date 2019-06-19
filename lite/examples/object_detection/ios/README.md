@@ -52,5 +52,9 @@ This app uses a MobileNet SSD model trained on [COCO dataset](http://cocodataset
 
 ## iOS App Details
 
-This app is written in both Swift and Objective C. All application functionality, image processing and results formatting is developed in Swift.
-Objective C is used via bridging to make the TensorFlow Lite C++ framework calls.
+The app is written entirely in Swift and uses the TensorFlow Lite
+[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/swift)
+for performing image classification.
+
+Note: Objective-C developers should use the TensorFlow Lite
+[Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/objc).
