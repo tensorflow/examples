@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CoreImage
 import TensorFlowLite
 import UIKit
 
@@ -89,7 +88,6 @@ class ModelDataHandler {
     self.threadCount = threadCount
     var options = InterpreterOptions()
     options.threadCount = threadCount
-    options.isErrorLoggingEnabled = true
     do {
       // Create the `Interpreter`.
       interpreter = try Interpreter(modelPath: modelPath, options: options)
