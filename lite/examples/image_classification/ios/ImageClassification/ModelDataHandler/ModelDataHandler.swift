@@ -15,6 +15,7 @@
 import CoreImage
 import TensorFlowLite
 import UIKit
+import Accelerate
 
 /// A result from invoking the `Interpreter`.
 struct Result {
@@ -105,6 +106,7 @@ class ModelDataHandler {
 
   /// Performs image preprocessing, invokes the `Interpreter`, and processes the inference results.
   func runModel(onFrame pixelBuffer: CVPixelBuffer) -> Result? {
+    
     let sourcePixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
     assert(sourcePixelFormat == kCVPixelFormatType_32ARGB ||
              sourcePixelFormat == kCVPixelFormatType_32BGRA ||
@@ -222,23 +224,56 @@ class ModelDataHandler {
     isModelQuantized: Bool
   ) -> Data? {
     CVPixelBufferLockBaseAddress(buffer, .readOnly)
-    defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
-    guard let mutableRawPointer = CVPixelBufferGetBaseAddress(buffer) else {
+    defer {
+      CVPixelBufferUnlockBaseAddress(buffer, .readOnly)
+    }
+    guard let sourceData = CVPixelBufferGetBaseAddress(buffer) else {
       return nil
     }
-    let count = CVPixelBufferGetDataSize(buffer)
-    let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
-    var rgbBytes = [UInt8](repeating: 0, count: byteCount)
-    var index = 0
-    for component in bufferData.enumerated() {
-      let offset = component.offset
-      let isAlphaComponent = (offset % alphaComponent.baseOffset) == alphaComponent.moduloRemainder
-      guard !isAlphaComponent else { continue }
-      rgbBytes[index] = component.element
-      index += 1
+    
+    let width = CVPixelBufferGetWidth(buffer)
+    let height = CVPixelBufferGetHeight(buffer)
+    let sourceBytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
+    let destinationChannelCount = 3
+    let destinationBytesPerRow = destinationChannelCount * width
+    
+    var sourceBuffer = vImage_Buffer(data: sourceData,
+                                     height: vImagePixelCount(height),
+                                     width: vImagePixelCount(width),
+                                     rowBytes: sourceBytesPerRow)
+    
+    guard let destinationData = malloc(height * destinationBytesPerRow) else {
+      print("Error: out of memory")
+      return nil
     }
-    if isModelQuantized { return Data(bytes: rgbBytes) }
-    return Data(copyingBufferOf: rgbBytes.map { Float($0) / 255.0 })
+    
+    defer {
+      free(destinationData)
+    }
+    
+    var destinationBuffer = vImage_Buffer(data: destinationData,
+                                          height: vImagePixelCount(height),
+                                          width: vImagePixelCount(width),
+                                          rowBytes: destinationBytesPerRow)
+    
+    if (CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA){
+      vImageConvert_BGRA8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+    } else if (CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32ARGB) {
+      vImageConvert_ARGB8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+    }
+    
+    let byteData = Data(bytes: destinationBuffer.data, count: destinationBuffer.rowBytes * height)
+    if isModelQuantized {
+      return byteData
+    }
+    
+    // Not quantized, convert to floats
+    let bytes = Array<UInt8>(unsafeData: byteData)!
+    var floats = [Float](repeating: 0, count: bytes.count)
+    for i in 0..<bytes.count {
+      floats.append(Float(bytes[i]) / 255.0)
+    }
+    return Data(copyingBufferOf: floats)
   }
 }
 
