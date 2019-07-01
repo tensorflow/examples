@@ -309,7 +309,7 @@ class ModelDataHandler: NSObject {
       return byteData
     }
 
-    //Not quantized, convert to floats
+    // Not quantized, convert to floats
     let bytes = Array<UInt8>(unsafeData: byteData)!
     var floats = [Float](repeating: 0, count: bytes.count)
     for i in 0..<bytes.count {
