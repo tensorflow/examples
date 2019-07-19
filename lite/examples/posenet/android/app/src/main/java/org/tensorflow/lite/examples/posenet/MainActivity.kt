@@ -17,6 +17,8 @@ package org.tensorflow.lite.examples.posenet
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.content.res.ResourcesCompat
@@ -66,5 +68,21 @@ class MainActivity : AppCompatActivity() {
     interpreter = Interpreter(loadModelFile("posenet_model.tflite"))
     val posenet = Posenet()
     val person = posenet.estimateSinglePose(interpreter!!, imageBitmap)
+
+    // Draw the keypoints over the image.
+    val red = Paint()
+    red.setColor(Color.RED)
+    val size = 2.0f
+
+    val mutableBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true)
+    val canvas = Canvas(mutableBitmap)
+    for (i in 0 until person.keyPoints.size) {
+      canvas.drawCircle(
+        person.keyPoints[i].position.x.toFloat(),
+        person.keyPoints[i].position.y.toFloat(), size, red
+      )
+    }
+    sampleImageView.setAdjustViewBounds(true)
+    sampleImageView.setImageBitmap(mutableBitmap)
   }
 }
