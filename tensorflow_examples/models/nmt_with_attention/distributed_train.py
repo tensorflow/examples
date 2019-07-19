@@ -111,10 +111,11 @@ def main(epochs, enable_function, buffer_size, batch_size, download_path,
   strategy = tf.distribute.MirroredStrategy()
   num_replicas = strategy.num_replicas_in_sync
 
+  file_path = utils.download(download_path)
+  train_ds, test_ds, inp_lang, targ_lang = utils.create_dataset(
+      file_path, num_examples, buffer_size, batch_size)
+
   with strategy.scope():
-    file_path = utils.download(download_path)
-    train_ds, test_ds, inp_lang, targ_lang = utils.create_dataset(
-        file_path, num_examples, buffer_size, batch_size)
     vocab_inp_size = len(inp_lang.word_index) + 1
     vocab_tar_size = len(targ_lang.word_index) + 1
 

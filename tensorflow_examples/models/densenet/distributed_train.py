@@ -208,6 +208,9 @@ def main(epochs,
   devices = ['/device:GPU:{}'.format(i) for i in range(num_gpu)]
   strategy = tf.distribute.MirroredStrategy(devices)
 
+  train_dataset, test_dataset, _ = utils.create_dataset(
+      buffer_size, batch_size, data_format, data_dir)
+
   with strategy.scope():
     model = densenet.DenseNet(
         mode, growth_rate, output_classes, depth_of_model, num_of_blocks,
@@ -215,9 +218,6 @@ def main(epochs,
         weight_decay, dropout_rate, pool_initial, include_top)
 
     trainer = Train(epochs, enable_function, model, batch_size, strategy)
-
-    train_dataset, test_dataset, _ = utils.create_dataset(
-        buffer_size, batch_size, data_format, data_dir)
 
     train_dist_dataset = strategy.experimental_distribute_dataset(train_dataset)
     test_dist_dataset = strategy.experimental_distribute_dataset(test_dataset)
