@@ -25,6 +25,33 @@ from tensorflow_examples.models.nmt_with_attention import utils
 assert tf.__version__.startswith('2')
 
 
+class NmtDistributedTest(tf.test.TestCase):
+
+  def test_one_epoch_multi_device(self):
+    if tf.test.is_gpu_available():
+      print('Using 2 virtual GPUs.')
+      device = tf.config.experimental.list_physical_devices('GPU')[0]
+      tf.config.experimental.set_virtual_device_configuration(
+          device, [
+              tf.config.experimental.VirtualDeviceConfiguration(
+                  memory_limit=8192),
+              tf.config.experimental.VirtualDeviceConfiguration(
+                  memory_limit=8192)
+          ])
+
+    kwargs = utils.get_common_kwargs()
+    kwargs.update({
+        'epochs': 1,
+        'batch_size': 16,
+        'num_examples': 10,
+        'embedding_dim': 4,
+        'enc_units': 4,
+        'dec_units': 4
+    })
+
+    distributed_train.main(**kwargs)
+
+
 class NmtDistributedBenchmark(tf.test.Benchmark):
 
   def __init__(self, output_dir=None, **kwargs):
@@ -41,7 +68,7 @@ class NmtDistributedBenchmark(tf.test.Benchmark):
 
   def benchmark_ten_epochs_2_gpus(self):
     kwargs = utils.get_common_kwargs()
-    kwargs.update({'epochs': 10, 'num_gpu': 2, 'batch_size': 128})
+    kwargs.update({'epochs': 10, 'batch_size': 128})
     self._run_and_report_benchmark(**kwargs)
 
   def _run_and_report_benchmark(self, **kwargs):
