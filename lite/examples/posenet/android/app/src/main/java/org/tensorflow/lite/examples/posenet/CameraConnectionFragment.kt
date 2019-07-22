@@ -21,13 +21,13 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.Matrix
-import android.graphics.Point
-import android.graphics.RectF
-import android.graphics.SurfaceTexture
+import android.graphics.Paint
+import android.graphics.Rect
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -51,11 +51,13 @@ import android.util.Size
 import android.util.SparseIntArray
 import android.view.LayoutInflater
 import android.view.Surface
-import android.view.TextureView
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import org.tensorflow.lite.Interpreter
+import java.io.FileInputStream
+import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.Arrays
 import java.util.Collections
@@ -63,9 +65,8 @@ import java.util.Comparator
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
-import java.nio.MappedByteBuffer
-import org.tensorflow.lite.examples.posenet.lib.Posenet as Posenet
-import java.io.FileInputStream
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.examples.posenet.lib.Posenet
 
 class CameraConnectionFragment :
   Fragment(),
@@ -73,29 +74,24 @@ class CameraConnectionFragment :
   ActivityCompat.OnRequestPermissionsResultCallback {
 
   /**
-   * [TextureView.SurfaceTextureListener] handles several lifecycle events on a
-   * [TextureView].
+   * Paint class holds the style and color information about how to draw geometries,
+   * text and bitmaps.
    */
-  private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+  private var paint = Paint()
 
-    override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
-      openCamera(width, height)
-    }
-
-    override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) {
-      configureTransform(width, height)
-    }
-
-    override fun onSurfaceTextureDestroyed(texture: SurfaceTexture) = true
-
-    override fun onSurfaceTextureUpdated(texture: SurfaceTexture) = Unit
+  /** Set the paint color to red.    */
+  init {
+    paint.setColor(Color.RED)
   }
+
+  /** An object for the Posenet library.    */
+  private val posenet = Posenet()
 
   /** ID of the current [CameraDevice].   */
   private var cameraId: String? = null
 
   /** An [AutoFitTextureView] for camera preview.   */
-  private var textureView: AutoFitTextureView? = null
+  private var surfaceView: SurfaceView? = null
 
   /** A [CameraCaptureSession] for camera preview.   */
   private var captureSession: CameraCaptureSession? = null
@@ -147,6 +143,9 @@ class CameraConnectionFragment :
 
   /** Orientation of the camera sensor.   */
   private var sensorOrientation: Int? = null
+
+  /** Abstract interface to someone holding a display surface.    */
+  private var surfaceHolder: SurfaceHolder? = null
 
   /** [CameraDevice.StateCallback] is called when [CameraDevice] changes its state.   */
   private val stateCallback = object : CameraDevice.StateCallback() {
@@ -206,23 +205,20 @@ class CameraConnectionFragment :
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     view.findViewById<View>(R.id.info).setOnClickListener(this)
-    textureView = view.findViewById(R.id.texture)
+    surfaceView = view.findViewById(R.id.surfaceView)
+    surfaceHolder = surfaceView!!.getHolder()
   }
 
   override fun onResume() {
     super.onResume()
     startBackgroundThread()
     interpreter = Interpreter(loadModelFile("posenet_model.tflite"))
+  }
 
-    // When the screen is turned off and turned back on, the SurfaceTexture is already
-    // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
-    // a camera and start preview from here (otherwise, we wait until the surface is ready in
-    // the SurfaceTextureListener).
-    if (textureView!!.isAvailable) {
-      openCamera(textureView!!.width, textureView!!.height)
-    } else {
-      textureView!!.surfaceTextureListener = surfaceTextureListener
-    }
+  override fun onStart() {
+    super.onStart()
+
+    openCamera()
   }
 
   override fun onPause() {
@@ -271,11 +267,9 @@ class CameraConnectionFragment :
 
   /**
    * Sets up member variables related to camera.
-   *
-   * @param width The width of available size for camera preview
-   * @param height The height of available size for camera preview
    */
-  private fun setUpCameraOutputs(width: Int, height: Int) {
+  private fun setUpCameraOutputs() {
+
     val activity = activity
     val manager = activity!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     try {
@@ -300,8 +294,10 @@ class CameraConnectionFragment :
           CompareSizesByArea()
         )
 
+        previewSize = Size(640, 480)
+
         imageReader = ImageReader.newInstance(
-          largest.width, largest.height,
+          PREVIEW_WIDTH, PREVIEW_HEIGHT,
           ImageFormat.YUV_420_888, /*maxImages*/ 2
         )
 
@@ -310,39 +306,12 @@ class CameraConnectionFragment :
         val displayRotation = activity.windowManager.defaultDisplay.rotation
 
         sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
-        val swappedDimensions = areDimensionsSwapped(displayRotation)
 
-        val displaySize = Point()
-        activity.windowManager.defaultDisplay.getSize(displaySize)
-        val rotatedPreviewWidth = if (swappedDimensions) height else width
-        val rotatedPreviewHeight = if (swappedDimensions) width else height
-        var maxPreviewWidth = if (swappedDimensions) displaySize.y else displaySize.x
-        var maxPreviewHeight = if (swappedDimensions) displaySize.x else displaySize.y
-
-        if (maxPreviewWidth > MAX_PREVIEW_WIDTH) maxPreviewWidth = MAX_PREVIEW_WIDTH
-        if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) maxPreviewHeight = MAX_PREVIEW_HEIGHT
-
-        // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
-        // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
-        // garbage capture data.
-        previewSize = chooseOptimalSize(
-          map.getOutputSizes(SurfaceTexture::class.java),
-          rotatedPreviewWidth, rotatedPreviewHeight,
-          maxPreviewWidth, maxPreviewHeight,
-          largest
-        )
         previewHeight = previewSize!!.height
         previewWidth = previewSize!!.width
 
         // Initialize the storage bitmaps once when the resolution is known.
         rgbBytes = IntArray(previewWidth * previewHeight)
-
-        // We fit the aspect ratio of TextureView to the size of preview we picked.
-        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-          textureView!!.setAspectRatio(previewSize!!.width, previewSize!!.height)
-        } else {
-          textureView!!.setAspectRatio(previewSize!!.height, previewSize!!.width)
-        }
 
         // Check if the flash is supported.
         flashSupported =
@@ -394,13 +363,12 @@ class CameraConnectionFragment :
   /**
    * Opens the camera specified by [CameraConnectionFragment.cameraId].
    */
-  private fun openCamera(width: Int, height: Int) {
+  private fun openCamera() {
     val permissionCamera = ContextCompat.checkSelfPermission(activity!!, Manifest.permission.CAMERA)
     if (permissionCamera != PackageManager.PERMISSION_GRANTED) {
       requestCameraPermission()
     } else {
-      setUpCameraOutputs(width, height)
-      configureTransform(width, height)
+      setUpCameraOutputs()
       val manager = activity!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
       try {
         // Wait for camera to open - 2.5 seconds is sufficient
@@ -501,6 +469,7 @@ class CameraConnectionFragment :
 
       var image = imageReader.acquireLatestImage() ?: return
       fillBytes(image.planes, yuvBytes)
+
       ImageUtils.convertYUV420ToARGB8888(
         yuvBytes[0]!!,
         yuvBytes[1]!!,
@@ -513,37 +482,58 @@ class CameraConnectionFragment :
         rgbBytes
       )
 
+      // Create bitmap from int array
+      var imageBitmap = Bitmap.createBitmap(
+        rgbBytes, previewWidth, previewHeight,
+        Bitmap.Config.ARGB_8888
+      )
+
+      // Create rotated version for portrait display
+      var rotateMatrix = Matrix()
+      rotateMatrix.postRotate(90.0f)
+
+      var rotatedBitmap = Bitmap.createBitmap(
+        imageBitmap, 0, 0, previewWidth, previewHeight,
+        rotateMatrix, true
+      )
+
       // Save an image for analysis in every 30 frames.
       frameCounter += 1
       if (frameCounter % 30 == 0) {
-        saveImage()
+        ImageUtils.saveBitmap(imageBitmap)
       }
       image.close()
-      processImage()
+      processImage(rotatedBitmap)
     }
   }
 
-  /** Construct bitmap image from rgb format bytes.  */
-  private fun constructBitmap(height: Int, width: Int): Bitmap {
-    var imageBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    imageBitmap.setPixels(rgbBytes, 0, width, 0, 0, width, height)
-    return imageBitmap!!
-  }
-
   /** Process image using Posenet library.   */
-  private fun processImage() {
-    var posenet = Posenet()
+  private fun processImage(bitmap: Bitmap) {
+    // Create scaled version of bitmap for model input
+    var scaledBitmap = Bitmap.createScaledBitmap(bitmap, MODEL_WIDTH, MODEL_HEIGHT, true)
+    // Perform inference
+    val person = posenet.estimateSinglePose(interpreter!!, scaledBitmap)
+    var canvas: Canvas = surfaceHolder!!.lockCanvas()
 
-    // TODO(tanjinprity): Change the arguments of constructBitmap once cropping and resize logic is
-    // added to the library.
-    val person = posenet.estimateSinglePose(interpreter!!, constructBitmap(353, 257))
-  }
+    // Draw bitmap on Canvas
+    // TODO: crop bitmap to not squish it
+    var screenWidth: Int = canvas.getWidth()
+    var screenHeight: Int = canvas.getHeight()
+    canvas.drawBitmap(
+      bitmap,
+      Rect(0, 0, previewHeight, previewWidth),
+      Rect(0, 0, screenWidth, screenHeight),
+      paint
+    )
 
-  /** Saves image for analysis.   */
-  private fun saveImage() {
-    val rgbFrameBitmap = constructBitmap(previewHeight, previewWidth)
-    // Save RGB Bitmap for examining the actual TF input.
-    ImageUtils.saveBitmap(rgbFrameBitmap)
+    // Draw keypoints
+    for (keypoint in person.keyPoints) {
+      var adjustedX: Float = keypoint.position.x.toFloat() / MODEL_WIDTH * screenWidth
+      var adjustedY: Float = keypoint.position.y.toFloat() / MODEL_HEIGHT * screenHeight
+      canvas.drawCircle(adjustedX, adjustedY, 8.0f, paint)
+    }
+    // Draw!
+    surfaceHolder!!.unlockCanvasAndPost(canvas)
   }
 
   /**
@@ -551,19 +541,12 @@ class CameraConnectionFragment :
    */
   private fun createCameraPreviewSession() {
     try {
-      val texture = textureView!!.surfaceTexture
-
-      // We configure the size of default buffer to be the size of camera preview we want.
-      texture!!.setDefaultBufferSize(previewSize!!.width, previewSize!!.height)
 
       // We capture images from preview in YUV format
       imageReader = ImageReader.newInstance(
         previewSize!!.getWidth(), previewSize!!.getHeight(), ImageFormat.YUV_420_888, 2
       )
       imageReader!!.setOnImageAvailableListener(imageAvailableListener, backgroundHandler)
-
-      // This is the output Surface we need to start preview.
-      val surface = Surface(texture)
 
       // This is the surface we need to record images for processing
       val recordingSurface = imageReader!!.surface
@@ -572,12 +555,11 @@ class CameraConnectionFragment :
       previewRequestBuilder = cameraDevice!!.createCaptureRequest(
         CameraDevice.TEMPLATE_PREVIEW
       )
-      previewRequestBuilder!!.addTarget(surface)
       previewRequestBuilder!!.addTarget(recordingSurface)
 
       // Here, we create a CameraCaptureSession for camera preview.
       cameraDevice!!.createCaptureSession(
-        Arrays.asList(surface, recordingSurface),
+        Arrays.asList(recordingSurface),
         object : CameraCaptureSession.StateCallback() {
           override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
             // The camera is already closed
@@ -614,40 +596,6 @@ class CameraConnectionFragment :
     } catch (e: CameraAccessException) {
       Log.e(TAG, e.toString())
     }
-  }
-
-  /**
-   * Configures the necessary [android.graphics.Matrix] transformation to `textureView`.
-   * This method should be called after the camera preview size is determined in
-   * setUpCameraOutputs and also the size of `textureView` is fixed.
-   *
-   * @param viewWidth The width of `textureView`
-   * @param viewHeight The height of `textureView`
-   */
-  private fun configureTransform(viewWidth: Int, viewHeight: Int) {
-    activity ?: return
-    val rotation = activity!!.windowManager.defaultDisplay.rotation
-    val matrix = Matrix()
-    val viewRect = RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
-    val bufferRect = RectF(0f, 0f, previewSize!!.height.toFloat(), previewSize!!.width.toFloat())
-    val centerX = viewRect.centerX()
-    val centerY = viewRect.centerY()
-
-    if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
-      bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
-      val scale = Math.max(
-        viewHeight.toFloat() / previewSize!!.height,
-        viewWidth.toFloat() / previewSize!!.width
-      )
-      with(matrix) {
-        setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
-        postScale(scale, scale, centerX, centerY)
-        postRotate((90 * (rotation - 2)).toFloat(), centerX, centerY)
-      }
-    } else if (Surface.ROTATION_180 == rotation) {
-      matrix.postRotate(180f, centerX, centerY)
-    }
-    textureView!!.setTransform(matrix)
   }
 
   override fun onClick(view: View) {
@@ -695,16 +643,17 @@ class CameraConnectionFragment :
 
     companion object {
 
-      @JvmStatic private val ARG_MESSAGE = "message"
+      @JvmStatic
+      private val ARG_MESSAGE = "message"
 
-      @JvmStatic fun newInstance(message: String): ErrorDialog = ErrorDialog().apply {
+      @JvmStatic
+      fun newInstance(message: String): ErrorDialog = ErrorDialog().apply {
         arguments = Bundle().apply { putString(ARG_MESSAGE, message) }
       }
     }
   }
 
   companion object {
-
     /**
      * Conversion from screen rotation to JPEG orientation.
      */
@@ -749,7 +698,8 @@ class CameraConnectionFragment :
      * @param aspectRatio The aspect ratio
      * @return The optimal `Size`, or an arbitrary one if none were big enough
      */
-    @JvmStatic private fun chooseOptimalSize(
+    @JvmStatic
+    private fun chooseOptimalSize(
       choices: Array<Size>,
       textureViewWidth: Int,
       textureViewHeight: Int,
@@ -787,7 +737,5 @@ class CameraConnectionFragment :
         return choices[0]
       }
     }
-
-    @JvmStatic fun newInstance(): CameraConnectionFragment = CameraConnectionFragment()
   }
 }

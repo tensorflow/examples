@@ -17,8 +17,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-  <org.tensorflow.lite.examples.posenet.AutoFitTextureView
-      android:id="@+id/texture"
+  <SurfaceView
+      android:id="@+id/surfaceView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="0dp"
@@ -41,15 +41,15 @@
 
 
   <ImageButton
-        android:id="@+id/info"
-        android:contentDescription="@string/description_info"
-        style="@android:style/Widget.Material.Light.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:padding="@dimen/image_button_padding"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:src="@mipmap/ic_action_info" />
+      android:id="@+id/info"
+      android:contentDescription="@string/description_info"
+      style="@android:style/Widget.Material.Light.Button.Borderless"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_vertical|end"
+      android:padding="@dimen/image_button_padding"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentRight="true"
+      android:src="@mipmap/ic_action_info" />
 
 </RelativeLayout>
