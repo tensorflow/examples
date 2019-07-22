@@ -19,4 +19,5 @@
   <color name="colorPrimaryDark">#00574B</color>
   <color name="colorAccent">#D81B60</color>
   <color name="control_background">#cc4285f4</color>
+  <color name="semi_transparent">#66000000</color>
 </resources>
