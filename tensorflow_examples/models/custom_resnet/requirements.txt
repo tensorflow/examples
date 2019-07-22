@@ -1,0 +1,8 @@
+opencv_python==4.0.0.21
+h5py==2.9.0
+pandas==0.23.4
+numpy==1.16.4
+Keras==2.2.4
+tensorflow==2.0.0b1
+imutils==0.5.2
+scikit_learn==0.21.2
