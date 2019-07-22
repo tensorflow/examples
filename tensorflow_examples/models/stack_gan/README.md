@@ -2,6 +2,10 @@
 ### Text to Photo-Realistic Image Synthesis
 ---
 #### Downloads
+- To download all the dependencies, simply execute 
+```
+pip install -r requirements.txt
+```
 - To download the CUB 200 dataset, simply execute the `data_download.py` file
 ```
 python data_download.py
