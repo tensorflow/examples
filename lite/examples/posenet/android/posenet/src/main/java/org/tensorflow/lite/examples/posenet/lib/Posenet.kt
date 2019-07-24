@@ -52,7 +52,7 @@ class KeyPoint {
 }
 
 class Person {
-  var keyPoints: List<KeyPoint> = listOf<KeyPoint>()
+  var keyPoints = listOf<KeyPoint>()
   var score: Float = 0.0f
 }
 
@@ -131,8 +131,8 @@ class Posenet {
     val outputMap = initOutputMap(interpreter)
     interpreter.runForMultipleInputsOutputs(inputArray, outputMap)
 
-    val outputRawHeatmaps = outputMap.get(1) as Array<Array<Array<FloatArray>>>
-    val outputRawOffsets = outputMap.get(2) as Array<Array<Array<FloatArray>>>
+    val outputRawHeatmaps = outputMap[1] as Array<Array<Array<FloatArray>>>
+    val outputRawOffsets = outputMap[2] as Array<Array<Array<FloatArray>>>
 
     val height = outputRawHeatmaps[0].size
     val width = outputRawHeatmaps[0][0].size
@@ -159,28 +159,38 @@ class Posenet {
     // Calculating the x and y coordinates of the keypoints with offset adjustment.
     var xCoords = IntArray(numKeypoints)
     var yCoords = IntArray(numKeypoints)
+    var confidenceScores = FloatArray(numKeypoints)
     keypointPositions.forEachIndexed { idx, position ->
+      var positionY = keypointPositions[idx].first
+      var positionX = keypointPositions[idx].second
       yCoords[idx] = (
         position.first / (height - 1).toFloat() * bitmap.height +
-          outputRawOffsets[0][keypointPositions[idx].first][keypointPositions[idx].second][idx]
+          outputRawOffsets[0][positionY][positionX][idx]
         ).toInt()
       xCoords[idx] = (
         position.second / (width - 1).toFloat() * bitmap.width +
-          outputRawOffsets[0][keypointPositions[idx].first]
-          [keypointPositions[idx].second][idx + numKeypoints]
+          outputRawOffsets[0][positionY]
+          [positionX][idx + numKeypoints]
         ).toInt()
+      confidenceScores[idx] =
+        (
+          (outputRawHeatmaps[0][positionY][positionX][idx]) / 10
+          )
     }
 
     var person = Person()
     var keypointList = Array(numKeypoints) { KeyPoint() }
+    var totalScore = 0.0f
     enumValues<BodyPart>().forEachIndexed { idx, it ->
       keypointList[idx].bodyPart = it
       keypointList[idx].position.x = xCoords[idx]
       keypointList[idx].position.y = yCoords[idx]
+      keypointList[idx].score = confidenceScores[idx]
+      totalScore += confidenceScores[idx]
     }
 
-    // TODO(eileenmao):ignore the unknown keypoint and get confidence scores
     person.keyPoints = keypointList.toList()
+    person.score = totalScore / numKeypoints
 
     return person
   }

@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
   private var interpreter: Interpreter? = null
 
   /** Preload and memory map the model file, returns a MappedByteBuffer containing the model.    */
-  fun loadModelFile(path: String): MappedByteBuffer {
+  private fun loadModelFile(path: String): MappedByteBuffer {
     val fileDescriptor = assets.openFd(path)
     val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
     return inputStream.channel.map(
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     val bitmap = Bitmap.createBitmap(257, 353, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
 
-    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
 
     drawable.draw(canvas)
     return bitmap
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     setContentView(R.layout.activity_main)
 
     val sampleImageView = findViewById<ImageView>(R.id.image)
-    val drawedImage = ResourcesCompat.getDrawable(getResources(), R.drawable.image, null)
+    val drawedImage = ResourcesCompat.getDrawable(resources, R.drawable.image, null)
     val imageBitmap = drawableToBitmap(drawedImage!!)
     sampleImageView.setImageBitmap(imageBitmap)
 
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         keypoint.position.y.toFloat(), size, paint
       )
     }
-    sampleImageView.setAdjustViewBounds(true)
+    sampleImageView.adjustViewBounds = true
     sampleImageView.setImageBitmap(mutableBitmap)
   }
 }
