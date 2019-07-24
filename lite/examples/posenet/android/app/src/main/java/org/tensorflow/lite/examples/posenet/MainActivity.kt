@@ -32,10 +32,10 @@ import org.tensorflow.lite.examples.posenet.lib.Posenet as Posenet
 
 class MainActivity : AppCompatActivity() {
 
-  // Instantiate an Interpreter
+  /** Instantiate an Interpreter.    */
   private var interpreter: Interpreter? = null
 
-  // Preload and memory map the model file, returning a MappedByteBuffer containing the model.
+  /** Preload and memory map the model file, returns a MappedByteBuffer containing the model.    */
   fun loadModelFile(path: String): MappedByteBuffer {
     val fileDescriptor = assets.openFd(path)
     val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
     )
   }
 
-  // Returns a resized bitmap of the drawable image.
+  /** Returns a resized bitmap of the drawable image.    */
   private fun drawableToBitmap(drawable: Drawable): Bitmap {
     val bitmap = Bitmap.createBitmap(257, 353, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     return bitmap
   }
 
-  // Calls the Posenet library functions.
+  /** Calls the Posenet library functions.    */
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -70,16 +70,16 @@ class MainActivity : AppCompatActivity() {
     val person = posenet.estimateSinglePose(interpreter!!, imageBitmap)
 
     // Draw the keypoints over the image.
-    val red = Paint()
-    red.setColor(Color.RED)
+    val paint = Paint()
+    paint.setColor(Color.RED)
     val size = 2.0f
 
     val mutableBitmap = imageBitmap.copy(Bitmap.Config.ARGB_8888, true)
     val canvas = Canvas(mutableBitmap)
-    for (i in 0 until person.keyPoints.size) {
+    for (keypoint in person.keyPoints) {
       canvas.drawCircle(
-        person.keyPoints[i].position.x.toFloat(),
-        person.keyPoints[i].position.y.toFloat(), size, red
+        keypoint.position.x.toFloat(),
+        keypoint.position.y.toFloat(), size, paint
       )
     }
     sampleImageView.setAdjustViewBounds(true)

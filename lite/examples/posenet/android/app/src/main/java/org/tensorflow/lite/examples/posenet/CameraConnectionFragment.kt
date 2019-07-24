@@ -66,6 +66,8 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.examples.posenet.lib.BodyPart
+import org.tensorflow.lite.examples.posenet.lib.Person
 import org.tensorflow.lite.examples.posenet.lib.Posenet
 
 class CameraConnectionFragment :
@@ -83,6 +85,22 @@ class CameraConnectionFragment :
   init {
     paint.setColor(Color.RED)
   }
+
+  /** List of body joints that should be connected.    */
+  val bodyJoints = listOf(
+    Pair(BodyPart.LEFT_WRIST, BodyPart.LEFT_ELBOW),
+    Pair(BodyPart.LEFT_ELBOW, BodyPart.LEFT_SHOULDER),
+    Pair(BodyPart.LEFT_SHOULDER, BodyPart.RIGHT_SHOULDER),
+    Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW),
+    Pair(BodyPart.RIGHT_ELBOW, BodyPart.RIGHT_WRIST),
+    Pair(BodyPart.LEFT_SHOULDER, BodyPart.LEFT_HIP),
+    Pair(BodyPart.LEFT_HIP, BodyPart.RIGHT_HIP),
+    Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_SHOULDER),
+    Pair(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE),
+    Pair(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE),
+    Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE),
+    Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
+  )
 
   /** An object for the Posenet library.    */
   private val posenet = Posenet()
@@ -507,14 +525,8 @@ class CameraConnectionFragment :
     }
   }
 
-  /** Process image using Posenet library.   */
-  private fun processImage(bitmap: Bitmap) {
-    // Create scaled version of bitmap for model input
-    var scaledBitmap = Bitmap.createScaledBitmap(bitmap, MODEL_WIDTH, MODEL_HEIGHT, true)
-    // Perform inference
-    val person = posenet.estimateSinglePose(interpreter!!, scaledBitmap)
-    var canvas: Canvas = surfaceHolder!!.lockCanvas()
-
+  /** Draw keypoints and lines.    */
+  private fun draw(canvas: Canvas, person: Person, bitmap: Bitmap) {
     // Draw bitmap on Canvas
     // TODO: crop bitmap to not squish it
     var screenWidth: Int = canvas.getWidth()
@@ -526,14 +538,42 @@ class CameraConnectionFragment :
       paint
     )
 
+    val widthRatio = screenWidth.toFloat() / MODEL_WIDTH
+    val heightRatio = screenHeight.toFloat() / MODEL_HEIGHT
+
     // Draw keypoints
     for (keypoint in person.keyPoints) {
-      var adjustedX: Float = keypoint.position.x.toFloat() / MODEL_WIDTH * screenWidth
-      var adjustedY: Float = keypoint.position.y.toFloat() / MODEL_HEIGHT * screenHeight
-      canvas.drawCircle(adjustedX, adjustedY, 8.0f, paint)
+      canvas.drawCircle(
+        keypoint.position.x.toFloat() * widthRatio,
+        keypoint.position.y.toFloat() * heightRatio,
+        8.0f, paint
+      )
+    }
+
+    paint.setStrokeWidth(8.0f)
+
+    for (line in person.bodyJoints) {
+      canvas.drawLine(
+        person.keyPoints[line.first.ordinal].position.x.toFloat() * widthRatio,
+        person.keyPoints[line.first.ordinal].position.y.toFloat() * heightRatio,
+        person.keyPoints[line.second.ordinal].position.x.toFloat() * widthRatio,
+        person.keyPoints[line.second.ordinal].position.y.toFloat() * heightRatio,
+        paint
+      )
     }
     // Draw!
     surfaceHolder!!.unlockCanvasAndPost(canvas)
+  }
+
+  /** Process image using Posenet library.   */
+  private fun processImage(bitmap: Bitmap) {
+    // Create scaled version of bitmap for model input
+    var scaledBitmap = Bitmap.createScaledBitmap(bitmap, MODEL_WIDTH, MODEL_HEIGHT, true)
+
+    // Perform inference
+    val person = posenet.estimateSinglePose(interpreter!!, scaledBitmap)
+    var canvas: Canvas = surfaceHolder!!.lockCanvas()
+    draw(canvas, person, bitmap)
   }
 
   /**
