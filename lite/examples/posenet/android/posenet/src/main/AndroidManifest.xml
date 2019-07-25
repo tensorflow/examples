@@ -1,8 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.tensorflow.lite.examples.posenet.lib">
-
-  <uses-sdk
-        android:minSdkVersion="21"
-        android:targetSdkVersion="23" />
-
-</manifest>
