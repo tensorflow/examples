@@ -21,7 +21,7 @@
   <string name="camera_error" translation_description="Error regarding camera support[CHAR_LIMIT=40]">This device doesn\'t support Camera2 API.</string>
   <string name="intro_message" translation_description="Introduction message for posenet [CHAR_LIMIT=120]">
     <![CDATA[
-       Currently, posenet demo app uses Camera2 API only to display camera preview.
+       Currently, posenet demo app detects the body parts of a single person on-device in real-time.
     ]]>
   </string>
 </resources>

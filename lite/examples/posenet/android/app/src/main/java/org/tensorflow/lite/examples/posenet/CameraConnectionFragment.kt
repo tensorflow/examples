@@ -65,6 +65,8 @@ import java.util.Comparator
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.math.pow
+import kotlin.math.abs
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.posenet.lib.BodyPart
 import org.tensorflow.lite.examples.posenet.lib.Person
@@ -79,7 +81,7 @@ class CameraConnectionFragment :
   private val posenet = Posenet()
 
   /** List of body joints that should be connected.    */
-  val bodyJoints = listOf(
+  private val bodyJoints = listOf(
     Pair(BodyPart.LEFT_WRIST, BodyPart.LEFT_ELBOW),
     Pair(BodyPart.LEFT_ELBOW, BodyPart.LEFT_SHOULDER),
     Pair(BodyPart.LEFT_SHOULDER, BodyPart.RIGHT_SHOULDER),
@@ -95,10 +97,10 @@ class CameraConnectionFragment :
   )
 
   /** Threshold for confidence score. */
-  private val MIN_CONFIDENCE = 0.2
+  private val minConfidence = 0.2
 
   /** Radius of circle used to draw keypoints.  */
-  private val CIRCLE_RADIUS = 8.0f
+  private val circleRadius = 8.0f
 
   /** Paint class holds the style and color information to draw geometries,text and bitmaps. */
   private var paint = Paint()
@@ -503,16 +505,16 @@ class CameraConnectionFragment :
       )
 
       // Create bitmap from int array
-      var imageBitmap = Bitmap.createBitmap(
+      val imageBitmap = Bitmap.createBitmap(
         rgbBytes, previewWidth, previewHeight,
         Bitmap.Config.ARGB_8888
       )
 
       // Create rotated version for portrait display
-      var rotateMatrix = Matrix()
+      val rotateMatrix = Matrix()
       rotateMatrix.postRotate(90.0f)
 
-      var rotatedBitmap = Bitmap.createBitmap(
+      val rotatedBitmap = Bitmap.createBitmap(
         imageBitmap, 0, 0, previewWidth, previewHeight,
         rotateMatrix, true
       )
@@ -527,16 +529,51 @@ class CameraConnectionFragment :
     }
   }
 
+  /** Crop Bitmap to maintain aspect ratio of model input.   */
+  private fun cropBitmap(bitmap: Bitmap): Bitmap {
+    // Rotated bitmap has previewWidth as its height and previewHeight as width.
+    val previewRatio = previewWidth.toFloat() / previewHeight
+    val modelInputRatio = MODEL_HEIGHT.toFloat() / MODEL_WIDTH
+    var croppedBitmap = bitmap
+
+    // Acceptable difference between the modelInputRatio and previewRatio to skip cropping.
+    val maxDifference = 1.0f.pow(-5)
+
+    // Checks if the previewing bitmap has similar aspect ratio as the required model input.
+    if (abs(modelInputRatio - previewRatio) < maxDifference) {
+      return croppedBitmap
+    } else if (modelInputRatio > previewRatio) {
+      // New image is taller so we are height constrained.
+      val cropHeight = previewHeight - (previewWidth.toFloat() / modelInputRatio)
+      croppedBitmap = Bitmap.createBitmap(
+        bitmap,
+        0,
+        (cropHeight / 2).toInt(),
+        previewHeight,
+        (previewWidth - (cropHeight / 2)).toInt()
+      )
+    } else {
+      val cropWidth = previewWidth - (previewHeight.toFloat() * modelInputRatio)
+      croppedBitmap = Bitmap.createBitmap(
+        bitmap,
+        (cropWidth / 2).toInt(),
+        0,
+        (previewHeight - (cropWidth / 2)).toInt(),
+        previewWidth
+      )
+    }
+    return croppedBitmap
+  }
+
   /** Set the paint color and size.    */
   private fun setPaint() {
     paint.color = Color.RED
-    paint.textSize = 40.0f
+    paint.textSize = 100.0f
     paint.strokeWidth = 8.0f
   }
 
   /** Draw bitmap on Canvas.   */
   private fun draw(canvas: Canvas, person: Person, bitmap: Bitmap) {
-    // TODO: crop bitmap to not squish it
     val screenWidth: Int = canvas.width
     val screenHeight: Int = canvas.height
     setPaint()
@@ -552,18 +589,18 @@ class CameraConnectionFragment :
 
     // Draw key points over the image.
     for (keyPoint in person.keyPoints) {
-      if (keyPoint.score > MIN_CONFIDENCE) {
+      if (keyPoint.score > minConfidence) {
         val position = keyPoint.position
         val adjustedX: Float = position.x.toFloat() * widthRatio
         val adjustedY: Float = position.y.toFloat() * heightRatio
-        canvas.drawCircle(adjustedX, adjustedY, CIRCLE_RADIUS, paint)
+        canvas.drawCircle(adjustedX, adjustedY, circleRadius, paint)
       }
     }
 
     for (line in bodyJoints) {
       if (
-        (person.keyPoints[line.first.ordinal].score > MIN_CONFIDENCE) and
-        (person.keyPoints[line.second.ordinal].score > MIN_CONFIDENCE)
+        (person.keyPoints[line.first.ordinal].score > minConfidence) and
+        (person.keyPoints[line.second.ordinal].score > minConfidence)
       ) {
         canvas.drawLine(
           person.keyPoints[line.first.ordinal].position.x.toFloat() * widthRatio,
@@ -576,10 +613,11 @@ class CameraConnectionFragment :
     }
 
     // Draw confidence score of a person.
+    val scoreMessage = "Score: " + "%.2f".format(person.score)
     canvas.drawText(
-      "%.2f".format(person.score),
-      (200.0f * widthRatio),
-      (200.0f * heightRatio),
+      scoreMessage,
+      (15.0f * widthRatio),
+      (340.0f * heightRatio),
       paint
     )
 
@@ -589,10 +627,13 @@ class CameraConnectionFragment :
 
   /** Process image using Posenet library.   */
   private fun processImage(bitmap: Bitmap) {
-    // Create scaled version of bitmap for model input
-    val scaledBitmap = Bitmap.createScaledBitmap(bitmap, MODEL_WIDTH, MODEL_HEIGHT, true)
+    // Crop bitmap.
+    val croppedBitmap = cropBitmap(bitmap)
 
-    // Perform inference
+    // Created scaled version of bitmap for model input.
+    val scaledBitmap = Bitmap.createScaledBitmap(croppedBitmap, MODEL_WIDTH, MODEL_HEIGHT, true)
+
+    // Perform inference.
     val person = posenet.estimateSinglePose(interpreter!!, scaledBitmap)
     val canvas: Canvas = surfaceHolder!!.lockCanvas()
     draw(canvas, person, bitmap)
@@ -604,13 +645,13 @@ class CameraConnectionFragment :
   private fun createCameraPreviewSession() {
     try {
 
-      // We capture images from preview in YUV format
+      // We capture images from preview in YUV format.
       imageReader = ImageReader.newInstance(
-        previewSize!!.getWidth(), previewSize!!.getHeight(), ImageFormat.YUV_420_888, 2
+        previewSize!!.width, previewSize!!.height, ImageFormat.YUV_420_888, 2
       )
       imageReader!!.setOnImageAvailableListener(imageAvailableListener, backgroundHandler)
 
-      // This is the surface we need to record images for processing
+      // This is the surface we need to record images for processing.
       val recordingSurface = imageReader!!.surface
 
       // We set up a CaptureRequest.Builder with the output Surface.
