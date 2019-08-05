@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+ Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<resources>
+  <string name="app_name" translation_description="Posenet demo app built with Posenet library [CHAR_LIMIT=40]">Posenet Demo</string>
+  <string name="picture" translation_description="Picture [CHAR_LIMIT=40]">Picture</string>
+  <string name="description_info" translation_description="Description information [CHAR_LIMIT=40]">Info</string>
+  <string name="request_permission" translation_description="Request camera permission [CHAR_LIMIT=40]">This app needs camera permission.</string>
+  <string name="camera_error" translation_description="Error regarding camera support[CHAR_LIMIT=40]">This device doesn\'t support Camera2 API.</string>
+  <string name="intro_message" translation_description="Introduction message for posenet [CHAR_LIMIT=120]">
+    <![CDATA[
+       Currently, posenet demo app detects the body parts of a single person on-device in real-time.
+    ]]>
+  </string>
+</resources>
