@@ -20,7 +20,6 @@ package org.tensorflow.lite.examples.posenet
 
 /** Request camera and external storage permission.   */
 const val REQUEST_CAMERA_PERMISSION = 1
-const val REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION = 1
 
 /** Model input shape for images.   */
 const val MODEL_WIDTH = 513

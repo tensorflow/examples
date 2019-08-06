@@ -243,17 +243,6 @@ class PosenetActivity :
     }
   }
 
-  private fun requestStoragePermission() {
-    if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-      ConfirmationDialog().show(childFragmentManager, FRAGMENT_DIALOG)
-    } else {
-      requestPermissions(
-        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-        REQUEST_CODE_WRITE_EXTERNAL_STORAGE_PERMISSION
-      )
-    }
-  }
-
   override fun onRequestPermissionsResult(
     requestCode: Int,
     permissions: Array<String>,
@@ -330,27 +319,19 @@ class PosenetActivity :
     val permissionCamera = ContextCompat.checkSelfPermission(activity!!, Manifest.permission.CAMERA)
     if (permissionCamera != PackageManager.PERMISSION_GRANTED) {
       requestCameraPermission()
-    } else {
-      setUpCameraOutputs()
-      val manager = activity!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-      try {
-        // Wait for camera to open - 2.5 seconds is sufficient
-        if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
-          throw RuntimeException("Time out waiting to lock camera opening.")
-        }
-        manager.openCamera(cameraId!!, stateCallback, backgroundHandler)
-      } catch (e: CameraAccessException) {
-        Log.e(TAG, e.toString())
-      } catch (e: InterruptedException) {
-        throw RuntimeException("Interrupted while trying to lock camera opening.", e)
-      }
     }
-    val permissionStorage = ContextCompat.checkSelfPermission(
-      activity!!,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
-    if (permissionStorage != PackageManager.PERMISSION_GRANTED) {
-      requestStoragePermission()
+    setUpCameraOutputs()
+    val manager = activity!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    try {
+      // Wait for camera to open - 2.5 seconds is sufficient
+      if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+        throw RuntimeException("Time out waiting to lock camera opening.")
+      }
+      manager.openCamera(cameraId!!, stateCallback, backgroundHandler)
+    } catch (e: CameraAccessException) {
+      Log.e(TAG, e.toString())
+    } catch (e: InterruptedException) {
+      throw RuntimeException("Interrupted while trying to lock camera opening.", e)
     }
   }
 
@@ -450,14 +431,13 @@ class PosenetActivity :
         imageBitmap, 0, 0, previewWidth, previewHeight,
         rotateMatrix, true
       )
-
-      // Save an image for analysis in every 30 frames.
-      frameCounter += 1
-      if (frameCounter % 30 == 0) {
-        ImageUtils.saveBitmap(imageBitmap)
-      }
       image.close()
-      processImage(rotatedBitmap)
+
+      // Process an image for analysis in every 3 frames.
+      frameCounter = (frameCounter + 1) % 3
+      if (frameCounter == 0) {
+        processImage(rotatedBitmap)
+      }
     }
   }
 

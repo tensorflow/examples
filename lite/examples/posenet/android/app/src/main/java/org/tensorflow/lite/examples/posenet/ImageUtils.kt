@@ -15,54 +15,11 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.posenet
 
-import android.graphics.Bitmap
-import android.os.Environment
-import android.util.Log
-import java.io.File
-import java.io.FileOutputStream
-
 /** Utility class for manipulating images.  */
 object ImageUtils {
   // This value is 2 ^ 18 - 1, and is used to hold the RGB values together before their ranges
   // are normalized to eight bits.
   private const val MAX_CHANNEL_VALUE = 262143
-
-  /** Directory where the bitmaps are saved for analysis.  */
-  private fun rootDirectory(): String {
-    return Environment.getExternalStorageDirectory().absolutePath + File.separator +
-      "tensorflow"
-  }
-
-  /**
-   * Saves a Bitmap object to disk for analysis.
-   *
-   * @param bitmap The bitmap to save.
-   * @param filename The location to save the bitmap to.
-   */
-  @JvmOverloads
-  fun saveBitmap(bitmap: Bitmap, filename: String = "preview.png") {
-    val root = rootDirectory()
-    val myDir = File(root)
-    if (!myDir.exists() or !myDir.isDirectory) {
-      if (!myDir.mkdirs()) {
-        Log.e("Local storage", "Failed to create directory for the app in root")
-      }
-    }
-
-    val file = File(myDir, filename)
-    if (file.exists()) {
-      file.delete()
-    }
-    val out = FileOutputStream(file)
-    try {
-      bitmap.compress(Bitmap.CompressFormat.PNG, 99, out)
-      out.flush()
-    } catch (e: Exception) {
-      Log.e("Compressing output", e.toString())
-    } finally {
-      out.close()
-    }
-  }
 
   /** Helper function to convert y,u,v integer values to RGB format */
   private fun convertYUVToRGB(y: Int, u: Int, v: Int): Int {
