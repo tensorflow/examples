@@ -22,6 +22,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import kotlin.math.exp
 import org.tensorflow.lite.Interpreter
 
 enum class BodyPart {
@@ -66,6 +67,11 @@ class Posenet(context: Context) {
 
   init {
     interpreter = Interpreter(loadModelFile("posenet_model.tflite", context))
+  }
+
+  /** Returns value within [0,1].   */
+  private fun sigmoid(x: Float): Float {
+    return (1.0f / (1.0f + exp(-x)))
   }
 
   /**
@@ -169,6 +175,7 @@ class Posenet(context: Context) {
       var maxCol = 0
       for (row in 0 until height) {
         for (col in 0 until width) {
+          heatmaps[0][row][col][keypoint] = sigmoid(heatmaps[0][row][col][keypoint])
           if (heatmaps[0][row][col][keypoint] > maxVal) {
             maxVal = heatmaps[0][row][col][keypoint]
             maxRow = row
@@ -195,10 +202,7 @@ class Posenet(context: Context) {
           offsets[0][positionY]
           [positionX][idx + numKeypoints]
         ).toInt()
-      confidenceScores[idx] =
-        (
-          (heatmaps[0][positionY][positionX][idx]) / 10
-          )
+      confidenceScores[idx] = heatmaps[0][positionY][positionX][idx]
     }
 
     val person = Person()

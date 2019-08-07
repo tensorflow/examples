@@ -85,7 +85,7 @@ class PosenetActivity :
   )
 
   /** Threshold for confidence score. */
-  private val minConfidence = 0.2
+  private val minConfidence = 0.5
 
   /** Radius of circle used to draw keypoints.  */
   private val circleRadius = 8.0f
