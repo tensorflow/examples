@@ -46,7 +46,7 @@ Downloading, extraction and placement in assets folder has been managed
 
 If you explicitly want to download the model, you can download it from
  **[here](
- https://storage.googleapis.com/download.tensorflow.org/models/tflite/posenet_mobilenet_v1_100_513x513_multi_kpt_stripped.tflite)**.
+ https://storage.googleapis.com/download.tensorflow.org/models/tflite/posenet_mobilenet_v1_100_257x257_multi_kpt_stripped.tflite)**.
 
 ### Additional Note
 _Please do not delete the assets folder content_. If you explicitly deleted the

@@ -17,6 +17,8 @@ package org.tensorflow.lite.examples.posenet.lib
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.SystemClock
+import android.util.Log
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -156,9 +158,17 @@ class Posenet(context: Context) {
    *      person: a Person object containing data about keypoint locations and confidence scores
    */
   fun estimateSinglePose(bitmap: Bitmap): Person {
+    var t1: Long = SystemClock.elapsedRealtimeNanos()
     val inputArray = arrayOf(initInputArray(bitmap))
+    var t2: Long = SystemClock.elapsedRealtimeNanos()
+    Log.i("posenet", String.format("Scaling to [-1,1] took %.2f ms", 1.0f * (t2 - t1) / 1_000_000))
+
     val outputMap = initOutputMap(interpreter!!)
+
+    t1 = SystemClock.elapsedRealtimeNanos()
     interpreter!!.runForMultipleInputsOutputs(inputArray, outputMap)
+    t2 = SystemClock.elapsedRealtimeNanos()
+    Log.i("posenet", String.format("Interpreter took %.2f ms", 1.0f * (t2 - t1) / 1_000_000))
 
     val heatmaps = outputMap[0] as Array<Array<Array<FloatArray>>>
     val offsets = outputMap[1] as Array<Array<Array<FloatArray>>>

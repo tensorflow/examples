@@ -531,7 +531,7 @@ class PosenetActivity :
     canvas.drawText(
       scoreMessage,
       (15.0f * widthRatio),
-      (500.0f * heightRatio),
+      (243.0f * heightRatio),
       paint
     )
 
