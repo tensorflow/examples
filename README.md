@@ -17,7 +17,7 @@ Those notebooks can be opened in Colab from
 
 <h2>What is this repo?</h2>
 
-This is the TensorFlow example repo.  It has several classes of material:
+This is NOT the TensorFlow example repo.  It has several classes of material:
 
 * Showcase examples and documentation for our fantastic [TensorFlow Community](https://tensorflow.org/community)
 * Provide examples mentioned on TensorFlow.org
