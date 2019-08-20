@@ -117,9 +117,15 @@ def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
   preprocess_train = Preprocess(data_format, train=True)
   preprocess_test = Preprocess(data_format, train=False)
 
-  dataset, metadata = tfds.load(
-      'cifar10', data_dir=data_dir, as_supervised=True, with_info=True)
-  train_dataset, test_dataset = dataset['train'], dataset['test']
+  train_dataset, metadata = tfds.load(
+      'cifar10',
+      split='train',
+      data_dir=data_dir,
+      as_supervised=True,
+      shuffle_files=True,
+      with_info=True)
+  test_dataset = tfds.load(
+      'cifar10', split='test', data_dir=data_dir, as_supervised=True)
 
   train_dataset = train_dataset.map(
       preprocess_train, num_parallel_calls=AUTOTUNE)
