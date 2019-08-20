@@ -169,7 +169,7 @@ class InstanceNormalization(tf.keras.layers.Layer):
     self.scale = self.add_weight(
         name='scale',
         shape=input_shape[-1:],
-        initializer=tf.random_normal_initializer(0., 0.02),
+        initializer=tf.random_normal_initializer(1., 0.02),
         trainable=True)
 
     self.offset = self.add_weight(
