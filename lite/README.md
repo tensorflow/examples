@@ -17,6 +17,7 @@ This app performs image classification on a live camera feed and displays the in
 
 [iOS image classification](examples/image_classification/ios/README.md)
 
+[Raspberry Pi image classification](examples/image_classification/raspberry_pi/README.md)
 
 ## Object detection
 
