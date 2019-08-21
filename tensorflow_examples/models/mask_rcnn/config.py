@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Masked R-CNN.
+"""Mask R-CNN - Configurations.
 
-Reference [
+Reference:
 Mask R-CNN](https://arxiv.org/abs/1703.06870)
 
-Adapted from [
-Matterport - Mask_RCNN](https://github.com/matterport/Mask_RCNN)
-
+Adapted from:
+@misc{matterport_maskrcnn_2017,
+  title={Mask R-CNN for object detection and instance segmentation on Keras and TensorFlow},
+  author={Waleed Abdulla},
+  year={2017},
+  publisher={Github},
+  journal={GitHub repository},
+  howpublished={url{https://github.com/matterport/Mask_RCNN}},
+}
 """
 
 import numpy as np

@@ -12,17 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Masked R-CNN compatible with TF 2.0.
+"""Mask R-CNN with TF 2.0 - Model Implementation.
 
 Reference:
 [Mask R-CNN](https://arxiv.org/asb/1703.06870)
 
 Adapted from:
-[Matterport - Mask_RCNN](https://github.com/matterport/Mask_RCNN)
-
+@misc{matterport_maskrcnn_2017,
+  title={Mask R-CNN for object detection and instance segmentation on Keras and TensorFlow},
+  author={Waleed Abdulla},
+  year={2017},
+  publisher={Github},
+  journal={GitHub repository},
+  howpublished={url{https://github.com/matterport/Mask_RCNN}},
+}
 """
 
 import os
+import pdb
 import random
 import datetime
 import re
@@ -35,7 +42,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as KB
 import tensorflow.keras.layers as KL
 
-from mrcnn import utils
+import utils
 
 # Requires TensorFlow 2.0
 assert tf.__version__.startswith('2')
@@ -1010,7 +1017,7 @@ def fpn_classifier_graph(rois, feature_maps, image_meta,
     x = KL.TimeDistributed(KL.Dense(num_classes * 4, activation='linear'),
                            name='mrcnn_bbox_fc')(shared)
     # Reshape to [batch, num_rois, NUM_CLASSES, (dy, dx, log(dh), log(dw))]
-    s = KB.int_shape(x)
+    s = tf.shape(x)
     mrcnn_bbox = KL.Reshape((s[1], num_classes, 4), name="mrcnn_bbox")(x)
 
     return mrcnn_class_logits, mrcnn_probs, mrcnn_bbox
@@ -1906,7 +1913,6 @@ class MaskRCNN():
                 outputs of the model differ accordingly.
         """
         assert mode in ['training', 'inference']
-
         # Image size must be dividable by 2 multiple times
         h, w = config.IMAGE_SHAPE[:2]
         if h / 2**6 != int(h / 2**6) or w / 2**6 != int(w / 2**6):
@@ -1916,7 +1922,7 @@ class MaskRCNN():
 
         # Inputs
         input_image = tf.keras.Input(
-            shape=[None, None, config.IMAGE_SHAPE[2]], name="input_image")
+            shape=[h, w, config.IMAGE_SHAPE[2]], name="input_image")
         input_image_meta = tf.keras.Input(shape=[config.IMAGE_META_SIZE],
                                     name="input_image_meta")
         if mode == "training":
@@ -2026,6 +2032,7 @@ class MaskRCNN():
             nms_threshold=config.RPN_NMS_THRESHOLD,
             name="ROI",
             config=config)([rpn_class, rpn_bbox, anchors])
+
 
         if mode == "training":
             # Class ID mask to mark class IDs supported by the dataset the image
