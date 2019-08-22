@@ -21,54 +21,16 @@ from __future__ import print_function
 
 import pandas as pd
 import numpy as np
-import occlusion
-import tensorflow
+import os
+import tensorflow as tf
 assert tf.__version__.startswith('2')
 
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-VAL_ANNOT = "/tiny-imagenet-200/val/val_annotations.txt"
-TRAIN = "/content/tiny-imagenet-200/train/"
-VAL = "/content/tiny-imagenet-200/val/images"
-
 data_url = "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
 
-def occlusion(thresh_prob=0.5):
-	"""Occlusion preprocessing to randomly cutout parts of an image to enable the model to learn 
-	more discriminative features while training. This is a regularization strategy.
-
-	Adapted from:
-	[yu4u - cutout-random-erasing](https://github.com/yu4u/cutout-random-erasing)
-	"""
-	def occlude(image):
-		height, width, channels = image.shape
-		random_prob = np.random.rand()
-
-		if random_prob > thresh_prob:
-			return image
-
-		while True:
-			s = np.random.uniform(s_l, s_h) * img_h * img_w
-            r = np.random.uniform(r_1, r_2)
-            w = int(np.sqrt(s / r))
-            h = int(np.sqrt(s * r))
-			left = np.random.randint(0, width)
-			top = np.random.randint(0, height)
-
-			if left + w <= width and top + h <= height:
-            	break
-
-		channels = np.random.uniform(v_l, v_h)
-
-        image[top:top + h, left:left + w, :] = channels
-
-        return image
-
-	return occlude
-
-
 class TinyImageNet(object):
-	def __init__(self, img_size=64, train_size=10000, val_size=1000):
+	def __init__(self, img_size=64, train_size=100000, val_size=10000):
 		self.img_size = img_size
 		self.train_size = train_size
 		self.val_size = val_size
@@ -94,6 +56,10 @@ class TinyImageNet(object):
 			train_datagen: ImageDataGenerator object for training images. 
 			val_datagen: ImageDataGenerator object for validation images.
 		"""
+		VAL_ANNOT = "tiny-imagenet-200/val/val_annotations.txt"
+		TRAIN = "tiny-imagenet-200/train/"
+		VAL = "tiny-imagenet-200/val/images"
+
 		val_data = pd.read_csv(VAL_ANNOT , sep='\t', names=['File', 'Class', 'X', 'Y', 'H', 'W'])
 		val_data.drop(['X','Y','H', 'W'], axis=1, inplace=True)
 
@@ -106,8 +72,8 @@ class TinyImageNet(object):
 		        shear_range=0.15,  # Shear Range
 		        horizontal_flip=True, # Horizontal Flip
 		        fill_mode="reflect", # Fills empty with reflections
-		        brightness_range=[0.4, 1.6],  # Increasing/decreasing brightness
-		        preprocessing_function=occlusion(v_l=0, v_h=1, pixel_level=pixel_level)
+		        brightness_range=[0.4, 1.6]  # Increasing/decreasing brightness
+		        #preprocessing_function=occlusion(v_l=0, v_h=1, pixel_level=pixel_level)
 		)
 
 		train_generator = train_datagen.flow_from_directory(
