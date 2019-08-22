@@ -12,12 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Sample runner Code.
-"""
-import model as stack_gan
+"""StackGAN tests."""
 
-stage1 = stack_gan.StackGanStage1()
-stage1.train_stage1()
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
-stage2 = stack_gan.StackGanStage2()
-stage2.train_stage2()
+from absl import app
+import tensorflow as tf # TF2
+from tensorflow_examples.models.stack_gan import stack_gan
+
+class StackGANTest(tf.test.TestCase):
+
+  def test_one_epoch(self):
+    epochs = 1
+    batch_size = 1
+    enable_function = True
+
+    input_image = tf.random.uniform((28, 28, 1))
+    label = tf.zeros((1,))
+    train_dataset = tf.data.Dataset.from_tensors(
+        (input_image, label)).batch(batch_size)
+    checkpoint_pr = dcgan.get_checkpoint_prefix()

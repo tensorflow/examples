@@ -28,6 +28,7 @@ assert tf.__version__.startswith('2')
 
 import PIL
 from PIL import Image
+import matplotlib.pyplot as plt
 import tensorflow.keras.backend as K
 from tensorflow.keras import Input, Model
 from tensorflow.keras.layers import LeakyReLU, BatchNormalization, ReLU, Activation
@@ -35,17 +36,6 @@ from tensorflow.keras.layers import UpSampling2D, Conv2D, Concatenate, Dense, co
 from tensorflow.keras.layers import Flatten, Lambda, Reshape, ZeroPadding2D, add
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-
-data_dir = "birds"
-train_dir = data_dir + "/train"
-test_dir = data_dir + "/test"
-embeddings_path_train = train_dir + "/char-CNN-RNN-embeddings.pickle"
-embeddings_path_test = test_dir + "/char-CNN-RNN-embeddings.pickle"
-filename_path_train = train_dir + "/filenames.pickle"
-filename_path_test = test_dir + "/filenames.pickle"
-class_id_path_train = train_dir + "/class_info.pickle"
-class_id_path_test = test_dir + "/class_info.pickle"
-dataset_path = "/CUB_200_2011"
 
 ############################################################
 # Conditioning Augmentation Network
@@ -438,8 +428,8 @@ def load_text_embeddings(text_embeddings):
 	return embeds
 
 def load_bbox(data_path):
-	bbox_path = os.path.join(data_path, 'bounding_boxes.txt')
-	image_path = os.path.join(data_path, 'images.txt')
+	bbox_path = data_path + '/bounding_boxes.txt'
+	image_path = data_path + '/images.txt'
 	bbox_df = pd.read_csv(bbox_path, delim_whitespace=True, header=None).astype(int)
 	filename_df = pd.read_csv(image_path, delim_whitespace=True, header=None)
 
@@ -503,7 +493,14 @@ def load_data(filename_path, class_id_path, dataset_path, embeddings_path, size)
 	
 	return x, y, embeds
 
-# TODO: Instance Normalization
+def save_image(file, save_path):
+	"""Saves the image at the specified file path.
+	"""
+	image = plt.figure()
+	ax = image.add_subplot(1,1,1)
+	ax.imshow(file)
+	ax.axis("off")
+	plt.savefig(save_path)
 
 
 ############################################################
@@ -521,7 +518,7 @@ class StackGanStage1(object):
 		stage1_generator_lr: Learning rate for stage 1 generator
 		stage1_discriminator_lr: Learning rate for stage 1 discriminator
 	"""
-	def __init__(self, epochs=500, z_dim=100, batch_size=64, enable_function=True, stage1_generator_lr=0.0002, stage1_discriminator_lr=0.0002):
+	def __init__(self, epochs=100, z_dim=100, batch_size=64, enable_function=True, stage1_generator_lr=0.0002, stage1_discriminator_lr=0.0002):
 		self.epochs = epochs
 		self.z_dim = z_dim
 		self.enable_function = enable_function
@@ -534,14 +531,19 @@ class StackGanStage1(object):
 		self.stage1_discriminator_optimizer = Adam(lr=stage1_discriminator_lr, beta_1=0.5, beta_2=0.999)
 		self.stage1_generator = build_stage1_generator()
 		self.stage1_generator.compile(loss='mse', optimizer=self.stage1_generator_optimizer)
+		#self.stage1_generator.load_weights('stage1_gen.h5')
 		self.stage1_discriminator = build_stage1_discriminator()
 		self.stage1_discriminator.compile(loss='binary_crossentropy', optimizer=self.stage1_discriminator_optimizer)
+		#self.stage1_discriminator.load_weights('stage1_disc.h5')
 		self.ca_network = build_ca_network()
 		self.ca_network.compile(loss='binary_crossentropy', optimizer='Adam')
+		#self.ca_network.load_weights('stage1_ca.h5')
 		self.embedding_compressor = build_embedding_compressor()
 		self.embedding_compressor.compile(loss='binary_crossentropy', optimizer='Adam')
+		#self.embedding_compressor.load_weights('stage1_embco.h5')
 		self.stage1_adversarial = build_adversarial(self.stage1_generator, self.stage1_discriminator)
 		self.stage1_adversarial.compile(loss=['binary_crossentropy', adversarial_loss], loss_weights=[1, 2.0], optimizer=self.stage1_generator_optimizer)
+		#self.stage1_adversarial.load_weights('stage1_adv.h5')
 		self.checkpoint1 = tf.train.Checkpoint(
         	generator_optimizer=self.stage1_generator_optimizer,
         	discriminator_optimizer=self.stage1_discriminator_optimizer,
@@ -612,6 +614,21 @@ class StackGanStage1(object):
 
 				print(f'Generator Loss: {g_loss}')
 				gen_loss.append(g_loss)
+
+				if epoch % 5 == 0:
+				    latent_space = np.random.normal(0, 1, size=(self.batch_size, self.z_dim))
+				    embedding_batch = test_embeds[0 : self.batch_size]
+				    gen_images, _ = self.stage1_generator.predict_on_batch([embedding_batch, latent_space])
+
+				    for i, image in enumerate(gen_images[:10]):
+				        save_image(image, f'test/gen_1_{epoch}_{i}')
+
+				if epoch % 25 == 0:
+					self.stage1_generator.save_weights('stage1_gen.h5')
+					self.stage1_discriminator.save_weights("stage1_disc.h5")
+					self.ca_network.save_weights('stage1_ca.h5')
+					self.embedding_compressor.save_weights('stage1_embco.h5')
+					self.stage1_adversarial.save_weights('stage1_adv.h5')      
 
 		self.stage1_generator.save_weights('stage1_gen.h5')
 		self.stage1_discriminator.save_weights("stage1_disc.h5")
@@ -727,5 +744,29 @@ class StackGanStage2(object):
 
 				print(f'Generator Loss: {g_loss}')
 
+				if epoch % 5 == 0:
+					latent_space = np.random.normal(0, 1, size=(self.batch_size, self.z_dim))
+
+
 		self.stage2_generator.save_weights('stage2_gen.h5')
 		self.stage2_discriminator.save_weights("stage2_disc.h5")
+
+
+if __name__ == '__main__':
+
+	data_dir = "birds"
+	train_dir = data_dir + "/train"
+	test_dir = data_dir + "/test"
+	embeddings_path_train = train_dir + "/char-CNN-RNN-embeddings.pickle"
+	embeddings_path_test = test_dir + "/char-CNN-RNN-embeddings.pickle"
+	filename_path_train = train_dir + "/filenames.pickle"
+	filename_path_test = test_dir + "/filenames.pickle"
+	class_id_path_train = train_dir + "/class_info.pickle"
+	class_id_path_test = test_dir + "/class_info.pickle"
+	dataset_path = "CUB_200_2011"
+
+	stage1 = StackGanStage1()
+	stage1.train_stage1()
+
+	# stage2 = StackGanStage2()
+	# stage2.train_stage2()
