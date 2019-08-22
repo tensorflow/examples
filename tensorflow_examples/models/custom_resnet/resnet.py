@@ -1,6 +1,5 @@
 class ResNet:
-    
-    @staticmethod
+
     def residual_block(data, K, stride, chanDim, red=False, reg=0.0001, bnEps=2e-5, bnMom=0.9):
         shortcut = data
 
@@ -23,8 +22,6 @@ class ResNet:
 
         return x
 
-    @staticmethod
-    @tf.function
     def build(width, height, depth, classes, stages, filters, reg=0.0001, bnEps=2e-5, bnMom=0.9):
         inputShape = (height, width, depth)
         chanDim = -1
