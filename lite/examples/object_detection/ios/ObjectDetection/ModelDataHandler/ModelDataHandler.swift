@@ -97,7 +97,7 @@ class ModelDataHandler: NSObject {
 
     // Specify the options for the `Interpreter`.
     self.threadCount = threadCount
-    var options = InterpreterOptions()
+    var options = Interpreter.Options()
     options.threadCount = threadCount
     do {
       // Create the `Interpreter`.
