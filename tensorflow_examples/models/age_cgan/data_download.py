@@ -13,6 +13,15 @@
 # limitations under the License.
 # ==============================================================================
 """Download the data.
+
+Dataset Citation:
+@article{Rothe-IJCV-2016,
+  author = {Rasmus Rothe and Radu Timofte and Luc Van Gool},
+  title = {Deep expectation of real and apparent age from a single image without facial landmarks},
+  journal = {International Journal of Computer Vision (IJCV)},
+  year = {2016},
+  month = {July},
+}
 """
 
 from __future__ import absolute_import
@@ -28,19 +37,20 @@ ap = argparse.ArgumentParser()
 ap.add_argument('-dp', '--download_path', required=False, help='Download Path')
 args = vars(ap.parse_args())
 
-data_url = ""
+data_url = "https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/wiki_crop.tar"
 
 def download_data(download_path):
 	path_to_zip = tf.keras.utils.get_file(
-		'', cache_subdir=download_path,
+		'wiki_crop.tar', cache_subdir=download_path,
 		origin = data_url, extract=True)
 
 	path_to_folder = os.path.join(os.path.dirname(path_to_zip), '')
 
 	return path_to_folder
 
-if args['download_path'] is not None:
-	path = download_data(args["download_path"])
-else:
-	cur = os.getcwd()
-	path = download_data(cur)
+if __name__ == '__main__':	
+	if args['download_path'] is not None:
+		path = download_data(args["download_path"])
+	else:
+		cur = os.getcwd()
+		path = download_data(cur)
