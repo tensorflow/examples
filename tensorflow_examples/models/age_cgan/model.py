@@ -38,7 +38,6 @@ from scipy.io import loadmat
 from datetime import datetime
 from tensorflow.keras import Input, Model
 from tensorflow.keras.applications import InceptionResNetV2
-from tensorflow.keras.preprocessing import image
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.layers import Dense, Upsampling2D, Conv2D, Activation, BatchNormalization
 from tensorflow.keras.layers import Conv2DTranspose, add, ZeroPadding2D, LeakyReLU
@@ -201,6 +200,45 @@ def adversarial(generator, discriminator):
     return Model(inputs=[latent_space, conditioning_variable], outputs=[valid])
 
 
+def get_age_categories(ages):
+    age_list = []
+    for age in ages:
+        if 0 < age <= 18:
+            age_list.append(0)
+        elif 18 < age <= 29:
+            age_list.append(1)
+        elif 29 < age <= 39:
+            age_list.append(2)
+        elif 39 < age <= 49:
+            age_list.append(3)
+        elif 49 < age <= 59:
+            age_list.append(4)
+        elif age >= 60:
+            age_list.append(5)
+
+    return age_list
+
+def load_images(path, image_paths, shape):
+    """Returns all the images as a variable of concatenated arrays.
+    """
+    image_ = None
+    for i, image_path in enumerate(image_paths):
+        try:
+            image = tf.keras.preprocessing.image.load_img(os.path.join(path, image_path),
+                        target_size=shape)
+            image = tf.keras.preprocessing.image.img_to_array(image)
+            image = np.expand_dims(image, axis=0)
+
+            if image_ is None:
+                image_ = image
+            else:
+                image_ = np.concat([image_, image], axis=0)
+
+        except Excepion as e:
+            print(f'Error! Image {i}{e}')
+
+    return image_
+
 def run_main(argv):
     del argv
     kwargs = {'path' : DATASET_PATH}
@@ -234,19 +272,71 @@ def main(path):
     adversarial.compile(loss='binary_crossentropy', optimizer=adv_opt)
 
     images, age_list = load_data(path)
-    categories = # TODO: Age categories function
-    age_categories = np.reshape()
+    categories = get_age_categories(age_list)
+    age_categories = np.reshape(np.array(categories), [len(categories), 1])
     num_classes = len(set(categories))
     y = to_categorical(age_categories, num_classes=num_classes)
 
-    loaded_images = # TODO: Load images
+    loaded_images = load_images(path, images, (image_shape[0], image_shape[1]))
 
     real = np.ones((batch_size, 1), dtype=np.float32) * 0.9
     fake = np.zeros((batch_size, 1), dtype=np.float32) * 0.1
 
     # Train Step 1: Train the Generator and Discriminator
+    if TRAIN_GAN:
+        print(f'Step 1: Training the Generator and Discriminator')
+        for epoch in range(epochs):
+            print(f'Epoch:{epoch}')
+
+            num_batches = int(len(loaded_images)/batch_size)
+            for i in range(num_batches):
+                batch = load_images[i*batch_size:(i+1)*batch_size]
+                batch = batch / 127.5 - 1.
+                batch = batch.astype(np.float32)
+
+                latent_vector = np.random.normal(0,1, size=(batch_size, 100))
+                y_curr = y[i*batch_size:(i+1)*batch_size]
+
+                reconstructed = generator.predict_on_batch([latent_vector, y_curr])
+                d_real = discriminator.train_on_batch([batch, y_curr], [real])
+                d_recons = discriminator.train_on_batch([reconstructed, y_curr], [fake])
+                d_curr = 0.5 * np.add(d_real, d_recons)
+
+                latent_space = np.random.normal(0, 1, shape=(batch_size, 100))
+                conditioning_variable = np.random.randint(0, 6, batch_size).reshape(-1, 1)
+                conditioning_variable = to_categorical(conditioning_variable, num_classes=6)
+
+                g_curr = adversarial.train_on_batch([latent_space, conditioning_variable], [1]*batch_size)
+                print(f'Gen_loss:{g_curr}\nDisc_loss:{d_curr}')
+
+            if epoch % 10 == 0:
+                mini_batch = load_images[(i*batch_size):(i*batch_size) + 10]
+                mini_batch = mini_batch / 127.5 - 1.
+                mini_batch = mini_batch.astype(np.float32)
+
+                y_batch = y[:batch_size]
+                latent_space = np.random.normal(0, 1, size=(batch_size, y_mini_batch))
+
+                gen = generator.predict_on_batch([mini_latent_space, y_mini_batch])
+
+                for i, image in enumerate(gen):
+
+            if epoch % 25 == 0:
+                generator.save_weights("generator.h5")
+                discriminator.save_weights("discriminator.h5")
+                adversarial.save_weights("adversarial.h5")
+
+        generator.save_weights("generator.h5")
+        discriminator.save_weights("discriminator.h5")
+        adversarial.save_weights("adversarial.h5")
+
     # Train Step 2: Train the Encoder
+    if TRAIN_ENCODER:
+        pass
+
     # Train Step 3: Train the Generator and Encoder and Generator
+    if TRAIN_ENC_GAN:
+        pass
 
 if __name__ == '__main__':
     app.run(run_main)
