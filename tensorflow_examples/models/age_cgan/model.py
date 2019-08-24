@@ -38,6 +38,8 @@ from scipy.io import loadmat
 from datetime import datetime
 from tensorflow.keras import Input, Model
 from tensorflow.keras.applications import InceptionResNetV2
+from tensorflow.keras.preprocessing import image
+import tensorflow.keras.backend as K
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.layers import Dense, Upsampling2D, Conv2D, Activation, BatchNormalization
 from tensorflow.keras.layers import Conv2DTranspose, add, ZeroPadding2D, LeakyReLU
@@ -150,6 +152,13 @@ def face_recognition(shape):
     outputs = Lambda(lambda x: tf.keras.backend.l2_normalize(x, -1))(x)
     return Model(inputs=[input_layer], outputs=[outputs])
 
+def save_image(img, path):
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.imshow(img)
+    ax.axis("off")
+    plt.savefig(path)
+    plt.close()
 
  def expand_dims(label):
     label = tf.keras.backend.expand_dims(label, 1)
@@ -239,6 +248,9 @@ def load_images(path, image_paths, shape):
 
     return image_
 
+def euclidean_loss(y_true, y_pred):
+    return K.sqrt(K.sum(K.square(y_pred - y_true), axis=-1))
+
 def run_main(argv):
     del argv
     kwargs = {'path' : DATASET_PATH}
@@ -294,7 +306,7 @@ def main(path):
                 batch = batch / 127.5 - 1.
                 batch = batch.astype(np.float32)
 
-                latent_vector = np.random.normal(0,1, size=(batch_size, 100))
+                latent_vector = np.random.normal(0, 1, size=(batch_size, 100))
                 y_curr = y[i*batch_size:(i+1)*batch_size]
 
                 reconstructed = generator.predict_on_batch([latent_vector, y_curr])
@@ -310,16 +322,17 @@ def main(path):
                 print(f'Gen_loss:{g_curr}\nDisc_loss:{d_curr}')
 
             if epoch % 10 == 0:
-                mini_batch = load_images[(i*batch_size):(i*batch_size) + 10]
+                mini_batch = load_images[:batch_size]
                 mini_batch = mini_batch / 127.5 - 1.
                 mini_batch = mini_batch.astype(np.float32)
 
                 y_batch = y[:batch_size]
                 latent_space = np.random.normal(0, 1, size=(batch_size, y_mini_batch))
 
-                gen = generator.predict_on_batch([mini_latent_space, y_mini_batch])
+                gen = generator.predict_on_batch([latent_space, y_batch])
 
-                for i, image in enumerate(gen):
+                for i, image in enumerate(gen[:10]):
+                    save_image(image, path=f'results/image_{epoch}_{i}')
 
             if epoch % 25 == 0:
                 generator.save_weights("generator.h5")
@@ -332,7 +345,36 @@ def main(path):
 
     # Train Step 2: Train the Encoder
     if TRAIN_ENCODER:
-        pass
+        print(f'Step 2: Training the Encoder - Latent Vector Approximation')
+        encoder = encoder()
+        encoder.compile(loss=euclidean_loss, optimizer='adam')
+
+        generator.load_weights('generator.h5')
+        
+        latent_vector = np.random.normal(0, 1, shape=(5000, 100))
+        y = np.random.randint(0, 6, size=(5000,), dtype=np.nt64)
+        num_classes = len(set(y))
+        y = np.reshape(np.array(y), [len(y), 1])
+        y = to_categorical(y, num_classes=num_classes)
+
+        for epoch in range(epochs):
+            print(f'Epoch: {epoch}')
+
+            num_batches = int(len(latent_vector.shape[0])/batch_size)
+            for i in range(batch_size):
+
+                latent_batch = latent_vector[i*batch_size:(i+1)*batch_size]
+                y_batch = y[i*batch_size:(i+1)*batch_size]
+
+                reconstructed = generator.predict_on_batch([latent_batch, y_batch])
+                e_loss = encoder.train_on_batch(reconstructed, latent_batch)
+
+                print(f'Encoder_loss: {e_loss}')
+
+            if epoch % 25 == 0:
+                encoder.save_weights('encoder.h5')
+
+        encoder.save_weights('encoder.h5')
 
     # Train Step 3: Train the Generator and Encoder and Generator
     if TRAIN_ENC_GAN:
