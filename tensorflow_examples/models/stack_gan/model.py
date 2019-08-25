@@ -15,6 +15,10 @@
 """StackGAN.
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import pickle
 import random
@@ -83,7 +87,8 @@ def UpSamplingBlock(x, num_kernels):
 		x: The final activation layer after the Upsampling block.
 	"""
 	x = UpSampling2D(size=(2,2))(x)
-	x = Conv2D(num_kernels, kernel_size=(3,3), padding='same', strides=1, use_bias=False)(x)
+	x = Conv2D(num_kernels, kernel_size=(3,3), padding='same', strides=1, use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	x = ReLU()(x)
 	return x
@@ -113,7 +118,8 @@ def build_stage1_generator():
 	x = UpSamplingBlock(x, 128)
 	x = UpSamplingBlock(x, 64)
 
-	x = Conv2D(3, kernel_size=3, padding='same', strides=1, use_bias=False)(x)
+	x = Conv2D(3, kernel_size=3, padding='same', strides=1, use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = Activation('tanh')(x)
 
 	stage1_gen = Model(inputs=[input_layer1, input_layer2], outputs=[x, ca])
@@ -134,7 +140,8 @@ def ConvBlock(x, num_kernels, kernel_size=(4,4), strides=2, activation=True):
 	Returns:
 		x: The final activation layer after the ConvBlock block.
 	"""
-	x = Conv2D(num_kernels, kernel_size=kernel_size, padding='same', strides=strides, use_bias=False)(x)
+	x = Conv2D(num_kernels, kernel_size=kernel_size, padding='same', strides=strides, use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	
 	if activation:
@@ -160,7 +167,8 @@ def build_stage1_discriminator():
 	"""
 	input_layer1 = Input(shape=(64, 64, 3))
 
-	x = Conv2D(64, kernel_size=(4,4), strides=2, padding='same', use_bias=False)(input_layer1)
+	x = Conv2D(64, kernel_size=(4,4), strides=2, padding='same', use_bias=False,
+				kernel_initializer='he_uniform')(input_layer1)
 	x = LeakyReLU(alpha=0.2)(x)
 
 	x = ConvBlock(x, 128)
@@ -171,7 +179,8 @@ def build_stage1_discriminator():
 	input_layer2 = Input(shape=(4, 4, 128))
 	concat = concatenate([x, input_layer2])
 
-	x1 = Conv2D(512, kernel_size=(1,1), padding='same', strides=1, use_bias=False)(concat)
+	x1 = Conv2D(512, kernel_size=(1,1), padding='same', strides=1, use_bias=False,
+				kernel_initializer='he_uniform')(concat)
 	x1 = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	x1 = LeakyReLU(alpha=0.2)(x)
 
@@ -242,11 +251,13 @@ def residual_block(input):
 	Returns:
 		Layer with computed identity mapping.
 	"""
-	x = Conv2D(512, kernel_size=(3,3), padding='same', use_bias=False)(input)
+	x = Conv2D(512, kernel_size=(3,3), padding='same', use_bias=False,
+				kernel_initializer='he_uniform')(input)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	x = ReLU()(x)
 	
-	x = Conv2D(512, kernel_size=(3,3), padding='same', use_bias=False)(x)
+	x = Conv2D(512, kernel_size=(3,3), padding='same', use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	
 	x = add([x, input])
@@ -270,16 +281,19 @@ def build_stage2_generator():
 
 	# Downsampling block
 	x = ZeroPadding2D(padding=(1,1))(input_images)
-	x = Conv2D(128, kernel_size=(3,3), strides=1, use_bias=False)(x)
+	x = Conv2D(128, kernel_size=(3,3), strides=1, use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = ReLU()(x)
 
 	x = ZeroPadding2D(padding=(1,1))(x)
-	x = Conv2D(256, kernel_size=(4,4), strides=2, use_bias=False)(x)
+	x = Conv2D(256, kernel_size=(4,4), strides=2, use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	x = ReLU()(x)
 
 	x = ZeroPadding2D(padding=(1,1))(x)
-	x = Conv2D(512, kernel_size=(4,4), strides=2, use_bias=False)(x)
+	x = Conv2D(512, kernel_size=(4,4), strides=2, use_bias=False,
+				kernel_initializer='he_uniform')(x)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	x = ReLU()(x)
 
@@ -288,7 +302,7 @@ def build_stage2_generator():
 
 	# Residual Blocks
 	x = ZeroPadding2D(padding=(1,1))(concat)
-	x = Conv2D(512, kernel_size=(3,3), use_bias=False)(x)
+	x = Conv2D(512, kernel_size=(3,3), use_bias=False, kernel_initializer='he_uniform')(x)
 	x = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x)
 	x = ReLU()(x)
 
@@ -303,7 +317,7 @@ def build_stage2_generator():
 	x = UpSamplingBlock(x, 128)
 	x = UpSamplingBlock(x, 64)
 
-	x = Conv2D(3, kernel_size=(3,3), padding='same', use_bias=False)(x)
+	x = Conv2D(3, kernel_size=(3,3), padding='same', use_bias=False, kernel_initializer='he_uniform')(x)
 	x = Activation('tanh')(x)
 	
 	stage2_gen = Model(inputs=[input_layer1, input_images], outputs=[x, mls])
@@ -323,7 +337,8 @@ def build_stage2_discriminator():
 	"""
 	input_layer1 = Input(shape=(256, 256, 3))
 
-	x = Conv2D(64, kernel_size=(4,4), padding='same', strides=2, use_bias=False)(input_layer1)
+	x = Conv2D(64, kernel_size=(4,4), padding='same', strides=2, use_bias=False,
+				kernel_initializer='he_uniform')(input_layer1)
 	x = LeakyReLU(alpha=0.2)(x)
 
 	x = ConvBlock(x, 128)
@@ -345,7 +360,7 @@ def build_stage2_discriminator():
 	input_layer2 = Input(shape=(4, 4, 128))
 	concat = concatenate([x2, input_layer2])
 
-	x3 = Conv2D(512, kernel_size=(1,1), strides=1, padding='same')(concat)
+	x3 = Conv2D(512, kernel_size=(1,1), strides=1, padding='same', kernel_initializer='he_uniform')(concat)
 	x3 = BatchNormalization(gamma_initializer='ones', beta_initializer='zeros')(x3)
 	x3 = LeakyReLU(alpha=0.2)(x3)
 
@@ -518,7 +533,7 @@ class StackGanStage1(object):
 		stage1_generator_lr: Learning rate for stage 1 generator
 		stage1_discriminator_lr: Learning rate for stage 1 discriminator
 	"""
-	def __init__(self, epochs=100, z_dim=100, batch_size=64, enable_function=True, stage1_generator_lr=0.0002, stage1_discriminator_lr=0.0002):
+	def __init__(self, epochs=500, z_dim=100, batch_size=64, enable_function=True, stage1_generator_lr=0.0002, stage1_discriminator_lr=0.0002):
 		self.epochs = epochs
 		self.z_dim = z_dim
 		self.enable_function = enable_function
@@ -662,14 +677,19 @@ class StackGanStage2(object):
 		self.stage1_generator.load_weights('stage1_gen.h5')
 		self.stage2_generator = build_stage2_generator()
 		self.stage2_generator.compile(loss='binary_crossentropy', optimizer=self.stage2_generator_optimizer)
+		# self.stage2_generator.load_weights('stage2_gen.h5')
 		self.stage2_discriminator = build_stage2_discriminator()
 		self.stage2_discriminator.compile(loss='binary_crossentropy', optimizer=self.stage2_discriminator_optimizer)
+		# self.stage2_discriminator.load_weights('stage2_disc.h5')
 		self.ca_network = build_ca_network()
 		self.ca_network.compile(loss='binary_crossentropy', optimizer='Adam')
+		# self.ca_network.load_weights('stage2_ca.h5')
 		self.embedding_compressor = build_embedding_compressor()
 		self.embedding_compressor.compile(loss='binary_crossentropy', optimizer='Adam')
+		# self.embedding_compressor.load_weights('stage2_embco.h5')
 		self.stage2_adversarial = stage2_adversarial_network(self.stage2_discriminator, self.stage2_generator, self.stage1_generator)
 		self.stage2_adversarial.compile(loss=['binary_crossentropy', adversarial_loss], loss_weights=[1, 2.0], optimizer=self.stage2_generator_optimizer)	
+		# self.stage2_adversarial.load_weights('stage2_adv.h5')
 		self.checkpoint2 = tf.train.Checkpoint(
         	generator_optimizer=self.stage2_generator_optimizer,
         	discriminator_optimizer=self.stage2_discriminator_optimizer,
@@ -747,6 +767,20 @@ class StackGanStage2(object):
 				if epoch % 5 == 0:
 					latent_space = np.random.normal(0, 1, size=(self.batch_size, self.z_dim))
 
+		            embedding_batch = high_test_embeds[0 : self.batch_size]
+
+		            low_fake_images, _ = self.stage1_generator.predict([embedding_batch, latent_space], verbose=3)
+		            high_fake_images, _ = self.stage2_generator.predict([embedding_batch, low_fake_images], verbose=3)
+
+		            for i, image in enumerate(high_fake_images[:10]):
+		                save_image(image, f'results_stage2/gen_{epoch}_{i}.png')
+
+				if epoch % 10 == 0:
+					self.stage2_generator.save_weights('stage2_gen.h5')
+					self.stage2_discriminator.save_weights("stage2_disc.h5")
+					self.ca_network.save_weights('stage2_ca.h5')
+					self.embedding_compressor.save_weights('stage2_embco.h5')
+					self.stage2_adversarial.save_weights('stage2_adv.h5')
 
 		self.stage2_generator.save_weights('stage2_gen.h5')
 		self.stage2_discriminator.save_weights("stage2_disc.h5")
@@ -768,5 +802,5 @@ if __name__ == '__main__':
 	stage1 = StackGanStage1()
 	stage1.train_stage1()
 
-	# stage2 = StackGanStage2()
-	# stage2.train_stage2()
+	stage2 = StackGanStage2()
+	stage2.train_stage2()
