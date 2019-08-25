@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import os
 import argparse
+from absl import app
 import tensorflow as tf
 assert tf.__version__.startswith('2')
 
@@ -39,10 +40,11 @@ def download_data(download_path):
 
 	return path_to_folder
 
-if args['download_path'] is not None:
-	path = download_data(args["download_path"])
-else:
-	cur = os.getcwd()
-	path = download_data(cur)
+if __name__ == '__main__':
+	if args['download_path'] is not None:
+		path = download_data(args["download_path"])
+	else:
+		cur = os.getcwd()
+		path = download_data(cur)
 
-# embeddings_url = "https://drive.google.com/file/d/0B3y_msrWZaXLT1BZdVdycDY5TEE"
+	# embeddings_url = "https://drive.google.com/file/d/0B3y_msrWZaXLT1BZdVdycDY5TEE"
