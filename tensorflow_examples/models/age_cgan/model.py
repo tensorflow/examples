@@ -79,18 +79,18 @@ def make_encoder():
     """Builds the Encoder network.
     """
     input_layer = Input(shape=(64, 64, 3))
-    x = Conv2D(32, (5,5), strides=2, padding='same')(input_layer)
+    x = Conv2D(32, (5,5), strides=2, padding='same', kernel_initializer='he_uniform')(input_layer)
     x = LeakyReLU(0.2)(x)
 
-    x = Conv2D(64, (5,5), strides=2, padding='same')(input_layer)
+    x = Conv2D(64, (5,5), strides=2, padding='same', kernel_initializer='he_uniform')(input_layer)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
-    x = Conv2D(128, (5,5), strides=2, padding='same')(input_layer)
+    x = Conv2D(128, (5,5), strides=2, padding='same', kernel_initializer='he_uniform')(input_layer)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
-    x = Conv2D(256, (5,5), strides=2, padding='same')(input_layer)
+    x = Conv2D(256, (5,5), strides=2, padding='same', kernel_initializer='he_uniform')(input_layer)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
@@ -123,17 +123,17 @@ def make_generator():
     x = Reshape((8, 8, 256))(x)
 
     x = UpSampling2D(size=(2,2))(x)
-    x = Conv2D(128, (5,5), padding='same')(x)
+    x = Conv2D(128, (5,5), padding='same', kernel_initializer='he_uniform')(x)
     x = BatchNormalization(momentum=0.8)(x)
     x = LeakyReLU(0.2)(x)
 
     x = UpSampling2D(size=(2,2))(x)
-    x = Conv2D(64, (5,5), padding='same')(x)
+    x = Conv2D(64, (5,5), padding='same', kernel_initializer='he_uniform')(x)
     x = BatchNormalization(momentum=0.8)(x)
     x = LeakyReLU(0.2)(x)
 
     x = UpSampling2D(size=(2,2))(x)
-    x = Conv2D(3, (5,5), padding='same')(x)
+    x = Conv2D(3, (5,5), padding='same', kernel_initializer='he_uniform')(x)
     x = Activation('tanh')(x)
 
     return Model(inputs=[latent_vector, conditioning_variable], outputs=[x])
@@ -182,21 +182,21 @@ def make_discriminator():
     image_input = Input(shape=(64, 64, 3))
     label_input = Input(shape=(6,))
 
-    x = Conv2D(64, (3,3), strides=2, padding='same')(image_input)
+    x = Conv2D(64, (3,3), strides=2, padding='same', kernel_initializer='he_uniform')(image_input)
     x = LeakyReLU(0.2)(x)
 
     label = Lambda(expand_dims)(label_input)
     
     x = concatenate([x, label], axis=3)
-    x = Conv2D(128, (3,3), strides=2, padding='same')(x)
+    x = Conv2D(128, (3,3), strides=2, padding='same', kernel_initializer='he_uniform')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
-    x = Conv2D(256, (3,3), strides=2, padding='same')(x)
+    x = Conv2D(256, (3,3), strides=2, padding='same', kernel_initializer='he_uniform')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
-    x = Conv2D(512, (3,3), strides=2, padding='same')(x)
+    x = Conv2D(512, (3,3), strides=2, padding='same', kernel_initializer='he_uniform')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
