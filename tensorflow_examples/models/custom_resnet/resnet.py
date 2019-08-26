@@ -1,22 +1,39 @@
-class ResNet:
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
+import tensorflow as tf
+assert tf.__version__.startswith('2.')
+
+from tensorflow.keras.layers import BatchNormalization, Conv2D, AveragePooling2D, MaxPooling2D
+from tensorflow.keras.layers import ZeroPadding2D, Activation, Flatten, add
+from tensorflow.keras.layers import GlobalAveragePooling2D, SeparableConv2D
+from tensorflow.keras.callbacks import LearningRateScheduler, ModelCheckpoint
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.regularizers import l2
+
+class ResNet:
+    
     def residual_block(data, K, stride, chanDim, red=False, reg=0.0001, bnEps=2e-5, bnMom=0.9):
         shortcut = data
 
         bn1 = BatchNormalization(axis=chanDim, epsilon=bnEps, momentum=bnMom)(data)
         act1 = Activation("relu")(bn1)
-        conv1 = Conv2D(int(K * 0.25), (1, 1), use_bias=False, kernel_regularizer=l2(reg))(act1)
+        conv1 = Conv2D(int(K * 0.25), (1, 1), use_bias=False, kernel_regularizer=l2(reg),
+                kernel_initializer='he_uniform')(act1)
 
         bn2 = BatchNormalization(axis=chanDim, epsilon=bnEps, momentum=bnMom)(conv1)
         act2 = Activation("relu")(bn2)
-        conv2 = Conv2D(int(K * 0.25), (3, 3), strides=stride, padding="same", use_bias=False, kernel_regularizer=l2(reg))(act2)
+        conv2 = Conv2D(int(K * 0.25), (3, 3), strides=stride, padding="same", use_bias=False, 
+                kernel_regularizer=l2(reg), kernel_initializer='he_uniform')(act2)
 
         bn3 = BatchNormalization(axis=chanDim, epsilon=bnEps, momentum=bnMom)(conv2)
         act3 = Activation("relu")(bn3)
         conv3 = Conv2D(K, (1, 1), use_bias=False, kernel_regularizer=l2(reg))(act3)
 
         if red:
-            shortcut = Conv2D(K, (1, 1), strides=stride, use_bias=False, kernel_regularizer=l2(reg))(act1)
+            shortcut = Conv2D(K, (1, 1), strides=stride, use_bias=False, kernel_regularizer=l2(reg),
+                        kernel_initializer='he_uniform')(act1)
 
         x = add([conv3, shortcut])
 
@@ -29,7 +46,8 @@ class ResNet:
         inputs = tf.keras.Input(shape=inputShape)
         x = BatchNormalization(axis=chanDim, epsilon=bnEps, momentum=bnMom)(inputs)
 
-        x = Conv2D(filters[0], (5, 5), use_bias=False, padding="same", kernel_regularizer=l2(reg))(x)
+        x = Conv2D(filters[0], (5, 5), use_bias=False, padding="same", kernel_regularizer=l2(reg),
+                kernel_initializer='he_uniform')(x)
         x = BatchNormalization(axis=chanDim, epsilon=bnEps, momentum=bnMom)(x)
         x = Activation("relu")(x)
         x = ZeroPadding2D((1, 1))(x)
@@ -46,10 +64,11 @@ class ResNet:
         x = Activation("relu")(x)
         x = AveragePooling2D((8, 8))(x)
   
-        x = Conv2D(200, (1,1), kernel_regularizer=l2(reg))(x)
+        x = Conv2D(200, (1,1), kernel_regularizer=l2(reg), kernel_initializer='he_uniform')(x)
         x = Flatten()(x)
         x = Activation("softmax")(x)
 
         model = tf.keras.Model(inputs, x, name="resnet")
 
         return model
+        

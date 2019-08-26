@@ -6,3 +6,4 @@ Keras==2.2.4
 tensorflow==2.0.0b1
 imutils==0.5.2
 scikit_learn==0.21.2
+absl-py==0.7.0

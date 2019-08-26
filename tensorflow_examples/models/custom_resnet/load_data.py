@@ -30,7 +30,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 data_url = "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
 
 class TinyImageNet(object):
-	def __init__(self, img_size=64, train_size=100000, val_size=10000):
+	def __init__(self, img_size=64, train_size=10000, val_size=1000):
 		self.img_size = img_size
 		self.train_size = train_size
 		self.val_size = val_size
@@ -73,7 +73,6 @@ class TinyImageNet(object):
 		        horizontal_flip=True, # Horizontal Flip
 		        fill_mode="reflect", # Fills empty with reflections
 		        brightness_range=[0.4, 1.6]  # Increasing/decreasing brightness
-		        #preprocessing_function=occlusion(v_l=0, v_h=1, pixel_level=pixel_level)
 		)
 
 		train_generator = train_datagen.flow_from_directory(
@@ -96,4 +95,8 @@ class TinyImageNet(object):
 		    seed=42
 		)
 
-		return train_datagen, val_datagen
+		return train_generator, val_generator
+
+if __name__ == '__main__':
+	ti = TinyImageNet()
+	ti.download_data()
