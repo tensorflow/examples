@@ -43,7 +43,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
