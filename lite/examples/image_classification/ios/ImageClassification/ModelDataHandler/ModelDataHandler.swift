@@ -65,8 +65,9 @@ class ModelDataHandler {
   /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
   private var interpreter: Interpreter
 
-  /// Information about the alpha component in RGBA data.
-  private let alphaComponent = (baseOffset: 4, moduloRemainder: 3)
+  /// Information about BGRA and RGB.
+  private let bgraPixel = (channels: 4, alphaComponent: 3, lastBgrComponent: 2)
+  private let rgbPixelChannels = 3
 
   // MARK: - Initialization
 
@@ -106,9 +107,7 @@ class ModelDataHandler {
   /// Performs image preprocessing, invokes the `Interpreter`, and processes the inference results.
   func runModel(onFrame pixelBuffer: CVPixelBuffer) -> Result? {
     let sourcePixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
-    assert(sourcePixelFormat == kCVPixelFormatType_32ARGB ||
-             sourcePixelFormat == kCVPixelFormatType_32BGRA ||
-               sourcePixelFormat == kCVPixelFormatType_32RGBA)
+    assert(sourcePixelFormat == kCVPixelFormatType_32BGRA)
 
 
     let imageChannels = 4
@@ -231,10 +230,14 @@ class ModelDataHandler {
     var rgbBytes = [UInt8](repeating: 0, count: byteCount)
     var index = 0
     for component in bufferData.enumerated() {
-      let offset = component.offset
-      let isAlphaComponent = (offset % alphaComponent.baseOffset) == alphaComponent.moduloRemainder
-      guard !isAlphaComponent else { continue }
-      rgbBytes[index] = component.element
+      let bgraComponent = component.offset % bgraPixel.channels;
+      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent;
+      guard !isAlphaComponent else {
+        continue
+      }
+      // Swizzle BGR -> RGB.
+      let rgbIndex = (index - bgraComponent) + (bgraPixel.lastBgrComponent - bgraComponent)
+      rgbBytes[rgbIndex] = component.element
       index += 1
     }
     if isModelQuantized { return Data(bytes: rgbBytes) }

@@ -250,7 +250,7 @@ class CameraFeedManager: NSObject {
     let sampleBufferQueue = DispatchQueue(label: "sampleBufferQueue")
     videoDataOutput.setSampleBufferDelegate(self, queue: sampleBufferQueue)
     videoDataOutput.alwaysDiscardsLateVideoFrames = true
-    videoDataOutput.videoSettings = [ String(kCVPixelBufferPixelFormatTypeKey) : kCMPixelFormat_32BGRA]
+    videoDataOutput.videoSettings = [ String(kCVPixelBufferPixelFormatTypeKey) : kCVPixelFormatType_32BGRA]
 
     if session.canAddOutput(videoDataOutput) {
       session.addOutput(videoDataOutput)
