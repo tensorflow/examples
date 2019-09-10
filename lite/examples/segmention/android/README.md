@@ -7,7 +7,7 @@ The model files are downloaded via Gradle scripts when you build and run. You do
 Application can run either on device or emulator.
 
 ![avatar](images/seg_01.gif)
-![avatar](images/seg_02.gir)
+![avatar](images/seg_02.gif)
 
 ## Build the demo using Android Studio
 
