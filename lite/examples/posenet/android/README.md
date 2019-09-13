@@ -22,7 +22,7 @@ This is an app that continuously detects the body parts in the frames seen by
 `Open an existing Android Studio project`.
 
 * From the `Open File or Project` window that appears, navigate to and select
- the `lite/examples/posenet/android` directory from wherever you
+ the `tensorflow-lite/examples/posenet/android` directory from wherever you
  cloned the TensorFlow Lite sample GitHub repo. Click `OK`.
 
 * If it asks you to do a `Gradle Sync`, click `OK`.

@@ -74,19 +74,19 @@ class Preprocess(object):
   """
 
   def __init__(self, data_format, train):
-    self.data_format = data_format
-    self.train = train
+    self._data_format = data_format
+    self._train = train
 
   def __call__(self, image, label):
     image = tf.cast(image, tf.float32)
 
-    if self.train:
+    if self._train:
       image = tf.image.random_flip_left_right(image)
       image = self.random_jitter(image)
 
     image = (image - CIFAR_MEAN) / CIFAR_STD
 
-    if self.data_format == 'channels_first':
+    if self._data_format == 'channels_first':
       image = tf.transpose(image, [2, 0, 1])
 
     return image, label
@@ -129,11 +129,12 @@ def create_dataset(buffer_size, batch_size, data_format, data_dir=None):
 
   train_dataset = train_dataset.map(
       preprocess_train, num_parallel_calls=AUTOTUNE)
+  train_dataset = train_dataset.cache()
   train_dataset = train_dataset.shuffle(buffer_size).batch(batch_size)
   train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
 
-  test_dataset = test_dataset.map(
-      preprocess_test, num_parallel_calls=AUTOTUNE).batch(batch_size)
+  test_dataset = test_dataset.map(preprocess_test, num_parallel_calls=AUTOTUNE)
+  test_dataset = test_dataset.cache().batch(batch_size)
   test_dataset = test_dataset.prefetch(buffer_size=AUTOTUNE)
 
   return train_dataset, test_dataset, metadata
