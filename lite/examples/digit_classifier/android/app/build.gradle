@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'de.undercouch.download'
 
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.google.example.digitclassifier"
+        applicationId "org.tensorflow.lite.examples.digitclassifier"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
@@ -27,13 +26,22 @@ android {
     }
 }
 
+// import DownloadModels task
+project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
+
+// Download default models; if you wish to use your own models then
+// place them in the "assets" directory and comment out this line.
+//apply from: "download_model.gradle"
+
+apply from:'download_model.gradle'
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // Support Libraries
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     // AndroidDraw Library
