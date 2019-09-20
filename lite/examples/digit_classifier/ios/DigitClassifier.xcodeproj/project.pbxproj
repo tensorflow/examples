@@ -104,6 +104,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F2AAA5F22FAB86C00C66F75 /* Build configuration list for PBXNativeTarget "DigitClassifier" */;
 			buildPhases = (
+				7F5EEAE82333630A00A72F0E /* Download TF Lite model */,
 				D72900AFF43DC7B4B5CD1959 /* [CP] Check Pods Manifest.lock */,
 				7F2AAA4922FAB86900C66F75 /* Sources */,
 				7F2AAA4A22FAB86900C66F75 /* Frameworks */,
@@ -188,6 +189,24 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DigitClassifier/Pods-DigitClassifier-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		7F5EEAE82333630A00A72F0E /* Download TF Lite model */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Download TF Lite model";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Download mnist.tflite from the internet if it's not exist.\nTFLITE_FILE=${SRCROOT}/DigitClassifier/mnist.tflite\nif test -f \"$TFLITE_FILE\"; then\n    echo \"INFO: mnist.tflite existed. Skip downloading and use the local model.\"\nelse\n    curl -o ${TFLITE_FILE} https://storage.googleapis.com/download.tensorflow.org/models/tflite/digit_classifier/mnist.tflite\n    echo \"INFO: Downloaded mnist.tflite to $TFLITE_FILE .\"\nfi\n\n";
 		};
 		D72900AFF43DC7B4B5CD1959 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
