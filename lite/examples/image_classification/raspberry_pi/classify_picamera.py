@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+# python3
 #
 # Copyright 2019 The TensorFlow Authors. All Rights Reserved.
 #
@@ -57,7 +57,8 @@ def classify_image(interpreter, image, top_k=1):
 
 
 def main():
-  parser = argparse.ArgumentParser()
+  parser = argparse.ArgumentParser(
+      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument(
       '--model', help='File path of .tflite file.', required=True)
   parser.add_argument(

@@ -7,7 +7,7 @@ else
 fi
 
 # Install required packages
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 
 # Get TF Lite model and labels
 curl -O https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_1.0_224_quant_and_labels.zip
