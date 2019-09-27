@@ -246,7 +246,7 @@ class AudioProcessor(object):
     self.background_clamp_ = tf.reshape(self.background_clamp_,
                                         (1, model_settings['desired_samples']))
     # Run the spectrogram and MFCC ops to get a 2D 'fingerprint' of the audio.
-    stfts = tf.contrib.signal.stft(
+    stfts = tf.signal.stft(
         self.background_clamp_,
         frame_length=model_settings['window_size_samples'],
         frame_step=model_settings['window_stride_samples'],
@@ -255,7 +255,7 @@ class AudioProcessor(object):
     num_spectrogram_bins = self.spectrogram_.shape[-1].value
     lower_edge_hertz, upper_edge_hertz = 80.0, 7600.0
     linear_to_mel_weight_matrix = \
-        tf.contrib.signal.linear_to_mel_weight_matrix(
+        tf.signal.linear_to_mel_weight_matrix(
             model_settings['dct_coefficient_count'],
             num_spectrogram_bins, model_settings['sample_rate'],
             lower_edge_hertz, upper_edge_hertz)
@@ -264,7 +264,7 @@ class AudioProcessor(object):
     mel_spectrograms.set_shape(self.spectrogram_.shape[:-1].concatenate(
         linear_to_mel_weight_matrix.shape[-1:]))
     log_mel_spectrograms = tf.log(mel_spectrograms + 1e-6)
-    self.mfcc_ = tf.contrib.signal.mfccs_from_log_mel_spectrograms(
+    self.mfcc_ = tf.signal.mfccs_from_log_mel_spectrograms(
         log_mel_spectrograms)[:, :, :
                               model_settings['num_log_mel_features']]  # :13
 
