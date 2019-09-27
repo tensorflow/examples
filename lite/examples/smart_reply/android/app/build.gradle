@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'de.undercouch.download'
 
 android {
     compileSdkVersion 28
@@ -37,8 +38,26 @@ android {
     }
 }
 
+ext {
+    LITE_MODEL_URL = 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/smartreply/smartreply.tflite'
+    LITE_MODEL_NAME = 'smartreply.tflite'
+    LITE_MODEL_DIRS = [
+            "$projectDir/src/main/assets",
+            "$projectDir/libs/cc/testdata",
+    ]
+
+    AAR_URL = 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/smartreply/smartreply_runtime_aar.aar'
+    AAR_PATH = "$projectDir/libs/smartreply_runtime_aar.aar"
+}
+
+// Download prebuilt AAR and TF Lite model.
+apply from: 'download.gradle'
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    assert new File(project.ext.AAR_PATH).exists(): 'Please run `./gradlew :app:downloadAAR() to download prebuilt aar package, or build it from code. (See: `app/libs/how-to-build.md`)'
+    implementation files(project.ext.AAR_PATH)
 
     // Support Libraries
     implementation 'com.google.guava:guava:28.1-android'
@@ -48,7 +67,6 @@ dependencies {
 
     // TF Lite
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
-    implementation(name:'smartreply_runtime_aar', ext:'aar')
 
     testImplementation 'junit:junit:4.12'
 }

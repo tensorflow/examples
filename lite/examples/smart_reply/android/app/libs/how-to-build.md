@@ -5,19 +5,23 @@
 The Smart Reply demo app contains custom ops to achieve machine learning
 feature. It calls C++ ops through JNI that preprocesses the text from raw input.
 
-We have pre-built AAR package released that could be found:
-  (URL)<URL-placeholder>. It contains those custom ops that will be
-  linked dynamically in the app.
+We have pre-built [AAR package](https://storage.googleapis.com/download.tensorflow.org/models/tflite/smartreply/smartreply_runtime_aar.aar)
+  released, and it contains those custom ops that will be linked dynamically in
+  the app. The corresponding smart reply [TF Lite model](https://storage.googleapis.com/download.tensorflow.org/models/tflite/smartreply/smartreply.tflite)
+  is also provided.
 
 Change directory to Folder `android`, and download AAR:
 
 ```
-cd <to-the-folder-of-android>.
+cd lite/examples/smart_reply/android  # Your android folder
 
-curl URL.
+# Run gradle to download.
+./gradlew :app:downloadAAR :app:downloadLiteModel
 ```
 
-You will have AAR package `smartreply_*_.aar` in Folder `apps/libs`.
+The above command downloads prebuilt AAR package with custom ops and TFLite
+  model. You will have AAR package `smartreply_*_.aar` in folder `apps/libs`
+  and `smartreply_*_.aar` in `apps/src/main/assets` and `apps/libs/cc/testdata`.
 
 ## Step 2. Use Gradle to build the app.
 
@@ -25,7 +29,7 @@ Then, use Gradle to build the Android app. Gradle will download dependencies and
   finish building process.
 
 ```
-gradle build
+./gradlew build
 ```
 
 *Note that*: Either system environment variable `ANDROID_HOME` or `sdk.dir` in
@@ -75,8 +79,9 @@ By default, it builds ops for multiple cpus (with options: `--fat_apk_cpu=x86,x8
 
 From your bazel root folder, copy AAR package to `libs` folder (same to
   `how-to-build.md`).
+
 ```
-cp bazel-genfiles/libs/cc/smartreply_runtime_aar.aar libs/smartreply_runtime_aar.aar
+cp bazel-bin/libs/cc/smartreply_runtime_aar.aar libs/smartreply_runtime_aar.aar
 ```
 
 If you want to build optimized package you may add options `-c opt` or
