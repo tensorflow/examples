@@ -56,7 +56,7 @@ apply from: 'download.gradle'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    assert new File(project.ext.AAR_PATH).exists(): 'Please run `./gradlew :app:downloadAAR() to download prebuilt aar package, or build it from code. (See: `app/libs/how-to-build.md`)'
+    assert new File(project.ext.AAR_PATH).exists(): 'Please run `./gradlew :app:downloadAAR()` to download prebuilt aar package, or build it from code. (See: `https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android/g3doc/how-to-build.md`)'
     implementation files(project.ext.AAR_PATH)
 
     // Support Libraries

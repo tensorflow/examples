@@ -59,11 +59,11 @@ to this [blog
 post](https://research.googleblog.com/2017/02/on-device-machine-intelligence.html)
 and [research paper](https://arxiv.org/pdf/1708.00630).
 
-## How to use this Model?
+## How to Use This Model?
 
 We have provided a pre-built demo APK that you can download, install and test on
-your phone ([demo APK
-here](http://download.tensorflow.org/deps/tflite/SmartReplyDemo.apk)).
+your phone
+([demo APK here](http://download.tensorflow.org/models/tflite/smartreply/SmartReplyDemo.apk)).
 
 The On-Device Smart Reply demo App works in the following way:
 
@@ -140,7 +140,16 @@ Following are the ops supported for using On-Device Smart Reply model:
     This is an op inside TensorFlow Lite that uses label id from predict op and
     looks up the response text from the given label id.
 
+## How to Run the App?
+
+We release
+([pre-built demo APK here](http://download.tensorflow.org/models/tflite/smartreply/SmartReplyDemo.apk))
+for you to download, install and test on your phone.
+
+If you want to know how to build the app at own side, please refer to
+[how-to-build.md](https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android/g3doc/how-to-build.md).
+
 ## Further Information
 
 *   Open source code
-    [here](https://github.com/tensorflow/examples/tree/master/lite/examples/smartreply/).
+    [here](https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android).

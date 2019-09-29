@@ -1,6 +1,38 @@
-# How to Build App with Gradle.
+# How to Build Smart Reply Demo App.
 
-## Step 1. Download pre-built AAR package containing custom ops.
+## How to Build with Android Studio (GUI)
+
+### Prerequisites
+
+*   If you don't have already, install
+    [Android Studio](https://developer.android.com/studio/index.html), following
+    the instructions on the website.
+
+*   Android Studio 3.2 or later.
+
+*   You need an Android device or Android emulator and Android development
+    environment with minimum API 15.
+
+### Building and Run with Android Studio.
+
+*   Open Android Studio, and from the Welcome screen, select `Open an existing
+    Android Studio project`.
+
+*   From the Open File or Project window that appears, navigate to and select
+    the `lite/examples/smart_reply/android` directory from wherever you cloned
+    the TensorFlow Lite sample GitHub repo.
+
+*   You may also need to install various platforms and tools according to error
+    messages.
+
+*   Select menu `Build -> Make Project` to build the app. (Ctrl+F9, depending on
+    your version).
+
+*   Click menu `Run -> Run 'app'`. (Shift+F10, depending on your version)
+
+## How to Build App with Gradle (Command Line).
+
+### Step 1. Download pre-built AAR package containing custom ops.
 
 The Smart Reply demo app contains custom ops to achieve machine learning
 feature. It calls C++ ops through JNI that preprocesses the text from raw input.
@@ -23,10 +55,11 @@ The above command downloads prebuilt AAR package with custom ops and TFLite
   model. You will have AAR package `smartreply_*_.aar` in folder `apps/libs`
   and `smartreply_*_.aar` in `apps/src/main/assets` and `apps/libs/cc/testdata`.
 
-## Step 2. Use Gradle to build the app.
+### Step 2. Use Gradle to build the app.
 
 Then, use Gradle to build the Android app. Gradle will download dependencies and
-  finish building process.
+finish building process. It creates android app under `app/build/outputs/apk`
+directory.
 
 ```
 ./gradlew build
@@ -35,7 +68,7 @@ Then, use Gradle to build the Android app. Gradle will download dependencies and
 *Note that*: Either system environment variable `ANDROID_HOME` or `sdk.dir` in
   file `local.properties` for gradle should be set to Android SDK path.
 
-## Step 3. Install apk.
+### Step 3. Install apk.
 
 Once packages of `debug` and `release` versions are created. You can install
 this app on your phone or use emulator for debugging.
@@ -77,8 +110,7 @@ bazel build libs/cc:smartreply_runtime_aar
 
 By default, it builds ops for multiple cpus (with options: `--fat_apk_cpu=x86,x86_64,arm64-v8a,armeabi-v7a`).
 
-From your bazel root folder, copy AAR package to `libs` folder (same to
-  `how-to-build.md`).
+From your bazel root folder, copy AAR package to `libs` folder.
 
 ```
 cp bazel-bin/libs/cc/smartreply_runtime_aar.aar libs/smartreply_runtime_aar.aar
