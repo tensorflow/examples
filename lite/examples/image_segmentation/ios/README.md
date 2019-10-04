@@ -1,5 +1,7 @@
 # Image Segmentation iOS sample
 
+![Screenshot](http://download.tensorflow.org/models/tflite/screenshots/image_segmentation_ios_small.png)
+
 ## Requirements
 
 *  Xcode 10.3 (installed on a Mac machine)
