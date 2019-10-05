@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     // Setup view instances.
     drawView = findViewById(R.id.draw_view)
-    drawView?.setStrokeWidth(150.0f)
+    drawView?.setStrokeWidth(70.0f)
     drawView?.setColor(Color.WHITE)
     drawView?.setBackgroundColor(Color.BLACK)
     clearButton = findViewById(R.id.clear_button)
