@@ -235,6 +235,11 @@ class PosenetActivity :
     super.onPause()
   }
 
+  override fun onDestroy() {
+    super.onDestroy()
+    posenet.close()
+  }
+
   private fun requestCameraPermission() {
     if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
       ConfirmationDialog().show(childFragmentManager, FRAGMENT_DIALOG)
@@ -526,10 +531,14 @@ class PosenetActivity :
       }
     }
 
-    // Draw confidence score of a person.
-    val scoreMessage = "SCORE: " + "%.2f".format(person.score)
     canvas.drawText(
-      scoreMessage,
+      "Score: %.2f".format(person.score),
+      (15.0f * widthRatio),
+      (233.0f * heightRatio),
+      paint
+    )
+    canvas.drawText(
+      "Device: %s".format(posenet.device),
       (15.0f * widthRatio),
       (243.0f * heightRatio),
       paint

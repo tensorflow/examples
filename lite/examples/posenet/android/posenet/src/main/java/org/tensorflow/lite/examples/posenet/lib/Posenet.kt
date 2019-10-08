@@ -26,6 +26,7 @@ import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import kotlin.math.exp
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.gpu.GpuDelegate
 
 enum class BodyPart {
   NOSE,
@@ -63,12 +64,44 @@ class Person {
   var score: Float = 0.0f
 }
 
-class Posenet(context: Context) {
+enum class Device {
+  CPU,
+  NNAPI,
+  GPU
+}
+
+class Posenet(
+  val context: Context,
+  val filename: String = "posenet_model.tflite",
+  val device: Device = Device.CPU
+) : AutoCloseable {
+
   /** An Interpreter for the TFLite model.   */
   private var interpreter: Interpreter? = null
+  private var gpuDelegate: GpuDelegate? = null
 
-  init {
-    interpreter = Interpreter(loadModelFile("posenet_model.tflite", context))
+  private fun getInterpreter(): Interpreter {
+    if (interpreter != null) {
+      return interpreter!!
+    }
+    val options = Interpreter.Options()
+    when (device) {
+      Device.CPU -> { }
+      Device.GPU -> {
+        gpuDelegate = GpuDelegate()
+        options.addDelegate(gpuDelegate)
+      }
+      Device.NNAPI -> options.setUseNNAPI(true)
+    }
+    interpreter = Interpreter(loadModelFile(filename, context), options)
+    return interpreter!!
+  }
+
+  override fun close() {
+    interpreter?.close()
+    interpreter = null
+    gpuDelegate?.close()
+    gpuDelegate = null
   }
 
   /** Returns value within [0,1].   */
@@ -163,10 +196,10 @@ class Posenet(context: Context) {
     var t2: Long = SystemClock.elapsedRealtimeNanos()
     Log.i("posenet", String.format("Scaling to [-1,1] took %.2f ms", 1.0f * (t2 - t1) / 1_000_000))
 
-    val outputMap = initOutputMap(interpreter!!)
+    val outputMap = initOutputMap(getInterpreter())
 
     t1 = SystemClock.elapsedRealtimeNanos()
-    interpreter!!.runForMultipleInputsOutputs(inputArray, outputMap)
+    getInterpreter().runForMultipleInputsOutputs(inputArray, outputMap)
     t2 = SystemClock.elapsedRealtimeNanos()
     Log.i("posenet", String.format("Interpreter took %.2f ms", 1.0f * (t2 - t1) / 1_000_000))
 
