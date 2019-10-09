@@ -75,6 +75,8 @@ class Posenet(
   val filename: String = "posenet_model.tflite",
   val device: Device = Device.CPU
 ) : AutoCloseable {
+  var lastInferenceTimeNanos: Long = -1
+    private set
 
   /** An Interpreter for the TFLite model.   */
   private var interpreter: Interpreter? = null
@@ -191,17 +193,25 @@ class Posenet(
    *      person: a Person object containing data about keypoint locations and confidence scores
    */
   fun estimateSinglePose(bitmap: Bitmap): Person {
-    var t1: Long = SystemClock.elapsedRealtimeNanos()
+    val estimationStartTimeNanos = SystemClock.elapsedRealtimeNanos()
     val inputArray = arrayOf(initInputArray(bitmap))
-    var t2: Long = SystemClock.elapsedRealtimeNanos()
-    Log.i("posenet", String.format("Scaling to [-1,1] took %.2f ms", 1.0f * (t2 - t1) / 1_000_000))
+    Log.i(
+      "posenet",
+      String.format(
+        "Scaling to [-1,1] took %.2f ms",
+        1.0f * (SystemClock.elapsedRealtimeNanos() - estimationStartTimeNanos) / 1_000_000
+      )
+    )
 
     val outputMap = initOutputMap(getInterpreter())
 
-    t1 = SystemClock.elapsedRealtimeNanos()
+    val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
     getInterpreter().runForMultipleInputsOutputs(inputArray, outputMap)
-    t2 = SystemClock.elapsedRealtimeNanos()
-    Log.i("posenet", String.format("Interpreter took %.2f ms", 1.0f * (t2 - t1) / 1_000_000))
+    lastInferenceTimeNanos = SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
+    Log.i(
+      "posenet",
+      String.format("Interpreter took %.2f ms", 1.0f * lastInferenceTimeNanos / 1_000_000)
+    )
 
     val heatmaps = outputMap[0] as Array<Array<Array<FloatArray>>>
     val offsets = outputMap[1] as Array<Array<Array<FloatArray>>>

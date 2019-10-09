@@ -543,6 +543,12 @@ class PosenetActivity :
       (243.0f * heightRatio),
       paint
     )
+    canvas.drawText(
+      "Time: %.2f ms".format(posenet.lastInferenceTimeNanos * 1.0f / 1_000_000),
+      (15.0f * widthRatio),
+      (253.0f * heightRatio),
+      paint
+    )
 
     // Draw!
     surfaceHolder!!.unlockCanvasAndPost(canvas)
