@@ -128,11 +128,11 @@ delegate model execution to the Edge TPU processor:
     `mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite`.
 
 Now you're ready to execute the TensorFlow Lite model on the Edge TPU. Just run
-`classify_picamera.py` again, but be sure you specify the model that's compiled
+`detect_picamera.py` again, but be sure you specify the model that's compiled
 for the Edge TPU (it uses the same labels file as before):
 
 ```
-python3 classify_picamera.py \
+python3 detect_picamera.py \
   --model /tmp/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite \
   --labels /tmp/coco_labels.txt
 ```
