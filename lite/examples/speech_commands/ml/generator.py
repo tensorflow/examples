@@ -28,7 +28,6 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
 from tensorflow.python.ops import io_ops
 from tensorflow.python.platform import gfile
 from tensorflow.python.util import compat
@@ -75,7 +74,7 @@ def load_wav_file(filename):
   with tf.Session(graph=tf.Graph()) as sess:
     wav_filename_placeholder = tf.placeholder(tf.string, [])
     wav_loader = io_ops.read_file(wav_filename_placeholder)
-    wav_decoder = contrib_audio.decode_wav(wav_loader, desired_channels=1)
+    wav_decoder = tf.audio.decode_wav(wav_loader, desired_channels=1)
     return sess.run(
         wav_decoder, feed_dict={
             wav_filename_placeholder: filename
@@ -88,8 +87,8 @@ def save_wav_file(filename, wav_data, sample_rate):
     wav_filename_placeholder = tf.placeholder(tf.string, [])
     sample_rate_placeholder = tf.placeholder(tf.int32, [])
     wav_data_placeholder = tf.placeholder(tf.float32, [None, 1])
-    wav_encoder = contrib_audio.encode_wav(wav_data_placeholder,
-                                           sample_rate_placeholder)
+    wav_encoder = tf.audio.encode_wav(wav_data_placeholder,
+                                      sample_rate_placeholder)
     wav_saver = io_ops.write_file(wav_filename_placeholder, wav_encoder)
     sess.run(
         wav_saver,
@@ -204,7 +203,7 @@ class AudioProcessor(object):
     with tf.Session(graph=tf.Graph()) as sess:
       wav_filename_placeholder = tf.placeholder(tf.string, [])
       wav_loader = io_ops.read_file(wav_filename_placeholder)
-      wav_decoder = contrib_audio.decode_wav(wav_loader, desired_channels=1)
+      wav_decoder = tf.audio.decode_wav(wav_loader, desired_channels=1)
       search_path = os.path.join(self.data_dirs[0], BACKGROUND_NOISE_DIR_NAME,
                                  '*.wav')
       for wav_path in gfile.Glob(search_path):
@@ -222,7 +221,7 @@ class AudioProcessor(object):
     self.wav_filename_placeholder_ = tf.placeholder(
         tf.string, [], name='filename')
     wav_loader = io_ops.read_file(self.wav_filename_placeholder_)
-    wav_decoder = contrib_audio.decode_wav(
+    wav_decoder = tf.audio.decode_wav(
         wav_loader, desired_channels=1, desired_samples=desired_samples)
     # Allow the audio sample's volume to be adjusted.
     self.foreground_volume_placeholder_ = tf.placeholder(
@@ -408,7 +407,7 @@ class AudioProcessor(object):
     with tf.Session(graph=tf.Graph()) as sess:
       wav_filename_placeholder = tf.placeholder(tf.string, [], name='filename')
       wav_loader = io_ops.read_file(wav_filename_placeholder)
-      wav_decoder = contrib_audio.decode_wav(
+      wav_decoder = tf.audio.decode_wav(
           wav_loader, desired_channels=1, desired_samples=desired_samples)
       foreground_volume_placeholder = tf.placeholder(
           tf.float32, [], name='foreground_volume')
