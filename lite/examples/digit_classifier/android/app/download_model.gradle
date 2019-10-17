@@ -1,6 +1,6 @@
 task downloadModelFile(type: Download) {
     src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/digit_classifier/mnist.tflite'
-    dest project.ext.ASSET_DIR
+    dest project.ext.ASSET_DIR + '/mnist.tflite'
     overwrite false
 }
 
