@@ -1,10 +1,10 @@
 PODS:
-  - TensorFlowLiteC (1.14.0)
-  - TensorFlowLiteSwift (1.14.0):
-    - TensorFlowLiteC (= 1.14.0)
+  - TensorFlowLiteC (0.0.1-nightly.20191016)
+  - TensorFlowLiteSwift (0.0.1-nightly):
+    - TensorFlowLiteC (~> 0.0.1-nightly)
 
 DEPENDENCIES:
-  - TensorFlowLiteSwift
+  - TensorFlowLiteSwift (= 0.0.1-nightly)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -12,9 +12,9 @@ SPEC REPOS:
     - TensorFlowLiteSwift
 
 SPEC CHECKSUMS:
-  TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
-  TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
+  TensorFlowLiteC: daa60db3a5700d1052c93c47659ec3828c115d7d
+  TensorFlowLiteSwift: 1db618cb4fd98077b679ff75911771e25a6e0d14
 
-PODFILE CHECKSUM: 4645c1359cda5bcfc5a434618f6a06327201eb6e
+PODFILE CHECKSUM: 46ab43e78133a1287355d345f1791263374c6f02
 
 COCOAPODS: 1.5.3

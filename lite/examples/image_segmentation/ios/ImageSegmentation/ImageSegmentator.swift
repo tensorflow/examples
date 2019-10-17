@@ -97,7 +97,7 @@ class ImageSegmentator {
       }
 
       // Specify the options for the TF Lite `Interpreter`.
-      var options = InterpreterOptions()
+      var options = Interpreter.Options()
       options.threadCount = 2
 
       do {
@@ -134,8 +134,8 @@ class ImageSegmentator {
   /// Initialize Image Segmentator instance.
   fileprivate init(
     interpreter: Interpreter,
-    inputShape: TensorShape,
-    outputShape: TensorShape,
+    inputShape: Tensor.Shape,
+    outputShape: Tensor.Shape,
     labelList: [String]
   ) {
     // Store TF Lite intepreter
