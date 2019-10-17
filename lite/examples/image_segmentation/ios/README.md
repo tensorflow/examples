@@ -2,6 +2,8 @@
 
 ![Screenshot](http://download.tensorflow.org/models/tflite/screenshots/image_segmentation_ios_small.png)
 
+*Image from [Pixabay](https://pixabay.com/photos/cap-boy-smile-tomboy-emotions-2923682/).*
+
 ## Requirements
 
 *  Xcode 10.3 (installed on a Mac machine)
