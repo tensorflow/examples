@@ -1,6 +1,6 @@
 # Image Segmentation iOS sample
 
-![Screenshot](http://download.tensorflow.org/models/tflite/screenshots/image_segmentation_ios_small.png)
+![Screenshot](http://download.tensorflow.org/models/tflite/screenshots/image_segmentation_screenshot_gpu.png)
 
 *Image from [Pixabay](https://pixabay.com/photos/cap-boy-smile-tomboy-emotions-2923682/).*
 
