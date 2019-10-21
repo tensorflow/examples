@@ -20,6 +20,9 @@ class ImageSegmentator {
   /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
   private var interpreter: Interpreter
 
+  /// Dedicated DispatchQueue for TF Lite operations.
+  private let tfLiteQueue: DispatchQueue
+
   /// TF Lite Model's input and output shapes.
   private let batchSize: Int
   private let inputImageWidth: Int
@@ -58,8 +61,11 @@ class ImageSegmentator {
 
   /// Create a new Image Segmentator instance.
   static func newInstance(completion: @escaping ((Result<ImageSegmentator>) -> Void)) {
+    // Create a dispatch queue to ensure all operations on the Intepreter will run serially.
+    let tfLiteQueue = DispatchQueue(label: "org.tensorflow.examples.lite.image_segmentation")
+
     // Run initialization in background thread to avoid UI freeze.
-    DispatchQueue.global(qos: .background).async {
+    tfLiteQueue.async {
       // Construct the path to the model file.
       guard
         let modelPath = Bundle.main.path(
@@ -125,6 +131,7 @@ class ImageSegmentator {
 
         // Create an ImageSegmentator instance and return.
         let segmentator = ImageSegmentator(
+          tfLiteQueue: tfLiteQueue,
           interpreter: interpreter,
           inputShape: inputShape,
           outputShape: outputShape,
@@ -145,6 +152,7 @@ class ImageSegmentator {
 
   /// Initialize Image Segmentator instance.
   fileprivate init(
+    tfLiteQueue: DispatchQueue,
     interpreter: Interpreter,
     inputShape: Tensor.Shape,
     outputShape: Tensor.Shape,
@@ -159,13 +167,16 @@ class ImageSegmentator {
     self.inputImageHeight = inputShape.dimensions[2]
     self.inputPixelSize = inputShape.dimensions[3]
 
-    // Read output shape from model
+    // Read output shape from model.
     self.outputImageWidth = outputShape.dimensions[1]
     self.outputImageHeight = outputShape.dimensions[2]
     self.outputClassCount = outputShape.dimensions[3]
 
     // Store label list
     self.labelList = labelList
+
+    // Store the dedicated DispatchQueue for TFLite.
+    self.tfLiteQueue = tfLiteQueue
   }
 
   // MARK: - Image Segmentation
@@ -176,7 +187,7 @@ class ImageSegmentator {
   func runSegmentation(
     _ image: UIImage, completion: @escaping ((Result<SegmentationResult>) -> Void)
   ) {
-    DispatchQueue.global(qos: .background).async {
+    tfLiteQueue.async {
       let outputTensor: Tensor
       var startTime: Date = Date()
       var preprocessingTime: TimeInterval = 0
