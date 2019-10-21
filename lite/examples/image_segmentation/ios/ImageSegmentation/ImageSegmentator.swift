@@ -97,12 +97,24 @@ class ImageSegmentator {
       }
 
       // Specify the options for the TF Lite `Interpreter`.
-      var options = Interpreter.Options()
-      options.threadCount = 2
+      var options: Interpreter.Options?
+      var delegates: [Delegate]?
+#if targetEnvironment(simulator)
+      // Use CPU for inference as MetalDelegate does not support iOS simulator.
+      options = Interpreter.Options()
+      options?.threadCount = 2
+#else
+      // Use GPU on real device for inference as this model is fully supported.
+      delegates = [MetalDelegate()]
+#endif
 
       do {
         // Create the `Interpreter`.
-        let interpreter = try Interpreter(modelPath: modelPath, options: options)
+        let interpreter = try Interpreter(
+          modelPath: modelPath,
+          options: options,
+          delegates: delegates
+        )
 
         // Allocate memory for the model's input `Tensor`s.
         try interpreter.allocateTensors()
