@@ -30,7 +30,7 @@ import org.tensorflow.lite.examples.posenet.lib.Posenet as Posenet
 class TestActivity : AppCompatActivity() {
   /** Returns a resized bitmap of the drawable image.    */
   private fun drawableToBitmap(drawable: Drawable): Bitmap {
-    val bitmap = Bitmap.createBitmap(257, 353, Bitmap.Config.ARGB_8888)
+    val bitmap = Bitmap.createBitmap(257, 257, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
 
     drawable.setBounds(0, 0, canvas.width, canvas.height)
