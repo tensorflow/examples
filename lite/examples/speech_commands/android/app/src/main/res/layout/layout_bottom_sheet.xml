@@ -144,7 +144,7 @@
             android:text="API"
             android:textColor="@android:color/black" />
 
-        <android.support.v7.widget.SwitchCompat
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/api_info_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
