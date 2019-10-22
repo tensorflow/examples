@@ -64,7 +64,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     borderedText = new BorderedText(textSizePx);
     borderedText.setTypeface(Typeface.MONOSPACE);
 
-    recreateClassifier(getModel(), getDevice(), getNumThreads());
+    recreateClassifier(getModel(), getDevice(), getNumThreads(), getFP16());
     if (classifier == null) {
       LOGGER.e("No classifier on preview!");
       return;
@@ -123,10 +123,11 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     final Device device = getDevice();
     final Model model = getModel();
     final int numThreads = getNumThreads();
-    runInBackground(() -> recreateClassifier(model, device, numThreads));
+    final boolean fp16 = getFP16();
+    runInBackground(() -> recreateClassifier(model, device, numThreads, fp16));
   }
 
-  private void recreateClassifier(Model model, Device device, int numThreads) {
+  private void recreateClassifier(Model model, Device device, int numThreads, boolean fp16) {
     if (classifier != null) {
       LOGGER.d("Closing classifier.");
       classifier.close();
@@ -143,8 +144,8 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     }
     try {
       LOGGER.d(
-          "Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
-      classifier = Classifier.create(this, model, device, numThreads);
+          "Creating classifier (model=%s, device=%s, numThreads=%d, allowFP16=%b)", model, device, numThreads, fp16);
+      classifier = Classifier.create(this, model, device, numThreads, fp16);
     } catch (IOException e) {
       LOGGER.e(e, "Failed to create classifier.");
     }

@@ -43,9 +43,11 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -61,7 +63,7 @@ public abstract class CameraActivity extends AppCompatActivity
     implements OnImageAvailableListener,
         Camera.PreviewCallback,
         View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+        AdapterView.OnItemSelectedListener, Switch.OnCheckedChangeListener {
   private static final Logger LOGGER = new Logger();
 
   private static final int PERMISSIONS_REQUEST = 1;
@@ -97,10 +99,12 @@ public abstract class CameraActivity extends AppCompatActivity
   private Spinner modelSpinner;
   private Spinner deviceSpinner;
   private TextView threadsTextView;
+  private Switch fp16Switch;
 
   private Model model = Model.QUANTIZED_EFFICIENTNET;
   private Device device = Device.CPU;
   private int numThreads = -1;
+  private boolean allowFP16 = false;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -116,6 +120,7 @@ public abstract class CameraActivity extends AppCompatActivity
       requestPermission();
     }
 
+    fp16Switch = findViewById(R.id.fp16);
     threadsTextView = findViewById(R.id.threads);
     plusImageView = findViewById(R.id.plus);
     minusImageView = findViewById(R.id.minus);
@@ -192,9 +197,12 @@ public abstract class CameraActivity extends AppCompatActivity
     plusImageView.setOnClickListener(this);
     minusImageView.setOnClickListener(this);
 
+    fp16Switch.setOnCheckedChangeListener(this);
+
     model = Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
     device = Device.valueOf(deviceSpinner.getSelectedItem().toString());
     numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
+    allowFP16 = fp16Switch.isChecked();
   }
 
   protected int[] getRgbBytes() {
@@ -609,6 +617,8 @@ public abstract class CameraActivity extends AppCompatActivity
     }
   }
 
+  protected boolean getFP16() { return allowFP16; }
+
   protected abstract void processImage();
 
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
@@ -650,5 +660,11 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public void onNothingSelected(AdapterView<?> parent) {
     // Do nothing.
+  }
+
+  @Override
+  public void onCheckedChanged(CompoundButton switchView, boolean isChecked) {
+    allowFP16 = isChecked;
+    onInferenceConfigurationChanged();
   }
 }
