@@ -12,6 +12,7 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     aaptOptions {
@@ -54,7 +55,7 @@ ext {
 apply from: 'download.gradle'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 
     assert new File(project.ext.AAR_PATH).exists(): 'Please run `./gradlew :app:downloadAAR()` to download prebuilt aar package, or build it from code. (See: `https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android/g3doc/how-to-build.md`)'
     implementation files(project.ext.AAR_PATH)
@@ -69,4 +70,7 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
+    // TODO: Include AAR for testing.
 }

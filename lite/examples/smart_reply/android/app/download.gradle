@@ -6,7 +6,6 @@ task downloadLiteModel {
         src project.ext.LITE_MODEL_URL
         dest tempFile
         overwrite false
-        retries 3
     }
     for (dir in project.ext.LITE_MODEL_DIRS) {
         if (!new File(dir, project.ext.LITE_MODEL_NAME).exists()) {
@@ -24,6 +23,5 @@ task downloadAAR {
         src project.ext.AAR_URL
         dest project.ext.AAR_PATH
         overwrite false
-        retries 3
     }
 }
