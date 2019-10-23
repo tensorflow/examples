@@ -15,9 +15,9 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.smartreply;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,7 +28,7 @@ import android.widget.TextView;
  * The main (and only) activity of this demo app. Displays a text box which updates as messages are
  * received.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
   private static final String TAG = "SmartReplyDemo";
   private SmartReplyClient client;
 

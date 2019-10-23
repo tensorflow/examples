@@ -22,7 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7F67811B23405195002A02F2 /* ImageSegmentation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageSegmentation.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F67811B23405195002A02F2 /* TFL Segmentation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TFL Segmentation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F67811E23405195002A02F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7F67812223405195002A02F2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7F67812523405195002A02F2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -82,7 +82,7 @@
 		7F67811C23405195002A02F2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7F67811B23405195002A02F2 /* ImageSegmentation.app */,
+				7F67811B23405195002A02F2 /* TFL Segmentation.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -133,7 +133,7 @@
 			);
 			name = ImageSegmentation;
 			productName = ImageSegmentation;
-			productReference = 7F67811B23405195002A02F2 /* ImageSegmentation.app */;
+			productReference = 7F67811B23405195002A02F2 /* TFL Segmentation.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -393,7 +393,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.examples.ImageSegmentation;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "TFL Segmentation";
 				PROVISIONING_PROFILE_SPECIFIER = Wildcard;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -415,7 +415,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.examples.ImageSegmentation;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "TFL Segmentation";
 				PROVISIONING_PROFILE_SPECIFIER = Wildcard;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

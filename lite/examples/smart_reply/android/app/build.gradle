@@ -65,6 +65,7 @@ dependencies {
     implementation 'com.android.support:support-annotations:28.0.0'
     implementation 'com.android.support:support-v13:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
 
     // TF Lite
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'

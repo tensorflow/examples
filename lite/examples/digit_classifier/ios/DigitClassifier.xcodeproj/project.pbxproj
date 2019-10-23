@@ -22,7 +22,7 @@
 		0E02F6AC415C851ECEEC3E6C /* Pods-DigitClassifier.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DigitClassifier.release.xcconfig"; path = "Pods/Target Support Files/Pods-DigitClassifier/Pods-DigitClassifier.release.xcconfig"; sourceTree = "<group>"; };
 		23653868A9D4D98AFCB0433E /* Pods-DigitClassifier.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DigitClassifier.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DigitClassifier/Pods-DigitClassifier.debug.xcconfig"; sourceTree = "<group>"; };
 		35BBB99DAF5672B05BF4D890 /* Pods_DigitClassifier.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DigitClassifier.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		7F2AAA4D22FAB86900C66F75 /* DigitClassifier.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DigitClassifier.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F2AAA4D22FAB86900C66F75 /* TFL DigitClassifier.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TFL DigitClassifier.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F2AAA5022FAB86900C66F75 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7F2AAA5222FAB86900C66F75 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7F2AAA5522FAB86900C66F75 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -76,7 +76,7 @@
 		7F2AAA4E22FAB86900C66F75 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7F2AAA4D22FAB86900C66F75 /* DigitClassifier.app */,
+				7F2AAA4D22FAB86900C66F75 /* TFL DigitClassifier.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,8 +104,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F2AAA5F22FAB86C00C66F75 /* Build configuration list for PBXNativeTarget "DigitClassifier" */;
 			buildPhases = (
-				7F5EEAE82333630A00A72F0E /* Download TF Lite model */,
 				D72900AFF43DC7B4B5CD1959 /* [CP] Check Pods Manifest.lock */,
+				7F5EEAE82333630A00A72F0E /* Download TF Lite model */,
 				7F2AAA4922FAB86900C66F75 /* Sources */,
 				7F2AAA4A22FAB86900C66F75 /* Frameworks */,
 				7F2AAA4B22FAB86900C66F75 /* Resources */,
@@ -117,7 +117,7 @@
 			);
 			name = DigitClassifier;
 			productName = DigitClassifier;
-			productReference = 7F2AAA4D22FAB86900C66F75 /* DigitClassifier.app */;
+			productReference = 7F2AAA4D22FAB86900C66F75 /* TFL DigitClassifier.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -396,7 +396,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.examples.DigitClassifier;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "TFL DigitClassifier";
 				PROVISIONING_PROFILE_SPECIFIER = Wildcard;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -417,7 +417,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.examples.DigitClassifier;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "TFL DigitClassifier";
 				PROVISIONING_PROFILE_SPECIFIER = Wildcard;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
