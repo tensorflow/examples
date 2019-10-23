@@ -48,8 +48,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'org.tensorflow:tensorflow-lite:1.14.0'
-    implementation 'org.tensorflow:tensorflow-lite-gpu:1.14.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.0.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.0.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {
