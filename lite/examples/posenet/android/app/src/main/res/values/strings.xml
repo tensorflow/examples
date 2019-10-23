@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 <resources>
-  <string name="app_name" translation_description="Posenet demo app built with Posenet library [CHAR_LIMIT=40]">Posenet Demo</string>
+  <string name="app_name" translation_description="Posenet demo app built with Posenet library [CHAR_LIMIT=40]">TFL Posenet</string>
   <string name="picture" translation_description="Picture [CHAR_LIMIT=40]">Picture</string>
   <string name="description_info" translation_description="Description information [CHAR_LIMIT=40]">Info</string>
   <string name="request_permission" translation_description="Request camera permission [CHAR_LIMIT=40]">This app needs camera permission.</string>
