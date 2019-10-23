@@ -132,7 +132,7 @@ Now you're ready to execute the TensorFlow Lite model on the Edge TPU. Just run
 for the Edge TPU (it uses the same labels file as before):
 
 ```
-python3 classify_picamera.py \
+python3 detect_picamera.py \
   --model /tmp/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite \
   --labels /tmp/coco_labels.txt
 ```
