@@ -24,6 +24,9 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 // import DownloadModels task
