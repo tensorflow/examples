@@ -1,4 +1,4 @@
-# TensorFlow Lite BERT QA Android example Application
+# TensorFlow Lite BERT QA Android Example Application
 
 ## Overview
 
