@@ -48,6 +48,9 @@ public class QaClient {
   private static final int PREDICT_ANS_NUM = 5;
   private static final int NUM_LITE_THREADS = 4;
 
+  // Need to shift 1 for outputs ([CLS]).
+  private static final int OUTPUT_OFFSET = 1;
+
   private final Context context;
   private final Map<String, Integer> dic = new HashMap<>();
   private final FeatureConverter featureConverter;
@@ -152,6 +155,7 @@ public class QaClient {
   /** Find the Best N answers & logits from the logits array and input feature. */
   private synchronized List<QaAnswer> getBestAnswers(
       float[] startLogits, float[] endLogits, Feature feature) {
+    // Model uses the closed interval [start, end] for indices.
     int[] startIndexes = getBestIndex(startLogits);
     int[] endIndexes = getBestIndex(endLogits);
 
@@ -164,10 +168,11 @@ public class QaClient {
         if (!feature.tokenToOrigMap.containsKey(end)) {
           continue;
         }
-        if (end <= start) {
+        if (end < start) {
           continue;
         }
-        if (end - start + 1 > MAX_ANS_LEN) {
+        int length = end - start + 1;
+        if (length > MAX_ANS_LEN) {
           continue;
         }
         origResults.add(new QaAnswer.Pos(start, end, startLogits[start] + endLogits[end]));
@@ -181,7 +186,13 @@ public class QaClient {
       if (i >= PREDICT_ANS_NUM) {
         break;
       }
-      String convertedText = convertBack(feature, origResults.get(i).start, origResults.get(i).end);
+
+      String convertedText;
+      if (origResults.get(i).start > 0) {
+        convertedText = convertBack(feature, origResults.get(i).start, origResults.get(i).end);
+      } else {
+        convertedText = "";
+      }
       QaAnswer ans = new QaAnswer(convertedText, origResults.get(i));
       answers.add(ans);
     }
@@ -208,9 +219,13 @@ public class QaClient {
   /** Convert the answer back to original text form. */
   @WorkerThread
   private static String convertBack(Feature feature, int start, int end) {
-    start = feature.tokenToOrigMap.get(start);
-    end = feature.tokenToOrigMap.get(end);
-    String ans = SPACE_JOINER.join(feature.origTokens.subList(start + 1, end + 1));
+     // Shifted index is: index of logits + offset.
+    int shiftedStart = start + OUTPUT_OFFSET;
+    int shiftedEnd = end + OUTPUT_OFFSET;
+    int startIndex = feature.tokenToOrigMap.get(shiftedStart);
+    int endIndex = feature.tokenToOrigMap.get(shiftedEnd);
+    // end + 1 for the closed interval.
+    String ans = SPACE_JOINER.join(feature.origTokens.subList(startIndex, endIndex + 1));
     return ans;
   }
 }

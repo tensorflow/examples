@@ -41,7 +41,7 @@ public final class FeatureConverter {
       queryTokens = queryTokens.subList(0, maxQueryLen);
     }
 
-    List<String> origTokens = Arrays.asList(context.split(" "));
+    List<String> origTokens = Arrays.asList(context.trim().split("\\s+"));
     List<Integer> tokenToOrigIndex = new ArrayList<>();
     List<String> allDocTokens = new ArrayList<>();
     for (int i = 0; i < origTokens.size(); i++) {
@@ -53,26 +53,32 @@ public final class FeatureConverter {
       }
     }
 
-    int maxContextLen = maxSeqLen - queryTokens.size() - 3; // 3 accounts for [CLS], [SEP] and [SEP]
+    // -3 accounts for [CLS], [SEP] and [SEP].
+    int maxContextLen = maxSeqLen - queryTokens.size() - 3;
     if (allDocTokens.size() > maxContextLen) {
       allDocTokens = allDocTokens.subList(0, maxContextLen);
     }
 
     List<String> tokens = new ArrayList<>();
     List<Integer> segmentIds = new ArrayList<>();
+
+    // Map token index to original index (in feature.origTokens).
     Map<Integer, Integer> tokenToOrigMap = new HashMap<>();
 
     // Start of generating the features.
     tokens.add("[CLS]");
     segmentIds.add(0);
+
     // For query input.
     for (String queryToken : queryTokens) {
       tokens.add(queryToken);
       segmentIds.add(0);
     }
-    // For Seperation.
+
+    // For Separation.
     tokens.add("[SEP]");
     segmentIds.add(0);
+
     // For Text Input.
     for (int i = 0; i < allDocTokens.size(); i++) {
       String docToken = allDocTokens.get(i);
@@ -80,6 +86,7 @@ public final class FeatureConverter {
       segmentIds.add(1);
       tokenToOrigMap.put(tokens.size(), tokenToOrigIndex.get(i));
     }
+
     // For ending mark.
     tokens.add("[SEP]");
     segmentIds.add(1);
