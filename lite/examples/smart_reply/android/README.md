@@ -147,7 +147,7 @@ We release
 for you to download, install and test on your phone.
 
 If you want to know how to build the app at own side, please refer to
-[how-to-build.md](https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android/g3doc/how-to-build.md).
+[how-to-build.md](https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android/how-to-build.md).
 
 ## Further Information
 
