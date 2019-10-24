@@ -1,0 +1,328 @@
+<html>
+
+<title>Magic Wand</title>
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+<style>
+    @font-face {
+        font-family: "Mouse";
+        src: url("asset/mouse.otf") format("opentype");
+    }
+
+    body,
+    table {
+        font-family: 'Mouse';
+        background-image: url("asset/background.svg");
+        padding: 60px;
+        font-size: 42px;
+        color: white;
+        text-align: center;
+    }
+
+    .instruction {
+        font-size: 36px;
+        opacity: 70%;
+    }
+
+    .pending_join {
+        color: white;
+        margin-top: 40px;
+    }
+
+    .player_joined {
+        color: #7BFAF1;
+        text-shadow: 2px 2px white;
+        margin-top: 40px;
+    }
+
+    #start_game,
+    #next_round {
+        color: white;
+        font-size: 50px;
+        margin-top: 40px;
+    }
+
+    .player_name {
+        color: white;
+    }
+
+    .time {
+        color: #FFB200;
+        font-size: 80px;
+    }
+</style>
+
+<body>
+
+    <!-- <h1> Magic Wand Demo </h1> -->
+    <img src="asset/logo.svg" alt="Magic Wand">
+    <div id="start" class="scene" hidden style="padding-top: 30px;">
+        <div class="pending_join" id="player1_join" onclick="player1_join()">Player1 Join</div>
+        <div class="pending_join" id="player2_join" onclick="player2_join()">Player2 Join</div>
+        <div id="start_game" onclick="start_game()" hidden>Start Game</div>
+        <div id="log" hidden></div>
+    </div>
+    <div id="game" class="scene" hidden>
+        <h3>Game instructions</h3>
+        <div class="instruction">
+            <ol>
+                <li>
+                    Draw "O", "W", "L" using your wand.
+                </li>
+                <li>
+                    "O" > "W", "W" > "L", "L" > "O"
+                </li>
+            </ol>
+
+        </div>
+        <div class="time">TIME: <span id="time"></span></div>
+        <div>
+            <table style="width: 100%">
+                <tr>
+                    <th class="player_name" style="width: 30%">Player1</th>
+                    <th></th>
+                    <th class="player_name" style="width: 30%">Player2</th>
+                </tr>
+                <tr style="height: 30px;"></tr>
+                <tr>
+                    <th id="player1_status"></th>
+                    <th style="size: 80px">:</th>
+                    <th id="player2_status"></th>
+                </tr>
+
+            </table>
+        </div>
+        <!-- <div>
+            Player1: <span id="player1_status"></span>
+        </div>
+        <div>
+            Player2: <span id="player2_status"></span>
+        </div> -->
+        <div id="result" hidden>
+            <div style="margin-bottom: 50px">
+                <div style="height: 5px">
+                    <img style="vertical-align: super; opacity: 0.3; padding-right: 150px;"" src=" asset/fireworks.svg"
+                        alt="Magic Wand" width="20px">
+                </div>
+                <div style="height: 120px">
+                    <img style="padding-right: 100px" src="asset/fireworks.svg" alt="Magic Wand" width="30px">
+                    <img style="opacity: 0.4;" src="asset/fireworks.svg" alt="Magic Wand" width="80px">
+                </div>
+                <div style="height: 15px; ">
+                    <img style="vertical-align: super; padding-left: 300px;" src="asset/fireworks.svg" alt="Magic Wand"
+                        width="20px">
+                </div>
+
+                <div>
+                    <span id="winner">Player 1 Win!</span>
+                </div>
+            </div>
+            <div id="next_round" onclick="next_round()">Next Round</div>
+        </div>
+    </div>
+
+    <script>
+        // Define global variables.
+        let player1_handle = undefined;
+        let player2_handle = undefined;
+
+        let player1_queue = [];
+        let player2_queue = [];
+
+        let current_scene = undefined;
+
+        move_scene('start');
+        // move_scene('game');
+
+        let log = x => $('#log').append(`<div>${x}</div>`);
+
+        function joined(element_id) {
+            let text = $(`#${element_id}`).text();
+            $(`#${element_id}`).html(`⭑ ${text}ed`).addClass('player_joined').removeClass('pending_join');
+            if ($('#player1_join').hasClass('player_joined') && $('#player2_join').hasClass('player_joined')) {
+                $('#start_game').show();
+            }
+        }
+
+        function player1_join() {
+            log("Connecting Player1");
+            if (player1_handle) {
+                alert("Player1 has already joined");
+                return;
+            }
+            return connect(
+                (handle) => { player1_handle = handle; joined('player1_join'); },
+                (pick) => { console.log(`Player1: ${pick}`); player1_queue.push(pick); console.log(player1_queue); });
+        }
+
+        // We have to split this into two clicks to avoid delay causing the second BEL connection to fail due to security issues.
+        function player2_join() {
+            log("Connecting Player2");
+            if (player2_handle) {
+                alert("Player2 has already joined");
+                return;
+            }
+            return connect(
+                (handle) => { player2_handle = handle; joined('player2_join') },
+                (pick) => { console.log(`Player2: ${pick}`); player2_queue.push(pick); console.log(player2_queue); });
+        }
+
+        function next_round() {
+            // TODO
+            start_game();
+        }
+
+        // O > W > L  ->  1 > 0 > 2  ->  2 > 1 > 0
+        function calculate_winner(player1, player2) {
+            let score = player1 - player2;
+            if (score == 0) {
+                return 'Draw';
+            } else if (score == 1 || score == -2) {
+                return 'Player1 won!';
+            } else {
+                return 'Player2 won!';
+            }
+        }
+
+        function id_to_name(id) {
+            switch (id) {
+                // case 0: return 'WING';  // Scissor
+                // case 1: return 'RING';  // Rock
+                // case 2: return 'SLOPE'; // Paper
+                case 0: return 'W';
+                case 1: return 'O';
+                case 2: return 'L';
+            }
+        }
+
+        function action(queue) {
+            // Picking the last available action.
+            if (queue.length == 0) { return undefined; } else { return queue[queue.length - 1]; }
+        }
+
+        function process(timeout) {
+            let p1 = player1_queue;
+            let p2 = player2_queue;
+            let s1 = x => $('#player1_status').html(x);
+            let s2 = x => $('#player2_status').html(x);
+            let st = x => $('#time').html(x);
+            let sw = x => $('#winner').html(x);
+            let rb = $('#result');
+
+            // Capture the value now to avoid racing condition.
+            let a1 = action(p1);
+            let a2 = action(p2);
+
+            st(timeout);
+
+            if (a1 == undefined) {
+                s1(`Please wave your wand!`);
+            } else {
+                s1('Gesture recognized!');
+            }
+            if (a2 == undefined) {
+                s2(`Please wave your wand!`);
+            } else {
+                s2('Gesture recognized!');
+            }
+            if (a1 != undefined && a2 != undefined) {
+                // Check who's the winner.
+                let winner = calculate_winner(a1, a2);
+                s1(id_to_name(a1));
+                s2(id_to_name(a2));
+                sw(winner);
+                rb.show()
+            } else {
+                if (timeout <= 0) {
+                    // Timeout.
+                    if (a1 == undefined) { s1('No gesture recognized'); } else { s1(id_to_name(a1)); }
+                    if (a2 == undefined) { s2('No gesture recognized'); } else { s2(id_to_name(a2)); }
+                    if (a1 == undefined && a2 == undefined) { // Neither had a gesture
+                        sw('Draw!');
+                    } else {
+                        // One player had a gesture
+                        if (a1 == undefined) {
+                            sw('Player2 won');
+                        } else {
+                            sw('Player1 won');
+                        }
+                    }
+                    rb.show();
+                } else {
+                    // Continue
+                    setTimeout(_ => process(timeout - 1), 1000);
+                }
+            }
+        }
+
+        function start_game() {
+            if (player1_handle && player2_handle) {
+                console.log('Game starts');
+                move_scene('game');
+                // Empty the action queue.
+                player1_queue = [];
+                player2_queue = [];
+                // $('#player1_status').html('Please wave your wand!');
+                // $('#player2_status').html('Please wave your wand!');
+
+                let timeout = 30;
+                process(timeout);
+            }
+        }
+
+        /////
+        ///// Library code
+        /////
+
+        function move_scene(name, callback) {
+            // Initializing all sections.
+            $('#result').hide();
+            if (current_scene) {
+                $(`#${current_scene}`).hide();
+            }
+            current_scene = name;
+            $(`#${current_scene}`).show();
+            if (callback) {
+                callback();
+            }
+        }
+
+
+        function connect(connect_callback, notification_callback) {
+            function handleNotifications(event) {
+                let value = event.target.value;
+                let pick = value.getUint8(1)
+                notification_callback(pick);
+            }
+            return connect_ble().then(characteristic => {
+                connect_callback(characteristic);
+                return characteristic.startNotifications().then(_ => {
+                    log('> Notification started');
+                    characteristic.addEventListener('characteristicvaluechanged',
+                        handleNotifications)
+                });
+            });
+        }
+
+        function connect_ble() {
+            let service_id = 'heart_rate';
+            let character_id = 'heart_rate_measurement';
+
+            return navigator.bluetooth.requestDevice({ name: 'ble', filters: [{ services: [service_id] }], keepRepeatedDevices: true })
+                .then(device => {
+                    log('Connecting to GATT Server...');
+                    return device.gatt.connect();
+                }).then(server => {
+                    log("Getting service...");
+                    return server.getPrimaryService(service_id);
+                }).then(service => {
+                    log('Getting Characteristic...');
+                    return service.getCharacteristic(character_id);
+                    // }).catch(error => {
+                    // console.log(`Error ${error}`);
+                })
+        }
+    </script>
+</body>
+
+</html>
