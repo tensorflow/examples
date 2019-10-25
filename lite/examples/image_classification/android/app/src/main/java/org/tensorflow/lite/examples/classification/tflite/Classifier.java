@@ -107,6 +107,7 @@ public abstract class Classifier {
    * @param model The model to use for classification.
    * @param device The device to use for classification.
    * @param numThreads The number of threads to use for classification.
+   * @param fp16 Allow FP32 model to run on FP16 accelerators
    * @return A classifier with the desired configuration.
    */
   public static Classifier create(Activity activity, Model model, Device device, int numThreads, boolean fp16)

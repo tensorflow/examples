@@ -203,6 +203,7 @@ public abstract class CameraActivity extends AppCompatActivity
     device = Device.valueOf(deviceSpinner.getSelectedItem().toString());
     numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
     allowFP16 = fp16Switch.isChecked();
+    fp16Switch.setEnabled(false);
   }
 
   protected int[] getRgbBytes() {
@@ -585,6 +586,7 @@ public abstract class CameraActivity extends AppCompatActivity
     if (this.model != model) {
       LOGGER.d("Updating  model: " + model);
       this.model = model;
+      fp16Switch.setEnabled((model == Model.FLOAT) && (device == Device.NNAPI));
       onInferenceConfigurationChanged();
     }
   }
@@ -601,6 +603,7 @@ public abstract class CameraActivity extends AppCompatActivity
       plusImageView.setEnabled(threadsEnabled);
       minusImageView.setEnabled(threadsEnabled);
       threadsTextView.setText(threadsEnabled ? String.valueOf(numThreads) : "N/A");
+      fp16Switch.setEnabled((model == Model.FLOAT) && (device == Device.NNAPI));
       onInferenceConfigurationChanged();
     }
   }
