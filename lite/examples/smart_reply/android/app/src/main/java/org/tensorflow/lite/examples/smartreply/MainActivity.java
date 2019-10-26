@@ -19,9 +19,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 /**
@@ -32,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
   private static final String TAG = "SmartReplyDemo";
   private SmartReplyClient client;
 
-  private Button sendButton;
   private TextView messageTextView;
   private EditText messageInput;
+  private ScrollView scrollView;
 
   private Handler handler;
 
@@ -47,14 +49,22 @@ public class MainActivity extends AppCompatActivity {
     client = new SmartReplyClient(getApplicationContext());
     handler = new Handler();
 
-    sendButton = (Button) findViewById(R.id.send_button);
-    sendButton.setOnClickListener(
-        (View v) -> {
-          send(messageInput.getText().toString());
+    scrollView = findViewById(R.id.scroll_view);
+    messageTextView = findViewById(R.id.message_text);
+
+    messageInput = findViewById(R.id.message_input);
+    messageInput.setOnKeyListener(
+        (view, keyCode, keyEvent) -> {
+          if (keyCode == KeyEvent.KEYCODE_ENTER && keyEvent.getAction() == KeyEvent.ACTION_UP) {
+            // Send message when pressing Enter on keyboard.
+            send(messageInput.getText().toString());
+            return true;
+          }
+          return false;
         });
 
-    messageTextView = (TextView) findViewById(R.id.message_text);
-    messageInput = (EditText) findViewById(R.id.message_input);
+    Button sendButton = findViewById(R.id.send_button);
+    sendButton.setOnClickListener((View v) -> send(messageInput.getText().toString()));
   }
 
   @Override
@@ -80,20 +90,27 @@ public class MainActivity extends AppCompatActivity {
   private void send(final String message) {
     handler.post(
         () -> {
-          messageTextView.append("Input: " + message + "\n");
+          StringBuilder textToShow = new StringBuilder();
+          textToShow.append("Input: ").append(message).append("\n\n");
 
+          // Get suggested replies from the model.
           SmartReply[] ans = client.predict(new String[] {message});
           for (SmartReply reply : ans) {
-            appendMessage("Reply: " + reply.getText());
+            textToShow.append("Reply: ").append(reply.getText()).append("\n");
           }
-          appendMessage("------");
-        });
-  }
+          textToShow.append("------").append("\n");
 
-  private void appendMessage(final String message) {
-    handler.post(
-        () -> {
-          messageTextView.append(message + "\n");
+          runOnUiThread(
+              () -> {
+                // Show the message and suggested replies on screen.
+                messageTextView.append(textToShow);
+
+                // Clear the input box
+                messageInput.setText(null);
+
+                // Scroll to the bottom to show latest entry's classification result.
+                scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+              });
         });
   }
 }

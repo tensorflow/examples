@@ -1,44 +1,46 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_margin="@dimen/activity_margin"
+    tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="5dip"
-        android:layout_weight="3">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/message_input">
 
         <TextView
             android:id="@+id/message_text"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:scrollbars="vertical"
-            android:gravity="bottom"/>
-    </LinearLayout>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:padding="5dip"
-        android:layout_weight="1">
+    <EditText
+        android:id="@+id/message_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_text_hint"
+        android:inputType="textNoSuggestions"
+        android:importantForAutofill="no"
+        app:layout_constraintBaseline_toBaselineOf="@+id/send_button"
+        app:layout_constraintEnd_toStartOf="@+id/send_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-        <EditText
-            android:id="@+id/message_input"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="6"
-            android:scrollbars="vertical"
-            android:hint="Enter Text"
-            android:gravity="top"
-            android:inputType="text"/>
-        <Button
-            android:id="@+id/send_button"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="2"
-            android:text="Send" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/send_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/message_input"
+        />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
