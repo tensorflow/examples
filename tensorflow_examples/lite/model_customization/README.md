@@ -6,6 +6,28 @@ The TFLite model customization library simplifies the process of adapting and
 converting a TensorFlow neural-network model to particular input data when
 deploying this model for on-device ML applications.
 
+## Requirements
+
+* Refer to
+[requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_customization/requirements.txt)
+for dependent libraries that're needed to use the library and run the demo code.
+
+## Installation
+
+Two alternative methods to install the model customization library.
+
+* Clone the repo and then add the path to the repo in PYTHONPATH.
+
+```shell
+git clone https://github.com/tensorflow/examples
+```
+
+* Install directly.
+
+```shell
+pip install git+https://github.com/tensorflow/examples
+```
+
 ## End-to-End Example
 
 For instance, it could have an end-to-end image
