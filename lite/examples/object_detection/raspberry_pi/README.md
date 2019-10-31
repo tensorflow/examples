@@ -142,3 +142,33 @@ You should see significantly faster inference speeds.
 For more information about creating and running TensorFlow Lite models with
 Coral devices, read [TensorFlow modles on the Edge TPU](
 https://coral.withgoogle.com/docs/edgetpu/models-intro/).
+
+
+
+# TensorFlow Lite Python object detection example with USB webcam.
+
+This is another example for Tensorflow lite with Raspberry Pi using USB webcam based on Pi camera version. In this example, you need to add one more from the settings that you performed on the Pi camera version. That is to install opencv.
+
+
+## Install opencv
+
+```bash
+sudo apt-get install libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev
+sudo apt-get install libavcodec-dev libavformat-dev libswscale-dev libv4l-dev
+sudo apt-get install libxvidcore-dev libx264-dev
+sudo apt-get install qt4-dev-tools libatlas-base-dev
+
+sudo pip3 install opencv-python
+```
+
+If you have successfully installed opencv, you can now run this example.
+
+
+## Run the example
+
+
+```bash
+python3 detect_usbwebcam.py \
+  --model /tmp/detect.tflite \
+  --labels /tmp/coco_labels.txt
+```
