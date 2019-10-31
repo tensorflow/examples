@@ -2,3 +2,6 @@
 numpy
 picamera
 Pillow
+
+# Python packasges required for detect_usbwebcam.py
+cv2
