@@ -152,7 +152,7 @@ class Posenet(
   private fun initOutputMap(interpreter: Interpreter): HashMap<Int, Any> {
     val outputMap = HashMap<Int, Any>()
 
-    // 1 * 17 * 17 * 17 contains heatmaps
+    // 1 * 9 * 9 * 17 contains heatmaps
     val heatmapsShape = interpreter.getOutputTensor(0).shape()
     outputMap[0] = Array(heatmapsShape[0]) {
       Array(heatmapsShape[1]) {
@@ -160,13 +160,13 @@ class Posenet(
       }
     }
 
-    // 1 * 17 * 17 * 34 contains offsets
+    // 1 * 9 * 9 * 34 contains offsets
     val offsetsShape = interpreter.getOutputTensor(1).shape()
     outputMap[1] = Array(offsetsShape[0]) {
       Array(offsetsShape[1]) { Array(offsetsShape[2]) { FloatArray(offsetsShape[3]) } }
     }
 
-    // 1 * 17 * 17 * 32 contains forward displacements
+    // 1 * 9 * 9 * 32 contains forward displacements
     val displacementsFwdShape = interpreter.getOutputTensor(2).shape()
     outputMap[2] = Array(offsetsShape[0]) {
       Array(displacementsFwdShape[1]) {
@@ -174,7 +174,7 @@ class Posenet(
       }
     }
 
-    // 1 * 17 * 17 * 32 contains backward displacements
+    // 1 * 9 * 9 * 32 contains backward displacements
     val displacementsBwdShape = interpreter.getOutputTensor(3).shape()
     outputMap[3] = Array(displacementsBwdShape[0]) {
       Array(displacementsBwdShape[1]) {
