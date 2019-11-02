@@ -90,7 +90,7 @@ public class QaActivity extends AppCompatActivity {
     RecyclerView questionSuggestionsView = findViewById(R.id.suggestion_list);
     QuestionAdapter adapter =
         new QuestionAdapter(this, datasetClient.getQuestions(datasetPosition));
-    adapter.setOnQuestionSelectListener(question -> answerQuestion(question, true));
+    adapter.setOnQuestionSelectListener(question -> answerQuestion(question));
     questionSuggestionsView.setAdapter(adapter);
     LinearLayoutManager layoutManager =
         new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -99,7 +99,7 @@ public class QaActivity extends AppCompatActivity {
     // Setup ask button.
     ImageButton askButton = findViewById(R.id.ask_button);
     askButton.setOnClickListener(
-        view -> answerQuestion(questionEditText.getText().toString(), false));
+        view -> answerQuestion(questionEditText.getText().toString()));
 
     // Setup text edit where users can input their question.
     questionEditText = findViewById(R.id.question_edit_text);
@@ -131,7 +131,7 @@ public class QaActivity extends AppCompatActivity {
     questionEditText.setOnKeyListener(
         (v, keyCode, event) -> {
           if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
-            answerQuestion(questionEditText.getText().toString(), false);
+            answerQuestion(questionEditText.getText().toString());
           }
           return false;
         });
@@ -177,10 +177,20 @@ public class QaActivity extends AppCompatActivity {
     }
   }
 
-  private void answerQuestion(String question, boolean updateQuestionText) {
-    if (updateQuestionText) {
+  private void answerQuestion(String question) {
+    question = question.trim();
+    if (question.isEmpty()) {
       questionEditText.setText(question);
+      return;
     }
+
+    // Append question mark '?' if not ended with '?'.
+    // This aligns with question format that trains the model.
+    if (!question.endsWith("?")) {
+      question += '?';
+    }
+    final String questionToAsk = question;
+    questionEditText.setText(questionToAsk);
 
     // Delete all pending tasks.
     handler.removeCallbacksAndMessages(null);
@@ -207,7 +217,7 @@ public class QaActivity extends AppCompatActivity {
     handler.post(
         () -> {
           long beforeTime = System.currentTimeMillis();
-          List<QaAnswer> answers = qaClient.predict(question, content);
+          final List<QaAnswer> answers = qaClient.predict(questionToAsk, content);
           long afterTime = System.currentTimeMillis();
           double totalSeconds = (afterTime - beforeTime) / 1000.0;
 
