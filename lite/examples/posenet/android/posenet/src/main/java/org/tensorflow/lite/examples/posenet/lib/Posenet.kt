@@ -228,7 +228,7 @@ class Posenet(
       var maxCol = 0
       for (row in 0 until height) {
         for (col in 0 until width) {
-          heatmaps[0][row][col][keypoint] = sigmoid(heatmaps[0][row][col][keypoint])
+          heatmaps[0][row][col][keypoint] = heatmaps[0][row][col][keypoint]
           if (heatmaps[0][row][col][keypoint] > maxVal) {
             maxVal = heatmaps[0][row][col][keypoint]
             maxRow = row
@@ -255,7 +255,7 @@ class Posenet(
           offsets[0][positionY]
           [positionX][idx + numKeypoints]
         ).toInt()
-      confidenceScores[idx] = heatmaps[0][positionY][positionX][idx]
+      confidenceScores[idx] = sigmoid(heatmaps[0][positionY][positionX][idx])
     }
 
     val person = Person()
