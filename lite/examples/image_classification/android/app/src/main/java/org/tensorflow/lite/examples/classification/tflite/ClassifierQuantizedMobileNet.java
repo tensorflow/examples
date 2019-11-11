@@ -17,15 +17,25 @@ package org.tensorflow.lite.examples.classification.tflite;
 
 import android.app.Activity;
 import java.io.IOException;
+import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
+import org.tensorflow.lite.support.common.TensorOperator;
+import org.tensorflow.lite.support.common.ops.NormalizeOp;
 
 /** This TensorFlow Lite classifier works with the quantized MobileNet model. */
 public class ClassifierQuantizedMobileNet extends Classifier {
 
   /**
-   * An array to hold inference results, to be feed into Tensorflow Lite as outputs. This isn't part
-   * of the super class, because we need a primitive array here.
+   * The quantized model does not require normalization, thus set mean as 0.0f, and std as 1.0f to
+   * bypass the normalization.
    */
-  private byte[][] labelProbArray = null;
+  private static final float IMAGE_MEAN = 0.0f;
+
+  private static final float IMAGE_STD = 1.0f;
+
+  /** Quantized MobileNet requires additional dequantization to the output probability. */
+  private static final float PROBABILITY_MEAN = 0.0f;
+
+  private static final float PROBABILITY_STD = 255.0f;
 
   /**
    * Initializes a {@code ClassifierQuantizedMobileNet}.
@@ -35,17 +45,6 @@ public class ClassifierQuantizedMobileNet extends Classifier {
   public ClassifierQuantizedMobileNet(Activity activity, Device device, int numThreads)
       throws IOException {
     super(activity, device, numThreads);
-    labelProbArray = new byte[1][getNumLabels()];
-  }
-
-  @Override
-  public int getImageSizeX() {
-    return 224;
-  }
-
-  @Override
-  public int getImageSizeY() {
-    return 224;
   }
 
   @Override
@@ -62,35 +61,12 @@ public class ClassifierQuantizedMobileNet extends Classifier {
   }
 
   @Override
-  protected int getNumBytesPerChannel() {
-    // the quantized model uses a single byte only
-    return 1;
+  protected TensorOperator getPreprocessNormalizeOp() {
+    return new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
   }
 
   @Override
-  protected void addPixelValue(int pixelValue) {
-    imgData.put((byte) ((pixelValue >> 16) & 0xFF));
-    imgData.put((byte) ((pixelValue >> 8) & 0xFF));
-    imgData.put((byte) (pixelValue & 0xFF));
-  }
-
-  @Override
-  protected float getProbability(int labelIndex) {
-    return labelProbArray[0][labelIndex];
-  }
-
-  @Override
-  protected void setProbability(int labelIndex, Number value) {
-    labelProbArray[0][labelIndex] = value.byteValue();
-  }
-
-  @Override
-  protected float getNormalizedProbability(int labelIndex) {
-    return (labelProbArray[0][labelIndex] & 0xff) / 255.0f;
-  }
-
-  @Override
-  protected void runInference() {
-    tflite.run(imgData, labelProbArray);
+  protected TensorOperator getPostprocessNormalizeOp() {
+    return new NormalizeOp(PROBABILITY_MEAN, PROBABILITY_STD);
   }
 }

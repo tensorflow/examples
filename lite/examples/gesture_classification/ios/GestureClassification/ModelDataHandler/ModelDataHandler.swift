@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import UIKit
-import CoreImage
 import Accelerate
+import CoreImage
+import TensorFlowLite
+import UIKit
 
 // MARK: Structures That hold results
 /**
- Stores inference results for a particular frame that was successfully run through the TfliteWrapper.
+ Stores inference results for a particular frame that was successfully run through the
+ TensorFlow Lite Interpreter.
  */
 struct Result{
   let inferenceTime: Double
@@ -29,16 +31,28 @@ struct Result{
  Stores one formatted inference.
  */
 struct Inference {
-  let className: String
-  let confidence: Double
+  let confidence: Float
+  let label: String
+}
+
+/// Information about a model file or labels file.
+typealias FileInfo = (name: String, extension: String)
+
+// Information about the model to be loaded.
+enum Model {
+  static let modelInfo: FileInfo = (name: "model", extension: "tflite")
+  static let labelsInfo: FileInfo = (name: "labels", extension: "txt")
 }
 
 /**
- This class handles all data preprocessing and makes calls to run inference on a given frame through the TfliteWrapper. It then formats the inferences obtained and returns the top N results for a successful inference.
+ This class handles all data preprocessing and makes calls to run inference on
+ a given frame through the TensorFlow Lite Interpreter. It then formats the
+ inferences obtained and returns the top N results for a successful inference.
  */
-class ModelDataHandler: NSObject {
+class ModelDataHandler {
 
   // MARK: Paremeters on which model was trained
+  let batchSize = 1
   let wantedInputChannels = 3
   let wantedInputWidth = 224
   let wantedInputHeight = 224
@@ -49,36 +63,60 @@ class ModelDataHandler: NSObject {
   let threadCountLimit: Int32 = 10
 
   // MARK: Instance Variables
+  /// The current thread count used by the TensorFlow Lite Interpreter.
+  let threadCount: Int
+
   var labels: [String] = []
-  var threadCount: Int32 = 1
   private let resultCount = 1
   private let threshold = 0.5
 
-  // MARK: TfliteWrapper
-  private let tfLiteWrapper: TfliteWrapper
+  /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
+  private var interpreter: Interpreter
+
+  private let bgraPixel = (channels: 4, alphaComponent: 3, lastBgrComponent: 2)
+  private let rgbPixelChannels = 3
+  private let colorStrideValue = 10
+
+  /// Information about the alpha component in RGBA data.
+  private let alphaComponent = (baseOffset: 4, moduloRemainder: 3)
 
   // MARK: Initializer
   /**
    This is a failable initializer for ModelDataHandler. It successfully initializes an object of the class if the model file and labels file is found, labels can be loaded and the interpreter of TensorflowLite can be initialized successfully.
    */
-  init?(modelFileName: String, labelsFileName: String, labelsFileExtension: String) {
-
-    // Initializes TFliteWrapper and based on the setup result of interpreter, initializes the object of this class
-    self.tfLiteWrapper = TfliteWrapper(modelFileName: modelFileName)
-    guard self.tfLiteWrapper.setUpModelAndInterpreter() else {
+  init?(modelFileInfo: FileInfo, labelsFileInfo: FileInfo, threadCount: Int = 1) {
+    // Construct the path to the model file.
+    guard let modelPath = Bundle.main.path(
+      forResource: modelFileInfo.name,
+      ofType: modelFileInfo.extension
+    ) else {
+      print("Failed to load the model file with name: \(modelFileInfo.name).")
       return nil
     }
 
-    super.init()
+    // Specify the options for the `Interpreter`.
+    self.threadCount = threadCount
+    var options = InterpreterOptions()
+    options.threadCount = threadCount
+    do {
+      // Create the `Interpreter`.
+      interpreter = try Interpreter(modelPath: modelPath, options: options)
+      // Allocate memory for the model's input `Tensor`s.
+      try interpreter.allocateTensors()
+    } catch let error {
+      print("Failed to create the interpreter with error: \(error.localizedDescription)")
+      return nil
+    }
 
     // Opens and loads the classes listed in labels file
-    loadLabels(fromFileName: labelsFileName, fileExtension: labelsFileExtension)
+    loadLabels(fromFileName: Model.labelsInfo.name, fileExtension: Model.labelsInfo.extension)
   }
 
   // MARK: Methods for data preprocessing and post processing.
-  /** Performs image preprocessing, calls the tfliteWrapper methods to feed the pixel buffer into the input tensor and  run inference
+  /**
+   Performs image preprocessing, calls the TensorFlow Lite Interpreter methods
+   to feed the pixel buffer into the input tensor and  run inference
    on the pixel buffer.
-
    */
   func runModel(onFrame pixelBuffer: CVPixelBuffer) -> Result? {
 
@@ -97,61 +135,111 @@ class ModelDataHandler: NSObject {
 
     CVPixelBufferLockBaseAddress(thumbnailPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
 
-    guard let sourceStartAddrss = CVPixelBufferGetBaseAddress(thumbnailPixelBuffer) else {
-      return nil
-    }
+    let interval: TimeInterval
+    let outputTensor: Tensor
+    do {
+      let inputTensor = try interpreter.input(at: 0)
 
-    // Obtains the input tensor to feed the pixel buffer into
-    guard  let tensorInputBaseAddress = tfLiteWrapper.inputTensor(at: 0) else {
-      return nil
-    }
-
-    let inputImageBaseAddress = sourceStartAddrss.assumingMemoryBound(to: UInt8.self)
-
-    for y in 0...wantedInputHeight - 1 {
-      let tensorInputRow = tensorInputBaseAddress.advanced(by: (y * wantedInputWidth * wantedInputChannels))
-      let inputImageRow = inputImageBaseAddress.advanced(by: y * wantedInputWidth * imageChannels)
-
-      for x in 0...wantedInputWidth - 1 {
-
-        let out_pixel = tensorInputRow.advanced(by: x * wantedInputChannels)
-        let in_pixel = inputImageRow.advanced(by: x * imageChannels)
-
-        var b = 2
-        for c in 0...(wantedInputChannels) - 1 {
-
-          // Pixel values are between 0-255. Model requires the values to be between -1 and 1.
-          // We are also reversing the order of pixels since the source pixel format is BGRA, but the model requires RGB format.
-          out_pixel[c] = Float32((Double(in_pixel[b]) / Double(stdDeviation)) - Double(mean))
-          b = b - 1
-        }
+      // Remove the alpha component from the image buffer to get the RGB data.
+      guard let rgbData = rgbDataFromBuffer(
+        thumbnailPixelBuffer,
+        byteCount: batchSize * wantedInputWidth * wantedInputHeight * wantedInputChannels,
+        isModelQuantized: inputTensor.dataType == .uInt8
+        ) else {
+          print("Failed to convert the image buffer to RGB data.")
+          return nil
       }
-    }
 
-    let beforeDate = Date()
+      // Copy the RGB data to the input `Tensor`.
+      try interpreter.copy(rgbData, toInputAt: 0)
 
-    // Runs inference
-    guard tfLiteWrapper.invokeInterpreter() else {
+      // Run inference by invoking the `Interpreter`.
+      let startDate = Date()
+      try interpreter.invoke()
+      interval = Date().timeIntervalSince(startDate) * 1000
+
+      // Get the output `Tensor` to process the inference results.
+      outputTensor = try interpreter.output(at: 0)
+    } catch let error {
+      print("Failed to invoke the interpreter with error: \(error.localizedDescription)")
       return nil
     }
 
-    // Calculates the inference time.
-    let inferenceTime = (Date().timeIntervalSince1970 - beforeDate.timeIntervalSince1970) * 1000
-
-    // Gets the output tensor at index 0. This is a vector that holds the confidence values of the classes detected.
-    guard let outputTensor = tfLiteWrapper.outputTensor(at: 0) else {
+    let results: [Float]
+    switch outputTensor.dataType {
+    case .uInt8:
+      guard let quantization = outputTensor.quantizationParameters else {
+        print("No results returned because the quantization values for the output tensor are nil.")
+        return nil
+      }
+      let quantizedResults = [UInt8](outputTensor.data)
+      results = quantizedResults.map {
+        quantization.scale * Float(Int($0) - quantization.zeroPoint)
+      }
+    case .float32:
+      results = [Float32](unsafeData: outputTensor.data) ?? []
+    default:
+      print("Output tensor data type \(outputTensor.dataType) is unsupported for this example app.")
       return nil
     }
 
-    CVPixelBufferUnlockBaseAddress(thumbnailPixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+    // Process the results.
+    let topNInferences = getTopN(results: results)
 
-    // Formats the results
-    let inferences = getTopN(prediction: outputTensor, resultCount: resultCount, threshold: threshold)
+    // Return the inference time and inference results.
+    return Result(inferenceTime: interval, inferences: topNInferences)
+  }
 
-    // Returns the inference time and inferences
-    let result = Result(inferenceTime: inferenceTime, inferences: inferences)
+  /// Returns the RGB data representation of the given image buffer with the specified `byteCount`.
+  ///
+  /// - Parameters
+  ///   - buffer: The BGRA pixel buffer to convert to RGB data.
+  ///   - byteCount: The expected byte count for the RGB data calculated using the values that the
+  ///       model was trained on: `batchSize * imageWidth * imageHeight * componentsCount`.
+  ///   - isModelQuantized: Whether the model is quantized (i.e. fixed point values rather than
+  ///       floating point values).
+  /// - Returns: The RGB data representation of the image buffer or `nil` if the buffer could not be
+  ///     converted.
+  private func rgbDataFromBuffer(
+    _ buffer: CVPixelBuffer,
+    byteCount: Int,
+    isModelQuantized: Bool
+  ) -> Data? {
+    CVPixelBufferLockBaseAddress(buffer, .readOnly)
+    defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
+    guard let mutableRawPointer = CVPixelBufferGetBaseAddress(buffer) else {
+      return nil
+    }
+    assert(CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA)
+    let count = CVPixelBufferGetDataSize(buffer)
+    let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
+    var rgbBytes = [UInt8](repeating: 0, count: byteCount)
+    var pixelIndex = 0
+    for component in bufferData.enumerated() {
+      let bgraComponent = component.offset % bgraPixel.channels;
+      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent;
+      guard !isAlphaComponent else {
+        pixelIndex += 1
+        continue
+      }
+      // Swizzle BGR -> RGB.
+      let rgbIndex = pixelIndex * rgbPixelChannels + (bgraPixel.lastBgrComponent - bgraComponent)
+      rgbBytes[rgbIndex] = component.element
+    }
+    if isModelQuantized { return Data(bytes: rgbBytes) }
+    return Data(copyingBufferOf: rgbBytes.map { Float($0) / 255.0 })
+  }
 
-    return result
+  /// Returns the top N inference results sorted in descending order.
+  private func getTopN(results: [Float]) -> [Inference] {
+    // Create a zipped array of tuples [(labelIndex: Int, confidence: Float)].
+    let zippedResults = zip(labels.indices, results)
+
+    // Sort the zipped results by confidence value in descending order.
+    let sortedResults = zippedResults.sorted { $0.1 > $1.1 }.prefix(resultCount)
+
+    // Return the `Inference` results.
+    return sortedResults.map { result in Inference(confidence: result.1, label: labels[result.0]) }
   }
 
   /**
@@ -228,53 +316,6 @@ class ModelDataHandler: NSObject {
   }
 
   /**
-   This method filters out all the results with confidence score < threshold and returns the top N results sorted in descending order.
-
-   */
-  func getTopN(prediction: UnsafeMutablePointer<Float>, resultCount: Int, threshold: Double) -> [Inference] {
-
-    var resultsArray: [Inference] = []
-
-    // Filters out results with confidence score < threshold and creates and Inference object for each class detected.
-    for i in 0..<labels.count {
-      let value = Double(prediction[i])
-
-      guard value >= threshold else {
-        continue
-      }
-
-      guard i < labels.count else {
-        continue
-      }
-      let inference = Inference(className: labels[i], confidence: value)
-      resultsArray.append(inference)
-    }
-
-    // Sorts Inferences in descending order and returns the top resultCount inferences.
-    resultsArray.sort { (first, second) -> Bool in
-      return first.confidence  > second.confidence
-    }
-
-    guard resultsArray.count > resultCount else {
-      return resultsArray
-    }
-
-    let finalArray = resultsArray[0..<resultCount]
-
-    return Array(finalArray)
-  }
-
-  // MARK: Thread Update Methods
-  /**
-   Sets the number of threads on the interpreter through the TFliteWrapper
-   */
-  func set(numberOfThreads threadCount: Int32) {
-
-    tfLiteWrapper.setNumberOfThreads(threadCount)
-    self.threadCount = threadCount
-  }
-
-  /**
    Loads the labels from the labels file and stores it in an instance variable
    */
   func loadLabels(fromFileName fileName: String, fileExtension: String) {
@@ -293,5 +334,43 @@ class ModelDataHandler: NSObject {
       fatalError("Labels file named \(fileName).\(fileExtension) cannot be read. Please add a valid labels file and try again.")
     }
 
+  }
+}
+
+// MARK: - Extensions
+
+extension Data {
+  /// Creates a new buffer by copying the buffer pointer of the given array.
+  ///
+  /// - Warning: The given array's element type `T` must be trivial in that it can be copied bit
+  ///     for bit with no indirection or reference-counting operations; otherwise, reinterpreting
+  ///     data from the resulting buffer has undefined behavior.
+  /// - Parameter array: An array with elements of type `T`.
+  init<T>(copyingBufferOf array: [T]) {
+    self = array.withUnsafeBufferPointer(Data.init)
+  }
+}
+
+extension Array {
+  /// Creates a new array from the bytes of the given unsafe data.
+  ///
+  /// - Warning: The array's `Element` type must be trivial in that it can be copied bit for bit
+  ///     with no indirection or reference-counting operations; otherwise, copying the raw bytes in
+  ///     the `unsafeData`'s buffer to a new array returns an unsafe copy.
+  /// - Note: Returns `nil` if `unsafeData.count` is not a multiple of
+  ///     `MemoryLayout<Element>.stride`.
+  /// - Parameter unsafeData: The data containing the bytes to turn into an array.
+  init?(unsafeData: Data) {
+    guard unsafeData.count % MemoryLayout<Element>.stride == 0 else { return nil }
+    #if swift(>=5.0)
+    self = unsafeData.withUnsafeBytes { .init($0.bindMemory(to: Element.self)) }
+    #else
+    self = unsafeData.withUnsafeBytes {
+      .init(UnsafeBufferPointer<Element>(
+        start: $0,
+        count: unsafeData.count / MemoryLayout<Element>.stride
+      ))
+    }
+    #endif  // swift(>=5.0)
   }
 }

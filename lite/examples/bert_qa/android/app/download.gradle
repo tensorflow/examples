@@ -1,0 +1,16 @@
+apply plugin: 'de.undercouch.download'
+
+task downloadLiteModel {
+    def downloadFiles = [
+        'https://storage.googleapis.com/download.tensorflow.org/models/tflite/bert_qa/vocab.txt': 'vocab.txt',
+        'https://storage.googleapis.com/download.tensorflow.org/models/tflite/bert_qa/contents_from_squad.json': 'qa.json',
+        'https://storage.googleapis.com/download.tensorflow.org/models/tflite/bert_qa/mobilebert_float_20191023.tflite': 'model.tflite',
+    ]
+    downloadFiles.each { key, value ->
+      download {
+          src key
+          dest "$projectDir/src/main/assets/" + value
+          overwrite false
+      }
+    }
+}

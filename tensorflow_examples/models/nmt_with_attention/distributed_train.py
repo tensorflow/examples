@@ -29,14 +29,11 @@ assert tf.__version__.startswith('2')
 
 FLAGS = flags.FLAGS
 
-# if additional flags are needed, define it here.
-flags.DEFINE_integer('num_gpu', 1, 'Number of GPUs to use')
-
 
 class DistributedTrain(Train):
   """Distributed Train class.
 
-  Args:
+  Attributes:
     epochs: Number of epochs.
     enable_function: Decorate function with tf.function.
     encoder: Encoder.
@@ -105,22 +102,20 @@ class DistributedTrain(Train):
 def run_main(argv):
   del argv
   kwargs = utils.flags_dict()
-  kwargs.update({'num_gpu': FLAGS.num_gpu})
   main(**kwargs)
 
 
 def main(epochs, enable_function, buffer_size, batch_size, download_path,
-         num_examples=70000, embedding_dim=256, enc_units=1024, dec_units=1024,
-         num_gpu=1):
+         num_examples=70000, embedding_dim=256, enc_units=1024, dec_units=1024):
 
-  devices = ['/device:GPU:{}'.format(i) for i in range(num_gpu)]
-  strategy = tf.distribute.MirroredStrategy(devices)
+  strategy = tf.distribute.MirroredStrategy()
   num_replicas = strategy.num_replicas_in_sync
 
+  file_path = utils.download(download_path)
+  train_ds, test_ds, inp_lang, targ_lang = utils.create_dataset(
+      file_path, num_examples, buffer_size, batch_size)
+
   with strategy.scope():
-    file_path = utils.download(download_path)
-    train_ds, test_ds, inp_lang, targ_lang = utils.create_dataset(
-        file_path, num_examples, buffer_size, batch_size)
     vocab_inp_size = len(inp_lang.word_index) + 1
     vocab_tar_size = len(targ_lang.word_index) + 1
 

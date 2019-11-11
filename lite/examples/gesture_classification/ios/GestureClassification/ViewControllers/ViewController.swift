@@ -20,7 +20,7 @@ class ViewController: UIViewController {
   // MARK: Storyboards Connections
   @IBOutlet weak var bottomSheetView: CurvedView!
   @IBOutlet weak var previewView: PreviewView!
-	  @IBOutlet weak var containerViewBottomSpace: NSLayoutConstraint!
+  @IBOutlet weak var containerViewBottomSpace: NSLayoutConstraint!
   @IBOutlet weak var containerViewHeight: NSLayoutConstraint!
   @IBOutlet weak var cameraUnavailableLabel: UILabel!
   @IBOutlet weak var resumeButton: UIButton!
@@ -38,7 +38,8 @@ class ViewController: UIViewController {
   private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
 
   // Handles all data preprocessing and makes calls to run inference
-  private let modelDataHandler: ModelDataHandler? = ModelDataHandler(modelFileName: "model", labelsFileName: "labels", labelsFileExtension: "txt")
+  private var modelDataHandler =
+    ModelDataHandler(modelFileInfo: Model.modelInfo, labelsFileInfo: Model.labelsInfo)
 
   // Handles the presenting of results on the screen
   private var inferenceViewController: InferenceViewController?
@@ -178,7 +179,9 @@ class ViewController: UIViewController {
 extension ViewController: InferenceViewControllerDelegate {
 
   func didChangeThreadCount(to count: Int) {
-    modelDataHandler?.set(numberOfThreads: Int32(count))
+    if modelDataHandler?.threadCount == count { return }
+    modelDataHandler =
+      ModelDataHandler(modelFileInfo: Model.modelInfo, labelsFileInfo: Model.labelsInfo)
   }
 }
 
