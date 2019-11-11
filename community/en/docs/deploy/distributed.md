@@ -26,11 +26,7 @@ method creates a single-process cluster, with an in-process server.
 
 ## Create a cluster
 
-<div class="video-wrapper">
-  <iframe class="devsite-embedded-youtube-video" data-video-id="la_M6bCV91M"
-          data-autohide="1" data-showinfo="0" frameborder="0" allowfullscreen>
-  </iframe>
-</div>
+[![Distributed TensorFlow (TensorFlow Dev Summit 2017)](http://img.youtube.com/vi/la_M6bCV91M/0.jpg)](https://www.youtube.com/embed/la_M6bCV91M "Distributed TensorFlow (TensorFlow Dev Summit 2017)")
 
 A TensorFlow "cluster" is a set of "tasks" that participate in the distributed
 execution of a TensorFlow graph. Each task is associated with a TensorFlow
