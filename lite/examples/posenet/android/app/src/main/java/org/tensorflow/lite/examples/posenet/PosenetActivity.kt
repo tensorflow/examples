@@ -448,36 +448,35 @@ class PosenetActivity :
 
   /** Crop Bitmap to maintain aspect ratio of model input.   */
   private fun cropBitmap(bitmap: Bitmap): Bitmap {
-    // Rotated bitmap has previewWidth as its height and previewHeight as width.
-    val previewRatio = previewWidth.toFloat() / previewHeight
+    val bitmapRatio = bitmap.height.toFloat() / bitmap.width
     val modelInputRatio = MODEL_HEIGHT.toFloat() / MODEL_WIDTH
     var croppedBitmap = bitmap
 
-    // Acceptable difference between the modelInputRatio and previewRatio to skip cropping.
-    val maxDifference = 1.0f.pow(-5)
+    // Acceptable difference between the modelInputRatio and bitmapRatio to skip cropping.
+    val maxDifference = 1e-5
 
-    // Checks if the previewing bitmap has similar aspect ratio as the required model input.
+    // Checks if the bitmap has similar aspect ratio as the required model input.
     when {
-      abs(modelInputRatio - previewRatio) < maxDifference -> return croppedBitmap
-      modelInputRatio > previewRatio -> {
+      abs(modelInputRatio - bitmapRatio) < maxDifference -> return croppedBitmap
+      modelInputRatio < bitmapRatio -> {
         // New image is taller so we are height constrained.
-        val cropHeight = previewHeight - (previewWidth.toFloat() / modelInputRatio)
+        val cropHeight = bitmap.height - (bitmap.width.toFloat() / modelInputRatio)
         croppedBitmap = Bitmap.createBitmap(
           bitmap,
           0,
           (cropHeight / 2).toInt(),
-          previewHeight,
-          (previewWidth - (cropHeight / 2)).toInt()
+          bitmap.width,
+          (bitmap.height - cropHeight).toInt()
         )
       }
       else -> {
-        val cropWidth = previewWidth - (previewHeight.toFloat() * modelInputRatio)
+        val cropWidth = bitmap.width - (bitmap.height.toFloat() * modelInputRatio)
         croppedBitmap = Bitmap.createBitmap(
           bitmap,
           (cropWidth / 2).toInt(),
           0,
-          (previewHeight - (cropWidth / 2)).toInt(),
-          previewWidth
+          (bitmap.width - cropWidth).toInt(),
+          bitmap.height
         )
       }
     }
