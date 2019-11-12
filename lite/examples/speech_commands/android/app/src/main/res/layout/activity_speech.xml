@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#00000000">
@@ -23,18 +23,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_alignParentTop="true"
-            android:background="@color/toolbar_bg">
+            android:background="@android:color/white">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/tfl_logo" />
-        </android.support.v7.widget.Toolbar>
+                android:src="@drawable/tfl2_logo_dark" />
+        </androidx.appcompat.widget.Toolbar>
 
         <TextView
             android:id="@+id/textView"
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/toolbar"
             android:layout_gravity="top"
-            android:background="#455B64"
+            android:background="@color/colorPrimary"
             android:padding="10dp"
             android:text="Say one of the words below!"
             android:textAlignment="center"
@@ -210,4 +210,4 @@
     <include
         android:id="@+id/bottom_sheet_layout"
         layout="@layout/layout_bottom_sheet" />
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

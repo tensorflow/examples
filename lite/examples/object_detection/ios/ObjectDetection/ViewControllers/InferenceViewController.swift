@@ -203,5 +203,3 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
     return(fieldName, info)
   }
 }
-
-

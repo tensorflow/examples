@@ -174,7 +174,7 @@ class InferenceViewController: UIViewController {
       return
     }
 
-    guard  let index = self.gestures.index(where: {$0.name.stringByTrimmingWhiteSpace() == inferences[0].className}) else {
+    guard  let index = self.gestures.index(where: {$0.name.stringByTrimmingWhiteSpace() == inferences[0].label}) else {
       return
     }
 

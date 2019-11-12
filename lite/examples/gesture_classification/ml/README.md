@@ -75,7 +75,7 @@ model = Model(inputs=self.base_model.input, outputs=self.top_model(layer.output)
 After obtaining the Keras H5 model, the session is cleared of all the global variables and reloaded again from the saved Keras model. Finally, the TensorFlow Lite Optimizing Converter or TOCO is used to convert the model from Keras to TFLite FlatBuffers.
 
 ```python
-converter = tf.contrib.lite.TocoConverter.from_keras_model_file(keras_model_file)
+converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(keras_model_file)
 tflite_model = converter.convert()
 ```
 

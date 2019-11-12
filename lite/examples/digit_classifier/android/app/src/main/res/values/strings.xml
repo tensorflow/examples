@@ -1,0 +1,6 @@
+<resources>
+  <string name="app_name" translatable="false">TFL Digit Classifier</string>
+  <string name="clear_button_text" translatable="false">Clear</string>
+  <string name="prediction_text_placeholder" translatable="false">Please draw a digit</string>
+  <string name="classification_error_message" translatable="false">Error classifying drawing: %s</string>
+</resources>

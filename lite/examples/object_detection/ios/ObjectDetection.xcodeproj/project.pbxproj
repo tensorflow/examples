@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2CF84B0A5A1DD5B9AB8BFB72 /* Pods_ObjectDetection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5D7E9025B9F809C28A36672 /* Pods_ObjectDetection.framework */; };
 		AA055D8921622F3E00B25948 /* labelmap.txt in Resources */ = {isa = PBXBuildFile; fileRef = AA055D8821622F3E00B25948 /* labelmap.txt */; };
 		AA119EA2217F337300DE46CF /* ModelDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA119EA1217F337300DE46CF /* ModelDataHandler.swift */; };
 		AA16E59B21807BAC00D9E153 /* InfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA16E59921807A7000D9E153 /* InfoCell.swift */; };
@@ -20,7 +19,6 @@
 		AA9AC5A6212D39FD000B4E9D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA9AC5A5212D39FD000B4E9D /* Assets.xcassets */; };
 		AA9AC5A9212D39FD000B4E9D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA9AC5A7212D39FD000B4E9D /* LaunchScreen.storyboard */; };
 		AA9AC5D7212D43E0000B4E9D /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5D5212D43E0000B4E9D /* PreviewView.swift */; };
-		AA9AC5E0212D447B000B4E9D /* TfliteWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5DF212D447B000B4E9D /* TfliteWrapper.mm */; };
 		AA9AC5E2212D4520000B4E9D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5E1212D4520000B4E9D /* ViewController.swift */; };
 		AAAB09702189838A0015A1F2 /* CVPixelBufferExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAB096F2189838A0015A1F2 /* CVPixelBufferExtension.swift */; };
 		AAB1116D21511218008C215D /* detect.tflite in Resources */ = {isa = PBXBuildFile; fileRef = AAB1116B21511218008C215D /* detect.tflite */; };
@@ -43,17 +41,11 @@
 		AA9AC5A8212D39FD000B4E9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AA9AC5AA212D39FD000B4E9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA9AC5D5212D43E0000B4E9D /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
-		AA9AC5DA212D4430000B4E9D /* ObjectDetection-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ObjectDetection-Bridging-Header.h"; sourceTree = "<group>"; };
-		AA9AC5DE212D447B000B4E9D /* TfliteWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TfliteWrapper.h; sourceTree = "<group>"; };
-		AA9AC5DF212D447B000B4E9D /* TfliteWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TfliteWrapper.mm; sourceTree = "<group>"; };
 		AA9AC5E1212D4520000B4E9D /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AAAB096F2189838A0015A1F2 /* CVPixelBufferExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CVPixelBufferExtension.swift; sourceTree = "<group>"; };
 		AAB1116B21511218008C215D /* detect.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = detect.tflite; sourceTree = "<group>"; };
 		AAC58494214797E800FB532F /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
-		BE5F327E7FB51CF1B69DFE19 /* Pods-ObjectDetection.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjectDetection.release.xcconfig"; path = "Pods/Target Support Files/Pods-ObjectDetection/Pods-ObjectDetection.release.xcconfig"; sourceTree = "<group>"; };
-		D5D7E9025B9F809C28A36672 /* Pods_ObjectDetection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjectDetection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FA9D2F6AD067D971339F1AB0 /* Pods-ObjectDetection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjectDetection.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ObjectDetection/Pods-ObjectDetection.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,22 +53,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2CF84B0A5A1DD5B9AB8BFB72 /* Pods_ObjectDetection.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		079010EB7407AAC2D027B2FA /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				FA9D2F6AD067D971339F1AB0 /* Pods-ObjectDetection.debug.xcconfig */,
-				BE5F327E7FB51CF1B69DFE19 /* Pods-ObjectDetection.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		AA09263B212D730700D5890F /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -118,8 +100,6 @@
 			children = (
 				AA9AC59D212D39FC000B4E9D /* ObjectDetection */,
 				AA9AC59C212D39FC000B4E9D /* Products */,
-				AA9AC5CC212D42D8000B4E9D /* Frameworks */,
-				079010EB7407AAC2D027B2FA /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -136,7 +116,6 @@
 			children = (
 				AA16E59A21807A7000D9E153 /* Cells */,
 				AAB1116F21512383008C215D /* ModelDataHandler */,
-				AA9AC5D9212D4411000B4E9D /* TfliteWrapper */,
 				AA9AC5D4212D43E0000B4E9D /* Camera Feed */,
 				AA9AC5D1212D43BD000B4E9D /* ViewControllers */,
 				AA756E682150CE88004BB0BC /* Views */,
@@ -149,14 +128,6 @@
 				AA9AC5AA212D39FD000B4E9D /* Info.plist */,
 			);
 			path = ObjectDetection;
-			sourceTree = "<group>";
-		};
-		AA9AC5CC212D42D8000B4E9D /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				D5D7E9025B9F809C28A36672 /* Pods_ObjectDetection.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		AA9AC5D1212D43BD000B4E9D /* ViewControllers */ = {
@@ -177,16 +148,6 @@
 			path = "Camera Feed";
 			sourceTree = "<group>";
 		};
-		AA9AC5D9212D4411000B4E9D /* TfliteWrapper */ = {
-			isa = PBXGroup;
-			children = (
-				AA9AC5DE212D447B000B4E9D /* TfliteWrapper.h */,
-				AA9AC5DF212D447B000B4E9D /* TfliteWrapper.mm */,
-				AA9AC5DA212D4430000B4E9D /* ObjectDetection-Bridging-Header.h */,
-			);
-			path = TfliteWrapper;
-			sourceTree = "<group>";
-		};
 		AAB1116F21512383008C215D /* ModelDataHandler */ = {
 			isa = PBXGroup;
 			children = (
@@ -202,7 +163,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA9AC5C3212D39FD000B4E9D /* Build configuration list for PBXNativeTarget "ObjectDetection" */;
 			buildPhases = (
-				0FF2C6B717D2142E4CA09673 /* [CP] Check Pods Manifest.lock */,
 				AA055D8A21622F7C00B25948 /* ShellScript */,
 				AA9AC597212D39FC000B4E9D /* Sources */,
 				AA9AC598212D39FC000B4E9D /* Frameworks */,
@@ -267,28 +227,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		0FF2C6B717D2142E4CA09673 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ObjectDetection-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		AA055D8A21622F7C00B25948 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -320,7 +258,6 @@
 				AA756E652150C996004BB0BC /* CameraFeedManager.swift in Sources */,
 				AAAB09702189838A0015A1F2 /* CVPixelBufferExtension.swift in Sources */,
 				AAEF3D8D21A2BE2B0073AE1C /* UIColorExtension.swift in Sources */,
-				AA9AC5E0212D447B000B4E9D /* TfliteWrapper.mm in Sources */,
 				AA9AC59F212D39FC000B4E9D /* AppDelegate.swift in Sources */,
 				AA9AC5D7212D43E0000B4E9D /* PreviewView.swift in Sources */,
 				AA16E59B21807BAC00D9E153 /* InfoCell.swift in Sources */,
@@ -408,6 +345,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -461,13 +399,13 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		AA9AC5C4212D39FD000B4E9D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FA9D2F6AD067D971339F1AB0 /* Pods-ObjectDetection.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -478,12 +416,6 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = (
-					"'${SRCROOT}/Pods/TensorFlowLite/Frameworks/tensorflow_lite.framework/Headers'",
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/TensorFlowLite\"",
-				);
 				INFOPLIST_FILE = ObjectDetection/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -493,16 +425,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.ObjectDetection;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "ObjectDetection/TfliteWrapper/ObjectDetection-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		AA9AC5C5212D39FD000B4E9D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BE5F327E7FB51CF1B69DFE19 /* Pods-ObjectDetection.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -513,12 +444,6 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = (
-					"'${SRCROOT}/Pods/TensorFlowLite/Frameworks/tensorflow_lite.framework/Headers'",
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/TensorFlowLite\"",
-				);
 				INFOPLIST_FILE = ObjectDetection/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -528,8 +453,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.ObjectDetection;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "ObjectDetection/TfliteWrapper/ObjectDetection-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

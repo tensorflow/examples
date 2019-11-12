@@ -44,7 +44,8 @@ class ViewController: UIViewController {
 
   // MARK: Controllers that manage functionality
   private lazy var cameraFeedManager = CameraFeedManager(previewView: previewView)
-  private let modelDataHandler: ModelDataHandler? = ModelDataHandler(modelFileName: "detect", labelsFileName: "labelmap", labelsFileExtension: "txt")
+  private var modelDataHandler: ModelDataHandler? =
+    ModelDataHandler(modelFileInfo: MobileNetSSD.modelInfo, labelsFileInfo: MobileNetSSD.labelsInfo)
   private var inferenceViewController: InferenceViewController?
 
   // MARK: View Handling Methods
@@ -58,7 +59,6 @@ class ViewController: UIViewController {
     overlayView.clearsContextBeforeDrawing = true
 
     addPanGesture()
-
   }
 
   override func didReceiveMemoryWarning() {
@@ -98,7 +98,11 @@ class ViewController: UIViewController {
   }
 
   func presentUnableToResumeSessionAlert() {
-    let alert = UIAlertController(title: "Unable to Resume Session", message: "There was an error while attempting to resume session.", preferredStyle: .alert)
+    let alert = UIAlertController(
+      title: "Unable to Resume Session",
+      message: "There was an error while attempting to resume session.",
+      preferredStyle: .alert
+    )
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
 
     self.present(alert, animated: true)
@@ -114,9 +118,9 @@ class ViewController: UIViewController {
         return
       }
       inferenceViewController = segue.destination as? InferenceViewController
-      inferenceViewController?.wantedInputHeight = tempModelDataHandler.wantedInputHeight
-      inferenceViewController?.wantedInputWidth = tempModelDataHandler.wantedInputWidth
-      inferenceViewController?.threadCountLimit = tempModelDataHandler.threaCountLimit
+      inferenceViewController?.wantedInputHeight = tempModelDataHandler.inputHeight
+      inferenceViewController?.wantedInputWidth = tempModelDataHandler.inputWidth
+      inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
       inferenceViewController?.currentThreadCount = tempModelDataHandler.threadCount
       inferenceViewController?.delegate = self
 
@@ -133,7 +137,12 @@ class ViewController: UIViewController {
 extension ViewController: InferenceViewControllerDelegate {
 
   func didChangeThreadCount(to count: Int) {
-    modelDataHandler?.set(numberOfThreads: count)
+    if modelDataHandler?.threadCount == count { return }
+    modelDataHandler = ModelDataHandler(
+      modelFileInfo: MobileNetSSD.modelInfo,
+      labelsFileInfo: MobileNetSSD.labelsInfo,
+      threadCount: count
+    )
   }
 
 }
@@ -155,7 +164,7 @@ extension ViewController: CameraFeedManagerDelegate {
   func sessionWasInterrupted(canResumeManually resumeManually: Bool) {
 
     // Updates the UI when session is interupted.
-    if resumeManually == true {
+    if resumeManually {
       self.resumeButton.isHidden = false
     }
     else {
@@ -191,7 +200,7 @@ extension ViewController: CameraFeedManagerDelegate {
     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
     let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
 
-      UIApplication.shared.open(URL(string: UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+      UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
     }
 
     alertController.addAction(cancelAction)
@@ -433,6 +442,3 @@ extension ViewController {
   }
 
 }
-
-
-

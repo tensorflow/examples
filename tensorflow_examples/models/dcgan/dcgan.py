@@ -45,11 +45,10 @@ def scale(image, label):
 
 
 def create_dataset(buffer_size, batch_size):
-  dataset, _ = tfds.load('mnist', as_supervised=True, with_info=True)
-  train_dataset, _ = dataset['train'], dataset['test']
+  train_dataset = tfds.load(
+      'mnist', split='train', as_supervised=True, shuffle_files=True)
   train_dataset = train_dataset.map(scale, num_parallel_calls=AUTOTUNE)
   train_dataset = train_dataset.shuffle(buffer_size).batch(batch_size)
-
   return train_dataset
 
 

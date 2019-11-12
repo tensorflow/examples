@@ -16,7 +16,7 @@ limitations under the License.
 package org.tensorflow.lite.examples.gesture;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 /** Main {@code Activity} class for the Camera app. */
 public class CameraActivity extends AppCompatActivity {

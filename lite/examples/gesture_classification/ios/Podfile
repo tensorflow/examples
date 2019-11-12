@@ -4,8 +4,6 @@ platform :ios, '12.0'
 target 'GestureClassification' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
-  pod 'TensorFlowLite' 
-
   # Pods for GestureClassification
-
+  pod 'TensorFlowLiteSwift'
 end

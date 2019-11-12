@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import UIKit
+import Foundation
 
 struct RecognizedCommand {
   var score: Float
@@ -24,7 +24,7 @@ struct RecognizedCommand {
  This class smoothes out the results by averaging them over a window duration and making sure the
  commands are not duplicated for display.
  */
-class RecognizeCommands: NSObject {
+class RecognizeCommands {
   // MARK: Structures that handles results.
   private struct Command {
     var score: Float
@@ -38,7 +38,7 @@ class RecognizeCommands: NSObject {
 
   // MARK: Constants
   private let averageWindowDuration: Double
-  private let supressionTime: Double
+  private let suppressionTime: Double
   private let minimumCount: Int
   private let minimumTimeBetweenSamples: Double
   private let detectionThreshold: Float
@@ -54,22 +54,20 @@ class RecognizeCommands: NSObject {
   /**
    Initializes RecognizeCommands with specified parameters.
    */
-  init(averageWindowDuration: Double, detectionThreshold: Float, minimumTimeBetweenSamples: Double, supressionTime: Double, minimumCount: Int, classLabels: [String]) {
+  init(averageWindowDuration: Double, detectionThreshold: Float, minimumTimeBetweenSamples: Double, suppressionTime: Double, minimumCount: Int, classLabels: [String]) {
     self.averageWindowDuration = averageWindowDuration
     self.detectionThreshold = detectionThreshold
     self.minimumTimeBetweenSamples = minimumTimeBetweenSamples
-    self.supressionTime = supressionTime
+    self.suppressionTime = suppressionTime
     self.minimumCount = minimumCount
     self.classLabels = classLabels
-
-    super.init()
   }
 
   /**
    This function averages the results obtained over an average window duration and prunes out any
    old results.
    */
-  func process(latestResults: [Float], currenTime: TimeInterval) -> RecognizedCommand? {
+  func process(latestResults: [Float], currentTime: TimeInterval) -> RecognizedCommand? {
 
     guard latestResults.count == classLabels.count else {
       fatalError("There should be \(classLabels.count) in results. But there are \(latestResults.count) results")
@@ -77,13 +75,13 @@ class RecognizeCommands: NSObject {
 
     // Checks if the new results were identified at a later time than the currently identified
     // results.
-    if let first = previousResults.first, first.time > currenTime {
+    if let first = previousResults.first, first.time > currentTime {
       fatalError("Results should be provided in increasing time order")
     }
 
-    if previousResults.count > 1 {
+    if let lastResult = previousResults.last {
 
-      let timeSinceMostRecent = currenTime - previousResults[previousResults.count - 1].time
+      let timeSinceMostRecent = currentTime - previousResults[previousResults.count - 1].time
 
       // If not enough time has passed after the last inference, we return the previously identified
       // result as legitimate one.
@@ -93,11 +91,11 @@ class RecognizeCommands: NSObject {
     }
 
     // Appends the new results to the identified results
-    let results: ResultsAtTime = ResultsAtTime(time: currenTime, scores: latestResults)
+    let results: ResultsAtTime = ResultsAtTime(time: currentTime, scores: latestResults)
 
     previousResults.append(results)
 
-    let timeLimit = currenTime - averageWindowDuration
+    let timeLimit = currentTime - averageWindowDuration
 
     // Flushes out all the results currently held that less than the average window duration since
     // they are considered too old for averaging.
@@ -148,16 +146,16 @@ class RecognizeCommands: NSObject {
       timeSinceLastTop = Date.distantFuture.timeIntervalSince1970 * 1000
     }
     else {
-      timeSinceLastTop = currenTime - previousTopLabelTime
+      timeSinceLastTop = currentTime - previousTopLabelTime
     }
 
     // Return the results
     var isNew = false
-    if (averageScores[0].score > detectionThreshold && timeSinceLastTop > supressionTime) {
+    if (averageScores[0].score > detectionThreshold && timeSinceLastTop > suppressionTime) {
 
       previousTopScore = averageScores[0].score
       previousTopLabel = averageScores[0].name
-      previousTopLabelTime = currenTime
+      previousTopLabelTime = currentTime
       isNew = true
     }
     else {
@@ -165,6 +163,6 @@ class RecognizeCommands: NSObject {
     }
 
     return RecognizedCommand(
-        score: averageScores[0].score, name: averageScores[0].name, isNew: isNew)
+        score: previousTopScore, name: previousTopLabel, isNew: isNew)
   }
 }
