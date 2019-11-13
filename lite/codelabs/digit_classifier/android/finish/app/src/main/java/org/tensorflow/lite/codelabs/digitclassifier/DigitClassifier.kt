@@ -95,7 +95,7 @@ class DigitClassifier(private val context: Context) {
     check(isInitialized) { "TF Lite Interpreter is not initialized yet." }
 
     // TODO: Add code to run inference with TF Lite.
-    // Pre-processing: resize the input image to match with model input shape.
+    // Pre-processing: resize the input image to match the model input shape.
     val resizedImage = Bitmap.createScaledBitmap(
       bitmap,
       inputImageWidth,
@@ -110,7 +110,7 @@ class DigitClassifier(private val context: Context) {
     // Run inference with the input data.
     interpreter?.run(byteBuffer, output)
 
-    // Post-processing: find the digit that has highest probability
+    // Post-processing: find the digit that has the highest probability
     // and return it a human-readable string.
     val result = output[0]
     val maxIndex = result.indices.maxBy { result[it] } ?: -1
