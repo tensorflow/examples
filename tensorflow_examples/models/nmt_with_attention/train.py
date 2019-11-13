@@ -160,6 +160,15 @@ class Train(object):
       for inp, targ in train_ds:
         self.train_step((inp, targ))
 
+      if epoch == self.epochs - 1:
+        import os, sys
+        checkpoint_dir = os.path.join(sys.path[0]+'/training_checkpoints')
+        checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+        checkpoint = tf.train.Checkpoint(optimizer=self.optimizer,
+                                         encoder=self.encoder,
+                                         decoder=self.decoder)
+        #save the model
+        checkpoint.save(file_prefix=checkpoint_prefix)
       for inp_test, targ_test in test_ds:
         self.test_step((inp_test, targ_test))
 
@@ -180,7 +189,7 @@ def run_main(argv):
 def main(epochs, enable_function, buffer_size, batch_size, download_path,
          num_examples=70000, embedding_dim=256, enc_units=1024, dec_units=1024):
   file_path = utils.download(download_path)
-  train_ds, test_ds, inp_lang, targ_lang = utils.create_dataset(
+  train_ds, test_ds, inp_lang, targ_lang, _, _ = utils.create_dataset(
       file_path, num_examples, buffer_size, batch_size)
   vocab_inp_size = len(inp_lang.word_index) + 1
   vocab_tar_size = len(targ_lang.word_index) + 1
