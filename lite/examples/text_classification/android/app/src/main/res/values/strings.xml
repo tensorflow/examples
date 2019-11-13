@@ -1,0 +1,5 @@
+<resources>
+  <string name="app_name" translatable="false">TFL Text Classification</string>
+  <string name="edit_text_hint" translatable="false">Please enter your movie review.</string>
+  <string name="button_ok" translatable="false">Predict</string>
+</resources>

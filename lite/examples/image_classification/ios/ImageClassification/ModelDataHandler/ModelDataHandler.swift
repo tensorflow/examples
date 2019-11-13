@@ -230,13 +230,33 @@ class ModelDataHandler {
     let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
     var rgbBytes = [UInt8](repeating: 0, count: byteCount)
     var index = 0
-    for component in bufferData.enumerated() {
-      let offset = component.offset
-      let isAlphaComponent = (offset % alphaComponent.baseOffset) == alphaComponent.moduloRemainder
-      guard !isAlphaComponent else { continue }
-      rgbBytes[index] = component.element
-      index += 1
+
+    let pixelBufferFormat = CVPixelBufferGetPixelFormatType(buffer)
+    var rgbChannelMap : [Int]
+    switch (pixelBufferFormat) {
+    case kCVPixelFormatType_32BGRA:
+      rgbChannelMap = [2, 1, 0]
+    case kCVPixelFormatType_32RGBA:
+      rgbChannelMap = [0, 1, 2]
+    case kCVPixelFormatType_32ABGR:
+      rgbChannelMap = [3, 2, 1]
+    case kCVPixelFormatType_32ARGB:
+      rgbChannelMap = [1, 2, 3]
+    default:
+      // Unknown pixel format.
+      return nil
     }
+
+    // Iterate through pixels and reorder bytes to be in RGB order.
+    let numChannels = 4
+    for pixelIndex in 0..<count / numChannels {
+      let offset = pixelIndex * numChannels
+      for j in 0...2 {
+        rgbBytes[index] = bufferData[offset + rgbChannelMap[j]]
+        index += 1
+      }
+    }
+
     if isModelQuantized { return Data(bytes: rgbBytes) }
     return Data(copyingBufferOf: rgbBytes.map { Float($0) / 255.0 })
   }

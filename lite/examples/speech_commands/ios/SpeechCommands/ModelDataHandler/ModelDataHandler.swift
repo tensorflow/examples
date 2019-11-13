@@ -165,7 +165,7 @@ class ModelDataHandler {
     // Runs results through recognize commands.
     let command = recognizeCommands?.process(
       latestResults: results,
-      currenTime: Date().timeIntervalSince1970 * 1000
+      currentTime: Date().timeIntervalSince1970 * 1000
     )
 
     // Check if command is new and the identified result is not silence or unknown.
