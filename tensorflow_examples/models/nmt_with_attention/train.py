@@ -19,12 +19,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os, sys
 from absl import app
 import tensorflow as tf # TF2
 from tensorflow_examples.models.nmt_with_attention import nmt
 from tensorflow_examples.models.nmt_with_attention import utils
 assert tf.__version__.startswith('2')
-
 
 class Train(object):
   """Train class.
@@ -161,7 +161,6 @@ class Train(object):
         self.train_step((inp, targ))
 
       if epoch == self.epochs - 1:
-        import os, sys
         checkpoint_dir = os.path.join(sys.path[0]+'/training_checkpoints')
         checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
         checkpoint = tf.train.Checkpoint(optimizer=self.optimizer,
