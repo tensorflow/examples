@@ -1,5 +1,5 @@
 tf-nightly
-tensorflow_hub=0.6.0
+tf-hub-nightly=0.8.0.dev201911110007
 python>=3.6
 numpy=1.17.3
 pip=19.3.1

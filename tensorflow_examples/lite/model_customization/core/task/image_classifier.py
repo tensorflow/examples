@@ -25,18 +25,21 @@ from tensorflow_examples.lite.model_customization.core.task import classificatio
 import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
 
 import tensorflow_hub as hub
+from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as lib
 
 
 def create(data,
            model_export_format=mef.ModelExportFormat.TFLITE,
            model_spec=ms.mobilenet_v2_spec,
            shuffle=False,
-           batch_size=32,
-           epochs=2,
-           train_whole_model=False,
            validation_ratio=0.1,
            test_ratio=0.1,
-           dropout_rate=0.2):
+           batch_size=None,
+           epochs=None,
+           train_whole_model=None,
+           dropout_rate=None,
+           learning_rate=None,
+           momentum=None):
   """Loads data and retrains the model based on data for image classification.
 
   Args:
@@ -44,18 +47,34 @@ def create(data,
     model_export_format: Model export format such as saved_model / tflite.
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
+    validation_ratio: The ratio of valid data to be splitted.
+    test_ratio: The ratio of test data to be splitted.
     batch_size: Number of samples per training step.
     epochs: Number of epochs for training.
     train_whole_model: If true, the Hub module is trained together with the
       classification layer on top. Otherwise, only train the top classification
       layer.
-    validation_ratio: The ratio of valid data to be splitted.
-    test_ratio: The ratio of test data to be splitted.
     dropout_rate: the rate for dropout.
-
+    learning_rate: a Python float forwarded to the optimizer.
+    momentum: a Python float forwarded to the optimizer.
   Returns:
     An instance of ImageClassifier class.
   """
+  # The hyperparameters for make_image_classifier by tensorflow hub.
+  hparams = lib.get_default_hparams()
+  if batch_size is not None:
+    hparams = hparams._replace(batch_size=batch_size)
+  if epochs is not None:
+    hparams = hparams._replace(train_epochs=epochs)
+  if train_whole_model is not None:
+    hparams = hparams._replace(do_fine_tuning=train_whole_model)
+  if dropout_rate is not None:
+    hparams = hparams._replace(dropout_rate=dropout_rate)
+  if learning_rate is not None:
+    hparams = hparams._replace(learning_rate=learning_rate)
+  if momentum is not None:
+    hparams = hparams._replace(momentum=momentum)
+
   image_classifier = ImageClassifier(
       data,
       model_export_format,
@@ -64,10 +83,10 @@ def create(data,
       train_whole_model=False,
       validation_ratio=validation_ratio,
       test_ratio=test_ratio,
-      dropout_rate=dropout_rate)
+      hparams=hparams)
 
   tf.compat.v1.logging.info('Retraining the models...')
-  image_classifier.train(epochs, batch_size, train_whole_model)
+  image_classifier.train(hparams)
 
   return image_classifier
 
@@ -83,7 +102,7 @@ class ImageClassifier(classification_model.ClassificationModel):
                train_whole_model=False,
                validation_ratio=0.1,
                test_ratio=0.1,
-               dropout_rate=0.2):
+               hparams=lib.get_default_hparams()):
     """Init function for ImageClassifier class.
 
     Including splitting the raw input data into train/eval/test sets and
@@ -99,7 +118,9 @@ class ImageClassifier(classification_model.ClassificationModel):
         classification layer.
       validation_ratio: The ratio of valid data to be splitted.
       test_ratio: The ratio of test data to be splitted.
-      dropout_rate: the rate for dropout.
+      hparams: A namedtuple of hyperparameters. This function expects
+        .dropout_rate: The fraction of the input units to drop, used in dropout
+          layer.
     """
     super(ImageClassifier,
           self).__init__(data, model_export_format, model_spec, shuffle,
@@ -125,21 +146,12 @@ class ImageClassifier(classification_model.ClassificationModel):
     if self.train_data.size == 0:
       raise ValueError('Training dataset is empty.')
 
-    # TF1.* models need Wrapper to be used in tf 2.0.
-    if self.pre_trained_model_spec.tf_version == 1:
-      module = ms.Wrapper(self.pre_trained_model_spec.uri, tags=[])
-    else:
-      module = self.pre_trained_model_spec.uri
     # Creates the classifier model for retraining.
-    self.model = tf.keras.Sequential([
-        hub.KerasLayer(
-            module,
-            input_shape=self.pre_trained_model_spec.input_image_shape + [3],
-            trainable=train_whole_model,
-        ),
-        tf.keras.layers.Dropout(dropout_rate),
-        tf.keras.layers.Dense(data.num_classes, activation='softmax')
-    ])
+    module_layer = hub.KerasLayer(
+        self.pre_trained_model_spec.uri, trainable=train_whole_model)
+    self.model = lib.build_model(module_layer, hparams,
+                                 self.pre_trained_model_spec.input_image_shape,
+                                 data.num_classes)
 
   def _gen_train_dataset(self, data, batch_size=32):
     ds = data.dataset.map(self.preprocess_image)
@@ -152,33 +164,35 @@ class ImageClassifier(classification_model.ClassificationModel):
 
   def _gen_valid_dataset(self, data, batch_size=32):
     ds = data.dataset.map(self.preprocess_image)
-
     ds = ds.batch(batch_size)
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
 
-  # TODO(yuqili): leverage make_image_classifier library for this part.
-  def train(self, epochs, batch_size=32, train_whole_model=False):
-    """Feeds the training data for training."""
+  def train(self, hparams=lib.get_default_hparams()):
+    """Feeds the training data for training.
 
-    train_ds = self._gen_train_dataset(self.train_data, batch_size)
+    Args:
+      hparams: A namedtuple of hyperparameters. This function expects
+      .train_epochs: a Python integer with the number of passes over the
+        training dataset;
+      .learning_rate: a Python float forwarded to the optimizer;
+      .momentum: a Python float forwarded to the optimizer;
+      .batch_size: a Python integer, number of samples per training step.
 
-    valid_ds = self._gen_valid_dataset(self.valid_data, batch_size)
+    Returns:
+      The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
+    """
+
+    train_data_and_size = (self._gen_train_dataset(self.train_data,
+                                                   hparams.batch_size),
+                           self.train_data.size)
+    validation_data_and_size = (self._gen_valid_dataset(self.valid_data,
+                                                        hparams.batch_size),
+                                self.valid_data.size)
 
     # Trains the models.
-    self.model.compile(
-        optimizer=tf.keras.optimizers.Adam(),
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy'])
-
-    steps_per_epoch = self.train_data.size // batch_size
-    validation_steps = self.valid_data.size // batch_size
-    self.model.fit(
-        train_ds,
-        epochs=epochs,
-        steps_per_epoch=steps_per_epoch,
-        validation_data=valid_ds,
-        validation_steps=validation_steps)
+    return lib.train_model(self.model, hparams, train_data_and_size,
+                           validation_data_and_size)
 
   def preprocess_image(self, image, label):
     """Image preprocessing method."""
@@ -195,6 +209,7 @@ class ImageClassifier(classification_model.ClassificationModel):
 
     image = tf.image.resize(image,
                             self.pre_trained_model_spec.input_image_shape)
+    label = tf.one_hot(label, depth=self.data.num_classes)
     return image, label
 
   def evaluate(self, data=None, batch_size=32):

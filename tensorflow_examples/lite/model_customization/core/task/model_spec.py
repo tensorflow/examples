@@ -17,9 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf # TF2
-import tensorflow_hub as hub
-
 
 class ImageModelSpec(object):
   """A specification of image model."""
@@ -28,31 +25,14 @@ class ImageModelSpec(object):
   mean_rgb = [0, 0, 0]
   stddev_rgb = [255, 255, 255]
 
-  def __init__(self, name, uri, tf_version=2):
+  def __init__(self, name, uri):
     self.name = name
     self.uri = uri
-    self.tf_version = tf_version
-
-
-class Wrapper(tf.train.Checkpoint):
-  """Used to compatible tf1.* models in tf2.0."""
-
-  def __init__(self, spec, tags=None):
-    super(Wrapper, self).__init__()
-    self.module = hub.load(spec, tags=tags)
-    self.variables = self.module.variables
-    self.trainable_variables = []
-
-  def __call__(self, x):
-    return self.module.signatures['default'](x)['default']
-
 
 efficientnet_b0_spec = ImageModelSpec(
     name='efficientnet_b0',
-    uri='https://tfhub.dev/google/efficientnet/b0/feature-vector/1',
-    tf_version=1)
+    uri='https://tfhub.dev/google/efficientnet/b0/feature-vector/1')
 
 mobilenet_v2_spec = ImageModelSpec(
     name='mobilenet_v2',
-    uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4',
-    tf_version=2)
+    uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4')
