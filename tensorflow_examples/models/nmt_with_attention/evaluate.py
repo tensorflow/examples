@@ -32,19 +32,14 @@ class Evaluate(object):
   """Train class.
 
   Attributes:
-    epochs: Number of epochs.
-    enable_function: Decorate function with tf.function.
     encoder: Encoder.
     decoder: Decoder.
     inp_lang: Input language tokenizer.
     targ_lang: Target language tokenizer.
-    batch_size: Batch size.
-    per_replica_batch_size: Batch size per replica for sync replicas. Same as
-      batch_size for non distributed training.
+    max_length_targ: target language max embedding feature dimension
+    max_length_inp: input language max embedding feature dimension
     optimizer: Optimizer.
     loss_object: Object of the loss class.
-    train_loss_metric: Mean metric to keep track of the train loss value.
-    test_loss_metric: Mean metric to keep track of the test loss value.
   """
 
   def __init__(self, encoder, decoder, inp_lang,
@@ -69,34 +64,26 @@ class Evaluate(object):
       result, sentence
     """
     sentence = utils.preprocess_sentence(sentence)
-
     inputs = [self.inp_lang.word_index[i] for i in sentence.split(' ')]
     inputs = tf.keras.preprocessing.\
                         sequence.pad_sequences([inputs],
                                                maxlen=self.max_length_inp,
                                                padding='post')
     inputs = tf.convert_to_tensor(inputs)
-
     result = ''
-
     hidden = [tf.zeros((1, self.encoder.enc_units))]
     enc_out, enc_hidden = self.encoder(inputs, hidden)
-
     dec_hidden = enc_hidden
     dec_input = tf.expand_dims([self.targ_lang.word_index['<start>']], 0)
-
     for _ in range(self.max_length_targ):
       predictions, dec_hidden, _ = self.decoder(dec_input,
                                                 dec_hidden,
                                                 enc_out)
       predicted_id = tf.argmax(predictions[0]).numpy()
-
       result += self.targ_lang.index_word[predicted_id] + ' '
-
       if self.targ_lang.index_word[predicted_id] == '<end>':
         # return result, sentence, attention_plot
         return result, sentence
-
       # the predicted ID is fed back into the model
       dec_input = tf.expand_dims([predicted_id], 0)
     return result, sentence
@@ -108,9 +95,9 @@ def evaluate_flags():
   flags.DEFINE_integer('enc_units', 1024, 'Encoder GRU units')
   flags.DEFINE_integer('dec_units', 1024, 'Decoder GRU units')
   flags.DEFINE_integer('num_examples', 70000,
-                       'Number of examples from dataset')
-  flags.DEFINE_integer('input_sentence', 'Halo.',
-                       'The input sentence to inference,')
+                       'Number of examples from dataset extract to analysis the feature')
+  flags.DEFINE_string('input_sentence', 'Halo.',
+                      'The input sentence to inference,')
 
 def flags_dict():
   """Define the flags.
@@ -118,7 +105,6 @@ def flags_dict():
   Returns:
     Command line arguments as Flags.
   """
-
   kwargs = {
       'file_path': FLAGS.file_path,
       'num_examples': FLAGS.num_examples,
@@ -137,27 +123,20 @@ def run_main(argv):
 
 def main(file_path, num_examples=70000, embedding_dim=256,
          enc_units=1024, dec_units=1024, input_sentence='Halo.'):
-
   input_tensor, target_tensor, inp_lang, targ_lang = utils.load_dataset(
       file_path, num_examples)
-
   max_length_targ, max_length_inp = \
       utils.max_length(target_tensor), utils.max_length(input_tensor)
-
   vocab_inp_size = len(inp_lang.word_index) + 1
   vocab_tar_size = len(targ_lang.word_index) + 1
-
   encoder = nmt.Encoder(vocab_inp_size, embedding_dim, enc_units)
   decoder = nmt.Decoder(vocab_tar_size, embedding_dim, dec_units)
-
   optimizer = tf.keras.optimizers.Adam()
-
   checkpoint_dir = os.path.join(sys.path[0] + '/training_checkpoints')
   checkpoint = tf.train.Checkpoint(optimizer=optimizer,
                                    encoder=encoder,
                                    decoder=decoder)
   _ = checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
-
   eva_obj = Evaluate(encoder, decoder,
                      inp_lang, targ_lang, max_length_targ, max_length_inp)
   print("*********start evaluate**********")
