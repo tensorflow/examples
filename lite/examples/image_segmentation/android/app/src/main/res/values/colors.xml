@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#ffa800</color>
+    <color name="colorPrimaryDark">#ff6f00</color>
+    <color name="colorAccent">#425066</color>
+
+    <color name="semi_transparent">#66000000</color>
+    <color name="white">#ffffff</color>
+
+
+    <color name="grey_50">#FAFAFA</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="grey_400">#BDBDBD</color>
+    <color name="grey_500">#9E9E9E</color>
+    <color name="grey_600">#757575</color>
+    <color name="grey_700">#616161</color>
+    <color name="grey_800">#424242</color>
+    <color name="grey_900">#212121</color>
+
+    <color name="orange_700">#F57C00</color>
+
+    <!-- Green -->
+    <color name="green_50">#E8F5E9</color>
+    <color name="green_100">#C8E6C9</color>
+    <color name="green_200">#A5D6A7</color>
+    <color name="green_300">#81C784</color>
+    <color name="green_400">#66BB6A</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="green_600">#43A047</color>
+    <color name="green_700">#388E3C</color>
+    <color name="green_800">#2E7D32</color>
+    <color name="green_900">#1B5E20</color>
+    <color name="green_A100">#B9F6CA</color>
+    <color name="green_A200">#69F0AE</color>
+    <color name="green_A400">#00E676</color>
+    <color name="green_A700">#00C853</color>
+    <!-- Green -->
+
+    <!-- Light Green -->
+    <color name="light_green_50">#F1F8E9</color>
+    <color name="light_green_100">#DCEDC8</color>
+    <color name="light_green_200">#C5E1A5</color>
+    <color name="light_green_300">#AED581</color>
+    <color name="light_green_400">#9CCC65</color>
+    <color name="light_green_500">#8BC34A</color>
+    <color name="light_green_600">#7CB342</color>
+    <color name="light_green_700">#689F38</color>
+    <color name="light_green_800">#558B2F</color>
+    <color name="light_green_900">#33691E</color>
+    <color name="light_green_A100">#CCFF90</color>
+    <color name="light_green_A200">#B2FF59</color>
+    <color name="light_green_A400">#76FF03</color>
+    <color name="light_green_A700">#64DD17</color>
+    <!-- Light Green -->
+
+    <color name="black">#000000</color>
+    <color name="black_aa">#aa000000</color>
+
+    <color name="yellow_200">#FFF59D</color>
+</resources>

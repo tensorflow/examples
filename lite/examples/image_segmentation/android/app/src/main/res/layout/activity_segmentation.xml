@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#00000000"
+    android:paddingTop="10dp">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_camera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/photo_camera"
+            android:alpha="0.5"/>
+
+        <ImageView
+            android:id="@+id/iv_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/photo_library"/>
+    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        android:src="@drawable/boy"
+        android:scaleType="fitXY"/>
+
+
+    <RelativeLayout
+        android:id="@+id/segment_buttons_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/image"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp">
+
+        <com.addisonelliott.segmentedbutton.SegmentedButtonGroup
+            android:id="@+id/segmented_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="0dp"
+            android:elevation="2dp"
+            android:background="@color/grey_300"
+            app:borderWidth="1dp"
+            app:borderColor="@android:color/transparent"
+            app:divider="@color/grey_600"
+            app:dividerPadding="10dp"
+            app:dividerWidth="1dp"
+            app:position="0"
+            app:radius="10dp"
+            app:ripple="true"
+            app:rippleColor="@color/grey_400"
+            app:selectedBackground="@color/white"
+            app:selectedButtonRadius="10dp"
+            app:selectionAnimationDuration="1000">
+
+            <com.addisonelliott.segmentedbutton.SegmentedButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="8dp"
+                app:text="@string/input"
+                app:textSize="18sp"
+                app:textColor="@color/black_aa" />
+
+            <com.addisonelliott.segmentedbutton.SegmentedButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="8dp"
+                app:text="@string/segmentation"
+                app:textSize="18sp"
+                app:textColor="@color/black_aa" />
+
+            <com.addisonelliott.segmentedbutton.SegmentedButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="8dp"
+                app:text="@string/overlay"
+                app:textSize="18sp"
+                app:textColor="@color/black_aa" />
+        </com.addisonelliott.segmentedbutton.SegmentedButtonGroup>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/segment_buttons_container"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="25dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:text="@string/crop_to_square"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_crop_to_square"
+                style="@style/MySwitchTheme"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:checked="true"
+                android:thumb="@drawable/thumb_selector"
+                app:track="@drawable/track_selector"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                tools:ignore="RtlHardcoded" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_inference_time"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            tools:ignore="RtlHardcoded"
+            android:text="@string/inference_time"/>
+
+        <TextView
+            android:id="@+id/tv_legend"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/legend"
+            tools:ignore="RtlHardcoded"/>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

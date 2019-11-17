@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">TFLiteImageSegmentation</string>
+    <string name="overlay">Overlay</string>
+    <string name="segmentation">Segmentation</string>
+    <string name="input">Input</string>
+    <string name="crop_to_square">Crop to Square</string>
+    <string name="inference_time">Inference Time</string>
+    <string name="legend">Legend</string>
+</resources>
