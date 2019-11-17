@@ -1,4 +1,4 @@
-package org.tensorflow.lite.examples.segmentation.tflite;
+package org.tensorflow.lite.examples.segmentation.tflite
 
 import android.app.Activity
 import android.graphics.Bitmap
@@ -14,7 +14,6 @@ import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import org.tensorflow.lite.examples.segmentation.env.Logger
 import org.tensorflow.lite.examples.segmentation.ext.overlayWithImage
-import java.nio.IntBuffer
 import java.nio.MappedByteBuffer
 import java.util.*
 import kotlin.collections.HashMap
@@ -31,7 +30,7 @@ class ImageSegmentator(activity: Activity) {
     private var tfliteModel: MappedByteBuffer
 
     /** An instance of the driver class to run model inference with Tensorflow Lite.  */
-    protected var tflite: Interpreter
+    private var tflite: Interpreter
 
     /** Options for configuring the Interpreter.  */
     private val tfliteOptions = Interpreter.Options()
@@ -61,7 +60,6 @@ class ImageSegmentator(activity: Activity) {
         tfliteOptions.setUseNNAPI(true)
         this.tflite = Interpreter(tfliteModel, tfliteOptions)
         labels = FileUtil.loadLabels(activity, getLabelPath())
-
 
         val inputShape = this.tflite.getInputTensor(0).shape() // {bacthSize, width, height, inputPixelSize}
         batchSize = inputShape[0]
@@ -110,12 +108,6 @@ class ImageSegmentator(activity: Activity) {
     }
 
     fun runSegmentation(bitmap: Bitmap) : SegmentationResult {
-        var startTime: Long = Date().time
-        var preprocessingTime: Long = 0
-        var inferenceTime: Long = 0
-        var postprocessingTime: Long = 0
-        var visualizationTime: Long = 0
-
         // Logs this method so that it can be analyzed with systrace.
         Trace.beginSection("recognizeImage")
 
@@ -124,7 +116,7 @@ class ImageSegmentator(activity: Activity) {
         inputImageBuffer = loadImage(bitmap)
         val endTimeForLoadImage = SystemClock.uptimeMillis()
         Trace.endSection()
-        preprocessingTime = (endTimeForLoadImage - startTimeForLoadImage)
+        val preprocessingTime = (endTimeForLoadImage - startTimeForLoadImage)
         LOGGER.v("Timecost to load the image: " + (endTimeForLoadImage - startTimeForLoadImage))
 
         // Runs the inference call.
@@ -133,7 +125,7 @@ class ImageSegmentator(activity: Activity) {
         tflite.run(inputImageBuffer.buffer, outputImageBuffer.buffer.rewind())
         val endTimeForReference = SystemClock.uptimeMillis()
         Trace.endSection()
-        inferenceTime = (endTimeForReference - startTimeForReference)
+        val inferenceTime = (endTimeForReference - startTimeForReference)
         LOGGER.v("Timecost to run model inference: " + (endTimeForReference - startTimeForReference))
 
         Trace.beginSection("parseOutput")
@@ -141,20 +133,19 @@ class ImageSegmentator(activity: Activity) {
         val (map, pixels, classList) = parseOutputTensor(outputImageBuffer.floatArray)
         val endTimeForPostProcess = SystemClock.uptimeMillis()
         Trace.endSection()
-        postprocessingTime = (endTimeForPostProcess - startTimeForPostProcess)
-        LOGGER.v("Timecost to run model inference: " + (endTimeForPostProcess - startTimeForPostProcess))
+        val postprocessingTime = (endTimeForPostProcess - startTimeForPostProcess)
+        LOGGER.v("Timecost to run post process: " + (endTimeForPostProcess - startTimeForPostProcess))
 
         Trace.beginSection("visualize")
         val startTimeForVisualize = SystemClock.uptimeMillis()
-        var resultImage = Bitmap.createBitmap(inputImageWidth, inputImageHeight, Bitmap.Config.ARGB_8888)
-        resultImage.copyPixelsFromBuffer(IntBuffer.wrap(pixels))
+        var resultImage = Bitmap.createBitmap(pixels, inputImageWidth, inputImageHeight, Bitmap.Config.ARGB_8888)
         resultImage = Bitmap.createScaledBitmap(resultImage, bitmap.width, bitmap.height, true)
-        val overlayImage = bitmap.overlayWithImage(resultImage, 0.5f)
+        val overlayImage = bitmap.overlayWithImage(resultImage)
         val colorLegend = classListToColorLegend(classList)
         val endTimeForVisualize = SystemClock.uptimeMillis()
         Trace.endSection()
-        visualizationTime = (endTimeForVisualize - startTimeForVisualize)
-        LOGGER.v("Timecost to run model inference: " + (endTimeForVisualize - startTimeForVisualize))
+        val visualizationTime = (endTimeForVisualize - startTimeForVisualize)
+        LOGGER.v("Timecost to run visualize: " + (endTimeForVisualize - startTimeForVisualize))
 
         return SegmentationResult(resultImage, overlayImage, preprocessingTime, inferenceTime, postprocessingTime, visualizationTime, colorLegend)
     }
@@ -166,8 +157,6 @@ class ImageSegmentator(activity: Activity) {
             // Look up the color legend for the class.
             // Using modulo to reuse colors on segmentation model with large number of classes.
             val color = legendColorList[classIndex % legendColorList.size]
-
-            // Convert the color from sRGB UInt32 representation to UIColor.
             colorLegend[labels[classIndex]] = color.toInt()
         }
         return colorLegend
@@ -244,7 +233,3 @@ class ImageSegmentator(activity: Activity) {
         )
     }
 }
-
-data class OutputTensorResult(val map: Array<IntArray>,
-                              val pixels: IntArray,
-                              val classSet: Set<Int>)

@@ -6,4 +6,5 @@
     <string name="crop_to_square">Crop to Square</string>
     <string name="inference_time">Inference Time</string>
     <string name="legend">Legend</string>
+    <string name="inference_running">Running inference with TensorFlow Lite...</string>
 </resources>

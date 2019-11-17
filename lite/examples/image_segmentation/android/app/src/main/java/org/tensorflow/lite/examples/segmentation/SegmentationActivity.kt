@@ -28,8 +28,8 @@ class SegmentationActivity: AppCompatActivity() {
     private var handler: Handler? = null
     private var handlerThread: HandlerThread? = null
 
-    protected lateinit var inferenceStatusLabel:TextView
-    protected lateinit var legendLabel:TextView
+    private lateinit var inferenceStatusLabel:TextView
+    private lateinit var legendLabel:TextView
     private lateinit var cameraImageView:ImageView
     private lateinit var photoImageView:ImageView
     private lateinit var imageView:ImageView
@@ -52,7 +52,7 @@ class SegmentationActivity: AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_segmentation)
 
         cameraImageView = findViewById(R.id.iv_camera)
@@ -227,7 +227,7 @@ Visualization: ${segmentationResult.visualizationTime}ms."""
     }
 
     private fun clearResults() {
-        inferenceStatusLabel.text = "Running inference with TensorFlow Lite..."
+        inferenceStatusLabel.text = getString(R.string.inference_running)
         legendLabel.text = ""
         segmentedControl.isEnabled = false
         segmentedControl.setPosition(0, true)
