@@ -54,7 +54,7 @@ class Evaluate(object):
     self.max_length_targ = max_length_targ
     self.max_length_inp = max_length_inp
 
-  def evaluate(self, sentence, beam_width=1):
+  def evaluate(self, sentence, beam_width=4):
     """Custom evaluating step.
 
     Args:
@@ -75,47 +75,20 @@ class Evaluate(object):
     hidden = [tf.zeros((1, self.encoder.enc_units))]
     enc_out, enc_hidden = self.encoder(inputs, hidden)
     dec_hidden = enc_hidden
-    dec_input_vector = tf.expand_dims([self.targ_lang.word_index['<start>']], 0)
-    possbility_input = tf.expand_dims([1], 0)
-    first = True
+    dec_input = tf.expand_dims([self.targ_lang.word_index['<start>']], 0)
 
     for _ in range(self.max_length_targ):
-      if first:
-        decode_input_numbers = 1
-        first = False
-      else:
-        decode_input_numbers = beam_width
-      current_probability = []
-      current_word = []
-      for decode_input_number in range(0, decode_input_numbers):
-          # Go through each possible word in the beam search
-          dec_input = tf.slice(dec_input_vector, [0, decode_input_number], [1, 1])
-          predictions, dec_hidden, _ = self.decoder(dec_input,
-                                                    dec_hidden,
-                                                    enc_out)
-          #Get the top beam_width most likely word
-          possible_word_list = tf.argsort(predictions[0], axis=-1, direction='DESCENDING', stable=False, name=None)
-          possible_word_list = tf.slice(possible_word_list, [0], [beam_width])
-          for item in possible_word_list:
-            current_probability.append(predictions[0][item] * possbility_input[0][decode_input_number].numpy())
-            current_word.append(item)
-      final_probability_index = tf.argsort(current_probability, axis=-1, direction='DESCENDING', stable=False, name=None)
-      final_probability_index = tf.slice(final_probability_index, [0], [beam_width])
-      #Get the top beam_width from all of the possible output
-      possbility_input = []
-      dec_input_vector = []
-      for item in final_probability_index:
-          possbility_input.append(current_probability[item])
-          dec_input_vector.append(current_word[item])
-      possbility_input = tf.expand_dims(possbility_input, 0)
-      dec_input_vector = tf.expand_dims(dec_input_vector, 0)
+      predictions, dec_hidden, _ = self.decoder(dec_input,
+                                                dec_hidden,
+                                                enc_out)
 
-      # Take the final top 1 into the result todo:take all the possible top beam_width result
-      predicted_id = dec_input_vector[0][0].numpy()
+      predicted_id = tf.argmax(predictions[0]).numpy()
       result += self.targ_lang.index_word[predicted_id] + ' '
       if self.targ_lang.index_word[predicted_id] == '<end>':
         # return result, sentence, attention_plot
         return result, sentence
+      # the predicted ID is fed back into the model
+      dec_input = tf.expand_dims([predicted_id], 0)
     return result, sentence
 
 def evaluate_flags():
