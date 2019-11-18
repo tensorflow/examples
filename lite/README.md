@@ -20,6 +20,19 @@ inference output in realtime on the screen.
 
 [Raspberry Pi image classification](examples/image_classification/raspberry_pi/README.md)
 
+## Image segmentation
+
+This app performs image segmentation on a demo image, take photo and gallery image feed and
+displays inference output on the screen.
+
+<!-- TODO(b/124116863): Add app screenshot and model details. -->
+
+### Samples
+
+[Android object detection](examples/image_segmentation/android/README.md)
+
+[iOS object detection](examples/image_segmentation/ios/README.md)
+
 ## Object detection
 
 This app performs object detection on a live camera feed and displays the
