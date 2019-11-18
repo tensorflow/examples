@@ -53,8 +53,6 @@ class ImageSegmentator(activity: Activity) {
     private var outputImageHeight: Int = 0
     private var outputClassCount: Int = 0
 
-    private var result: Array<Array<FloatArray>>
-
     init {
         tfliteModel = FileUtil.loadMappedFile(activity, getModelPath())
         tfliteOptions.setUseNNAPI(true)
@@ -76,7 +74,6 @@ class ImageSegmentator(activity: Activity) {
         outputClassCount = outputShape[3]
 
         inputImageBuffer = TensorImage(imageDataType)
-        result = Array(outputImageWidth) { Array(outputImageHeight) { FloatArray(outputClassCount) } }
 
         val outputDataType = this.tflite.getOutputTensor(0).dataType()
         outputImageBuffer = TensorBuffer.createFixedSize(outputShape, outputDataType)
@@ -138,7 +135,7 @@ class ImageSegmentator(activity: Activity) {
 
         Trace.beginSection("visualize")
         val startTimeForVisualize = SystemClock.uptimeMillis()
-        var resultImage = Bitmap.createBitmap(pixels, inputImageWidth, inputImageHeight, Bitmap.Config.ARGB_8888)
+        var resultImage = Bitmap.createBitmap(pixels, outputImageWidth, outputImageHeight, Bitmap.Config.ARGB_8888)
         resultImage = Bitmap.createScaledBitmap(resultImage, bitmap.width, bitmap.height, true)
         val overlayImage = bitmap.overlayWithImage(resultImage)
         val colorLegend = classListToColorLegend(classList)
@@ -193,7 +190,6 @@ class ImageSegmentator(activity: Activity) {
                 // Using modulo to reuse colors on segmentation model with large number of classes.
                 val legendColor = legendColorList[indexMax % legendColorList.size]
                 segmentationImagePixels[x * outputImageHeight + y] = legendColor.toInt()
-
             }
         }
         return OutputTensorResult(segmentationMap, segmentationImagePixels, classList)
