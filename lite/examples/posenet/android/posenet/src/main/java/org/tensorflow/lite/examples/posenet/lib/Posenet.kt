@@ -124,16 +124,18 @@ class Posenet(
     inputBuffer.order(ByteOrder.nativeOrder())
     inputBuffer.rewind()
 
+    val pixels = IntArray(bitmap.height * bitmap.width)
+    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+
     val mean = 128.0f
     val std = 128.0f
-    for (row in 0 until bitmap.height) {
-      for (col in 0 until bitmap.width) {
-        val pixelValue = bitmap.getPixel(col, row)
-        inputBuffer.putFloat(((pixelValue shr 16 and 0xFF) - mean) / std)
-        inputBuffer.putFloat(((pixelValue shr 8 and 0xFF) - mean) / std)
-        inputBuffer.putFloat(((pixelValue and 0xFF) - mean) / std)
-      }
+    for (pixelValue in pixels)
+    {
+      inputBuffer.putFloat(((pixelValue shr 16 and 0xFF) - mean) / std)
+      inputBuffer.putFloat(((pixelValue shr 8 and 0xFF) - mean) / std)
+      inputBuffer.putFloat(((pixelValue and 0xFF) - mean) / std)
     }
+
     return inputBuffer
   }
 
