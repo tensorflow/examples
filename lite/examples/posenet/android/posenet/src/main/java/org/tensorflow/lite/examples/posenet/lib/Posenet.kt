@@ -129,8 +129,7 @@ class Posenet(
 
     val mean = 128.0f
     val std = 128.0f
-    for (pixelValue in pixels)
-    {
+    for (pixelValue in pixels) {
       inputBuffer.putFloat(((pixelValue shr 16 and 0xFF) - mean) / std)
       inputBuffer.putFloat(((pixelValue shr 8 and 0xFF) - mean) / std)
       inputBuffer.putFloat(((pixelValue and 0xFF) - mean) / std)
