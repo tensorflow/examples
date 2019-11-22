@@ -99,9 +99,7 @@ class ImageSegmentator(activity: Activity) {
         // Creates processor for the TensorImage.
         val cropSize = min(bitmap.width, bitmap.height)
         val imageProcessor = ImageProcessor.Builder()
-                .add(ResizeWithCropOrPadOp(cropSize, cropSize))
                 .add(ResizeOp(inputImageWidth, inputImageHeight, ResizeOp.ResizeMethod.BILINEAR))
-                //.add(Rot90Op(numRoration))
                 .add(NormalizeOp(IMAGE_MEAN, IMAGE_STD))
                 .build()
         return imageProcessor.process(inputImageBuffer)
