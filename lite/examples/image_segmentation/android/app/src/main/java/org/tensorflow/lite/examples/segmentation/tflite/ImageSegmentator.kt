@@ -144,6 +144,7 @@ class ImageSegmentator(activity: Activity) {
         Trace.endSection()
         val visualizationTime = (endTimeForVisualize - startTimeForVisualize)
         LOGGER.v("Timecost to run visualize: " + (endTimeForVisualize - startTimeForVisualize))
+        Trace.endSection()
 
         return SegmentationResult(resultImage, overlayImage, preprocessingTime, inferenceTime, postprocessingTime, visualizationTime, colorLegend)
     }
