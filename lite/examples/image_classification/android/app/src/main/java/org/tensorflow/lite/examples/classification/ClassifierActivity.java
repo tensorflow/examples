@@ -41,6 +41,10 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private Integer sensorOrientation;
   private Classifier classifier;
   private BorderedText borderedText;
+  /** Input image size of the model along x axis. */
+  private int imageSizeX;
+  /** Input image size of the model along y axis. */
+  private int imageSizeY;
 
   @Override
   protected int getLayoutId() {
@@ -79,8 +83,6 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   @Override
   protected void processImage() {
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-    final int imageSizeX = classifier.getImageSizeX();
-    final int imageSizeY = classifier.getImageSizeY();
     final int cropSize = Math.min(previewWidth, previewHeight);
 
     runInBackground(
@@ -146,5 +148,9 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     } catch (IOException e) {
       LOGGER.e(e, "Failed to create classifier.");
     }
+
+    // Updates the input image size.
+    imageSizeX = classifier.getImageSizeX();
+    imageSizeY = classifier.getImageSizeY();
   }
 }
