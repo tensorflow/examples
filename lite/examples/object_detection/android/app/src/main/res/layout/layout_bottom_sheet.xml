@@ -10,7 +10,7 @@
     android:orientation="vertical"
     android:padding="8dp"
     app:behavior_hideable="true"
-    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout
         android:id="@+id/gesture_layout"
@@ -173,7 +173,7 @@
             android:text="API"
             android:textColor="@android:color/black" />
 
-        <android.support.v7.widget.SwitchCompat
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/api_info_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

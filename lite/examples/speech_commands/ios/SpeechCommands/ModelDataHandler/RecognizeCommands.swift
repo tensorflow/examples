@@ -67,7 +67,7 @@ class RecognizeCommands {
    This function averages the results obtained over an average window duration and prunes out any
    old results.
    */
-  func process(latestResults: [Float], currenTime: TimeInterval) -> RecognizedCommand? {
+  func process(latestResults: [Float], currentTime: TimeInterval) -> RecognizedCommand? {
 
     guard latestResults.count == classLabels.count else {
       fatalError("There should be \(classLabels.count) in results. But there are \(latestResults.count) results")
@@ -75,13 +75,13 @@ class RecognizeCommands {
 
     // Checks if the new results were identified at a later time than the currently identified
     // results.
-    if let first = previousResults.first, first.time > currenTime {
+    if let first = previousResults.first, first.time > currentTime {
       fatalError("Results should be provided in increasing time order")
     }
 
-    if previousResults.count > 1 {
+    if let lastResult = previousResults.last {
 
-      let timeSinceMostRecent = currenTime - previousResults[previousResults.count - 1].time
+      let timeSinceMostRecent = currentTime - previousResults[previousResults.count - 1].time
 
       // If not enough time has passed after the last inference, we return the previously identified
       // result as legitimate one.
@@ -91,11 +91,11 @@ class RecognizeCommands {
     }
 
     // Appends the new results to the identified results
-    let results: ResultsAtTime = ResultsAtTime(time: currenTime, scores: latestResults)
+    let results: ResultsAtTime = ResultsAtTime(time: currentTime, scores: latestResults)
 
     previousResults.append(results)
 
-    let timeLimit = currenTime - averageWindowDuration
+    let timeLimit = currentTime - averageWindowDuration
 
     // Flushes out all the results currently held that less than the average window duration since
     // they are considered too old for averaging.
@@ -146,7 +146,7 @@ class RecognizeCommands {
       timeSinceLastTop = Date.distantFuture.timeIntervalSince1970 * 1000
     }
     else {
-      timeSinceLastTop = currenTime - previousTopLabelTime
+      timeSinceLastTop = currentTime - previousTopLabelTime
     }
 
     // Return the results
@@ -155,7 +155,7 @@ class RecognizeCommands {
 
       previousTopScore = averageScores[0].score
       previousTopLabel = averageScores[0].name
-      previousTopLabelTime = currenTime
+      previousTopLabelTime = currentTime
       isNew = true
     }
     else {
@@ -163,6 +163,6 @@ class RecognizeCommands {
     }
 
     return RecognizedCommand(
-        score: averageScores[0].score, name: averageScores[0].name, isNew: isNew)
+        score: previousTopScore, name: previousTopLabel, isNew: isNew)
   }
 }

@@ -1,0 +1,27 @@
+// Required to download TF Lite model for Smart Reply.
+task downloadLiteModel {
+    def tempFile = new File(buildDir, project.ext.LITE_MODEL_NAME)
+    // Download and copy to targets, without overwriting.
+    download {
+        src project.ext.LITE_MODEL_URL
+        dest tempFile
+        overwrite false
+    }
+    for (dir in project.ext.LITE_MODEL_DIRS) {
+        if (!new File(dir, project.ext.LITE_MODEL_NAME).exists()) {
+            copy {
+                from tempFile
+                into dir
+            }
+        }
+    }
+}
+
+// Required to download Prebuilt AAR Package for custom ops.
+task downloadAAR {
+    download {
+        src project.ext.AAR_URL
+        dest project.ext.AAR_PATH
+        overwrite false
+    }
+}

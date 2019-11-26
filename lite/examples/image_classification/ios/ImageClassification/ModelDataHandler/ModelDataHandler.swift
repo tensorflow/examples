@@ -248,30 +248,38 @@ class ModelDataHandler {
     }
     
     defer {
-      free(destinationData)
+        free(destinationData)
     }
-    
+
     var destinationBuffer = vImage_Buffer(data: destinationData,
                                           height: vImagePixelCount(height),
                                           width: vImagePixelCount(width),
                                           rowBytes: destinationBytesPerRow)
-    
-    if (CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA){
-      vImageConvert_BGRA8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
-    } else if (CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32ARGB) {
-      vImageConvert_ARGB8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+
+    let pixelBufferFormat = CVPixelBufferGetPixelFormatType(buffer)
+
+    switch (pixelBufferFormat) {
+    case kCVPixelFormatType_32BGRA:
+        vImageConvert_BGRA8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+    case kCVPixelFormatType_32ARGB:
+        vImageConvert_ARGB8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+    case kCVPixelFormatType_32RGBA:
+        vImageConvert_RGBA8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+    default:
+        // Unknown pixel format.
+        return nil
     }
-    
+
     let byteData = Data(bytes: destinationBuffer.data, count: destinationBuffer.rowBytes * height)
     if isModelQuantized {
-      return byteData
+        return byteData
     }
-    
+
     // Not quantized, convert to floats
     let bytes = Array<UInt8>(unsafeData: byteData)!
     var floats = [Float](repeating: 0, count: bytes.count)
     for i in 0..<bytes.count {
-      floats.append(Float(bytes[i]) / 255.0)
+        floats.append(Float(bytes[i]) / 255.0)
     }
     return Data(copyingBufferOf: floats)
   }

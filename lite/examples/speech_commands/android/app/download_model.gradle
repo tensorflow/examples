@@ -2,7 +2,7 @@
 task downloadZipFile(type: Download) {
     src 'http://storage.googleapis.com/download.tensorflow.org/models/tflite/conv_actions_tflite.zip'
     dest new File(buildDir, 'zips/')
-    overwrite true
+    overwrite false
 }
 
 

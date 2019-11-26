@@ -18,8 +18,6 @@ package org.tensorflow.lite.examples.classification;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
@@ -29,7 +27,6 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.util.List;
 import org.tensorflow.lite.examples.classification.env.BorderedText;
-import org.tensorflow.lite.examples.classification.env.ImageUtils;
 import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
@@ -37,18 +34,17 @@ import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
-  private static final boolean MAINTAIN_ASPECT = true;
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
   private static final float TEXT_SIZE_DIP = 10;
   private Bitmap rgbFrameBitmap = null;
-  private Bitmap croppedBitmap = null;
-  private Bitmap cropCopyBitmap = null;
   private long lastProcessingTimeMs;
   private Integer sensorOrientation;
   private Classifier classifier;
-  private Matrix frameToCropTransform;
-  private Matrix cropToFrameTransform;
   private BorderedText borderedText;
+  /** Input image size of the model along x axis. */
+  private int imageSizeX;
+  /** Input image size of the model along y axis. */
+  private int imageSizeY;
 
   @Override
   protected int getLayoutId() {
@@ -82,28 +78,12 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
     LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
     rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Config.ARGB_8888);
-    croppedBitmap =
-        Bitmap.createBitmap(
-            classifier.getImageSizeX(), classifier.getImageSizeY(), Config.ARGB_8888);
-
-    frameToCropTransform =
-        ImageUtils.getTransformationMatrix(
-            previewWidth,
-            previewHeight,
-            classifier.getImageSizeX(),
-            classifier.getImageSizeY(),
-            sensorOrientation,
-            MAINTAIN_ASPECT);
-
-    cropToFrameTransform = new Matrix();
-    frameToCropTransform.invert(cropToFrameTransform);
   }
 
   @Override
   protected void processImage() {
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-    final Canvas canvas = new Canvas(croppedBitmap);
-    canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
+    final int cropSize = Math.min(previewWidth, previewHeight);
 
     runInBackground(
         new Runnable() {
@@ -111,10 +91,10 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
           public void run() {
             if (classifier != null) {
               final long startTime = SystemClock.uptimeMillis();
-              final List<Classifier.Recognition> results = classifier.recognizeImage(croppedBitmap);
+              final List<Classifier.Recognition> results =
+                  classifier.recognizeImage(rgbFrameBitmap, sensorOrientation);
               lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
               LOGGER.v("Detect: %s", results);
-              cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
 
               runOnUiThread(
                   new Runnable() {
@@ -122,8 +102,8 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
                     public void run() {
                       showResultsInBottomSheet(results);
                       showFrameInfo(previewWidth + "x" + previewHeight);
-                      showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
-                      showCameraResolution(canvas.getWidth() + "x" + canvas.getHeight());
+                      showCropInfo(imageSizeX + "x" + imageSizeY);
+                      showCameraResolution(cropSize + "x" + cropSize);
                       showRotationInfo(String.valueOf(sensorOrientation));
                       showInference(lastProcessingTimeMs + "ms");
                     }
@@ -136,7 +116,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
   @Override
   protected void onInferenceConfigurationChanged() {
-    if (croppedBitmap == null) {
+    if (rgbFrameBitmap == null) {
       // Defer creation until we're getting camera frames.
       return;
     }
@@ -168,5 +148,9 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     } catch (IOException e) {
       LOGGER.e(e, "Failed to create classifier.");
     }
+
+    // Updates the input image size.
+    imageSizeX = classifier.getImageSizeX();
+    imageSizeY = classifier.getImageSizeY();
   }
 }

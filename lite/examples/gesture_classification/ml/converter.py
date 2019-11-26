@@ -102,7 +102,7 @@ class ModelConverter:
     return base_model
 
   def _deserialize_tflite_from_keras(self):
-    converter = tf.contrib.lite.TocoConverter.from_keras_model_file(
+    converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(
         self.keras_model_file)
     tflite_model = converter.convert()
 
