@@ -55,7 +55,7 @@ def create(data,
     shuffle: Whether the data should be shuffled.
     batch_size: Batch size for training.
     epochs: Number of epochs for training.
-    validation_ratio: The ratio of valid data to be splitted.
+    validation_ratio: The ratio of validation data to be splitted.
     test_ratio: The ratio of test data to be splitted.
     num_words: Number of words to generate the vocabulary from data.
     sentence_len: Length of the sentence to feed into the model.
@@ -111,7 +111,7 @@ class TextClassifier(classification_model.ClassificationModel):
       model_export_format: Model export format such as saved_model / tflite.
       model_name: Model name.
       shuffle: Whether the data should be shuffled.
-      validation_ratio: The ratio of valid data to be splitted.
+      validation_ratio: The ratio of validation data to be splitted.
       test_ratio: The ratio of test data to be splitted.
       num_words: Number of words to generate the vocabulary from data.
       sentence_len: Length of the sentence to feed into the model.
@@ -147,7 +147,8 @@ class TextClassifier(classification_model.ClassificationModel):
           'The total ratio for validation and test data should be less than 1.0.'
       )
 
-    self.valid_data, rest_data = data.split(validation_ratio, shuffle=shuffle)
+    self.validation_data, rest_data = data.split(
+        validation_ratio, shuffle=shuffle)
     self.test_data, self.train_data = rest_data.split(
         test_ratio, shuffle=shuffle)
 
@@ -183,7 +184,8 @@ class TextClassifier(classification_model.ClassificationModel):
     """Feeds the training data for training."""
 
     train_ds = self._gen_train_dataset(self.train_data, batch_size)
-    valid_ds = self._gen_valid_dataset(self.valid_data, batch_size)
+    validation_ds = self._gen_validation_dataset(self.validation_data,
+                                                 batch_size)
 
     # Trains the models.
     self.model.compile(
@@ -192,12 +194,12 @@ class TextClassifier(classification_model.ClassificationModel):
         metrics=['accuracy'])
 
     steps_per_epoch = self.train_data.size // batch_size
-    validation_steps = self.valid_data.size // batch_size
+    validation_steps = self.validation_data.size // batch_size
     self.model.fit(
         train_ds,
         epochs=epochs,
         steps_per_epoch=steps_per_epoch,
-        validation_data=valid_ds,
+        validation_data=validation_ds,
         validation_steps=validation_steps)
 
   def evaluate(self, data=None, batch_size=32):
@@ -212,7 +214,7 @@ class TextClassifier(classification_model.ClassificationModel):
     """
     if data is None:
       data = self.test_data
-    ds = self._gen_valid_dataset(data, batch_size)
+    ds = self._gen_validation_dataset(data, batch_size)
 
     return self.model.evaluate(ds)
 
@@ -261,7 +263,7 @@ class TextClassifier(classification_model.ClassificationModel):
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
 
-  def _gen_valid_dataset(self, data, batch_size=32):
+  def _gen_validation_dataset(self, data, batch_size=32):
     ds = data.dataset.map(self.preprocess_text)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
@@ -343,7 +345,7 @@ class TextClassifier(classification_model.ClassificationModel):
 
     if data is None:
       data = self.test_data
-    ds = self._gen_valid_dataset(data, batch_size)
+    ds = self._gen_validation_dataset(data, batch_size)
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)

@@ -47,7 +47,7 @@ def create(data,
     model_export_format: Model export format such as saved_model / tflite.
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
-    validation_ratio: The ratio of valid data to be splitted.
+    validation_ratio: The ratio of validation data to be splitted.
     test_ratio: The ratio of test data to be splitted.
     batch_size: Number of samples per training step.
     epochs: Number of epochs for training.
@@ -116,7 +116,7 @@ class ImageClassifier(classification_model.ClassificationModel):
       train_whole_model: If true, the Hub module is trained together with the
         classification layer on top. Otherwise, only train the top
         classification layer.
-      validation_ratio: The ratio of valid data to be splitted.
+      validation_ratio: The ratio of validation data to be splitted.
       test_ratio: The ratio of test data to be splitted.
       hparams: A namedtuple of hyperparameters. This function expects
         .dropout_rate: The fraction of the input units to drop, used in dropout
@@ -138,7 +138,8 @@ class ImageClassifier(classification_model.ClassificationModel):
           'The total ratio for validation and test data should be less than 1.0.'
       )
 
-    self.valid_data, rest_data = data.split(validation_ratio, shuffle=shuffle)
+    self.validation_data, rest_data = data.split(
+        validation_ratio, shuffle=shuffle)
     self.test_data, self.train_data = rest_data.split(
         test_ratio, shuffle=shuffle)
 
@@ -162,7 +163,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
 
-  def _gen_valid_dataset(self, data, batch_size=32):
+  def _gen_validation_dataset(self, data, batch_size=32):
     ds = data.dataset.map(self.preprocess_image)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
@@ -182,14 +183,12 @@ class ImageClassifier(classification_model.ClassificationModel):
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
     """
+    train_data = self._gen_train_dataset(self.train_data, hparams.batch_size)
+    train_data_and_size = (train_data, self.train_data.size)
 
-    train_data_and_size = (self._gen_train_dataset(self.train_data,
-                                                   hparams.batch_size),
-                           self.train_data.size)
-    validation_data_and_size = (self._gen_valid_dataset(self.valid_data,
-                                                        hparams.batch_size),
-                                self.valid_data.size)
-
+    validation_data = self._gen_validation_dataset(self.validation_data,
+                                                   hparams.batch_size)
+    validation_data_and_size = (validation_data, self.validation_data.size)
     # Trains the models.
     return lib.train_model(self.model, hparams, train_data_and_size,
                            validation_data_and_size)
@@ -224,7 +223,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     """
     if data is None:
       data = self.test_data
-    ds = self._gen_valid_dataset(data, batch_size)
+    ds = self._gen_validation_dataset(data, batch_size)
 
     return self.model.evaluate(ds)
 
@@ -285,7 +284,7 @@ class ImageClassifier(classification_model.ClassificationModel):
 
     if data is None:
       data = self.test_data
-    ds = self._gen_valid_dataset(data, batch_size)
+    ds = self._gen_validation_dataset(data, batch_size)
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
