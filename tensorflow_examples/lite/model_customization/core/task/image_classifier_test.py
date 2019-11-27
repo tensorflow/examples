@@ -66,6 +66,7 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
+    self._test_predict_topk(model)
 
   def test_efficientnetb0_model(self):
     model = image_classifier.create(
@@ -77,6 +78,13 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
+
+  def _test_predict_topk(self, model):
+    topk = model.predict_topk(batch_size=4)
+    for i, (_, label) in enumerate(model.test_data.dataset):
+      predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
+      self.assertEqual(model.data.index_to_label[label], predict_label)
+      self.assertGreater(predict_prob, 0.7)
 
   def _test_accuracy(self, model):
     _, accuracy = model.evaluate()

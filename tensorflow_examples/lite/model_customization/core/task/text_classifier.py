@@ -328,7 +328,6 @@ class TextClassifier(classification_model.ClassificationModel):
         'Exported to tflite model in %s, saved labels in %s and vocabulary in %s.',
         tflite_filename, label_filename, vocab_filename)
 
-  # TODO(b/142607208): need to fix the wrong output.
   def predict_topk(self, data=None, k=1, batch_size=32):
     """Predicts the top-k predictions.
 
@@ -349,7 +348,7 @@ class TextClassifier(classification_model.ClassificationModel):
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
-    topk_label = np.array(self.data.index_to_label)[topk_id]
+    topk_label = np.array(self.data.index_to_label)[topk_id.numpy()]
 
     label_prob = []
     for label, prob in zip(topk_label, topk_prob.numpy()):
