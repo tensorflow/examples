@@ -38,5 +38,5 @@ class DataLoaderTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  tf.compat.v1.enable_v2_behavior()
+  assert tf.__version__.startswith('2')
   tf.test.main()
