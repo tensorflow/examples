@@ -119,7 +119,7 @@ class ImageClassifierTest(tf.test.TestCase):
     lite_model = self._load_lite_model(tflite_output_file)
     for i, (class_name, rgb) in enumerate(self.CMY_NAMES_AND_RGB_VALUES):
       input_batch = tf.constant(_fill_image(rgb, self.IMAGE_SIZE))
-      input_batch = model.preprocess_image(input_batch, i)[0]
+      input_batch = model.preprocess(input_batch, i)[0]
       input_batch = tf.expand_dims(input_batch, 0).numpy()
       output_batch = lite_model(input_batch)
       prediction = labels[np.argmax(output_batch[0])]

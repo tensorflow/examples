@@ -17,7 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
 import tensorflow as tf # TF2
 
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
@@ -80,13 +79,12 @@ def create(data,
       model_export_format,
       model_spec,
       shuffle=shuffle,
-      train_whole_model=False,
       validation_ratio=validation_ratio,
       test_ratio=test_ratio,
       hparams=hparams)
 
   tf.compat.v1.logging.info('Retraining the models...')
-  image_classifier.train(hparams)
+  image_classifier.train()
 
   return image_classifier
 
@@ -99,7 +97,6 @@ class ImageClassifier(classification_model.ClassificationModel):
                model_export_format,
                model_spec,
                shuffle=True,
-               train_whole_model=False,
                validation_ratio=0.1,
                test_ratio=0.1,
                hparams=lib.get_default_hparams()):
@@ -113,9 +110,6 @@ class ImageClassifier(classification_model.ClassificationModel):
       model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
       shuffle: Whether the data should be shuffled.
-      train_whole_model: If true, the Hub module is trained together with the
-        classification layer on top. Otherwise, only train the top
-        classification layer.
       validation_ratio: The ratio of validation data to be splitted.
       test_ratio: The ratio of test data to be splitted.
       hparams: A namedtuple of hyperparameters. This function expects
@@ -124,52 +118,23 @@ class ImageClassifier(classification_model.ClassificationModel):
     """
     super(ImageClassifier,
           self).__init__(data, model_export_format, model_spec, shuffle,
-                         train_whole_model, validation_ratio, test_ratio)
-
-    # Gets pre_trained models.
-    if model_export_format != mef.ModelExportFormat.TFLITE:
-      raise ValueError('Model export mode %s is not supported currently.' %
-                       str(model_export_format))
+                         hparams.do_fine_tuning, validation_ratio, test_ratio)
     self.pre_trained_model_spec = model_spec
+    self.hparams = hparams
+    self.model = self._create_model()
 
-    # Generates training, validation and testing data.
-    if validation_ratio + test_ratio >= 1.0:
-      raise ValueError(
-          'The total ratio for validation and test data should be less than 1.0.'
-      )
+  def _create_model(self, hparams=None):
+    """Creates the classifier model for retraining."""
+    if hparams is None:
+      hparams = self.hparams
 
-    self.validation_data, rest_data = data.split(
-        validation_ratio, shuffle=shuffle)
-    self.test_data, self.train_data = rest_data.split(
-        test_ratio, shuffle=shuffle)
-
-    # Checks dataset parameter.
-    if self.train_data.size == 0:
-      raise ValueError('Training dataset is empty.')
-
-    # Creates the classifier model for retraining.
     module_layer = hub.KerasLayer(
-        self.pre_trained_model_spec.uri, trainable=train_whole_model)
-    self.model = lib.build_model(module_layer, hparams,
-                                 self.pre_trained_model_spec.input_image_shape,
-                                 data.num_classes)
+        self.pre_trained_model_spec.uri, trainable=hparams.do_fine_tuning)
+    return lib.build_model(module_layer, hparams,
+                           self.pre_trained_model_spec.input_image_shape,
+                           self.data.num_classes)
 
-  def _gen_train_dataset(self, data, batch_size=32):
-    ds = data.dataset.map(self.preprocess_image)
-    if self.shuffle:
-      ds = ds.shuffle(buffer_size=self.train_data.size)
-    ds = ds.repeat()
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
-
-  def _gen_validation_dataset(self, data, batch_size=32):
-    ds = data.dataset.map(self.preprocess_image)
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
-
-  def train(self, hparams=lib.get_default_hparams()):
+  def train(self, hparams=None):
     """Feeds the training data for training.
 
     Args:
@@ -183,6 +148,9 @@ class ImageClassifier(classification_model.ClassificationModel):
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
     """
+    if hparams is None:
+      hparams = self.hparams
+
     train_data = self._gen_train_dataset(self.train_data, hparams.batch_size)
     train_data_and_size = (train_data, self.train_data.size)
 
@@ -193,7 +161,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     return lib.train_model(self.model, hparams, train_data_and_size,
                            validation_data_and_size)
 
-  def preprocess_image(self, image, label):
+  def preprocess(self, image, label):
     """Image preprocessing method."""
     image = tf.cast(image, tf.float32)
 
@@ -210,22 +178,6 @@ class ImageClassifier(classification_model.ClassificationModel):
                             self.pre_trained_model_spec.input_image_shape)
     label = tf.one_hot(label, depth=self.data.num_classes)
     return image, label
-
-  def evaluate(self, data=None, batch_size=32):
-    """Evaluates the model.
-
-    Args:
-      data: Data to be evaluated. If None, then evaluates in self.test_data.
-      batch_size: Number of samples per evaluation step.
-
-    Returns:
-      The loss value and accuracy.
-    """
-    if data is None:
-      data = self.test_data
-    ds = self._gen_validation_dataset(data, batch_size)
-
-    return self.model.evaluate(ds)
 
   def export(self, tflite_filename, label_filename, **kwargs):
     """Converts the retrained model based on `model_export_format`.
@@ -244,53 +196,3 @@ class ImageClassifier(classification_model.ClassificationModel):
     else:
       raise ValueError('Model Export Format %s is not supported currently.' %
                        str(self.model_export_format))
-
-  def _export_tflite(self, tflite_filename, label_filename, quantized):
-    """Converts the retrained model to tflite format and saves it.
-
-    Args:
-      tflite_filename: File name to save tflite model.
-      label_filename: File name to save labels.
-      quantized: boolean, if True, save quantized model.
-    """
-    converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
-    if quantized:
-      converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
-    tflite_model = converter.convert()
-
-    with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
-      f.write(tflite_model)
-
-    with tf.io.gfile.GFile(label_filename, 'w') as f:
-      f.write('\n'.join(self.data.index_to_label))
-
-    tf.compat.v1.logging.info('Export to tflite model %s, saved labels in %s.',
-                              tflite_filename, label_filename)
-
-  def predict_topk(self, data=None, k=1, batch_size=32):
-    """Predicts the top-k predictions.
-
-    Args:
-      data: Data to be evaluated. If None, then predicts in self.test_data.
-      k: Number of top results to be predicted.
-      batch_size: Number of samples per evaluation step.
-
-    Returns:
-      top k results. Each one is (label, probability).
-    """
-    if k < 0:
-      raise ValueError('K should be equal or larger than 0.')
-
-    if data is None:
-      data = self.test_data
-    ds = self._gen_validation_dataset(data, batch_size)
-
-    predicted_prob = self.model.predict(ds)
-    topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
-    topk_label = np.array(self.data.index_to_label)[topk_id.numpy()]
-
-    label_prob = []
-    for label, prob in zip(topk_label, topk_prob.numpy()):
-      label_prob.append(list(zip(label, prob)))
-
-    return label_prob

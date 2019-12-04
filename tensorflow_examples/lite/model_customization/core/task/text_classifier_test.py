@@ -112,7 +112,7 @@ class TextClassifierTest(tf.test.TestCase):
     lite_model = self._load_lite_model(tflite_output_file)
     for i, (class_name, text) in enumerate(self.TEST_LABELS_AND_TEXT):
       input_batch = tf.constant(text)
-      input_batch = model.preprocess_text(input_batch, np.int64(i))[0]
+      input_batch = model.preprocess(input_batch, np.int64(i))[0]
       input_batch = tf.cast(input_batch, tf.float32)
       output_batch = lite_model(input_batch)
       prediction = labels[np.argmax(output_batch[0])]

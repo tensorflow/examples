@@ -18,11 +18,8 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import os
 import re
-import tempfile
 
-import numpy as np
 import tensorflow as tf # TF2
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import classification_model
@@ -120,10 +117,6 @@ class TextClassifier(classification_model.ClassificationModel):
       lowercase: Whether to convert all uppercase character to lowercase
         during preprocessing.
     """
-    if model_export_format != mef.ModelExportFormat.TFLITE:
-      raise ValueError('Model export format %s is not supported currently.' %
-                       str(model_export_format))
-
     # Checks model parameter.
     if model_name != 'average_wordvec':
       raise ValueError('Model %s is not supported currently.' % model_name)
@@ -138,26 +131,12 @@ class TextClassifier(classification_model.ClassificationModel):
         test_ratio=test_ratio)
     self.sentence_len = sentence_len
     self.lowercase = lowercase
-
     self.vocab = self._gen_vocab(data.dataset, num_words)
+    self.model = self._create_model(wordvec_dim, sentence_len, dropout_rate)
 
-    # Generates training, validation and testing data.
-    if validation_ratio + test_ratio >= 1.0:
-      raise ValueError(
-          'The total ratio for validation and test data should be less than 1.0.'
-      )
-
-    self.validation_data, rest_data = data.split(
-        validation_ratio, shuffle=shuffle)
-    self.test_data, self.train_data = rest_data.split(
-        test_ratio, shuffle=shuffle)
-
-    # Checks dataset parameter.
-    if self.train_data.size == 0:
-      raise ValueError('Training dataset is empty.')
-
-    # Creates the text classifier model.
-    self.model = tf.keras.Sequential([
+  def _create_model(self, wordvec_dim, sentence_len, dropout_rate):
+    """Creates the text classifier model."""
+    return tf.keras.Sequential([
         tf.keras.layers.Embedding(
             len(self.vocab), wordvec_dim, input_length=sentence_len),
         tf.keras.layers.GlobalAveragePooling1D(),
@@ -202,22 +181,6 @@ class TextClassifier(classification_model.ClassificationModel):
         validation_data=validation_ds,
         validation_steps=validation_steps)
 
-  def evaluate(self, data=None, batch_size=32):
-    """Evaluates the model.
-
-    Args:
-      data: Data to be evaluated. If None, then evaluates in self.test_data.
-      batch_size: Number of samples per evaluation step.
-
-    Returns:
-      The loss value and accuracy.
-    """
-    if data is None:
-      data = self.test_data
-    ds = self._gen_validation_dataset(data, batch_size)
-
-    return self.model.evaluate(ds)
-
   def _tokenize(self, sentence):
     r"""Splits by '\W' except '\''."""
     sentence = tf.compat.as_text(sentence)
@@ -245,7 +208,7 @@ class TextClassifier(classification_model.ClassificationModel):
       token_ids = token_ids[:self.sentence_len]
     return token_ids, label
 
-  def preprocess_text(self, raw_text, label):
+  def preprocess(self, raw_text, label):
     text, label = tf.py_function(
         self._preprocess_text_py_func,
         inp=[raw_text, label],
@@ -253,21 +216,6 @@ class TextClassifier(classification_model.ClassificationModel):
     text.set_shape((self.sentence_len))
     label.set_shape(())
     return text, label
-
-  def _gen_train_dataset(self, data, batch_size=32):
-    ds = data.dataset.map(self.preprocess_text)
-    if self.shuffle:
-      ds = ds.shuffle(buffer_size=data.size)
-    ds = ds.repeat()
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
-
-  def _gen_validation_dataset(self, data, batch_size=32):
-    ds = data.dataset.map(self.preprocess_text)
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
 
   def export(self, tflite_filename, label_filename, vocab_filename, **kwargs):
     """Converts the retrained model based on `model_export_format`.
@@ -302,56 +250,11 @@ class TextClassifier(classification_model.ClassificationModel):
       vocab_filename: File name to save vocabulary.
       quantized: boolean, if True, save quantized model.
     """
-    temp_dir = tempfile.TemporaryDirectory()
-    kera_model_file = os.path.join(temp_dir.name, 'tmp.h5')
-    self.model.save(kera_model_file)
-
-    input_embedding = '{}_input'.format(self.model.layers[0].name)
-    converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(
-        kera_model_file,
-        input_shapes={input_embedding: [None, self.sentence_len]})
-    if quantized:
-      converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
-    tflite_model = converter.convert()
-
-    with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
-      f.write(tflite_model)
-
-    with tf.io.gfile.GFile(label_filename, 'w') as f:
-      f.write('\n'.join(self.data.index_to_label))
+    super(TextClassifier, self)._export_tflite(
+        tflite_filename, label_filename, quantized=quantized)
 
     with tf.io.gfile.GFile(vocab_filename, 'w') as f:
       for token, index in self.vocab.items():
         f.write('%s %d\n' % (token, index))
 
-    tf.compat.v1.logging.info(
-        'Exported to tflite model in %s, saved labels in %s and vocabulary in %s.',
-        tflite_filename, label_filename, vocab_filename)
-
-  def predict_topk(self, data=None, k=1, batch_size=32):
-    """Predicts the top-k predictions.
-
-    Args:
-      data: Data to be evaluated. If None, then predicts in self.test_data.
-      k: Number of top results to be predicted.
-      batch_size: Number of samples per evaluation step.
-
-    Returns:
-      top k results. Each one is (label, probability).
-    """
-    if k < 0:
-      raise ValueError('K should be equal or larger than 0.')
-
-    if data is None:
-      data = self.test_data
-    ds = self._gen_validation_dataset(data, batch_size)
-
-    predicted_prob = self.model.predict(ds)
-    topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
-    topk_label = np.array(self.data.index_to_label)[topk_id.numpy()]
-
-    label_prob = []
-    for label, prob in zip(topk_label, topk_prob.numpy()):
-      label_prob.append(list(zip(label, prob)))
-
-    return label_prob
+    tf.compat.v1.logging.info('  Saved vocabulary in %s.', vocab_filename)
