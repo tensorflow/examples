@@ -277,7 +277,7 @@ class ModelDataHandler {
 
     // Not quantized, convert to floats
     let bytes = Array<UInt8>(unsafeData: byteData)!
-    var floats = [Float](repeating: 0, count: bytes.count)
+    var floats = [Float]()
     for i in 0..<bytes.count {
         floats.append(Float(bytes[i]) / 255.0)
     }
