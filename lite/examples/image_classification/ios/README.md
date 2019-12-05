@@ -9,7 +9,7 @@ a quantized MobileNet model. The application must be run on device.
 
 These instructions walk you through building and
 running the demo on an iOS device. For an explanation of the source, see
-[TensorFlow Lite iOS image classification example](https://www.tensorflow.org/lite/models/image_classification/ios).
+[TensorFlow Lite iOS image classification example](https://github.com/tensorflow/examples/blob/master/lite/examples/image_classification/ios/EXPLORE_THE_CODE.md).
 
 <!-- TODO(b/124116863): Add app screenshot. -->
 
