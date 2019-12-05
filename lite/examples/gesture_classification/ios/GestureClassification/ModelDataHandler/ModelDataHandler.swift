@@ -207,27 +207,53 @@ class ModelDataHandler {
   ) -> Data? {
     CVPixelBufferLockBaseAddress(buffer, .readOnly)
     defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
-    guard let mutableRawPointer = CVPixelBufferGetBaseAddress(buffer) else {
-      return nil
+
+    let pixelBufferFormat = CVPixelBufferGetPixelFormatType(buffer)
+    assert(pixelBufferFormat == kCVPixelFormatType_32BGRA)
+
+    guard let sourceData = CVPixelBufferGetBaseAddress(buffer) else {
+        return nil
     }
-    assert(CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA)
-    let count = CVPixelBufferGetDataSize(buffer)
-    let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
-    var rgbBytes = [UInt8](repeating: 0, count: byteCount)
-    var pixelIndex = 0
-    for component in bufferData.enumerated() {
-      let bgraComponent = component.offset % bgraPixel.channels;
-      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent;
-      guard !isAlphaComponent else {
-        pixelIndex += 1
-        continue
-      }
-      // Swizzle BGR -> RGB.
-      let rgbIndex = pixelIndex * rgbPixelChannels + (bgraPixel.lastBgrComponent - bgraComponent)
-      rgbBytes[rgbIndex] = component.element
+
+    let width = CVPixelBufferGetWidth(buffer)
+    let height = CVPixelBufferGetHeight(buffer)
+    let sourceBytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
+    let destinationChannelCount = 3
+    let destinationBytesPerRow = destinationChannelCount * width
+
+    var sourceBuffer = vImage_Buffer(data: sourceData,
+                                     height: vImagePixelCount(height),
+                                     width: vImagePixelCount(width),
+                                     rowBytes: sourceBytesPerRow)
+
+    guard let destinationData = malloc(height * destinationBytesPerRow) else {
+        print("Error: out of memory")
+        return nil
     }
-    if isModelQuantized { return Data(bytes: rgbBytes) }
-    return Data(copyingBufferOf: rgbBytes.map { Float($0) / 255.0 })
+
+    defer {
+        free(destinationData)
+    }
+
+    var destinationBuffer = vImage_Buffer(data: destinationData,
+                                          height: vImagePixelCount(height),
+                                          width: vImagePixelCount(width),
+                                          rowBytes: destinationBytesPerRow)
+
+    vImageConvert_BGRA8888toRGB888(&sourceBuffer, &destinationBuffer, UInt32(kvImageNoFlags))
+
+    let byteData = Data(bytes: destinationBuffer.data, count: destinationBuffer.rowBytes * height)
+    if isModelQuantized {
+        return byteData
+    }
+
+    // Not quantized, convert to floats
+    let bytes = Array<UInt8>(unsafeData: byteData)!
+    var floats = [Float]()
+    for i in 0..<bytes.count {
+        floats.append(Float(bytes[i]) / 255.0)
+    }
+    return Data(copyingBufferOf: floats)
   }
 
   /// Returns the top N inference results sorted in descending order.
