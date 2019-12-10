@@ -83,4 +83,17 @@ Once we have the TensorFlow Lite model, the implementation is very similar to th
 
 [iOS gesture classification](examples/gesture_classification/ios/README.md)
 
+## Model personalization
+
+This app performs model personalization on a live camera feed and displays the
+results in realtime on the screen. The app displays the confidence scores,
+classes and detected bounding boxes for multiple objects that were trained in
+realtime.
+
+<!-- TODO(b/124116863): Add app screenshot and model details. -->
+
+### Samples
+
+[Android Model Personalization](examples/model_personalization/README.md)
+
 

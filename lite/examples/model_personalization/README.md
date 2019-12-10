@@ -1,16 +1,18 @@
-# TensorFlow Lite on-device transfer learning
+# TensorFlow Lite Example On-device Model Personalization
 
 This example illustrates a way of personalizing a TFLite model
 on-device without sending any data to the server. It builds
 on top of existing TFLite functionality, and can be adapted
 for various tasks and models.
 
+See more in [TensorFlow Blog: Example on-device model personalization with TensorFlow Lite](https://blog.tensorflow.org/2019/12/example-on-device-model-personalization.html)
+
 ## Quickstart
 
 Pre-requisites:
 
 - [Android Studio](https://developer.android.com/studio).
-- [Python 2.7+ or 3.5+](https://www.python.org/downloads/).
+- [Python 3.5+](https://www.python.org/downloads/).
 - [`virtualenv`](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv)
   (usually comes preinstalled with Python).
 - Physical Android device with camera.
@@ -48,7 +50,7 @@ to predict the class of the camera input class in real time.
 There are three main parts of this project:
 
 - Converter: a Python library and CLI that allows you to
-  define and generate your transfer learning model. The code
+  define and generate your personalizable model. The code
   lives under `converter` directory.
 
 - Android library: a library that allows you to use models
@@ -57,20 +59,20 @@ There are three main parts of this project:
   Gradle module.
 
 - Android classifier app: an application that illustrates
-  how to use the transfer learning library. The code lives
+  how to use the model personalization library. The code lives
   under `android/app`.
 
 ## Full workflow
 
-This section describes how you can apply on-device transfer
-learning towards solving a custom task.
+This section describes how you can apply on-device model
+personalization towards solving a custom task.
 
 ### Converting the model using the CLI
 
-First, you need to pick the models that you want to use with transfer
-learning. A TFLite transfer learning model has two parts: the base
-model, which is typically trained for a generic data-rich task, and
-the head model, which will be trained on device. Base model weights
+First, you need to pick the models that you want to use with model
+personalization. A TFLite on-device personalization model has two parts:
+the base model, which is typically trained for a generic data-rich task,
+and the head model, which will be trained on device. Base model weights
 are fixed during conversion, and cannot be changed later. You need
 to pick two models for both parts respectively.
 
@@ -88,7 +90,7 @@ included alternative model "configurations". Included are:
 See the [Python API](#converting-the-model-using-the-python-api) section
 for an exhaustive list of included configurations.
 
-To generate a simple transfer learning model for image recognition,
+To generate a simple personalizable model for image recognition,
 do the following from the `converter` directory:
 
 ```sh
@@ -120,7 +122,7 @@ use as base and head as TensorFlow SavedModels. If you are using Keras,
 `tf.keras.experimental.export_saved_model` can be used to do this.
 
 Suppose your SavedModels are in directories `model_A` and `model_B`.
-Then by executing the following a transfer learning model will be
+Then by executing the following a personalizable model will be
 generated under `custom_model`.
 
 ```sh
@@ -242,6 +244,27 @@ Refer to JavaDocs and
 [the app from this project](android/app/src/main/java/org/tensorflow/lite/examples/transfer)
 for usage examples.
 
+For example, if you want to use your own personalizable model, then you need to
+comment out the last three lines in `doLast{}`.
+
+```groovy
+task downloadModel(type: DefaultTask) {
+    doFirst {
+        println "Downloading and unpacking the model..."
+        mkdir project.buildDir
+    }
+
+    doLast {
+        ant.mkdir(dir: modelTargetLocation)
+        // If you want to use your own models rather than pre-built models,
+        // comment out the following three lines.
+        ant.get(src: modelUrl, dest: modelArchivePath)
+        ant.unzip(src: modelArchivePath, dest: modelTargetLocation)
+        ant.delete(file: modelArchivePath)
+    }
+}
+```
+
 ## TensorFlow Select Ops dependency for custom Keras models.
 
 There is an important difference between `heads.SoftmaxClassifierHead` and
@@ -267,7 +290,7 @@ and some initialization time overhead.
 
 ## How it works
 
-Transfer learning pipeline is implemented on top of existing
+Model personalization pipeline is implemented on top of existing
 TensorFlow Lite functionality. It provides a higher-level abstraction of a
 trainable model and maps it to a lower-level representation that involves
 multiple “physical” TensorFlow Lite models. Different logical routines
