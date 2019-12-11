@@ -5,7 +5,7 @@ This is an app that continuously detects the body parts in the frames seen by
  the demo on an Android device. Camera captures are discarded immediately after
  use, nothing is stored or saved.
 
-![Demo Image](posenetimage.jpeg)
+![Demo Image](posenetimage.png)
 
 ## Build the demo using Android Studio
 
