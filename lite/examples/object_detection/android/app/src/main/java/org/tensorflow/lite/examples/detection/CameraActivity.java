@@ -345,14 +345,21 @@ public abstract class CameraActivity extends AppCompatActivity
   public void onRequestPermissionsResult(
       final int requestCode, final String[] permissions, final int[] grantResults) {
     if (requestCode == PERMISSIONS_REQUEST) {
-      if (grantResults.length > 0
-          && grantResults[0] == PackageManager.PERMISSION_GRANTED
-          && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+      if (allPermissionsGranted(grantResults)) {
         setFragment();
       } else {
         requestPermission();
       }
     }
+  }
+
+  private static boolean allPermissionsGranted(final int[] grantResults) {
+    for (int result : grantResults) {
+      if (result != PackageManager.PERMISSION_GRANTED) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private boolean hasPermission() {

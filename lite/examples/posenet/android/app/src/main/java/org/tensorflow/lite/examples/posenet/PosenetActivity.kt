@@ -59,7 +59,6 @@ import android.widget.Toast
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-import kotlin.math.pow
 import org.tensorflow.lite.examples.posenet.lib.BodyPart
 import org.tensorflow.lite.examples.posenet.lib.Person
 import org.tensorflow.lite.examples.posenet.lib.Posenet
@@ -254,13 +253,17 @@ class PosenetActivity :
     grantResults: IntArray
   ) {
     if (requestCode == REQUEST_CAMERA_PERMISSION) {
-      if (grantResults.size != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+      if (allPermissionsGranted(grantResults)) {
         ErrorDialog.newInstance(getString(R.string.request_permission))
           .show(childFragmentManager, FRAGMENT_DIALOG)
       }
     } else {
       super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+  }
+
+  private fun allPermissionsGranted(grantResults: IntArray) = grantResults.all {
+    it == PackageManager.PERMISSION_GRANTED
   }
 
   /**
