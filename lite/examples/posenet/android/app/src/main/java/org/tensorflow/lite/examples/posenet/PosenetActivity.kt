@@ -27,6 +27,7 @@ import android.graphics.Color
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.PorterDuff
 import android.graphics.Rect
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
@@ -59,7 +60,6 @@ import android.widget.Toast
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-import kotlin.math.pow
 import org.tensorflow.lite.examples.posenet.lib.BodyPart
 import org.tensorflow.lite.examples.posenet.lib.Person
 import org.tensorflow.lite.examples.posenet.lib.Posenet
@@ -254,13 +254,17 @@ class PosenetActivity :
     grantResults: IntArray
   ) {
     if (requestCode == REQUEST_CAMERA_PERMISSION) {
-      if (grantResults.size != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+      if (allPermissionsGranted(grantResults)) {
         ErrorDialog.newInstance(getString(R.string.request_permission))
           .show(childFragmentManager, FRAGMENT_DIALOG)
       }
     } else {
       super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+  }
+
+  private fun allPermissionsGranted(grantResults: IntArray) = grantResults.all {
+    it == PackageManager.PERMISSION_GRANTED
   }
 
   /**
@@ -492,13 +496,33 @@ class PosenetActivity :
 
   /** Draw bitmap on Canvas.   */
   private fun draw(canvas: Canvas, person: Person, bitmap: Bitmap) {
-    val screenWidth: Int = canvas.width
-    val screenHeight: Int = canvas.height
+    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+    // Draw `bitmap` and `person` in square canvas.
+    val screenWidth: Int
+    val screenHeight: Int
+    val left: Int
+    val right: Int
+    val top: Int
+    val bottom: Int
+    if (canvas.height > canvas.width) {
+      screenWidth = canvas.width
+      screenHeight = canvas.width
+      left = 0
+      top = (canvas.height - canvas.width) / 2
+    } else {
+      screenWidth = canvas.height
+      screenHeight = canvas.height
+      left = (canvas.width - canvas.height) / 2
+      top = 0
+    }
+    right = left + screenWidth
+    bottom = top + screenHeight
+
     setPaint()
     canvas.drawBitmap(
       bitmap,
-      Rect(0, 0, previewHeight, previewWidth),
-      Rect(0, 0, screenWidth, screenHeight),
+      Rect(0, 0, bitmap.width, bitmap.height),
+      Rect(left, top, right, bottom),
       paint
     )
 
@@ -509,8 +533,8 @@ class PosenetActivity :
     for (keyPoint in person.keyPoints) {
       if (keyPoint.score > minConfidence) {
         val position = keyPoint.position
-        val adjustedX: Float = position.x.toFloat() * widthRatio
-        val adjustedY: Float = position.y.toFloat() * heightRatio
+        val adjustedX: Float = position.x.toFloat() * widthRatio + left
+        val adjustedY: Float = position.y.toFloat() * heightRatio + top
         canvas.drawCircle(adjustedX, adjustedY, circleRadius, paint)
       }
     }
@@ -521,10 +545,10 @@ class PosenetActivity :
         (person.keyPoints[line.second.ordinal].score > minConfidence)
       ) {
         canvas.drawLine(
-          person.keyPoints[line.first.ordinal].position.x.toFloat() * widthRatio,
-          person.keyPoints[line.first.ordinal].position.y.toFloat() * heightRatio,
-          person.keyPoints[line.second.ordinal].position.x.toFloat() * widthRatio,
-          person.keyPoints[line.second.ordinal].position.y.toFloat() * heightRatio,
+          person.keyPoints[line.first.ordinal].position.x.toFloat() * widthRatio + left,
+          person.keyPoints[line.first.ordinal].position.y.toFloat() * heightRatio + top,
+          person.keyPoints[line.second.ordinal].position.x.toFloat() * widthRatio + left,
+          person.keyPoints[line.second.ordinal].position.y.toFloat() * heightRatio + top,
           paint
         )
       }
@@ -533,19 +557,19 @@ class PosenetActivity :
     canvas.drawText(
       "Score: %.2f".format(person.score),
       (15.0f * widthRatio),
-      (233.0f * heightRatio),
+      (30.0f * heightRatio + bottom),
       paint
     )
     canvas.drawText(
       "Device: %s".format(posenet.device),
       (15.0f * widthRatio),
-      (243.0f * heightRatio),
+      (50.0f * heightRatio + bottom),
       paint
     )
     canvas.drawText(
       "Time: %.2f ms".format(posenet.lastInferenceTimeNanos * 1.0f / 1_000_000),
       (15.0f * widthRatio),
-      (253.0f * heightRatio),
+      (70.0f * heightRatio + bottom),
       paint
     )
 
@@ -564,7 +588,7 @@ class PosenetActivity :
     // Perform inference.
     val person = posenet.estimateSinglePose(scaledBitmap)
     val canvas: Canvas = surfaceHolder!!.lockCanvas()
-    draw(canvas, person, bitmap)
+    draw(canvas, person, scaledBitmap)
   }
 
   /**

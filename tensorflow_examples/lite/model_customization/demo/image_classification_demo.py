@@ -53,7 +53,7 @@ def main(_):
 
 
 if __name__ == '__main__':
-  tf.compat.v1.enable_v2_behavior()
+  assert tf.__version__.startswith('2')
   flags.mark_flag_as_required('tflite_filename')
   flags.mark_flag_as_required('label_filename')
   app.run(main)
