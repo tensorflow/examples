@@ -3,11 +3,11 @@ package org.tensorflow.lite.examples.digitclassifier
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import com.divyanshu.draw.widget.DrawView
 
 class MainActivity : AppCompatActivity() {

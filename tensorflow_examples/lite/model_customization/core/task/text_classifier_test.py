@@ -57,10 +57,18 @@ class TextClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
+    self._test_predict_topk(model)
 
   def _test_accuracy(self, model):
     _, accuracy = model.evaluate()
     self.assertEqual(accuracy, 1.0)
+
+  def _test_predict_topk(self, model):
+    topk = model.predict_topk(batch_size=4)
+    for i, (_, label) in enumerate(model.test_data.dataset):
+      predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
+      self.assertEqual(model.data.index_to_label[label], predict_label)
+      self.assertGreater(predict_prob, 0.5)
 
   def _load_vocab(self, filename):
     with tf.io.gfile.GFile(filename, 'r') as f:
@@ -104,7 +112,7 @@ class TextClassifierTest(tf.test.TestCase):
     lite_model = self._load_lite_model(tflite_output_file)
     for i, (class_name, text) in enumerate(self.TEST_LABELS_AND_TEXT):
       input_batch = tf.constant(text)
-      input_batch = model.preprocess_text(input_batch, np.int64(i))[0]
+      input_batch = model.preprocess(input_batch, np.int64(i))[0]
       input_batch = tf.cast(input_batch, tf.float32)
       output_batch = lite_model(input_batch)
       prediction = labels[np.argmax(output_batch[0])]
@@ -112,5 +120,5 @@ class TextClassifierTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  tf.compat.v1.enable_v2_behavior()
+  assert tf.__version__.startswith('2')
   tf.test.main()

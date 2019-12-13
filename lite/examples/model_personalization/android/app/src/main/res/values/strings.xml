@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">TFL Transfer</string>
+
+  <string name="inference_mode_title">Inference</string>
+  <string name="capture_mode_title">Capture</string>
+
+  <string name="train_action">Train</string>
+  <string name="pause_action">Pause</string>
+  <string name="resume_action">Resume</string>
+
+  <string name="switch_to_inference_hint">You can switch back to inference mode now.</string>
+</resources>

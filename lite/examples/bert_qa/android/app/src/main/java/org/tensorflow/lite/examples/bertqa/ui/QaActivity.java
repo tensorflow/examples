@@ -247,7 +247,7 @@ public class QaActivity extends AppCompatActivity {
     int offset = content.indexOf(answer.text, 0);
     if (offset >= 0) {
       spanText.setSpan(
-          new BackgroundColorSpan(getColor(R.color.secondaryColor)),
+          new BackgroundColorSpan(getColor(R.color.colorHighlight)),
           offset,
           offset + answer.text.length(),
           Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
