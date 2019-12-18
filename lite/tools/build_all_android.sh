@@ -24,7 +24,7 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 function build_android_examples {
   # In case the one of the build fails, overwrite the exit code to 255, in order
   # to make xargs to terminate early and stop processing the remaining builds.
-  find -s "${EXAMPLES_DIR}" -type d -name android -depth 2 -print0 \
+  find "${EXAMPLES_DIR}" -mindepth 2 -maxdepth 2 -type d -name android -print0 \
     | xargs -0 -n1 -I{} bash -c \
         "${SCRIPT_DIR}/build_android_app.sh \"{}\" || exit 255"
 }
