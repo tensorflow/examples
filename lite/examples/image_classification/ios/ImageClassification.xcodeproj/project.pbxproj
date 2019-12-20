@@ -196,7 +196,7 @@
 				TargetAttributes = {
 					AAE79E55213521DA00E7AC1F = {
 						CreatedOnToolsVersion = 9.4.1;
-						LastSwiftMigration = 0940;
+						LastSwiftMigration = 1110;
 					};
 				};
 			};
@@ -429,7 +429,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -454,7 +454,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.ImageClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
