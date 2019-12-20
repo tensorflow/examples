@@ -15,6 +15,10 @@
 import UIKit
 import AVFoundation
 
+#if targetEnvironment(simulator)
+
+#else
+
 // MARK: CameraFeedManagerDelegate Declaration
 protocol CameraFeedManagerDelegate: class {
 
@@ -344,3 +348,5 @@ extension CameraFeedManager: AVCaptureVideoDataOutputSampleBufferDelegate {
   }
 
 }
+
+#endif

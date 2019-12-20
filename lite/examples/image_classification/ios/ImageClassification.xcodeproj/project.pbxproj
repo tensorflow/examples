@@ -108,6 +108,7 @@
 			children = (
 				AAE79E58213521DA00E7AC1F /* ImageClassification */,
 				AAE79E57213521DA00E7AC1F /* Products */,
+				D48092CD801D3DF8F55ECF9A /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -153,6 +154,13 @@
 				AAE79E992135268800E7AC1F /* CameraFeedManager.swift */,
 			);
 			path = "Camera Feed";
+			sourceTree = "<group>";
+		};
+		D48092CD801D3DF8F55ECF9A /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

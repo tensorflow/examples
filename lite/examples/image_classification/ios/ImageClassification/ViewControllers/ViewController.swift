@@ -38,9 +38,13 @@ class ViewController: UIViewController {
   private var previousInferenceTimeMs: TimeInterval = Date.distantPast.timeIntervalSince1970 * 1000
 
 
+#if targetEnvironment(simulator)
+
+#else
   // MARK: Controllers that manage functionality
   // Handles all the camera related functionality
   private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
+#endif
 
   // Handles all data preprocessing and makes calls to run inference through the `Interpreter`.
   private var modelDataHandler: ModelDataHandler? =
@@ -57,7 +61,14 @@ class ViewController: UIViewController {
       fatalError("Model set up failed")
     }
 
+#if targetEnvironment(simulator)
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(classifyPasteboardImage),
+                                           name: UIApplication.didBecomeActiveNotification,
+                                           object: nil)
+#else
     cameraCapture.delegate = self
+#endif
 
     addPanGesture()
   }
@@ -66,12 +77,18 @@ class ViewController: UIViewController {
     super.viewWillAppear(animated)
 
     changeBottomViewState()
+
+#if !targetEnvironment(simulator)
     cameraCapture.checkCameraConfigurationAndStartSession()
+#endif
   }
 
+#if !targetEnvironment(simulator)
   override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
     cameraCapture.stopSession()
   }
+#endif
 
   override var preferredStatusBarStyle: UIStatusBarStyle {
     return .lightContent
@@ -107,6 +124,28 @@ class ViewController: UIViewController {
     }
   }
 
+  #if targetEnvironment(simulator)
+  @objc func classifyPasteboardImage() {
+    guard let image = UIPasteboard.general.images?.first else {
+      return
+    }
+
+    guard let buffer = CVImageBuffer.buffer(from: image) else {
+      return
+    }
+
+    previewView.image = image
+
+    DispatchQueue.global().async {
+      self.didOutput(pixelBuffer: buffer)
+    }
+  }
+  #endif
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
+
 }
 
 // MARK: InferenceViewControllerDelegate Methods
@@ -123,7 +162,7 @@ extension ViewController: InferenceViewControllerDelegate {
 }
 
 // MARK: CameraFeedManagerDelegate Methods
-extension ViewController: CameraFeedManagerDelegate {
+extension ViewController {
 
   func didOutput(pixelBuffer: CVPixelBuffer) {
     let currentTimeMs = Date().timeIntervalSince1970 * 1000
@@ -323,3 +362,7 @@ extension ViewController {
   }
 
 }
+
+#if !targetEnvironment(simulator)
+extension ViewController: CameraFeedManagerDelegate {}
+#endif
