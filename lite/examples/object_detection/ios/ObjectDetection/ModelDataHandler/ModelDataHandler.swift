@@ -204,7 +204,7 @@ class ModelDataHandler: NSObject {
       let outputClassIndex = Int(outputClasses[i])
       let outputClass = labels[outputClassIndex + 1]
 
-      var rect: CGRect = CGRect.zero
+      var rect: CGRect = .zero
 
       // Translates the detected bounding box to CGRect.
       rect.origin = CGPoint(x: CGFloat(boundingBox[4*i+1]), y: CGFloat(boundingBox[4*i]))
