@@ -126,7 +126,6 @@ class ModelDataHandler: NSObject {
              sourcePixelFormat == kCVPixelFormatType_32BGRA ||
                sourcePixelFormat == kCVPixelFormatType_32RGBA)
 
-
     let imageChannels = 4
     assert(imageChannels >= inputChannels)
 
@@ -160,7 +159,7 @@ class ModelDataHandler: NSObject {
       // Run inference by invoking the `Interpreter`.
       let startDate = Date()
       try interpreter.invoke()
-      interval = Date().timeIntervalSince(startDate) * 1000
+      interval = -startDate.timeIntervalSinceNow * 1000
 
       outputBoundingBox = try interpreter.output(at: 0)
       outputClasses = try interpreter.output(at: 1)
