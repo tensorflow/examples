@@ -269,11 +269,10 @@ class ModelDataHandler: NSObject {
       return nil
     }
     let count = CVPixelBufferGetDataSize(buffer)
-    let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
     var rgbBytes = [UInt8](repeating: 0, count: byteCount)
     var pixelIndex = 0
-    for component in bufferData.enumerated() {
-      let bgraComponent = component.offset % bgraPixel.channels
+    for i in 0..<count {
+      let bgraComponent = i % bgraPixel.channels
       let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent
       guard !isAlphaComponent else {
         pixelIndex += 1
@@ -281,7 +280,7 @@ class ModelDataHandler: NSObject {
       }
       // Swizzle BGR -> RGB.
       let rgbIndex = pixelIndex * rgbPixelChannels + (bgraPixel.lastBgrComponent - bgraComponent)
-      rgbBytes[rgbIndex] = component.element
+      rgbBytes[rgbIndex] = mutableRawPointer.load(fromByteOffset: i, as: UInt8.self)
     }
     if isModelQuantized { return Data(bytes: rgbBytes) }
     return Data(copyingBufferOf: rgbBytes.map { Float($0) / 255.0 })
