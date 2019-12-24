@@ -262,12 +262,12 @@ class ModelDataHandler: NSObject {
     byteCount: Int,
     isModelQuantized: Bool
   ) -> Data? {
+    assert(CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA)
     CVPixelBufferLockBaseAddress(buffer, .readOnly)
     defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
     guard let mutableRawPointer = CVPixelBufferGetBaseAddress(buffer) else {
       return nil
     }
-    assert(CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA)
     let count = CVPixelBufferGetDataSize(buffer)
     let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
     var rgbBytes = [UInt8](repeating: 0, count: byteCount)
