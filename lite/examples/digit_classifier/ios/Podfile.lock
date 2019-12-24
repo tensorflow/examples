@@ -1,0 +1,24 @@
+PODS:
+  - Sketch (2.0)
+  - TensorFlowLiteC (1.14.0)
+  - TensorFlowLiteSwift (1.14.0):
+    - TensorFlowLiteC (= 1.14.0)
+
+DEPENDENCIES:
+  - Sketch
+  - TensorFlowLiteSwift
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Sketch
+    - TensorFlowLiteC
+    - TensorFlowLiteSwift
+
+SPEC CHECKSUMS:
+  Sketch: c54b898799ba34cb282b57ff42b5d0a6071e855f
+  TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
+  TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
+
+PODFILE CHECKSUM: db17edffc3754b40a0cf959adc9530d3838970d5
+
+COCOAPODS: 1.5.3

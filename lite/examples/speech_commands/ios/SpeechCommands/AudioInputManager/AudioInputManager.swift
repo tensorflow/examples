@@ -48,7 +48,7 @@ class AudioInputManager: NSObject {
   }
 
   func checkPermissionsAndStartTappingMicrophone() {
-    switch AVAudioSession.sharedInstance().recordPermission() {
+    switch AVAudioSession.sharedInstance().recordPermission {
 
     case .granted:
       startTappingMicrophone()

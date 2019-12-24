@@ -7,7 +7,8 @@ The following samples demonstrate the use of TensorFlow Lite in mobile applicati
 
 ## Image classification
 
-This app performs image classification on a live camera feed and displays the inference output in realtime on the screen.
+This app performs image classification on a live camera feed and displays the
+inference output in realtime on the screen.
 
 <!-- TODO(b/124116863): Add app screenshot and model details. -->
 
@@ -17,10 +18,14 @@ This app performs image classification on a live camera feed and displays the in
 
 [iOS image classification](examples/image_classification/ios/README.md)
 
+[Raspberry Pi image classification](examples/image_classification/raspberry_pi/README.md)
 
 ## Object detection
 
-This app performs object detection on a live camera feed and displays the results in realtime on the screen. The app displays the confidence scores, classes and detected bounding boxes for multiple objects. A detected object is only displayed if the confidence score is greater than a defined threshold.
+This app performs object detection on a live camera feed and displays the
+results in realtime on the screen. The app displays the confidence scores,
+classes and detected bounding boxes for multiple objects. A detected object is
+only displayed if the confidence score is greater than a defined threshold.
 
 <!-- TODO(b/124116863): Add app screenshot and model details. -->
 
@@ -29,6 +34,8 @@ This app performs object detection on a live camera feed and displays the result
 [Android object detection](examples/object_detection/android/README.md)
 
 [iOS object detection](examples/object_detection/ios/README.md)
+
+[Raspberry Pi object detection](examples/object_detection/raspberry_pi/README.md)
 
 
 ## Speech command recognition
@@ -75,5 +82,18 @@ Once we have the TensorFlow Lite model, the implementation is very similar to th
 [Android gesture classification](examples/gesture_classification/android/README.md)
 
 [iOS gesture classification](examples/gesture_classification/ios/README.md)
+
+## Model personalization
+
+This app performs model personalization on a live camera feed and displays the
+results in realtime on the screen. The app displays the confidence scores,
+classes and detected bounding boxes for multiple objects that were trained in
+realtime.
+
+<!-- TODO(b/124116863): Add app screenshot and model details. -->
+
+### Samples
+
+[Android Model Personalization](examples/model_personalization/README.md)
 
 

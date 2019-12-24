@@ -29,7 +29,7 @@ assert tf.__version__.startswith('2')
 class Train(object):
   """Train class.
 
-  Args:
+  Attributes:
     epochs: Number of epochs.
     enable_function: Decorate function with tf.function.
     encoder: Encoder.
@@ -39,6 +39,10 @@ class Train(object):
     batch_size: Batch size.
     per_replica_batch_size: Batch size per replica for sync replicas. Same as
       batch_size for non distributed training.
+    optimizer: Optimizer.
+    loss_object: Object of the loss class.
+    train_loss_metric: Mean metric to keep track of the train loss value.
+    test_loss_metric: Mean metric to keep track of the test loss value.
   """
 
   def __init__(self, epochs, enable_function, encoder, decoder, inp_lang,

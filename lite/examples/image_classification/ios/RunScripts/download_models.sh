@@ -46,7 +46,7 @@ download_and_extract() {
   rm -rf ${tempdir2} ${tempdir}
 }
 
-if [ -f ../ImageClassification/Model/detect.tflite ]
+if [ -f ../ImageClassification/Model/mobilenet_quant_v1_224.tflite ]
 then
 echo "File exists. Exiting..."
 exit 0

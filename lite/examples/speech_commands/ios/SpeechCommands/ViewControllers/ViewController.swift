@@ -31,9 +31,8 @@ class ViewController: UIViewController {
   private let imageInset: CGFloat = 8.0
 
   // MARK: Objects Handling Core Functionality
-  private let modelDataHandler = ModelDataHandler(
-      modelFileName: "conv_actions_frozen", labelsFileName: "conv_actions_labels",
-      labelsFileExtension: "txt")
+  private var modelDataHandler: ModelDataHandler? =
+    ModelDataHandler(modelFileInfo: ConvActions.modelInfo, labelsFileInfo: ConvActions.labelsInfo)
   private var audioInputManager: AudioInputManager?
   private var inferenceViewController: InferenceViewController?
 
@@ -52,7 +51,7 @@ class ViewController: UIViewController {
     }
 
     // Displays lables
-    words = handler.offSetLabelsForDisplay()
+    words = handler.offsetLabelsForDisplay()
     self.collectionView.reloadData()
 
     startAudioRecognition()
@@ -74,7 +73,7 @@ class ViewController: UIViewController {
       }
       inferenceViewController = segue.destination as? InferenceViewController
       inferenceViewController?.sampleRate = Int(tempModelDataHandler.sampleRate)
-      inferenceViewController?.threadCountLimit = tempModelDataHandler.threaCountLimit
+      inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
       inferenceViewController?.currentThreadCount = tempModelDataHandler.threadCount
       inferenceViewController?.delegate = self
     }
@@ -162,7 +161,12 @@ class ViewController: UIViewController {
 // MARK: InferenceViewControllerDelegate Methods
 extension ViewController: InferenceViewControllerDelegate {
   func didChangeThreadCount(to count: Int) {
-    modelDataHandler?.set(numberOfThreads: count)
+    if modelDataHandler?.threadCount == count { return }
+    modelDataHandler = ModelDataHandler(
+      modelFileInfo: ConvActions.modelInfo,
+      labelsFileInfo: ConvActions.labelsInfo,
+      threadCount: count
+    )
   }
 }
 
@@ -220,7 +224,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource, 
     var name = word.capitalized
 
     if let recognizedCommand = highlightedCommand, recognizedCommand.name == word {
-      backgroundImage = UIImage(named: "base")?.resizableImage(withCapInsets: UIEdgeInsetsMake(imageInset, imageInset, imageInset, imageInset), resizingMode: .stretch)
+      backgroundImage = UIImage(named: "base")?.resizableImage(withCapInsets: UIEdgeInsets(top: imageInset, left: imageInset, bottom: imageInset, right: imageInset), resizingMode: .stretch)
       fontColor = selectedFontColor
       name = word.capitalized + " (\(Int(recognizedCommand.score * 100.0))%)"
     }
@@ -252,7 +256,7 @@ extension ViewController: AudioInputManagerDelegate {
 
     let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
     let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
-      UIApplication.shared.open(URL(string: UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+      UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
     }
 
     alertController.addAction(cancelAction)
@@ -261,4 +265,3 @@ extension ViewController: AudioInputManagerDelegate {
     present(alertController, animated: true, completion: nil)
   }
 }
-

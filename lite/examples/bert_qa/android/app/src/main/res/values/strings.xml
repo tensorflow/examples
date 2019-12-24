@@ -1,0 +1,10 @@
+<resources>
+  <string name="app_name" translatable="false">TFL Question and Answer</string>
+  <string name="banner_description" translatable="false">Banner</string>
+  <string name="title_dataset_hint_text" translatable="false">Please select an article below.</string>
+  <string name="title_dataset_list" translatable="false">Datasets</string>
+  <string name="title_dataset_detail" translatable="false">Dataset Detail</string>
+  <string name="you_might_want_to_ask" translatable="false">You might want to ask?</string>
+  <string name="text_query" translatable="false">Text query</string>
+  <string name="ask_question" translatable="false">Ask question</string>
+</resources>

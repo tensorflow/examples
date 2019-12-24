@@ -56,5 +56,9 @@ The percentage displayed is average command recognition over a window duration (
 
 ## iOS App Details
 
-This app is written in both Swift and Objective C. All application functionality, image processing and results formatting is developed in Swift.
-Objective C is used via bridging to make the TensorFlow Lite C++ framework calls.
+The app is written entirely in Swift and uses the TensorFlow Lite
+[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/swift)
+for performing speech commands.
+
+Note: Objective-C developers should use the TensorFlow Lite
+[Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/objc).

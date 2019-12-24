@@ -28,7 +28,7 @@ If this is a new install, you will need to run the Xcode application once to agr
 ```sudo gem install cocoapods```
 
 2. Install the pod to generate the workspace file:
-```cd therepowithnoname/examples/gesture_classification/ios```
+```cd lite/examples/gesture_classification/ios```
 ```pod install```
 If you have installed this pod before and that command doesn't work, try
 ```pod update```

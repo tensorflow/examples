@@ -1,0 +1,14 @@
+task downloadModelFile(type: Download) {
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification.tflite'
+    dest project.ext.ASSET_DIR + '/text_classification.tflite'
+    overwrite false
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleDebug') {
+        task.dependsOn 'downloadModelFile'
+    }
+    if (task.name == 'assembleRelease') {
+        task.dependsOn 'downloadModelFile'
+    }
+}

@@ -1,0 +1,78 @@
+apply plugin: 'com.android.application'
+apply plugin: 'de.undercouch.download'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "org.tensorflow.lite.examples.smartreply.SmartReply"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    aaptOptions {
+        noCompress "tflite"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility '1.8'
+        targetCompatibility '1.8'
+    }
+
+    repositories {
+        jcenter()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
+ext {
+    LITE_MODEL_URL = 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/smartreply/smartreply.tflite'
+    LITE_MODEL_NAME = 'smartreply.tflite'
+    LITE_MODEL_DIRS = [
+            "$projectDir/src/main/assets",
+            "$projectDir/libs/cc/testdata",
+    ]
+
+    AAR_URL = 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/smartreply/smartreply_runtime_aar.aar'
+    AAR_PATH = "$projectDir/libs/smartreply_runtime_aar.aar"
+}
+
+// Download prebuilt AAR and TF Lite model.
+apply from: 'download.gradle'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+
+    assert new File(project.ext.AAR_PATH).exists(): 'Please run `./gradlew :app:downloadAAR()` to download prebuilt aar package, or build it from code. (See: `https://github.com/tensorflow/examples/blob/master/lite/examples/smart_reply/android/how-to-build.md`)'
+    implementation files(project.ext.AAR_PATH)
+
+    // Support Libraries
+    implementation 'com.google.guava:guava:28.1-android'
+    implementation 'com.android.support:support-annotations:28.0.0'
+    implementation 'com.android.support:support-v13:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+
+    // TF Lite
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation 'org.robolectric:robolectric:4.3.1'
+    // TODO: Include AAR for testing.
+}
