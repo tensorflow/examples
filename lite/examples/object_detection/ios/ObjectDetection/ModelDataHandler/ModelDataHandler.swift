@@ -126,7 +126,6 @@ class ModelDataHandler: NSObject {
              sourcePixelFormat == kCVPixelFormatType_32BGRA ||
                sourcePixelFormat == kCVPixelFormatType_32RGBA)
 
-
     let imageChannels = 4
     assert(imageChannels >= inputChannels)
 
@@ -160,7 +159,7 @@ class ModelDataHandler: NSObject {
       // Run inference by invoking the `Interpreter`.
       let startDate = Date()
       try interpreter.invoke()
-      interval = Date().timeIntervalSince(startDate) * 1000
+      interval = -startDate.timeIntervalSinceNow * 1000
 
       outputBoundingBox = try interpreter.output(at: 0)
       outputClasses = try interpreter.output(at: 1)
@@ -182,18 +181,17 @@ class ModelDataHandler: NSObject {
     )
 
     // Returns the inference time and inferences
-    let result = Result(inferenceTime: interval, inferences: resultArray)
-    return result
+    return Result(inferenceTime: interval, inferences: resultArray)
   }
 
   /// Filters out all the results with confidence score < threshold and returns the top N results
   /// sorted in descending order.
   func formatResults(boundingBox: [Float], outputClasses: [Float], outputScores: [Float], outputCount: Int, width: CGFloat, height: CGFloat) -> [Inference]{
     var resultsArray: [Inference] = []
-    if (outputCount == 0) {
+    guard outputCount > 0 else {
       return resultsArray
     }
-    for i in 0...outputCount - 1 {
+    for i in 0..<outputCount {
 
       let score = outputScores[i]
 
@@ -206,11 +204,10 @@ class ModelDataHandler: NSObject {
       let outputClassIndex = Int(outputClasses[i])
       let outputClass = labels[outputClassIndex + 1]
 
-      var rect: CGRect = CGRect.zero
+      var rect: CGRect = .zero
 
       // Translates the detected bounding box to CGRect.
-      rect.origin.y = CGFloat(boundingBox[4*i])
-      rect.origin.x = CGFloat(boundingBox[4*i+1])
+      rect.origin = CGPoint(x: CGFloat(boundingBox[4*i+1]), y: CGFloat(boundingBox[4*i]))
       rect.size.height = CGFloat(boundingBox[4*i+2]) - rect.origin.y
       rect.size.width = CGFloat(boundingBox[4*i+3]) - rect.origin.x
 
@@ -228,9 +225,7 @@ class ModelDataHandler: NSObject {
     }
 
     // Sort results in descending order of confidence.
-    resultsArray.sort { (first, second) -> Bool in
-      return first.confidence  > second.confidence
-    }
+    resultsArray.sort { $0.confidence  > $1.confidence }
 
     return resultsArray
   }
@@ -267,26 +262,27 @@ class ModelDataHandler: NSObject {
     byteCount: Int,
     isModelQuantized: Bool
   ) -> Data? {
-    CVPixelBufferLockBaseAddress(buffer, .readOnly)
+    assert(CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA)
+    guard CVPixelBufferLockBaseAddress(buffer, .readOnly) == kCVReturnSuccess else {
+        return nil
+    }
     defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
     guard let mutableRawPointer = CVPixelBufferGetBaseAddress(buffer) else {
       return nil
     }
-    assert(CVPixelBufferGetPixelFormatType(buffer) == kCVPixelFormatType_32BGRA)
     let count = CVPixelBufferGetDataSize(buffer)
-    let bufferData = Data(bytesNoCopy: mutableRawPointer, count: count, deallocator: .none)
     var rgbBytes = [UInt8](repeating: 0, count: byteCount)
     var pixelIndex = 0
-    for component in bufferData.enumerated() {
-      let bgraComponent = component.offset % bgraPixel.channels;
-      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent;
+    for i in 0..<count {
+      let bgraComponent = i % bgraPixel.channels
+      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent
       guard !isAlphaComponent else {
         pixelIndex += 1
         continue
       }
       // Swizzle BGR -> RGB.
       let rgbIndex = pixelIndex * rgbPixelChannels + (bgraPixel.lastBgrComponent - bgraComponent)
-      rgbBytes[rgbIndex] = component.element
+      rgbBytes[rgbIndex] = mutableRawPointer.load(fromByteOffset: i, as: UInt8.self)
     }
     if isModelQuantized { return Data(bytes: rgbBytes) }
     return Data(copyingBufferOf: rgbBytes.map { Float($0) / 255.0 })
@@ -295,19 +291,16 @@ class ModelDataHandler: NSObject {
   /// This assigns color for a particular class.
   private func colorForClass(withIndex index: Int) -> UIColor {
 
-    // We have a set of colors and the depending upon a stride, it assigns variations to of the base
-    // colors to each object based on its index.
+    // We have a set of colors and depending upon a stride, it assigns variations of the base colors to each object based on its index.
     let baseColor = colors[index % colors.count]
-
-    var colorToAssign = baseColor
 
     let percentage = CGFloat((colorStrideValue / 2 - index / colors.count) * colorStrideValue)
 
     if let modifiedColor = baseColor.getModified(byPercentage: percentage) {
-      colorToAssign = modifiedColor
+      return modifiedColor
     }
 
-    return colorToAssign
+    return baseColor
   }
 }
 
