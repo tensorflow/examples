@@ -273,8 +273,8 @@ class ModelDataHandler: NSObject {
     var rgbBytes = [UInt8](repeating: 0, count: byteCount)
     var pixelIndex = 0
     for component in bufferData.enumerated() {
-      let bgraComponent = component.offset % bgraPixel.channels;
-      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent;
+      let bgraComponent = component.offset % bgraPixel.channels
+      let isAlphaComponent = bgraComponent == bgraPixel.alphaComponent
       guard !isAlphaComponent else {
         pixelIndex += 1
         continue
