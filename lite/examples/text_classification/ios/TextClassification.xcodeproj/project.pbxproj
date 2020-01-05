@@ -17,6 +17,11 @@
 		A131D18823C26E7A00D4BB91 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A131D18623C26E7A00D4BB91 /* LaunchScreen.storyboard */; };
 		A131D19323C26E7A00D4BB91 /* TextClassificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D19223C26E7A00D4BB91 /* TextClassificationTests.swift */; };
 		A131D19E23C26E7A00D4BB91 /* TextClassificationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D19D23C26E7A00D4BB91 /* TextClassificationUITests.swift */; };
+		A17759F823C2788100F7982F /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = A17759F623C2788100F7982F /* labels.txt */; };
+		A17759F923C2788100F7982F /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = A17759F723C2788100F7982F /* vocab.txt */; };
+		A17759FB23C2789D00F7982F /* text_classification.tflite in Resources */ = {isa = PBXBuildFile; fileRef = A17759FA23C2789D00F7982F /* text_classification.tflite */; };
+		A17759FD23C2790C00F7982F /* TextClassificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17759FC23C2790C00F7982F /* TextClassificationClient.swift */; };
+		A17759FE23C2790C00F7982F /* TextClassificationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17759FC23C2790C00F7982F /* TextClassificationClient.swift */; };
 		CC0DD9B3188E31A673DE2673 /* Pods_TextClassification_TextClassificationUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86F3C1EE720037C3117AA6F5 /* Pods_TextClassification_TextClassificationUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +64,10 @@
 		A131D19923C26E7A00D4BB91 /* TextClassificationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TextClassificationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A131D19D23C26E7A00D4BB91 /* TextClassificationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextClassificationUITests.swift; sourceTree = "<group>"; };
 		A131D19F23C26E7A00D4BB91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A17759F623C2788100F7982F /* labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = labels.txt; sourceTree = "<group>"; };
+		A17759F723C2788100F7982F /* vocab.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vocab.txt; sourceTree = "<group>"; };
+		A17759FA23C2789D00F7982F /* text_classification.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = text_classification.tflite; sourceTree = "<group>"; };
+		A17759FC23C2790C00F7982F /* TextClassificationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextClassificationClient.swift; sourceTree = "<group>"; };
 		C6695D03A746D78AA88FE01B /* Pods_TextClassificationTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TextClassificationTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0DA97C718DC781AA2D41851 /* Pods-TextClassificationTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassificationTests.release.xcconfig"; path = "Target Support Files/Pods-TextClassificationTests/Pods-TextClassificationTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -101,7 +110,6 @@
 				191C83CBCCDAC043F63DFEEA /* Pods-TextClassificationTests.debug.xcconfig */,
 				F0DA97C718DC781AA2D41851 /* Pods-TextClassificationTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -130,6 +138,7 @@
 		A131D17A23C26E7900D4BB91 /* TextClassification */ = {
 			isa = PBXGroup;
 			children = (
+				A17759F523C2784100F7982F /* Model */,
 				A131D17B23C26E7900D4BB91 /* AppDelegate.swift */,
 				A131D17D23C26E7900D4BB91 /* SceneDelegate.swift */,
 				A131D17F23C26E7900D4BB91 /* ViewController.swift */,
@@ -159,6 +168,17 @@
 			path = TextClassificationUITests;
 			sourceTree = "<group>";
 		};
+		A17759F523C2784100F7982F /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				A17759FA23C2789D00F7982F /* text_classification.tflite */,
+				A17759F623C2788100F7982F /* labels.txt */,
+				A17759F723C2788100F7982F /* vocab.txt */,
+				A17759FC23C2790C00F7982F /* TextClassificationClient.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		BFDA08748425BFDC42C3E00F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -177,6 +197,7 @@
 			buildConfigurationList = A131D1A223C26E7A00D4BB91 /* Build configuration list for PBXNativeTarget "TextClassification" */;
 			buildPhases = (
 				6D15215550EFC98852A88569 /* [CP] Check Pods Manifest.lock */,
+				A17759F223C2750A00F7982F /* ShellScript */,
 				A131D17423C26E7900D4BB91 /* Sources */,
 				A131D17523C26E7900D4BB91 /* Frameworks */,
 				A131D17623C26E7900D4BB91 /* Resources */,
@@ -276,9 +297,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A17759F923C2788100F7982F /* vocab.txt in Resources */,
 				A131D18823C26E7A00D4BB91 /* LaunchScreen.storyboard in Resources */,
+				A17759FB23C2789D00F7982F /* text_classification.tflite in Resources */,
 				A131D18523C26E7A00D4BB91 /* Assets.xcassets in Resources */,
 				A131D18323C26E7900D4BB91 /* Main.storyboard in Resources */,
+				A17759F823C2788100F7982F /* labels.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,6 +367,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		A17759F223C2750A00F7982F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n$SRCROOT/RunScripts/download_models.sh\n";
+		};
 		C0D9E53490E6EB74388AA23F /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -373,6 +414,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A131D18023C26E7900D4BB91 /* ViewController.swift in Sources */,
+				A17759FD23C2790C00F7982F /* TextClassificationClient.swift in Sources */,
 				A131D17C23C26E7900D4BB91 /* AppDelegate.swift in Sources */,
 				A131D17E23C26E7900D4BB91 /* SceneDelegate.swift in Sources */,
 			);
@@ -383,6 +425,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A131D19323C26E7A00D4BB91 /* TextClassificationTests.swift in Sources */,
+				A17759FE23C2790C00F7982F /* TextClassificationClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
