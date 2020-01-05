@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C47360F5F9034790404FB96 /* Pods_TextClassificationTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C6695D03A746D78AA88FE01B /* Pods_TextClassificationTests.framework */; };
+		92C6E8FDD56E9DD43E815EB9 /* Pods_TextClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B440E70E5F47F345E4EBE55 /* Pods_TextClassification.framework */; };
 		A131D17C23C26E7900D4BB91 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D17B23C26E7900D4BB91 /* AppDelegate.swift */; };
 		A131D17E23C26E7900D4BB91 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D17D23C26E7900D4BB91 /* SceneDelegate.swift */; };
 		A131D18023C26E7900D4BB91 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D17F23C26E7900D4BB91 /* ViewController.swift */; };
@@ -15,6 +17,7 @@
 		A131D18823C26E7A00D4BB91 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A131D18623C26E7A00D4BB91 /* LaunchScreen.storyboard */; };
 		A131D19323C26E7A00D4BB91 /* TextClassificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D19223C26E7A00D4BB91 /* TextClassificationTests.swift */; };
 		A131D19E23C26E7A00D4BB91 /* TextClassificationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A131D19D23C26E7A00D4BB91 /* TextClassificationUITests.swift */; };
+		CC0DD9B3188E31A673DE2673 /* Pods_TextClassification_TextClassificationUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86F3C1EE720037C3117AA6F5 /* Pods_TextClassification_TextClassificationUITests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +38,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		02904407235CE9359DFC4D0C /* Pods-TextClassification.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassification.release.xcconfig"; path = "Target Support Files/Pods-TextClassification/Pods-TextClassification.release.xcconfig"; sourceTree = "<group>"; };
+		05CFAA221CEAA1195D66A363 /* Pods-TextClassification.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassification.debug.xcconfig"; path = "Target Support Files/Pods-TextClassification/Pods-TextClassification.debug.xcconfig"; sourceTree = "<group>"; };
+		191C83CBCCDAC043F63DFEEA /* Pods-TextClassificationTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassificationTests.debug.xcconfig"; path = "Target Support Files/Pods-TextClassificationTests/Pods-TextClassificationTests.debug.xcconfig"; sourceTree = "<group>"; };
+		40614EA2CC694EC518E2EB36 /* Pods-TextClassification-TextClassificationUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassification-TextClassificationUITests.release.xcconfig"; path = "Target Support Files/Pods-TextClassification-TextClassificationUITests/Pods-TextClassification-TextClassificationUITests.release.xcconfig"; sourceTree = "<group>"; };
+		86F3C1EE720037C3117AA6F5 /* Pods_TextClassification_TextClassificationUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TextClassification_TextClassificationUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B440E70E5F47F345E4EBE55 /* Pods_TextClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TextClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		931E604CD2375C868B5211B0 /* Pods-TextClassification-TextClassificationUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassification-TextClassificationUITests.debug.xcconfig"; path = "Target Support Files/Pods-TextClassification-TextClassificationUITests/Pods-TextClassification-TextClassificationUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		A131D17823C26E7900D4BB91 /* TextClassification.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TextClassification.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A131D17B23C26E7900D4BB91 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A131D17D23C26E7900D4BB91 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -49,6 +59,8 @@
 		A131D19923C26E7A00D4BB91 /* TextClassificationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TextClassificationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A131D19D23C26E7A00D4BB91 /* TextClassificationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextClassificationUITests.swift; sourceTree = "<group>"; };
 		A131D19F23C26E7A00D4BB91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C6695D03A746D78AA88FE01B /* Pods_TextClassificationTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TextClassificationTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0DA97C718DC781AA2D41851 /* Pods-TextClassificationTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TextClassificationTests.release.xcconfig"; path = "Target Support Files/Pods-TextClassificationTests/Pods-TextClassificationTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92C6E8FDD56E9DD43E815EB9 /* Pods_TextClassification.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1C47360F5F9034790404FB96 /* Pods_TextClassificationTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,12 +84,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC0DD9B3188E31A673DE2673 /* Pods_TextClassification_TextClassificationUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		29AD591BC003753CEB5573F6 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				05CFAA221CEAA1195D66A363 /* Pods-TextClassification.debug.xcconfig */,
+				02904407235CE9359DFC4D0C /* Pods-TextClassification.release.xcconfig */,
+				931E604CD2375C868B5211B0 /* Pods-TextClassification-TextClassificationUITests.debug.xcconfig */,
+				40614EA2CC694EC518E2EB36 /* Pods-TextClassification-TextClassificationUITests.release.xcconfig */,
+				191C83CBCCDAC043F63DFEEA /* Pods-TextClassificationTests.debug.xcconfig */,
+				F0DA97C718DC781AA2D41851 /* Pods-TextClassificationTests.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		A131D16F23C26E7900D4BB91 = {
 			isa = PBXGroup;
 			children = (
@@ -83,6 +112,8 @@
 				A131D19123C26E7A00D4BB91 /* TextClassificationTests */,
 				A131D19C23C26E7A00D4BB91 /* TextClassificationUITests */,
 				A131D17923C26E7900D4BB91 /* Products */,
+				29AD591BC003753CEB5573F6 /* Pods */,
+				BFDA08748425BFDC42C3E00F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -128,6 +159,16 @@
 			path = TextClassificationUITests;
 			sourceTree = "<group>";
 		};
+		BFDA08748425BFDC42C3E00F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8B440E70E5F47F345E4EBE55 /* Pods_TextClassification.framework */,
+				86F3C1EE720037C3117AA6F5 /* Pods_TextClassification_TextClassificationUITests.framework */,
+				C6695D03A746D78AA88FE01B /* Pods_TextClassificationTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -135,6 +176,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A131D1A223C26E7A00D4BB91 /* Build configuration list for PBXNativeTarget "TextClassification" */;
 			buildPhases = (
+				6D15215550EFC98852A88569 /* [CP] Check Pods Manifest.lock */,
 				A131D17423C26E7900D4BB91 /* Sources */,
 				A131D17523C26E7900D4BB91 /* Frameworks */,
 				A131D17623C26E7900D4BB91 /* Resources */,
@@ -152,6 +194,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A131D1A523C26E7A00D4BB91 /* Build configuration list for PBXNativeTarget "TextClassificationTests" */;
 			buildPhases = (
+				71A382F68870FFBA8A75CD4B /* [CP] Check Pods Manifest.lock */,
 				A131D18A23C26E7A00D4BB91 /* Sources */,
 				A131D18B23C26E7A00D4BB91 /* Frameworks */,
 				A131D18C23C26E7A00D4BB91 /* Resources */,
@@ -170,6 +213,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A131D1A823C26E7A00D4BB91 /* Build configuration list for PBXNativeTarget "TextClassificationUITests" */;
 			buildPhases = (
+				C0D9E53490E6EB74388AA23F /* [CP] Check Pods Manifest.lock */,
 				A131D19523C26E7A00D4BB91 /* Sources */,
 				A131D19623C26E7A00D4BB91 /* Frameworks */,
 				A131D19723C26E7A00D4BB91 /* Resources */,
@@ -253,6 +297,75 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6D15215550EFC98852A88569 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TextClassification-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		71A382F68870FFBA8A75CD4B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TextClassificationTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C0D9E53490E6EB74388AA23F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-TextClassification-TextClassificationUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A131D17423C26E7900D4BB91 /* Sources */ = {
@@ -432,6 +545,7 @@
 		};
 		A131D1A323C26E7A00D4BB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05CFAA221CEAA1195D66A363 /* Pods-TextClassification.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -449,6 +563,7 @@
 		};
 		A131D1A423C26E7A00D4BB91 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02904407235CE9359DFC4D0C /* Pods-TextClassification.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -466,6 +581,7 @@
 		};
 		A131D1A623C26E7A00D4BB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 191C83CBCCDAC043F63DFEEA /* Pods-TextClassificationTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -487,6 +603,7 @@
 		};
 		A131D1A723C26E7A00D4BB91 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F0DA97C718DC781AA2D41851 /* Pods-TextClassificationTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -508,6 +625,7 @@
 		};
 		A131D1A923C26E7A00D4BB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 931E604CD2375C868B5211B0 /* Pods-TextClassification-TextClassificationUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -527,6 +645,7 @@
 		};
 		A131D1AA23C26E7A00D4BB91 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40614EA2CC694EC518E2EB36 /* Pods-TextClassification-TextClassificationUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
