@@ -26,14 +26,14 @@ import tensorflow_examples.lite.model_customization.core.model_export_format as 
 class ClassificationModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
 
-  def __init__(self, data, model_export_format, model_name, shuffle,
+  def __init__(self, data, model_export_format, model_spec, shuffle,
                train_whole_model, validation_ratio, test_ratio):
     """Initialize a instance with data, deploy mode and other related parameters.
 
     Args:
       data: Raw data that could be splitted for training / validation / testing.
       model_export_format: Model export format such as saved_model / tflite.
-      model_name: Model name.
+      model_spec: Specification for the model.
       shuffle: Whether the data should be shuffled.
       train_whole_model: If true, the Hub module is trained together with the
         classification layer on top. Otherwise, only train the top
@@ -47,7 +47,7 @@ class ClassificationModel(abc.ABC):
 
     self.data = data
     self.model_export_format = model_export_format
-    self.model_name = model_name
+    self.model_spec = model_spec
     self.shuffle = shuffle
     self.train_whole_model = train_whole_model
     self.validation_ratio = validation_ratio

@@ -119,7 +119,6 @@ class ImageClassifier(classification_model.ClassificationModel):
     super(ImageClassifier,
           self).__init__(data, model_export_format, model_spec, shuffle,
                          hparams.do_fine_tuning, validation_ratio, test_ratio)
-    self.pre_trained_model_spec = model_spec
     self.hparams = hparams
     self.model = self._create_model()
 
@@ -129,9 +128,9 @@ class ImageClassifier(classification_model.ClassificationModel):
       hparams = self.hparams
 
     module_layer = hub.KerasLayer(
-        self.pre_trained_model_spec.uri, trainable=hparams.do_fine_tuning)
+        self.model_spec.uri, trainable=hparams.do_fine_tuning)
     return lib.build_model(module_layer, hparams,
-                           self.pre_trained_model_spec.input_image_shape,
+                           self.model_spec.input_image_shape,
                            self.data.num_classes)
 
   def train(self, hparams=None):
@@ -166,16 +165,11 @@ class ImageClassifier(classification_model.ClassificationModel):
     image = tf.cast(image, tf.float32)
 
     image -= tf.constant(
-        self.pre_trained_model_spec.mean_rgb,
-        shape=[1, 1, 3],
-        dtype=image.dtype)
+        self.model_spec.mean_rgb, shape=[1, 1, 3], dtype=image.dtype)
     image /= tf.constant(
-        self.pre_trained_model_spec.stddev_rgb,
-        shape=[1, 1, 3],
-        dtype=image.dtype)
+        self.model_spec.stddev_rgb, shape=[1, 1, 3], dtype=image.dtype)
 
-    image = tf.image.resize(image,
-                            self.pre_trained_model_spec.input_image_shape)
+    image = tf.image.resize(image, self.model_spec.input_image_shape)
     label = tf.one_hot(label, depth=self.data.num_classes)
     return image, label
 

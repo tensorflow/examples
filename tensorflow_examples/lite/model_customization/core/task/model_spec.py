@@ -25,14 +25,11 @@ class ImageModelSpec(object):
   mean_rgb = [0, 0, 0]
   stddev_rgb = [255, 255, 255]
 
-  def __init__(self, name, uri):
-    self.name = name
+  def __init__(self, uri):
     self.uri = uri
 
 efficientnet_b0_spec = ImageModelSpec(
-    name='efficientnet_b0',
     uri='https://tfhub.dev/google/efficientnet/b0/feature-vector/1')
 
 mobilenet_v2_spec = ImageModelSpec(
-    name='mobilenet_v2',
     uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4')
