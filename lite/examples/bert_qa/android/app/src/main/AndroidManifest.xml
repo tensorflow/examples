@@ -20,9 +20,9 @@
 
   <application
       android:allowBackup="true"
-      android:icon="@drawable/ic_launcher"
+      android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
-      android:roundIcon="@drawable/ic_launcher"
+      android:roundIcon="@mipmap/ic_launcher_round"
       android:supportsRtl="true"
       android:theme="@style/AppTheme"
       tools:ignore="GoogleAppIndexingWarning">
@@ -32,7 +32,7 @@
         android:exported="false">
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
-          android:value="org.tensorflow.lite.examples.bertqa.ui.DatasetListActivity" />
+          android:value=".ui.DatasetListActivity" />
     </activity>
 
     <activity
