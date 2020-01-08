@@ -15,10 +15,6 @@
 import UIKit
 import AVFoundation
 
-#if targetEnvironment(simulator)
-
-#else
-
 // MARK: CameraFeedManagerDelegate Declaration
 protocol CameraFeedManagerDelegate: class {
 
@@ -228,7 +224,7 @@ class CameraFeedManager: NSObject {
     /**Tries to get the default back camera.
      */
     guard let camera  = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
-      fatalError("Cannot find camera")
+      return false
     }
 
     do {
@@ -348,5 +344,3 @@ extension CameraFeedManager: AVCaptureVideoDataOutputSampleBufferDelegate {
   }
 
 }
-
-#endif
