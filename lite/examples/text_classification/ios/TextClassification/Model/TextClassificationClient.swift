@@ -14,7 +14,18 @@ typealias FileInfo = (name: String, extension: String)
 
 let modelFile = FileInfo(name: "", extension: "")
 
+struct Result {
+  let id: String
+  let title: String
+  let confidence: Float
+}
 final class TextClassificationnClient {
+// The maximum length of an input sentence.
+private let sentenceLength = 256
+private let pattern = " |\\,|\\.|\\!|\\?|\n"
+private let start = "<START>"
+private let pad = "<PAD>"
+private let unknown = "<UNKNOWN>"
 /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
 private let interpreter: Interpreter
 private var dictionary = [String: Int]()
@@ -39,6 +50,38 @@ init?(modelFileInfo: FileInfo, labelsFileInfo: FileInfo, vocabFileInfo: FileInfo
   loadDictionary(fileInfo: vocabFileInfo)
 }
   
+func classify(text: String) -> [Result] {
+  return []
+}
+
+func tokenizeInputText(text: String) -> [[Float]] {
+  var temp = [Float]()
+  let array = text.split(pattern: pattern)
+  var index = 0
+  if let startValue = dictionary[start] {
+    temp[index] = Float(startValue)
+    index += 1
+  }
+  for word in array {
+    if index >= sentenceLength {
+      break
+    }
+    if let value = dictionary[word] {
+      temp[index] = Float(value)
+      index += 1
+    } else if let value = dictionary[unknown] {
+      temp[index] = Float(value)
+      index += 1
+    }
+  }
+  if let paddingValue = dictionary[pad] {
+    let floatValue = Float(paddingValue)
+    for _ in index..<sentenceLength {
+      temp.append(floatValue)
+    }
+  }
+  return [temp]
+}
 /// Loads the labels from the labels file and stores them in the `labels` property.
 private func loadLabels(fileInfo: FileInfo) {
   let filename = fileInfo.name
@@ -80,3 +123,21 @@ private func loadDictionary(fileInfo: FileInfo) {
 }
   
 } // class TextClassificationnClient
+
+extension String {
+func split(pattern: String) -> [String] {
+  do {
+    let regularExpression = try NSRegularExpression(pattern: pattern, options: [])
+    let results = regularExpression.matches(in: self, options: [], range: NSRange(location: 0, length: count))
+    var components = [String]()
+    for result in results {
+      guard let range = Range(result.range, in: self) else { continue }
+      components.append(String(self[range]))
+    }
+    return components
+  } catch {
+    print(error)
+  }
+  return []
+}
+} // extension String
