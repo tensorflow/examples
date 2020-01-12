@@ -12,7 +12,9 @@ import Foundation
 
 typealias FileInfo = (name: String, extension: String)
 
-let modelFile = FileInfo(name: "", extension: "")
+let modelFileInfo = FileInfo(name: "text_classification", extension: "tflite")
+let labelsFileInfo = FileInfo(name: "labels", extension: "txt")
+let vocabFileInfo = FileInfo(name: "vocab", extension: "txt")
 
 struct Result {
   let id: String
@@ -22,14 +24,14 @@ struct Result {
 final class TextClassificationnClient {
 // The maximum length of an input sentence.
 private let sentenceLength = 256
-private let pattern = " |\\,|\\.|\\!|\\?|\n"
+private let characterSet = CharacterSet(charactersIn: " ,.!?")
 private let start = "<START>"
 private let pad = "<PAD>"
 private let unknown = "<UNKNOWN>"
 /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
 private let interpreter: Interpreter
-private var dictionary = [String: Int]()
-private var labels = [String]()
+var dictionary = [String: Int]()
+var labels = [String]()
 
 /// A failable initializer for `TextClassificationnClient`. A new instance is created if the model, labels and vocab
 /// files are successfully loaded from the app's main bundle.
@@ -51,12 +53,30 @@ init?(modelFileInfo: FileInfo, labelsFileInfo: FileInfo, vocabFileInfo: FileInfo
 }
   
 func classify(text: String) -> [Result] {
+  let input = tokenizeInputText(text: text)
+  let data = Data(copyingBufferOf: input[0])
+  do {
+    try interpreter.copy(data, toInputAt: 0)
+    try interpreter.invoke()
+    let outputTensor = try interpreter.output(at: 0)
+    if outputTensor.dataType == .float32 {
+      let outputArray = [Float](unsafeData: outputTensor.data) ?? []
+      var output = [Result]()
+      for (index, label) in labels.enumerated() {
+        output.append(Result(id: "", title: label, confidence: outputArray[index]))
+      }
+      output.sort(by: >)
+      return output
+    }
+  } catch {
+    print(error)
+  }
   return []
 }
 
 func tokenizeInputText(text: String) -> [[Float]] {
-  var temp = [Float]()
-  let array = text.split(pattern: pattern)
+  var temp = [Float](repeating: 0, count: sentenceLength)
+  let array = text.split(characterSet: characterSet)
   var index = 0
   if let startValue = dictionary[start] {
     temp[index] = Float(startValue)
@@ -76,12 +96,13 @@ func tokenizeInputText(text: String) -> [[Float]] {
   }
   if let paddingValue = dictionary[pad] {
     let floatValue = Float(paddingValue)
-    for _ in index..<sentenceLength {
-      temp.append(floatValue)
+    for i in index..<sentenceLength {
+      temp[i] = floatValue
     }
   }
   return [temp]
 }
+  
 /// Loads the labels from the labels file and stores them in the `labels` property.
 private func loadLabels(fileInfo: FileInfo) {
   let filename = fileInfo.name
@@ -124,20 +145,51 @@ private func loadDictionary(fileInfo: FileInfo) {
   
 } // class TextClassificationnClient
 
+
+extension Result: Comparable {
+static func < (lhs: Result, rhs: Result) -> Bool {
+  return lhs.confidence < rhs.confidence
+}
+} // extension Result
+
 extension String {
-func split(pattern: String) -> [String] {
-  do {
-    let regularExpression = try NSRegularExpression(pattern: pattern, options: [])
-    let results = regularExpression.matches(in: self, options: [], range: NSRange(location: 0, length: count))
-    var components = [String]()
-    for result in results {
-      guard let range = Range(result.range, in: self) else { continue }
-      components.append(String(self[range]))
-    }
-    return components
-  } catch {
-    print(error)
-  }
-  return []
+func split(characterSet: CharacterSet) -> [String] {
+  components(separatedBy: characterSet).filter { !$0.isEmpty }
 }
 } // extension String
+
+extension Array {
+/// Creates a new array from the bytes of the given unsafe data.
+///
+/// - Warning: The array's `Element` type must be trivial in that it can be copied bit for bit
+///     with no indirection or reference-counting operations; otherwise, copying the raw bytes in
+///     the `unsafeData`'s buffer to a new array returns an unsafe copy.
+/// - Note: Returns `nil` if `unsafeData.count` is not a multiple of
+///     `MemoryLayout<Element>.stride`.
+/// - Parameter unsafeData: The data containing the bytes to turn into an array.
+init?(unsafeData: Data) {
+  guard unsafeData.count % MemoryLayout<Element>.stride == 0 else { return nil }
+  #if swift(>=5.0)
+  self = unsafeData.withUnsafeBytes { .init($0.bindMemory(to: Element.self)) }
+  #else
+  self = unsafeData.withUnsafeBytes {
+    .init(UnsafeBufferPointer<Element>(
+      start: $0,
+      count: unsafeData.count / MemoryLayout<Element>.stride
+    ))
+  }
+  #endif  // swift(>=5.0)
+  }
+} // extension Array
+
+extension Data {
+/// Creates a new buffer by copying the buffer pointer of the given array.
+///
+/// - Warning: The given array's element type `T` must be trivial in that it can be copied bit
+///     for bit with no indirection or reference-counting operations; otherwise, reinterpreting
+///     data from the resulting buffer has undefined behavior.
+/// - Parameter array: An array with elements of type `T`.
+init<T>(copyingBufferOf array: [T]) {
+  self = array.withUnsafeBufferPointer(Data.init)
+}
+} // extension Data
