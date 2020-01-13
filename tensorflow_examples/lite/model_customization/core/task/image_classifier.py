@@ -143,14 +143,15 @@ class ImageClassifier(classification_model.ClassificationModel):
     if hparams is None:
       hparams = self.hparams
 
-    train_ds = self._gen_train_dataset(train_data, hparams.batch_size)
+    train_ds = self._gen_dataset(
+        train_data, hparams.batch_size, is_training=True)
     train_data_and_size = (train_ds, train_data.size)
 
     validation_ds = None
     validation_size = 0
     if validation_data is not None:
-      validation_ds = self._gen_validation_dataset(validation_data,
-                                                   hparams.batch_size)
+      validation_ds = self._gen_dataset(
+          validation_data, hparams.batch_size, is_training=False)
       validation_size = validation_data.size
     validation_data_and_size = (validation_ds, validation_size)
     # Trains the models.

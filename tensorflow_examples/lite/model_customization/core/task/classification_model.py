@@ -54,10 +54,6 @@ class ClassificationModel(abc.ABC):
     self.model = None
 
   @abc.abstractmethod
-  def _create_model(self, **kwargs):
-    return
-
-  @abc.abstractmethod
   def preprocess(self, sample_data, label):
     return
 
@@ -82,7 +78,7 @@ class ClassificationModel(abc.ABC):
     Returns:
       The loss value and accuracy.
     """
-    ds = self._gen_validation_dataset(data, batch_size)
+    ds = self._gen_dataset(data, batch_size, is_training=False)
 
     return self.model.evaluate(ds)
 
@@ -99,7 +95,7 @@ class ClassificationModel(abc.ABC):
     """
     if k < 0:
       raise ValueError('K should be equal or larger than 0.')
-    ds = self._gen_validation_dataset(data, batch_size)
+    ds = self._gen_dataset(data, batch_size, is_training=False)
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
@@ -111,21 +107,16 @@ class ClassificationModel(abc.ABC):
 
     return label_prob
 
-  def _gen_train_dataset(self, data, batch_size=32):
-    """Generates training dataset."""
+  def _gen_dataset(self, data, batch_size=32, is_training=True):
+    """Generates training / validation dataset."""
     ds = data.dataset.map(
         self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    if self.shuffle:
-      ds = ds.shuffle(buffer_size=data.size)
-    ds = ds.repeat()
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
 
-  def _gen_validation_dataset(self, data, batch_size=32):
-    """Generates validation dataset."""
-    ds = data.dataset.map(
-        self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    if is_training:
+      if self.shuffle:
+        ds = ds.shuffle(buffer_size=min(data.size, 100))
+      ds = ds.repeat()
+
     ds = ds.batch(batch_size)
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds

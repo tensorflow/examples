@@ -23,6 +23,7 @@ import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core.data_util import text_dataloader
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import text_classifier
+import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
 
 
 class TextClassifierTest(tf.test.TestCase):
@@ -52,10 +53,9 @@ class TextClassifierTest(tf.test.TestCase):
     model = text_classifier.create(
         self.train_data,
         mef.ModelExportFormat.TFLITE,
-        model_name='average_wordvec',
+        model_spec=ms.AverageWordVecModelSpec(sentence_len=2),
         epochs=2,
         batch_size=4,
-        sentence_len=2,
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
