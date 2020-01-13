@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -9,16 +10,89 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="TextClassification" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qfM-2x-f5J">
+                                <rect key="frame" x="0.0" y="44" width="414" height="818"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Yjk-H8-9o0">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="818"/>
+                                        <subviews>
+                                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="bxJ-v0-bMl">
+                                                <rect key="frame" x="8" y="8" width="398" height="760"/>
+                                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                                <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                            </textView>
+                                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Please enter your movie review." textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="bFg-ol-Zqz">
+                                                <rect key="frame" x="8" y="776" width="341" height="34"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                <textInputTraits key="textInputTraits"/>
+                                            </textField>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="k0b-fJ-dLp">
+                                                <rect key="frame" x="357" y="777" width="49" height="30"/>
+                                                <state key="normal" title="Predict"/>
+                                                <connections>
+                                                    <action selector="onPredictTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Wwy-Gd-jkU"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="bxJ-v0-bMl" secondAttribute="trailing" constant="8" id="6NX-n6-Cy6"/>
+                                            <constraint firstAttribute="trailing" secondItem="k0b-fJ-dLp" secondAttribute="trailing" constant="8" id="6k9-gR-NHa"/>
+                                            <constraint firstItem="k0b-fJ-dLp" firstAttribute="leading" secondItem="bFg-ol-Zqz" secondAttribute="trailing" constant="8" id="Aep-0H-9SL"/>
+                                            <constraint firstItem="bFg-ol-Zqz" firstAttribute="leading" secondItem="Yjk-H8-9o0" secondAttribute="leading" constant="8" id="V2y-tn-hEK"/>
+                                            <constraint firstItem="bxJ-v0-bMl" firstAttribute="leading" secondItem="Yjk-H8-9o0" secondAttribute="leading" constant="8" id="WBN-gK-jA3"/>
+                                            <constraint firstItem="bxJ-v0-bMl" firstAttribute="top" secondItem="Yjk-H8-9o0" secondAttribute="top" constant="8" id="YEu-SU-zhF"/>
+                                            <constraint firstAttribute="bottom" secondItem="bxJ-v0-bMl" secondAttribute="bottom" constant="50" id="fKy-IP-qno"/>
+                                            <constraint firstAttribute="bottom" secondItem="bFg-ol-Zqz" secondAttribute="bottom" constant="8" id="ndd-Ju-2QJ"/>
+                                            <constraint firstAttribute="bottom" secondItem="k0b-fJ-dLp" secondAttribute="bottom" constant="11" id="paL-1x-jC3"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="Yjk-H8-9o0" firstAttribute="leading" secondItem="qfM-2x-f5J" secondAttribute="leading" id="Cf6-X7-KBP"/>
+                                    <constraint firstAttribute="bottom" secondItem="Yjk-H8-9o0" secondAttribute="bottom" id="FGo-lL-iiS"/>
+                                    <constraint firstItem="Yjk-H8-9o0" firstAttribute="top" secondItem="qfM-2x-f5J" secondAttribute="top" id="KWa-hw-6pY"/>
+                                    <constraint firstItem="Yjk-H8-9o0" firstAttribute="trailing" secondItem="qfM-2x-f5J" secondAttribute="trailing" id="UG1-a0-ThN"/>
+                                </constraints>
+                                <viewLayoutGuide key="contentLayoutGuide" id="v7b-Gm-gz8"/>
+                                <viewLayoutGuide key="frameLayoutGuide" id="x6s-eS-b3o"/>
+                            </scrollView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="qfM-2x-f5J" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="0ys-XG-8Va"/>
+                            <constraint firstItem="qfM-2x-f5J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="5Dj-a3-Xhn"/>
+                            <constraint firstItem="qfM-2x-f5J" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailing" id="aPR-og-uKZ"/>
+                            <constraint firstItem="qfM-2x-f5J" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="eCg-Xk-RAu"/>
+                            <constraint firstItem="Yjk-H8-9o0" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="0.912946" id="oVw-1N-gta"/>
+                            <constraint firstItem="Yjk-H8-9o0" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="ted-De-21l"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <connections>
+                        <outlet property="scrollView" destination="qfM-2x-f5J" id="f55-0s-KB1"/>
+                        <outlet property="textField" destination="bFg-ol-Zqz" id="fPB-ja-9GO"/>
+                        <outlet property="textView" destination="bxJ-v0-bMl" id="QTR-hP-XHQ"/>
+                    </connections>
                 </viewController>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="tXy-gC-SPl">
+                    <rect key="frame" x="0.0" y="0.0" width="49" height="30"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <state key="normal" title="Predict"/>
+                    <connections>
+                        <action selector="onPredictTap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3IO-dk-XF3"/>
+                    </connections>
+                </button>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="137.68115942028987" y="131.91964285714286"/>
         </scene>
     </scenes>
 </document>
