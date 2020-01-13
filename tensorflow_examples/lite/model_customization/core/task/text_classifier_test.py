@@ -44,11 +44,13 @@ class TextClassifierTest(tf.test.TestCase):
 
   def setUp(self):
     super(TextClassifierTest, self).setUp()
-    self.data = self._gen_data()
+    all_data = self._gen_data()
+    # Splits data, 90% data for training, 10% for testing
+    self.train_data, self.test_data = all_data.split(0.9)
 
   def test_average_wordvec_model(self):
     model = text_classifier.create(
-        self.data,
+        self.train_data,
         mef.ModelExportFormat.TFLITE,
         model_name='average_wordvec',
         epochs=2,
@@ -57,17 +59,17 @@ class TextClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
-    self._test_predict_topk(model)
+    self._test_predict_top_k(model)
 
   def _test_accuracy(self, model):
-    _, accuracy = model.evaluate()
+    _, accuracy = model.evaluate(self.test_data)
     self.assertEqual(accuracy, 1.0)
 
-  def _test_predict_topk(self, model):
-    topk = model.predict_topk(batch_size=4)
-    for i, (_, label) in enumerate(model.test_data.dataset):
+  def _test_predict_top_k(self, model):
+    topk = model.predict_top_k(self.test_data, batch_size=4)
+    for i, (_, label) in enumerate(self.test_data.dataset):
       predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
-      self.assertEqual(model.data.index_to_label[label], predict_label)
+      self.assertEqual(model.index_to_label[label], predict_label)
       self.assertGreater(predict_prob, 0.5)
 
   def _load_vocab(self, filename):
@@ -105,9 +107,16 @@ class TextClassifierTest(tf.test.TestCase):
     self.assertEqual(labels, ['pos', 'neg'])
 
     word_index = self._load_vocab(vocab_output_file)
-    expected = [['<PAD>', '0'], ['<START>', '1'], ['<UNKNOWN>', '2'],
-                ['super', '3'], ['good', '4'], ['really', '5'], ['bad', '6']]
-    self.assertEqual(word_index, expected)
+    expected_predefined = [['<PAD>', '0'], ['<START>', '1'], ['<UNKNOWN>', '2']]
+    self.assertEqual(word_index[:3], expected_predefined)
+
+    expected_vocab = ['bad', 'good', 'really', 'super']
+    actual_vocab = sorted([word for word, index in word_index[3:]])
+    self.assertEqual(actual_vocab, expected_vocab)
+
+    expected_index = ['3', '4', '5', '6']
+    actual_index = [index for word, index in word_index[3:]]
+    self.assertEqual(actual_index, expected_index)
 
     lite_model = self._load_lite_model(tflite_output_file)
     for i, (class_name, text) in enumerate(self.TEST_LABELS_AND_TEXT):

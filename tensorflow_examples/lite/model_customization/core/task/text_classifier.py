@@ -30,14 +30,13 @@ START = '<START>'  # Index: 1
 UNKNOWN = '<UNKNOWN>'  # Index: 2
 
 
-def create(data,
+def create(train_data,
            model_export_format=mef.ModelExportFormat.TFLITE,
            model_name='average_wordvec',
            shuffle=False,
            batch_size=32,
            epochs=2,
-           validation_ratio=0.1,
-           test_ratio=0.1,
+           validation_data=None,
            num_words=10000,
            sentence_len=256,
            wordvec_dim=16,
@@ -46,14 +45,13 @@ def create(data,
   """Loads data and train the model for test classification.
 
   Args:
-    data: Raw data that could be splitted for training / validation / testing.
+    train_data: Raw data for training.
     model_export_format: Model export format such as saved_model / tflite.
     model_name: Model name.
     shuffle: Whether the data should be shuffled.
     batch_size: Batch size for training.
     epochs: Number of epochs for training.
-    validation_ratio: The ratio of validation data to be splitted.
-    test_ratio: The ratio of test data to be splitted.
+    validation_data: Validation data. If None, skips validation process.
     num_words: Number of words to generate the vocabulary from data.
     sentence_len: Length of the sentence to feed into the model.
     wordvec_dim: Dimension of the word embedding.
@@ -65,12 +63,12 @@ def create(data,
     TextClassifier
   """
   text_classifier = TextClassifier(
-      data,
+      train_data,
       model_export_format,
       model_name,
+      train_data.index_to_label,
+      train_data.num_classes,
       shuffle=shuffle,
-      validation_ratio=validation_ratio,
-      test_ratio=test_ratio,
       num_words=num_words,
       sentence_len=sentence_len,
       wordvec_dim=wordvec_dim,
@@ -78,7 +76,7 @@ def create(data,
       lowercase=lowercase)
 
   tf.compat.v1.logging.info('Retraining the models...')
-  text_classifier.train(epochs, batch_size)
+  text_classifier.train(train_data, validation_data, epochs, batch_size)
 
   return text_classifier
 
@@ -87,12 +85,13 @@ class TextClassifier(classification_model.ClassificationModel):
   """TextClassifier class for inference and exporting to tflite."""
 
   def __init__(self,
-               data,
+               train_data,
                model_export_format,
                model_name,
+               index_to_label,
+               num_classes,
                shuffle=True,
-               validation_ratio=0.1,
-               test_ratio=0.1,
+               validation_data=None,
                num_words=10000,
                sentence_len=256,
                wordvec_dim=16,
@@ -100,16 +99,14 @@ class TextClassifier(classification_model.ClassificationModel):
                lowercase=True):
     """Init function for TextClassifier class.
 
-    Including splitting the raw input data into train/eval/test sets and
-    selecting the exact NN model to be used.
-
     Args:
-      data: Raw data that could be splitted for training / validation / testing.
+      train_data: Raw data for training.
       model_export_format: Model export format such as saved_model / tflite.
       model_name: Model name.
+      index_to_label: A list that map from index to label class name.
+      num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
-      validation_ratio: The ratio of validation data to be splitted.
-      test_ratio: The ratio of test data to be splitted.
+      validation_data: Validation data. If None, skips validation process.
       num_words: Number of words to generate the vocabulary from data.
       sentence_len: Length of the sentence to feed into the model.
       wordvec_dim: Dimension of the word embedding.
@@ -122,16 +119,15 @@ class TextClassifier(classification_model.ClassificationModel):
       raise ValueError('Model %s is not supported currently.' % model_name)
 
     super(TextClassifier, self).__init__(
-        data,
         model_export_format,
         model_name,
+        index_to_label,
+        num_classes,
         shuffle,
-        train_whole_model=False,
-        validation_ratio=validation_ratio,
-        test_ratio=test_ratio)
+        train_whole_model=False)
     self.sentence_len = sentence_len
     self.lowercase = lowercase
-    self.vocab = self._gen_vocab(data.dataset, num_words)
+    self.vocab = self._gen_vocab(train_data.dataset, num_words)
     self.model = self._create_model(wordvec_dim, sentence_len, dropout_rate)
 
   def _create_model(self, wordvec_dim, sentence_len, dropout_rate):
@@ -142,7 +138,7 @@ class TextClassifier(classification_model.ClassificationModel):
         tf.keras.layers.GlobalAveragePooling1D(),
         tf.keras.layers.Dense(wordvec_dim, activation=tf.nn.relu),
         tf.keras.layers.Dropout(dropout_rate),
-        tf.keras.layers.Dense(self.data.num_classes, activation='softmax')
+        tf.keras.layers.Dense(self.num_classes, activation='softmax')
     ])
 
   def _gen_vocab(self, text_ds, num_words):
@@ -159,12 +155,17 @@ class TextClassifier(classification_model.ClassificationModel):
     vocab = collections.OrderedDict(((v, i) for i, v in enumerate(vocab_list)))
     return vocab
 
-  def train(self, epochs, batch_size=32):
+  def train(self, train_data, validation_data=None, epochs=2, batch_size=32):
     """Feeds the training data for training."""
 
-    train_ds = self._gen_train_dataset(self.train_data, batch_size)
-    validation_ds = self._gen_validation_dataset(self.validation_data,
-                                                 batch_size)
+    train_ds = self._gen_train_dataset(train_data, batch_size)
+    steps_per_epoch = train_data.size // batch_size
+
+    validation_ds = None
+    validation_steps = None
+    if validation_data is not None:
+      validation_ds = self._gen_validation_dataset(validation_data, batch_size)
+      validation_steps = validation_data.size // batch_size
 
     # Trains the models.
     self.model.compile(
@@ -172,8 +173,6 @@ class TextClassifier(classification_model.ClassificationModel):
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy'])
 
-    steps_per_epoch = self.train_data.size // batch_size
-    validation_steps = self.validation_data.size // batch_size
     self.model.fit(
         train_ds,
         epochs=epochs,

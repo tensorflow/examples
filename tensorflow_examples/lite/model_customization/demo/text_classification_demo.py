@@ -44,11 +44,14 @@ def main(_):
   train_data = TextClassifierDataLoader.from_folder(
       filename=os.path.join(os.path.join(data_path, 'train')),
       class_labels=['pos', 'neg'])
+  train_data, validation_data = train_data.split(0.9)
   test_data = TextClassifierDataLoader.from_folder(
       filename=os.path.join(data_path, 'test'))
 
   model = text_classifier.create(
-      train_data, model_export_format=ModelExportFormat.TFLITE)
+      train_data,
+      model_export_format=ModelExportFormat.TFLITE,
+      validation_data=validation_data)
 
   _, acc = model.evaluate(test_data)
   print('Test accuracy: %f' % acc)
