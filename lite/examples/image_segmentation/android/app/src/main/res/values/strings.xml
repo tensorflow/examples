@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name" translatable="false">TFL Image Segmentation</string>
+    <string name="gpu" translatable="false">GPU</string>
+    <string name="re_run_model" translatable="false">Re-run model</string>
+    <string name="labels_found" translatable="false">Labels Found</string>
+    <string name="no_labels_found" translatable="false">No Labels Found</string>
+</resources>
