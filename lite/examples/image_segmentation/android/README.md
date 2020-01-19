@@ -42,7 +42,7 @@ Re-installing the app may require you to uninstall the previous installations.
 
 *   Camera2:
     https://developer.android.com/reference/android/hardware/camera2/package-summary
-*   Canera2 base sample:
+*   Camera2 base sample:
     https://github.com/android/camera-samples/tree/master/Camera2Formats
 *   TensorFlow Lite: https://www.tensorflow.org/lite
 *   ImageSegmentation model:
