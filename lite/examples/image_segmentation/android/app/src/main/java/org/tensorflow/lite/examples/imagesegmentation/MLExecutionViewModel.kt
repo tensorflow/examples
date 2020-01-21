@@ -19,48 +19,37 @@ package org.tensorflow.lite.examples.imagesegmentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.content.Context
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MLExecutionViewModel : ViewModel() {
 
-  lateinit var imageSegmentationModel: ImageSegmentationModelExecutor
-  private val _styledBitmap = MutableLiveData<ModelExecutionResult>()
+  private val _resultingBitmap = MutableLiveData<ModelExecutionResult>()
 
-  val styledBitmap: LiveData<ModelExecutionResult>
-    get() = _styledBitmap
+  val resultingBitmap: LiveData<ModelExecutionResult>
+    get() = _resultingBitmap
 
   private val viewModelJob = Job()
   private val viewModelScope = CoroutineScope(viewModelJob)
 
-  fun onApplyStyle(
-    context: Context,
+  // the execution of the model has to be on the same thread where the interpreter
+  // was created
+  fun onApplyModel(
     filePath: String,
-    useGpu: Boolean = false
+    imageSegmentationModel: ImageSegmentationModelExecutor,
+    inferenceThread: ExecutorCoroutineDispatcher
   ) {
-    viewModelScope.launch(Dispatchers.Default) {
-      imageSegmentationModel =
-        ImageSegmentationModelExecutor(
-          context,
-          useGpu
-        )
+    viewModelScope.launch(inferenceThread) {
       val contentImage =
         ImageUtils.decodeBitmap(
           File(filePath)
         )
 
       val result = imageSegmentationModel.execute(contentImage)
-      _styledBitmap.postValue(result)
-      imageSegmentationModel.close()
+      _resultingBitmap.postValue(result)
     }
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    imageSegmentationModel.close()
   }
 }

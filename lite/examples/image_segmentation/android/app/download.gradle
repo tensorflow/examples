@@ -1,7 +1,7 @@
 apply plugin: 'de.undercouch.download'
 
 task downloadModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/gpu/deeplabv3_257_mv_gpu.tflite'
+    src 'https://tfhub.dev/tensorflow/lite-model/deeplabv3/1/default/1?lite-format=tflite'
     dest project.ext.ASSET_DIR + '/deeplabv3_257_mv_gpu.tflite'
     overwrite false
 }

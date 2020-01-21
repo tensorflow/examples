@@ -43,6 +43,10 @@ import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import java.io.File
+import java.util.concurrent.Executors
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
 import org.tensorflow.lite.examples.imagesegmentation.camera.CameraFragment
 
 // This is an arbitrary number we are using to keep tab of the permission
@@ -69,6 +73,9 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
 
   private var lastSavedFile = ""
   private var useGPU = false
+  private lateinit var imageSegmentationModel: ImageSegmentationModelExecutor
+  private val inferenceThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+  private val mainScope = MainScope()
 
   private var lensFacing = CameraCharacteristics.LENS_FACING_FRONT
 
@@ -101,8 +108,7 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
 
     viewModel = ViewModelProviders.of(this)
       .get(MLExecutionViewModel::class.java)
-
-    viewModel.styledBitmap.observe(
+    viewModel.resultingBitmap.observe(
       this,
       Observer { resultImage ->
         if (resultImage != null) {
@@ -111,15 +117,21 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
       }
     )
 
+    imageSegmentationModel = ImageSegmentationModelExecutor(this, useGPU)
+
     useGpuSwitch.setOnCheckedChangeListener { _, isChecked ->
       useGPU = isChecked
+      mainScope.async(inferenceThread) {
+        imageSegmentationModel.close()
+        imageSegmentationModel = ImageSegmentationModelExecutor(this@MainActivity, useGPU)
+      }
     }
 
     rerunButton = findViewById(R.id.rerun_button)
     rerunButton.setOnClickListener {
       if (lastSavedFile.isNotEmpty()) {
         enableControls(false)
-        viewModel.onApplyStyle(this, lastSavedFile, useGPU)
+        viewModel.onApplyModel(lastSavedFile, imageSegmentationModel, inferenceThread)
       }
     }
 
@@ -264,6 +276,6 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
 
     lastSavedFile = file.absolutePath
     enableControls(false)
-    viewModel.onApplyStyle(baseContext, file.absolutePath, useGPU)
+    viewModel.onApplyModel(file.absolutePath, imageSegmentationModel, inferenceThread)
   }
 }
