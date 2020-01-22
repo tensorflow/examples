@@ -43,7 +43,7 @@ On Windows, use powershell to find the virtual machine's IP using:
 Then go to: http://(ip address received from the above command):8888 (likely
 http://192.168.99.100:8888)
 
-FAQ
+FAQs
 ---
 
 * **I'm getting a MemoryError when loading data in the first notebook.**
