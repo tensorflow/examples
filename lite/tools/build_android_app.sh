@@ -27,7 +27,6 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 # from the builds.
 SKIPPED_BUILDS="
 image_segmentation/android
-model_personalization/android
 style_transfer/android
 "
 
