@@ -66,6 +66,8 @@ class ViewController: UIViewController {
       threadCountStepper.decrementImage(for: .normal), for: .normal)
     threadCountStepper.setIncrementImage(
       threadCountStepper.incrementImage(for: .normal), for: .normal)
+    threadCountStepper.value = Double(Constants.defaultThreadCount)
+    threadCountLabel.text = Constants.defaultThreadCount.description
   }
 
   override func viewWillAppear(_ animated: Bool) {
