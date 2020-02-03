@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0CDA8C85042ADF65D0787629 /* Pods_PoseNet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1CE41C09920CCEC31985547 /* Pods_PoseNet.framework */; };
+		8402440123D9834600704ABD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8402440023D9834600704ABD /* README.md */; };
 		840ECB20238BAA2300C7D88A /* InfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840ECB1F238BAA2300C7D88A /* InfoCell.swift */; };
 		840EDCFD2341DDD30017ED42 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 840EDCFB2341DDD30017ED42 /* Launch Screen.storyboard */; };
 		840EDD022341DE380017ED42 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 840EDD002341DE380017ED42 /* Main.storyboard */; };
@@ -26,6 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8402440023D9834600704ABD /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		840ECB1F238BAA2300C7D88A /* InfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCell.swift; sourceTree = "<group>"; };
 		840EDCFC2341DDD30017ED42 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "Base.lproj/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		840EDD012341DE380017ED42 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 		84B67CE22326338300A11A08 = {
 			isa = PBXGroup;
 			children = (
+				8402440023D9834600704ABD /* README.md */,
 				84884290236FF07F0043FC4C /* RunScripts */,
 				84B67CED2326338300A11A08 /* PoseNet */,
 				84B67CEC2326338300A11A08 /* Products */,
@@ -252,6 +255,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8402440123D9834600704ABD /* README.md in Resources */,
 				840EDD022341DE380017ED42 /* Main.storyboard in Resources */,
 				840EDCFD2341DDD30017ED42 /* Launch Screen.storyboard in Resources */,
 				84FCF5922387BD7900663812 /* tfl_logo.png in Resources */,
@@ -466,9 +470,8 @@
 			baseConfigurationReference = FCA88463911267B1001A596F /* Pods-PoseNet.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = PoseNet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -487,9 +490,8 @@
 			baseConfigurationReference = D2BFF06D0AE9137D332447F3 /* Pods-PoseNet.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = PoseNet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

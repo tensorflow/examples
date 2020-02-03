@@ -26,6 +26,9 @@ class ViewController: UIViewController {
   @IBOutlet weak var cameraUnavailableLabel: UILabel!
   @IBOutlet weak var tableView: UITableView!
 
+  @IBOutlet weak var threadCountLabel: UILabel!
+  @IBOutlet weak var threadCountStepper: UIStepper!
+
   // MARK: Result Variables
   // Inferenced data to render.
   private var inferencedData: InferencedData?
@@ -58,6 +61,11 @@ class ViewController: UIViewController {
     cameraCapture.delegate = self
     tableView.delegate = self
     tableView.dataSource = self
+
+    threadCountStepper.setDecrementImage(
+      threadCountStepper.decrementImage(for: .normal), for: .normal)
+    threadCountStepper.setIncrementImage(
+      threadCountStepper.incrementImage(for: .normal), for: .normal)
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -76,6 +84,21 @@ class ViewController: UIViewController {
   }
 
   // MARK: Button Actions
+  @IBAction func didChangeThreadCount(_ sender: UIStepper) {
+    let changedCount = Int(sender.value)
+    if threadCountLabel.text == changedCount.description {
+      return
+    }
+
+    threadCountLabel.text = changedCount.description
+    do {
+      modelDataHandler = try ModelDataHandler(threadCount: changedCount)
+    } catch let error {
+      fatalError(error.localizedDescription)
+    }
+
+  }
+
   @IBAction func didTapResumeButton(_ sender: Any) {
     cameraCapture.resumeInterruptedSession { complete in
 

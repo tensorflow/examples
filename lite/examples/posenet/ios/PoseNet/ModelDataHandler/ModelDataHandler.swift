@@ -35,8 +35,8 @@ class ModelDataHandler {
   // MARK: - Initialization
 
   /// A failable initializer for `ModelDataHandler`. A new instance is created if the model is
-  /// successfully loaded from the app's main bundle. Default `threadCount` is 2.
-  init(threadCount: Int = 2) throws {
+  /// successfully loaded from the app's main bundle. Default `threadCount` is 1.
+  init(threadCount: Int = 1) throws {
     // Construct the path to the model file.
     guard
       let modelPath = Bundle.main.path(
