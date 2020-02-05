@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import csv
 import os
 import random
 import tempfile
@@ -75,6 +76,17 @@ def get_cache_info(cache_dir, data_name, model_spec, is_training):
       model_spec.load_vocab(vocab_file)
     is_cached = True
   return is_cached, tfrecord_file, meta_data_file, vocab_file
+
+
+def read_csv(input_file, fieldnames=None, delimiter=',', quotechar='"'):
+  """Reads a separated value file."""
+  with tf.io.gfile.GFile(input_file, 'r') as f:
+    reader = csv.DictReader(
+        f, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
+    lines = []
+    for line in reader:
+      lines.append(line)
+    return lines
 
 
 class TextClassifierDataLoader(dataloader.DataLoader):
@@ -183,6 +195,69 @@ class TextClassifierDataLoader(dataloader.DataLoader):
         text = f.read()
       guid = '%s-%d' % (folder_name, i)
       label = os.path.basename(os.path.dirname(path))
+      examples.append(classifier_data_lib.InputExample(guid, text, None, label))
+
+    # Saves preprocessed data and other assets into files.
+    save(examples, model_spec, label_names, tfrecord_file, meta_data_file,
+         vocab_file, is_training)
+
+    # Loads data from cache directory.
+    return load(tfrecord_file, meta_data_file, model_spec)
+
+  @classmethod
+  def from_csv(cls,
+               filename,
+               text_column,
+               label_column,
+               fieldnames=None,
+               model_spec=ms.AverageWordVecModelSpec(),
+               is_training=True,
+               delimiter=',',
+               quotechar='"',
+               shuffle=False,
+               cache_dir=None):
+    """Loads text with labels from the csv file and preproecess text according to `model_spec`.
+
+    Args:
+      filename: Name of the file.
+      text_column: String, Column name for input text.
+      label_column: String, Column name for labels.
+      fieldnames: A sequence, used in csv.DictReader. If fieldnames is omitted,
+        the values in the first row of file f will be used as the fieldnames.
+      model_spec: Specification for the model.
+      is_training: Whether the loaded data is for training or not.
+      delimiter: Character used to separate fields.
+      quotechar: Character used to quote fields containing special characters.
+      shuffle: boolean, if shuffle, random shuffle data.
+      cache_dir: The cache directory to save preprocessed data. If None,
+        generates a temporary directory to cache preprocessed data.
+
+    Returns:
+      TextDataset containing text, labels and other related info.
+    """
+    csv_name = os.path.basename(filename)
+
+    is_cached, tfrecord_file, meta_data_file, vocab_file = get_cache_info(
+        cache_dir, csv_name, model_spec, is_training)
+    # If cached, directly loads data from cache directory.
+    if is_cached:
+      return load(tfrecord_file, meta_data_file, model_spec)
+
+    lines = read_csv(filename, fieldnames, delimiter, quotechar)
+    if shuffle:
+      random.shuffle(lines)
+
+    # Gets labels.
+    label_set = set()
+    for line in lines:
+      label_set.add(line[label_column])
+    label_names = sorted(label_set)
+
+    # Generates text examples from csv file.
+    examples = []
+    for i, line in enumerate(lines):
+      text, label = line[text_column], line[label_column]
+      guid = '%s-%d' % (csv_name, i)
       examples.append(classifier_data_lib.InputExample(guid, text, None, label))
 
     # Saves preprocessed data and other assets into files.

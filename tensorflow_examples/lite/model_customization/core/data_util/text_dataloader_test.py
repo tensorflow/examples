@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import csv
 import os
 import numpy as np
 import tensorflow as tf # TF2
@@ -40,6 +41,18 @@ class TextDataLoaderTest(tf.test.TestCase):
         f.write(text)
     return folder_path
 
+  def _get_csv_file(self):
+    csv_file = os.path.join(self.get_temp_dir(), 'tmp.csv')
+    if os.path.exists(csv_file):
+      return csv_file
+    fieldnames = ['text', 'label']
+    with open(csv_file, 'w') as f:
+      writer = csv.DictWriter(f, fieldnames=fieldnames)
+      writer.writeheader()
+      for label, text in self.TEST_LABELS_AND_TEXT:
+        writer.writerow({'text': text, 'label': label})
+    return csv_file
+
   def test_split(self):
     ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
     data = text_dataloader.TextClassifierDataLoader(ds, 4, 2, ['pos', 'neg'])
@@ -57,12 +70,24 @@ class TextDataLoaderTest(tf.test.TestCase):
     self.assertEqual(test_data.num_classes, 2)
     self.assertEqual(test_data.index_to_label, ['pos', 'neg'])
 
+  def test_from_csv(self):
+    csv_file = self._get_csv_file()
+    model_spec = ms.AverageWordVecModelSpec()
+    data = text_dataloader.TextClassifierDataLoader.from_csv(
+        csv_file,
+        text_column='text',
+        label_column='label',
+        model_spec=model_spec)
+    self._test_data(data, model_spec)
+
   def test_from_folder(self):
     folder_path = self._get_folder_path()
     model_spec = ms.AverageWordVecModelSpec()
     data = text_dataloader.TextClassifierDataLoader.from_folder(
         folder_path, model_spec=model_spec)
+    self._test_data(data, model_spec)
 
+  def _test_data(self, data, model_spec):
     self.assertEqual(data.size, 2)
     self.assertEqual(data.num_classes, 2)
     self.assertEqual(data.index_to_label, ['neg', 'pos'])
