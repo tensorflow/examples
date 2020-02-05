@@ -19,13 +19,62 @@ from __future__ import print_function
 
 import os
 import random
+import tempfile
+
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core.data_util import dataloader
+import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
+from official.nlp.bert import classifier_data_lib
 
 
-def load_text(path):
-  raw_text = tf.io.read_file(path)
-  return raw_text
+def load(tfrecord_file, meta_data_file, model_spec):
+  """Gets `TextClassifierDataLoader` object from tfrecord file and metadata file."""
+
+  dataset, meta_data = dataloader.load(tfrecord_file, meta_data_file,
+                                       model_spec)
+  tf.compat.v1.logging.info(
+      'Load preprocessed data and metadata from %s and %s '
+      'with size: %d, num_classes: %d', tfrecord_file, meta_data_file,
+      meta_data['size'], meta_data['num_classes'])
+  return TextClassifierDataLoader(dataset, meta_data['size'],
+                                  meta_data['num_classes'],
+                                  meta_data['index_to_label'])
+
+
+def save(examples, model_spec, label_names, tfrecord_file, meta_data_file,
+         vocab_file, is_training):
+  """Saves preprocessed data and other assets into files."""
+  # If needed, generates and saves vocabulary in vocab_file=None,
+  if model_spec.need_gen_vocab and is_training:
+    model_spec.gen_vocab(examples)
+    model_spec.save_vocab(vocab_file)
+
+  # Converts examples into preprocessed features and saves in tfrecord_file.
+  model_spec.convert_examples_to_features(examples, tfrecord_file, label_names)
+
+  # Generates and saves meta data in meta_data_file.
+  meta_data = {
+      'size': len(examples),
+      'num_classes': len(label_names),
+      'index_to_label': label_names
+  }
+  dataloader.write_meta_data(meta_data_file, meta_data)
+
+
+def get_cache_info(cache_dir, data_name, model_spec, is_training):
+  """Gets cache related information: whether is cached, related filenames."""
+  if cache_dir is None:
+    cache_dir = tempfile.mkdtemp()
+  tfrecord_file, meta_data_file, file_prefix = dataloader.get_cache_filenames(
+      cache_dir, model_spec, data_name)
+  vocab_file = file_prefix + '_vocab'
+
+  is_cached = False
+  if os.path.exists(tfrecord_file) and os.path.exists(meta_data_file):
+    if model_spec.need_gen_vocab and is_training:
+      model_spec.load_vocab(vocab_file)
+    is_cached = True
+  return is_cached, tfrecord_file, meta_data_file, vocab_file
 
 
 class TextClassifierDataLoader(dataloader.DataLoader):
@@ -67,23 +116,40 @@ class TextClassifierDataLoader(dataloader.DataLoader):
     return trainset, testset
 
   @classmethod
-  def from_folder(cls, filename, class_labels=None, shuffle=True):
-    """Text analysis for text classification load text with labels.
+  def from_folder(cls,
+                  filename,
+                  model_spec=ms.AverageWordVecModelSpec(),
+                  is_training=True,
+                  class_labels=None,
+                  shuffle=True,
+                  cache_dir=None):
+    """Loads text with labels and preproecess text according to `model_spec`.
 
     Assume the text data of the same label are in the same subdirectory. each
     file is one text.
 
     Args:
       filename: Name of the file.
+      model_spec: Specification for the model.
+      is_training: Whether the loaded data is for training or not.
       class_labels: Class labels that should be considered. Name of the
         subdirectory not in `class_labels` will be ignored. If None, all the
         subdirectories will be considered.
       shuffle: boolean, if shuffle, random shuffle data.
+      cache_dir: The cache directory to save preprocessed data. If None,
+        generates a temporary directory to cache preprocessed data.
 
     Returns:
-      TextDataset containing images, labels and other related info.
+      TextDataset containing text, labels and other related info.
     """
     data_root = os.path.abspath(filename)
+    folder_name = os.path.basename(data_root)
+
+    is_cached, tfrecord_file, meta_data_file, vocab_file = get_cache_info(
+        cache_dir, folder_name, model_spec, is_training)
+    # If cached, directly loads data from cache directory.
+    if is_cached:
+      return load(tfrecord_file, meta_data_file, model_spec)
 
     # Gets paths of all text.
     if class_labels:
@@ -109,29 +175,19 @@ class TextClassifierDataLoader(dataloader.DataLoader):
       label_names = sorted(
           name for name in os.listdir(data_root)
           if os.path.isdir(os.path.join(data_root, name)))
-    all_label_size = len(label_names)
-    label_to_index = dict(
-        (name, index) for index, name in enumerate(label_names))
-    all_text_labels = [
-        label_to_index[os.path.basename(os.path.dirname(path))]
-        for path in all_text_paths
-    ]
 
-    # Gets raw data.
-    path_ds = tf.data.Dataset.from_tensor_slices(all_text_paths)
+    # Generates text examples from folder.
+    examples = []
+    for i, path in enumerate(all_text_paths):
+      with tf.io.gfile.GFile(path, 'r') as f:
+        text = f.read()
+      guid = '%s-%d' % (folder_name, i)
+      label = os.path.basename(os.path.dirname(path))
+      examples.append(classifier_data_lib.InputExample(guid, text, None, label))
 
-    autotune = tf.data.experimental.AUTOTUNE
-    text_ds = path_ds.map(load_text, num_parallel_calls=autotune)
+    # Saves preprocessed data and other assets into files.
+    save(examples, model_spec, label_names, tfrecord_file, meta_data_file,
+         vocab_file, is_training)
 
-    # Loads label.
-    label_ds = tf.data.Dataset.from_tensor_slices(
-        tf.cast(all_text_labels, tf.int64))
-
-    # Creates a dataset if (text, label) pairs.
-    text_label_ds = tf.data.Dataset.zip((text_ds, label_ds))
-
-    tf.compat.v1.logging.info(
-        'load text from %s with size: %d, num_label: %d, labels: %s', data_root,
-        all_text_size, all_label_size, ', '.join(label_names))
-    return TextClassifierDataLoader(text_label_ds, all_text_size,
-                                    all_label_size, label_names)
+    # Loads data from cache directory.
+    return load(tfrecord_file, meta_data_file, model_spec)

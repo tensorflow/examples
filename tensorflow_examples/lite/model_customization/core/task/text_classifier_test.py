@@ -35,25 +35,35 @@ class TextClassifierTest(tf.test.TestCase):
       for _ in range(self.TEXT_PER_CLASS):
         yield text, i
 
-  def _gen_data(self):
-    ds = tf.data.Dataset.from_generator(
-        self._gen, (tf.string, tf.int64),
-        (tf.TensorShape([]), tf.TensorShape([])))
-    data = text_dataloader.TextClassifierDataLoader(ds, self.TEXT_PER_CLASS * 2,
-                                                    2, ['pos', 'neg'])
-    return data
+  def _gen_text_dir(self):
+    text_dir = os.path.join(self.get_temp_dir(), 'random_text_dir')
+    if os.path.exists(text_dir):
+      return text_dir
+    os.mkdir(text_dir)
+
+    for class_name, text in self.TEST_LABELS_AND_TEXT:
+      class_subdir = os.path.join(text_dir, class_name)
+      os.mkdir(class_subdir)
+      for i in range(self.TEXT_PER_CLASS):
+        with open(os.path.join(class_subdir, '%d.txt' % i), 'w') as f:
+          f.write(text)
+    return text_dir
 
   def setUp(self):
     super(TextClassifierTest, self).setUp()
-    all_data = self._gen_data()
+    self.text_dir = self._gen_text_dir()
+
+  def test_average_wordvec_model(self):
+    model_spec = ms.AverageWordVecModelSpec(seq_len=2)
+    all_data = text_dataloader.TextClassifierDataLoader.from_folder(
+        self.text_dir, model_spec=model_spec)
     # Splits data, 90% data for training, 10% for testing
     self.train_data, self.test_data = all_data.split(0.9)
 
-  def test_average_wordvec_model(self):
     model = text_classifier.create(
         self.train_data,
         mef.ModelExportFormat.TFLITE,
-        model_spec=ms.AverageWordVecModelSpec(sentence_len=2),
+        model_spec=model_spec,
         epochs=2,
         batch_size=4,
         shuffle=True)
@@ -104,7 +114,7 @@ class TextClassifierTest(tf.test.TestCase):
     model.export(tflite_output_file, labels_output_file, vocab_output_file)
 
     labels = self._load_labels(labels_output_file)
-    self.assertEqual(labels, ['pos', 'neg'])
+    self.assertEqual(labels, ['neg', 'pos'])
 
     word_index = self._load_vocab(vocab_output_file)
     expected_predefined = [['<PAD>', '0'], ['<START>', '1'], ['<UNKNOWN>', '2']]
@@ -119,13 +129,11 @@ class TextClassifierTest(tf.test.TestCase):
     self.assertEqual(actual_index, expected_index)
 
     lite_model = self._load_lite_model(tflite_output_file)
-    for i, (class_name, text) in enumerate(self.TEST_LABELS_AND_TEXT):
-      input_batch = tf.constant(text)
-      input_batch = model.preprocess(input_batch, np.int64(i))[0]
-      input_batch = tf.cast(input_batch, tf.float32)
+    for x, y in self.test_data.dataset:
+      input_batch = tf.cast(x, tf.float32)
       output_batch = lite_model(input_batch)
-      prediction = labels[np.argmax(output_batch[0])]
-      self.assertEqual(class_name, prediction)
+      prediction = np.argmax(output_batch[0])
+      self.assertEqual(y, prediction)
 
 
 if __name__ == '__main__':

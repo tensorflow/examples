@@ -24,6 +24,11 @@ import re
 import tensorflow as tf # TF2
 
 
+def create_int_feature(values):
+  feature = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
+  return feature
+
+
 class ImageModelSpec(object):
   """A specification of image model."""
 
@@ -71,17 +76,32 @@ class TextModelSpec(abc.ABC):
     Returns:
       The retrained model.
     """
-    return
-
-  @abc.abstractmethod
-  def preprocess(self, raw_text, label):
-    """Preprocesses function for the text model."""
-    return
+    pass
 
   @abc.abstractmethod
   def save_vocab(self, vocab_filename):
     """Saves the vocabulary if it's generated from the input data, otherwise, prints the file path to the vocabulary."""
-    return
+    pass
+
+  @abc.abstractmethod
+  def get_name_to_features(self):
+    """Gets the dictionary describing the features."""
+    pass
+
+  @abc.abstractmethod
+  def select_data_from_record(self, record):
+    """Dispatches records to features and labels."""
+    pass
+
+  @abc.abstractmethod
+  def convert_examples_to_features(self, examples, tfrecord_file, label_names):
+    """Converts examples to features and write them into TFRecord file."""
+    pass
+
+  @abc.abstractmethod
+  def get_config(self):
+    """Gets the configuration."""
+    pass
 
 
 class AverageWordVecModelSpec(TextModelSpec):
@@ -92,7 +112,7 @@ class AverageWordVecModelSpec(TextModelSpec):
 
   def __init__(self,
                num_words=10000,
-               sentence_len=256,
+               seq_len=256,
                wordvec_dim=16,
                lowercase=True,
                dropout_rate=0.2):
@@ -100,7 +120,7 @@ class AverageWordVecModelSpec(TextModelSpec):
 
     Args:
       num_words: Number of words to generate the vocabulary from data.
-      sentence_len: Length of the sentence to feed into the model.
+      seq_len: Length of the sequence to feed into the model.
       wordvec_dim: Dimension of the word embedding.
       lowercase: Whether to convert all uppercase character to lowercase during
         preprocessing.
@@ -108,10 +128,41 @@ class AverageWordVecModelSpec(TextModelSpec):
     """
     super(AverageWordVecModelSpec, self).__init__(need_gen_vocab=True)
     self.num_words = num_words
-    self.sentence_len = sentence_len
+    self.seq_len = seq_len
     self.wordvec_dim = wordvec_dim
     self.lowercase = lowercase
     self.dropout_rate = dropout_rate
+
+  def get_name_to_features(self):
+    """Gets the dictionary describing the features."""
+    name_to_features = {
+        'input_ids': tf.io.FixedLenFeature([self.seq_len], tf.int64),
+        'label_ids': tf.io.FixedLenFeature([], tf.int64),
+    }
+    return name_to_features
+
+  def select_data_from_record(self, record):
+    """Dispatches records to features and labels."""
+    x = record['input_ids']
+    y = record['label_ids']
+    return (x, y)
+
+  def convert_examples_to_features(self, examples, tfrecord_file, label_names):
+    """Converts examples to features and write them into TFRecord file."""
+    writer = tf.io.TFRecordWriter(tfrecord_file)
+
+    label_to_id = dict((name, i) for i, name in enumerate(label_names))
+    for example in examples:
+      features = collections.OrderedDict()
+
+      input_ids = self.preprocess(example.text_a)
+      label_id = label_to_id[example.label]
+      features['input_ids'] = create_int_feature(input_ids)
+      features['label_ids'] = create_int_feature([label_id])
+      tf_example = tf.train.Example(
+          features=tf.train.Features(feature=features))
+      writer.write(tf_example.SerializeToString())
+    writer.close()
 
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
@@ -119,7 +170,7 @@ class AverageWordVecModelSpec(TextModelSpec):
     # Gets a classifier model.
     model = tf.keras.Sequential([
         tf.keras.layers.Embedding(
-            len(self.vocab), self.wordvec_dim, input_length=self.sentence_len),
+            len(self.vocab), self.wordvec_dim, input_length=self.seq_len),
         tf.keras.layers.GlobalAveragePooling1D(),
         tf.keras.layers.Dense(self.wordvec_dim, activation=tf.nn.relu),
         tf.keras.layers.Dropout(self.dropout_rate),
@@ -147,12 +198,12 @@ class AverageWordVecModelSpec(TextModelSpec):
 
     return model
 
-  def gen_vocab(self, text_ds):
-    """Generates vocabulary list in `text_ds` with maximum `num_words` words."""
+  def gen_vocab(self, examples):
+    """Generates vocabulary list in `examples` with maximum `num_words` words."""
     vocab_counter = collections.Counter()
 
-    for raw_text, _ in text_ds:
-      tokens = self._tokenize(raw_text.numpy())
+    for example in examples:
+      tokens = self._tokenize(example.text_a)
       for token in tokens:
         vocab_counter[token] += 1
 
@@ -163,9 +214,9 @@ class AverageWordVecModelSpec(TextModelSpec):
         ((v, i) for i, v in enumerate(vocab_list)))
     return self.vocab
 
-  def _preprocess_text_py_func(self, raw_text, label):
-    """Preprocess the text."""
-    tokens = self._tokenize(raw_text.numpy())
+  def preprocess(self, raw_text):
+    """Preprocess the text for text classification."""
+    tokens = self._tokenize(raw_text)
 
     # Gets ids for START, PAD and UNKNOWN tokens.
     start_id = self.vocab[self.START]
@@ -175,30 +226,21 @@ class AverageWordVecModelSpec(TextModelSpec):
     token_ids = [self.vocab.get(token, unknown_id) for token in tokens]
     token_ids = [start_id] + token_ids
 
-    if len(token_ids) < self.sentence_len:
+    if len(token_ids) < self.seq_len:
       # Padding.
-      pad_length = self.sentence_len - len(token_ids)
+      pad_length = self.seq_len - len(token_ids)
       token_ids = token_ids + pad_length * [pad_id]
     else:
-      token_ids = token_ids[:self.sentence_len]
-    return token_ids, label
+      token_ids = token_ids[:self.seq_len]
 
-  def preprocess(self, raw_text, label):
-    """Preprocess the text."""
-    text, label = tf.py_function(
-        self._preprocess_text_py_func,
-        inp=[raw_text, label],
-        Tout=(tf.int32, tf.int64))
-    text.set_shape((self.sentence_len))
-    label.set_shape(())
-    return text, label
+    return token_ids
 
-  def _tokenize(self, sentence):
+  def _tokenize(self, text):
     r"""Splits by '\W' except '\''."""
-    sentence = tf.compat.as_text(sentence)
+    text = tf.compat.as_text(text)
     if self.lowercase:
-      sentence = sentence.lower()
-    tokens = re.compile(r'[^\w\']+').split(sentence.strip())
+      text = text.lower()
+    tokens = re.compile(r'[^\w\']+').split(text.strip())
     return list(filter(None, tokens))
 
   def save_vocab(self, vocab_filename):
@@ -208,3 +250,22 @@ class AverageWordVecModelSpec(TextModelSpec):
         f.write('%s %d\n' % (token, index))
 
     tf.compat.v1.logging.info('Saved vocabulary in %s.', vocab_filename)
+
+  def load_vocab(self, vocab_filename):
+    """Loads vocabulary from `vocab_filename`."""
+    with tf.io.gfile.GFile(vocab_filename, 'r') as f:
+      vocab_list = []
+      for line in f:
+        word, index = line.strip().split()
+        vocab_list.append((word, int(index)))
+    self.vocab = collections.OrderedDict(vocab_list)
+    return self.vocab
+
+  def get_config(self):
+    """Gets the configuration."""
+    return {
+        'num_words': self.num_words,
+        'seq_len': self.seq_len,
+        'wordvec_dim': self.wordvec_dim,
+        'lowercase': self.lowercase
+    }

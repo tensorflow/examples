@@ -86,12 +86,12 @@ class TextClassifier(classification_model.ClassificationModel):
         num_classes,
         shuffle,
         train_whole_model=True)
-    if self.model_spec.need_gen_vocab:
-      self.model_spec.gen_vocab(train_data.dataset)
 
   def preprocess(self, raw_text, label):
     """Preprocess the text."""
-    return self.model_spec.preprocess(raw_text, label)
+    # TODO(yuqili): remove this method once preprocess for image classifier is
+    # also moved to DataLoader part.
+    return raw_text, label
 
   def get_dataset_fn(self, input_data, batch_size, is_training):
     """Gets a closure to create a dataset."""
