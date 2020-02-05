@@ -77,6 +77,9 @@ to perform each inference in milliseconds at the top-left corner of the screen.
 For more information about executing inferences with TensorFlow Lite, read
 [TensorFlow Lite inference](https://www.tensorflow.org/lite/guide/inference).
 
+## Video tutorial
+You can see the above steps in a video tutorial on the following link:
+[How to Set Up Object Detection on Raspberry Pi with TensorFlow Lite](https://youtu.be/iKQC4oCvSXU)
 
 ## Speed up the inferencing time (optional)
 
