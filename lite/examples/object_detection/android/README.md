@@ -73,7 +73,7 @@ tflite_convert \
 
 `input_arrays` and `output_arrays` can be drawn from the visualized graph of the example detection model.
 ```
-bazel run //<directory with the TensorFlow repository>/lite/tools:visualize \
+bazel run //tensorflow/lite/tools:visualize \
   "<directory with the TensorFlow examples repository>/lite/examples/object_detection/android/app/src/main/assets/detect.tflite" \
   detect.html
 ```
