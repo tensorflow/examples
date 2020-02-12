@@ -21,10 +21,10 @@
   <application
       android:allowBackup="true"
       android:icon="@mipmap/ic_launcher"
-      android:label="@string/app_name"
+      android:label="@string/tfe_qa_app_name"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:supportsRtl="true"
-      android:theme="@style/AppTheme"
+      android:theme="@style/AppTheme.QA"
       tools:ignore="GoogleAppIndexingWarning">
 
     <activity
@@ -38,7 +38,7 @@
     <activity
         android:name=".ui.DatasetListActivity"
         android:exported="true"
-        android:theme="@style/AppTheme.NoTitleActivity" >
+        android:theme="@style/AppTheme.QA.NoTitleActivity" >
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

@@ -167,11 +167,11 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
         chip.setPadding(0, paddingDp, 0, paddingDp)
         chipsGroup.addView(chip)
       }
-      val labelsFoundTextView: TextView = findViewById(R.id.labels_found)
+      val labelsFoundTextView: TextView = findViewById(R.id.tfe_is_labels_found)
       if (chipsGroup.childCount == 0) {
-        labelsFoundTextView.text = getString(R.string.no_labels_found)
+        labelsFoundTextView.text = getString(R.string.tfe_is_no_labels_found)
       } else {
-        labelsFoundTextView.text = getString(R.string.labels_found)
+        labelsFoundTextView.text = getString(R.string.tfe_is_labels_found)
       }
     }
     chipsGroup.parent.requestLayout()

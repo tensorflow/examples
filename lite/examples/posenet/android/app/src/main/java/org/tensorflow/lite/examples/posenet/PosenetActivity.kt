@@ -255,7 +255,7 @@ class PosenetActivity :
   ) {
     if (requestCode == REQUEST_CAMERA_PERMISSION) {
       if (allPermissionsGranted(grantResults)) {
-        ErrorDialog.newInstance(getString(R.string.request_permission))
+        ErrorDialog.newInstance(getString(R.string.tfe_pn_request_permission))
           .show(childFragmentManager, FRAGMENT_DIALOG)
       }
     } else {
@@ -316,7 +316,7 @@ class PosenetActivity :
     } catch (e: NullPointerException) {
       // Currently an NPE is thrown when the Camera2API is used but not supported on the
       // device this code runs.
-      ErrorDialog.newInstance(getString(R.string.camera_error))
+      ErrorDialog.newInstance(getString(R.string.tfe_pn_camera_error))
         .show(childFragmentManager, FRAGMENT_DIALOG)
     }
   }

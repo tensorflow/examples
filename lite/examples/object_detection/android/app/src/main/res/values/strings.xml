@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name">TFLiteObjectDetection</string>
-    <string name="description_info">Info</string>
-    <string name="request_permission">This app needs camera permission.</string>
-    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
+    <string name="tfe_od_app_name" translation_description="Object Detection demo app [CHAR_LIMIT=40]">TFL Detect</string>
+    <string name="tfe_od_camera_error" translation_description="Error regarding camera support[CHAR_LIMIT=40]">This device doesn\'t support Camera2 API.</string>
 </resources>

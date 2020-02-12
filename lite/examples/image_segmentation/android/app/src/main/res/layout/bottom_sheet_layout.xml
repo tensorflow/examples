@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:text="@string/gpu" />
+        android:text="@string/tfe_is_gpu" />
 
     <TextView
         android:id="@+id/log_view"
@@ -41,13 +41,13 @@
         android:textColor="@android:color/black" />
 
     <TextView
-        android:id="@+id/labels_found"
+        android:id="@+id/tfe_is_labels_found"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:text="@string/labels_found" />
+        android:text="@string/tfe_is_labels_found" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chips_group"
@@ -62,6 +62,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="8dp"
-        android:text="@string/re_run_model" />
+        android:text="@string/tfe_is_re_run_model" />
 
 </LinearLayout>

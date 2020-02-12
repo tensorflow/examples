@@ -50,20 +50,20 @@
 
                 <ImageView
                     android:id="@+id/original_imageview"
-                    android:layout_width="@dimen/previewSize"
-                    android:layout_height="@dimen/previewSize"
+                    android:layout_width="@dimen/tfe_is_preview_size"
+                    android:layout_height="@dimen/tfe_is_preview_size"
                     android:padding="8dp" />
 
                 <ImageView
                     android:id="@+id/result_imageview"
-                    android:layout_width="@dimen/previewSize"
-                    android:layout_height="@dimen/previewSize"
+                    android:layout_width="@dimen/tfe_is_preview_size"
+                    android:layout_height="@dimen/tfe_is_preview_size"
                     android:padding="8dp" />
 
                 <ImageView
                     android:id="@+id/mask_imageview"
-                    android:layout_width="@dimen/previewSize"
-                    android:layout_height="@dimen/previewSize"
+                    android:layout_width="@dimen/tfe_is_preview_size"
+                    android:layout_height="@dimen/tfe_is_preview_size"
                     android:padding="8dp" />
 
             </LinearLayout>
