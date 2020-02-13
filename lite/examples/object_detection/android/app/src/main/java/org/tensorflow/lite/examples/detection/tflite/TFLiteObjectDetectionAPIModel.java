@@ -200,7 +200,7 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
       // because on some models, they don't always output the same total number of detections
       // For example, your model's NUM_DETECTIONS = 20, but sometimes it only outputs 16 predictions
       // If you don't use the output's numDetections, you'll get nonsensical data
-    int numDetectionsOutput = (int) numDetections[0]; // cast from float to integer
+    int numDetectionsOutput = Math.min(NUM_DETECTIONS, (int) numDetections[0]); // cast from float to integer, use min for safety
       
     final ArrayList<Recognition> recognitions = new ArrayList<>(numDetectionsOutput);
     for (int i = 0; i < numDetectionsOutput; ++i) {
