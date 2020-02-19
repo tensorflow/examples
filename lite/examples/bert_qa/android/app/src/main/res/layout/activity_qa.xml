@@ -11,7 +11,7 @@
       android:id="@+id/title_text"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:padding="@dimen/standard_margin"
+      android:padding="@dimen/tfe_qa_standard_margin"
       app:layout_constraintTop_toTopOf="parent"
       android:text="Here is the title of article"
       android:textStyle="bold"/>
@@ -25,7 +25,7 @@
         android:id="@+id/content_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/standard_margin"
+        android:padding="@dimen/tfe_qa_standard_margin"
         android:scrollbars="vertical"
         android:text="This is the content of the article."/>
   </android.support.design.widget.CoordinatorLayout>
@@ -34,9 +34,9 @@
       android:id="@+id/footer_view"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:padding="@dimen/standard_margin"
+      android:padding="@dimen/tfe_qa_standard_margin"
       app:layout_constraintBottom_toBottomOf="parent"
-      android:elevation="@dimen/bottom_sheet_elevation"
+      android:elevation="@dimen/tfe_qa_bottom_sheet_elevation"
       android:background="@android:color/white">
 
     <TextView
@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="@string/you_might_want_to_ask"/>
+        android:text="@string/tfe_qa_you_might_want_to_ask"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/suggestion_list"
@@ -60,7 +60,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toLeftOf="@id/ask_button"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:hint="@string/text_query">
+        android:hint="@string/tfe_qa_text_query">
 
       <android.support.design.widget.TextInputEditText
           android:id="@+id/question_edit_text"
@@ -75,14 +75,14 @@
         android:id="@+id/ask_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="@dimen/standard_margin"
+        android:padding="@dimen/tfe_qa_standard_margin"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@id/text_input_layout"
         app:layout_constraintBottom_toBottomOf="@id/text_input_layout"
         android:src="@drawable/ic_ask_inactive"
         android:clickable="false"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/ask_question" />
+        android:contentDescription="@string/tfe_qa_ask_question" />
 
   </android.support.constraint.ConstraintLayout>
 

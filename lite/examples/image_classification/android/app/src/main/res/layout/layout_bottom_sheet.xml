@@ -27,7 +27,6 @@
             android:layout_gravity="center"
             android:src="@drawable/icn_chevron_up" />
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -286,7 +285,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="@string/model"
+            android:text="@string/tfe_ic_model"
             android:textColor="@android:color/black" />
 
         <Spinner
@@ -295,8 +294,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_alignParentRight="true"
-            android:entries="@array/models"
-            android:prompt="@string/model" />
+            android:entries="@array/tfe_ic_models"
+            android:prompt="@string/tfe_ic_model" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -307,7 +306,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="@string/device"
+            android:text="@string/tfe_ic_device"
             android:textColor="@android:color/black" />
 
         <Spinner
@@ -316,7 +315,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_alignParentRight="true"
-            android:entries="@array/devices"
-            android:prompt="@string/device" />
+            android:entries="@array/tfe_ic_devices"
+            android:prompt="@string/tfe_ic_device" />
     </RelativeLayout>
 </LinearLayout>

@@ -19,7 +19,7 @@
       android:textStyle="bold"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="@string/prediction_text_placeholder"
+      android:text="@string/tfe_dc_prediction_text_placeholder"
       android:textSize="20sp"
       app:layout_constraintBottom_toTopOf="@id/clear_button"
       app:layout_constraintLeft_toLeftOf="parent"
@@ -30,7 +30,7 @@
       android:id="@+id/clear_button"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="@string/clear_button_text"
+      android:text="@string/tfe_dc_clear_button_text"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintRight_toRightOf="parent"/>

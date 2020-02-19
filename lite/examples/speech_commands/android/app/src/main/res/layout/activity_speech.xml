@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/toolbar"
             android:layout_gravity="top"
-            android:background="@color/colorPrimary"
+            android:background="@color/tfe_color_primary"
             android:padding="10dp"
             android:text="Say one of the words below!"
             android:textAlignment="center"

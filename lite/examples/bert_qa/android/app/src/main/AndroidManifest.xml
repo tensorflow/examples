@@ -20,11 +20,11 @@
 
   <application
       android:allowBackup="true"
-      android:icon="@drawable/ic_launcher"
-      android:label="@string/app_name"
-      android:roundIcon="@drawable/ic_launcher"
+      android:icon="@mipmap/ic_launcher"
+      android:label="@string/tfe_qa_app_name"
+      android:roundIcon="@mipmap/ic_launcher_round"
       android:supportsRtl="true"
-      android:theme="@style/AppTheme"
+      android:theme="@style/AppTheme.QA"
       tools:ignore="GoogleAppIndexingWarning">
 
     <activity
@@ -32,13 +32,13 @@
         android:exported="false">
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
-          android:value="org.tensorflow.lite.examples.bertqa.ui.DatasetListActivity" />
+          android:value=".ui.DatasetListActivity" />
     </activity>
 
     <activity
         android:name=".ui.DatasetListActivity"
         android:exported="true"
-        android:theme="@style/AppTheme.NoTitleActivity" >
+        android:theme="@style/AppTheme.QA.NoTitleActivity" >
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

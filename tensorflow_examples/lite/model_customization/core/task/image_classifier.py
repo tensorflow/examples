@@ -27,12 +27,11 @@ import tensorflow_hub as hub
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as lib
 
 
-def create(data,
+def create(train_data,
            model_export_format=mef.ModelExportFormat.TFLITE,
            model_spec=ms.mobilenet_v2_spec,
            shuffle=False,
-           validation_ratio=0.1,
-           test_ratio=0.1,
+           validation_data=None,
            batch_size=None,
            epochs=None,
            train_whole_model=None,
@@ -42,12 +41,11 @@ def create(data,
   """Loads data and retrains the model based on data for image classification.
 
   Args:
-    data: Raw data that could be splitted for training / validation / testing.
+    train_data: Training data.
     model_export_format: Model export format such as saved_model / tflite.
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
-    validation_ratio: The ratio of validation data to be splitted.
-    test_ratio: The ratio of test data to be splitted.
+    validation_data: Validation data. If None, skips validation process.
     batch_size: Number of samples per training step.
     epochs: Number of epochs for training.
     train_whole_model: If true, the Hub module is trained together with the
@@ -75,16 +73,15 @@ def create(data,
     hparams = hparams._replace(momentum=momentum)
 
   image_classifier = ImageClassifier(
-      data,
       model_export_format,
       model_spec,
+      train_data.index_to_label,
+      train_data.num_classes,
       shuffle=shuffle,
-      validation_ratio=validation_ratio,
-      test_ratio=test_ratio,
       hparams=hparams)
 
   tf.compat.v1.logging.info('Retraining the models...')
-  image_classifier.train()
+  image_classifier.train(train_data, validation_data)
 
   return image_classifier
 
@@ -93,33 +90,27 @@ class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
 
   def __init__(self,
-               data,
                model_export_format,
                model_spec,
+               index_to_label,
+               num_classes,
                shuffle=True,
-               validation_ratio=0.1,
-               test_ratio=0.1,
                hparams=lib.get_default_hparams()):
     """Init function for ImageClassifier class.
 
-    Including splitting the raw input data into train/eval/test sets and
-    selecting the exact NN model to be used.
-
     Args:
-      data: Raw data that could be splitted for training / validation / testing.
       model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
+      index_to_label: A list that map from index to label class name.
+      num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
-      validation_ratio: The ratio of validation data to be splitted.
-      test_ratio: The ratio of test data to be splitted.
       hparams: A namedtuple of hyperparameters. This function expects
         .dropout_rate: The fraction of the input units to drop, used in dropout
           layer.
     """
     super(ImageClassifier,
-          self).__init__(data, model_export_format, model_spec, shuffle,
-                         hparams.do_fine_tuning, validation_ratio, test_ratio)
-    self.pre_trained_model_spec = model_spec
+          self).__init__(model_export_format, model_spec, index_to_label,
+                         num_classes, shuffle, hparams.do_fine_tuning)
     self.hparams = hparams
     self.model = self._create_model()
 
@@ -129,15 +120,16 @@ class ImageClassifier(classification_model.ClassificationModel):
       hparams = self.hparams
 
     module_layer = hub.KerasLayer(
-        self.pre_trained_model_spec.uri, trainable=hparams.do_fine_tuning)
+        self.model_spec.uri, trainable=hparams.do_fine_tuning)
     return lib.build_model(module_layer, hparams,
-                           self.pre_trained_model_spec.input_image_shape,
-                           self.data.num_classes)
+                           self.model_spec.input_image_shape, self.num_classes)
 
-  def train(self, hparams=None):
+  def train(self, train_data, validation_data=None, hparams=None):
     """Feeds the training data for training.
 
     Args:
+      train_data: Training data.
+      validation_data: Validation data. If None, skips validation process.
       hparams: A namedtuple of hyperparameters. This function expects
       .train_epochs: a Python integer with the number of passes over the
         training dataset;
@@ -151,12 +143,17 @@ class ImageClassifier(classification_model.ClassificationModel):
     if hparams is None:
       hparams = self.hparams
 
-    train_data = self._gen_train_dataset(self.train_data, hparams.batch_size)
-    train_data_and_size = (train_data, self.train_data.size)
+    train_ds = self._gen_dataset(
+        train_data, hparams.batch_size, is_training=True)
+    train_data_and_size = (train_ds, train_data.size)
 
-    validation_data = self._gen_validation_dataset(self.validation_data,
-                                                   hparams.batch_size)
-    validation_data_and_size = (validation_data, self.validation_data.size)
+    validation_ds = None
+    validation_size = 0
+    if validation_data is not None:
+      validation_ds = self._gen_dataset(
+          validation_data, hparams.batch_size, is_training=False)
+      validation_size = validation_data.size
+    validation_data_and_size = (validation_ds, validation_size)
     # Trains the models.
     return lib.train_model(self.model, hparams, train_data_and_size,
                            validation_data_and_size)
@@ -166,17 +163,12 @@ class ImageClassifier(classification_model.ClassificationModel):
     image = tf.cast(image, tf.float32)
 
     image -= tf.constant(
-        self.pre_trained_model_spec.mean_rgb,
-        shape=[1, 1, 3],
-        dtype=image.dtype)
+        self.model_spec.mean_rgb, shape=[1, 1, 3], dtype=image.dtype)
     image /= tf.constant(
-        self.pre_trained_model_spec.stddev_rgb,
-        shape=[1, 1, 3],
-        dtype=image.dtype)
+        self.model_spec.stddev_rgb, shape=[1, 1, 3], dtype=image.dtype)
 
-    image = tf.image.resize(image,
-                            self.pre_trained_model_spec.input_image_shape)
-    label = tf.one_hot(label, depth=self.data.num_classes)
+    image = tf.image.resize(image, self.model_spec.input_image_shape)
+    label = tf.one_hot(label, depth=self.num_classes)
     return image, label
 
   def export(self, tflite_filename, label_filename, **kwargs):

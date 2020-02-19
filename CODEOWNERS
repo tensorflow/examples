@@ -2,10 +2,14 @@
 # Last matching pattern takes preecedence.
 
 # Default owners for everything in repo.
-*  @wolffg @lamberta @MarkDaoust
-
-# TF Lite
-/lite/ @dansitu @jdduke @yyoon
+*  @MarkDaoust @wolffg @yashk2810
 
 # Community docs
-/community/ @adammichaelwood
+/community/ @adammichaelwood @anirudh161 @lamberta @MarkDaoust @yashk2810
+
+# Courses
+/courses/udacity_intro_to_tensorflow_for_deep_learning/ @dynamicwebpaige @mhyttsten @MarkDaoust
+/courses/udacity_intro_to_tensorflow_lite/ @dynamicwebpaige @MarkDaoust
+
+# TF Lite
+/lite/ @jdduke @yyoon

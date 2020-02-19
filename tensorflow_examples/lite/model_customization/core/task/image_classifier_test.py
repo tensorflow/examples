@@ -54,11 +54,13 @@ class ImageClassifierTest(tf.test.TestCase):
 
   def setUp(self):
     super(ImageClassifierTest, self).setUp()
-    self.data = self._gen_cmy_data()
+    all_data = self._gen_cmy_data()
+    # Splits data, 90% data for training, 10% for testing
+    self.train_data, self.test_data = all_data.split(0.9)
 
   def test_mobilenetv2_model(self):
     model = image_classifier.create(
-        self.data,
+        self.train_data,
         mef.ModelExportFormat.TFLITE,
         model_spec.mobilenet_v2_spec,
         epochs=2,
@@ -66,11 +68,11 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
-    self._test_predict_topk(model)
+    self._test_predict_top_k(model)
 
   def test_efficientnetb0_model(self):
     model = image_classifier.create(
-        self.data,
+        self.train_data,
         mef.ModelExportFormat.TFLITE,
         model_spec.efficientnet_b0_spec,
         epochs=5,
@@ -79,15 +81,15 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
 
-  def _test_predict_topk(self, model):
-    topk = model.predict_topk(batch_size=4)
-    for i, (_, label) in enumerate(model.test_data.dataset):
+  def _test_predict_top_k(self, model):
+    topk = model.predict_top_k(self.test_data, batch_size=4)
+    for i, (_, label) in enumerate(self.test_data.dataset):
       predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
-      self.assertEqual(model.data.index_to_label[label], predict_label)
+      self.assertEqual(model.index_to_label[label], predict_label)
       self.assertGreater(predict_prob, 0.7)
 
   def _test_accuracy(self, model):
-    _, accuracy = model.evaluate()
+    _, accuracy = model.evaluate(self.test_data)
     self.assertEqual(accuracy, 1.0)
 
   def _load_labels(self, filename):

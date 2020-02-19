@@ -106,7 +106,7 @@ public class SpeechActivity extends Activity
   private RecognizeCommands recognizeCommands = null;
   private LinearLayout bottomSheetLayout;
   private LinearLayout gestureLayout;
-  private BottomSheetBehavior sheetBehavior;
+  private BottomSheetBehavior<LinearLayout> sheetBehavior;
 
   private Interpreter tfLite;
   private ImageView bottomSheetArrowImageView;

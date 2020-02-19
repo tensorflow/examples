@@ -37,7 +37,6 @@ class ViewController: UIViewController {
   private var initialBottomSpace: CGFloat = 0.0
   private var previousInferenceTimeMs: TimeInterval = Date.distantPast.timeIntervalSince1970 * 1000
 
-
   // MARK: Controllers that manage functionality
   // Handles all the camera related functionality
   private lazy var cameraCapture = CameraFeedManager(previewView: previewView)
@@ -57,6 +56,13 @@ class ViewController: UIViewController {
       fatalError("Model set up failed")
     }
 
+#if targetEnvironment(simulator)
+    previewView.shouldUseClipboardImage = true
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(classifyPasteboardImage),
+                                           name: UIApplication.didBecomeActiveNotification,
+                                           object: nil)
+#endif
     cameraCapture.delegate = self
 
     addPanGesture()
@@ -66,12 +72,18 @@ class ViewController: UIViewController {
     super.viewWillAppear(animated)
 
     changeBottomViewState()
+
+#if !targetEnvironment(simulator)
     cameraCapture.checkCameraConfigurationAndStartSession()
+#endif
   }
 
+#if !targetEnvironment(simulator)
   override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
     cameraCapture.stopSession()
   }
+#endif
 
   override var preferredStatusBarStyle: UIStatusBarStyle {
     return .lightContent
@@ -105,6 +117,26 @@ class ViewController: UIViewController {
       inferenceViewController?.delegate = self
 
     }
+  }
+
+  @objc func classifyPasteboardImage() {
+    guard let image = UIPasteboard.general.images?.first else {
+      return
+    }
+
+    guard let buffer = CVImageBuffer.buffer(from: image) else {
+      return
+    }
+
+    previewView.image = image
+
+    DispatchQueue.global().async {
+      self.didOutput(pixelBuffer: buffer)
+    }
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
   }
 
 }
@@ -167,6 +199,7 @@ extension ViewController: CameraFeedManagerDelegate {
   func sessionRunTimeErrorOccured() {
     // Handles session run time error by updating the UI and providing a button if session can be manually resumed.
     self.resumeButton.isHidden = false
+    previewView.shouldUseClipboardImage = true
   }
 
   func presentCameraPermissionsDeniedAlert() {
@@ -180,6 +213,8 @@ extension ViewController: CameraFeedManagerDelegate {
     alertController.addAction(settingsAction)
 
     present(alertController, animated: true, completion: nil)
+
+    previewView.shouldUseClipboardImage = true
   }
 
   func presentVideoConfigurationErrorAlert() {
@@ -187,6 +222,7 @@ extension ViewController: CameraFeedManagerDelegate {
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
 
     self.present(alert, animated: true)
+    previewView.shouldUseClipboardImage = true
   }
 }
 

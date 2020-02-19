@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/activity_margin"
+    android:layout_margin="@dimen/tfe_sr_activity_margin"
     tools:context=".MainActivity">
 
     <ScrollView
@@ -25,7 +25,7 @@
         android:id="@+id/message_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="@string/edit_text_hint"
+        android:hint="@string/tfe_sr_edit_text_hint"
         android:inputType="textNoSuggestions"
         android:importantForAutofill="no"
         app:layout_constraintBaseline_toBaselineOf="@+id/send_button"
@@ -37,7 +37,7 @@
         android:id="@+id/send_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_send"
+        android:text="@string/tfe_sr_button_send"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/message_input"

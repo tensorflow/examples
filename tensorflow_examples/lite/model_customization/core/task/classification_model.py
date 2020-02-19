@@ -26,60 +26,39 @@ import tensorflow_examples.lite.model_customization.core.model_export_format as 
 class ClassificationModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
 
-  def __init__(self, data, model_export_format, model_name, shuffle,
-               train_whole_model, validation_ratio, test_ratio):
+  def __init__(self, model_export_format, model_spec, index_to_label,
+               num_classes, shuffle, train_whole_model):
     """Initialize a instance with data, deploy mode and other related parameters.
 
     Args:
-      data: Raw data that could be splitted for training / validation / testing.
       model_export_format: Model export format such as saved_model / tflite.
-      model_name: Model name.
+      model_spec: Specification for the model.
+      index_to_label: A list that map from index to label class name.
+      num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
       train_whole_model: If true, the Hub module is trained together with the
         classification layer on top. Otherwise, only train the top
         classification layer.
-      validation_ratio: The ratio of valid data to be splitted.
-      test_ratio: The ratio of test data to be splitted.
     """
     if model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model export format %s is not supported currently.' %
                        str(model_export_format))
 
-    self.data = data
     self.model_export_format = model_export_format
-    self.model_name = model_name
+    self.model_spec = model_spec
+    self.index_to_label = index_to_label
+    self.num_classes = num_classes
     self.shuffle = shuffle
     self.train_whole_model = train_whole_model
-    self.validation_ratio = validation_ratio
-    self.test_ratio = test_ratio
-
-    # Generates training, validation and testing data.
-    if validation_ratio + test_ratio >= 1.0:
-      raise ValueError(
-          'The total ratio for validation and test data should be less than 1.0.'
-      )
-
-    self.validation_data, rest_data = data.split(
-        validation_ratio, shuffle=shuffle)
-    self.test_data, self.train_data = rest_data.split(
-        test_ratio / (1 - validation_ratio), shuffle=shuffle)
-
-    # Checks dataset parameter.
-    if self.train_data.size == 0:
-      raise ValueError('Training dataset is empty.')
 
     self.model = None
-
-  @abc.abstractmethod
-  def _create_model(self, **kwargs):
-    return
 
   @abc.abstractmethod
   def preprocess(self, sample_data, label):
     return
 
   @abc.abstractmethod
-  def train(self, **kwargs):
+  def train(self, train_data, validation_data=None, **kwargs):
     return
 
   @abc.abstractmethod
@@ -89,27 +68,25 @@ class ClassificationModel(abc.ABC):
   def summary(self):
     self.model.summary()
 
-  def evaluate(self, data=None, batch_size=32):
+  def evaluate(self, data, batch_size=32):
     """Evaluates the model.
 
     Args:
-      data: Data to be evaluated. If None, then evaluates in self.test_data.
+      data: Data to be evaluated.
       batch_size: Number of samples per evaluation step.
 
     Returns:
       The loss value and accuracy.
     """
-    if data is None:
-      data = self.test_data
-    ds = self._gen_validation_dataset(data, batch_size)
+    ds = self._gen_dataset(data, batch_size, is_training=False)
 
     return self.model.evaluate(ds)
 
-  def predict_topk(self, data=None, k=1, batch_size=32):
+  def predict_top_k(self, data, k=1, batch_size=32):
     """Predicts the top-k predictions.
 
     Args:
-      data: Data to be evaluated. If None, then predicts in self.test_data.
+      data: Data to be evaluated.
       k: Number of top results to be predicted.
       batch_size: Number of samples per evaluation step.
 
@@ -118,14 +95,11 @@ class ClassificationModel(abc.ABC):
     """
     if k < 0:
       raise ValueError('K should be equal or larger than 0.')
-
-    if data is None:
-      data = self.test_data
-    ds = self._gen_validation_dataset(data, batch_size)
+    ds = self._gen_dataset(data, batch_size, is_training=False)
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
-    topk_label = np.array(self.data.index_to_label)[topk_id.numpy()]
+    topk_label = np.array(self.index_to_label)[topk_id.numpy()]
 
     label_prob = []
     for label, prob in zip(topk_label, topk_prob.numpy()):
@@ -133,21 +107,16 @@ class ClassificationModel(abc.ABC):
 
     return label_prob
 
-  def _gen_train_dataset(self, data, batch_size=32):
-    """Generates training dataset."""
+  def _gen_dataset(self, data, batch_size=32, is_training=True):
+    """Generates training / validation dataset."""
     ds = data.dataset.map(
         self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    if self.shuffle:
-      ds = ds.shuffle(buffer_size=data.size)
-    ds = ds.repeat()
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
 
-  def _gen_validation_dataset(self, data, batch_size=32):
-    """Generates validation dataset."""
-    ds = data.dataset.map(
-        self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    if is_training:
+      if self.shuffle:
+        ds = ds.shuffle(buffer_size=min(data.size, 100))
+      ds = ds.repeat()
+
     ds = ds.batch(batch_size)
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
@@ -169,7 +138,7 @@ class ClassificationModel(abc.ABC):
       f.write(tflite_model)
 
     with tf.io.gfile.GFile(label_filename, 'w') as f:
-      f.write('\n'.join(self.data.index_to_label))
+      f.write('\n'.join(self.index_to_label))
 
     tf.compat.v1.logging.info('Export to tflite model %s, saved labels in %s.',
                               tflite_filename, label_filename)

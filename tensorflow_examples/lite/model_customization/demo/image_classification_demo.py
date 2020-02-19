@@ -40,13 +40,16 @@ def main(_):
       'https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz',
       untar=True)
   data = ImageClassifierDataLoader.from_folder(image_path)
+  train_data, rest_data = data.split(0.8)
+  validation_data, test_data = rest_data.split(0.5)
 
   model = image_classifier.create(
-      data,
+      train_data,
       model_export_format=ModelExportFormat.TFLITE,
-      model_spec=efficientnet_b0_spec)
+      model_spec=efficientnet_b0_spec,
+      validation_data=validation_data)
 
-  _, acc = model.evaluate()
+  _, acc = model.evaluate(test_data)
   print('Test accuracy: %f' % acc)
 
   model.export(FLAGS.tflite_filename, FLAGS.label_filename)

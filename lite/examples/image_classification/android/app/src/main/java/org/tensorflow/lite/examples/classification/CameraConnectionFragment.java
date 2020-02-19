@@ -62,6 +62,12 @@ import java.util.concurrent.TimeUnit;
 import org.tensorflow.lite.examples.classification.customview.AutoFitTextureView;
 import org.tensorflow.lite.examples.classification.env.Logger;
 
+/**
+ * Camera Connection Fragment that captures images from camera.
+ *
+ * <p>Instantiated by newInstance.</p>
+ */
+@SuppressWarnings("FragmentNotInstantiable")
 public class CameraConnectionFragment extends Fragment {
   private static final Logger LOGGER = new Logger();
 
@@ -349,11 +355,9 @@ public class CameraConnectionFragment extends Fragment {
     } catch (final NullPointerException e) {
       // Currently an NPE is thrown when the Camera2API is used but not supported on the
       // device this code runs.
-      // TODO(andrewharp): abstract ErrorDialog/RuntimeException handling out into new method and
-      // reuse throughout app.
-      ErrorDialog.newInstance(getString(R.string.camera_error))
+      ErrorDialog.newInstance(getString(R.string.tfe_ic_camera_error))
           .show(getChildFragmentManager(), FRAGMENT_DIALOG);
-      throw new RuntimeException(getString(R.string.camera_error));
+      throw new IllegalStateException(getString(R.string.tfe_ic_camera_error));
     }
 
     cameraConnectionCallback.onPreviewSizeChosen(previewSize, sensorOrientation);

@@ -36,7 +36,7 @@ import java.util.Map;
 import org.tensorflow.lite.Interpreter;
 
 /** Interface to load TfLite model and provide predictions. */
-public class QaClient {
+public class QaClient implements AutoCloseable {
   private static final String TAG = "BertDemo";
   private static final String MODEL_PATH = "model.tflite";
   private static final String DIC_PATH = "vocab.txt";
@@ -88,7 +88,15 @@ public class QaClient {
 
   @WorkerThread
   public synchronized void unload() {
-    tflite.close();
+    close();
+  }
+
+  @Override
+  public void close() {
+    if (tflite != null) {
+      tflite.close();
+      tflite = null;
+    }
     dic.clear();
   }
 
