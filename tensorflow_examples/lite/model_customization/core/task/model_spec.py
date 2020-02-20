@@ -45,6 +45,9 @@ efficientnet_b0_spec = ImageModelSpec(
 mobilenet_v2_spec = ImageModelSpec(
     uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4')
 
+resnet_50_spec = ImageModelSpec(
+    uri='https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4')
+
 
 class TextModelSpec(abc.ABC):
   """The abstract base class that constains the specification of text model."""
