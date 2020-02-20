@@ -57,6 +57,7 @@ public class DetectorTest {
   private Classifier detector;
   private Bitmap croppedBitmap;
   private Matrix frameToCropTransform;
+  private Matrix cropToFrameTransform;
 
   @Before
   public void setUp() throws IOException {
@@ -80,6 +81,8 @@ public class DetectorTest {
             previewWidth, previewHeight,
             cropSize, cropSize,
             sensorOrientation, false);
+    cropToFrameTransform = new Matrix();
+    frameToCropTransform.invert(cropToFrameTransform);
   }
 
   @Test
@@ -88,12 +91,16 @@ public class DetectorTest {
     canvas.drawBitmap(loadImage("table.jpg"), frameToCropTransform, null);
     final List<Recognition> results = detector.recognizeImage(croppedBitmap);
     final List<Recognition> expected = loadRecognitions("table_results.txt");
+
+
     for (Recognition target : expected) {
       // Find a matching result in results
       boolean matched = false;
       for (Recognition item : results) {
+        RectF bbox = new RectF();
+        cropToFrameTransform.mapRect(bbox, item.getLocation());
         if (item.getTitle().equals(target.getTitle())
-            && matchBoundingBoxes(item.getLocation(), target.getLocation())
+            && matchBoundingBoxes(bbox, target.getLocation())
             && matchConfidence(item.getConfidence(), target.getConfidence())) {
           matched = true;
           break;
@@ -105,7 +112,7 @@ public class DetectorTest {
 
   // Confidence tolerance: absolute 1%
   private static boolean matchConfidence(float a, float b) {
-    return abs(a - b) < 1;
+    return abs(a - b) < 0.01;
   }
 
   // Bounding Box tolerance: overlapped area > 95% of each one
@@ -126,6 +133,13 @@ public class DetectorTest {
     return BitmapFactory.decodeStream(inputStream);
   }
 
+  // The format of result:
+  // category bbox.left bbox.top bbox.right bbox.bottom confidence
+  // ...
+  // Example:
+  // Apple 99 25 30 75 80 0.99
+  // Banana 25 90 75 200 0.98
+  // ...
   private static List<Recognition> loadRecognitions(String fileName) throws Exception {
     AssetManager assetManager =
         InstrumentationRegistry.getInstrumentation().getContext().getAssets();
@@ -138,12 +152,12 @@ public class DetectorTest {
       if (!scanner.hasNextFloat()) {
         break;
       }
-      float confidence = scanner.nextFloat() / 100.0f;
       float left = scanner.nextFloat();
       float top = scanner.nextFloat();
       float right = scanner.nextFloat();
       float bottom = scanner.nextFloat();
       RectF boundingBox = new RectF(left, top, right, bottom);
+      float confidence = scanner.nextFloat();
       Recognition recognition = new Recognition(null, category, confidence, boundingBox);
       result.add(recognition);
     }
