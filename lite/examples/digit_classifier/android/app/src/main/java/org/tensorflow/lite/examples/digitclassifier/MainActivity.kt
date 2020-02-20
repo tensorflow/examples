@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
   @SuppressLint("ClickableViewAccessibility")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    setContentView(R.layout.tfe_dc_activity_main)
 
     // Setup view instances
     drawView = findViewById(R.id.draw_view)

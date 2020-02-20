@@ -13,18 +13,16 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#00000000">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"
+        android:background="#00000000"
         android:orientation="vertical">
 
 
@@ -33,7 +31,9 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="org.tensorflow.demo.CameraActivity" />
+            android:background="@android:color/black"
+            tools:context="org.tensorflow.lite.examples.classification.CameraActivity" />
+
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -52,5 +52,5 @@
 
     <include
         android:id="@+id/bottom_sheet_layout"
-        layout="@layout/layout_bottom_sheet" />
+        layout="@layout/tfe_ic_layout_bottom_sheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

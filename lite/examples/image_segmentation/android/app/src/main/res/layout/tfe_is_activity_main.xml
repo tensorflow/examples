@@ -70,7 +70,7 @@
         </HorizontalScrollView>
     </LinearLayout>
 
-    <include layout="@layout/bottom_sheet_layout" />
+    <include layout="@layout/tfe_is_bottom_sheet_layout" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/capture_button"

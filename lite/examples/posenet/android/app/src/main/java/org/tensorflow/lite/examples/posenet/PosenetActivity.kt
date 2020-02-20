@@ -211,7 +211,7 @@ class PosenetActivity :
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? = inflater.inflate(R.layout.activity_posenet, container, false)
+  ): View? = inflater.inflate(R.layout.tfe_pn_activity_posenet, container, false)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     surfaceView = view.findViewById(R.id.surfaceView)

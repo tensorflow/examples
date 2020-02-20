@@ -13,7 +13,7 @@
     app:behavior_hideable="false"
     app:behavior_peekHeight="36dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/tfe_is_activity_main">
 
     <ImageView
         android:id="@+id/bottom_sheet_arrow"

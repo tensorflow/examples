@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    setContentView(R.layout.tfe_is_activity_main)
 
     val toolbar: Toolbar = findViewById(R.id.toolbar)
     setSupportActionBar(toolbar)

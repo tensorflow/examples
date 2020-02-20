@@ -70,7 +70,7 @@ public class QaActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     Log.v(TAG, "onCreate");
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_qa);
+    setContentView(R.layout.tfe_qa_activity_qa);
 
     // Get content of the selected dataset.
     int datasetPosition = getIntent().getIntExtra(DATASET_POSITION_KEY, -1);
