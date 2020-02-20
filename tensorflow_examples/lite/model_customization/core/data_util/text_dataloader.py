@@ -25,7 +25,7 @@ import tempfile
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core.data_util import dataloader
 import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
-from official.nlp.bert import classifier_data_lib
+from official.nlp.data import classifier_data_lib
 
 
 def load(tfrecord_file, meta_data_file, model_spec):
