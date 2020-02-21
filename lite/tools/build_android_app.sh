@@ -26,8 +26,6 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 # Keep a list of blacklisted android apps directories which should be excluded
 # from the builds.
 SKIPPED_BUILDS="
-image_segmentation/android
-style_transfer/android
 "
 
 function build_android_example {
