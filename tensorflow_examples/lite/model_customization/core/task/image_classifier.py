@@ -21,9 +21,9 @@ import tensorflow as tf # TF2
 
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import classification_model
+from tensorflow_examples.lite.model_customization.core.task import hub_loader
 import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
 
-import tensorflow_hub as hub
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as lib
 
 
@@ -119,7 +119,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     if hparams is None:
       hparams = self.hparams
 
-    module_layer = hub.KerasLayer(
+    module_layer = hub_loader.HubKerasLayerV1V2(
         self.model_spec.uri, trainable=hparams.do_fine_tuning)
     return lib.build_model(module_layer, hparams,
                            self.model_spec.input_image_shape, self.num_classes)
