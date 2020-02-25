@@ -24,7 +24,7 @@ import tempfile
 import numpy as np
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core import compat
-import tensorflow_examples.lite.model_customization.core.model_export_format as mef
+from tensorflow_examples.lite.model_customization.core import model_export_format as mef
 
 
 class ClassificationModel(abc.ABC):

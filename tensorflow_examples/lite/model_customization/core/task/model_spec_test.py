@@ -18,7 +18,7 @@ from __future__ import print_function
 
 import tensorflow as tf # TF2
 
-import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
+from tensorflow_examples.lite.model_customization.core.task import model_spec as ms
 
 
 class AverageWordVecModelSpecTest(tf.test.TestCase):

@@ -20,8 +20,8 @@ import os
 import numpy as np
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core import compat
+from tensorflow_examples.lite.model_customization.core import model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.data_util import image_dataloader
-import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import image_classifier
 from tensorflow_examples.lite.model_customization.core.task import model_spec
 
