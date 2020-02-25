@@ -18,8 +18,12 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import os
+import tempfile
+
 import numpy as np
 import tensorflow as tf # TF2
+from tensorflow_examples.lite.model_customization.core import compat
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 
 
@@ -129,7 +133,15 @@ class ClassificationModel(abc.ABC):
       label_filename: File name to save labels.
       quantized: boolean, if True, save quantized model.
     """
-    converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
+    if compat.get_tf_behavior() == 1:
+      with tempfile.TemporaryDirectory() as temp_dir:
+        save_path = os.path.join(temp_dir, 'saved_model')
+        self.model.save(save_path, include_optimizer=False, save_format='tf')
+        converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(
+            save_path)
+    else:
+      converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
+
     if quantized:
       converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
     tflite_model = converter.convert()

@@ -20,6 +20,7 @@ import os
 import numpy as np
 import tensorflow as tf # TF2
 
+from tensorflow_examples.lite.model_customization.core import compat
 from tensorflow_examples.lite.model_customization.core.data_util import text_dataloader
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import text_classifier
@@ -53,6 +54,19 @@ class TextClassifierTest(tf.test.TestCase):
     super(TextClassifierTest, self).setUp()
     self.text_dir = self._gen_text_dir()
 
+  @compat.test_in_tf_1
+  def test_average_wordvec_model_create_v1_incompatible(self):
+    with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
+      model_spec = ms.AverageWordVecModelSpec(seq_len=2)
+      all_data = text_dataloader.TextClassifierDataLoader.from_folder(
+          self.text_dir, model_spec=model_spec)
+      _ = text_classifier.create(
+          all_data,
+          mef.ModelExportFormat.TFLITE,
+          model_spec=model_spec,
+      )
+
+  @compat.test_in_tf_2
   def test_average_wordvec_model(self):
     model_spec = ms.AverageWordVecModelSpec(seq_len=2)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
@@ -137,5 +151,5 @@ class TextClassifierTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
+  compat.setup_tf_behavior(tf_version=2)
   tf.test.main()

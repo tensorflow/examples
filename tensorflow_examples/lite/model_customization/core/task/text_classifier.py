@@ -19,6 +19,8 @@ from __future__ import print_function
 
 
 import tensorflow as tf # TF2
+
+from tensorflow_examples.lite.model_customization.core import compat
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import classification_model
 import tensorflow_examples.lite.model_customization.core.task.model_spec as ms
@@ -45,6 +47,10 @@ def create(train_data,
   Returns:
     TextClassifier
   """
+  if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
+    raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
+        model_spec.compat_tf_versions, compat.get_tf_behavior()))
+
   text_classifier = TextClassifier(
       train_data,
       model_export_format,
@@ -136,16 +142,12 @@ class TextClassifier(classification_model.ClassificationModel):
       vocab_filename: File name to save vocabulary.
       **kwargs: Other parameters like `quantized` for tflite model.
     """
-    if self.model_export_format == mef.ModelExportFormat.TFLITE:
-      if 'quantized' in kwargs:
-        quantized = kwargs['quantized']
-      else:
-        quantized = False
-      self._export_tflite(tflite_filename, label_filename, vocab_filename,
-                          quantized)
-    else:
+    if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model export format %s is not supported currently.' %
-                       str(self.model_export_format))
+                       self.model_export_format)
+    quantized = kwargs.get('quantized', False)
+    self._export_tflite(tflite_filename, label_filename, vocab_filename,
+                        quantized)
 
   def _export_tflite(self,
                      tflite_filename,

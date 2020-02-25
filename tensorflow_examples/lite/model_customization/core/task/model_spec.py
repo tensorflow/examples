@@ -29,6 +29,22 @@ def create_int_feature(values):
   return feature
 
 
+def _get_compat_tf_versions(compat_tf_versions=None):
+  """Gets compatible tf versions (default: [2]).
+
+  Args:
+    compat_tf_versions: int, int list or None, indicates compatible versions.
+
+  Returns:
+    A list of compatible tf versions.
+  """
+  if compat_tf_versions is None:
+    compat_tf_versions = [2]
+  if not isinstance(compat_tf_versions, list):
+    compat_tf_versions = [compat_tf_versions]
+  return compat_tf_versions
+
+
 class ImageModelSpec(object):
   """A specification of image model."""
 
@@ -36,17 +52,22 @@ class ImageModelSpec(object):
   mean_rgb = [0, 0, 0]
   stddev_rgb = [255, 255, 255]
 
-  def __init__(self, uri):
+  def __init__(self, uri, compat_tf_versions=None):
     self.uri = uri
+    self.compat_tf_versions = _get_compat_tf_versions(compat_tf_versions)
+
 
 efficientnet_b0_spec = ImageModelSpec(
-    uri='https://tfhub.dev/google/efficientnet/b0/feature-vector/1')
+    uri='https://tfhub.dev/google/efficientnet/b0/feature-vector/1',
+    compat_tf_versions=[1, 2])
 
 mobilenet_v2_spec = ImageModelSpec(
-    uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4')
+    uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4',
+    compat_tf_versions=2)
 
 resnet_50_spec = ImageModelSpec(
-    uri='https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4')
+    uri='https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4',
+    compat_tf_versions=2)
 
 
 class TextModelSpec(abc.ABC):
@@ -113,6 +134,8 @@ class AverageWordVecModelSpec(TextModelSpec):
   START = '<START>'  # Index: 1
   UNKNOWN = '<UNKNOWN>'  # Index: 2
 
+  compat_tf_versions = _get_compat_tf_versions(2)
+
   def __init__(self,
                num_words=10000,
                seq_len=256,
@@ -172,6 +195,7 @@ class AverageWordVecModelSpec(TextModelSpec):
     """Creates classifier and runs the classifier training."""
     # Gets a classifier model.
     model = tf.keras.Sequential([
+        tf.keras.layers.InputLayer(input_shape=[self.seq_len]),
         tf.keras.layers.Embedding(
             len(self.vocab), self.wordvec_dim, input_length=self.seq_len),
         tf.keras.layers.GlobalAveragePooling1D(),

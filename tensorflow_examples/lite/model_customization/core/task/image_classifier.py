@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import tensorflow as tf # TF2
 
+from tensorflow_examples.lite.model_customization.core import compat
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import classification_model
 from tensorflow_examples.lite.model_customization.core.task import hub_loader
@@ -57,6 +58,10 @@ def create(train_data,
   Returns:
     An instance of ImageClassifier class.
   """
+  if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
+    raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
+        model_spec.compat_tf_versions, compat.get_tf_behavior()))
+
   # The hyperparameters for make_image_classifier by tensorflow hub.
   hparams = lib.get_default_hparams()
   if batch_size is not None:
@@ -116,8 +121,7 @@ class ImageClassifier(classification_model.ClassificationModel):
 
   def _create_model(self, hparams=None):
     """Creates the classifier model for retraining."""
-    if hparams is None:
-      hparams = self.hparams
+    hparams = self._get_hparams_or_default(hparams)
 
     module_layer = hub_loader.HubKerasLayerV1V2(
         self.model_spec.uri, trainable=hparams.do_fine_tuning)
@@ -140,8 +144,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
     """
-    if hparams is None:
-      hparams = self.hparams
+    hparams = self._get_hparams_or_default(hparams)
 
     train_ds = self._gen_dataset(
         train_data, hparams.batch_size, is_training=True)
@@ -179,12 +182,12 @@ class ImageClassifier(classification_model.ClassificationModel):
       label_filename: File name to save labels.
       **kwargs: Other parameters like `quantized` for TFLITE model.
     """
-    if self.model_export_format == mef.ModelExportFormat.TFLITE:
-      if 'quantized' in kwargs:
-        quantized = kwargs['quantized']
-      else:
-        quantized = False
-      self._export_tflite(tflite_filename, label_filename, quantized)
-    else:
+    if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model Export Format %s is not supported currently.' %
-                       str(self.model_export_format))
+                       self.model_export_format)
+    quantized = kwargs.get('quantized', False)
+    self._export_tflite(tflite_filename, label_filename, quantized)
+
+  def _get_hparams_or_default(self, hparams):
+    """Returns hparams if not none, otherwise uses default one."""
+    return hparams if hparams else self.hparams

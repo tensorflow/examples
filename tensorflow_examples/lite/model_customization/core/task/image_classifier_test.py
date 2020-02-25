@@ -19,6 +19,7 @@ from __future__ import print_function
 import os
 import numpy as np
 import tensorflow as tf # TF2
+from tensorflow_examples.lite.model_customization.core import compat
 from tensorflow_examples.lite.model_customization.core.data_util import image_dataloader
 import tensorflow_examples.lite.model_customization.core.model_export_format as mef
 from tensorflow_examples.lite.model_customization.core.task import image_classifier
@@ -58,6 +59,7 @@ class ImageClassifierTest(tf.test.TestCase):
     # Splits data, 90% data for training, 10% for testing
     self.train_data, self.test_data = all_data.split(0.9)
 
+  @compat.test_in_tf_2
   def test_mobilenetv2_model(self):
     model = image_classifier.create(
         self.train_data,
@@ -70,31 +72,50 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite(model)
     self._test_predict_top_k(model)
 
+  @compat.test_in_tf_1
+  def test_mobilenetv2_model_create_v1_incompatible(self):
+    with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
+      _ = image_classifier.create(self.train_data, mef.ModelExportFormat.TFLITE,
+                                  model_spec.mobilenet_v2_spec)
+
+  @compat.test_in_tf_1and2
   def test_efficientnetb0_model(self):
     model = image_classifier.create(
         self.train_data,
         mef.ModelExportFormat.TFLITE,
         model_spec.efficientnet_b0_spec,
-        epochs=5,
+        epochs=2,
         batch_size=4,
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
 
-  def _test_predict_top_k(self, model):
+  @compat.test_in_tf_2
+  def test_resnet_50_model(self):
+    model = image_classifier.create(
+        self.train_data,
+        mef.ModelExportFormat.TFLITE,
+        model_spec.resnet_50_spec,
+        epochs=2,
+        batch_size=4,
+        shuffle=True)
+    self._test_accuracy(model)
+    self._test_export_to_tflite(model)
+
+  def _test_predict_top_k(self, model, threshold=0.7):
     topk = model.predict_top_k(self.test_data, batch_size=4)
     for i, (_, label) in enumerate(self.test_data.dataset):
       predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
       self.assertEqual(model.index_to_label[label], predict_label)
-      self.assertGreater(predict_prob, 0.7)
+      self.assertGreater(predict_prob, threshold)
 
-  def _test_accuracy(self, model):
+  def _test_accuracy(self, model, threashold=0.8):
     _, accuracy = model.evaluate(self.test_data)
-    self.assertEqual(accuracy, 1.0)
+    self.assertGreater(accuracy, threashold)
 
   def _load_labels(self, filename):
     with tf.io.gfile.GFile(filename, 'r') as f:
-      return [label.strip('\n') for label in f]
+      return [label.strip() for label in f]
 
   def _load_lite_model(self, filename):
     self.assertTrue(os.path.isfile(filename))
@@ -119,15 +140,34 @@ class ImageClassifierTest(tf.test.TestCase):
     labels = self._load_labels(labels_output_file)
     self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
     lite_model = self._load_lite_model(tflite_output_file)
-    for i, (class_name, rgb) in enumerate(self.CMY_NAMES_AND_RGB_VALUES):
-      input_batch = tf.constant(_fill_image(rgb, self.IMAGE_SIZE))
-      input_batch = model.preprocess(input_batch, i)[0]
-      input_batch = tf.expand_dims(input_batch, 0).numpy()
-      output_batch = lite_model(input_batch)
-      prediction = labels[np.argmax(output_batch[0])]
-      self.assertEqual(class_name, prediction)
+
+    if compat.get_tf_behavior() == 1:
+      image_placeholder = tf.compat.v1.placeholder(
+          tf.uint8, [1, self.IMAGE_SIZE, self.IMAGE_SIZE, 3])
+      label_placeholder = tf.compat.v1.placeholder(tf.int32, [1])
+      image_tensor, _ = model.preprocess(image_placeholder, label_placeholder)
+      with tf.compat.v1.Session() as sess:
+        for i, (class_name, rgb) in enumerate(self.CMY_NAMES_AND_RGB_VALUES):
+          input_image = np.expand_dims(_fill_image(rgb, self.IMAGE_SIZE), 0)
+          image = sess.run(
+              image_tensor,
+              feed_dict={
+                  image_placeholder: input_image,
+                  label_placeholder: [i]
+              })
+          output_batch = lite_model(image)
+          prediction = labels[np.argmax(output_batch[0])]
+          self.assertEqual(class_name, prediction)
+    else:
+      for i, (class_name, rgb) in enumerate(self.CMY_NAMES_AND_RGB_VALUES):
+        input_batch = np.expand_dims(_fill_image(rgb, self.IMAGE_SIZE), 0)
+        image, _ = model.preprocess(input_batch, i)
+        image = image.numpy()
+        output_batch = lite_model(image)
+        prediction = labels[np.argmax(output_batch[0])]
+        self.assertEqual(class_name, prediction)
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
+  compat.setup_tf_behavior(tf_version=2)
   tf.test.main()
