@@ -26,6 +26,18 @@ import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core import compat
 from tensorflow_examples.lite.model_customization.core import model_export_format as mef
 
+DEFAULT_QUANTIZATION_STEPS = 2000
+
+
+def get_representative_dataset_gen(dataset, num_steps):
+
+  def representative_dataset_gen():
+    """Generates representative dataset for quantized."""
+    for image, _ in dataset.take(num_steps):
+      yield [image]
+
+  return representative_dataset_gen
+
 
 class ClassificationModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
@@ -125,13 +137,22 @@ class ClassificationModel(abc.ABC):
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
 
-  def _export_tflite(self, tflite_filename, label_filename, quantized=False):
+  def _export_tflite(self,
+                     tflite_filename,
+                     label_filename,
+                     quantized=False,
+                     quantization_steps=None,
+                     representative_data=None):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filename: File name to save tflite model.
       label_filename: File name to save labels.
       quantized: boolean, if True, save quantized model.
+      quantization_steps: Number of post-training quantization calibration steps
+        to run. Used only if `quantized` is True.
+      representative_data: Representative data used for post-training
+        quantization. Used only if `quantized` is True.
     """
     if compat.get_tf_behavior() == 1:
       with tempfile.TemporaryDirectory() as temp_dir:
@@ -143,7 +164,22 @@ class ClassificationModel(abc.ABC):
       converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
 
     if quantized:
-      converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+      if quantization_steps is None:
+        quantization_steps = DEFAULT_QUANTIZATION_STEPS
+      if representative_data is None:
+        raise ValueError(
+            'representative_data couldn\'t be None if model is quantized.')
+      ds = self._gen_dataset(
+          representative_data, batch_size=1, is_training=False)
+      converter.representative_dataset = tf.lite.RepresentativeDataset(
+          get_representative_dataset_gen(ds, quantization_steps))
+
+      converter.optimizations = [tf.lite.Optimize.DEFAULT]
+      converter.inference_input_type = tf.uint8
+      converter.inference_output_type = tf.uint8
+      converter.target_spec.supported_ops = [
+          tf.lite.OpsSet.TFLITE_BUILTINS_INT8
+      ]
     tflite_model = converter.convert()
 
     with tf.io.gfile.GFile(tflite_filename, 'wb') as f:

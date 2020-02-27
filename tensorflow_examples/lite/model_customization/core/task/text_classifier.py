@@ -36,7 +36,7 @@ def create(train_data,
   """Loads data and train the model for test classification.
 
   Args:
-    train_data: Raw data for training.
+    train_data: Training data.
     model_export_format: Model export format such as saved_model / tflite.
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
@@ -52,7 +52,6 @@ def create(train_data,
         model_spec.compat_tf_versions, compat.get_tf_behavior()))
 
   text_classifier = TextClassifier(
-      train_data,
       model_export_format,
       model_spec,
       train_data.index_to_label,
@@ -69,7 +68,6 @@ class TextClassifier(classification_model.ClassificationModel):
   """TextClassifier class for inference and exporting to tflite."""
 
   def __init__(self,
-               train_data,
                model_export_format,
                model_spec,
                index_to_label,
@@ -78,7 +76,6 @@ class TextClassifier(classification_model.ClassificationModel):
     """Init function for TextClassifier class.
 
     Args:
-      train_data: Raw data for training.
       model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
@@ -133,36 +130,30 @@ class TextClassifier(classification_model.ClassificationModel):
 
     return self.model
 
-  def export(self, tflite_filename, label_filename, vocab_filename, **kwargs):
+  def export(self,
+             tflite_filename,
+             label_filename,
+             vocab_filename,
+             quantized=False,
+             quantization_steps=None,
+             representative_data=None):
     """Converts the retrained model based on `model_export_format`.
 
     Args:
       tflite_filename: File name to save tflite model.
       label_filename: File name to save labels.
       vocab_filename: File name to save vocabulary.
-      **kwargs: Other parameters like `quantized` for tflite model.
+      quantized: boolean, if True, save quantized model.
+      quantization_steps: Number of post-training quantization calibration steps
+        to run. Used only if `quantized` is True.
+      representative_data: Representative data used for post-training
+        quantization. Used only if `quantized` is True.
     """
     if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model export format %s is not supported currently.' %
                        self.model_export_format)
-    quantized = kwargs.get('quantized', False)
-    self._export_tflite(tflite_filename, label_filename, vocab_filename,
-                        quantized)
 
-  def _export_tflite(self,
-                     tflite_filename,
-                     label_filename,
-                     vocab_filename,
-                     quantized=False):
-    """Converts the retrained model to tflite format and saves it.
-
-    Args:
-      tflite_filename: File name to save tflite model.
-      label_filename: File name to save labels.
-      vocab_filename: File name to save vocabulary.
-      quantized: boolean, if True, save quantized model.
-    """
-    super(TextClassifier, self)._export_tflite(
-        tflite_filename, label_filename, quantized=quantized)
+    self._export_tflite(tflite_filename, label_filename, quantized,
+                        quantization_steps, representative_data)
 
     self.model_spec.save_vocab(vocab_filename)

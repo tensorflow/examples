@@ -174,19 +174,28 @@ class ImageClassifier(classification_model.ClassificationModel):
     label = tf.one_hot(label, depth=self.num_classes)
     return image, label
 
-  def export(self, tflite_filename, label_filename, **kwargs):
+  def export(self,
+             tflite_filename,
+             label_filename,
+             quantized=False,
+             quantization_steps=None,
+             representative_data=None):
     """Converts the retrained model based on `model_export_format`.
 
     Args:
       tflite_filename: File name to save tflite model.
       label_filename: File name to save labels.
-      **kwargs: Other parameters like `quantized` for TFLITE model.
+      quantized: boolean, if True, save quantized model.
+      quantization_steps: Number of post-training quantization calibration steps
+        to run. Used only if `quantized` is True.
+      representative_data: Representative data used for post-training
+        quantization. Used only if `quantized` is True.
     """
     if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model Export Format %s is not supported currently.' %
                        self.model_export_format)
-    quantized = kwargs.get('quantized', False)
-    self._export_tflite(tflite_filename, label_filename, quantized)
+    self._export_tflite(tflite_filename, label_filename, quantized,
+                        quantization_steps, representative_data)
 
   def _get_hparams_or_default(self, hparams):
     """Returns hparams if not none, otherwise uses default one."""

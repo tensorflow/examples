@@ -71,6 +71,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
     self._test_predict_top_k(model)
+    self._test_export_to_tflite_quantized(model, self.train_data)
 
   @compat.test_in_tf_1
   def test_mobilenetv2_model_create_v1_incompatible(self):
@@ -166,6 +167,21 @@ class ImageClassifierTest(tf.test.TestCase):
         output_batch = lite_model(image)
         prediction = labels[np.argmax(output_batch[0])]
         self.assertEqual(class_name, prediction)
+
+  def _test_export_to_tflite_quantized(self, model, representative_data):
+    # Just test whether quantization will crash, can't guarantee the result.
+    tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
+    labels_output_file = os.path.join(self.get_temp_dir(), 'label')
+    model.export(
+        tflite_output_file,
+        labels_output_file,
+        quantized=True,
+        representative_data=representative_data)
+    self.assertTrue(
+        os.path.isfile(tflite_output_file) and
+        os.path.getsize(tflite_output_file) > 0)
+    labels = self._load_labels(labels_output_file)
+    self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
 
 
 if __name__ == '__main__':
