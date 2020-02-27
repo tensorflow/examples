@@ -47,10 +47,10 @@ def get_test_data_path(file_or_dirname):
 class HubKerasLayerV1V2Test(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
-      (("v1_implicit_tags", "hub_module_v1_mini"), ("trainable", True)),
-      (("v2_implicit_tags", "saved_model_v2_mini"), ("trainable", True)),
-      (("v1_implicit_tags", "hub_module_v1_mini"), ("trainable", False)),
-      (("v2_implicit_tags", "saved_model_v2_mini"), ("trainable", False)),
+      ("hub_module_v1_mini", True),
+      ("saved_model_v2_mini", True),
+      ("hub_module_v1_mini", False),
+      ("saved_model_v2_mini", False),
   )
   def test_load_with_defaults(self, module_name, trainable):
     inputs, expected_outputs = 10., 11.  # Test modules perform increment op.

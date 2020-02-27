@@ -24,7 +24,7 @@ PYTHON_BIN="$(which python3.7)"
 PIP_BIN="$(which pip3.7)"
 PIP_OPTIONS="--user"
 
-function test_pip_setup {
+function test_pip_install {
   if [[ "${PYTHON_BIN}" == "" ]]; then
     echo "python is not available."
     exit 1
@@ -34,7 +34,7 @@ function test_pip_setup {
     exit 1
   fi
 
-  echo "=== TEST SETUP STARTED IN: ${WORKSPACE_DIR} ==="
+  echo "=== TEST PIP INSTASLL IN: ${WORKSPACE_DIR} ==="
 
   pushd "${WORKSPACE_DIR}" > /dev/null
 
@@ -46,19 +46,36 @@ function test_pip_setup {
   echo "--- End of setup.py ---"
 
   # Run pip install.
-  ${PIP_BIN} install -e .[model_customization] ${PIP_OPTIONS}
-
-  # Dry run to import the package
-  ${PYTHON_BIN} -c "import tensorflow_examples"
-
-  # Uninstall tensorflow-examples
-  yes | ${PIP_BIN} uninstall tensorflow-examples
+  ${PIP_BIN} install -e .[model_customization,tests] ${PIP_OPTIONS}
 
   popd > /dev/null
-
-  echo "=== TEST SETUP FINISHED IN: ${WORKSPACE_DIR} ==="
   echo
   echo
 }
 
-test_pip_setup
+function test_model_maker() {
+  TEST_DIR="tensorflow_examples/lite/model_customization"
+
+  echo "=== BEGIN UNIT TESTS FOR: ${TEST_DIR} ==="
+  pushd "${WORKSPACE_DIR}" > /dev/null
+
+  # Set environment variables: test_srcdir for unit tests; and the run tests
+  # at the root directory.
+  TEST_SRCDIR=${WORKSPACE_DIR} ${PYTHON_BIN?} -m unittest discover -s ${TEST_DIR} -t . -p "*_test.py"
+
+  popd > /dev/null
+  echo "=== END UNIT TESTS: ${TEST_DIR} ==="
+  echo
+  echo
+}
+
+function test_pip_uninstall() {
+  echo "=== TO UNINSTASLL PACKAGE ==="
+  yes | ${PIP_BIN} uninstall tensorflow-examples
+  echo
+  echo
+}
+
+test_pip_install
+test_model_maker
+test_pip_uninstall

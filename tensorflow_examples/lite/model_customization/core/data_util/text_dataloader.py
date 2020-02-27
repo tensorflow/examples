@@ -25,7 +25,12 @@ import tempfile
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core.data_util import dataloader
 from tensorflow_examples.lite.model_customization.core.task import model_spec as ms
-from official.nlp.data import classifier_data_lib
+
+try:
+  from official.nlp.data import classifier_data_lib  # pylint: disable=g-import-not-at-top
+except ImportError:
+  # TODO(tianlin): Use old package temporarily. To fix with a consistent path.
+  from official.nlp.bert import classifier_data_lib  # pylint: disable=g-import-not-at-top
 
 
 def load(tfrecord_file, meta_data_file, model_spec):
