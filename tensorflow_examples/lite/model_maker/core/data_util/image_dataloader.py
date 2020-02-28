@@ -21,7 +21,7 @@ import os
 import random
 
 import tensorflow as tf # TF2
-from tensorflow_examples.lite.model_customization.core.data_util import dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 
 
 def load_image(path):

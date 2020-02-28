@@ -17,22 +17,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf # TF2
+from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.task import text_classifier_test
 
-from tensorflow_examples.lite.model_customization.core.task import model_spec as ms
 
-
-class AverageWordVecModelSpecTest(tf.test.TestCase):
-
-  def test_tokenize(self):
-    model_spec = ms.AverageWordVecModelSpec()
-    text = model_spec._tokenize('It\'s really good.')
-    self.assertEqual(text, ['it\'s', 'really', 'good'])
-
-    model_spec = ms.AverageWordVecModelSpec(lowercase=False)
-    text = model_spec._tokenize('That is so cool!!!')
-    self.assertEqual(text, ['That', 'is', 'so', 'cool'])
+class TextClassifierV1Test(text_classifier_test.TextClassifierTest):
+  """Share text tests of the base class, but in tf v1 behavior."""
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
+  compat.setup_tf_behavior(tf_version=1)
   tf.test.main()

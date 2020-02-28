@@ -20,11 +20,11 @@ import os
 import numpy as np
 import tensorflow as tf # TF2
 
-from tensorflow_examples.lite.model_customization.core import compat
-from tensorflow_examples.lite.model_customization.core import model_export_format as mef
-from tensorflow_examples.lite.model_customization.core.data_util import text_dataloader
-from tensorflow_examples.lite.model_customization.core.task import model_spec as ms
-from tensorflow_examples.lite.model_customization.core.task import text_classifier
+from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core import model_export_format as mef
+from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
+from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
+from tensorflow_examples.lite.model_maker.core.task import text_classifier
 
 
 class TextClassifierTest(tf.test.TestCase):

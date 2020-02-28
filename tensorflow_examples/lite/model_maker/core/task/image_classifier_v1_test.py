@@ -17,8 +17,8 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf # TF2
-from tensorflow_examples.lite.model_customization.core import compat
-from tensorflow_examples.lite.model_customization.core.task import image_classifier_test
+from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.task import image_classifier_test
 
 
 class ImageClassifierV1Test(image_classifier_test.ImageClassifierTest):

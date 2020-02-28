@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Image classification demo code of model customization for TFLite."""
+"""Image classification demo code of Model Maker for TFLite."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,10 +22,10 @@ from absl import flags
 from absl import logging
 
 import tensorflow as tf # TF2
-from tensorflow_examples.lite.model_customization.core.data_util.image_dataloader import ImageClassifierDataLoader
-from tensorflow_examples.lite.model_customization.core.model_export_format import ModelExportFormat
-from tensorflow_examples.lite.model_customization.core.task import image_classifier
-from tensorflow_examples.lite.model_customization.core.task.model_spec import efficientnet_b0_spec
+from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.model_export_format import ModelExportFormat
+from tensorflow_examples.lite.model_maker.core.task import image_classifier
+from tensorflow_examples.lite.model_maker.core.task.model_spec import efficientnet_b0_spec
 
 flags.DEFINE_string('tflite_filename', None, 'File name to save tflite model.')
 flags.DEFINE_string('label_filename', None, 'File name to save labels.')

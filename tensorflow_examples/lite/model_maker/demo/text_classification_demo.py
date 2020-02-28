@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Text classification demo code of model customization for TFLite."""
+"""Text classification demo code of Model Maker for TFLite."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -24,9 +24,9 @@ from absl import flags
 from absl import logging
 
 import tensorflow as tf # TF2
-from tensorflow_examples.lite.model_customization.core.data_util.text_dataloader import TextClassifierDataLoader
-from tensorflow_examples.lite.model_customization.core.task import text_classifier
-from tensorflow_examples.lite.model_customization.core.task.model_spec import BertModelSpec
+from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.task import text_classifier
+from tensorflow_examples.lite.model_maker.core.task.model_spec import BertModelSpec
 
 flags.DEFINE_string('tflite_filename', None, 'File name to save tflite model.')
 flags.DEFINE_string('label_filename', None, 'File name to save labels.')

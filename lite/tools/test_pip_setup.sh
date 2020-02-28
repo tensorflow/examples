@@ -46,7 +46,7 @@ function test_pip_install {
   echo "--- End of setup.py ---"
 
   # Run pip install.
-  ${PIP_BIN} install -e .[model_customization,tests] ${PIP_OPTIONS}
+  ${PIP_BIN} install -e .[model_maker,tests] ${PIP_OPTIONS}
 
   popd > /dev/null
   echo
@@ -54,7 +54,7 @@ function test_pip_install {
 }
 
 function test_model_maker() {
-  TEST_DIR="tensorflow_examples/lite/model_customization"
+  TEST_DIR="tensorflow_examples/lite/model_maker"
 
   echo "=== BEGIN UNIT TESTS FOR: ${TEST_DIR} ==="
   pushd "${WORKSPACE_DIR}" > /dev/null

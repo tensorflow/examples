@@ -22,8 +22,8 @@ import os
 
 import numpy as np
 import tensorflow as tf # TF2
-from tensorflow_examples.lite.model_customization.core.data_util import dataloader
-from tensorflow_examples.lite.model_customization.core.task import model_spec as ms
+from tensorflow_examples.lite.model_maker.core.data_util import dataloader
+from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
 
 class DataLoaderTest(tf.test.TestCase):

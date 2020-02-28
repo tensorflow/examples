@@ -1,20 +1,20 @@
-# TFLite model customization
+# TFLite Model Maker
 
 ## Overview
 
-The TFLite model customization library simplifies the process of adapting and
-converting a TensorFlow neural-network model to particular input data when
-deploying this model for on-device ML applications.
+The TFLite Model Maker library simplifies the process of adapting and converting
+a TensorFlow neural-network model to particular input data when deploying this
+model for on-device ML applications.
 
 ## Requirements
 
 * Refer to
-[requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_customization/requirements.txt)
+[requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/requirements.txt)
 for dependent libraries that're needed to use the library and run the demo code.
 
 ## Installation
 
-Two alternative methods to install the model customization library.
+Two alternative methods to install Model Maker library.
 
 * Clone the repo and then add the path to the repo in PYTHONPATH.
 
@@ -63,6 +63,6 @@ model.export('flower_classifier.tflite', 'flower_label.txt')
 Currently, we support image classification and text classification tasks and
 provide demo code and colab for each of them in demo folder.
 
-* [Colab for image classification](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_customization/demo/image_classification.ipynb)
-* [Colab for text classfication](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_customization/demo/text_classification.ipynb)
+* [Colab for image classification](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/image_classification.ipynb)
+* [Colab for text classfication](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/text_classification.ipynb)
 
