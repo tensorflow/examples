@@ -8,12 +8,10 @@ deploying this model for on-device ML applications.
 
 ## Requirements
 
-*   Refer to
-    [requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_customization/requirements.txt)
-    for dependent libraries that're needed to use the library and run the demo
-    code.
-*   Requires to install the latest version of
-    [TensorFlow Official Models](https://www.tensorflow.org/code/tensorflow_models/official/).
+* Refer to
+[requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_customization/requirements.txt)
+for dependent libraries that're needed to use the library and run the demo code.
+
 ## Installation
 
 Two alternative methods to install the model customization library.
