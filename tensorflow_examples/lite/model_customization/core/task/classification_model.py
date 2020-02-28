@@ -66,7 +66,6 @@ class ClassificationModel(abc.ABC):
     self.num_classes = num_classes
     self.shuffle = shuffle
     self.train_whole_model = train_whole_model
-
     self.model = None
 
   @abc.abstractmethod
@@ -123,9 +122,20 @@ class ClassificationModel(abc.ABC):
 
     return label_prob
 
-  def _gen_dataset(self, data, batch_size=32, is_training=True):
+  def _gen_dataset(self,
+                   data,
+                   batch_size=32,
+                   is_training=True,
+                   input_pipeline_context=None):
     """Generates training / validation dataset."""
-    ds = data.dataset.map(
+    # The dataset is always sharded by number of hosts.
+    # num_input_pipelines is the number of hosts rather than number of cores.
+    ds = data.dataset
+    if input_pipeline_context and input_pipeline_context.num_input_pipelines > 1:
+      ds = ds.shard(input_pipeline_context.num_input_pipelines,
+                    input_pipeline_context.input_pipeline_id)
+
+    ds = ds.map(
         self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     if is_training:
@@ -142,7 +152,8 @@ class ClassificationModel(abc.ABC):
                      label_filename,
                      quantized=False,
                      quantization_steps=None,
-                     representative_data=None):
+                     representative_data=None,
+                     experimental_new_converter=False):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
@@ -153,6 +164,8 @@ class ClassificationModel(abc.ABC):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
+      experimental_new_converter: Experimental flag, subject to change. Enables
+        MLIR-based conversion instead of TOCO conversion.
     """
     if compat.get_tf_behavior() == 1:
       with tempfile.TemporaryDirectory() as temp_dir:
@@ -180,6 +193,7 @@ class ClassificationModel(abc.ABC):
       converter.target_spec.supported_ops = [
           tf.lite.OpsSet.TFLITE_BUILTINS_INT8
       ]
+    converter.experimental_new_converter = experimental_new_converter
     tflite_model = converter.convert()
 
     with tf.io.gfile.GFile(tflite_filename, 'wb') as f:

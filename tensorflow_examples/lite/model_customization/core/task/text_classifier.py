@@ -41,7 +41,7 @@ def create(train_data,
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
     batch_size: Batch size for training.
-    epochs: Number of epochs for training.
+    epochs: Number of epochs for training. If None, default num_epoch is used.
     validation_data: Validation data. If None, skips validation process.
 
   Returns:
@@ -96,18 +96,23 @@ class TextClassifier(classification_model.ClassificationModel):
     # also moved to DataLoader part.
     return raw_text, label
 
-  def get_dataset_fn(self, input_data, batch_size, is_training):
+  def get_dataset_fn(self, input_data, global_batch_size, is_training):
     """Gets a closure to create a dataset."""
 
-    def _dataset_fn():
+    def _dataset_fn(ctx=None):
       """Returns tf.data.Dataset for text classifier retraining."""
+      batch_size = ctx.get_per_replica_batch_size(
+          global_batch_size) if ctx else global_batch_size
       dataset = self._gen_dataset(
-          input_data, batch_size, is_training=is_training)
+          input_data,
+          batch_size,
+          is_training=is_training,
+          input_pipeline_context=ctx)
       return dataset
 
     return _dataset_fn
 
-  def train(self, train_data, validation_data=None, epochs=2, batch_size=32):
+  def train(self, train_data, validation_data=None, epochs=None, batch_size=32):
     """Feeds the training data for training."""
 
     train_input_fn = self.get_dataset_fn(
@@ -136,7 +141,8 @@ class TextClassifier(classification_model.ClassificationModel):
              vocab_filename,
              quantized=False,
              quantization_steps=None,
-             representative_data=None):
+             representative_data=None,
+             experimental_new_converter=False):
     """Converts the retrained model based on `model_export_format`.
 
     Args:
@@ -148,12 +154,15 @@ class TextClassifier(classification_model.ClassificationModel):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
+      experimental_new_converter: Experimental flag, subject to change. Enables
+        MLIR-based conversion instead of TOCO conversion.
     """
     if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model export format %s is not supported currently.' %
                        self.model_export_format)
-
+    self.model_spec.set_shape(self.model)
     self._export_tflite(tflite_filename, label_filename, quantized,
-                        quantization_steps, representative_data)
+                        quantization_steps, representative_data,
+                        self.model_spec.experimental_new_converter)
 
     self.model_spec.save_vocab(vocab_filename)

@@ -26,7 +26,7 @@ from absl import logging
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_customization.core.data_util.text_dataloader import TextClassifierDataLoader
 from tensorflow_examples.lite.model_customization.core.task import text_classifier
-from tensorflow_examples.lite.model_customization.core.task.model_spec import AverageWordVecModelSpec
+from tensorflow_examples.lite.model_customization.core.task.model_spec import BertModelSpec
 
 flags.DEFINE_string('tflite_filename', None, 'File name to save tflite model.')
 flags.DEFINE_string('label_filename', None, 'File name to save labels.')
@@ -37,28 +37,38 @@ FLAGS = flags.FLAGS
 def main(_):
   logging.set_verbosity(logging.INFO)
 
-  model_spec = AverageWordVecModelSpec()
-
   data_path = tf.keras.utils.get_file(
-      fname='aclImdb',
-      origin='http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz',
-      untar=True)
-  train_data = TextClassifierDataLoader.from_folder(
-      filename=os.path.join(os.path.join(data_path, 'train')),
-      model_spec=model_spec,
-      class_labels=['pos', 'neg'])
-  train_data, validation_data = train_data.split(0.9)
-  test_data = TextClassifierDataLoader.from_folder(
-      filename=os.path.join(data_path, 'test'),
-      model_spec=model_spec,
-      is_training=False)
+      fname='sst.tar.gz',
+      origin='https://firebasestorage.googleapis.com/v0/b/mtl-sentence-representations.appspot.com/o/data%2FSST-2.zip?alt=media&token=aabc5f6b-e466-44a2-b9b4-cf6337f84ac8',
+      extract=True)
+  data_path = os.path.join(os.path.dirname(data_path), 'SST-2')
 
+  # Chooses model specification that represents model.
+  model_spec = BertModelSpec()
+
+  # Gets training data and validation data.
+  train_data = TextClassifierDataLoader.from_csv(
+      filename=os.path.join(os.path.join(data_path, 'train.tsv')),
+      text_column='sentence',
+      label_column='label',
+      model_spec=model_spec,
+      delimiter='\t')
+  validation_data = TextClassifierDataLoader.from_csv(
+      filename=os.path.join(os.path.join(data_path, 'dev.tsv')),
+      text_column='sentence',
+      label_column='label',
+      model_spec=model_spec,
+      delimiter='\t')
+
+  # Fine-tunes the model.
   model = text_classifier.create(
       train_data, model_spec=model_spec, validation_data=validation_data)
 
-  _, acc = model.evaluate(test_data)
-  print('\nTest accuracy: %f' % acc)
+  # Gets evaluation results.
+  _, acc = model.evaluate(validation_data)
+  print('Eval accuracy: %f' % acc)
 
+  # Exports to TFLite format.
   model.export(FLAGS.tflite_filename, FLAGS.label_filename,
                FLAGS.vocab_filename)
 
