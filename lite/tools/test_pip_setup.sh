@@ -23,6 +23,8 @@ WORKSPACE_DIR="$(realpath "${SCRIPT_DIR}/../..")"
 PYTHON_BIN="$(which python3.7)"
 PIP_BIN="$(which pip3.7)"
 PIP_OPTIONS="--user"
+# For pip install with --user, add pip local bin directory is in path.
+export PATH=$PATH:~/.local/bin/
 
 function test_pip_install {
   if [[ "${PYTHON_BIN}" == "" ]]; then
