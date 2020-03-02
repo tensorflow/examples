@@ -83,7 +83,7 @@ class DataLoader(object):
     self.dataset = dataset
     self.size = size
 
-  def split(self, fraction, shuffle=True):
+  def split(self, fraction):
     """Splits dataset into two sub-datasets with the given fraction.
 
     Primarily used for splitting the data set into training and testing sets.
@@ -91,17 +91,11 @@ class DataLoader(object):
     Args:
       fraction: float, demonstrates the fraction of the first returned
         subdataset in the original data.
-      shuffle: boolean, indicates whether to randomly shufflerandomly shuffle
-        the data before splitting.
 
     Returns:
       The splitted two sub dataset.
     """
-    if shuffle:
-      ds = self.dataset.shuffle(
-          buffer_size=self.size, reshuffle_each_iteration=False)
-    else:
-      ds = self.dataset
+    ds = self.dataset
 
     train_size = int(self.size * fraction)
     trainset = DataLoader(ds.take(train_size), train_size)

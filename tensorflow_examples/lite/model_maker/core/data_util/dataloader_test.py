@@ -35,7 +35,7 @@ class DataLoaderTest(tf.test.TestCase):
   def test_split(self):
     ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
     data = dataloader.DataLoader(ds, 4)
-    train_data, test_data = data.split(0.5, shuffle=False)
+    train_data, test_data = data.split(0.5)
 
     self.assertEqual(train_data.size, 2)
     for i, elem in enumerate(train_data.dataset):
