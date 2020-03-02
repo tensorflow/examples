@@ -85,6 +85,27 @@ class ImageDataLoaderTest(tf.test.TestCase):
             os.path.join(self.image_path, 'tulips', '0.jpeg'))
       self.assertTrue((image.numpy() == raw_image_tensor.numpy()).all())
 
+  def test_load_from_tfds(self):
+    train_data, validation_data, test_data = image_dataloader.load_from_tfds(
+        'beans')
+    self.assertIsInstance(train_data.dataset, tf.data.Dataset)
+    self.assertEqual(train_data.size, 1034)
+    self.assertEqual(train_data.num_classes, 3)
+    self.assertEqual(train_data.index_to_label,
+                     ['angular_leaf_spot', 'bean_rust', 'healthy'])
+
+    self.assertIsInstance(validation_data.dataset, tf.data.Dataset)
+    self.assertEqual(validation_data.size, 133)
+    self.assertEqual(validation_data.num_classes, 3)
+    self.assertEqual(validation_data.index_to_label,
+                     ['angular_leaf_spot', 'bean_rust', 'healthy'])
+
+    self.assertIsInstance(test_data.dataset, tf.data.Dataset)
+    self.assertEqual(test_data.size, 128)
+    self.assertEqual(test_data.num_classes, 3)
+    self.assertEqual(test_data.index_to_label,
+                     ['angular_leaf_spot', 'bean_rust', 'healthy'])
+
 
 if __name__ == '__main__':
   assert tf.__version__.startswith('2')
