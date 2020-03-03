@@ -16,8 +16,21 @@ limitations under the License.
 package org.tensorflow.lite.examples.transfer;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.ConditionVariable;
+
+import androidx.annotation.RequiresApi;
+
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -39,11 +52,32 @@ public class TransferLearningModelWrapper implements Closeable {
 
   private final ConditionVariable shouldTrain = new ConditionVariable();
   private volatile LossConsumer lossConsumer;
+  private final String model_filename = "tflite-tl-trained.bin";
+
+  private FileOutputStream modelOutputStream;
+
+  private boolean fileExists(Context context, String filename) {
+    File file = context.getFileStreamPath(filename);
+    if(file == null || !file.exists()) {
+      return false;
+    }
+    return true;
+  }
 
   TransferLearningModelWrapper(Context context) {
     model =
         new TransferLearningModel(
-            new AssetModelLoader(context, "model"), Arrays.asList("1", "2", "3", "4"));
+                new AssetModelLoader(context, "model"), Arrays.asList("1", "2", "3", "4"));
+
+    try {
+      modelOutputStream = context.openFileOutput(model_filename, Context.MODE_PRIVATE);
+      if (fileExists(context, model_filename)) {
+        FileInputStream inputStream = context.openFileInput(model_filename);
+        model.loadParameters(inputStream.getChannel());
+      }
+    } catch(IOException e){
+      throw new RuntimeException("Exception occurred during model loading" + e, e.getCause());
+    }
 
     new Thread(() -> {
       while (!Thread.interrupted()) {
@@ -51,7 +85,7 @@ public class TransferLearningModelWrapper implements Closeable {
         try {
           model.train(1, lossConsumer).get();
         } catch (ExecutionException e) {
-          throw new RuntimeException("Exception occurred during model training", e.getCause());
+          throw new RuntimeException("Exception occurred during model training " + e, e.getCause());
         } catch (InterruptedException e) {
           // no-op
         }
@@ -89,6 +123,12 @@ public class TransferLearningModelWrapper implements Closeable {
    */
   public void disableTraining() {
     shouldTrain.close();
+    try {
+      model.saveParameters(modelOutputStream.getChannel());
+      modelOutputStream.flush();
+    } catch (IOException e) {
+      throw new RuntimeException("Exception occurred during model saving " + e, e.getCause());
+    }
   }
 
   /** Frees all model resources and shuts down all background threads. */

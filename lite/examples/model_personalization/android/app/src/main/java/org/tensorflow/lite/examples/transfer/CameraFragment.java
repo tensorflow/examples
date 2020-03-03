@@ -15,6 +15,8 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.transfer;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -34,28 +36,41 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.camera.core.AspectRatio;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
 import androidx.camera.core.CameraX;
-import androidx.camera.core.CameraX.LensFacing;
 import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageAnalysis.ImageReaderMode;
-import androidx.camera.core.ImageAnalysisConfig;
+import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.ImageProxy.PlaneProxy;
 import androidx.camera.core.Preview;
-import androidx.camera.core.PreviewConfig;
+import androidx.camera.core.impl.ImageAnalysisConfig;
+import androidx.camera.core.impl.PreviewConfig;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.tensorflow.lite.examples.transfer.api.TransferLearningModel.Prediction;
 import org.tensorflow.lite.examples.transfer.databinding.CameraFragmentBinding;
 
@@ -71,11 +86,10 @@ public class CameraFragment extends Fragment {
 
   private static final String TAG = CameraFragment.class.getSimpleName();
 
-  private static final LensFacing LENS_FACING = LensFacing.BACK;
-
-  private TextureView viewFinder;
+  private PreviewView viewFinder;
 
   private Integer viewFinderRotation = null;
+  private int lensFacing = CameraSelector.LENS_FACING_BACK;
 
   private Size bufferDimens = new Size(0, 0);
   private Size viewFinderDimens = new Size(0, 0);
@@ -90,6 +104,21 @@ public class CameraFragment extends Fragment {
 
   private final LoggingBenchmark inferenceBenchmark = new LoggingBenchmark("InferenceBench");
 
+  private ExecutorService cameraExecutor = Executors.newFixedThreadPool(1);
+
+  private Integer rotation;
+
+  private final double RATIO_4_3_VALUE = 4.0 / 3.0;
+  private final double RATIO_16_9_VALUE = 16.0 / 9.0;
+
+  private int aspectRatio(int width, int height) {
+    final double previewRatio = (double)Math.max(width, height) / (double)Math.min(width, height);
+    if (Math.abs(previewRatio - RATIO_4_3_VALUE) <= Math.abs(previewRatio - RATIO_16_9_VALUE)) {
+      return AspectRatio.RATIO_4_3;
+    }
+    return AspectRatio.RATIO_16_9;
+  }
+
   /**
    * Set up a responsive preview for the view finder.
    */
@@ -101,55 +130,65 @@ public class CameraFragment extends Fragment {
 
     DisplayMetrics metrics = new DisplayMetrics();
     viewFinder.getDisplay().getRealMetrics(metrics);
-    Rational screenAspectRatio = new Rational(metrics.widthPixels, metrics.heightPixels);
 
-    PreviewConfig config = new PreviewConfig.Builder()
-        .setLensFacing(LENS_FACING)
-        .setTargetAspectRatio(screenAspectRatio)
-        .setTargetRotation(viewFinder.getDisplay().getRotation())
-        .build();
+    int screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels);
+    rotation = getDisplaySurfaceRotation(viewFinder.getDisplay());
 
-    Preview preview = new Preview(config);
+    CameraSelector cameraSelector = new CameraSelector.Builder()
+            .requireLensFacing(lensFacing).build();
+    ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
+            ProcessCameraProvider.getInstance(requireContext());
 
-    preview.setOnPreviewOutputUpdateListener(previewOutput -> {
-      ViewGroup parent = (ViewGroup) viewFinder.getParent();
-      parent.removeView(viewFinder);
-      parent.addView(viewFinder, 0);
+    cameraProviderFuture.addListener(()->{
 
-      viewFinder.setSurfaceTexture(previewOutput.getSurfaceTexture());
+      // CameraProvider
+      ProcessCameraProvider cameraProvider = null;
+      try {
+        cameraProvider = cameraProviderFuture.get();
+      } catch (ExecutionException e) {
+        e.printStackTrace();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
 
-      Integer rotation = getDisplaySurfaceRotation(viewFinder.getDisplay());
-      updateTransform(rotation, previewOutput.getTextureSize(), viewFinderDimens);
-    });
+      // Preview
+      Preview preview = new Preview.Builder()
+              // We request aspect ratio but no resolution
+              .setTargetAspectRatio(screenAspectRatio)
+              // Set initial target rotation
+              .setTargetRotation(rotation)
+              .build();
 
-    viewFinder.addOnLayoutChangeListener((
-        view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-      Size newViewFinderDimens = new Size(right - left, bottom - top);
-      Integer rotation = getDisplaySurfaceRotation(viewFinder.getDisplay());
-      updateTransform(rotation, bufferDimens, newViewFinderDimens);
-    });
+      // Attach the viewfinder's surface provider to preview use case
+      preview.setSurfaceProvider(viewFinder.getPreviewSurfaceProvider());
 
-    HandlerThread inferenceThread = new HandlerThread("InferenceThread");
-    inferenceThread.start();
-    ImageAnalysisConfig analysisConfig = new ImageAnalysisConfig.Builder()
-        .setLensFacing(LENS_FACING)
-        .setCallbackHandler(new Handler(inferenceThread.getLooper()))
-        .setImageReaderMode(ImageReaderMode.ACQUIRE_LATEST_IMAGE)
-        .setTargetRotation(viewFinder.getDisplay().getRotation())
-        .build();
+      ImageAnalysis imageAnalyzer = new ImageAnalysis.Builder()
+              .setTargetAspectRatio(screenAspectRatio)
+              .setTargetRotation(rotation)
+              .build();
+      imageAnalyzer.setAnalyzer(cameraExecutor, inferenceAnalyzer);
 
-    ImageAnalysis imageAnalysis = new ImageAnalysis(analysisConfig);
-    imageAnalysis.setAnalyzer(inferenceAnalyzer);
+      // Must unbind the use-cases before rebinding them
+      cameraProvider.unbindAll();
 
-    CameraX.bindToLifecycle(this, preview, imageAnalysis);
+      try {
+        // A variable number of use-cases can be passed here -
+        // camera provides access to CameraControl & CameraInfo
+        Camera camera = cameraProvider.bindToLifecycle(
+                this, cameraSelector, preview, imageAnalyzer);
+      } catch(Exception e) {
+        Log.e(TAG, "Use case binding failed", e);
+      }
+
+    }, ContextCompat.getMainExecutor(requireContext()));
   }
 
   private final ImageAnalysis.Analyzer inferenceAnalyzer =
-      (imageProxy, rotationDegrees) -> {
+      (imageProxy) -> {
         final String imageId = UUID.randomUUID().toString();
 
         inferenceBenchmark.startStage(imageId, "preprocess");
-        float[] rgbImage = prepareCameraImage(yuvCameraImageToBitmap(imageProxy), rotationDegrees);
+        float[] rgbImage = prepareCameraImage(yuvCameraImageToBitmap(imageProxy), rotation);
         inferenceBenchmark.endStage(imageId, "preprocess");
 
         // Adding samples is also handled by inference thread / use case.
@@ -184,6 +223,7 @@ public class CameraFragment extends Fragment {
           }
         }
 
+        imageProxy.close();
         inferenceBenchmark.finish(imageId);
       };
 
@@ -203,69 +243,6 @@ public class CameraFragment extends Fragment {
 
     addSampleRequests.add(className);
   };
-
-  /**
-   * Fit the camera preview into [viewFinder].
-   *
-   * @param rotation view finder rotation.
-   * @param newBufferDimens camera preview dimensions.
-   * @param newViewFinderDimens view finder dimensions.
-   */
-  private void updateTransform(Integer rotation, Size newBufferDimens, Size newViewFinderDimens) {
-    if (Objects.equals(rotation, viewFinderRotation)
-      && Objects.equals(newBufferDimens, bufferDimens)
-      && Objects.equals(newViewFinderDimens, viewFinderDimens)) {
-      return;
-    }
-
-    if (rotation == null) {
-      return;
-    } else {
-      viewFinderRotation = rotation;
-    }
-
-    if (newBufferDimens.getWidth() == 0 || newBufferDimens.getHeight() == 0) {
-      return;
-    } else {
-      bufferDimens = newBufferDimens;
-    }
-
-    if (newViewFinderDimens.getWidth() == 0 || newViewFinderDimens.getHeight() == 0) {
-      return;
-    } else {
-      viewFinderDimens = newViewFinderDimens;
-    }
-
-    Log.d(TAG, String.format("Applying output transformation.\n"
-        + "View finder size: %s.\n"
-        + "Preview output size: %s\n"
-        + "View finder rotation: %s\n", viewFinderDimens, bufferDimens, viewFinderRotation));
-    Matrix matrix = new Matrix();
-
-    float centerX = viewFinderDimens.getWidth() / 2f;
-    float centerY = viewFinderDimens.getHeight() / 2f;
-
-    matrix.postRotate(-viewFinderRotation.floatValue(), centerX, centerY);
-
-    float bufferRatio = bufferDimens.getHeight() / (float) bufferDimens.getWidth();
-
-    int scaledWidth;
-    int scaledHeight;
-    if (viewFinderDimens.getWidth() > viewFinderDimens.getHeight()) {
-      scaledHeight = viewFinderDimens.getWidth();
-      scaledWidth = Math.round(viewFinderDimens.getWidth() * bufferRatio);
-    } else {
-      scaledHeight = viewFinderDimens.getHeight();
-      scaledWidth = Math.round(viewFinderDimens.getHeight() * bufferRatio);
-    }
-
-    float xScale = scaledWidth / (float) viewFinderDimens.getWidth();
-    float yScale = scaledHeight / (float) viewFinderDimens.getHeight();
-
-    matrix.preScale(xScale, yScale, centerX, centerY);
-
-    viewFinder.setTransform(matrix);
-  }
 
   @Override
   public void onCreate(Bundle bundle) {
