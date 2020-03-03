@@ -16,7 +16,7 @@
       android:layout_height="match_parent"
       tools:context="com.google.learning.brain.mobile.transfer.android.MainActivity">
 
-    <TextureView
+    <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
