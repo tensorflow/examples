@@ -14,18 +14,20 @@ for dependent libraries that're needed to use the library and run the demo code.
 
 ## Installation
 
-Two alternative methods to install Model Maker library.
+Two alternative methods to install Model Maker library with its dependencies.
 
-* Clone the repo and then add the path to the repo in PYTHONPATH.
+*   Install directly.
+
+```shell
+pip install git+https://github.com/tensorflow/examples.git#egg=tensorflow-examples[model_maker]
+```
+
+*   Clone the repo from the HEAD, and then install with pip.
 
 ```shell
 git clone https://github.com/tensorflow/examples
-```
-
-* Install directly.
-
-```shell
-pip install git+https://github.com/tensorflow/examples
+cd examples
+pip install .[model_maker]
 ```
 
 ## End-to-End Example
