@@ -74,10 +74,10 @@ public abstract class Classifier {
   /** Image size along the y axis. */
   private final int imageSizeY;
 
-  /** Optional GPU delegate for accleration. */
+  /** Optional GPU delegate for acceleration. */
   private GpuDelegate gpuDelegate = null;
 
-  /** Optional NNAPI delegate for accleration. */
+  /** Optional NNAPI delegate for acceleration. */
   private NnApiDelegate nnApiDelegate = null;
 
   /** An instance of the driver class to run model inference with Tensorflow Lite. */
