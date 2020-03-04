@@ -21,6 +21,22 @@ import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
 
+class ModelSpecTest(tf.test.TestCase):
+
+  def test_get(self):
+    spec = ms.get('mobilenet_v2')
+    self.assertIsInstance(spec, ms.ImageModelSpec)
+
+    spec = ms.get('average_word_vec')
+    self.assertIsInstance(spec, ms.TextModelSpec)
+
+    spec = ms.get(ms.mobilenet_v2_spec)
+    self.assertEqual(spec, ms.mobilenet_v2_spec)
+
+    with self.assertRaises(KeyError):
+      ms.get('not_exist_model_spec')
+
+
 class AverageWordVecModelSpecTest(tf.test.TestCase):
 
   def test_tokenize(self):

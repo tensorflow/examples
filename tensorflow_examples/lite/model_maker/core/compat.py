@@ -17,8 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import functools
-
 import tensorflow as tf # TF2
 
 _DEFAULT_TF_BEHAVIOR = 2
@@ -52,44 +50,3 @@ def get_tf_behavior():
   """
   return _tf_behavior_version
 
-
-def test_in_tf_1(fn):
-  """Decorator to test in tf 1 behaviors."""
-
-  @functools.wraps(fn)
-  def decorator(*args, **kwargs):
-    if get_tf_behavior() != 1:
-      tf.compat.v1.logging.info('Skip function {} for test_in_tf_1'.format(
-          fn.__name__))
-      return
-    fn(*args, **kwargs)
-
-  return decorator
-
-
-def test_in_tf_2(fn):
-  """Decorator to test in tf 2 behaviors."""
-
-  @functools.wraps(fn)
-  def decorator(*args, **kwargs):
-    if get_tf_behavior() != 2:
-      tf.compat.v1.logging.info('Skip function {} for test_in_tf_2'.format(
-          fn.__name__))
-      return
-    fn(*args, **kwargs)
-
-  return decorator
-
-
-def test_in_tf_1and2(fn):
-  """Decorator to test in tf 1 and 2 behaviors."""
-
-  @functools.wraps(fn)
-  def decorator(*args, **kwargs):
-    if get_tf_behavior() not in [1, 2]:
-      tf.compat.v1.logging.info('Skip function {} for test_in_tf_1and2'.format(
-          fn.__name__))
-      return
-    fn(*args, **kwargs)
-
-  return decorator

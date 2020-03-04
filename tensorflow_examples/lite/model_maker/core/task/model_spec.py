@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import abc
 import collections
+import inspect
 import re
 import tempfile
 
@@ -90,17 +91,13 @@ resnet_50_spec = ImageModelSpec(
 class TextModelSpec(abc.ABC):
   """The abstract base class that constains the specification of text model."""
 
-  def __init__(self, need_gen_vocab, experimental_new_converter=False):
+  def __init__(self, experimental_new_converter=False):
     """Initialization function for TextClassifier class.
 
     Args:
-      need_gen_vocab: If true, needs to generate vocabulary from input data
-        using `gen_vocab` function. Otherwise, loads vocab from text model
-        assets.
       experimental_new_converter: Experimental flag, subject to change. Enables
         MLIR-based conversion instead of TOCO conversion.
     """
-    self.need_gen_vocab = need_gen_vocab
     self.experimental_new_converter = experimental_new_converter
 
   @abc.abstractmethod
@@ -159,6 +156,7 @@ class AverageWordVecModelSpec(TextModelSpec):
   UNKNOWN = '<UNKNOWN>'  # Index: 2
 
   compat_tf_versions = _get_compat_tf_versions(2)
+  need_gen_vocab = True
 
   def __init__(self,
                num_words=10000,
@@ -180,7 +178,6 @@ class AverageWordVecModelSpec(TextModelSpec):
         MLIR-based conversion instead of TOCO conversion.
     """
     super(AverageWordVecModelSpec, self).__init__(
-        need_gen_vocab=True,
         experimental_new_converter=experimental_new_converter)
     self.num_words = num_words
     self.seq_len = seq_len
@@ -331,6 +328,7 @@ class BertModelSpec(TextModelSpec):
   """A specification of BERT model."""
 
   compat_tf_versions = _get_compat_tf_versions(2)
+  need_gen_vocab = False
 
   def __init__(
       self,
@@ -345,6 +343,7 @@ class BertModelSpec(TextModelSpec):
       distribution_strategy='mirrored',
       num_gpus=-1,
       tpu='',
+      trainable=True,
       experimental_new_converter=True,
   ):
     """Initialze an instance with model paramaters.
@@ -371,11 +370,11 @@ class BertModelSpec(TextModelSpec):
         DistributionStrategies API. The default is -1, which means utilize all
         available GPUs.
       tpu: TPU address to connect to.
+      trainable: boolean, whether pretrain layer is trainable.
       experimental_new_converter: Experimental flag, subject to change. Enables
         MLIR-based conversion instead of TOCO conversion.
     """
     super(BertModelSpec, self).__init__(
-        need_gen_vocab=False,
         experimental_new_converter=experimental_new_converter)
     self.seq_len = seq_len
     self.dropout_rate = dropout_rate
@@ -395,10 +394,11 @@ class BertModelSpec(TextModelSpec):
         tpu_address=tpu)
 
     self.uri = uri
-    self.bert_model = hub.KerasLayer(uri, trainable=True)
-    self.vocab_file = self.bert_model.resolved_object.vocab_file.asset_path.numpy(
-    )
-    self.do_lower_case = self.bert_model.resolved_object.do_lower_case.numpy()
+    self.bert_model = hub.KerasLayer(uri, trainable=trainable)
+
+    resolved_object = self.bert_model.resolved_object
+    self.vocab_file = resolved_object.vocab_file.asset_path.numpy()
+    self.do_lower_case = resolved_object.do_lower_case.numpy()
 
     self.tokenizer = tokenization.FullTokenizer(self.vocab_file,
                                                 self.do_lower_case)
@@ -527,3 +527,26 @@ class BertModelSpec(TextModelSpec):
     """Sets the input model shape. Used in tflite conveter for BatchMatMul."""
     for model_input in model.inputs:
       model_input.set_shape((1, self.seq_len))
+
+
+# A dict for model specs to make it accessible by string key.
+MODEL_SPECS = {
+    'efficientnet_b0': efficientnet_b0_spec,
+    'mobilenet_v2': mobilenet_v2_spec,
+    'resnet_50': resnet_50_spec,
+    'average_word_vec': AverageWordVecModelSpec,
+    'bert': BertModelSpec,
+}
+
+
+def get(spec_or_str):
+  """Gets model spec by name or instance, and initializes by default."""
+  if isinstance(spec_or_str, str):
+    model_spec = MODEL_SPECS[spec_or_str]
+  else:
+    model_spec = spec_or_str
+
+  if inspect.isclass(model_spec):
+    return model_spec()
+  else:
+    return model_spec

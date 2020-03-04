@@ -21,6 +21,7 @@ import numpy as np
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
+from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
@@ -59,7 +60,7 @@ class ImageClassifierTest(tf.test.TestCase):
     # Splits data, 90% data for training, 10% for testing
     self.train_data, self.test_data = all_data.split(0.9)
 
-  @compat.test_in_tf_2
+  @test_util.test_in_tf_2
   def test_mobilenetv2_model(self):
     model = image_classifier.create(
         self.train_data,
@@ -73,13 +74,13 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_predict_top_k(model)
     self._test_export_to_tflite_quantized(model, self.train_data)
 
-  @compat.test_in_tf_1
+  @test_util.test_in_tf_1
   def test_mobilenetv2_model_create_v1_incompatible(self):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
       _ = image_classifier.create(self.train_data, mef.ModelExportFormat.TFLITE,
                                   model_spec.mobilenet_v2_spec)
 
-  @compat.test_in_tf_1and2
+  @test_util.test_in_tf_1and2
   def test_efficientnetb0_model(self):
     model = image_classifier.create(
         self.train_data,
@@ -91,7 +92,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
 
-  @compat.test_in_tf_2
+  @test_util.test_in_tf_2
   def test_resnet_50_model(self):
     model = image_classifier.create(
         self.train_data,
