@@ -65,7 +65,7 @@ class ImageClassificationDemoTest(tf.test.TestCase):
             data_dir,
             tflite_filename,
             label_filename,
-            spec='mobilenet_v2',
+            spec='efficientnet_b0',
             epochs=1)
         self.assertTrue(tf.io.gfile.exists(tflite_filename))
         self.assertTrue(tf.io.gfile.exists(label_filename))

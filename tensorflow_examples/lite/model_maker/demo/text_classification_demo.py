@@ -67,13 +67,15 @@ def run(data_dir,
       text_column='sentence',
       label_column='label',
       model_spec=spec,
-      delimiter='\t')
+      delimiter='\t',
+      is_training=True)
   validation_data = TextClassifierDataLoader.from_csv(
       filename=os.path.join(os.path.join(data_dir, 'dev.tsv')),
       text_column='sentence',
       label_column='label',
       model_spec=spec,
-      delimiter='\t')
+      delimiter='\t',
+      is_training=False)
 
   # Fine-tunes the model.
   model = text_classifier.create(

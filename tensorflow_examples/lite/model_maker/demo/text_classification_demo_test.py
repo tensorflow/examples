@@ -31,7 +31,7 @@ def get_cache_dir():
   return os.path.join(test_util.get_test_data_path('demo'), 'testdata')
 
 
-from_folder_fn = TextClassifierDataLoader.from_folder
+from_csv_fn = TextClassifierDataLoader.from_csv
 
 
 def patch_data_loader():
@@ -39,14 +39,14 @@ def patch_data_loader():
 
   def side_effect(*args, **kwargs):
     tf.compat.v1.logging.info('Train on partial dataset')
-    data_loader = from_folder_fn(*args, **kwargs)
+    data_loader = from_csv_fn(*args, **kwargs)
     if data_loader.size > 8:  # Trim dataset to at most 8.
       data_loader.size = 8
       data_loader.dataset = data_loader.dataset.take(data_loader.size)
     return data_loader
 
   return patch.object(
-      TextClassifierDataLoader, 'from_folder', side_effect=side_effect)
+      TextClassifierDataLoader, 'from_csv', side_effect=side_effect)
 
 
 class TextClassificationDemoTest(tf.test.TestCase):
@@ -62,16 +62,16 @@ class TextClassificationDemoTest(tf.test.TestCase):
         tflite_filename = os.path.join(temp_dir, 'model.tflite')
         label_filename = os.path.join(temp_dir, 'label.txt')
         vocab_filename = os.path.join(temp_dir, 'vocab.txt')
-        # TODO(b/150597348): To fix the exception raised in training.
-        with self.assertRaises(Exception):
-          text_classification_demo.run(
-              data_dir,
-              tflite_filename,
-              label_filename,
-              vocab_filename,
-              spec='average_word_vec',
-              epochs=1,
-              batch_size=1)
+        # TODO(b/150597348): Bert model is out of memory when export to tflite.
+        # Changed to a smaller bert models like mobilebert later for unittest.
+        text_classification_demo.run(
+            data_dir,
+            tflite_filename,
+            label_filename,
+            vocab_filename,
+            spec='average_word_vec',
+            epochs=1,
+            batch_size=1)
 
 
 if __name__ == '__main__':
