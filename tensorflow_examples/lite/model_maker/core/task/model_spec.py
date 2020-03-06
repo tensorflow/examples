@@ -545,6 +545,10 @@ MODEL_SPECS = {
     'bert': BertModelSpec,
 }
 
+# List constants for supported models.
+IMAGE_CLASSIFICATION_MODELS = ['efficientnet_b0', 'mobilenet_v2', 'resnet_50']
+TEXT_CLASSIFICATION_MODELS = ['bert', 'average_word_vec']
+
 
 def get(spec_or_str):
   """Gets model spec by name or instance, and initializes by default."""

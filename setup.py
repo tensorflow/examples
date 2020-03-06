@@ -84,6 +84,11 @@ setup(
         'tests': TESTS_REQUIRE,
         'model_maker': MODEL_MAKER_REQUIRE,
     },
+    entry_points={
+        'console_scripts': [
+            'model_maker=tensorflow_examples.lite.model_maker.cli.cli:main',
+        ],
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

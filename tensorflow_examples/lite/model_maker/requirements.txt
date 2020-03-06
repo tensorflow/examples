@@ -5,3 +5,4 @@ tf-models-official==2.1.0.dev2
 pillow
 sentencepiece
 tensorflow-datasets>=2.1.0
+fire
