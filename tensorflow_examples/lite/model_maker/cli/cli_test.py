@@ -58,10 +58,10 @@ class CLITest(parameterized.TestCase):
     with patch_image() as run, patch_setup() as setup:
       cli.main()
       setup.assert_called_once_with(expected_tf)
-      run.assert_called_once_with('data', 'lite', 'label', 'efficientnet_b0')
+      run.assert_called_once_with('data', 'lite', 'label', 'efficientnet_lite0')
 
   @parameterized.parameters(
-      ([], ['efficientnet_b0'], {}),
+      ([], ['efficientnet_lite0'], {}),
       (['--spec=mobilenet_v2'], ['mobilenet_v2'], {}),
       (['--spec=mobilenet_v2', '--epochs=1'], ['mobilenet_v2'], dict(epochs=1)),
   )

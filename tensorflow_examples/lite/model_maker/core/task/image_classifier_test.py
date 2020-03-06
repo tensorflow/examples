@@ -81,11 +81,23 @@ class ImageClassifierTest(tf.test.TestCase):
                                   model_spec.mobilenet_v2_spec)
 
   @test_util.test_in_tf_1and2
-  def test_efficientnetb0_model(self):
+  def test_efficientnetlite0_model(self):
     model = image_classifier.create(
         self.train_data,
         mef.ModelExportFormat.TFLITE,
-        model_spec.efficientnet_b0_spec,
+        model_spec.efficientnet_lite0_spec,
+        epochs=2,
+        batch_size=4,
+        shuffle=True)
+    self._test_accuracy(model)
+    self._test_export_to_tflite(model)
+
+  @test_util.test_in_tf_1and2
+  def test_efficientnetlite4_model(self):
+    model = image_classifier.create(
+        self.train_data,
+        mef.ModelExportFormat.TFLITE,
+        model_spec.efficientnet_lite4_spec,
         epochs=2,
         batch_size=4,
         shuffle=True)

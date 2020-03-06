@@ -30,7 +30,7 @@ from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib
 
 def create(train_data,
            model_export_format=mef.ModelExportFormat.TFLITE,
-           model_spec=ms.mobilenet_v2_spec,
+           model_spec=ms.efficientnet_lite0_spec,
            shuffle=False,
            validation_data=None,
            batch_size=None,

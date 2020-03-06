@@ -52,7 +52,7 @@ def download_demo_data(**kwargs):
 def run(data_dir,
         tflite_filename,
         label_filename,
-        spec='efficientnet_b0',
+        spec='efficientnet_lite0',
         **kwargs):
   """Runs demo."""
   spec = model_spec.get(spec)

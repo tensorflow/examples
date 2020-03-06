@@ -54,7 +54,7 @@ class ModelMakerCLI(object):
                            data_dir,
                            tflite_filename,
                            label_filename,
-                           spec='efficientnet_b0',
+                           spec='efficientnet_lite0',
                            **kwargs):
     """Run Image classification.
 
@@ -62,7 +62,7 @@ class ModelMakerCLI(object):
       data_dir: str, input directory of training data. (required)
       tflite_filename: str, output path to export tflite file. (required)
       label_filename: str, output path to export label file. (required)
-      spec: str, model_name. Valid: {MODELS}, default: efficientnet_b0.
+      spec: str, model_name. Valid: {MODELS}, default: efficientnet_lite0.
       **kwargs: --epochs: int, epoch num to run. More: see `create` function.
     """
     # Convert types
