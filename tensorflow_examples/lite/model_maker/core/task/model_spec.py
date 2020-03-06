@@ -157,6 +157,7 @@ class AverageWordVecModelSpec(TextModelSpec):
 
   compat_tf_versions = _get_compat_tf_versions(2)
   need_gen_vocab = True
+  default_training_epochs = 2
 
   def __init__(self,
                num_words=10000,
@@ -219,6 +220,9 @@ class AverageWordVecModelSpec(TextModelSpec):
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
     """Creates classifier and runs the classifier training."""
+    if epochs is None:
+      epochs = self.default_training_epochs
+
     # Gets a classifier model.
     model = tf.keras.Sequential([
         tf.keras.layers.InputLayer(input_shape=[self.seq_len]),
@@ -329,6 +333,7 @@ class BertModelSpec(TextModelSpec):
 
   compat_tf_versions = _get_compat_tf_versions(2)
   need_gen_vocab = False
+  default_training_epochs = 3
 
   def __init__(
       self,
@@ -449,6 +454,8 @@ class BertModelSpec(TextModelSpec):
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
     """Creates classifier and runs the classifier training."""
+    if epochs is None:
+      epochs = self.default_training_epochs
 
     bert_config = bert_configs.BertConfig(
         0,

@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import os
 
-from absl import app
 from absl import flags
 from absl import logging
 
@@ -99,4 +98,4 @@ def main(_):
 if __name__ == '__main__':
   assert tf.__version__.startswith('2')
   define_flags()
-  app.run(main)
+  tf.compat.v1.app.run(main)
