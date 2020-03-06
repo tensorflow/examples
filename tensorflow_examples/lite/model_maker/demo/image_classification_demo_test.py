@@ -40,8 +40,8 @@ def patch_data_loader():
   def side_effect(*args, **kwargs):
     tf.compat.v1.logging.info('Train on partial dataset')
     data_loader = from_folder_fn(*args, **kwargs)
-    if data_loader.size > 512:  # Trim dataset to at most 512.
-      data_loader.size = 512
+    if data_loader.size > 10:  # Trim dataset to at most 10.
+      data_loader.size = 10
       data_loader.dataset = data_loader.dataset.take(data_loader.size)
     return data_loader
 
@@ -66,7 +66,8 @@ class ImageClassificationDemoTest(tf.test.TestCase):
             tflite_filename,
             label_filename,
             spec='efficientnet_b0',
-            epochs=1)
+            epochs=1,
+            batch_size=1)
         self.assertTrue(tf.io.gfile.exists(tflite_filename))
         self.assertTrue(tf.io.gfile.exists(label_filename))
 

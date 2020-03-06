@@ -40,8 +40,8 @@ def patch_data_loader():
   def side_effect(*args, **kwargs):
     tf.compat.v1.logging.info('Train on partial dataset')
     data_loader = from_csv_fn(*args, **kwargs)
-    if data_loader.size > 8:  # Trim dataset to at most 8.
-      data_loader.size = 8
+    if data_loader.size > 2:  # Trim dataset to at most 2.
+      data_loader.size = 2
       data_loader.dataset = data_loader.dataset.take(data_loader.size)
     return data_loader
 
