@@ -146,7 +146,14 @@ def process_record_dataset(dataset,
   dataset = parse_dataset_record(dataset, is_training, dtype)
   dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
+  # Operations between the final prefetch and the get_next call to the iterator
+  # will happen synchronously during run time. We prefetch here again to
+  # background all of the above processing work and keep it out of the
+  # critical training path. Setting buffer_size to tf.data.experimental.AUTOTUNE
+  # allows DistributionStrategies to adjust how many batches to fetch based
+  # on how many devices are present.
   dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+
   options = tf.data.Options()
   options.experimental_slack = tf_data_experimental_slack
   dataset = dataset.with_options(options)
