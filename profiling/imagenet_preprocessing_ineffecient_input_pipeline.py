@@ -70,6 +70,30 @@ CHANNEL_MEANS = [_R_MEAN, _G_MEAN, _B_MEAN]
 _RESIZE_MIN = 256
 
 
+def parse_dataset_record(dataset,is_training, dtype)
+  """ Parses the records into images and labels.
+
+  Args:
+    dataset: A Dataset representing raw records.
+    is_training: A boolean denoting whether is the input is for training.
+    dtype: Data type to use for images/features.
+
+  Returns:
+    Dataset of (image, label) pairs.
+  """
+
+  # BEGIN_DEOPTIMIZE
+  # Remove data autotuning
+  # dataset = dataset.map(
+  #    lambda value: parse_record_fn(value, is_training, dtype),
+  #    num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  # END_DEOPTIMIZE
+
+  dataset.map(
+      lambda value: parse_record_fn(value, is_training, dtype))
+  return dataset
+
+
 def process_record_dataset(dataset,
                            is_training,
                            batch_size,
@@ -119,30 +143,10 @@ def process_record_dataset(dataset,
     dataset = dataset.repeat()
 
   # Parses the raw records into images and labels.
-
-  # BEGIN_DEOPTIMIZE
-  # Remove data autotuning
-  # dataset = dataset.map(
-  #    lambda value: parse_record_fn(value, is_training, dtype),
-  #    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  # END_DEOPTIMIZE
-
-  dataset = dataset.map(
-      lambda value: parse_record_fn(value, is_training, dtype))
+  dataset = parse_dataset_record(dataset, is_training, dtype)
   dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
-  # Operations between the final prefetch and the get_next call to the iterator
-  # will happen synchronously during run time. We prefetch here again to
-  # background all of the above processing work and keep it out of the
-  # critical training path. Setting buffer_size to tf.data.experimental.AUTOTUNE
-  # allows DistributionStrategies to adjust how many batches to fetch based
-  # on how many devices are present.
-
-  # BEGIN_DEOPTIMIZE
-  # Remove the prefetch
-  # dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-  # END_DEOPTIMIZE
-
+  dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
   options = tf.data.Options()
   options.experimental_slack = tf_data_experimental_slack
   dataset = dataset.with_options(options)
@@ -348,15 +352,10 @@ def input_fn(is_training,
   # parallel. You may want to increase this number if you have a large number of
   # CPU cores.
 
-  # BEGIN_DEOPTIMIZE
-  # Deoptimization by removing cycle length and data autotining
-  # dataset = dataset.interleave(
-  #    tf.data.TFRecordDataset,
-  #    cycle_length=10,
-  #    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  # END_DEOPTIMIZE
-
-  dataset = dataset.interleave(tf.data.TFRecordDataset)
+  dataset = dataset.interleave(
+      tf.data.TFRecordDataset,
+      cycle_length=10,
+      num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
   if is_training and training_dataset_cache:
     # Improve training performance when training data is in remote storage and
