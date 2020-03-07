@@ -70,7 +70,7 @@ CHANNEL_MEANS = [_R_MEAN, _G_MEAN, _B_MEAN]
 _RESIZE_MIN = 256
 
 
-def parse_dataset_record(dataset, is_training, dtype):
+def parse_dataset_record(dataset, is_training, parse_record_fn, dtype):
   """ Parses the records into images and labels.
 
   Args:
@@ -142,7 +142,7 @@ def process_record_dataset(dataset,
     dataset = dataset.repeat()
 
   # Parses the raw records into images and labels.
-  dataset = parse_dataset_record(dataset, is_training, dtype)
+  dataset = parse_dataset_record(dataset, is_training, parse_record_fn, dtype)
   dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
   # Operations between the final prefetch and the get_next call to the iterator
