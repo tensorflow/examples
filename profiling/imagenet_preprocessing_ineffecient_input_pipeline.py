@@ -76,6 +76,8 @@ def parse_dataset_record(dataset, is_training, parse_record_fn, dtype):
   Args:
     dataset: A Dataset representing raw records.
     is_training: A boolean denoting whether is the input is for training.
+    parse_record_fn: A function that takes a raw record and returns the
+      corresponding (image, label) pair.
     dtype: Data type to use for images/features.
 
   Returns:
