@@ -119,16 +119,10 @@ def process_record_dataset(dataset,
     dataset = dataset.repeat()
 
   # Parses the raw records into images and labels.
-
-  # BEGIN_DEOPTIMIZE
-  # Remove data autotuning
-  # dataset = dataset.map(
-  #    lambda value: parse_record_fn(value, is_training, dtype),
-  #    num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  # END_DEOPTIMIZE
-
   dataset = dataset.map(
-      lambda value: parse_record_fn(value, is_training, dtype))
+      lambda value: parse_record_fn(value, is_training, dtype),
+      num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
   dataset = dataset.batch(batch_size, drop_remainder=drop_remainder)
 
   # Operations between the final prefetch and the get_next call to the iterator
