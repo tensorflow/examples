@@ -302,7 +302,7 @@ class DenseNet(tf.keras.Model):
 
     axis = -1 if self.data_format == "channels_last" else 1
 
-    # setting the filters and stride of the initial covn layer.
+    # setting the filters and stride of the initial conv layer.
     if self.pool_initial:
       init_filters = (7, 7)
       stride = (2, 2)
