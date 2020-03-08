@@ -34,7 +34,7 @@ from tensorflow.keras import initializers
 from tensorflow.keras import layers as tf_python_keras_layers
 from tensorflow.keras import models
 from tensorflow.keras import regularizers
-from examples.profiling import imagenet_preprocessing_ineffecient_input_pipeline
+from tensorflow_examples.profiling import imagenet_preprocessing_ineffecient_input_pipeline
 
 L2_WEIGHT_DECAY = 1e-4
 BATCH_NORM_DECAY = 0.9
