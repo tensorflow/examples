@@ -16,7 +16,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import filecmp
 import os
+
 import numpy as np
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_maker.core import compat
@@ -24,6 +26,7 @@ from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
+from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 
 
@@ -73,6 +76,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite(model)
     self._test_predict_top_k(model)
     self._test_export_to_tflite_quantized(model, self.train_data)
+    self._test_export_to_tflite_with_metadata(model)
 
   @test_util.test_in_tf_1
   def test_mobilenetv2_model_create_v1_incompatible(self):
@@ -183,18 +187,44 @@ class ImageClassifierTest(tf.test.TestCase):
 
   def _test_export_to_tflite_quantized(self, model, representative_data):
     # Just test whether quantization will crash, can't guarantee the result.
-    tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
+    tflite_output_file = os.path.join(self.get_temp_dir(),
+                                      'model_quantized.tflite')
     labels_output_file = os.path.join(self.get_temp_dir(), 'label')
     model.export(
         tflite_output_file,
         labels_output_file,
         quantized=True,
         representative_data=representative_data)
-    self.assertTrue(
-        os.path.isfile(tflite_output_file) and
-        os.path.getsize(tflite_output_file) > 0)
+    self.assertTrue(os.path.isfile(tflite_output_file))
+    self.assertGreater(os.path.getsize(tflite_output_file), 0)
     labels = self._load_labels(labels_output_file)
     self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
+
+  def _test_export_to_tflite_with_metadata(self, model):
+    model_name = 'model_with_metadata'
+    tflite_output_file = os.path.join(self.get_temp_dir(),
+                                      '%s.tflite' % model_name)
+    json_output_file = os.path.join(self.get_temp_dir(), '%s.json' % model_name)
+    labels_output_file = os.path.join(self.get_temp_dir(), 'label.txt')
+
+    model.export(
+        tflite_output_file,
+        labels_output_file,
+        with_metadata=True,
+        export_metadata_json_file=True)
+
+    self.assertTrue(os.path.isfile(tflite_output_file))
+    self.assertGreater(os.path.getsize(tflite_output_file), 0)
+
+    labels = self._load_labels(labels_output_file)
+    self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
+
+    if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
+      return
+
+    expected_json_file = test_util.get_test_data_path(
+        'mobilenet_v2_metadata.json')
+    self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
 
 if __name__ == '__main__':

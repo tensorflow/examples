@@ -35,9 +35,6 @@ from official.nlp.data import classifier_data_lib
 from official.utils.misc import distribution_utils
 
 
-DEFAULT_INPUT_IMAGE_SHAPE = [224, 224]
-
-
 def create_int_feature(values):
   feature = tf.train.Feature(int64_list=tf.train.Int64List(value=list(values)))
   return feature
@@ -69,49 +66,61 @@ def get_num_gpus(num_gpus):
 class ImageModelSpec(object):
   """A specification of image model."""
 
-  mean_rgb = [0, 0, 0]
-  stddev_rgb = [255, 255, 255]
+  mean_rgb = [0.0]
+  stddev_rgb = [255.0]
 
-  def __init__(self, uri, compat_tf_versions=None, input_image_shape=None):
+  def __init__(self,
+               uri,
+               compat_tf_versions=None,
+               input_image_shape=None,
+               name=''):
     self.uri = uri
     self.compat_tf_versions = _get_compat_tf_versions(compat_tf_versions)
+    self.name = name
 
-    self.input_image_shape = DEFAULT_INPUT_IMAGE_SHAPE
-    if input_image_shape is not None:
-      self.input_image_shape = input_image_shape
+    if input_image_shape is None:
+      input_image_shape = [224, 224]
+    self.input_image_shape = input_image_shape
 
 
 mobilenet_v2_spec = ImageModelSpec(
     uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4',
-    compat_tf_versions=2)
+    compat_tf_versions=2,
+    name='mobilenet_v2')
 
 resnet_50_spec = ImageModelSpec(
     uri='https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4',
-    compat_tf_versions=2)
+    compat_tf_versions=2,
+    name='resnet_50')
 
 efficientnet_lite0_spec = ImageModelSpec(
     uri='https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/1',
-    compat_tf_versions=[1, 2])
+    compat_tf_versions=[1, 2],
+    name='efficientnet_lite0')
 
 efficientnet_lite1_spec = ImageModelSpec(
     uri='https://tfhub.dev/tensorflow/efficientnet/lite1/feature-vector/1',
     compat_tf_versions=[1, 2],
-    input_image_shape=[240, 240])
+    input_image_shape=[240, 240],
+    name='efficientnet_lite1')
 
 efficientnet_lite2_spec = ImageModelSpec(
     uri='https://tfhub.dev/tensorflow/efficientnet/lite2/feature-vector/1',
     compat_tf_versions=[1, 2],
-    input_image_shape=[260, 260])
+    input_image_shape=[260, 260],
+    name='efficientnet_lite2')
 
 efficientnet_lite3_spec = ImageModelSpec(
     uri='https://tfhub.dev/tensorflow/efficientnet/lite3/feature-vector/1',
     compat_tf_versions=[1, 2],
-    input_image_shape=[280, 280])
+    input_image_shape=[280, 280],
+    name='efficientnet_lite3')
 
 efficientnet_lite4_spec = ImageModelSpec(
     uri='https://tfhub.dev/tensorflow/efficientnet/lite4/feature-vector/1',
     compat_tf_versions=[1, 2],
-    input_image_shape=[300, 300])
+    input_image_shape=[300, 300],
+    name='efficientnet_lite4')
 
 
 class TextModelSpec(abc.ABC):
