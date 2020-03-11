@@ -21,15 +21,15 @@ import os
 
 import tensorflow as tf # TF2
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
-import flatbuffers
 
 TFLITE_SUPPORT_TOOLS_INSTALLED = True
 
 try:
-  # pylint: disable=g-direct-tensorflow-import
-  from tflite_support import metadata as _metadata  # pylint: disable=g-import-not-at-top
-  from tflite_support import metadata_schema_py_generated as _metadata_fb  # pylint: disable=g-import-not-at-top
-  # pylint: enable=g-direct-tensorflow-import
+  # pylint: disable=g-direct-tensorflow-import,g-import-not-at-top
+  from tflite_support import flatbuffers
+  from tflite_support import metadata as _metadata
+  from tflite_support import metadata_schema_py_generated as _metadata_fb
+  # pylint: enable=g-direct-tensorflow-import,g-import-not-at-top
 except ImportError:
   tf.compat.v1.logging.warning("Needs to install tflite-support package.")
   TFLITE_SUPPORT_TOOLS_INSTALLED = False
