@@ -21,9 +21,7 @@ android {
         }
     }
     // TODO: Add an option to avoid compressing TF Lite model file
-    aaptOptions {
-        noCompress "tflite"
-    }
+
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -41,9 +39,7 @@ dependencies {
 
     // Build off of nightly TensorFlow Lite
     // TODO: Add TFLite dependencies
-    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
-    implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
-    implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
+
     // Use local TensorFlow library
     // implementation 'org.tensorflow:tensorflow-lite-local:0.0.0'
 }
