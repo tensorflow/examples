@@ -17,13 +17,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 keras_model = "../conv_1d_time_stacked_model/ep-084-vl-0.2595.hdf5"
 input_arrays = ["the_input"]
 output_arrays = ["the_output"]
 
-converter = tf.compat.v1.lite.TFLiteConverter
+converter = tf.lite.TFLiteConverter
 converter = converter.from_keras_model_file(keras_model, input_arrays,
                                             output_arrays)
 tflite_model = converter.convert()

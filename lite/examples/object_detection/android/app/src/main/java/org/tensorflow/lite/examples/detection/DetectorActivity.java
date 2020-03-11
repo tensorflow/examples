@@ -230,7 +230,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   @Override
   protected int getLayoutId() {
-    return R.layout.camera_connection_fragment_tracking;
+    return R.layout.tfe_od_camera_connection_fragment_tracking;
   }
 
   @Override

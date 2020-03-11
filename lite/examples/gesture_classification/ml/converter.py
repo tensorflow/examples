@@ -19,7 +19,7 @@ from __future__ import print_function
 import logging
 import os
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from keras import Model, Input
 from keras.applications import MobileNet
 from tensorflowjs.converters import load_keras_model
@@ -102,7 +102,7 @@ class ModelConverter:
     return base_model
 
   def _deserialize_tflite_from_keras(self):
-    converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(
+    converter = tf.lite.TFLiteConverter.from_keras_model_file(
         self.keras_model_file)
     tflite_model = converter.convert()
 

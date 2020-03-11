@@ -19,11 +19,12 @@ from __future__ import division
 from __future__ import print_function
 
 import datetime
+import os
 import subprocess
 import sys
 
-from setuptools import setup
 from setuptools import find_packages
+from setuptools import setup
 
 nightly = False
 if '--nightly' in sys.argv:
@@ -49,6 +50,10 @@ REQUIRED_PKGS = [
 TESTS_REQUIRE = [
     'jupyter',
 ]
+
+REQUIRMENTS = 'tensorflow_examples/lite/model_maker/requirements.txt'.replace('/', os.sep)
+with open(REQUIRMENTS) as f:
+  MODEL_MAKER_REQUIRE = [l.strip() for l in f.read().splitlines() if l.strip()]
 
 if sys.version_info.major == 3:
   # Packages only for Python 3
@@ -77,6 +82,12 @@ setup(
     install_requires=REQUIRED_PKGS,
     extras_require={
         'tests': TESTS_REQUIRE,
+        'model_maker': MODEL_MAKER_REQUIRE,
+    },
+    entry_points={
+        'console_scripts': [
+            'model_maker=tensorflow_examples.lite.model_maker.cli.cli:main',
+        ],
     },
     classifiers=[
         'Development Status :: 4 - Beta',

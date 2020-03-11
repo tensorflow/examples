@@ -15,9 +15,9 @@
 -->
 
 <resources>
-  <color name="colorPrimary">#ffa800</color>
-  <color name="colorPrimaryDark">#ff6f00</color>
-  <color name="colorAccent">#425066</color>
-  <color name="control_background">#cc4285f4</color>
-  <color name="semi_transparent">#66000000</color>
+  <color name="tfe_color_primary">#ffa800</color>
+  <color name="tfe_color_primary_dark">#ff6f00</color>
+  <color name="tfe_color_accent">#425066</color>
+
+  <color name="tfe_semi_transparent">#66000000</color>
 </resources>

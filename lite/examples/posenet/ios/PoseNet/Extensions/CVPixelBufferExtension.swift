@@ -174,10 +174,3 @@ extension CVPixelBuffer {
     return Data(copyingBufferOf: imageBytes.map { Float($0) / Constants.maxRGBValue })
   }
 }
-
-// MARK: - Constants
-private enum Constants {
-  static let bgraPixel = (channels: 4, alphaComponent: 3, lastBgrComponent: 2)
-  static let rgbPixelChannels = 3
-  static let maxRGBValue: Float32 = 255.0
-}

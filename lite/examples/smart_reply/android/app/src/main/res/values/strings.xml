@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name" translatable="false">TFL Smart Reply</string>
-  <string name="button_send" translatable="false">Send</string>
-  <string name="edit_text_hint" translatable="false">Enter your message...</string>
+  <string name="tfe_sr_app_name" translatable="false">TFL Smart Reply</string>
+  <string name="tfe_sr_button_send" translatable="false">Send</string>
+  <string name="tfe_sr_edit_text_hint" translatable="false">Enter your message...</string>
 </resources>

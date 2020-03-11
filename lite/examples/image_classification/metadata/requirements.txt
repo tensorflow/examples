@@ -1,0 +1,4 @@
+# Python packages required for metadata_writer_for_image_classifier.py
+absl-py
+tensorflow
+tflite-support

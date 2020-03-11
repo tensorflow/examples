@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     Log.v(TAG, "onCreate");
-    setContentView(R.layout.main_activity);
+    setContentView(R.layout.tfe_sr_main_activity);
 
     client = new SmartReplyClient(getApplicationContext());
     handler = new Handler();

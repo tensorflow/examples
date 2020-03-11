@@ -51,11 +51,11 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from pathlib import Path
 from keras import backend as K
-from tensorflow.python.framework import graph_util
-from tensorflow.python.framework import graph_io
+from tensorflow.compat.v1.python.framework import graph_util
+from tensorflow.compat.v1.python.framework import graph_io
 from model import conv_1d_time_stacked_model
 
 parser = argparse.ArgumentParser(description='set input arguments')
@@ -165,7 +165,7 @@ if args.graph_def:
 # In[ ]:
 
 if args.quantize:
-  from tensorflow.tools.graph_transforms import TransformGraph
+  from tensorflow.compat.v1.tools.graph_transforms import TransformGraph
   transforms = ['quantize_weights', 'quantize_nodes']
   transformed_graph_def = TransformGraph(sess.graph.as_graph_def(), [],
                                          pred_node_names, transforms)

@@ -42,7 +42,7 @@ class TestActivity : AppCompatActivity() {
   /** Calls the Posenet library functions.    */
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_test)
+    setContentView(R.layout.tfe_pn_activity_test)
 
     val sampleImageView = findViewById<ImageView>(R.id.image)
     val drawedImage = ResourcesCompat.getDrawable(resources, R.drawable.image, null)
