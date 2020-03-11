@@ -24,8 +24,8 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp;
 /** This TensorFlowLite classifier works with the float EfficientNet model. */
 public class ClassifierFloatEfficientNet extends Classifier {
 
-  private static final float IMAGE_MEAN = 127.5f;
-  private static final float IMAGE_STD = 127.5f;
+  private static final float IMAGE_MEAN = 127.0f;
+  private static final float IMAGE_STD = 128.0f;
 
   /**
    * Float model does not need dequantization in the post-processing. Setting mean and std as 0.0f
