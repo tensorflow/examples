@@ -81,12 +81,14 @@ class Posenet(
   /** An Interpreter for the TFLite model.   */
   private var interpreter: Interpreter? = null
   private var gpuDelegate: GpuDelegate? = null
+  private val NUM_LITE_THREADS = 4
 
   private fun getInterpreter(): Interpreter {
     if (interpreter != null) {
       return interpreter!!
     }
     val options = Interpreter.Options()
+    options.setNumThreads(NUM_LITE_THREADS)
     when (device) {
       Device.CPU -> { }
       Device.GPU -> {
@@ -228,7 +230,6 @@ class Posenet(
       var maxCol = 0
       for (row in 0 until height) {
         for (col in 0 until width) {
-          heatmaps[0][row][col][keypoint] = heatmaps[0][row][col][keypoint]
           if (heatmaps[0][row][col][keypoint] > maxVal) {
             maxVal = heatmaps[0][row][col][keypoint]
             maxRow = row
