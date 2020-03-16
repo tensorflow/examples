@@ -37,6 +37,8 @@ import java.util.Vector;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.examples.detection.env.Logger;
 
+import static java.lang.Math.min;
+
 /**
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
  * github.com/tensorflow/models/tree/master/research/object_detection
@@ -196,7 +198,7 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
     // Show the best detections.
     // after scaling them back to the input size.
     final ArrayList<Recognition> recognitions = new ArrayList<>(NUM_DETECTIONS);
-    for (int i = 0; i < NUM_DETECTIONS; ++i) {
+    for (int i = 0; i < min(numDetections[0], NUM_DETECTIONS); ++i) {
       final RectF detection =
           new RectF(
               outputLocations[0][i][1] * inputSize,
