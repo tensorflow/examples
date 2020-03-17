@@ -46,17 +46,24 @@ class StyleTransferModelExecutor(
   private var postProcessTime = 0L
 
   init {
-    interpreterPredict = getInterpreter(context, styleTransferPredictModel, useGPU)
-    // The transform model is not optimized for GPU usage yet
-    interpreterTransform = getInterpreter(context, styleTransferTransferModel, useGPU)
+    if (useGPU) {
+      interpreterPredict = getInterpreter(context, styleTransferPredictGPUModel, true)
+      interpreterTransform = getInterpreter(context, styleTransferTransferGPUModel, true)
+    } else {
+      interpreterPredict = getInterpreter(context, styleTransferPredictModel, false)
+      interpreterTransform = getInterpreter(context, styleTransferTransferModel, false)
+    }
   }
 
   companion object {
     private val TAG = "StyleTransferMExec"
     private var styleImageSize = 256
     private var contentImageSize = 384
+    private var bottleneckSize = 100
     private var styleTransferPredictModel = "style_predict_quantized_256.tflite"
     private var styleTransferTransferModel = "style_transfer_quantized_384.tflite"
+    private var styleTransferPredictGPUModel = "style_predict_f16_256.tflite"
+    private var styleTransferTransferGPUModel = "style_transfer_f16_384.tflite"
   }
 
   fun execute(
@@ -79,7 +86,7 @@ class StyleTransferModelExecutor(
 
       val inputsForPredict = arrayOf<Any>(input)
       val outputsForPredict = HashMap<Int, Any>()
-      val styleBottleneck = Array(1) { Array(1) { Array(1) { FloatArray(100) } } }
+      val styleBottleneck = Array(1) { Array(1) { Array(1) { FloatArray(bottleneckSize) } } }
       outputsForPredict[0] = styleBottleneck
       preProcessTime = SystemClock.uptimeMillis() - preProcessTime
 
@@ -90,7 +97,7 @@ class StyleTransferModelExecutor(
       stylePredictTime = SystemClock.uptimeMillis() - stylePredictTime
       Log.d(TAG, "Style Predict Time to run: $stylePredictTime")
 
-      val inputsForStyleTransfer = arrayOf<Any>(contentArray, styleBottleneck)
+      val inputsForStyleTransfer = arrayOf(contentArray, styleBottleneck)
       val outputsForStyleTransfer = HashMap<Int, Any>()
       val outputImage =
         Array(1) { Array(contentImageSize) { Array(contentImageSize) { FloatArray(3) } } }
