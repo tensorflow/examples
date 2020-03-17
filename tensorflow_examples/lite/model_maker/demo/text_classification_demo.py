@@ -19,10 +19,11 @@ from __future__ import print_function
 
 import os
 
+from absl import app
 from absl import flags
 from absl import logging
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
@@ -96,6 +97,5 @@ def main(_):
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
   define_flags()
-  tf.compat.v1.app.run(main)
+  app.run(main)

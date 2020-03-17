@@ -21,7 +21,7 @@ import os
 
 from absl import flags
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 
 FLAGS = flags.FLAGS

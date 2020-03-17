@@ -17,7 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl.testing import parameterized
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
@@ -50,5 +50,4 @@ class HubKerasLayerV1V2Test(tf.test.TestCase, parameterized.TestCase):
 
 
 if __name__ == "__main__":
-  assert tf.__version__.startswith('2')
   tf.test.main()

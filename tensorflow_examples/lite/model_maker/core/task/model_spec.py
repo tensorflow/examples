@@ -23,7 +23,7 @@ import inspect
 import re
 import tempfile
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 import tensorflow_hub as hub
 
 from official.modeling import model_training_utils

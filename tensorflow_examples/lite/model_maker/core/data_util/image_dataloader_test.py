@@ -19,7 +19,7 @@ from __future__ import print_function
 import os
 import random
 import numpy as np
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
 
@@ -108,5 +108,4 @@ class ImageDataLoaderTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
   tf.test.main()

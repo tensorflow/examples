@@ -20,7 +20,7 @@ import os
 import tempfile
 from unittest.mock import patch
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
@@ -73,5 +73,4 @@ class ImageClassificationDemoTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
   tf.test.main()

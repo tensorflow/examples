@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef

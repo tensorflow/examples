@@ -21,7 +21,7 @@ import json
 import os
 
 import numpy as np
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
@@ -100,5 +100,4 @@ class DataLoaderTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
   tf.test.main()

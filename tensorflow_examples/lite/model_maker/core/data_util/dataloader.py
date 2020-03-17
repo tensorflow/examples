@@ -21,7 +21,7 @@ import hashlib
 import json
 import os
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 from official.nlp.bert import input_pipeline
 
 
