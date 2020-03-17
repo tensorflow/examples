@@ -18,7 +18,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.tensorflow.lite.examples.imagesegmentation">
 
-  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="29"/>
+  <uses-sdk />
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-feature android:name="android.hardware.camera.any" />
   <application
