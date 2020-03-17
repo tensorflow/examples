@@ -23,7 +23,7 @@ import inspect
 import re
 import tempfile
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 import tensorflow_hub as hub
 
 from official.modeling import model_training_utils
@@ -94,30 +94,30 @@ resnet_50_spec = ImageModelSpec(
     name='resnet_50')
 
 efficientnet_lite0_spec = ImageModelSpec(
-    uri='https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/1',
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/2',
     compat_tf_versions=[1, 2],
     name='efficientnet_lite0')
 
 efficientnet_lite1_spec = ImageModelSpec(
-    uri='https://tfhub.dev/tensorflow/efficientnet/lite1/feature-vector/1',
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite1/feature-vector/2',
     compat_tf_versions=[1, 2],
     input_image_shape=[240, 240],
     name='efficientnet_lite1')
 
 efficientnet_lite2_spec = ImageModelSpec(
-    uri='https://tfhub.dev/tensorflow/efficientnet/lite2/feature-vector/1',
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite2/feature-vector/2',
     compat_tf_versions=[1, 2],
     input_image_shape=[260, 260],
     name='efficientnet_lite2')
 
 efficientnet_lite3_spec = ImageModelSpec(
-    uri='https://tfhub.dev/tensorflow/efficientnet/lite3/feature-vector/1',
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite3/feature-vector/2',
     compat_tf_versions=[1, 2],
     input_image_shape=[280, 280],
     name='efficientnet_lite3')
 
 efficientnet_lite4_spec = ImageModelSpec(
-    uri='https://tfhub.dev/tensorflow/efficientnet/lite4/feature-vector/1',
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite4/feature-vector/2',
     compat_tf_versions=[1, 2],
     input_image_shape=[300, 300],
     name='efficientnet_lite4')

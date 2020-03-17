@@ -19,10 +19,11 @@ from __future__ import print_function
 
 import os
 
+from absl import app
 from absl import flags
 from absl import logging
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
 from tensorflow_examples.lite.model_maker.core.model_export_format import ModelExportFormat
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
@@ -75,10 +76,9 @@ def run(data_dir,
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.tflite_filename, FLAGS.label_filename, epochs=10)
+  run(data_dir, FLAGS.tflite_filename, FLAGS.label_filename)
 
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
   define_flags()
-  tf.compat.v1.app.run(main)
+  app.run(main)

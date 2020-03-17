@@ -19,7 +19,8 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import flags
-import tensorflow as tf # TF2
+
+import tensorflow as tf
 from tensorflow_examples.models.pix2pix import data_download
 from tensorflow_examples.models.pix2pix import pix2pix
 
@@ -85,5 +86,4 @@ class Pix2PixBenchmark(tf.test.Benchmark):
     self.report_benchmark(wall_time=tf.reduce_mean(time_list[1:]))
 
 if __name__ == "__main__":
-  assert tf.__version__.startswith('2')
   tf.test.main()

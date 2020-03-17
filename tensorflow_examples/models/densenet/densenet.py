@@ -23,8 +23,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf # TF2
-assert tf.__version__.startswith('2')
+import tensorflow as tf
 
 l2 = tf.keras.regularizers.l2
 

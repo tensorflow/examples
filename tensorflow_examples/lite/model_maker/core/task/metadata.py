@@ -19,7 +19,7 @@ from __future__ import print_function
 
 import os
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
 TFLITE_SUPPORT_TOOLS_INSTALLED = True

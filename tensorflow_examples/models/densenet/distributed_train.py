@@ -20,10 +20,9 @@ from __future__ import print_function
 
 from absl import app
 from absl import flags
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.models.densenet import densenet
 from tensorflow_examples.models.densenet import utils
-assert tf.__version__.startswith('2')
 
 FLAGS = flags.FLAGS
 

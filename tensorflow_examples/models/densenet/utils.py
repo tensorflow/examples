@@ -20,9 +20,8 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import flags
-import tensorflow as tf # TF2
+import tensorflow as tf
 import tensorflow_datasets as tfds
-assert tf.__version__.startswith('2')
 
 FLAGS = flags.FLAGS
 

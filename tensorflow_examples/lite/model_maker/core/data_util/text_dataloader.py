@@ -22,7 +22,7 @@ import os
 import random
 import tempfile
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
