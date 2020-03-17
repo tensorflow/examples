@@ -96,18 +96,6 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
 
-  @test_util.test_in_tf_1and2
-  def test_efficientnetlite4_model(self):
-    model = image_classifier.create(
-        self.train_data,
-        mef.ModelExportFormat.TFLITE,
-        model_spec.efficientnet_lite4_spec,
-        epochs=2,
-        batch_size=4,
-        shuffle=True)
-    self._test_accuracy(model)
-    self._test_export_to_tflite(model)
-
   @test_util.test_in_tf_2
   def test_resnet_50_model(self):
     model = image_classifier.create(

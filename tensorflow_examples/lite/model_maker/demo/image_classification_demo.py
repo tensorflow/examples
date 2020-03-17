@@ -76,7 +76,7 @@ def run(data_dir,
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.tflite_filename, FLAGS.label_filename, epochs=10)
+  run(data_dir, FLAGS.tflite_filename, FLAGS.label_filename)
 
 
 if __name__ == '__main__':
