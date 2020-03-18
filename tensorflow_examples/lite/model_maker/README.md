@@ -33,7 +33,7 @@ pip install .[model_maker]
 ## End-to-End Example
 
 For instance, it could have an end-to-end image
-classfication example that utilizes this library with just 4 lines of
+classification example that utilizes this library with just 4 lines of
 code, each of which representing one step of the overall process:
 
 1.   Load input data specific to an on-device ML app.
@@ -66,5 +66,5 @@ Currently, we support image classification and text classification tasks and
 provide demo code and colab for each of them in demo folder.
 
 * [Colab for image classification](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/image_classification.ipynb)
-* [Colab for text classfication](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/text_classification.ipynb)
+* [Colab for text classification](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/text_classification.ipynb)
 
