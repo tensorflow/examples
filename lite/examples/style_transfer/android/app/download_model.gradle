@@ -1,33 +1,27 @@
-task downloadPredictInt8ModelFile(type: Download) {
+task downloadPredictModelFile(type: Download) {
     src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_predict_quantized_256.tflite'
     dest project.ext.ASSET_DIR + '/style_predict_quantized_256.tflite'
     overwrite false
 }
 
-task downloadTransformInt8ModelFile(type: Download) {
+task downloadTransformModelDynamicFile(type: Download) {
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_quantized_dynamic.tflite'
+    dest project.ext.ASSET_DIR + '/style_transfer_quantized_dynamic.tflite'
+    overwrite false
+}
+
+task downloadTransformModelFile(type: Download) {
     src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_quantized_384.tflite'
     dest project.ext.ASSET_DIR + '/style_transfer_quantized_384.tflite'
     overwrite false
 }
 
-task downloadPredictFloat16ModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_predict_f16_256.tflite'
-    dest project.ext.ASSET_DIR + '/style_predict_f16_256.tflite'
-    overwrite false
-}
-
-task downloadTransformFloat16ModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_f16_384.tflite'
-    dest project.ext.ASSET_DIR + '/style_transfer_f16_384.tflite'
-    overwrite false
-}
-
 tasks.whenTaskAdded { task ->
-    if ((task.name == 'assembleDebug') || (task.name == 'assembleRelease')) {
-        task.dependsOn 'downloadPredictInt8ModelFile'
-        task.dependsOn 'downloadTransformInt8ModelFile'
-        task.dependsOn 'downloadPredictFloat16ModelFile'
-        task.dependsOn 'downloadTransformFloat16ModelFile'
+    if (task.name == 'assembleDebug') {
+        task.dependsOn 'downloadPredictModelFile', 'downloadTransformModelFile', 'downloadTransformModelDynamicFile'
+    }
+    if (task.name == 'assembleRelease') {
+        task.dependsOn 'downloadPredictModelFile', 'downloadTransformModelFile', 'downloadTransformModelDynamicFile'
     }
 }
 

@@ -138,16 +138,9 @@ class MainActivity :
 
     useGpuSwitch.setOnCheckedChangeListener { _, isChecked ->
       useGPU = isChecked
-      // Disable control buttons to avoid running model before initialization
-      enableControls(false)
-
-      // Reinitialize TF Lite models with new GPU setting
       mainScope.async(inferenceThread) {
         styleTransferModelExecutor.close()
         styleTransferModelExecutor = StyleTransferModelExecutor(this@MainActivity, useGPU)
-
-        // Re-enable control buttons
-        runOnUiThread { enableControls(true) }
       }
     }
 
