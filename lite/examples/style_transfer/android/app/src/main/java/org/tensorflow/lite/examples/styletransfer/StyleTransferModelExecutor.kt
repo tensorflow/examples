@@ -46,17 +46,24 @@ class StyleTransferModelExecutor(
   private var postProcessTime = 0L
 
   init {
-    interpreterPredict = getInterpreter(context, styleTransferPredictModel, useGPU)
-    // The transform model is not optimized for GPU usage yet
-    interpreterTransform = getInterpreter(context, styleTransferTransferModel, useGPU)
+    if (useGPU) {
+      interpreterPredict = getInterpreter(context, STYLE_PREDICT_FLOAT16_MODEL, true)
+      interpreterTransform = getInterpreter(context, STYLE_TRANSFER_FLOAT16_MODEL, true)
+    } else {
+      interpreterPredict = getInterpreter(context, STYLE_PREDICT_INT8_MODEL, false)
+      interpreterTransform = getInterpreter(context, STYLE_TRANSFER_INT8_MODEL, false)
+    }
   }
 
   companion object {
-    private val TAG = "StyleTransferMExec"
-    private var styleImageSize = 256
-    private var contentImageSize = 384
-    private var styleTransferPredictModel = "style_predict_quantized_256.tflite"
-    private var styleTransferTransferModel = "style_transfer_quantized_384.tflite"
+    private const val TAG = "StyleTransferMExec"
+    private const val STYLE_IMAGE_SIZE = 256
+    private const val CONTENT_IMAGE_SIZE = 384
+    private const val BOTTLENECK_SIZE = 100
+    private const val STYLE_PREDICT_INT8_MODEL = "style_predict_quantized_256.tflite"
+    private const val STYLE_TRANSFER_INT8_MODEL = "style_transfer_quantized_384.tflite"
+    private const val STYLE_PREDICT_FLOAT16_MODEL = "style_predict_f16_256.tflite"
+    private const val STYLE_TRANSFER_FLOAT16_MODEL = "style_transfer_f16_384.tflite"
   }
 
   fun execute(
@@ -72,14 +79,14 @@ class StyleTransferModelExecutor(
 
       val contentImage = ImageUtils.decodeBitmap(File(contentImagePath))
       val contentArray =
-        ImageUtils.bitmapToByteBuffer(contentImage, contentImageSize, contentImageSize)
+        ImageUtils.bitmapToByteBuffer(contentImage, CONTENT_IMAGE_SIZE, CONTENT_IMAGE_SIZE)
       val styleBitmap =
         ImageUtils.loadBitmapFromResources(context, "thumbnails/$styleImageName")
-      val input = ImageUtils.bitmapToByteBuffer(styleBitmap, styleImageSize, styleImageSize)
+      val input = ImageUtils.bitmapToByteBuffer(styleBitmap, STYLE_IMAGE_SIZE, STYLE_IMAGE_SIZE)
 
       val inputsForPredict = arrayOf<Any>(input)
       val outputsForPredict = HashMap<Int, Any>()
-      val styleBottleneck = Array(1) { Array(1) { Array(1) { FloatArray(100) } } }
+      val styleBottleneck = Array(1) { Array(1) { Array(1) { FloatArray(BOTTLENECK_SIZE) } } }
       outputsForPredict[0] = styleBottleneck
       preProcessTime = SystemClock.uptimeMillis() - preProcessTime
 
@@ -90,10 +97,10 @@ class StyleTransferModelExecutor(
       stylePredictTime = SystemClock.uptimeMillis() - stylePredictTime
       Log.d(TAG, "Style Predict Time to run: $stylePredictTime")
 
-      val inputsForStyleTransfer = arrayOf<Any>(contentArray, styleBottleneck)
+      val inputsForStyleTransfer = arrayOf(contentArray, styleBottleneck)
       val outputsForStyleTransfer = HashMap<Int, Any>()
       val outputImage =
-        Array(1) { Array(contentImageSize) { Array(contentImageSize) { FloatArray(3) } } }
+        Array(1) { Array(CONTENT_IMAGE_SIZE) { Array(CONTENT_IMAGE_SIZE) { FloatArray(3) } } }
       outputsForStyleTransfer[0] = outputImage
 
       styleTransferTime = SystemClock.uptimeMillis()
@@ -106,7 +113,7 @@ class StyleTransferModelExecutor(
 
       postProcessTime = SystemClock.uptimeMillis()
       var styledImage =
-        ImageUtils.convertArrayToBitmap(outputImage, contentImageSize, contentImageSize)
+        ImageUtils.convertArrayToBitmap(outputImage, CONTENT_IMAGE_SIZE, CONTENT_IMAGE_SIZE)
       postProcessTime = SystemClock.uptimeMillis() - postProcessTime
 
       fullExecutionTime = SystemClock.uptimeMillis() - fullExecutionTime
@@ -127,8 +134,8 @@ class StyleTransferModelExecutor(
 
       val emptyBitmap =
         ImageUtils.createEmptyBitmap(
-          contentImageSize,
-          contentImageSize
+          CONTENT_IMAGE_SIZE,
+          CONTENT_IMAGE_SIZE
         )
       return ModelExecutionResult(
         emptyBitmap, errorMessage = e.message!!
@@ -169,7 +176,7 @@ class StyleTransferModelExecutor(
 
   private fun formatExecutionLog(): String {
     val sb = StringBuilder()
-    sb.append("Input Image Size: $contentImageSize x $contentImageSize\n")
+    sb.append("Input Image Size: $CONTENT_IMAGE_SIZE x $CONTENT_IMAGE_SIZE\n")
     sb.append("GPU enabled: $useGPU\n")
     sb.append("Number of threads: $numberThreads\n")
     sb.append("Pre-process execution time: $preProcessTime ms\n")
