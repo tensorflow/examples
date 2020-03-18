@@ -87,7 +87,6 @@ captures/
 # Android Studio 3 in .gitignore file.
 .idea/caches
 .idea/modules.xml
-# Comment next line if keeping position of elements in Navigation Editor is relevant for you
 .idea/navEditor.xml
 
 # Keystore files
@@ -101,18 +100,6 @@ captures/
 
 # Google Services (e.g. APIs or Firebase)
 # google-services.json
-
-# Freeline
-freeline.py
-freeline/
-freeline_project_description.json
-
-# fastlane
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots
-fastlane/test_output
-fastlane/readme.md
 
 # Version control
 vcs.xml
