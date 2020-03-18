@@ -96,7 +96,7 @@ class InferenceViewController: UIViewController {
 
   }
 
-  // MARK: Buttion Actions
+  // MARK: Button Actions
   /**
    Delegate the change of number of threads to View Controller and change the stepper display.
    */
