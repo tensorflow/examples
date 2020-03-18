@@ -39,9 +39,8 @@ Re-installing the app may require you to uninstall the previous installations.
 
 ## Resources used:
 
-*   TensorFlow Lite: https://www.tensorflow.org/lite
-*   Style Transfer model for mobile:
-    https://www.tensorflow.org/lite/models/style_transfer/overview
-*   Neural Style Transfer:
-    https://www.tensorflow.org/tutorials/generative/style_transfer
-*   CameraX: https://developer.android.com/training/camerax
+*   [TensorFlow Lite](https://www.tensorflow.org/lite)
+*   [Style Transfer model for mobile](https://www.tensorflow.org/lite/models/style_transfer/overview)
+*   [Train the style transfer model and export to TensorFlow Lite](https://github.com/tensorflow/magenta/tree/master/magenta/models/arbitrary_image_stylization#train-a-model-on-a-large-dataset-with-data-augmentation-to-run-on-mobile)
+*   [Neural Style Transfer with TensorFlow](https://www.tensorflow.org/tutorials/generative/style_transfer)
+*   [CameraX](https://developer.android.com/training/camerax)
