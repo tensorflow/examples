@@ -48,7 +48,7 @@ function test_pip_install {
   echo "--- End of setup.py ---"
 
   # Run pip install.
-  ${PIP_BIN} install -e .[model_maker,tests,metadata] ${PIP_OPTIONS}
+  ${PIP_BIN} install -e .[model_maker,tests] ${PIP_OPTIONS}
 
   popd > /dev/null
   echo
