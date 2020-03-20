@@ -18,10 +18,11 @@ from __future__ import print_function
 
 import os
 import numpy as np
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
+from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
@@ -54,7 +55,7 @@ class TextClassifierTest(tf.test.TestCase):
     super(TextClassifierTest, self).setUp()
     self.text_dir = self._gen_text_dir()
 
-  @compat.test_in_tf_1
+  @test_util.test_in_tf_1
   def test_average_wordvec_model_create_v1_incompatible(self):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
       model_spec = ms.AverageWordVecModelSpec(seq_len=2)
@@ -66,7 +67,7 @@ class TextClassifierTest(tf.test.TestCase):
           model_spec=model_spec,
       )
 
-  @compat.test_in_tf_2
+  @test_util.test_in_tf_2
   def test_average_wordvec_model(self):
     model_spec = ms.AverageWordVecModelSpec(seq_len=2)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(

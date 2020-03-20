@@ -92,7 +92,6 @@ public class DetectorTest {
     final List<Recognition> results = detector.recognizeImage(croppedBitmap);
     final List<Recognition> expected = loadRecognitions("table_results.txt");
 
-
     for (Recognition target : expected) {
       // Find a matching result in results
       boolean matched = false;

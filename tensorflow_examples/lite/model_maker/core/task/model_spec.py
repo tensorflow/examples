@@ -19,10 +19,11 @@ from __future__ import print_function
 
 import abc
 import collections
+import inspect
 import re
 import tempfile
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 import tensorflow_hub as hub
 
 from official.modeling import model_training_utils
@@ -65,42 +66,73 @@ def get_num_gpus(num_gpus):
 class ImageModelSpec(object):
   """A specification of image model."""
 
-  input_image_shape = [224, 224]
-  mean_rgb = [0, 0, 0]
-  stddev_rgb = [255, 255, 255]
+  mean_rgb = [0.0]
+  stddev_rgb = [255.0]
 
-  def __init__(self, uri, compat_tf_versions=None):
+  def __init__(self,
+               uri,
+               compat_tf_versions=None,
+               input_image_shape=None,
+               name=''):
     self.uri = uri
     self.compat_tf_versions = _get_compat_tf_versions(compat_tf_versions)
+    self.name = name
 
+    if input_image_shape is None:
+      input_image_shape = [224, 224]
+    self.input_image_shape = input_image_shape
 
-efficientnet_b0_spec = ImageModelSpec(
-    uri='https://tfhub.dev/google/efficientnet/b0/feature-vector/1',
-    compat_tf_versions=[1, 2])
 
 mobilenet_v2_spec = ImageModelSpec(
     uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4',
-    compat_tf_versions=2)
+    compat_tf_versions=2,
+    name='mobilenet_v2')
 
 resnet_50_spec = ImageModelSpec(
     uri='https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4',
-    compat_tf_versions=2)
+    compat_tf_versions=2,
+    name='resnet_50')
+
+efficientnet_lite0_spec = ImageModelSpec(
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/2',
+    compat_tf_versions=[1, 2],
+    name='efficientnet_lite0')
+
+efficientnet_lite1_spec = ImageModelSpec(
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite1/feature-vector/2',
+    compat_tf_versions=[1, 2],
+    input_image_shape=[240, 240],
+    name='efficientnet_lite1')
+
+efficientnet_lite2_spec = ImageModelSpec(
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite2/feature-vector/2',
+    compat_tf_versions=[1, 2],
+    input_image_shape=[260, 260],
+    name='efficientnet_lite2')
+
+efficientnet_lite3_spec = ImageModelSpec(
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite3/feature-vector/2',
+    compat_tf_versions=[1, 2],
+    input_image_shape=[280, 280],
+    name='efficientnet_lite3')
+
+efficientnet_lite4_spec = ImageModelSpec(
+    uri='https://tfhub.dev/tensorflow/efficientnet/lite4/feature-vector/2',
+    compat_tf_versions=[1, 2],
+    input_image_shape=[300, 300],
+    name='efficientnet_lite4')
 
 
 class TextModelSpec(abc.ABC):
   """The abstract base class that constains the specification of text model."""
 
-  def __init__(self, need_gen_vocab, experimental_new_converter=False):
+  def __init__(self, experimental_new_converter=False):
     """Initialization function for TextClassifier class.
 
     Args:
-      need_gen_vocab: If true, needs to generate vocabulary from input data
-        using `gen_vocab` function. Otherwise, loads vocab from text model
-        assets.
       experimental_new_converter: Experimental flag, subject to change. Enables
         MLIR-based conversion instead of TOCO conversion.
     """
-    self.need_gen_vocab = need_gen_vocab
     self.experimental_new_converter = experimental_new_converter
 
   @abc.abstractmethod
@@ -159,6 +191,8 @@ class AverageWordVecModelSpec(TextModelSpec):
   UNKNOWN = '<UNKNOWN>'  # Index: 2
 
   compat_tf_versions = _get_compat_tf_versions(2)
+  need_gen_vocab = True
+  default_training_epochs = 2
 
   def __init__(self,
                num_words=10000,
@@ -180,7 +214,6 @@ class AverageWordVecModelSpec(TextModelSpec):
         MLIR-based conversion instead of TOCO conversion.
     """
     super(AverageWordVecModelSpec, self).__init__(
-        need_gen_vocab=True,
         experimental_new_converter=experimental_new_converter)
     self.num_words = num_words
     self.seq_len = seq_len
@@ -222,6 +255,9 @@ class AverageWordVecModelSpec(TextModelSpec):
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
     """Creates classifier and runs the classifier training."""
+    if epochs is None:
+      epochs = self.default_training_epochs
+
     # Gets a classifier model.
     model = tf.keras.Sequential([
         tf.keras.layers.InputLayer(input_shape=[self.seq_len]),
@@ -331,6 +367,8 @@ class BertModelSpec(TextModelSpec):
   """A specification of BERT model."""
 
   compat_tf_versions = _get_compat_tf_versions(2)
+  need_gen_vocab = False
+  default_training_epochs = 3
 
   def __init__(
       self,
@@ -345,6 +383,7 @@ class BertModelSpec(TextModelSpec):
       distribution_strategy='mirrored',
       num_gpus=-1,
       tpu='',
+      trainable=True,
       experimental_new_converter=True,
   ):
     """Initialze an instance with model paramaters.
@@ -371,11 +410,11 @@ class BertModelSpec(TextModelSpec):
         DistributionStrategies API. The default is -1, which means utilize all
         available GPUs.
       tpu: TPU address to connect to.
+      trainable: boolean, whether pretrain layer is trainable.
       experimental_new_converter: Experimental flag, subject to change. Enables
         MLIR-based conversion instead of TOCO conversion.
     """
     super(BertModelSpec, self).__init__(
-        need_gen_vocab=False,
         experimental_new_converter=experimental_new_converter)
     self.seq_len = seq_len
     self.dropout_rate = dropout_rate
@@ -395,10 +434,11 @@ class BertModelSpec(TextModelSpec):
         tpu_address=tpu)
 
     self.uri = uri
-    self.bert_model = hub.KerasLayer(uri, trainable=True)
-    self.vocab_file = self.bert_model.resolved_object.vocab_file.asset_path.numpy(
-    )
-    self.do_lower_case = self.bert_model.resolved_object.do_lower_case.numpy()
+    self.bert_model = hub.KerasLayer(uri, trainable=trainable)
+
+    resolved_object = self.bert_model.resolved_object
+    self.vocab_file = resolved_object.vocab_file.asset_path.numpy()
+    self.do_lower_case = resolved_object.do_lower_case.numpy()
 
     self.tokenizer = tokenization.FullTokenizer(self.vocab_file,
                                                 self.do_lower_case)
@@ -449,6 +489,8 @@ class BertModelSpec(TextModelSpec):
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
     """Creates classifier and runs the classifier training."""
+    if epochs is None:
+      epochs = self.default_training_epochs
 
     bert_config = bert_configs.BertConfig(
         0,
@@ -527,3 +569,37 @@ class BertModelSpec(TextModelSpec):
     """Sets the input model shape. Used in tflite conveter for BatchMatMul."""
     for model_input in model.inputs:
       model_input.set_shape((1, self.seq_len))
+
+
+# A dict for model specs to make it accessible by string key.
+MODEL_SPECS = {
+    'efficientnet_lite0': efficientnet_lite0_spec,
+    'efficientnet_lite1': efficientnet_lite1_spec,
+    'efficientnet_lite2': efficientnet_lite2_spec,
+    'efficientnet_lite3': efficientnet_lite3_spec,
+    'efficientnet_lite4': efficientnet_lite4_spec,
+    'mobilenet_v2': mobilenet_v2_spec,
+    'resnet_50': resnet_50_spec,
+    'average_word_vec': AverageWordVecModelSpec,
+    'bert': BertModelSpec,
+}
+
+# List constants for supported models.
+IMAGE_CLASSIFICATION_MODELS = [
+    'efficientnet_lite0', 'efficientnet_lite1', 'efficientnet_lite2',
+    'efficientnet_lite3', 'efficientnet_lite4', 'mobilenet_v2', 'resnet_50'
+]
+TEXT_CLASSIFICATION_MODELS = ['bert', 'average_word_vec']
+
+
+def get(spec_or_str):
+  """Gets model spec by name or instance, and initializes by default."""
+  if isinstance(spec_or_str, str):
+    model_spec = MODEL_SPECS[spec_or_str]
+  else:
+    model_spec = spec_or_str
+
+  if inspect.isclass(model_spec):
+    return model_spec()
+  else:
+    return model_spec

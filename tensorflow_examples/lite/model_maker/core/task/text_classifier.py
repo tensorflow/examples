@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
@@ -31,7 +31,7 @@ def create(train_data,
            model_spec=ms.AverageWordVecModelSpec(),
            shuffle=False,
            batch_size=32,
-           epochs=2,
+           epochs=None,
            validation_data=None):
   """Loads data and train the model for test classification.
 
@@ -41,7 +41,7 @@ def create(train_data,
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
     batch_size: Batch size for training.
-    epochs: Number of epochs for training. If None, default num_epoch is used.
+    epochs: Number of epochs for training.
     validation_data: Validation data. If None, skips validation process.
 
   Returns:

@@ -17,12 +17,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
+from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as lib
@@ -30,7 +31,7 @@ from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib
 
 def create(train_data,
            model_export_format=mef.ModelExportFormat.TFLITE,
-           model_spec=ms.mobilenet_v2_spec,
+           model_spec=ms.efficientnet_lite0_spec,
            shuffle=False,
            validation_data=None,
            batch_size=None,
@@ -179,7 +180,9 @@ class ImageClassifier(classification_model.ClassificationModel):
              label_filename,
              quantized=False,
              quantization_steps=None,
-             representative_data=None):
+             representative_data=None,
+             with_metadata=False,
+             export_metadata_json_file=False):
     """Converts the retrained model based on `model_export_format`.
 
     Args:
@@ -190,12 +193,28 @@ class ImageClassifier(classification_model.ClassificationModel):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
+      with_metadata: Whether the output tflite model contains metadata.
+      export_metadata_json_file: Whether to export metadata in json file. If
+        True, export the metadata in the same directory as tflite model.Used
+        only if `with_metadata` is True.
     """
     if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model Export Format %s is not supported currently.' %
                        self.model_export_format)
     self._export_tflite(tflite_filename, label_filename, quantized,
                         quantization_steps, representative_data)
+    if with_metadata:
+      if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
+        tf.compat.v1.logging.warning('Needs to install tflite-support package.')
+        return
+
+      model_info = metadata.get_model_info(self.model_spec, quantized=quantized)
+      populator = metadata.MetadataPopulatorForImageClassifier(
+          tflite_filename, model_info, label_filename)
+      populator.populate()
+
+      if export_metadata_json_file:
+        metadata.export_metadata_json_file(tflite_filename)
 
   def _get_hparams_or_default(self, hparams):
     """Returns hparams if not none, otherwise uses default one."""

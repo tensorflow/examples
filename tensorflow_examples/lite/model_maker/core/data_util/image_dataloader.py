@@ -20,7 +20,7 @@ from __future__ import print_function
 import os
 import random
 
-import tensorflow as tf # TF2
+import tensorflow as tf
 import tensorflow_datasets as tfds
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 

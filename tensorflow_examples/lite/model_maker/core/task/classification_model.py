@@ -22,7 +22,7 @@ import os
 import tempfile
 
 import numpy as np
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 
