@@ -152,8 +152,7 @@ class ClassificationModel(abc.ABC):
                      label_filename,
                      quantized=False,
                      quantization_steps=None,
-                     representative_data=None,
-                     experimental_new_converter=False):
+                     representative_data=None):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
@@ -164,8 +163,6 @@ class ClassificationModel(abc.ABC):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
-      experimental_new_converter: Experimental flag, subject to change. Enables
-        MLIR-based conversion instead of TOCO conversion.
     """
     if compat.get_tf_behavior() == 1:
       with tempfile.TemporaryDirectory() as temp_dir:
@@ -193,7 +190,6 @@ class ClassificationModel(abc.ABC):
       converter.target_spec.supported_ops = [
           tf.lite.OpsSet.TFLITE_BUILTINS_INT8
       ]
-    converter.experimental_new_converter = experimental_new_converter
     tflite_model = converter.convert()
 
     with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
