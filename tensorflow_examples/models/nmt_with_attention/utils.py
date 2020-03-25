@@ -27,8 +27,8 @@ import re
 import unicodedata
 from absl import flags
 from sklearn.model_selection import train_test_split
-import tensorflow as tf # TF2
-assert tf.__version__.startswith('2')
+
+import tensorflow as tf
 
 FLAGS = flags.FLAGS
 

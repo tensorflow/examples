@@ -23,8 +23,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf # TF2
-assert tf.__version__.startswith('2')
+import tensorflow as tf
 
 l2 = tf.keras.regularizers.l2
 
@@ -302,7 +301,7 @@ class DenseNet(tf.keras.Model):
 
     axis = -1 if self.data_format == "channels_last" else 1
 
-    # setting the filters and stride of the initial covn layer.
+    # setting the filters and stride of the initial conv layer.
     if self.pool_initial:
       init_filters = (7, 7)
       stride = (2, 2)

@@ -1,0 +1,68 @@
+{
+  "name": "mobilenet_v2",
+  "description": "Identify the most prominent object in the image from a set of categories.",
+  "version": "v1",
+  "subgraph_metadata": [
+    {
+      "input_tensor_metadata": [
+        {
+          "name": "image",
+          "description": "Input image to be classified. The expected image is 224 x 224, with three channels (red, blue, and green) per pixel. Each value in the tensor is a single byte between 0 and 1.",
+          "content": {
+            "content_properties_type": "ImageProperties",
+            "content_properties": {
+              "color_space": "RGB"
+            }
+          },
+          "process_units": [
+            {
+              "options_type": "NormalizationOptions",
+              "options": {
+                "mean": [
+                  0.0
+                ],
+                "std": [
+                  255.0
+                ]
+              }
+            }
+          ],
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              0.0
+            ]
+          }
+        }
+      ],
+      "output_tensor_metadata": [
+        {
+          "name": "probability",
+          "description": "Probabilities of the labels respectively.",
+          "content": {
+            "content_properties_type": "FeatureProperties"
+          },
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              0.0
+            ]
+          },
+          "associated_files": [
+            {
+              "name": "label.txt",
+              "description": "Labels that mobilenet_v2 can recognize.",
+              "type": "TENSOR_AXIS_LABELS"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "author": "TFLite Model Maker",
+  "license": "Apache License. Version 2.0 http://www.apache.org/licenses/LICENSE-2.0."
+}

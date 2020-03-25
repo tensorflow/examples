@@ -32,7 +32,7 @@ public class DatasetListActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_dataset_list);
+    setContentView(R.layout.tfe_qa_activity_dataset_list);
 
     ListView listView = findViewById(R.id.dataset_list);
     assert listView != null;

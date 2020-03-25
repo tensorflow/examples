@@ -38,7 +38,7 @@ public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.MyView
   @Override
   public QuestionAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-    View view = inflater.inflate(R.layout.question_chip, parent, false);
+    View view = inflater.inflate(R.layout.tfe_qa_question_chip, parent, false);
     MyViewHolder holder = new MyViewHolder(view);
 
     return holder;

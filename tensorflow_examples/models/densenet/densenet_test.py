@@ -23,7 +23,7 @@ from __future__ import division
 from __future__ import print_function
 
 import time
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.models.densenet import densenet
 from tensorflow_examples.models.densenet import train
 from tensorflow_examples.models.densenet import utils
@@ -135,5 +135,4 @@ class DenseNetBenchmark(tf.test.Benchmark):
     self.report_benchmark(wall_time=wall_time_sec, metrics=metrics)
 
 if __name__ == '__main__':
-  assert tf.__version__.startswith('2')
   tf.test.main()

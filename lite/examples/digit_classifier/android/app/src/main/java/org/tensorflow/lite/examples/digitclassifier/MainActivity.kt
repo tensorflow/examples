@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
   @SuppressLint("ClickableViewAccessibility")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
+    setContentView(R.layout.tfe_dc_activity_main)
 
     // Setup view instances
     drawView = findViewById(R.id.draw_view)
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     // Setup clear drawing button
     clearButton?.setOnClickListener {
       drawView?.clearCanvas()
-      predictedTextView?.text = getString(R.string.prediction_text_placeholder)
+      predictedTextView?.text = getString(R.string.tfe_dc_prediction_text_placeholder)
     }
 
     // Setup classification trigger so that it classify after every stroke drew
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         .addOnSuccessListener { resultText -> predictedTextView?.text = resultText }
         .addOnFailureListener { e ->
           predictedTextView?.text = getString(
-            R.string.classification_error_message,
+            R.string.tfe_dc_classification_error_message,
             e.localizedMessage
           )
           Log.e(TAG, "Error classifying drawing.", e)

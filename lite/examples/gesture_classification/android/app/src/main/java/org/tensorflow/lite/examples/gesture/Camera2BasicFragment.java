@@ -105,7 +105,7 @@ public class Camera2BasicFragment extends Fragment
       rightClickLayout,
       scrollUpLayout,
       scrollDownLayout;
-  private BottomSheetBehavior sheetBehavior;
+  private BottomSheetBehavior<LinearLayout> sheetBehavior;
   private LinearLayout bottomSheetLayout;
   private LinearLayout gestureLayout;
   private TextView resultTextView;

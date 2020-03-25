@@ -20,7 +20,7 @@ from __future__ import print_function
 import argparse
 import os
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau
 from keras.callbacks import TensorBoard

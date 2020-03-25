@@ -17,12 +17,35 @@ Pre-requisites:
   (usually comes preinstalled with Python).
 - Physical Android device with camera.
 
-To install and run the app on your Android device, import the
+### Install and run the application
+
+You can either build and run the application inside Android Studio
+or run command line to do so.
+
+If you want to use Android Studio, first import the
 project into Android Studio (point it to the top-level `build.gradle`
 file), connect your Android device to your machine, and use the
 `Run` button in Android Studio. If the `Run` button is inactive,
 first add an Android application build configuration for the `app`
 module.
+
+If you want to build and install on Linux directly, you can first
+switch to the `android` folder, then execute
+
+```shell
+gradle wrapper
+./gradlew build
+```
+
+Then you can run the following command to install the apk
+
+```shell
+adb install ./app/build/outputs/apk/debug/app-debug.apk
+```
+
+If you need to install gradle, you can reference this [link](https://docs.gradle.org/current/userguide/installation.html)
+
+The running application will look like
 
 ![Screenshot from the app](app_screenshot.png)
 
