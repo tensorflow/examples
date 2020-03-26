@@ -25,14 +25,18 @@ import tempfile
 
 import tensorflow as tf
 import tensorflow_hub as hub
-
-from official.modeling import model_training_utils
 from official.nlp import optimization
 from official.nlp.bert import bert_models
 from official.nlp.bert import configs as bert_configs
 from official.nlp.bert import tokenization
 from official.nlp.data import classifier_data_lib
 from official.utils.misc import distribution_utils
+
+# TODO(b/152451908)
+try:
+  from official.nlp.bert import model_training_utils  # pylint: disable=g-import-not-at-top
+except ImportError:
+  from official.modeling import model_training_utils  # pylint: disable=g-import-not-at-top
 
 
 def create_int_feature(values):
