@@ -62,6 +62,6 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.31'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
-    implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
-    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
+    implementation('org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly') { changing = true }
 }
