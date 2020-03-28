@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5907E623F8485E17B5BD4C77 /* Pods_ImageClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC4C97F37EC38541E71580DD /* Pods_ImageClassification.framework */; };
 		78F01971242F0F5C0001D0D6 /* ModelDataHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F01970242F0F5C0001D0D6 /* ModelDataHandling.swift */; };
 		78F01974242FBE940001D0D6 /* StylePredictorModelDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F01972242FA4820001D0D6 /* StylePredictorModelDataHandler.swift */; };
 		78F01976242FD2A90001D0D6 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F01975242FD2A90001D0D6 /* Extensions.swift */; };
@@ -19,6 +18,7 @@
 		78F01982242FE8390001D0D6 /* ImageHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F01981242FE8390001D0D6 /* ImageHelper.swift */; };
 		78F019C424300F910001D0D6 /* style_predict_f16_256.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 78F019C224300F910001D0D6 /* style_predict_f16_256.tflite */; };
 		78F019C524300F910001D0D6 /* style_transfer_f16_384.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 78F019C324300F910001D0D6 /* style_transfer_f16_384.tflite */; };
+		799449CBA3962E8437F430BF /* Pods_StyleTransfer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC9C8A46535F7A1457D7704D /* Pods_StyleTransfer.framework */; };
 		AA5B0EEC217E70000026FF23 /* CurvedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5B0EEB217E70000026FF23 /* CurvedView.swift */; };
 		AAAB096E218981FA0015A1F2 /* CVPixelBuffer+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAB096D218981FA0015A1F2 /* CVPixelBuffer+extension.swift */; };
 		AAE79E5A213521DA00E7AC1F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE79E59213521DA00E7AC1F /* AppDelegate.swift */; };
@@ -31,6 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		55EF3AFD9D49A73C71FE1DAA /* Pods-StyleTransfer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StyleTransfer.release.xcconfig"; path = "Target Support Files/Pods-StyleTransfer/Pods-StyleTransfer.release.xcconfig"; sourceTree = "<group>"; };
 		78F0196E242F0DEE0001D0D6 /* style_predict_quantized_256.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = style_predict_quantized_256.tflite; sourceTree = "<group>"; };
 		78F0196F242F0E0B0001D0D6 /* style_transfer_quantized_384.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = style_transfer_quantized_384.tflite; sourceTree = "<group>"; };
 		78F01970242F0F5C0001D0D6 /* ModelDataHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDataHandling.swift; sourceTree = "<group>"; };
@@ -45,7 +46,7 @@
 		79B4E501CC3B9C1D89B2BC99 /* Pods-ImageClassification.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ImageClassification.release.xcconfig"; path = "Target Support Files/Pods-ImageClassification/Pods-ImageClassification.release.xcconfig"; sourceTree = "<group>"; };
 		AA5B0EEB217E70000026FF23 /* CurvedView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurvedView.swift; sourceTree = "<group>"; };
 		AAAB096D218981FA0015A1F2 /* CVPixelBuffer+extension.swift */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+extension.swift"; sourceTree = "<group>"; tabWidth = 2; };
-		AAE79E56213521DA00E7AC1F /* ImageClassification.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageClassification.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAE79E56213521DA00E7AC1F /* TFL Style Transfer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TFL Style Transfer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAE79E59213521DA00E7AC1F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AAE79E5E213521DA00E7AC1F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AAE79E60213521DB00E7AC1F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -54,7 +55,8 @@
 		AAE79E942135237A00E7AC1F /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; tabWidth = 2; };
 		AAE79E982135268800E7AC1F /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		AAE79E992135268800E7AC1F /* CameraFeedManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraFeedManager.swift; sourceTree = "<group>"; };
-		CC4C97F37EC38541E71580DD /* Pods_ImageClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ImageClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC9C8A46535F7A1457D7704D /* Pods_StyleTransfer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StyleTransfer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2A2C264DE78E0D394E023CF /* Pods-StyleTransfer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StyleTransfer.debug.xcconfig"; path = "Target Support Files/Pods-StyleTransfer/Pods-StyleTransfer.debug.xcconfig"; sourceTree = "<group>"; };
 		FD1295825F55771C142321E6 /* Pods-ImageClassification.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ImageClassification.debug.xcconfig"; path = "Target Support Files/Pods-ImageClassification/Pods-ImageClassification.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,7 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5907E623F8485E17B5BD4C77 /* Pods_ImageClassification.framework in Frameworks */,
+				799449CBA3962E8437F430BF /* Pods_StyleTransfer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,7 +123,7 @@
 		AAE79E4D213521DA00E7AC1F = {
 			isa = PBXGroup;
 			children = (
-				AAE79E58213521DA00E7AC1F /* ImageClassification */,
+				AAE79E58213521DA00E7AC1F /* StyleTransfer */,
 				AAE79E57213521DA00E7AC1F /* Products */,
 				DB78A6F809CBEF7BD59A3A1B /* Pods */,
 				C7692D66C8DF55213FFC7EFF /* Frameworks */,
@@ -131,12 +133,12 @@
 		AAE79E57213521DA00E7AC1F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AAE79E56213521DA00E7AC1F /* ImageClassification.app */,
+				AAE79E56213521DA00E7AC1F /* TFL Style Transfer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AAE79E58213521DA00E7AC1F /* ImageClassification */ = {
+		AAE79E58213521DA00E7AC1F /* StyleTransfer */ = {
 			isa = PBXGroup;
 			children = (
 				AAAB096C218981A30015A1F2 /* Extensions */,
@@ -151,7 +153,7 @@
 				AAE79E65213521DB00E7AC1F /* Info.plist */,
 				78F01975242FD2A90001D0D6 /* Extensions.swift */,
 			);
-			path = ImageClassification;
+			path = StyleTransfer;
 			sourceTree = "<group>";
 		};
 		AAE79E932135236700E7AC1F /* ViewControllers */ = {
@@ -175,7 +177,7 @@
 		C7692D66C8DF55213FFC7EFF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CC4C97F37EC38541E71580DD /* Pods_ImageClassification.framework */,
+				BC9C8A46535F7A1457D7704D /* Pods_StyleTransfer.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -185,6 +187,8 @@
 			children = (
 				FD1295825F55771C142321E6 /* Pods-ImageClassification.debug.xcconfig */,
 				79B4E501CC3B9C1D89B2BC99 /* Pods-ImageClassification.release.xcconfig */,
+				E2A2C264DE78E0D394E023CF /* Pods-StyleTransfer.debug.xcconfig */,
+				55EF3AFD9D49A73C71FE1DAA /* Pods-StyleTransfer.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -192,9 +196,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AAE79E55213521DA00E7AC1F /* ImageClassification */ = {
+		AAE79E55213521DA00E7AC1F /* StyleTransfer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AAE79E7E213521DB00E7AC1F /* Build configuration list for PBXNativeTarget "ImageClassification" */;
+			buildConfigurationList = AAE79E7E213521DB00E7AC1F /* Build configuration list for PBXNativeTarget "StyleTransfer" */;
 			buildPhases = (
 				6F6D4C9C8F08EC81CD3A74DB /* [CP] Check Pods Manifest.lock */,
 				AA055D8B2162320A00B25948 /* ShellScript */,
@@ -206,9 +210,9 @@
 			);
 			dependencies = (
 			);
-			name = ImageClassification;
+			name = StyleTransfer;
 			productName = ImageClassification;
-			productReference = AAE79E56213521DA00E7AC1F /* ImageClassification.app */;
+			productReference = AAE79E56213521DA00E7AC1F /* TFL Style Transfer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -227,7 +231,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AAE79E51213521DA00E7AC1F /* Build configuration list for PBXProject "ImageClassification" */;
+			buildConfigurationList = AAE79E51213521DA00E7AC1F /* Build configuration list for PBXProject "StyleTransfer" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -240,7 +244,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AAE79E55213521DA00E7AC1F /* ImageClassification */,
+				AAE79E55213521DA00E7AC1F /* StyleTransfer */,
 			);
 		};
 /* End PBXProject section */
@@ -278,7 +282,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ImageClassification-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-StyleTransfer-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -465,7 +469,7 @@
 		};
 		AAE79E7F213521DB00E7AC1F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FD1295825F55771C142321E6 /* Pods-ImageClassification.debug.xcconfig */;
+			baseConfigurationReference = E2A2C264DE78E0D394E023CF /* Pods-StyleTransfer.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -475,14 +479,14 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				INFOPLIST_FILE = ImageClassification/Info.plist;
+				INFOPLIST_FILE = StyleTransfer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ivan.cheung.ImageClassification;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = ivan.cheung.StyleTransfer;
+				PRODUCT_NAME = "TFL Style Transfer";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -492,7 +496,7 @@
 		};
 		AAE79E80213521DB00E7AC1F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79B4E501CC3B9C1D89B2BC99 /* Pods-ImageClassification.release.xcconfig */;
+			baseConfigurationReference = 55EF3AFD9D49A73C71FE1DAA /* Pods-StyleTransfer.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -502,14 +506,14 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				INFOPLIST_FILE = ImageClassification/Info.plist;
+				INFOPLIST_FILE = StyleTransfer/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ivan.cheung.ImageClassification;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = ivan.cheung.StyleTransfer;
+				PRODUCT_NAME = "TFL Style Transfer";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -519,7 +523,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AAE79E51213521DA00E7AC1F /* Build configuration list for PBXProject "ImageClassification" */ = {
+		AAE79E51213521DA00E7AC1F /* Build configuration list for PBXProject "StyleTransfer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AAE79E7C213521DB00E7AC1F /* Debug */,
@@ -528,7 +532,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AAE79E7E213521DB00E7AC1F /* Build configuration list for PBXNativeTarget "ImageClassification" */ = {
+		AAE79E7E213521DB00E7AC1F /* Build configuration list for PBXNativeTarget "StyleTransfer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AAE79E7F213521DB00E7AC1F /* Debug */,

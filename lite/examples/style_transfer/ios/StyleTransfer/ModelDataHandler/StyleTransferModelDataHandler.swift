@@ -1,6 +1,6 @@
 //
 //  StyleTransferModelDataHandler.swift
-//  ImageClassification
+//  StyleTransfer
 //
 //  Created by Ivan Cheung on 3/28/20.
 //  Copyright © 2020 Y Media Labs. All rights reserved.

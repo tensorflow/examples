@@ -46,7 +46,7 @@ download_and_extract() {
   rm -rf ${tempdir2} ${tempdir}
 }
 
-if [ -f ../ImageClassification/Model/mobilenet_quant_v1_224.tflite ]
+if [ -f ../StyleTransfer/Model/mobilenet_quant_v1_224.tflite ]
 then
 echo "File exists. Exiting..."
 exit 0
@@ -56,5 +56,4 @@ download_and_extract "${MODELS_URL}" "${DOWNLOADS_DIR}/models"
 
 file ${DOWNLOADS_DIR}/models
 
-cp ${DOWNLOADS_DIR}/models/* ../ImageClassification/Model
-
+cp ${DOWNLOADS_DIR}/models/* ../StyleTransfer/Model
