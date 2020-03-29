@@ -66,7 +66,7 @@ class CombinedModelDataHandler: ModelDataHandling {
 //          Style transfer:\t\(imageResult.elapsedTimeInMs)ms
 //          Total:\t\(elapsedTimeInMs)ms\n
 //          """)
-    
+
     return Result<UIImage>(elapsedTimeInMs: elapsedTimeInMs, inference: imageResult.inference)
   }
   
