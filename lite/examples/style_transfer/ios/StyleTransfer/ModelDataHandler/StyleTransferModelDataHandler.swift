@@ -8,6 +8,7 @@
 
 import CoreImage
 import TensorFlowLite
+import Accelerate
 
 /// Information about the MobileNet model.
 enum StyleTransferModel {
@@ -142,7 +143,7 @@ class StyleTransferModelDataHandler: ModelDataHandling {
     }
     
     // Handle quantization
-    let results: [Float]
+    let rgbDataAsFloats: [Float]
     switch outputTensor.dataType {
     case .uInt8:
       guard let quantization = outputTensor.quantizationParameters else {
@@ -150,83 +151,56 @@ class StyleTransferModelDataHandler: ModelDataHandling {
         return nil
       }
       let quantizedResults = [UInt8](outputTensor.data)
-      results = quantizedResults.map {
+      rgbDataAsFloats = quantizedResults.map {
         quantization.scale * Float(Int($0) - quantization.zeroPoint)
       }
     case .float32:
-      results = [Float32](unsafeData: outputTensor.data) ?? []
+      rgbDataAsFloats = [Float32](unsafeData: outputTensor.data) ?? []
     default:
       print("Output tensor data type \(outputTensor.dataType) is unsupported for this example app.")
       return nil
     }
     
+    let rgbData: [UInt8]
+    if #available(iOS 13.0, *) {
+      // Use faster, vectorized operations if available
+      rgbData = vDSP.floatingPointToInteger(vDSP.multiply(255, rgbDataAsFloats),
+                                                integerType: UInt8.self,
+                                                rounding: .towardNearestInteger)
+    } else {
+      // Fallback on earlier versions
+      rgbData = rgbDataAsFloats.map { UInt8($0 * 255) }
+    }
+    
     // Convert float array to StyleTransferOutput
-    let image = convertArrayToBitmap(imageArray: results, imageWidth: contentImageSize, imageHeight: contentImageSize)
+    let image = convertRGBToImage(rgbData: rgbData, width: contentImageSize, height: contentImageSize) ?? UIImage()
     
     // Return the inference time and inference results.
     return Result<StyleTransferOutput>(elapsedTimeInMs: interval, inference: image)
   }
-  
-  // TODO: There is probably a faster, vectorized way to do this
-  // Perhaps: https://github.com/hollance/CoreMLHelpers/blob/master/CoreMLHelpers/CGImage%2BRawBytes.swift
-  func convertArrayToBitmap(
-    imageArray: [Float],
-    imageWidth: Int,
-    imageHeight: Int
-  ) -> UIImage {
-    
-    var pixelDataAll = [PixelData]()
-    
-    for x in 0..<imageWidth {
-      for y in 0..<imageHeight {
-        let rIndex = ((x*imageWidth) + y) * 3
-        let gIndex = ((x*imageWidth) + y) * 3 + 1
-        let bIndex = ((x*imageWidth) + y) * 3 + 2
 
-//        print("R: \(rIndex) = \(imageArray[rIndex]), G: \(gIndex) = \(imageArray[gIndex]), B: \(bIndex) = \(imageArray[bIndex])")
-        
-        let pixelData = PixelData(a: 255,
-                                  r: UInt8(imageArray[rIndex] * 255),
-                                  g: UInt8(imageArray[gIndex] * 255),
-                                  b: UInt8(imageArray[bIndex] * 255))
-        
-        pixelDataAll.append(pixelData)
-      }
-    }
+  private func convertRGBToImage(rgbData: [UInt8], width: Int, height: Int) -> UIImage? {
+    let bitsPerComponent = 8
+    let componentsPerPixel = 3
+    let bitsPerPixel = bitsPerComponent * componentsPerPixel
     
-    return imageFromARGB32Bitmap(pixels: pixelDataAll, width: imageWidth, height: imageHeight) ?? UIImage()
-  }
-  
-  public struct PixelData {
-    var a: UInt8
-    var r: UInt8
-    var g: UInt8
-    var b: UInt8
-  }
-
-  // From: https://stackoverflow.com/questions/30958427/pixel-array-to-uiimage-in-swift
-  // TODO: Determine if code is legally usable or not
-  private func imageFromARGB32Bitmap(pixels: [PixelData], width: Int, height: Int) -> UIImage? {
     guard width > 0 && height > 0 else { return nil }
-    guard pixels.count == width * height else { return nil }
+    guard rgbData.count == width * height * componentsPerPixel else { return nil }
     
     let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-    let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
-    let bitsPerComponent = 8
-    let bitsPerPixel = 32
+    let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
     
-    var data = pixels // Copy to mutable []
-    guard let providerRef = CGDataProvider(data: NSData(bytes: &data,
-                                                        length: data.count * MemoryLayout<PixelData>.size)
-      )
+    var rgbDataMutable = rgbData
+    guard let providerRef = CGDataProvider(data: NSData(bytes: &rgbDataMutable,
+                                                        length: rgbDataMutable.count * MemoryLayout<UInt8>.size))
       else { return nil }
     
-    guard let cgim = CGImage(
+    guard let cgImage = CGImage(
       width: width,
       height: height,
       bitsPerComponent: bitsPerComponent,
       bitsPerPixel: bitsPerPixel,
-      bytesPerRow: width * MemoryLayout<PixelData>.size,
+      bytesPerRow: width * MemoryLayout<UInt8>.size * componentsPerPixel,
       space: rgbColorSpace,
       bitmapInfo: bitmapInfo,
       provider: providerRef,
@@ -236,7 +210,7 @@ class StyleTransferModelDataHandler: ModelDataHandling {
       )
       else { return nil }
     
-    return UIImage(cgImage: cgim)
+    return UIImage(cgImage: cgImage)
   }
   
 }
