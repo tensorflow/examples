@@ -104,10 +104,6 @@ class ViewController: UIViewController {
     super.prepare(for: segue, sender: sender)
 
     if segue.identifier == "EMBED" {
-
-      guard let tempModelDataHandler = modelDataHandler else {
-        return
-      }
     
       self.inferenceViewController = segue.destination as? InferenceImageDisplayViewController
         
@@ -118,6 +114,7 @@ class ViewController: UIViewController {
 //      inferenceViewController?.delegate = self
 
     }
+    
   }
 
   @objc func classifyPasteboardImage() {

@@ -17,43 +17,45 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODELS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_224_android_quant_2017_11_08.zip"
+MODELS_PREDICT_QUANTIZED_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_predict_quantized_256.tflite"
+MODELS_TRANSFER_QUANTIZED_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_quantized_384.tflite"
+MODELS_PREDICT_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_predict_f16_256.tflite"
+MODELS_TRANSFER_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_f16_384.tflite"
 DOWNLOADS_DIR=$(mktemp -d)
 
 cd $SCRIPT_DIR
 
-download_and_extract() {
-  local usage="Usage: download_and_extract URL DIR"
+download() {
+  local usage="Usage: download URL DIR"
   local url="${1:?${usage}}"
   local dir="${2:?${usage}}"
   echo "downloading ${url}" >&2
   mkdir -p "${dir}"
-  tempdir=$(mktemp -d)
-  tempdir2=$(mktemp -d)
 
-  curl -L ${url} > ${tempdir}/zipped.zip
-  unzip ${tempdir}/zipped.zip -d ${tempdir2}
-
-  # If the zip file contains nested directories, extract the files from the
-  # inner directory.
-  if ls ${tempdir2}/*/* 1> /dev/null 2>&1; then
-    # unzip has no strip components, so unzip to a temp dir, and move the
-    # files we want from the tempdir to destination.
-    cp -R ${tempdir2}/*/* ${dir}/
-  else
-    cp -R ${tempdir2}/* ${dir}/
-  fi
-  rm -rf ${tempdir2} ${tempdir}
+  cd ${dir} && { curl -L -O ${url} ; cd -; }
 }
 
-if [ -f ../StyleTransfer/Model/mobilenet_quant_v1_224.tflite ]
+if [ ! -f ../StyleTransfer/Model/style_predict_quantized_256.tflite ]
 then
-echo "File exists. Exiting..."
-exit 0
+download "${MODELS_PREDICT_QUANTIZED_URL}" "${DOWNLOADS_DIR}/models"
 fi
 
-download_and_extract "${MODELS_URL}" "${DOWNLOADS_DIR}/models"
+if [ ! -f ../StyleTransfer/Model/style_transfer_quantized_384.tflite ]
+then
+download "${MODELS_TRANSFER_QUANTIZED_URL}" "${DOWNLOADS_DIR}/models"
+fi
 
-file ${DOWNLOADS_DIR}/models
+if [ ! -f ../StyleTransfer/Model/style_predict_f16_256.tflite ]
+then
+download "${MODELS_PREDICT_URL}" "${DOWNLOADS_DIR}/models"
+fi
 
+if [ ! -f ../StyleTransfer/Model/style_transfer_f16_384.tflite ]
+then
+download "${MODELS_TRANSFER_URL}" "${DOWNLOADS_DIR}/models"
+fi
+
+if [ -d ${DOWNLOADS_DIR}/models ]
+then
 cp ${DOWNLOADS_DIR}/models/* ../StyleTransfer/Model
+fi
