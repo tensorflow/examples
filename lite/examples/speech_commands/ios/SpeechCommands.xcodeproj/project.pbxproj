@@ -214,7 +214,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/RunScripts/download_models.sh\n";
+			shellScript = "\"$SRCROOT/RunScripts/download_models.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
