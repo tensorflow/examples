@@ -106,13 +106,6 @@ class ViewController: UIViewController {
     if segue.identifier == "EMBED" {
     
       self.inferenceViewController = segue.destination as? InferenceImageDisplayViewController
-        
-//      inferenceViewController?.wantedInputHeight = tempModelDataHandler.inputHeight
-//      inferenceViewController?.wantedInputWidth = tempModelDataHandler.inputWidth
-//      inferenceViewController?.maxResults = tempModelDataHandler.resultCount
-//      inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
-//      inferenceViewController?.delegate = self
-
     }
     
   }

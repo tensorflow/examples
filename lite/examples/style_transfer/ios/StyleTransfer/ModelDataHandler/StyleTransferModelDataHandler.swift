@@ -163,17 +163,7 @@ class StyleTransferModelDataHandler: ModelDataHandling {
     // Convert float array to StyleTransferOutput
     let image = convertArrayToBitmap(imageArray: results, imageWidth: contentImageSize, imageHeight: contentImageSize)
     
-    // Process the results.
     // Return the inference time and inference results.
-    //    let logInfo = StyleBottleneck.LogInfo(preProcessTime: <#T##Int#>,
-    //                                                  stylePredictTime: <#T##Int#>,
-    //                                                  styleTransferTime: <#T##Int#>,
-    //                                                  postProcessTime: <#T##Int#>,
-    //                                                  totalExecutionTime: <#T##Int#>,
-    //                                                  executionLog: <#T##String#>,
-    //                                                  errorMessage: <#T##String#>)
-    
-    
     return Result<StyleTransferOutput>(elapsedTimeInMs: interval, inference: image)
   }
   

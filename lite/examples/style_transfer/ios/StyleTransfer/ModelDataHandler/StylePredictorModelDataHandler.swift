@@ -163,16 +163,7 @@ class StylePredictorModelDataHandler: ModelDataHandling {
       return nil
     }
 
-    // Process the results.
     // Return the inference time and inference results.
-//    let logInfo = StyleBottleneck.LogInfo(preProcessTime: <#T##Int#>,
-//                                                  stylePredictTime: <#T##Int#>,
-//                                                  styleTransferTime: <#T##Int#>,
-//                                                  postProcessTime: <#T##Int#>,
-//                                                  totalExecutionTime: <#T##Int#>,
-//                                                  executionLog: <#T##String#>,
-//                                                  errorMessage: <#T##String#>)
-    
     return Result<StyleBottleneck>(elapsedTimeInMs: interval, inference: results)
   }
 }
