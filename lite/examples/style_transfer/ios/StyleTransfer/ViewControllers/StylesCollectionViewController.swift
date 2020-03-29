@@ -14,10 +14,14 @@ protocol StylesCollectionViewControllerDelegate: AnyObject {
 
 class StylesCollectionViewController: UICollectionViewController {
     weak var delegate: StylesCollectionViewControllerDelegate?
+    var selectedStyle: Style?
     
     // MARK: - Private Properties
     private let reuseIdentifier = "cell"
     private let styles: [Style] = Style.allCases
+    
+    private let selectedBorderColor: CGColor = UIColor.green.cgColor
+    private let selectedBorderWidth: CGFloat = 4
     
     private let itemsPerRow: CGFloat = 3
     private let sectionInsets = UIEdgeInsets(top: 30.0,
@@ -47,6 +51,8 @@ extension StylesCollectionViewController {
         if let cell = cell as? ImageCollectionViewCell {
             let style = styles[indexPath.item]
             cell.image = UIImage(named: style.rawValue)
+            cell.contentView.layer.borderColor = selectedBorderColor
+            cell.contentView.layer.borderWidth = selectedStyle == style ? selectedBorderWidth : 0
         }
         
         return cell

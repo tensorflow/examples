@@ -120,6 +120,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate & UINavi
     case Segue.ShowStyles.rawValue:
       self.stylesViewController = segue.destination as? StylesCollectionViewController
       self.stylesViewController?.delegate = self
+      self.stylesViewController?.selectedStyle = modelDataHandler?.style
     default:
       break
     }
