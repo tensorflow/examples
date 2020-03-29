@@ -1,20 +1,14 @@
-# TensorFlow Lite image classification iOS example application
+# Style Transfer iOS sample.
 
 ## Overview
 
-This is an example application for [TensorFlow Lite](https://tensorflow.org/lite)
-on iOS. It uses [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview)
-to continuously classify whatever it sees from the device's back camera, using
-a quantized MobileNet model. The application must be run on device.
-
-These instructions walk you through building and
-running the demo on an iOS device. For an explanation of the source, see
-[TensorFlow Lite iOS image classification example](https://github.com/tensorflow/examples/blob/master/lite/examples/image_classification/ios/EXPLORE_THE_CODE.md).
-
-<!-- TODO(b/124116863): Add app screenshot. -->
+Artistic style transfer is an optimization technique used to take two images: a
+content image and a style reference image (such as an artwork by a famous
+painter) and blend them together so the output image looks like the content
+image, but “painted” in the style of the style reference image.
 
 ### Model
-For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
+For details of the model used, visit [Style Transfer](https://www.tensorflow.org/lite/models/style_transfer/overview).
 
 The model will be downloaded as part of the build process.
 
@@ -22,7 +16,7 @@ The model will be downloaded as part of the build process.
 
 The app is written entirely in Swift and uses the TensorFlow Lite
 [Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/swift)
-for performing image classification.
+for performing style transfer.
 
 Note: Objective-C developers should use the TensorFlow Lite
 [Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/objc).
@@ -52,20 +46,20 @@ You can build it and run with the iPhone Simulator, but the app will raise a
     https://github.com/tensorflow/examples.git`
 
 2.  Install the pod to generate the workspace file: `bash cd
-    examples/lite/examples/image_classification/ios pod install`
+    examples/lite/examples/style_transfer/ios pod install`
 
 Note: If you have installed this pod before and that command doesn't work, try
 `pod update`.
 
 At the end of this step you should have a directory called
-`ImageClassification.xcworkspace`.
+`StyleTransfer.xcworkspace`.
 
 1.  Open the project in Xcode with the following command: `bash open
-    ImageClassification.xcworkspace`
+    StyleTransfer.xcworkspace`
 
-This launches Xcode and opens the `ImageClassification` project.
+This launches Xcode and opens the `StyleTransfer` project.
 
-1.  Select the `ImageClassification` project in the left hand navigation to open
+1.  Select the `StyleTransfer` project in the left hand navigation to open
     the project configuration. In the **Signing** section of the **General**
     tab, select your development team from the dropdown.
 
@@ -77,7 +71,7 @@ This launches Xcode and opens the `ImageClassification` project.
 3.  With an iOS device connected, build and run the app in Xcode.
 
 You'll have to grant permissions for the app to use the device's camera. Point
-the camera at various objects and enjoy seeing how the model classifies things!
+the camera at various objects and enjoy seeing how the model transfers styles!
 
 ## Model references
 _Do not delete the empty references_ to the .tflite and .txt files after you
