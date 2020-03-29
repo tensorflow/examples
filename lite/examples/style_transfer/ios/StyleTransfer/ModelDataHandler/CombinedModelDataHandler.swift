@@ -3,7 +3,7 @@
 //  StyleTransfer
 //
 //  Created by Ivan Cheung on 3/28/20.
-//  Copyright © 2020 Y Media Labs. All rights reserved.
+//  Copyright © 2020 Ivan Cheung. All rights reserved.
 //
 
 import TensorFlowLite
