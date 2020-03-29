@@ -24,6 +24,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app uses the camera to capture an image to transfer a style to</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app uses the photo library to save styled images to</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

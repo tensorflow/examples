@@ -361,8 +361,23 @@ extension ViewController: InferenceImageDisplayViewControllerDelegate {
     self.performSegue(withIdentifier: ViewController.Segue.ShowStyles.rawValue, sender: nil)
   }
   
-  func didTapCameraButton() {
-    // TODO
+  func didTapCameraButton(image: UIImage) {
+    UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+  }
+  
+  @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    if let error = error {
+        let alertController = UIAlertController(title: "Error saving image",
+                                                message: error.localizedDescription,
+                                                preferredStyle: .alert)
+      
+        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alertController, animated: true)
+    } else {
+        let alertController = UIAlertController(title: "Saved", message: "The styled image has been saved to your photos.", preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alertController, animated: true)
+    }
   }
 }
 

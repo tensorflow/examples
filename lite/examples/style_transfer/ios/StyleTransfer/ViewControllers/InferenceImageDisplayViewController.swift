@@ -10,7 +10,7 @@ import UIKit
 
 protocol InferenceImageDisplayViewControllerDelegate: AnyObject {
     func didTapStyleSelectionButton()
-    func didTapCameraButton()
+    func didTapCameraButton(image: UIImage)
 }
 
 class InferenceImageDisplayViewController: UIViewController {
@@ -44,6 +44,7 @@ class InferenceImageDisplayViewController: UIViewController {
     }
     
     @IBAction func didTapCameraButton(_ sender: Any) {
-        delegate?.didTapCameraButton()
+        guard let image = image else { return }
+        delegate?.didTapCameraButton(image: image)
     }
 }
