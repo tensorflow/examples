@@ -13,16 +13,17 @@ import TensorFlowLite
 /// results for a successful inference.
 class CombinedModelDataHandler: ModelDataHandling {
   // MARK: - Internal Properties
-  var inputWidth: Int { styleTransferModelDataHandler.contentImageSize }
-  var inputHeight: Int { styleTransferModelDataHandler.contentImageSize }
+  var style: Style = .style0
+  
   let threadCount: Int
   let threadCountLimit = 10
   
   // MARK: - Private Properties
-  let stylePredictorModelDataHandler: StylePredictorModelDataHandler
-  let styleTransferModelDataHandler: StyleTransferModelDataHandler
+  private let stylePredictorModelDataHandler: StylePredictorModelDataHandler
+  private let styleTransferModelDataHandler: StyleTransferModelDataHandler
   
-  // TODO: Cache last style predictor to use if not changed
+  // Cache predicted style bottlenecks
+  private var styleBottleneckCache = [Style: StyleBottleneck]()
     
   // MARK: - Initialization
 
@@ -43,22 +44,35 @@ class CombinedModelDataHandler: ModelDataHandling {
 
   /// Performs image preprocessing, invokes the `Interpreter`, and processes the inference results.
   func runModel(input pixelBuffer: CVPixelBuffer) -> Result<UIImage>? {
-    guard let styleBottleneckResult = stylePredictorModelDataHandler.runModel(input: .style24) else {
+    let styleBottleneckResult: Result<StyleBottleneck>?
+    if let cachedStyleBottleneck = retrieveStyleBottlenextFromCache(style: style) {
+      styleBottleneckResult = cachedStyleBottleneck
+    } else {
+      styleBottleneckResult = stylePredictorModelDataHandler.runModel(input: style)
+      styleBottleneckCache[style] = styleBottleneckResult?.inference
+    }
+    
+    guard let bottleneckResult = styleBottleneckResult else {
       return nil
     }
     
     guard let imageResult = styleTransferModelDataHandler.runModel(input: StyleTransferInput(
-      styleBottleneck: styleBottleneckResult.inference,
+      styleBottleneck: bottleneckResult.inference,
       pixelBuffer: pixelBuffer)) else { return nil }
     
-    let elapsedTimeInMs = styleBottleneckResult.elapsedTimeInMs + imageResult.elapsedTimeInMs
+    let elapsedTimeInMs = bottleneckResult.elapsedTimeInMs + imageResult.elapsedTimeInMs
     
     print("""
-          Style prediction: \(styleBottleneckResult.elapsedTimeInMs)
-          Style transfer: \(imageResult.elapsedTimeInMs)
-          Total: \(elapsedTimeInMs)\n
+          Style prediction:\t\(bottleneckResult.elapsedTimeInMs)"ms"
+          Style transfer:\t\(imageResult.elapsedTimeInMs)"ms"
+          Total:\t\(elapsedTimeInMs)"ms"\n
           """)
     
     return Result<UIImage>(elapsedTimeInMs: elapsedTimeInMs, inference: imageResult.inference)
+  }
+  
+  // MARK: - Private Methods
+  private func retrieveStyleBottlenextFromCache(style: Style) -> Result<StyleBottleneck>? {
+    return styleBottleneckCache[style].map { Result(elapsedTimeInMs: 0, inference: $0) }
   }
 }

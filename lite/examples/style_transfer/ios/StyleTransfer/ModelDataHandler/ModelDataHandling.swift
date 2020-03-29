@@ -6,8 +6,6 @@
 //  Copyright © 2020 Ivan Cheung. All rights reserved.
 //
 
-import CoreImage
-
 /// A result from invoking the `Interpreter`.
 struct Result<Inference> {
   let elapsedTimeInMs: Double
