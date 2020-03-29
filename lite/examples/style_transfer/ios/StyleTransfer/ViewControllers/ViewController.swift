@@ -15,8 +15,13 @@
 import AVFoundation
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
 
+  fileprivate enum Segue: String {
+    case Embed
+    case ShowStyles
+  }
+  
   // MARK: Storyboards Connections
   @IBOutlet weak var previewView: PreviewView!
   @IBOutlet weak var cameraUnavailableLabel: UILabel!
@@ -46,6 +51,9 @@ class ViewController: UIViewController {
 
   // Handles the presenting of results on the screen
   private var inferenceViewController: InferenceImageDisplayViewController?
+  
+  // Handles the presenting and selection of styles
+  private var stylesViewController: StylesCollectionViewController?
 
   // MARK: View Handling Methods
   override func viewDidLoad() {
@@ -102,12 +110,19 @@ class ViewController: UIViewController {
   // MARK: Storyboard Segue Handlers
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     super.prepare(for: segue, sender: sender)
+    
+    guard let identifier = segue.identifier else { return }
 
-    if segue.identifier == "EMBED" {
-    
+    switch (identifier) {
+    case Segue.Embed.rawValue:
       self.inferenceViewController = segue.destination as? InferenceImageDisplayViewController
+      self.inferenceViewController?.delegate = self
+    case Segue.ShowStyles.rawValue:
+      self.stylesViewController = segue.destination as? StylesCollectionViewController
+      self.stylesViewController?.delegate = self
+    default:
+      break
     }
-    
   }
 
   @objc func classifyPasteboardImage() {
@@ -338,4 +353,22 @@ extension ViewController {
     view.setNeedsLayout()
   }
 
+}
+
+extension ViewController: InferenceImageDisplayViewControllerDelegate {
+  func didTapStyleSelectionButton() {
+    self.performSegue(withIdentifier: ViewController.Segue.ShowStyles.rawValue, sender: nil)
+  }
+  
+  func didTapCameraButton() {
+    // TODO
+  }
+}
+
+extension ViewController: StylesCollectionViewControllerDelegate {
+  func didSelectStyle(style: Style) {
+    modelDataHandler?.style = style
+    
+    dismiss(animated: true, completion: nil)
+  }
 }

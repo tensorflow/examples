@@ -8,9 +8,16 @@
 
 import UIKit
 
+protocol InferenceImageDisplayViewControllerDelegate: AnyObject {
+    func didTapStyleSelectionButton()
+    func didTapCameraButton()
+}
+
 class InferenceImageDisplayViewController: UIViewController {
     // MARK: Storyboard Outlets
-    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet private weak var imageView: UIImageView!
+    
+    weak var delegate: InferenceImageDisplayViewControllerDelegate?
     
     // MARK: Instance variables
     var image: UIImage? {
@@ -30,5 +37,13 @@ class InferenceImageDisplayViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    @IBAction func didTapStyleSelectionButton(_ sender: Any) {
+        delegate?.didTapStyleSelectionButton()
+    }
+    
+    @IBAction func didTapCameraButton(_ sender: Any) {
+        delegate?.didTapCameraButton()
     }
 }

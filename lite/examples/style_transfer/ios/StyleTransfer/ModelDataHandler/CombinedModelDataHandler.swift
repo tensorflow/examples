@@ -14,7 +14,7 @@ import TensorFlowLite
 class CombinedModelDataHandler: ModelDataHandling {
   // MARK: - Internal Properties
   var style: Style = .style0
-  
+
   let threadCount: Int
   let threadCountLimit = 10
   
@@ -27,7 +27,6 @@ class CombinedModelDataHandler: ModelDataHandling {
     
   // MARK: - Initialization
 
-    
   /// A failable initializer for `ModelDataHandler`. A new instance is created if the model and
   /// labels files are successfully loaded from the app's main bundle. Default `threadCount` is 1.
   init?(threadCount: Int = 1) {
@@ -41,7 +40,7 @@ class CombinedModelDataHandler: ModelDataHandling {
   }
 
   // MARK: - Internal Methods
-
+  
   /// Performs image preprocessing, invokes the `Interpreter`, and processes the inference results.
   func runModel(input pixelBuffer: CVPixelBuffer) -> Result<UIImage>? {
     let styleBottleneckResult: Result<StyleBottleneck>?
