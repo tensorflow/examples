@@ -1,13 +1,15 @@
-# TensorFlow Lite iOS image classification example
+# TensorFlow Lite iOS style transfer example
 
 This document walks through the code of a simple iOS mobile application that
-demonstrates [image classification](https://www.tensorflow.org/lite/models/image_classification/overview) using the device camera.
+demonstrates [style transfer](https://www.tensorflow.org/lite/models/style_transfer/overview) using the device camera.
+
+The code borrows heavily from the [Image Classification on iOS](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/ios) example.
 
 ## Explore the code
 
 The app is written entirely in Swift and uses the TensorFlow Lite
 [Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/swift)
-for performing image classification.
+for performing style transfer.
 
 Note: Objective-C developers should use the TensorFlow Lite
 [Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/objc).
@@ -17,7 +19,7 @@ We're now going to walk through the most important parts of the sample code.
 ### Get camera input
 
 The app's main view is represented by the `ViewController` class in
-[`ViewController.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/ios/ImageClassification/ViewControllers/ViewController.swift),
+[`ViewController.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/style_transfer/ios/StyleTransfer/ViewControllers/ViewController.swift),
 which we extend with functionality from the `CameraFeedManagerDelegate` protocol
 to process frames from a camera feed. To run inference on a given frame, we
 implement the `didOutput` method, which is called whenever a frame is available
@@ -25,7 +27,7 @@ from the camera.
 
 Our implementation of `didOutput` includes a call to the `runModel` method of a
 `ModelDataHandler` instance. As we will see below, this class gives us access to
-the TensorFlow Lite `Interpreter` class for performing image classification.
+the TensorFlow Lite `Interpreter` class for performing style transfer.
 
 ```swift
 extension ViewController: CameraFeedManagerDelegate {
@@ -52,7 +54,7 @@ extension ViewController: CameraFeedManagerDelegate {
 ### ModelDataHandler
 
 The Swift class `ModelDataHandler`, defined in
-[`ModelDataHandler.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/ios/ImageClassification/ModelDataHandler/ModelDataHandler.swift),
+[`ModelDataHandler.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/style_transfer/ios/StyleTransfer/ModelDataHandler/ModelDataHandler.swift),
 handles all data preprocessing and makes calls to run inference on a given frame
 using the TensorFlow Lite [`Interpreter`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/experimental/swift/Sources/Interpreter.swift).
 It then formats the inferences obtained from invoking the `Interpreter` and
@@ -90,8 +92,6 @@ init?(modelFileInfo: FileInfo, labelsFileInfo: FileInfo, threadCount: Int = 1) {
     print("Failed to create the interpreter with error: \(error.localizedDescription)")
     return nil
   }
-  // Load the classes listed in the labels file.
-  loadLabels(fileInfo: labelsFileInfo)
 }
 ```
 
@@ -212,6 +212,4 @@ let topNInferences = sortedResults.map { result in Inference(confidence: result.
 
 ### Display results
 
-The file
-[`InferenceViewController.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/ios/ImageClassification/ViewControllers/InferenceViewController.swift)
-defines the app's UI. A `UITableView` is used to display the results.
+TODO
