@@ -62,11 +62,11 @@ class CombinedModelDataHandler: ModelDataHandling {
     
     let elapsedTimeInMs = bottleneckResult.elapsedTimeInMs + imageResult.elapsedTimeInMs
     
-    print("""
-          Style prediction:\t\(bottleneckResult.elapsedTimeInMs)"ms"
-          Style transfer:\t\(imageResult.elapsedTimeInMs)"ms"
-          Total:\t\(elapsedTimeInMs)"ms"\n
-          """)
+//    print("""
+//          Style prediction:\t\(bottleneckResult.elapsedTimeInMs)ms
+//          Style transfer:\t\(imageResult.elapsedTimeInMs)ms
+//          Total:\t\(elapsedTimeInMs)ms\n
+//          """)
     
     return Result<UIImage>(elapsedTimeInMs: elapsedTimeInMs, inference: imageResult.inference)
   }
