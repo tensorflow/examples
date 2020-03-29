@@ -206,7 +206,7 @@ class StyleTransferModelDataHandler: ModelDataHandling {
 
   // From: https://stackoverflow.com/questions/30958427/pixel-array-to-uiimage-in-swift
   // TODO: Determine if code is legally usable or not
-  func imageFromARGB32Bitmap(pixels: [PixelData], width: Int, height: Int) -> UIImage? {
+  private func imageFromARGB32Bitmap(pixels: [PixelData], width: Int, height: Int) -> UIImage? {
     guard width > 0 && height > 0 else { return nil }
     guard pixels.count == width * height else { return nil }
     
