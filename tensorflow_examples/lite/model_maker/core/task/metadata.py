@@ -26,7 +26,7 @@ TFLITE_SUPPORT_TOOLS_INSTALLED = True
 
 try:
   # pylint: disable=g-direct-tensorflow-import,g-import-not-at-top
-  from tflite_support import flatbuffers
+  import flatbuffers
   from tflite_support import metadata as _metadata
   from tflite_support import metadata_schema_py_generated as _metadata_fb
   # pylint: enable=g-direct-tensorflow-import,g-import-not-at-top

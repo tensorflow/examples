@@ -18,7 +18,7 @@ from __future__ import print_function
 
 import os
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
@@ -68,6 +68,23 @@ class TextClassifierTest(tf.test.TestCase):
       )
 
   @test_util.test_in_tf_2
+  def test_bert_model(self):
+    model_spec = ms.BertModelSpec(seq_len=2, trainable=False)
+    all_data = text_dataloader.TextClassifierDataLoader.from_folder(
+        self.text_dir, model_spec=model_spec)
+    # Splits data, 90% data for training, 10% for testing
+    self.train_data, self.test_data = all_data.split(0.9)
+
+    model = text_classifier.create(
+        self.train_data,
+        mef.ModelExportFormat.TFLITE,
+        model_spec=model_spec,
+        epochs=1,
+        batch_size=1,
+        shuffle=True)
+    self._test_accuracy(model, 0.5)
+
+  @test_util.test_in_tf_2
   def test_average_wordvec_model(self):
     model_spec = ms.AverageWordVecModelSpec(seq_len=2)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
@@ -86,9 +103,9 @@ class TextClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite(model)
     self._test_predict_top_k(model)
 
-  def _test_accuracy(self, model):
+  def _test_accuracy(self, model, threshold=1.0):
     _, accuracy = model.evaluate(self.test_data)
-    self.assertEqual(accuracy, 1.0)
+    self.assertEqual(accuracy, threshold)
 
   def _test_predict_top_k(self, model):
     topk = model.predict_top_k(self.test_data, batch_size=4)

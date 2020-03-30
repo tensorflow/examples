@@ -36,6 +36,8 @@ function test_pip_install {
     exit 1
   fi
 
+  ${PIP_BIN} install --upgrade pip ${PIP_OPTIONS}
+
   echo "=== TEST PIP INSTASLL IN: ${WORKSPACE_DIR} ==="
 
   pushd "${WORKSPACE_DIR}" > /dev/null
