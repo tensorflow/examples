@@ -195,8 +195,15 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
 
     // Show the best detections.
     // after scaling them back to the input size.
-    final ArrayList<Recognition> recognitions = new ArrayList<>(NUM_DETECTIONS);
-    for (int i = 0; i < NUM_DETECTIONS; ++i) {
+      
+    // You need to use the number of detections from the output and not the NUM_DETECTONS variable declared on top
+      // because on some models, they don't always output the same total number of detections
+      // For example, your model's NUM_DETECTIONS = 20, but sometimes it only outputs 16 predictions
+      // If you don't use the output's numDetections, you'll get nonsensical data
+    int numDetectionsOutput = Math.min(NUM_DETECTIONS, (int) numDetections[0]); // cast from float to integer, use min for safety
+      
+    final ArrayList<Recognition> recognitions = new ArrayList<>(numDetectionsOutput);
+    for (int i = 0; i < numDetectionsOutput; ++i) {
       final RectF detection =
           new RectF(
               outputLocations[0][i][1] * inputSize,
