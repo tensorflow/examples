@@ -39,7 +39,12 @@ import org.tensorflow.lite.examples.detection.env.Logger;
 
 /**
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
- * github.com/tensorflow/models/tree/master/research/object_detection
+ * - https://github.com/tensorflow/models/tree/master/research/object_detection
+ * where you can find the training code.
+ *
+ * To use pretrained models in the API or convert to TF Lite models, please see docs for details:
+ * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+ * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
  */
 public class TFLiteObjectDetectionAPIModel implements Classifier {
   private static final Logger LOGGER = new Logger();
@@ -105,11 +110,9 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
       throws IOException {
     final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel();
 
-    InputStream labelsInput = null;
     String actualFilename = labelFilename.split("file:///android_asset/")[1];
-    labelsInput = assetManager.open(actualFilename);
-    BufferedReader br = null;
-    br = new BufferedReader(new InputStreamReader(labelsInput));
+    InputStream labelsInput = assetManager.open(actualFilename);
+    BufferedReader br = new BufferedReader(new InputStreamReader(labelsInput));
     String line;
     while ((line = br.readLine()) != null) {
       LOGGER.w(line);
