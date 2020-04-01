@@ -247,10 +247,10 @@ dependencies {
   // Assuming you copied the Android library from this project to your project.
   implementation project(path: ':transfer_api')
 
-  implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+  implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
   // Please uncomment the following line if you use a custom Keras model.
   // (see TensorFlow Select Ops dependency section below).
-  // implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly'
+  // implementation('org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly') { changing = true }
 }
 ```
 
