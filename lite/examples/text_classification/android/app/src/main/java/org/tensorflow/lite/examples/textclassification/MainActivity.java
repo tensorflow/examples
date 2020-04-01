@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+    setContentView(R.layout.tfe_tc_activity_main);
     Log.v(TAG, "onCreate");
 
     client = new TextClassificationClient(getApplicationContext());

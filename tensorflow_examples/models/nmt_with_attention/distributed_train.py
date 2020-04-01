@@ -21,11 +21,12 @@ from __future__ import print_function
 
 from absl import app
 from absl import flags
-import tensorflow as tf # TF2
+
+import tensorflow as tf
 from tensorflow_examples.models.nmt_with_attention import nmt
 from tensorflow_examples.models.nmt_with_attention import utils
 from tensorflow_examples.models.nmt_with_attention.train import Train
-assert tf.__version__.startswith('2')
+
 
 FLAGS = flags.FLAGS
 

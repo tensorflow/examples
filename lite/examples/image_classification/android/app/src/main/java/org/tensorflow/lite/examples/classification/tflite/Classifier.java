@@ -51,8 +51,10 @@ public abstract class Classifier {
 
   /** The model type used for classification. */
   public enum Model {
-    FLOAT,
-    QUANTIZED,
+    FLOAT_MOBILENET,
+    QUANTIZED_MOBILENET,
+    FLOAT_EFFICIENTNET,
+    QUANTIZED_EFFICIENTNET
   }
 
   /** The runtime device type used for executing classification. */
@@ -109,10 +111,16 @@ public abstract class Classifier {
    */
   public static Classifier create(Activity activity, Model model, Device device, int numThreads)
       throws IOException {
-    if (model == Model.QUANTIZED) {
+    if (model == Model.QUANTIZED_MOBILENET) {
       return new ClassifierQuantizedMobileNet(activity, device, numThreads);
-    } else {
+    } else if (model == Model.FLOAT_MOBILENET) {
       return new ClassifierFloatMobileNet(activity, device, numThreads);
+    } else if (model == Model.FLOAT_EFFICIENTNET) {
+      return new ClassifierFloatEfficientNet(activity, device, numThreads);
+    } else if (model == Model.QUANTIZED_EFFICIENTNET) {
+      return new ClassifierQuantizedEfficientNet(activity, device, numThreads);
+    } else {
+      throw new UnsupportedOperationException();
     }
   }
 
@@ -294,13 +302,13 @@ public abstract class Classifier {
 
     // Creates processor for the TensorImage.
     int cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight());
-    int numRoration = sensorOrientation / 90;
+    int numRotation = sensorOrientation / 90;
     // TODO(b/143564309): Fuse ops inside ImageProcessor.
     ImageProcessor imageProcessor =
         new ImageProcessor.Builder()
             .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
             .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.NEAREST_NEIGHBOR))
-            .add(new Rot90Op(numRoration))
+            .add(new Rot90Op(numRotation))
             .add(getPreprocessNormalizeOp())
             .build();
     return imageProcessor.process(inputImageBuffer);

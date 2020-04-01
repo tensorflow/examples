@@ -26,11 +26,11 @@ import sys
 
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
-from tensorflow.python.ops import io_ops
-from tensorflow.python.platform import gfile
-from tensorflow.python.util import compat
+from tensorflow.compat.v1.python.ops import io_ops
+from tensorflow.compat.v1.python.platform import gfile
+from tensorflow.compat.v1.python.util import compat
 
 from utils import tf_roll
 
