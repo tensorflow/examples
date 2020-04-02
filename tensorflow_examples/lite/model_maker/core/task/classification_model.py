@@ -164,12 +164,12 @@ class ClassificationModel(abc.ABC):
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
     """
+    temp_dir = None
     if compat.get_tf_behavior() == 1:
-      with tempfile.TemporaryDirectory() as temp_dir:
-        save_path = os.path.join(temp_dir, 'saved_model')
-        self.model.save(save_path, include_optimizer=False, save_format='tf')
-        converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(
-            save_path)
+      temp_dir = tempfile.TemporaryDirectory()
+      save_path = os.path.join(temp_dir.name, 'saved_model')
+      self.model.save(save_path, include_optimizer=False, save_format='tf')
+      converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(save_path)
     else:
       converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
 
@@ -191,6 +191,8 @@ class ClassificationModel(abc.ABC):
           tf.lite.OpsSet.TFLITE_BUILTINS_INT8
       ]
     tflite_model = converter.convert()
+    if temp_dir:
+      temp_dir.cleanup()
 
     with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
       f.write(tflite_model)
