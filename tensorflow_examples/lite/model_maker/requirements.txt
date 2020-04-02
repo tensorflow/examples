@@ -1,6 +1,6 @@
 tf-nightly
 tf-models-nightly
-tf-hub-nightly==0.8.0.dev202002230005
+tensorflow-hub>=0.8.0
 numpy>=1.17.3
 pillow
 sentencepiece
