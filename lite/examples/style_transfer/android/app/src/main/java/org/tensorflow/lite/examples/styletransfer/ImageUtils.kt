@@ -69,38 +69,6 @@ abstract class ImageUtils {
     }
 
     /**
-     * sets the Exif orientation of an image.
-     * this method is used to fix the exit of pictures taken by the camera
-     *
-     * @param filePath - The image file to change
-     * @param value - the orientation of the file
-     */
-    fun setExifOrientation(
-      filePath: String,
-      value: String
-    ) {
-      val exif = ExifInterface(filePath)
-      exif.setAttribute(
-        ExifInterface.TAG_ORIENTATION, value
-      )
-      exif.saveAttributes()
-    }
-
-    /** Transforms rotation and mirroring information into one of the [ExifInterface] constants */
-    fun computeExifOrientation(rotationDegrees: Int, mirrored: Boolean) = when {
-      rotationDegrees == 0 && !mirrored -> ExifInterface.ORIENTATION_NORMAL
-      rotationDegrees == 0 && mirrored -> ExifInterface.ORIENTATION_FLIP_HORIZONTAL
-      rotationDegrees == 180 && !mirrored -> ExifInterface.ORIENTATION_ROTATE_180
-      rotationDegrees == 180 && mirrored -> ExifInterface.ORIENTATION_FLIP_VERTICAL
-      rotationDegrees == 270 && mirrored -> ExifInterface.ORIENTATION_TRANSVERSE
-      rotationDegrees == 90 && !mirrored -> ExifInterface.ORIENTATION_ROTATE_90
-      rotationDegrees == 90 && mirrored -> ExifInterface.ORIENTATION_TRANSPOSE
-      rotationDegrees == 270 && mirrored -> ExifInterface.ORIENTATION_ROTATE_270
-      rotationDegrees == 270 && !mirrored -> ExifInterface.ORIENTATION_TRANSVERSE
-      else -> ExifInterface.ORIENTATION_UNDEFINED
-    }
-
-    /**
      * Decode a bitmap from a file and apply the transformations described in its EXIF data
      *
      * @param file - The image file to be read using [BitmapFactory.decodeFile]

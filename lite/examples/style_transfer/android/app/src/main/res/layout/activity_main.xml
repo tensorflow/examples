@@ -25,17 +25,17 @@
         android:orientation="vertical"
         android:paddingTop="?attr/actionBarSize">
 
-      <LinearLayout
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:gravity="center_horizontal">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal">
 
-        <FrameLayout
-            android:id="@+id/view_finder"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:paddingTop="16dp" />
-      </LinearLayout>
+            <FrameLayout
+                android:id="@+id/view_finder"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:paddingTop="16dp" />
+        </LinearLayout>
 
         <HorizontalScrollView
             android:id="@+id/horizontal_scroll_view"
