@@ -59,6 +59,8 @@ class ModelDataHandler {
     switch delegate {
     case .Metal:
       delegates = [MetalDelegate()]
+    case .CoreML:
+      delegates = [CoreMLDelegate()]
     default:
       delegates = nil
     }
@@ -366,6 +368,7 @@ enum BodyPart: String, CaseIterable {
 enum Delegates: Int, CaseIterable {
   case CPU
   case Metal
+  case CoreML
 
   var description: String {
     switch self {
@@ -373,6 +376,8 @@ enum Delegates: Int, CaseIterable {
       return "CPU"
     case .Metal:
       return "GPU"
+    case .CoreML:
+      return "NPU"
     }
   }
 }
