@@ -79,7 +79,6 @@ class InferenceViewController: UIViewController {
   private var currentThreadCount: Int = 0
   private var infoTextColor = UIColor.black
 
-
   // MARK: Delegate
   var delegate: InferenceViewControllerDelegate?
 
