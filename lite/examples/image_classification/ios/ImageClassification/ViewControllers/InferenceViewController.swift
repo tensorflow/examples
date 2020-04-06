@@ -65,7 +65,6 @@ class InferenceViewController: UIViewController {
   private let bottomSpacing: CGFloat = 21.0
   private let minThreadCount = 1
   private let bottomSheetButtonDisplayHeight: CGFloat = 44.0
-  private let infoTextColor = UIColor(named: "darkOrLight")
   private let lightTextInfoColor = UIColor(displayP3Red: 117.0/255.0, green: 117.0/255.0, blue: 117.0/255.0, alpha: 1.0)
   private let infoFont = UIFont.systemFont(ofSize: 14.0, weight: .regular)
   private let highlightedFont = UIFont.systemFont(ofSize: 14.0, weight: .medium)
@@ -78,6 +77,8 @@ class InferenceViewController: UIViewController {
   var maxResults: Int = 0
   var threadCountLimit: Int = 0
   private var currentThreadCount: Int = 0
+  private var infoTextColor = UIColor.black
+
 
   // MARK: Delegate
   var delegate: InferenceViewControllerDelegate?
@@ -97,6 +98,11 @@ class InferenceViewController: UIViewController {
     threadStepper.minimumValue = Double(minThreadCount)
     threadStepper.value = Double(currentThreadCount)
 
+    // Set the info text color on iOS 11 and higher.
+    if #available(iOS 11, *) {
+      infoTextColor = UIColor(named: "darkOrLight")!
+    }
+    
   }
 
   // MARK: Buttion Actions
