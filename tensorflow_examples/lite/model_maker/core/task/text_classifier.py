@@ -141,8 +141,7 @@ class TextClassifier(classification_model.ClassificationModel):
              vocab_filename,
              quantized=False,
              quantization_steps=None,
-             representative_data=None,
-             experimental_new_converter=False):
+             representative_data=None):
     """Converts the retrained model based on `model_export_format`.
 
     Args:
@@ -154,15 +153,12 @@ class TextClassifier(classification_model.ClassificationModel):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
-      experimental_new_converter: Experimental flag, subject to change. Enables
-        MLIR-based conversion instead of TOCO conversion.
     """
     if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model export format %s is not supported currently.' %
                        self.model_export_format)
     self.model_spec.set_shape(self.model)
     self._export_tflite(tflite_filename, label_filename, quantized,
-                        quantization_steps, representative_data,
-                        self.model_spec.experimental_new_converter)
+                        quantization_steps, representative_data)
 
     self.model_spec.save_vocab(vocab_filename)

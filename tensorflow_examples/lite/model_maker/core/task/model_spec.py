@@ -25,14 +25,18 @@ import tempfile
 
 import tensorflow as tf
 import tensorflow_hub as hub
-
-from official.modeling import model_training_utils
 from official.nlp import optimization
 from official.nlp.bert import bert_models
 from official.nlp.bert import configs as bert_configs
 from official.nlp.bert import tokenization
 from official.nlp.data import classifier_data_lib
 from official.utils.misc import distribution_utils
+
+# TODO(b/152451908)
+try:
+  from official.nlp.bert import model_training_utils  # pylint: disable=g-import-not-at-top
+except ImportError:
+  from official.modeling import model_training_utils  # pylint: disable=g-import-not-at-top
 
 
 def create_int_feature(values):
@@ -126,15 +130,6 @@ efficientnet_lite4_spec = ImageModelSpec(
 class TextModelSpec(abc.ABC):
   """The abstract base class that constains the specification of text model."""
 
-  def __init__(self, experimental_new_converter=False):
-    """Initialization function for TextClassifier class.
-
-    Args:
-      experimental_new_converter: Experimental flag, subject to change. Enables
-        MLIR-based conversion instead of TOCO conversion.
-    """
-    self.experimental_new_converter = experimental_new_converter
-
   @abc.abstractmethod
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
@@ -199,8 +194,7 @@ class AverageWordVecModelSpec(TextModelSpec):
                seq_len=256,
                wordvec_dim=16,
                lowercase=True,
-               dropout_rate=0.2,
-               experimental_new_converter=False):
+               dropout_rate=0.2):
     """Initialze a instance with preprocessing and model paramaters.
 
     Args:
@@ -210,11 +204,7 @@ class AverageWordVecModelSpec(TextModelSpec):
       lowercase: Whether to convert all uppercase character to lowercase during
         preprocessing.
       dropout_rate: The rate for dropout.
-      experimental_new_converter: Experimental flag, subject to change. Enables
-        MLIR-based conversion instead of TOCO conversion.
     """
-    super(AverageWordVecModelSpec, self).__init__(
-        experimental_new_converter=experimental_new_converter)
     self.num_words = num_words
     self.seq_len = seq_len
     self.wordvec_dim = wordvec_dim
@@ -383,9 +373,7 @@ class BertModelSpec(TextModelSpec):
       distribution_strategy='mirrored',
       num_gpus=-1,
       tpu='',
-      trainable=True,
-      experimental_new_converter=True,
-  ):
+      trainable=True):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -411,11 +399,7 @@ class BertModelSpec(TextModelSpec):
         available GPUs.
       tpu: TPU address to connect to.
       trainable: boolean, whether pretrain layer is trainable.
-      experimental_new_converter: Experimental flag, subject to change. Enables
-        MLIR-based conversion instead of TOCO conversion.
     """
-    super(BertModelSpec, self).__init__(
-        experimental_new_converter=experimental_new_converter)
     self.seq_len = seq_len
     self.dropout_rate = dropout_rate
     self.initializer_range = initializer_range

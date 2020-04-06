@@ -152,8 +152,7 @@ class ClassificationModel(abc.ABC):
                      label_filename,
                      quantized=False,
                      quantization_steps=None,
-                     representative_data=None,
-                     experimental_new_converter=False):
+                     representative_data=None):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
@@ -164,15 +163,13 @@ class ClassificationModel(abc.ABC):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
-      experimental_new_converter: Experimental flag, subject to change. Enables
-        MLIR-based conversion instead of TOCO conversion.
     """
+    temp_dir = None
     if compat.get_tf_behavior() == 1:
-      with tempfile.TemporaryDirectory() as temp_dir:
-        save_path = os.path.join(temp_dir, 'saved_model')
-        self.model.save(save_path, include_optimizer=False, save_format='tf')
-        converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(
-            save_path)
+      temp_dir = tempfile.TemporaryDirectory()
+      save_path = os.path.join(temp_dir.name, 'saved_model')
+      self.model.save(save_path, include_optimizer=False, save_format='tf')
+      converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(save_path)
     else:
       converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
 
@@ -193,8 +190,9 @@ class ClassificationModel(abc.ABC):
       converter.target_spec.supported_ops = [
           tf.lite.OpsSet.TFLITE_BUILTINS_INT8
       ]
-    converter.experimental_new_converter = experimental_new_converter
     tflite_model = converter.convert()
+    if temp_dir:
+      temp_dir.cleanup()
 
     with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
       f.write(tflite_model)

@@ -88,6 +88,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutines_version}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutines_version}"
 
-    implementation "org.tensorflow:tensorflow-lite:${tfl_version}"
-    implementation "org.tensorflow:tensorflow-lite-gpu:${tfl_version}"
+    implementation("org.tensorflow:tensorflow-lite:${tfl_version}") { changing = true }
+    implementation("org.tensorflow:tensorflow-lite-gpu:${tfl_version}") { changing = true }
 }

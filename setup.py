@@ -56,7 +56,7 @@ with open(REQUIRMENTS) as f:
   MODEL_MAKER_REQUIRE = [l.strip() for l in f.read().splitlines() if l.strip()]
 
 METADATA_REQUIRE = [
-    'tflite-support',
+    'tflite-support==0.1.0a0',
 ]
 if sys.version_info.major == 3:
   # Packages only for Python 3

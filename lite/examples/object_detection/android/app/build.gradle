@@ -44,7 +44,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.google.truth:truth:1.0.1'
