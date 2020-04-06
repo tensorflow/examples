@@ -25,9 +25,8 @@ enum StylePredictorModel {
 
 typealias StyleBottleneck = [Float]
 
-/// This class handles all data preprocessing and makes calls to run inference on a given frame
-/// by invoking the `Interpreter`. It then formats the inferences obtained and returns the top N
-/// results for a successful inference.
+/// This class handles all data preprocessing and makes calls to generate a style
+/// bottleneck for a given style.
 class StylePredictorModelDataHandler: ModelDataHandling {
   typealias Inference = StyleBottleneck
     
@@ -43,8 +42,6 @@ class StylePredictorModelDataHandler: ModelDataHandling {
   let inputChannels = 3
   let inputWidth = 256
   let inputHeight = 256
-
-//  let bottleneckSize = 100
 
   // MARK: - Private Properties
 

@@ -22,9 +22,8 @@ struct StyleTransferInput {
 }
 typealias StyleTransferOutput = UIImage
 
-/// This class handles all data preprocessing and makes calls to run inference on a given frame
-/// by invoking the `Interpreter`. It then formats the inferences obtained and returns the top N
-/// results for a successful inference.
+/// This class handles all data preprocessing and makes calls to perform style transfer on a given frame
+/// by invoking the `Interpreter`. 
 class StyleTransferModelDataHandler: ModelDataHandling {
   typealias Inference = StyleTransferOutput
   
@@ -163,12 +162,12 @@ class StyleTransferModelDataHandler: ModelDataHandling {
     
     let rgbData: [UInt8]
     if #available(iOS 13.0, *) {
-      // Use faster, vectorized operations if available
+      // Use faster, vectorized operations if available.
       rgbData = vDSP.floatingPointToInteger(vDSP.multiply(255, rgbDataAsFloats),
                                                 integerType: UInt8.self,
                                                 rounding: .towardNearestInteger)
     } else {
-      // Fallback on earlier versions
+      // Fallback on earlier versions.
       rgbData = rgbDataAsFloats.map { UInt8($0 * 255) }
     }
     
@@ -180,10 +179,12 @@ class StyleTransferModelDataHandler: ModelDataHandling {
   }
 
   private func convertRGBToImage(rgbData: [UInt8], width: Int, height: Int) -> UIImage? {
+    // Set up local constants to define the raw image format.
     let bitsPerComponent = 8
     let componentsPerPixel = 3
     let bitsPerPixel = bitsPerComponent * componentsPerPixel
     
+    // Check that the parameters and rgb data are valid.
     guard width > 0 && height > 0 else { return nil }
     guard rgbData.count == width * height * componentsPerPixel else { return nil }
     
@@ -195,6 +196,7 @@ class StyleTransferModelDataHandler: ModelDataHandling {
                                                         length: rgbDataMutable.count * MemoryLayout<UInt8>.size))
       else { return nil }
     
+    // Create the image with CoreGraphics.
     guard let cgImage = CGImage(
       width: width,
       height: height,
@@ -210,6 +212,7 @@ class StyleTransferModelDataHandler: ModelDataHandling {
       )
       else { return nil }
     
+    // Convert to a UIImage.
     return UIImage(cgImage: cgImage)
   }
   

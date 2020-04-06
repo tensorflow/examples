@@ -8,9 +8,10 @@
 
 import TensorFlowLite
 
-/// This class handles all data preprocessing and makes calls to run inference on a given frame
-/// by invoking the `Interpreter`. It then formats the inferences obtained and returns the top N
-/// results for a successful inference.
+/// This class handles all data preprocessing and makes calls to perform style transfer on a given frame
+/// by invoking the `Interpreter`. It uses two internal model handlers to do this.
+/// First, it invokes the style predictor model to generate style bottleneck.
+/// Next, it applies the model bottleneck to the given frame using the style transfer model.
 class CombinedModelDataHandler: ModelDataHandling {
   // MARK: - Internal Properties
   var style: Style = .style0
@@ -61,13 +62,7 @@ class CombinedModelDataHandler: ModelDataHandling {
       pixelBuffer: pixelBuffer)) else { return nil }
     
     let elapsedTimeInMs = bottleneckResult.elapsedTimeInMs + imageResult.elapsedTimeInMs
-    
-//    print("""
-//          Style prediction:\t\(bottleneckResult.elapsedTimeInMs)ms
-//          Style transfer:\t\(imageResult.elapsedTimeInMs)ms
-//          Total:\t\(elapsedTimeInMs)ms\n
-//          """)
-    
+
     return Result<UIImage>(elapsedTimeInMs: elapsedTimeInMs, inference: imageResult.inference)
   }
   

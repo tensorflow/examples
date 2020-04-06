@@ -53,12 +53,12 @@ extension ViewController: CameraFeedManagerDelegate {
 
 ### ModelDataHandler
 
-The Swift class `ModelDataHandler`, defined in
-[`ModelDataHandler.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/style_transfer/ios/StyleTransfer/ModelDataHandler/ModelDataHandler.swift),
-handles all data preprocessing and makes calls to run inference on a given frame
+The Swift class `StyleTransferModelDataHandler`, defined in
+[`StyleTransferModelDataHandler.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/style_transfer/ios/StyleTransfer/ModelDataHandler/StyleTransferModelDataHandler.swift),
+handles all the style transfer data preprocessing and makes calls to perform style transfer on a given frame
 using the TensorFlow Lite [`Interpreter`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/experimental/swift/Sources/Interpreter.swift).
 It then formats the inferences obtained from invoking the `Interpreter` and
-returns the top N results for a successful inference.
+converts the raw image data to a UIImage for display.
 
 The following sections show how this works.
 
@@ -196,18 +196,49 @@ let results = quantizedResults.map {
 }
 ```
 
-Next, the results are sorted to get the top `N` results (where `N` is
-`resultCount`):
+Next, the raw RGB values are converted back to a UIImage for display:
 
 ```swift
-// Create a zipped array of tuples [(labelIndex: Int, confidence: Float)].
-let zippedResults = zip(labels.indices, results)
+// Convert float array to StyleTransferOutput
+let image = convertRGBToImage(rgbData: rgbData, width: contentImageSize, height: contentImageSize) ?? UIImage()
 
-// Sort the zipped results by confidence value in descending order.
-let sortedResults = zippedResults.sorted { $0.1 > $1.1 }.prefix(resultCount)
+private func convertRGBToImage(rgbData: [UInt8], width: Int, height: Int) -> UIImage? {
+  // Set up local constants to define the raw image format
+  let bitsPerComponent = 8
+  let componentsPerPixel = 3
+  let bitsPerPixel = bitsPerComponent * componentsPerPixel
 
-// Get the top N `Inference` results.
-let topNInferences = sortedResults.map { result in Inference(confidence: result.1, label: labels[result.0]) }
+  // Check that the parameters and rgb data are valid
+  guard width > 0 && height > 0 else { return nil }
+  guard rgbData.count == width * height * componentsPerPixel else { return nil }
+
+  let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
+  let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
+
+  var rgbDataMutable = rgbData
+  guard let providerRef = CGDataProvider(data: NSData(bytes: &rgbDataMutable,
+                                                      length: rgbDataMutable.count * MemoryLayout<UInt8>.size))
+    else { return nil }
+
+  // Create the image with CoreGraphics
+  guard let cgImage = CGImage(
+    width: width,
+    height: height,
+    bitsPerComponent: bitsPerComponent,
+    bitsPerPixel: bitsPerPixel,
+    bytesPerRow: width * MemoryLayout<UInt8>.size * componentsPerPixel,
+    space: rgbColorSpace,
+    bitmapInfo: bitmapInfo,
+    provider: providerRef,
+    decode: nil,
+    shouldInterpolate: true,
+    intent: .defaultIntent
+    )
+    else { return nil }
+
+  // Convert to a UIImage
+  return UIImage(cgImage: cgImage)
+}
 ```
 
 ### Display results
