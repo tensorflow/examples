@@ -1,23 +1,23 @@
 task downloadPredictInt8ModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_predict_quantized_256.tflite'
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite'
     dest project.ext.ASSET_DIR + '/style_predict_quantized_256.tflite'
     overwrite false
 }
 
 task downloadTransformInt8ModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_quantized_384.tflite'
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite'
     dest project.ext.ASSET_DIR + '/style_transfer_quantized_384.tflite'
     overwrite false
 }
 
 task downloadPredictFloat16ModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_predict_f16_256.tflite'
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/prediction/1?lite-format=tflite'
     dest project.ext.ASSET_DIR + '/style_predict_f16_256.tflite'
     overwrite false
 }
 
 task downloadTransformFloat16ModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/arbitrary_style_transfer/style_transfer_f16_384.tflite'
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/transfer/1?lite-format=tflite'
     dest project.ext.ASSET_DIR + '/style_transfer_f16_384.tflite'
     overwrite false
 }
