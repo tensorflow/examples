@@ -586,7 +586,7 @@ public abstract class CameraActivity extends AppCompatActivity
     if (this.model != model) {
       LOGGER.d("Updating  model: " + model);
       this.model = model;
-      fp16Switch.setEnabled((model == Model.FLOAT) && (device == Device.NNAPI));
+      fp16Switch.setEnabled(((model == Model.FLOAT_MOBILENET) || (model == Model.FLOAT_EFFICIENTNET)) && (device == Device.NNAPI));
       onInferenceConfigurationChanged();
     }
   }
@@ -603,7 +603,7 @@ public abstract class CameraActivity extends AppCompatActivity
       plusImageView.setEnabled(threadsEnabled);
       minusImageView.setEnabled(threadsEnabled);
       threadsTextView.setText(threadsEnabled ? String.valueOf(numThreads) : "N/A");
-      fp16Switch.setEnabled((model == Model.FLOAT) && (device == Device.NNAPI));
+      fp16Switch.setEnabled(((model == Model.FLOAT_MOBILENET) || (model == Model.FLOAT_EFFICIENTNET)) && (device == Device.NNAPI));
       onInferenceConfigurationChanged();
     }
   }
