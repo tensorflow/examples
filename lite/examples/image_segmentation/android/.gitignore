@@ -1,7 +1,0 @@
-.gradle
-*.iml
-local.properties
-
-# Following file is downloaded during build time,
-# please see download.gradle for details.
-app/src/main/assets/deeplabv3_257_mv_gpu.tflite
