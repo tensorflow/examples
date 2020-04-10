@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-import tensorflow as tf
+import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
@@ -135,6 +135,13 @@ class TextClassifier(classification_model.ClassificationModel):
 
     return self.model
 
+  @staticmethod
+  def _set_batch_size(model, batch_size):
+    """Sets batch size for the model."""
+    for model_input in model.inputs:
+      new_shape = [batch_size] + model_input.shape[1:]
+      model_input.set_shape(new_shape)
+
   def export(self,
              tflite_filename,
              label_filename,
@@ -157,8 +164,12 @@ class TextClassifier(classification_model.ClassificationModel):
     if self.model_export_format != mef.ModelExportFormat.TFLITE:
       raise ValueError('Model export format %s is not supported currently.' %
                        self.model_export_format)
-    self.model_spec.set_shape(self.model)
+
+    # Sets batch size from None to 1 when converting to tflite.
+    self._set_batch_size(self.model, batch_size=1)
     self._export_tflite(tflite_filename, label_filename, quantized,
                         quantization_steps, representative_data)
+    # Sets batch size back to None to support retraining later.
+    self._set_batch_size(self.model, batch_size=None)
 
     self.model_spec.save_vocab(vocab_filename)

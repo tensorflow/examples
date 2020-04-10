@@ -17,26 +17,23 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import abc
 import collections
 import inspect
+import os
 import re
 import tempfile
 
-import tensorflow as tf
+import tensorflow.compat.v2 as tf
+from tensorflow_examples.lite.model_maker.core.task import hub_loader
+
 import tensorflow_hub as hub
+from tensorflow_hub import registry
+
 from official.nlp import optimization
-from official.nlp.bert import bert_models
 from official.nlp.bert import configs as bert_configs
 from official.nlp.bert import tokenization
 from official.nlp.data import classifier_data_lib
 from official.utils.misc import distribution_utils
-
-# TODO(b/152451908)
-try:
-  from official.nlp.bert import model_training_utils  # pylint: disable=g-import-not-at-top
-except ImportError:
-  from official.modeling import model_training_utils  # pylint: disable=g-import-not-at-top
 
 
 def create_int_feature(values):
@@ -127,59 +124,7 @@ efficientnet_lite4_spec = ImageModelSpec(
     name='efficientnet_lite4')
 
 
-class TextModelSpec(abc.ABC):
-  """The abstract base class that constains the specification of text model."""
-
-  @abc.abstractmethod
-  def run_classifier(self, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps, num_classes):
-    """Creates classifier and runs the classifier training.
-
-    Args:
-      train_input_fn: Function that returns a tf.data.Dataset used for training.
-      validation_input_fn: Function that returns a tf.data.Dataset used for
-        evaluation.
-      epochs: Number of epochs to train.
-      steps_per_epoch: Number of steps to run per epoch.
-      validation_steps: Number of steps to run evaluation.
-      num_classes: Number of label classes.
-
-    Returns:
-      The retrained model.
-    """
-    pass
-
-  @abc.abstractmethod
-  def save_vocab(self, vocab_filename):
-    """Saves the vocabulary if it's generated from the input data, otherwise, prints the file path to the vocabulary."""
-    pass
-
-  @abc.abstractmethod
-  def get_name_to_features(self):
-    """Gets the dictionary describing the features."""
-    pass
-
-  @abc.abstractmethod
-  def select_data_from_record(self, record):
-    """Dispatches records to features and labels."""
-    pass
-
-  @abc.abstractmethod
-  def convert_examples_to_features(self, examples, tfrecord_file, label_names):
-    """Converts examples to features and write them into TFRecord file."""
-    pass
-
-  @abc.abstractmethod
-  def get_config(self):
-    """Gets the configuration."""
-    pass
-
-  def set_shape(self, model):
-    """Sets the input model shape. Used in tflite conveter for BatchMatMul."""
-    pass
-
-
-class AverageWordVecModelSpec(TextModelSpec):
+class AverageWordVecModelSpec(object):
   """A specification of averaging word vector model."""
   PAD = '<PAD>'  # Index: 0
   START = '<START>'  # Index: 1
@@ -353,7 +298,74 @@ class AverageWordVecModelSpec(TextModelSpec):
     }
 
 
-class BertModelSpec(TextModelSpec):
+def create_classifier_model(bert_config,
+                            num_labels,
+                            max_seq_length,
+                            initializer=None,
+                            hub_module_url=None,
+                            hub_module_trainable=True,
+                            is_tf2=True):
+  """BERT classifier model in functional API style.
+
+  Construct a Keras model for predicting `num_labels` outputs from an input with
+  maximum sequence length `max_seq_length`.
+
+  Args:
+    bert_config: BertConfig, the config defines the core Bert model.
+    num_labels: integer, the number of classes.
+    max_seq_length: integer, the maximum input sequence length.
+    initializer: Initializer for the final dense layer in the span labeler.
+      Defaulted to TruncatedNormal initializer.
+    hub_module_url: TF-Hub path/url to Bert module.
+    hub_module_trainable: True to finetune layers in the hub module.
+    is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
+
+  Returns:
+    Combined prediction model (words, mask, type) -> (one-hot labels)
+    BERT sub-model (words, mask, type) -> (bert_outputs)
+  """
+  if initializer is None:
+    initializer = tf.keras.initializers.TruncatedNormal(
+        stddev=bert_config.initializer_range)
+
+  input_word_ids = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_word_ids')
+  input_mask = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_mask')
+  input_type_ids = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_type_ids')
+
+  if is_tf2:
+    bert_model = hub.KerasLayer(hub_module_url, trainable=hub_module_trainable)
+    pooled_output, _ = bert_model([input_word_ids, input_mask, input_type_ids])
+  else:
+    bert_model = hub_loader.HubKerasLayerV1V2(
+        hub_module_url,
+        signature='tokens',
+        output_key='pooled_output',
+        trainable=hub_module_trainable)
+
+    pooled_output = bert_model({
+        'input_ids': input_word_ids,
+        'input_mask': input_mask,
+        'segment_ids': input_type_ids
+    })
+
+  output = tf.keras.layers.Dropout(rate=bert_config.hidden_dropout_prob)(
+      pooled_output)
+  output = tf.keras.layers.Dense(
+      num_labels,
+      kernel_initializer=initializer,
+      name='output',
+      dtype=tf.float32)(
+          output)
+
+  return tf.keras.Model(
+      inputs=[input_word_ids, input_mask, input_type_ids],
+      outputs=output), bert_model
+
+
+class BertModelSpec(object):
   """A specification of BERT model."""
 
   compat_tf_versions = _get_compat_tf_versions(2)
@@ -368,12 +380,12 @@ class BertModelSpec(TextModelSpec):
       dropout_rate=0.1,
       initializer_range=0.02,
       learning_rate=3e-5,
-      scale_loss=False,
-      steps_per_loop=1000,
       distribution_strategy='mirrored',
       num_gpus=-1,
       tpu='',
-      trainable=True):
+      trainable=True,
+      do_lower_case=True,
+      is_tf2=True):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -384,11 +396,6 @@ class BertModelSpec(TextModelSpec):
       initializer_range: The stdev of the truncated_normal_initializer for
         initializing all weight matrices.
       learning_rate: The initial learning rate for Adam.
-      scale_loss: Whether to divide the loss by number of replica inside the
-        per-replica loss function.
-      steps_per_loop: Number of steps per graph-mode loop. In order to reduce
-        communication in eager context, training logs are printed every
-        steps_per_loop.
       distribution_strategy:  A string specifying which distribution strategy to
         use. Accepted values are 'off', 'one_device', 'mirrored',
         'parameter_server', 'multi_worker_mirrored', and 'tpu' -- case
@@ -399,13 +406,15 @@ class BertModelSpec(TextModelSpec):
         available GPUs.
       tpu: TPU address to connect to.
       trainable: boolean, whether pretrain layer is trainable.
+      do_lower_case: boolean, whether to lower case the input text. Should be
+        True for uncased models and False for cased models.
+      is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
     """
     self.seq_len = seq_len
     self.dropout_rate = dropout_rate
     self.initializer_range = initializer_range
     self.learning_rate = learning_rate
-    self.scale_loss = scale_loss
-    self.steps_per_loop = steps_per_loop
+    self.trainable = trainable
 
     self.model_dir = model_dir
     if self.model_dir is None:
@@ -418,14 +427,19 @@ class BertModelSpec(TextModelSpec):
         tpu_address=tpu)
 
     self.uri = uri
-    self.bert_model = hub.KerasLayer(uri, trainable=trainable)
 
-    resolved_object = self.bert_model.resolved_object
-    self.vocab_file = resolved_object.vocab_file.asset_path.numpy()
-    self.do_lower_case = resolved_object.do_lower_case.numpy()
+    self.is_tf2 = is_tf2
+    self.vocab_file = os.path.join(
+        registry.resolver(uri), 'assets', 'vocab.txt')
+    self.do_lower_case = do_lower_case
 
     self.tokenizer = tokenization.FullTokenizer(self.vocab_file,
                                                 self.do_lower_case)
+
+    self.bert_config = bert_configs.BertConfig(
+        0,
+        initializer_range=self.initializer_range,
+        hidden_dropout_prob=self.dropout_rate)
 
   def get_name_to_features(self):
     """Gets the dictionary describing the features."""
@@ -453,10 +467,10 @@ class BertModelSpec(TextModelSpec):
     classifier_data_lib.file_based_convert_examples_to_features(
         examples, label_names, self.seq_len, self.tokenizer, tfrecord_file)
 
-  def get_classification_loss_fn(self, num_classes, loss_factor=1.0):
+  def _get_classification_loss_fn(self, num_classes):
     """Gets the classification loss function."""
 
-    def classification_loss_fn(labels, logits):
+    def _classification_loss_fn(labels, logits):
       """Classification loss."""
       labels = tf.squeeze(labels)
       log_probs = tf.nn.log_softmax(logits, axis=-1)
@@ -465,10 +479,9 @@ class BertModelSpec(TextModelSpec):
       per_example_loss = -tf.reduce_sum(
           tf.cast(one_hot_labels, dtype=tf.float32) * log_probs, axis=-1)
       loss = tf.reduce_mean(per_example_loss)
-      loss *= loss_factor
       return loss
 
-    return classification_loss_fn
+    return _classification_loss_fn
 
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
@@ -476,34 +489,24 @@ class BertModelSpec(TextModelSpec):
     if epochs is None:
       epochs = self.default_training_epochs
 
-    bert_config = bert_configs.BertConfig(
-        0,
-        initializer_range=self.initializer_range,
-        hidden_dropout_prob=self.dropout_rate)
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
     initial_lr = self.learning_rate
 
     def _get_classifier_model():
       """Gets a classifier model."""
-      classifier_model, core_model = (
-          bert_models.classifier_model(
-              bert_config, num_classes, self.seq_len, hub_module_url=self.uri))
+      classifier_model, core_model = create_classifier_model(
+          self.bert_config,
+          num_classes,
+          self.seq_len,
+          hub_module_url=self.uri,
+          hub_module_trainable=self.trainable,
+          is_tf2=self.is_tf2)
+
       classifier_model.optimizer = optimization.create_optimizer(
           initial_lr, steps_per_epoch * epochs, warmup_steps)
       return classifier_model, core_model
 
-    # During distributed training, loss used for gradient computation is
-    # summed over from all replicas. When Keras compile/fit() API is used,
-    # the fit() API internally normalizes the loss by dividing the loss by
-    # the number of replicas used for computation. However, when custom
-    # training loop is used this is not done automatically and should be
-    # done manually by the end user.
-    loss_multiplier = 1.0
-    if self.scale_loss:
-      loss_multiplier = 1.0 / self.strategy.num_replicas_in_sync
-
-    loss_fn = self.get_classification_loss_fn(
-        num_classes, loss_factor=loss_multiplier)
+    loss_fn = self._get_classification_loss_fn(num_classes)
 
     # Defines evaluation metrics function, which will create metrics in the
     # correct device and strategy scope.
@@ -511,32 +514,31 @@ class BertModelSpec(TextModelSpec):
       return tf.keras.metrics.SparseCategoricalAccuracy(
           'test_accuracy', dtype=tf.float32)
 
-    # Use user-defined loop to start training.
-    tf.compat.v1.logging.info('Training using customized training loop TF 2.0 '
-                              'with distribution strategy.')
-    bert_model = model_training_utils.run_customized_training_loop(
-        strategy=self.strategy,
-        model_fn=_get_classifier_model,
-        loss_fn=loss_fn,
-        model_dir=self.model_dir,
-        steps_per_epoch=steps_per_epoch,
-        steps_per_loop=self.steps_per_loop,
-        epochs=epochs,
-        train_input_fn=train_input_fn,
-        eval_input_fn=validation_input_fn,
-        eval_steps=validation_steps,
-        init_checkpoint=None,
-        metric_fn=metric_fn,
-        custom_callbacks=None,
-        run_eagerly=False)
-
-    # Used in evaluation.
-    with self.strategy.scope():
+    with distribution_utils.get_strategy_scope(self.strategy):
+      training_dataset = train_input_fn()
+      evaluation_dataset = None
+      if validation_input_fn is not None:
+        evaluation_dataset = validation_input_fn()
       bert_model, _ = _get_classifier_model()
-      checkpoint_path = tf.train.latest_checkpoint(self.model_dir)
-      checkpoint = tf.train.Checkpoint(model=bert_model)
-      checkpoint.restore(checkpoint_path).expect_partial()
-      bert_model.compile(loss=loss_fn, metrics=[metric_fn()])
+      optimizer = bert_model.optimizer
+
+      bert_model.compile(
+          optimizer=optimizer, loss=loss_fn, metrics=[metric_fn()])
+
+    summary_dir = os.path.join(self.model_dir, 'summaries')
+    summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
+    checkpoint_path = os.path.join(self.model_dir, 'checkpoint')
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        checkpoint_path, save_weights_only=True)
+
+    bert_model.fit(
+        x=training_dataset,
+        validation_data=evaluation_dataset,
+        steps_per_epoch=steps_per_epoch,
+        epochs=epochs,
+        validation_steps=validation_steps,
+        callbacks=[summary_callback, checkpoint_callback])
+
     return bert_model
 
   def save_vocab(self, vocab_filename):
@@ -548,11 +550,6 @@ class BertModelSpec(TextModelSpec):
     """Gets the configuration."""
     # Only preprocessing related variables are included.
     return {'uri': self.uri, 'seq_len': self.seq_len}
-
-  def set_shape(self, model):
-    """Sets the input model shape. Used in tflite conveter for BatchMatMul."""
-    for model_input in model.inputs:
-      model_input.set_shape((1, self.seq_len))
 
 
 # A dict for model specs to make it accessible by string key.
