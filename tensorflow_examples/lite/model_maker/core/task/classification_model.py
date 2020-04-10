@@ -11,35 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Custom model that is already retained by data."""
+"""Custom classification model that is already retained by data."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import abc
-import os
-import tempfile
 
 import numpy as np
-import tensorflow as tf
-from tensorflow_examples.lite.model_maker.core import compat
+import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
-
-DEFAULT_QUANTIZATION_STEPS = 2000
-
-
-def get_representative_dataset_gen(dataset, num_steps):
-
-  def representative_dataset_gen():
-    """Generates representative dataset for quantized."""
-    for image, _ in dataset.take(num_steps):
-      yield [image]
-
-  return representative_dataset_gen
+from tensorflow_examples.lite.model_maker.core.task import custom_model
 
 
-class ClassificationModel(abc.ABC):
+class ClassificationModel(custom_model.CustomModel):
   """"The abstract base class that represents a Tensorflow classification model."""
 
   def __init__(self, model_export_format, model_spec, index_to_label,
@@ -60,28 +45,11 @@ class ClassificationModel(abc.ABC):
       raise ValueError('Model export format %s is not supported currently.' %
                        str(model_export_format))
 
-    self.model_export_format = model_export_format
-    self.model_spec = model_spec
+    super(ClassificationModel, self).__init__(model_export_format, model_spec,
+                                              shuffle)
     self.index_to_label = index_to_label
     self.num_classes = num_classes
-    self.shuffle = shuffle
     self.train_whole_model = train_whole_model
-    self.model = None
-
-  @abc.abstractmethod
-  def preprocess(self, sample_data, label):
-    return
-
-  @abc.abstractmethod
-  def train(self, train_data, validation_data=None, **kwargs):
-    return
-
-  @abc.abstractmethod
-  def export(self, **kwargs):
-    return
-
-  def summary(self):
-    self.model.summary()
 
   def evaluate(self, data, batch_size=32):
     """Evaluates the model.
@@ -122,31 +90,6 @@ class ClassificationModel(abc.ABC):
 
     return label_prob
 
-  def _gen_dataset(self,
-                   data,
-                   batch_size=32,
-                   is_training=True,
-                   input_pipeline_context=None):
-    """Generates training / validation dataset."""
-    # The dataset is always sharded by number of hosts.
-    # num_input_pipelines is the number of hosts rather than number of cores.
-    ds = data.dataset
-    if input_pipeline_context and input_pipeline_context.num_input_pipelines > 1:
-      ds = ds.shard(input_pipeline_context.num_input_pipelines,
-                    input_pipeline_context.input_pipeline_id)
-
-    ds = ds.map(
-        self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-    if is_training:
-      if self.shuffle:
-        ds = ds.shuffle(buffer_size=min(data.size, 100))
-      ds = ds.repeat()
-
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
-
   def _export_tflite(self,
                      tflite_filename,
                      label_filename,
@@ -164,41 +107,11 @@ class ClassificationModel(abc.ABC):
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
     """
-    temp_dir = None
-    if compat.get_tf_behavior() == 1:
-      temp_dir = tempfile.TemporaryDirectory()
-      save_path = os.path.join(temp_dir.name, 'saved_model')
-      self.model.save(save_path, include_optimizer=False, save_format='tf')
-      converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(save_path)
-    else:
-      converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
-
-    if quantized:
-      if quantization_steps is None:
-        quantization_steps = DEFAULT_QUANTIZATION_STEPS
-      if representative_data is None:
-        raise ValueError(
-            'representative_data couldn\'t be None if model is quantized.')
-      ds = self._gen_dataset(
-          representative_data, batch_size=1, is_training=False)
-      converter.representative_dataset = tf.lite.RepresentativeDataset(
-          get_representative_dataset_gen(ds, quantization_steps))
-
-      converter.optimizations = [tf.lite.Optimize.DEFAULT]
-      converter.inference_input_type = tf.uint8
-      converter.inference_output_type = tf.uint8
-      converter.target_spec.supported_ops = [
-          tf.lite.OpsSet.TFLITE_BUILTINS_INT8
-      ]
-    tflite_model = converter.convert()
-    if temp_dir:
-      temp_dir.cleanup()
-
-    with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
-      f.write(tflite_model)
+    super(ClassificationModel,
+          self)._export_tflite(tflite_filename, quantized, quantization_steps,
+                               representative_data)
 
     with tf.io.gfile.GFile(label_filename, 'w') as f:
       f.write('\n'.join(self.index_to_label))
 
-    tf.compat.v1.logging.info('Export to tflite model %s, saved labels in %s.',
-                              tflite_filename, label_filename)
+    tf.compat.v1.logging.info('Saved labels in %s.', label_filename)

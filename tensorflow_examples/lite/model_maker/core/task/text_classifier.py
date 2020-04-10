@@ -90,12 +90,6 @@ class TextClassifier(classification_model.ClassificationModel):
         shuffle,
         train_whole_model=True)
 
-  def preprocess(self, raw_text, label):
-    """Preprocess the text."""
-    # TODO(yuqili): remove this method once preprocess for image classifier is
-    # also moved to DataLoader part.
-    return raw_text, label
-
   def get_dataset_fn(self, input_data, global_batch_size, is_training):
     """Gets a closure to create a dataset."""
 
