@@ -60,7 +60,11 @@ class ModelDataHandler {
     case .Metal:
       delegates = [MetalDelegate()]
     case .CoreML:
-      delegates = [CoreMLDelegate()]
+      if let coreMLDelegate = CoreMLDelegate() {
+        delegates = [coreMLDelegate]
+      } else {
+        delegates = nil
+      }
     default:
       delegates = nil
     }
