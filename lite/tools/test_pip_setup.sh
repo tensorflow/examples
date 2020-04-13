@@ -58,14 +58,15 @@ function test_pip_install {
 }
 
 function test_model_maker() {
-  TEST_DIR="tensorflow_examples/lite/model_maker"
+  TEST_DIR="${WORKSPACE_DIR}/tensorflow_examples/lite/model_maker"
 
   echo "=== BEGIN UNIT TESTS FOR: ${TEST_DIR} ==="
   pushd "${WORKSPACE_DIR}" > /dev/null
 
-  # Set environment variables: test_srcdir for unit tests; and the run tests
-  # at the root directory.
-  TEST_SRCDIR=${WORKSPACE_DIR} ${PYTHON_BIN?} -m unittest discover -s ${TEST_DIR} -t . -p "*_test.py"
+  # Set environment variables: test_srcdir for unit tests; and then run tests
+  # one by one.
+  export TEST_SRCDIR=${TEST_DIR}
+  find "${TEST_DIR}" -name "*_test.py" -print0 | xargs -0 -I{} ${PYTHON_BIN?} {}
 
   popd > /dev/null
   echo "=== END UNIT TESTS: ${TEST_DIR} ==="
