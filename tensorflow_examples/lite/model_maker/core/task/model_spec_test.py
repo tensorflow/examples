@@ -147,14 +147,14 @@ class AverageWordVecModelSpecTest(tf.test.TestCase):
     return _input_fn
 
 
-class BertModelSpecTest(tf.test.TestCase, parameterized.TestCase):
+class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(
       ('https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/1', True),
       ('https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1', False),
   )
   def test_bert(self, uri, is_tf2):
-    model_spec = ms.BertModelSpec(
+    model_spec = ms.BertClassifierModelSpec(
         uri, is_tf2=is_tf2, distribution_strategy='off', seq_len=3)
     self._test_convert_examples_to_features(model_spec)
     self._test_run_classifier(model_spec)

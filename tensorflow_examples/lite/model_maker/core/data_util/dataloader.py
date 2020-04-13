@@ -17,45 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import hashlib
-import json
-import os
-
-import tensorflow as tf
-from official.nlp.bert import input_pipeline
-
-
-def load(tfrecord_file, meta_data_file, model_spec):
-  """Loads data from tfrecord file and metada file."""
-
-  dataset = input_pipeline.single_file_dataset(
-      tfrecord_file, model_spec.get_name_to_features())
-  dataset = dataset.map(
-      model_spec.select_data_from_record,
-      num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-  with tf.io.gfile.GFile(meta_data_file, 'rb') as reader:
-    meta_data = json.load(reader)
-  return dataset, meta_data
-
-
-def get_cache_filenames(cache_dir, model_spec, data_name):
-  """Gets cache tfrecord filename, metada filename and prefix of filenames."""
-  hasher = hashlib.md5()
-  hasher.update(data_name.encode('utf-8'))
-  hasher.update(str(model_spec.get_config()).encode('utf-8'))
-  cache_prefix = os.path.join(cache_dir, hasher.hexdigest())
-  cache_tfrecord_file = cache_prefix + '.tfrecord'
-  cache_meta_data_file = cache_prefix + '_meta_data'
-
-  return cache_tfrecord_file, cache_meta_data_file, cache_prefix
-
-
-def write_meta_data(meta_data_file, meta_data):
-  """Writes meta data into file."""
-  with tf.io.gfile.GFile(meta_data_file, 'w') as f:
-    json.dump(meta_data, f)
-
 
 class DataLoader(object):
   """This class provides generic utilities for loading customized domain data that will be used later in model retraining.

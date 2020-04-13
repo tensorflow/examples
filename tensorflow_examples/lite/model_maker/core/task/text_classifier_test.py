@@ -69,7 +69,7 @@ class TextClassifierTest(tf.test.TestCase):
 
   @test_util.test_in_tf_2
   def test_bert_model(self):
-    model_spec = ms.BertModelSpec(seq_len=2, trainable=False)
+    model_spec = ms.BertClassifierModelSpec(seq_len=2, trainable=False)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
         self.text_dir, model_spec=model_spec)
     # Splits data, 90% data for training, 10% for testing

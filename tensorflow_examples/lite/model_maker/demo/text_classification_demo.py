@@ -55,7 +55,7 @@ def run(data_dir,
         tflite_filename,
         label_filename,
         vocab_filename,
-        spec='bert',
+        spec='bert_classifier',
         **kwargs):
   """Runs demo."""
   # Chooses model specification that represents model.

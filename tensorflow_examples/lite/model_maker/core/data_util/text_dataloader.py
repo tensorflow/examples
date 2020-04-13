@@ -18,76 +18,71 @@ from __future__ import division
 from __future__ import print_function
 
 import csv
+import hashlib
+import json
 import os
 import random
 import tempfile
 
-import tensorflow as tf
+from absl import logging
+import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
+from official.nlp.bert import input_pipeline
 from official.nlp.data import classifier_data_lib
+from official.nlp.data import squad_lib
 
 
-def load(tfrecord_file, meta_data_file, model_spec):
-  """Gets `TextClassifierDataLoader` object from tfrecord file and metadata file."""
+def _load(tfrecord_file, meta_data_file, model_spec, is_training=None):
+  """Loads data from tfrecord file and metada file."""
 
-  dataset, meta_data = dataloader.load(tfrecord_file, meta_data_file,
-                                       model_spec)
-  tf.compat.v1.logging.info(
+  if is_training is None:
+    name_to_features = model_spec.get_name_to_features()
+  else:
+    name_to_features = model_spec.get_name_to_features(is_training=is_training)
+
+  dataset = input_pipeline.single_file_dataset(tfrecord_file, name_to_features)
+  dataset = dataset.map(
+      model_spec.select_data_from_record,
+      num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+  with tf.io.gfile.GFile(meta_data_file, 'rb') as reader:
+    meta_data = json.load(reader)
+  logging.info(
       'Load preprocessed data and metadata from %s and %s '
-      'with size: %d, num_classes: %d', tfrecord_file, meta_data_file,
-      meta_data['size'], meta_data['num_classes'])
-  return TextClassifierDataLoader(dataset, meta_data['size'],
-                                  meta_data['num_classes'],
-                                  meta_data['index_to_label'])
+      'with size: %d', tfrecord_file, meta_data_file, meta_data['size'])
+  return dataset, meta_data
 
 
-def save(examples, model_spec, label_names, tfrecord_file, meta_data_file,
-         vocab_file, is_training):
-  """Saves preprocessed data and other assets into files."""
-  # If needed, generates and saves vocabulary in vocab_file=None,
-  if model_spec.need_gen_vocab and is_training:
-    model_spec.gen_vocab(examples)
-    model_spec.save_vocab(vocab_file)
+def _get_cache_filenames(cache_dir, model_spec, data_name):
+  """Gets cache tfrecord filename, metada filename and prefix of filenames."""
+  hasher = hashlib.md5()
+  hasher.update(data_name.encode('utf-8'))
+  hasher.update(str(model_spec.get_config()).encode('utf-8'))
+  cache_prefix = os.path.join(cache_dir, hasher.hexdigest())
+  cache_tfrecord_file = cache_prefix + '.tfrecord'
+  cache_meta_data_file = cache_prefix + '_meta_data'
 
-  # Converts examples into preprocessed features and saves in tfrecord_file.
-  model_spec.convert_examples_to_features(examples, tfrecord_file, label_names)
-
-  # Generates and saves meta data in meta_data_file.
-  meta_data = {
-      'size': len(examples),
-      'num_classes': len(label_names),
-      'index_to_label': label_names
-  }
-  dataloader.write_meta_data(meta_data_file, meta_data)
+  return cache_tfrecord_file, cache_meta_data_file, cache_prefix
 
 
-def get_cache_info(cache_dir, data_name, model_spec, is_training):
+def _write_meta_data(meta_data_file, meta_data):
+  """Writes meta data into file."""
+  with tf.io.gfile.GFile(meta_data_file, 'w') as f:
+    json.dump(meta_data, f)
+
+
+def _get_cache_info(cache_dir, data_name, model_spec):
   """Gets cache related information: whether is cached, related filenames."""
   if cache_dir is None:
     cache_dir = tempfile.mkdtemp()
-  tfrecord_file, meta_data_file, file_prefix = dataloader.get_cache_filenames(
+  tfrecord_file, meta_data_file, file_prefix = _get_cache_filenames(
       cache_dir, model_spec, data_name)
-  vocab_file = file_prefix + '_vocab'
+  is_cached = tf.io.gfile.exists(tfrecord_file) and tf.io.gfile.exists(
+      meta_data_file)
 
-  is_cached = False
-  if os.path.exists(tfrecord_file) and os.path.exists(meta_data_file):
-    if model_spec.need_gen_vocab and is_training:
-      model_spec.load_vocab(vocab_file)
-    is_cached = True
-  return is_cached, tfrecord_file, meta_data_file, vocab_file
-
-
-def read_csv(input_file, fieldnames=None, delimiter=',', quotechar='"'):
-  """Reads a separated value file."""
-  with tf.io.gfile.GFile(input_file, 'r') as f:
-    reader = csv.DictReader(
-        f, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
-    lines = []
-    for line in reader:
-      lines.append(line)
-    return lines
+  return is_cached, tfrecord_file, meta_data_file, file_prefix
 
 
 class TextClassifierDataLoader(dataloader.DataLoader):
@@ -152,11 +147,11 @@ class TextClassifierDataLoader(dataloader.DataLoader):
     data_root = os.path.abspath(filename)
     folder_name = os.path.basename(data_root)
 
-    is_cached, tfrecord_file, meta_data_file, vocab_file = get_cache_info(
+    is_cached, tfrecord_file, meta_data_file, vocab_file = cls._get_cache_info(
         cache_dir, folder_name, model_spec, is_training)
     # If cached, directly loads data from cache directory.
     if is_cached:
-      return load(tfrecord_file, meta_data_file, model_spec)
+      return cls._load_data(tfrecord_file, meta_data_file, model_spec)
 
     # Gets paths of all text.
     if class_labels:
@@ -193,11 +188,11 @@ class TextClassifierDataLoader(dataloader.DataLoader):
       examples.append(classifier_data_lib.InputExample(guid, text, None, label))
 
     # Saves preprocessed data and other assets into files.
-    save(examples, model_spec, label_names, tfrecord_file, meta_data_file,
-         vocab_file, is_training)
+    cls._save_data(examples, model_spec, label_names, tfrecord_file,
+                   meta_data_file, vocab_file, is_training)
 
     # Loads data from cache directory.
-    return load(tfrecord_file, meta_data_file, model_spec)
+    return cls._load_data(tfrecord_file, meta_data_file, model_spec)
 
   @classmethod
   def from_csv(cls,
@@ -232,13 +227,13 @@ class TextClassifierDataLoader(dataloader.DataLoader):
     """
     csv_name = os.path.basename(filename)
 
-    is_cached, tfrecord_file, meta_data_file, vocab_file = get_cache_info(
+    is_cached, tfrecord_file, meta_data_file, vocab_file = cls._get_cache_info(
         cache_dir, csv_name, model_spec, is_training)
     # If cached, directly loads data from cache directory.
     if is_cached:
-      return load(tfrecord_file, meta_data_file, model_spec)
+      return cls._load_data(tfrecord_file, meta_data_file, model_spec)
 
-    lines = read_csv(filename, fieldnames, delimiter, quotechar)
+    lines = cls._read_csv(filename, fieldnames, delimiter, quotechar)
     if shuffle:
       random.shuffle(lines)
 
@@ -256,8 +251,172 @@ class TextClassifierDataLoader(dataloader.DataLoader):
       examples.append(classifier_data_lib.InputExample(guid, text, None, label))
 
     # Saves preprocessed data and other assets into files.
-    save(examples, model_spec, label_names, tfrecord_file, meta_data_file,
-         vocab_file, is_training)
+    cls._save_data(examples, model_spec, label_names, tfrecord_file,
+                   meta_data_file, vocab_file, is_training)
 
     # Loads data from cache directory.
-    return load(tfrecord_file, meta_data_file, model_spec)
+    return cls._load_data(tfrecord_file, meta_data_file, model_spec)
+
+  @classmethod
+  def _load_data(cls, tfrecord_file, meta_data_file, model_spec):
+    """Gets `TextClassifierDataLoader` object from tfrecord file and metadata file."""
+
+    dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec)
+    return TextClassifierDataLoader(dataset, meta_data['size'],
+                                    meta_data['num_classes'],
+                                    meta_data['index_to_label'])
+
+  @classmethod
+  def _save_data(cls, examples, model_spec, label_names, tfrecord_file,
+                 meta_data_file, vocab_file, is_training):
+    """Saves preprocessed data and other assets into files."""
+    # If needed, generates and saves vocabulary in vocab_file=None,
+    if model_spec.need_gen_vocab and is_training:
+      model_spec.gen_vocab(examples)
+      model_spec.save_vocab(vocab_file)
+
+    # Converts examples into preprocessed features and saves in tfrecord_file.
+    model_spec.convert_examples_to_features(examples, tfrecord_file,
+                                            label_names)
+
+    # Generates and saves meta data in meta_data_file.
+    meta_data = {
+        'size': len(examples),
+        'num_classes': len(label_names),
+        'index_to_label': label_names
+    }
+    _write_meta_data(meta_data_file, meta_data)
+
+  @classmethod
+  def _get_cache_info(cls, cache_dir, data_name, model_spec, is_training):
+    """Gets cache related information for text classifier."""
+    is_cached, tfrecord_file, meta_data_file, file_prefix = _get_cache_info(
+        cache_dir, data_name, model_spec)
+
+    vocab_file = file_prefix + '_vocab'
+    if is_cached:
+      if model_spec.need_gen_vocab and is_training:
+        model_spec.load_vocab(vocab_file)
+      is_cached = True
+    return is_cached, tfrecord_file, meta_data_file, vocab_file
+
+  @classmethod
+  def _read_csv(cls, input_file, fieldnames=None, delimiter=',', quotechar='"'):
+    """Reads a separated value file."""
+    with tf.io.gfile.GFile(input_file, 'r') as f:
+      reader = csv.DictReader(
+          f, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
+      lines = []
+      for line in reader:
+        lines.append(line)
+      return lines
+
+
+class QuestionAnswerDataLoader(dataloader.DataLoader):
+  """DataLoader for question answering."""
+
+  def __init__(self, dataset, size, version_2_with_negative, examples, features,
+               squad_file):
+    super(QuestionAnswerDataLoader, self).__init__(dataset, size)
+    self.version_2_with_negative = version_2_with_negative
+    self.examples = examples
+    self.features = features
+    self.squad_file = squad_file
+
+  @classmethod
+  def from_squad(cls,
+                 filename,
+                 model_spec,
+                 is_training=True,
+                 version_2_with_negative=False,
+                 cache_dir=None):
+    """Loads data in SQuAD format and preproecess text according to `model_spec`.
+
+    Args:
+      filename: Name of the file.
+      model_spec: Specification for the model.
+      is_training: Whether the loaded data is for training or not.
+      version_2_with_negative: Whether it's SQuAD 2.0 format.
+      cache_dir: The cache directory to save preprocessed data. If None,
+        generates a temporary directory to cache preprocessed data.
+
+    Returns:
+      QuestionAnswerDataLoader object.
+    """
+    file_base_name = os.path.basename(filename)
+    is_cached, tfrecord_file, meta_data_file, _ = _get_cache_info(
+        cache_dir, file_base_name, model_spec)
+    # If cached, directly loads data from cache directory.
+    if is_cached and is_training:
+      dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec,
+                                 is_training)
+      return QuestionAnswerDataLoader(
+          dataset=dataset,
+          size=meta_data['size'],
+          version_2_with_negative=meta_data['version_2_with_negative'],
+          examples=[],
+          features=[],
+          squad_file=filename)
+
+    meta_data, examples, features = cls._generate_tf_record_from_squad_file(
+        filename, model_spec.tokenizer, tfrecord_file, is_training,
+        model_spec.predict_batch_size, model_spec.seq_len, model_spec.query_len,
+        model_spec.doc_stride, version_2_with_negative)
+    _write_meta_data(meta_data_file, meta_data)
+
+    dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec,
+                               is_training)
+    return QuestionAnswerDataLoader(dataset, meta_data['size'],
+                                    meta_data['version_2_with_negative'],
+                                    examples, features, filename)
+
+  @classmethod
+  def _generate_tf_record_from_squad_file(cls,
+                                          input_file_path,
+                                          tokenizer,
+                                          output_path,
+                                          is_training,
+                                          predict_batch_size=8,
+                                          max_seq_length=384,
+                                          max_query_length=64,
+                                          doc_stride=128,
+                                          version_2_with_negative=False):
+    """Generates and saves training/validation data into a tf record file."""
+    examples = squad_lib.read_squad_examples(
+        input_file=input_file_path,
+        is_training=is_training,
+        version_2_with_negative=version_2_with_negative)
+    writer = squad_lib.FeatureWriter(
+        filename=output_path, is_training=is_training)
+
+    features = []
+
+    def _append_feature(feature, is_padding):
+      if not is_padding:
+        features.append(feature)
+      writer.process_feature(feature)
+
+    if is_training:
+      batch_size = None
+    else:
+      batch_size = predict_batch_size
+
+    number_of_examples = squad_lib.convert_examples_to_features(
+        examples=examples,
+        tokenizer=tokenizer,
+        max_seq_length=max_seq_length,
+        doc_stride=doc_stride,
+        max_query_length=max_query_length,
+        is_training=is_training,
+        output_fn=writer.process_feature if is_training else _append_feature,
+        batch_size=batch_size)
+    writer.close()
+
+    meta_data = {
+        'size': number_of_examples,
+        'version_2_with_negative': version_2_with_negative
+    }
+
+    if is_training:
+      examples = []
+    return meta_data, examples, features
