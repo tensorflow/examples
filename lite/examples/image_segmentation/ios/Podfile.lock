@@ -1,5 +1,5 @@
 PODS:
-  - TensorFlowLiteC (0.0.1-nightly.20200405)
+  - TensorFlowLiteC (0.0.1-nightly.20200412)
   - TensorFlowLiteSwift (0.0.1-nightly):
     - TensorFlowLiteC (~> 0.0.1-nightly)
 
@@ -12,7 +12,7 @@ SPEC REPOS:
     - TensorFlowLiteSwift
 
 SPEC CHECKSUMS:
-  TensorFlowLiteC: b67742ff9847a50239e9f1a62d56c1532b67a7b9
+  TensorFlowLiteC: 83a6769e2100850e3ac728b912cf5ef297fb7b9b
   TensorFlowLiteSwift: 1db618cb4fd98077b679ff75911771e25a6e0d14
 
 PODFILE CHECKSUM: 14f77372c9b0dcfcb00999f99180933e0b554b8f
