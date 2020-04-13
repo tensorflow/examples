@@ -147,31 +147,24 @@ class ImageClassifierTest(tf.test.TestCase):
     self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
     lite_model = self._load_lite_model(tflite_output_file)
 
+    test_ds = model._gen_dataset(
+        self.test_data, batch_size=1, is_training=False)
     if compat.get_tf_behavior() == 1:
-      image_placeholder = tf.compat.v1.placeholder(
-          tf.uint8, [1, self.IMAGE_SIZE, self.IMAGE_SIZE, 3])
-      label_placeholder = tf.compat.v1.placeholder(tf.int32, [1])
-      image_tensor, _ = model.preprocess(image_placeholder, label_placeholder)
+      iterator = test_ds.make_one_shot_iterator()
+      image_tensor, label_tensor = iterator.get_next()
       with tf.compat.v1.Session() as sess:
-        for i, (class_name, rgb) in enumerate(self.CMY_NAMES_AND_RGB_VALUES):
-          input_image = np.expand_dims(_fill_image(rgb, self.IMAGE_SIZE), 0)
-          image = sess.run(
-              image_tensor,
-              feed_dict={
-                  image_placeholder: input_image,
-                  label_placeholder: [i]
-              })
+        for _ in range(self.test_data.size):
+          image, label = sess.run((image_tensor, label_tensor))
           output_batch = lite_model(image)
-          prediction = labels[np.argmax(output_batch[0])]
-          self.assertEqual(class_name, prediction)
+          prediction = np.argmax(output_batch[0])
+          label = np.argmax(label[0])
+          self.assertEqual(label, prediction)
     else:
-      for i, (class_name, rgb) in enumerate(self.CMY_NAMES_AND_RGB_VALUES):
-        input_batch = np.expand_dims(_fill_image(rgb, self.IMAGE_SIZE), 0)
-        image, _ = model.preprocess(input_batch, i)
-        image = image.numpy()
-        output_batch = lite_model(image)
-        prediction = labels[np.argmax(output_batch[0])]
-        self.assertEqual(class_name, prediction)
+      for image, label in test_ds:
+        output_batch = lite_model(image.numpy())
+        prediction = np.argmax(output_batch[0])
+        label = np.argmax(label.numpy()[0])
+        self.assertEqual(label, prediction)
 
   def _test_export_to_tflite_quantized(self, model, representative_data):
     # Just test whether quantization will crash, can't guarantee the result.

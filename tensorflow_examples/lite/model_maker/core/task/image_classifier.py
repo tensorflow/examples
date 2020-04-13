@@ -23,6 +23,7 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
+from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
 from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
@@ -39,7 +40,8 @@ def create(train_data,
            train_whole_model=None,
            dropout_rate=None,
            learning_rate=None,
-           momentum=None):
+           momentum=None,
+           use_augmentation=False):
   """Loads data and retrains the model based on data for image classification.
 
   Args:
@@ -56,6 +58,7 @@ def create(train_data,
     dropout_rate: the rate for dropout.
     learning_rate: a Python float forwarded to the optimizer.
     momentum: a Python float forwarded to the optimizer.
+    use_augmentation: Use data augmentation for preprocessing.
   Returns:
     An instance of ImageClassifier class.
   """
@@ -84,7 +87,8 @@ def create(train_data,
       train_data.index_to_label,
       train_data.num_classes,
       shuffle=shuffle,
-      hparams=hparams)
+      hparams=hparams,
+      use_augmentation=use_augmentation)
 
   tf.compat.v1.logging.info('Retraining the models...')
   image_classifier.train(train_data, validation_data)
@@ -101,7 +105,8 @@ class ImageClassifier(classification_model.ClassificationModel):
                index_to_label,
                num_classes,
                shuffle=True,
-               hparams=lib.get_default_hparams()):
+               hparams=lib.get_default_hparams(),
+               use_augmentation=False):
     """Init function for ImageClassifier class.
 
     Args:
@@ -113,12 +118,19 @@ class ImageClassifier(classification_model.ClassificationModel):
       hparams: A namedtuple of hyperparameters. This function expects
         .dropout_rate: The fraction of the input units to drop, used in dropout
           layer.
+      use_augmentation: Use data augmentation for preprocessing.
     """
     super(ImageClassifier,
           self).__init__(model_export_format, model_spec, index_to_label,
                          num_classes, shuffle, hparams.do_fine_tuning)
     self.hparams = hparams
     self.model = self._create_model()
+    self.preprocessor = image_preprocessing.Preprocessor(
+        self.model_spec.input_image_shape,
+        num_classes,
+        self.model_spec.mean_rgb,
+        self.model_spec.stddev_rgb,
+        use_augmentation=use_augmentation)
 
   def _create_model(self, hparams=None):
     """Creates the classifier model for retraining."""
@@ -162,18 +174,22 @@ class ImageClassifier(classification_model.ClassificationModel):
     return lib.train_model(self.model, hparams, train_data_and_size,
                            validation_data_and_size)
 
-  def preprocess(self, image, label):
-    """Image preprocessing method."""
-    image = tf.cast(image, tf.float32)
+  def preprocess(self, image, label, is_training=False):
+    return self.preprocessor(image, label, is_training)
 
-    image -= tf.constant(
-        self.model_spec.mean_rgb, shape=[1, 1, 3], dtype=image.dtype)
-    image /= tf.constant(
-        self.model_spec.stddev_rgb, shape=[1, 1, 3], dtype=image.dtype)
+  def _gen_dataset(self, data, batch_size=32, is_training=True):
+    """Generates training / validation dataset."""
+    ds = data.dataset
+    ds = ds.map(lambda image, label: self.preprocess(image, label, is_training))
 
-    image = tf.image.resize(image, self.model_spec.input_image_shape)
-    label = tf.one_hot(label, depth=self.num_classes)
-    return image, label
+    if is_training:
+      if self.shuffle:
+        ds = ds.shuffle(buffer_size=min(data.size, 100))
+      ds = ds.repeat()
+
+    ds = ds.batch(batch_size)
+    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+    return ds
 
   def export(self,
              tflite_filename,
