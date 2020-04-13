@@ -20,7 +20,7 @@ import filecmp
 import os
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core import test_util
@@ -83,6 +83,19 @@ class ImageClassifierTest(tf.test.TestCase):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
       _ = image_classifier.create(self.train_data, mef.ModelExportFormat.TFLITE,
                                   model_spec.mobilenet_v2_spec)
+
+  @test_util.test_in_tf_1and2
+  def test_efficientnetlite0_model_with_model_maker_retraining_lib(self):
+    model = image_classifier.create(
+        self.train_data,
+        mef.ModelExportFormat.TFLITE,
+        model_spec.efficientnet_lite0_spec,
+        epochs=2,
+        batch_size=4,
+        shuffle=True,
+        use_hub_library=False)
+    self._test_accuracy(model)
+    self._test_export_to_tflite(model)
 
   @test_util.test_in_tf_1and2
   def test_efficientnetlite0_model(self):

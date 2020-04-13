@@ -17,7 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf
+import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import model_export_format as mef
@@ -26,8 +26,15 @@ from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
 from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
+from tensorflow_examples.lite.model_maker.core.task import train_image_classifier_lib
 
-from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as lib
+from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
+
+
+def get_hub_lib_hparams(**kwargs):
+  """Gets the hyperparameters for the tensorflow hub's library."""
+  hparams = hub_lib.get_default_hparams()
+  return train_image_classifier_lib.add_params(hparams, **kwargs)
 
 
 def create(train_data,
@@ -41,7 +48,10 @@ def create(train_data,
            dropout_rate=None,
            learning_rate=None,
            momentum=None,
-           use_augmentation=False):
+           use_augmentation=False,
+           use_hub_library=True,
+           warmup_steps=None,
+           model_dir=None):
   """Loads data and retrains the model based on data for image classification.
 
   Args:
@@ -50,15 +60,27 @@ def create(train_data,
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
     validation_data: Validation data. If None, skips validation process.
-    batch_size: Number of samples per training step.
+    batch_size: Number of samples per training step. If `use_hub_library` is
+      False, it represents the base learning rate when train batch size is 256
+      and it's linear to the batch size.
     epochs: Number of epochs for training.
     train_whole_model: If true, the Hub module is trained together with the
       classification layer on top. Otherwise, only train the top classification
       layer.
-    dropout_rate: the rate for dropout.
-    learning_rate: a Python float forwarded to the optimizer.
-    momentum: a Python float forwarded to the optimizer.
+    dropout_rate: The rate for dropout.
+    learning_rate: Base learning rate when train batch size is 256. Linear to
+      the batch size.
+    momentum: a Python float forwarded to the optimizer. Only used when
+      `use_hub_library` is True.
     use_augmentation: Use data augmentation for preprocessing.
+    use_hub_library: Use `make_image_classifier_lib` from tensorflow hub to
+      retrain the model.
+    warmup_steps: Number of warmup steps for warmup schedule on learning rate.
+      If None, the default warmup_steps is used which is the total training
+      steps in two epochs. Only used when `use_hub_library` is False.
+    model_dir: The location of the model checkpoint files. Only used when
+      `use_hub_library` is False.
+
   Returns:
     An instance of ImageClassifier class.
   """
@@ -66,20 +88,23 @@ def create(train_data,
     raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
         model_spec.compat_tf_versions, compat.get_tf_behavior()))
 
-  # The hyperparameters for make_image_classifier by tensorflow hub.
-  hparams = lib.get_default_hparams()
-  if batch_size is not None:
-    hparams = hparams._replace(batch_size=batch_size)
-  if epochs is not None:
-    hparams = hparams._replace(train_epochs=epochs)
-  if train_whole_model is not None:
-    hparams = hparams._replace(do_fine_tuning=train_whole_model)
-  if dropout_rate is not None:
-    hparams = hparams._replace(dropout_rate=dropout_rate)
-  if learning_rate is not None:
-    hparams = hparams._replace(learning_rate=learning_rate)
-  if momentum is not None:
-    hparams = hparams._replace(momentum=momentum)
+  if use_hub_library:
+    hparams = get_hub_lib_hparams(
+        batch_size=batch_size,
+        train_epochs=epochs,
+        do_fine_tuning=train_whole_model,
+        dropout_rate=dropout_rate,
+        learning_rate=learning_rate,
+        momentum=momentum)
+  else:
+    hparams = train_image_classifier_lib.HParams.get_hparams(
+        batch_size=batch_size,
+        train_epochs=epochs,
+        do_fine_tuning=train_whole_model,
+        dropout_rate=dropout_rate,
+        learning_rate=learning_rate,
+        warmup_steps=warmup_steps,
+        model_dir=model_dir)
 
   image_classifier = ImageClassifier(
       model_export_format,
@@ -105,7 +130,7 @@ class ImageClassifier(classification_model.ClassificationModel):
                index_to_label,
                num_classes,
                shuffle=True,
-               hparams=lib.get_default_hparams(),
+               hparams=hub_lib.get_default_hparams(),
                use_augmentation=False):
     """Init function for ImageClassifier class.
 
@@ -118,6 +143,8 @@ class ImageClassifier(classification_model.ClassificationModel):
       hparams: A namedtuple of hyperparameters. This function expects
         .dropout_rate: The fraction of the input units to drop, used in dropout
           layer.
+        .do_fine_tuning: If true, the Hub module is trained together with the
+          classification layer on top.
       use_augmentation: Use data augmentation for preprocessing.
     """
     super(ImageClassifier,
@@ -138,8 +165,9 @@ class ImageClassifier(classification_model.ClassificationModel):
 
     module_layer = hub_loader.HubKerasLayerV1V2(
         self.model_spec.uri, trainable=hparams.do_fine_tuning)
-    return lib.build_model(module_layer, hparams,
-                           self.model_spec.input_image_shape, self.num_classes)
+    return hub_lib.build_model(module_layer, hparams,
+                               self.model_spec.input_image_shape,
+                               self.num_classes)
 
   def train(self, train_data, validation_data=None, hparams=None):
     """Feeds the training data for training.
@@ -147,12 +175,8 @@ class ImageClassifier(classification_model.ClassificationModel):
     Args:
       train_data: Training data.
       validation_data: Validation data. If None, skips validation process.
-      hparams: A namedtuple of hyperparameters. This function expects
-      .train_epochs: a Python integer with the number of passes over the
-        training dataset;
-      .learning_rate: a Python float forwarded to the optimizer;
-      .momentum: a Python float forwarded to the optimizer;
-      .batch_size: a Python integer, number of samples per training step.
+      hparams: An instance of hub_lib.HParams or
+        train_image_classifier_lib.HParams. Anamedtuple of hyperparameters.
 
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
@@ -170,7 +194,11 @@ class ImageClassifier(classification_model.ClassificationModel):
           validation_data, hparams.batch_size, is_training=False)
       validation_size = validation_data.size
     validation_data_and_size = (validation_ds, validation_size)
+
     # Trains the models.
+    lib = hub_lib
+    if isinstance(hparams, train_image_classifier_lib.HParams):
+      lib = train_image_classifier_lib
     return lib.train_model(self.model, hparams, train_data_and_size,
                            validation_data_and_size)
 
