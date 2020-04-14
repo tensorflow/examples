@@ -5,7 +5,7 @@ target 'BertQA-UIKit' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-  # Pods for BertQA
+  # Pods for BertQA-UIKit
   pod 'TensorFlowLiteSwift', '0.0.1-nightly'
 end
 
@@ -13,6 +13,6 @@ target 'BertQA-SwiftUI' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
-  # Pods for BertQA
+  # Pods for BertQA-SwiftUI
   pod 'TensorFlowLiteSwift', '0.0.1-nightly'
 end

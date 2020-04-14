@@ -62,7 +62,9 @@ function.
 ## Requirements
 
 *   Xcode 11.0 or above
+
 *   Valid Apple Developer ID
+
 *   Real iOS device
 
     Note: You can also use an iOS emulator, but some of the functionality may
@@ -77,30 +79,33 @@ function.
 ## Build and run
 
 1.  Clone the TensorFlow examples GitHub repository to your computer to get the
-    demo application:
+    demo application: `git clone https://github.com/tensorflow/examples`
 
-    `git clone https://github.com/tensorflow/examples`
-
-1.  Install the pod to generate the workspace file:
-
-    `cd examples/lite/examples/bert_qa/ios && pod install`
+1.  Install the pod to generate the workspace file: `cd
+    examples/lite/examples/bert_qa/ios && pod install`
 
     Note: If you have installed this pod before and that command doesn't work,
     try `pod update`. At the end of this step you should have a directory called
     `BertQA.xcworkspace`.
 
-1.  Open the project in Xcode with the following command:
-
-    `open BertQA.xcworkspace`
+1.  Open the project in Xcode with the following command: `open
+    BertQA.xcworkspace`
 
     This launches Xcode and opens the BertQA project.
 
 1.  In the Menu bar, select `Product` → `Destination` and choose your device.
 
-1.  In the Menu bar, select `Product` → `Scheme` and choose `BertQA-UIKit` or
-    `BertQA-SwiftUI` or `BertQA-Tests`.
+1. Follow the direction below if you want to:
+    *   Run the application:
+        1.  In the Menu bar, select `Product` → `Scheme` and choose
+            `BertQA-UIKit` or `BertQA-SwiftUI`.
+        1.  In the Menu bar, select `Product` → `Run` to install the app on your
+            device.
+    *   Test the core logic:
 
-1.  In the Menu bar, select `Product` → `Run` to install the app on your device.
+        1.  In the Menu bar, select `Product` --> `Scheme` and choose
+            `BertQA-UIKit`.
+        1.  In the Menu bar, select `Product` --> `Test`.
 
 [UIKit screencast]: https://storage.googleapis.com/download.tensorflow.org/models/tflite/screenshots/bertqa_ios_uikit_demo.gif
 [SwiftUI screencast]: https://storage.googleapis.com/download.tensorflow.org/models/tflite/screenshots/bertqa_ios_swiftui_demo.gif
