@@ -19,6 +19,7 @@ set -e  # Exit immediately when one of the commands fails.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 
+PROJECT_EXT=".xcodeproj"
 WORKSPACE_EXT=".xcworkspace"
 
 # Keep a list of blacklisted iOS apps directories which should be excluded from
@@ -26,6 +27,16 @@ WORKSPACE_EXT=".xcworkspace"
 SKIPPED_BUILDS="
 gesture_classification/ios
 "
+
+function install_helper_tools {
+  if ! [ -x "$(command -v jq)" ]; then
+    brew install jq
+  fi
+
+  if ! [ -x "$(command -v xcpretty)" ]; then
+    sudo gem install xcpretty
+  fi
+}
 
 function build_ios_example {
   # Check if this directory appears in the skipped builds list.
@@ -42,19 +53,32 @@ function build_ios_example {
   # Cleanly install the dependencies
   pod install --repo-update --clean-install
 
-  # Extract the workspace and target names.
+  # Extract the scheme names.
+  PROJECT_NAME="$(find * -maxdepth 0 -type d -name "*${PROJECT_EXT}")"
   WORKSPACE_NAME="$(find * -type d -name "*${WORKSPACE_EXT}")"
-  TARGET_NAME="$(basename "${WORKSPACE_NAME}" "${WORKSPACE_EXT}")"
+  SCHEMES="$(xcodebuild -list -project "${PROJECT_NAME}" -json | jq -r ".project.schemes[]")"
 
-  # Build the main scheme without code signing.
-  xcodebuild \
-      CODE_SIGN_IDENTITY="" \
-      CODE_SIGNING_REQUIRED="NO" \
-      CODE_SIGN_ENTITLEMENTS="" \
-      CODE_SIGNING_ALLOWED="NO" \
-      ARCHS="arm64" \
-      -scheme "${TARGET_NAME}" \
-      -workspace "${WORKSPACE_NAME}"
+  # Build each scheme without code signing.
+  for scheme in ${SCHEMES}; do
+    # Due to an unknown issue prior to Xcode 11.4, a non-existing test scheme
+    # might appear in the list of project schemes. For now, if a scheme name
+    # contains the word "Tests", skip the build for that particular scheme.
+    if [[ "${scheme}" == *"Tests"* ]]; then
+      continue
+    fi
+
+    echo "--- BUILDING SCHEME ${scheme} FOR PROJECT ${RELATIVE_DIR} ---"
+    set -o pipefail && xcodebuild \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED="NO" \
+        CODE_SIGN_ENTITLEMENTS="" \
+        CODE_SIGNING_ALLOWED="NO" \
+        ARCHS="arm64" \
+        -scheme "${scheme}" \
+        -workspace "${WORKSPACE_NAME}" \
+        | xcpretty  # Pretty print the build output.
+    echo "--- FINISHED BUILDING SCHEME ${scheme} FOR PROJECT ${RELATIVE_DIR} ---"
+  done
 
   popd > /dev/null
 
@@ -63,4 +87,5 @@ function build_ios_example {
   echo
 }
 
+install_helper_tools
 build_ios_example "$1"
