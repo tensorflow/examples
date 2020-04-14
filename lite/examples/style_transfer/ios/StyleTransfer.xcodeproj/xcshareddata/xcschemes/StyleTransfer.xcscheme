@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7F67811A23405195002A02F2"
-               BuildableName = "TFL Segmentation.app"
+               BuildableName = "TFL Style Transfer.app"
                BlueprintName = "StyleTransfer"
                ReferencedContainer = "container:StyleTransfer.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7F67811A23405195002A02F2"
-            BuildableName = "TFL Segmentation.app"
+            BuildableName = "TFL Style Transfer.app"
             BlueprintName = "StyleTransfer"
             ReferencedContainer = "container:StyleTransfer.xcodeproj">
          </BuildableReference>
@@ -69,7 +69,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7F67811A23405195002A02F2"
-            BuildableName = "TFL Segmentation.app"
+            BuildableName = "TFL Style Transfer.app"
             BlueprintName = "StyleTransfer"
             ReferencedContainer = "container:StyleTransfer.xcodeproj">
          </BuildableReference>
