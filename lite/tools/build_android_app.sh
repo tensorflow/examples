@@ -25,7 +25,9 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 
 # Keep a list of blacklisted android apps directories which should be excluded
 # from the builds.
+# TODO(b/154114877): Restore smart_reply after resolving aapt_version build issues.
 SKIPPED_BUILDS="
+smart_reply/android
 "
 
 function build_android_example {
