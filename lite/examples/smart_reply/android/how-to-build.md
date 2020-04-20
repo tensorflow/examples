@@ -90,7 +90,7 @@ If you changed C++ ops or JNI from source code, you may want to build AAR from
 The procedure is to 1) build AAR package containing JNI (.so) lib, and 2) copy
   to Folder `libs`.
 
-### Require: Bazel installed https://bazel.build/ (version >= 1.0.0).
+### Require: Bazel installed https://bazel.build/.
 
 First, you need to set environment variables ANDROID_HOME and ANDROID_NDK_HOME
   for Android SDK and NDK respectively.

@@ -63,6 +63,7 @@ tf_cc_test(
         "//libs/cc/testdata:smartreply.tflite",
         "//libs/cc/testdata:smartreply_samples.tsv",
     ],
+    tags = ["no_oss"],
     deps = [
         ":predictor_lib",
         "@org_tensorflow//tensorflow/core:test",
@@ -77,6 +78,7 @@ cc_test(
     name = "extract_feature_op_test",
     size = "small",
     srcs = ["ops/extract_feature_test.cc"],
+    tags = ["no_oss"],
     deps = [
         ":custom_ops",
         "@org_tensorflow//tensorflow/lite:framework",
@@ -91,6 +93,7 @@ cc_test(
     name = "normalize_op_test",
     size = "small",
     srcs = ["ops/normalize_test.cc"],
+    tags = ["no_oss"],
     deps = [
         ":custom_ops",
         "@org_tensorflow//tensorflow/lite:framework",
@@ -105,6 +108,7 @@ cc_test(
     name = "predict_op_test",
     size = "small",
     srcs = ["ops/predict_test.cc"],
+    tags = ["no_oss"],
     deps = [
         ":custom_ops",
         "@org_tensorflow//tensorflow/lite:framework",

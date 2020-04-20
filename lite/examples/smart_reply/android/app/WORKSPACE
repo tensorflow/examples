@@ -9,59 +9,34 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Needs to be in-sync with TensorFlow sources.
 http_archive(
     name = "io_bazel_rules_closure",
-    sha256 = "5b00383d08dd71f28503736db0500b6fb4dda47489ff5fc6bed42557c07c6ba9",
-    strip_prefix = "rules_closure-308b05b2419edb5c8ee0471b67a40403df940149",
+    sha256 = "ddce3b3a3909f99b28b25071c40b7fec7e2e1d1d1a4b2e933f3082aa99517105",
+    strip_prefix = "rules_closure-316e6133888bfc39fb860a4f1a31cfcbae485aef",
     urls = [
-        "https://storage.googleapis.com/mirror.tensorflow.org/github.com/bazelbuild/rules_closure/archive/308b05b2419edb5c8ee0471b67a40403df940149.tar.gz",
-        "https://github.com/bazelbuild/rules_closure/archive/308b05b2419edb5c8ee0471b67a40403df940149.tar.gz",  # 2019-06-13
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_closure/archive/316e6133888bfc39fb860a4f1a31cfcbae485aef.tar.gz",
+        "https://github.com/bazelbuild/rules_closure/archive/316e6133888bfc39fb860a4f1a31cfcbae485aef.tar.gz",  # 2019-03-21
     ],
 )
-
-
-# https://github.com/bazelbuild/bazel-skylib/releases
 http_archive(
     name = "bazel_skylib",
-    sha256 = "1dde365491125a3db70731e25658dfdd3bc5dbdfd11b840b3e987ecf043c7ca0",
-    urls = [
-        "https://storage.googleapis.com/mirror.tensorflow.org/github.com/bazelbuild/bazel-skylib/releases/download/0.9.0/bazel_skylib-0.9.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/0.9.0/bazel_skylib-0.9.0.tar.gz",
-    ],
+    sha256 = "2c62d8cd4ab1e65c08647eb4afe38f51591f43f7f0885e7769832fa137633dcb",
+    strip_prefix = "bazel-skylib-0.7.0",
+    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.7.0.tar.gz"],
 )
 # END: Upstream TensorFlow dependencies
 
 http_archive(
     name = "org_tensorflow",
-    sha256 = "3a814b7b575b348b97aa6d231682195e2d9db808f550ae439ccb47f62cadb073",
-    strip_prefix = "tensorflow-2.2.0-rc3",
+    sha256 = "352819de805d58c859c8889bf279abde508dbd89d91c804c78cd8e700845a2c5",
+    strip_prefix = "tensorflow-d9b09c432eb6fd176333277a83d9f364b540d529",
     urls = [
-        "https://github.com/tensorflow/tensorflow/archive/v2.2.0-rc3.tar.gz",  # 2020-04-14
+        "https://github.com/tensorflow/tensorflow/archive/d9b09c432eb6fd176333277a83d9f364b540d529.tar.gz",  # 2019-09-24
     ],
 )
 
 load("@org_tensorflow//tensorflow:version_check.bzl", "check_bazel_version_at_least")
-check_bazel_version_at_least("1.0.0")
+check_bazel_version_at_least(minimum_bazel_version="0.24.1")
 load("@org_tensorflow//tensorflow:workspace.bzl", "tf_repositories")
 tf_repositories(path_prefix="", tf_repo_name="org_tensorflow")
-
-register_toolchains("@local_config_python//:py_toolchain")
-
-load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
-closure_repositories()
-
-load("@org_tensorflow//third_party/toolchains/preconfig/generate:archives.bzl",
-     "bazel_toolchains_archive")
-bazel_toolchains_archive()
-
-load(
-    "@bazel_toolchains//repositories:repositories.bzl",
-    bazel_toolchains_repositories = "repositories",
-)
-bazel_toolchains_repositories()
-
-load("@org_tensorflow//third_party/android:android_configure.bzl", "android_configure")
-android_configure(name="local_config_android")
-load("@local_config_android//:android.bzl", "android_workspace")
-android_workspace()
 
 # Need to export environment variable ANDROID_HOME.
 android_sdk_repository(

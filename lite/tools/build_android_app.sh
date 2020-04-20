@@ -15,7 +15,6 @@
 # ==============================================================================
 
 set -e  # Exit immediately when one of the commands fails.
-set -x  # Verbose
 
 # Prerequisites: The following envvars should be set when running this script.
 #  - ANDROID_HOME: Android SDK location (tested with Android SDK 29)
@@ -28,6 +27,7 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 # from the builds.
 # TODO(b/154114877): Restore smart_reply after resolving aapt_version build issues.
 SKIPPED_BUILDS="
+smart_reply/android
 "
 
 function build_android_example {
@@ -61,35 +61,4 @@ function build_android_example {
   echo
 }
 
-
-function build_smartreply_aar {
-  # Builds once only after Smart Reply Android app.
-  # It is to use bazel to build and create AAR for custom ops in cc.
-  # TODO(tianlin): To generalize as pre-/post-build.
-  RELATIVE_DIR="${1#"${EXAMPLES_DIR}/"}"
-
-  # Run this only for smart_reply/android.
-  if [[ "${RELATIVE_DIR}" != "smart_reply/android" ]]; then
-    return 0
-  fi
-  WORKSPACE_DIR="${EXAMPLES_DIR}/smart_reply/android/app"
-  echo "=== BUILD STARTED: ${RELATIVE_DIR} :: build_smartreply_aar ==="
-
-  pushd "$1" > /dev/null
-
-  cd "${WORKSPACE_DIR}"
-  echo "-- Building in directory: ${WORKSPACE_DIR} --"
-  bazel version  # Get bazel version info.
-  bazel build //libs/cc/...
-  bazel test //libs/cc/...
-
-  popd > /dev/null
-
-  echo "=== BUILD STARTED: ${RELATIVE_DIR} :: build_smartreply_aar ==="
-  echo
-  echo
-}
-
 build_android_example "$1"
-
-build_smartreply_aar "$1"
