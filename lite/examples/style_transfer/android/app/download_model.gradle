@@ -1,0 +1,34 @@
+task downloadPredictInt8ModelFile(type: Download) {
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/style_predict_quantized_256.tflite'
+    overwrite false
+}
+
+task downloadTransformInt8ModelFile(type: Download) {
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/style_transfer_quantized_384.tflite'
+    overwrite false
+}
+
+task downloadPredictFloat16ModelFile(type: Download) {
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/prediction/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/style_predict_f16_256.tflite'
+    overwrite false
+}
+
+task downloadTransformFloat16ModelFile(type: Download) {
+    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/transfer/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/style_transfer_f16_384.tflite'
+    overwrite false
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'assembleDebug') || (task.name == 'assembleRelease')) {
+        task.dependsOn 'downloadPredictInt8ModelFile'
+        task.dependsOn 'downloadTransformInt8ModelFile'
+        task.dependsOn 'downloadPredictFloat16ModelFile'
+        task.dependsOn 'downloadTransformFloat16ModelFile'
+    }
+}
+
+

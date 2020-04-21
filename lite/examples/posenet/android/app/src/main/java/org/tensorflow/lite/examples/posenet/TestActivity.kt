@@ -30,7 +30,7 @@ import org.tensorflow.lite.examples.posenet.lib.Posenet as Posenet
 class TestActivity : AppCompatActivity() {
   /** Returns a resized bitmap of the drawable image.    */
   private fun drawableToBitmap(drawable: Drawable): Bitmap {
-    val bitmap = Bitmap.createBitmap(257, 353, Bitmap.Config.ARGB_8888)
+    val bitmap = Bitmap.createBitmap(257, 257, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
 
     drawable.setBounds(0, 0, canvas.width, canvas.height)
@@ -42,7 +42,7 @@ class TestActivity : AppCompatActivity() {
   /** Calls the Posenet library functions.    */
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_test)
+    setContentView(R.layout.tfe_pn_activity_test)
 
     val sampleImageView = findViewById<ImageView>(R.id.image)
     val drawedImage = ResourcesCompat.getDrawable(resources, R.drawable.image, null)

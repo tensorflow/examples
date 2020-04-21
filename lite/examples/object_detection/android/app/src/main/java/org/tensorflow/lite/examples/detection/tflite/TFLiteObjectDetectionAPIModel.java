@@ -39,7 +39,12 @@ import org.tensorflow.lite.examples.detection.env.Logger;
 
 /**
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
- * github.com/tensorflow/models/tree/master/research/object_detection
+ * - https://github.com/tensorflow/models/tree/master/research/object_detection
+ * where you can find the training code.
+ *
+ * To use pretrained models in the API or convert to TF Lite models, please see docs for details:
+ * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+ * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
  */
 public class TFLiteObjectDetectionAPIModel implements Classifier {
   private static final Logger LOGGER = new Logger();
@@ -105,11 +110,9 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
       throws IOException {
     final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel();
 
-    InputStream labelsInput = null;
     String actualFilename = labelFilename.split("file:///android_asset/")[1];
-    labelsInput = assetManager.open(actualFilename);
-    BufferedReader br = null;
-    br = new BufferedReader(new InputStreamReader(labelsInput));
+    InputStream labelsInput = assetManager.open(actualFilename);
+    BufferedReader br = new BufferedReader(new InputStreamReader(labelsInput));
     String line;
     while ((line = br.readLine()) != null) {
       LOGGER.w(line);
@@ -195,8 +198,15 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
 
     // Show the best detections.
     // after scaling them back to the input size.
-    final ArrayList<Recognition> recognitions = new ArrayList<>(NUM_DETECTIONS);
-    for (int i = 0; i < NUM_DETECTIONS; ++i) {
+      
+    // You need to use the number of detections from the output and not the NUM_DETECTONS variable declared on top
+      // because on some models, they don't always output the same total number of detections
+      // For example, your model's NUM_DETECTIONS = 20, but sometimes it only outputs 16 predictions
+      // If you don't use the output's numDetections, you'll get nonsensical data
+    int numDetectionsOutput = Math.min(NUM_DETECTIONS, (int) numDetections[0]); // cast from float to integer, use min for safety
+      
+    final ArrayList<Recognition> recognitions = new ArrayList<>(numDetectionsOutput);
+    for (int i = 0; i < numDetectionsOutput; ++i) {
       final RectF detection =
           new RectF(
               outputLocations[0][i][1] * inputSize,

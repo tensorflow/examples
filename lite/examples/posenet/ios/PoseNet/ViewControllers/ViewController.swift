@@ -24,7 +24,17 @@ class ViewController: UIViewController {
 
   @IBOutlet weak var resumeButton: UIButton!
   @IBOutlet weak var cameraUnavailableLabel: UILabel!
+
   @IBOutlet weak var tableView: UITableView!
+
+  @IBOutlet weak var threadCountLabel: UILabel!
+  @IBOutlet weak var threadCountStepper: UIStepper!
+
+  @IBOutlet weak var delegatesControl: UISegmentedControl!
+
+  // MARK: ModelDataHandler traits
+  var threadCount: Int = Constants.defaultThreadCount
+  var delegate: Delegates = Constants.defaultDelegate
 
   // MARK: Result Variables
   // Inferenced data to render.
@@ -58,6 +68,34 @@ class ViewController: UIViewController {
     cameraCapture.delegate = self
     tableView.delegate = self
     tableView.dataSource = self
+
+    // MARK: UI Initialization
+    // Setup thread count stepper with white color.
+    // https://forums.developer.apple.com/thread/121495
+    threadCountStepper.setDecrementImage(
+      threadCountStepper.decrementImage(for: .normal), for: .normal)
+    threadCountStepper.setIncrementImage(
+      threadCountStepper.incrementImage(for: .normal), for: .normal)
+    // Setup initial stepper value and its label.
+    threadCountStepper.value = Double(Constants.defaultThreadCount)
+    threadCountLabel.text = Constants.defaultThreadCount.description
+
+    // Setup segmented controller's color.
+    delegatesControl.setTitleTextAttributes(
+      [NSAttributedString.Key.foregroundColor: UIColor.lightGray],
+      for: .normal)
+    delegatesControl.setTitleTextAttributes(
+      [NSAttributedString.Key.foregroundColor: UIColor.black],
+      for: .selected)
+    // Remove existing segments to initialize it with `Delegates` entries.
+    delegatesControl.removeAllSegments()
+    Delegates.allCases.forEach { delegate in
+      delegatesControl.insertSegment(
+        withTitle: delegate.description,
+        at: delegate.rawValue,
+        animated: false)
+    }
+    delegatesControl.selectedSegmentIndex = 0
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -76,6 +114,35 @@ class ViewController: UIViewController {
   }
 
   // MARK: Button Actions
+  @IBAction func didChangeThreadCount(_ sender: UIStepper) {
+    let changedCount = Int(sender.value)
+    if threadCountLabel.text == changedCount.description {
+      return
+    }
+
+    do {
+      modelDataHandler = try ModelDataHandler(threadCount: changedCount)
+    } catch let error {
+      fatalError(error.localizedDescription)
+    }
+    threadCount = changedCount
+    threadCountLabel.text = changedCount.description
+    os_log("Thread count is changed to: %d", threadCount)
+  }
+
+  @IBAction func didChangeDelegate(_ sender: UISegmentedControl) {
+    guard let changedDelegate = Delegates(rawValue: delegatesControl.selectedSegmentIndex) else {
+      fatalError("Unexpected value from delegates segemented controller.")
+    }
+    do {
+      modelDataHandler = try ModelDataHandler(threadCount: threadCount, delegate: changedDelegate)
+    } catch let error {
+      fatalError(error.localizedDescription)
+    }
+    delegate = changedDelegate
+    os_log("Delegate is changed to: %s", delegate.description)
+  }
+
   @IBAction func didTapResumeButton(_ sender: Any) {
     cameraCapture.resumeInterruptedSession { complete in
 
@@ -273,19 +340,19 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: - Private enums
 /// UI coinstraint values
-private enum Traits {
+fileprivate enum Traits {
   static let normalCellHeight: CGFloat = 35.0
   static let separatorCellHeight: CGFloat = 25.0
   static let bottomSpacing: CGFloat = 30.0
 }
 
-private struct InferencedData {
+fileprivate struct InferencedData {
   var score: Float
   var times: Times
 }
 
 /// Type of sections in Info Cell
-private enum InferenceSections: Int, CaseIterable {
+fileprivate enum InferenceSections: Int, CaseIterable {
   case Score
   case Time
 
@@ -309,7 +376,7 @@ private enum InferenceSections: Int, CaseIterable {
 }
 
 /// Type of processing times in Time section in Info Cell
-private enum ProcessingTimes: Int, CaseIterable {
+fileprivate enum ProcessingTimes: Int, CaseIterable {
   case InferenceTime
 
   var description: String {

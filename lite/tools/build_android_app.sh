@@ -25,10 +25,9 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 
 # Keep a list of blacklisted android apps directories which should be excluded
 # from the builds.
+# TODO(b/154114877): Restore smart_reply after resolving aapt_version build issues.
 SKIPPED_BUILDS="
-image_segmentation/android
-model_personalization/android
-style_transfer/android
+smart_reply/android
 "
 
 function build_android_example {
@@ -44,13 +43,16 @@ function build_android_example {
   pushd "$1" > /dev/null
 
   # Check if the directory contains a gradle wrapper.
-  if ! [[ -x "$1/gradlew" ]]; then
+  if [[ -x "$1/gradlew" ]]; then
+    # Run the "build" task with the gradle wrapper.
+    ./gradlew clean build --stacktrace
+  elif [[ -x "$1/finish/gradlew" ]]; then
+    # Accommodate codelab directory
+    ./finish/gradlew clean build --stacktrace
+  else
     echo "ERROR: Gradle wrapper could not be found under ${RELATIVE_DIR}."
     exit 1
   fi
-
-  # Run the "build" task with the gradle wrapper.
-  ./gradlew clean build --stacktrace
 
   popd > /dev/null
 

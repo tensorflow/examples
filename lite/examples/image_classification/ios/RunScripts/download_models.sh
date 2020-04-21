@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODELS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_224_android_quant_2017_11_08.zip"
 DOWNLOADS_DIR=$(mktemp -d)
 
-cd $SCRIPT_DIR
+cd "$SCRIPT_DIR"
 
 download_and_extract() {
   local usage="Usage: download_and_extract URL DIR"

@@ -36,7 +36,10 @@ class ModelDataHandler {
 
   /// A failable initializer for `ModelDataHandler`. A new instance is created if the model is
   /// successfully loaded from the app's main bundle. Default `threadCount` is 2.
-  init(threadCount: Int = 2) throws {
+  init(
+    threadCount: Int = Constants.defaultThreadCount,
+    delegate: Delegates = Constants.defaultDelegate
+  ) throws {
     // Construct the path to the model file.
     guard
       let modelPath = Bundle.main.path(
@@ -51,8 +54,23 @@ class ModelDataHandler {
     var options = Interpreter.Options()
     options.threadCount = threadCount
 
+    // Specify the delegates for the `Interpreter`.
+    var delegates: [Delegate]?
+    switch delegate {
+    case .Metal:
+      delegates = [MetalDelegate()]
+    case .CoreML:
+      if let coreMLDelegate = CoreMLDelegate() {
+        delegates = [coreMLDelegate]
+      } else {
+        delegates = nil
+      }
+    default:
+      delegates = nil
+    }
+
     // Create the `Interpreter`.
-    interpreter = try Interpreter(modelPath: modelPath, options: options)
+    interpreter = try Interpreter(modelPath: modelPath, options: options, delegates: delegates)
 
     // Initialize input and output `Tensor`s.
     // Allocate memory for the model's input `Tensor`s.
@@ -348,6 +366,24 @@ enum BodyPart: String, CaseIterable {
     (from: BodyPart.RIGHT_HIP, to: BodyPart.RIGHT_KNEE),
     (from: BodyPart.RIGHT_KNEE, to: BodyPart.RIGHT_ANKLE),
   ]
+}
+
+// MARK: - Delegates Enum
+enum Delegates: Int, CaseIterable {
+  case CPU
+  case Metal
+  case CoreML
+
+  var description: String {
+    switch self {
+    case .CPU:
+      return "CPU"
+    case .Metal:
+      return "GPU"
+    case .CoreML:
+      return "NPU"
+    }
+  }
 }
 
 // MARK: - Custom Errors

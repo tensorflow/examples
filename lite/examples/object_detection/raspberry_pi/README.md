@@ -140,5 +140,5 @@ python3 detect_picamera.py \
 You should see significantly faster inference speeds.
 
 For more information about creating and running TensorFlow Lite models with
-Coral devices, read [TensorFlow modles on the Edge TPU](
+Coral devices, read [TensorFlow models on the Edge TPU](
 https://coral.withgoogle.com/docs/edgetpu/models-intro/).

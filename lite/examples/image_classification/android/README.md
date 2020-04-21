@@ -20,6 +20,15 @@ running the demo on an Android device. For an explanation of the source, see
 <!-- TODO(b/124116863): Add app screenshot. -->
 
 ### Model
+
+We provide 4 models bundled in this App: MobileNetV1 (float), MobileNetV1
+(quantized), EfficientNetLite (float) and EfficientNetLite (quantized).
+Particularly, we chose "mobilenet_v1_1.0_224" and "efficientnet-lite0".
+MobileNets are classical models, while EfficientNets are the latest work. The
+chosen EfficientNet (lite0) has comparable speed with MobileNetV1, and on the
+ImageNet dataset, EfficientNet-lite0 out performs MobileNetV1 by ~4% in terms of
+top-1 accuracy.
+
 For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
 
 Downloading, extracting, and placing the model in the assets folder is managed

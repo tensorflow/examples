@@ -22,8 +22,8 @@ from __future__ import print_function
 import os
 from absl import app
 from absl import flags
-import tensorflow as tf # TF2
-assert tf.__version__.startswith('2')
+
+import tensorflow as tf
 
 FLAGS = flags.FLAGS
 

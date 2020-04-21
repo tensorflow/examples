@@ -1,0 +1,10 @@
+tf-nightly
+tf-models-nightly
+tensorflow-hub>=0.8.0
+numpy>=1.17.3
+pillow
+sentencepiece
+tensorflow-datasets>=2.1.0
+fire
+flatbuffers==1.12
+absl-py

@@ -20,10 +20,9 @@ from __future__ import print_function
 
 from absl import app
 from absl import flags
-import tensorflow as tf # TF2
+import tensorflow as tf
 from tensorflow_examples.models.densenet import densenet
 from tensorflow_examples.models.densenet import utils
-assert tf.__version__.startswith('2')
 
 FLAGS = flags.FLAGS
 
@@ -125,8 +124,7 @@ class Train(object):
       total_loss = 0.0
       num_train_batches = 0.0
       for one_batch in ds:
-        per_replica_loss = strategy.experimental_run_v2(
-            self.train_step, args=(one_batch,))
+        per_replica_loss = strategy.run(self.train_step, args=(one_batch,))
         total_loss += strategy.reduce(
             tf.distribute.ReduceOp.SUM, per_replica_loss, axis=None)
         num_train_batches += 1
@@ -135,8 +133,7 @@ class Train(object):
     def distributed_test_epoch(ds):
       num_test_batches = 0.0
       for one_batch in ds:
-        strategy.experimental_run_v2(
-            self.test_step, args=(one_batch,))
+        strategy.run(self.test_step, args=(one_batch,))
         num_test_batches += 1
       return self.test_loss_metric.result(), num_test_batches
 

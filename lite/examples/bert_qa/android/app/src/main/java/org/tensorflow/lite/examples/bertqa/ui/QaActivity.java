@@ -70,7 +70,7 @@ public class QaActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     Log.v(TAG, "onCreate");
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_qa);
+    setContentView(R.layout.tfe_qa_activity_qa);
 
     // Get content of the selected dataset.
     int datasetPosition = getIntent().getIntExtra(DATASET_POSITION_KEY, -1);
@@ -247,7 +247,7 @@ public class QaActivity extends AppCompatActivity {
     int offset = content.indexOf(answer.text, 0);
     if (offset >= 0) {
       spanText.setSpan(
-          new BackgroundColorSpan(getColor(R.color.colorHighlight)),
+          new BackgroundColorSpan(getColor(R.color.tfe_qa_color_highlight)),
           offset,
           offset + answer.text.length(),
           Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

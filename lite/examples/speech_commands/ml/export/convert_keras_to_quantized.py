@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Input arguments:
+"""Input arguments.
 
 num_output: this value has nothing to do with the number of classes, batch_size,
 etc.,
@@ -51,12 +51,10 @@ from __future__ import division
 from __future__ import print_function
 
 import argparse
-import tensorflow as tf
-from pathlib import Path
 from keras import backend as K
-from tensorflow.python.framework import graph_util
-from tensorflow.python.framework import graph_io
 from model import conv_1d_time_stacked_model
+from pathlib import Path
+import tensorflow.compat.v1 as tf
 
 parser = argparse.ArgumentParser(description='set input arguments')
 parser.add_argument(
@@ -104,11 +102,11 @@ args = parser.parse_args()
 parser.print_help()
 print('input args: ', args)
 
-if args.theano_backend is True and args.quantize is True:
+if args.theano_backend and args.quantize:
   raise ValueError('Quantize feature does not work with theano backend.')
 
-output_fld = args.input_fld if args.output_fld == '' else args.output_fld
-if args.output_model_file == '':
+output_fld = args.input_fld if not args.output_fld else args.output_fld
+if not args.output_model_file:
   args.output_model_file = str(Path(args.input_model_file).name) + '.pb'
 Path(output_fld).mkdir(parents=True, exist_ok=True)
 weight_file_path = str(Path(args.input_fld) / args.input_model_file)
@@ -134,8 +132,8 @@ except ValueError as err:
   print(
       """Input file specified ({}) only holds the weights, and not the model definition.
     Save the model using mode.save(filename.h5) which will contain the network architecture
-    as well as its weights. 
-    If the model is saved using model.save_weights(filename.h5), the model architecture is 
+    as well as its weights.
+    If the model is saved using model.save_weights(filename.h5), the model architecture is
     expected to be saved separately in a json format and loaded prior to loading the weights.
     Check the keras documentation for more details (https://keras.io/getting-started/faq/)"""
       .format(weight_file_path))
@@ -156,7 +154,7 @@ sess = K.get_session()
 
 if args.graph_def:
   f = args.output_graphdef_file
-  tf.train.write_graph(sess.graph.as_graph_def(), output_fld, f, as_text=True)
+  tf.io.write_graph(sess.graph.as_graph_def(), output_fld, f, as_text=True)
   print('saved the graph definition in ascii format at: ',
         str(Path(output_fld) / f))
 
@@ -165,16 +163,17 @@ if args.graph_def:
 # In[ ]:
 
 if args.quantize:
-  from tensorflow.tools.graph_transforms import TransformGraph
+  # graph_transforms will not be available for future versions.
+  from tensorflow.compat.v1.tools.graph_transforms import TransformGraph  # pylint: disable=g-import-not-at-top
   transforms = ['quantize_weights', 'quantize_nodes']
   transformed_graph_def = TransformGraph(sess.graph.as_graph_def(), [],
                                          pred_node_names, transforms)
-  constant_graph = graph_util.convert_variables_to_constants(
+  constant_graph = tf.graph_util.convert_variables_to_constants(
       sess, transformed_graph_def, pred_node_names)
 else:
-  constant_graph = graph_util.convert_variables_to_constants(
+  constant_graph = tf.graph_util.convert_variables_to_constants(
       sess, sess.graph.as_graph_def(), pred_node_names)
-graph_io.write_graph(
+tf.io.write_graph(
     constant_graph, output_fld, args.output_model_file, as_text=False)
 print('saved the freezed graph (ready for inference) at: ',
       str(Path(output_fld) / args.output_model_file))

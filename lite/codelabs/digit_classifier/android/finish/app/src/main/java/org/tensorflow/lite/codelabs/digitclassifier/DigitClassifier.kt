@@ -56,11 +56,9 @@ class DigitClassifier(private val context: Context) {
   private fun initializeInterpreter() {
     // TODO: Load the TF Lite model from file and initialize an interpreter.
 
-    // Load the TF Lite model from asset folder.
+    // Load the TF Lite model from asset folder and initialize TF Lite Interpreter with NNAPI enabled.
     val assetManager = context.assets
     val model = loadModelFile(assetManager, "mnist.tflite")
-
-    // Initialize TF Lite Interpreter with NNAPI enabled.
     val options = Interpreter.Options()
     options.setUseNNAPI(true)
     val interpreter = Interpreter(model, options)

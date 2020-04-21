@@ -7,33 +7,161 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		74537DFD3D70DF2DD0014627 /* Pods_BertQA.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 001BFBB11AA365FF222606D1 /* Pods_BertQA.framework */; };
+		3A4D441F43E606AFFBEDC0F4 /* Pods_BertQA_UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */; };
+		8073F32F9E31519DA1C60690 /* Pods_BertQA_SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */; };
+		8402440423D9BFDE00704ABD /* FullTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440323D9BFDE00704ABD /* FullTokenizer.swift */; };
+		8402440623D9C18600704ABD /* WordpieceTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440523D9C18600704ABD /* WordpieceTokenizer.swift */; };
+		8402440823D9C1FB00704ABD /* BasicTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440723D9C1FB00704ABD /* BasicTokenizer.swift */; };
+		840245262424CB63002D1DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245252424CB63002D1DAD /* AppDelegate.swift */; };
+		840245282424CB63002D1DAD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245272424CB63002D1DAD /* SceneDelegate.swift */; };
+		840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 840245302424CB64002D1DAD /* LaunchScreen.storyboard */; };
+		840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3B2403A39E00E6905E /* DataExtension.swift */; };
+		840C6F402403A39E00E6905E /* InputFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3C2403A39E00E6905E /* InputFeatures.swift */; };
+		840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
+		840C6F422403A39E00E6905E /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
+		840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
+		842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D023CEDD6F00AE9416 /* Constants.swift */; };
+		842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */; };
+		8433178E23E933AC001B0AE8 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8433178D23E933AC001B0AE8 /* StringExtension.swift */; };
+		84433D4D240EA8EF00C983EA /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84433D4C240EA8EF00C983EA /* ContentData.swift */; };
+		844C87012424CE29006DA707 /* DatasetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FC2424CD7F006DA707 /* DatasetListView.swift */; };
+		844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FE2424CD97006DA707 /* DatasetDetailView.swift */; };
+		844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
+		844C87072424D019006DA707 /* KeyboardHeightObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C87062424D019006DA707 /* KeyboardHeightObserver.swift */; };
+		844C87082424D03E006DA707 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D023CEDD6F00AE9416 /* Constants.swift */; };
+		84551A6C23F2710100C71C16 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
+		845B4FD42434856500943980 /* Dataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B4FD32434856500943980 /* Dataset.swift */; };
+		845B4FD52434856A00943980 /* Dataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B4FD32434856500943980 /* Dataset.swift */; };
+		846918EB2425212B00A90808 /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3B2403A39E00E6905E /* DataExtension.swift */; };
+		846918EC2425212F00A90808 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */; };
+		846918ED2425213100A90808 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8433178D23E933AC001B0AE8 /* StringExtension.swift */; };
+		846918EF2425213800A90808 /* FileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E81C6023FFC2B400D50692 /* FileLoader.swift */; };
+		846918F12425213B00A90808 /* FullTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440323D9BFDE00704ABD /* FullTokenizer.swift */; };
+		846918F32425213E00A90808 /* BasicTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440723D9C1FB00704ABD /* BasicTokenizer.swift */; };
+		846918F52425214200A90808 /* WordpieceTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440523D9C18600704ABD /* WordpieceTokenizer.swift */; };
+		846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
+		846918FA2425214D00A90808 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
+		8475814E23CDC1660003472A /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8475814D23CDC1660003472A /* README.md */; };
+		8475815023CDC24D0003472A /* DataSetDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475814F23CDC24D0003472A /* DataSetDetailViewController.swift */; };
+		8475815223CDC28C0003472A /* DataSetsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475815123CDC28C0003472A /* DataSetsTableViewController.swift */; };
+		849401F824447883005F0C25 /* StringExtensionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F024447883005F0C25 /* StringExtensionTest.swift */; };
+		849401F924447883005F0C25 /* UnicodeScalarExtensionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F124447883005F0C25 /* UnicodeScalarExtensionTest.swift */; };
+		849401FA24447883005F0C25 /* WordpieceTokenizerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F324447883005F0C25 /* WordpieceTokenizerTest.swift */; };
+		849401FB24447883005F0C25 /* FullTokenizerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F424447883005F0C25 /* FullTokenizerTest.swift */; };
+		849401FC24447883005F0C25 /* BasicTokenizerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F524447883005F0C25 /* BasicTokenizerTest.swift */; };
+		849401FD24447883005F0C25 /* BertQAHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F724447883005F0C25 /* BertQAHandlerTest.swift */; };
+		8496E7E123CF019C00386218 /* SuggestedQuestionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */; };
+		8498AA6D240FA5DF003ABA5E /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
 		84C3284F23B49E2E00A7980D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C3284E23B49E2E00A7980D /* AppDelegate.swift */; };
-		84C3285123B49E2E00A7980D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C3285023B49E2E00A7980D /* ViewController.swift */; };
 		84C3285423B49E2E00A7980D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285223B49E2E00A7980D /* Main.storyboard */; };
 		84C3285623B49E2F00A7980D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285523B49E2F00A7980D /* Assets.xcassets */; };
 		84C3285923B49E2F00A7980D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285723B49E2F00A7980D /* LaunchScreen.storyboard */; };
+		84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */; };
+		84CBD8F92424DCBF00DC20AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285523B49E2F00A7980D /* Assets.xcassets */; };
+		84D84026243C4DFB00E0B769 /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
+		84D84027243C4E0100E0B769 /* InputFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3C2403A39E00E6905E /* InputFeatures.swift */; };
+		84D84028243C4E0300E0B769 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84433D4C240EA8EF00C983EA /* ContentData.swift */; };
+		84D84029243C4E0600E0B769 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
+		84D8402E243C4E3E00E0B769 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402B243C4E3E00E0B769 /* StatusView.swift */; };
+		84D8402F243C4E3E00E0B769 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402C243C4E3E00E0B769 /* ContentView.swift */; };
+		84D84030243C4E3E00E0B769 /* SuggestedQuestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402D243C4E3E00E0B769 /* SuggestedQuestionsView.swift */; };
+		84E81C6123FFC2B400D50692 /* FileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E81C6023FFC2B400D50692 /* FileLoader.swift */; };
+		84F0354E2418B7380039B5D5 /* OptionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F0354D2418B7380039B5D5 /* OptionViewController.swift */; };
+		84F035502418B7800039B5D5 /* OptionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F0354F2418B7800039B5D5 /* OptionTableViewController.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		849401DB244462AB005F0C25 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84C3284323B49E2E00A7980D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84C3284A23B49E2E00A7980D;
+			remoteInfo = "BertQA-UIKit";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		001BFBB11AA365FF222606D1 /* Pods_BertQA.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BertQA.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		20076681A0E239448C8D4B05 /* Pods-BertQA.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.release.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.release.xcconfig"; sourceTree = "<group>"; };
+		2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BertQA_SwiftUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F95CAA32D15283DD33CF2F /* Pods-BertQA.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.debug.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.debug.xcconfig"; sourceTree = "<group>"; };
-		84C3284B23B49E2E00A7980D /* BertQA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BertQA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BertQA_UIKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		67EE9FD8BFDA0BBBC2A8C538 /* Pods-BertQA-UIKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-UIKit.release.xcconfig"; path = "Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit.release.xcconfig"; sourceTree = "<group>"; };
+		6D06722FADA8CA7F3CCC3492 /* Pods-BertQA-SwiftUI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-SwiftUI.release.xcconfig"; path = "Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI.release.xcconfig"; sourceTree = "<group>"; };
+		7595E796644E0735F1BD68A4 /* Pods-BertQA-SwiftUI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-SwiftUI.debug.xcconfig"; path = "Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI.debug.xcconfig"; sourceTree = "<group>"; };
+		8402440323D9BFDE00704ABD /* FullTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullTokenizer.swift; sourceTree = "<group>"; };
+		8402440523D9C18600704ABD /* WordpieceTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordpieceTokenizer.swift; sourceTree = "<group>"; };
+		8402440723D9C1FB00704ABD /* BasicTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicTokenizer.swift; sourceTree = "<group>"; };
+		840245232424CB63002D1DAD /* BertQA-SwiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BertQA-SwiftUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		840245252424CB63002D1DAD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		840245272424CB63002D1DAD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		840245312424CB64002D1DAD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		840245332424CB64002D1DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		840C6F3B2403A39E00E6905E /* DataExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
+		840C6F3C2403A39E00E6905E /* InputFeatures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputFeatures.swift; sourceTree = "<group>"; };
+		840C6F3D2403A39E00E6905E /* BertQAHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandler.swift; sourceTree = "<group>"; };
+		840C6F3E2403A39E00E6905E /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
+		840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = mobilebert_float_20191023.tflite; sourceTree = "<group>"; };
+		84126CCB24111D5E00349A2A /* ControlPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlPanelView.swift; sourceTree = "<group>"; };
+		842E65D023CEDD6F00AE9416 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetTitleCell.swift; sourceTree = "<group>"; };
+		8433178D23E933AC001B0AE8 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
+		84433D4C240EA8EF00C983EA /* ContentData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
+		844C86FC2424CD7F006DA707 /* DatasetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetListView.swift; sourceTree = "<group>"; };
+		844C86FE2424CD97006DA707 /* DatasetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetDetailView.swift; sourceTree = "<group>"; };
+		844C87062424D019006DA707 /* KeyboardHeightObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightObserver.swift; sourceTree = "<group>"; };
+		84551A6B23F2710100C71C16 /* vocab.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = vocab.txt; sourceTree = "<group>"; };
+		845B4FD32434856500943980 /* Dataset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dataset.swift; sourceTree = "<group>"; };
+		8475814D23CDC1660003472A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8475814F23CDC24D0003472A /* DataSetDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSetDetailViewController.swift; sourceTree = "<group>"; };
+		8475815123CDC28C0003472A /* DataSetsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSetsTableViewController.swift; sourceTree = "<group>"; };
+		848BC39924002091009434DE /* BertQATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BertQATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		849401D6244462AB005F0C25 /* BertQA-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "BertQA-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		849401DA244462AB005F0C25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		849401F024447883005F0C25 /* StringExtensionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensionTest.swift; sourceTree = "<group>"; };
+		849401F124447883005F0C25 /* UnicodeScalarExtensionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnicodeScalarExtensionTest.swift; sourceTree = "<group>"; };
+		849401F324447883005F0C25 /* WordpieceTokenizerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordpieceTokenizerTest.swift; sourceTree = "<group>"; };
+		849401F424447883005F0C25 /* FullTokenizerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FullTokenizerTest.swift; sourceTree = "<group>"; };
+		849401F524447883005F0C25 /* BasicTokenizerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTokenizerTest.swift; sourceTree = "<group>"; };
+		849401F724447883005F0C25 /* BertQAHandlerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandlerTest.swift; sourceTree = "<group>"; };
+		8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedQuestionButton.swift; sourceTree = "<group>"; };
+		8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = contents_from_squad_dict_format.json; sourceTree = "<group>"; };
+		84C3284B23B49E2E00A7980D /* BertQA-UIKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BertQA-UIKit.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		84C3284E23B49E2E00A7980D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		84C3285023B49E2E00A7980D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		84C3285323B49E2E00A7980D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		84C3285523B49E2F00A7980D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		84C3285823B49E2F00A7980D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84C3285A23B49E2F00A7980D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnicodeScalarExtension.swift; sourceTree = "<group>"; };
+		84D8402B243C4E3E00E0B769 /* StatusView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
+		84D8402C243C4E3E00E0B769 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		84D8402D243C4E3E00E0B769 /* SuggestedQuestionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SuggestedQuestionsView.swift; sourceTree = "<group>"; };
+		84E81C6023FFC2B400D50692 /* FileLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLoader.swift; sourceTree = "<group>"; };
+		84F0354D2418B7380039B5D5 /* OptionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionViewController.swift; sourceTree = "<group>"; };
+		84F0354F2418B7800039B5D5 /* OptionTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionTableViewController.swift; sourceTree = "<group>"; };
+		FA8F6BA054A264013FFDBD91 /* Pods-BertQA-UIKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-UIKit.debug.xcconfig"; path = "Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		840245202424CB63002D1DAD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8073F32F9E31519DA1C60690 /* Pods_BertQA_SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		849401D3244462AB005F0C25 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84C3284823B49E2E00A7980D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				74537DFD3D70DF2DD0014627 /* Pods_BertQA.framework in Frameworks */,
+				3A4D441F43E606AFFBEDC0F4 /* Pods_BertQA_UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,7 +171,8 @@
 		5A57E91BD94E10B803571A3B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				001BFBB11AA365FF222606D1 /* Pods_BertQA.framework */,
+				2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */,
+				64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -53,14 +182,170 @@
 			children = (
 				37F95CAA32D15283DD33CF2F /* Pods-BertQA.debug.xcconfig */,
 				20076681A0E239448C8D4B05 /* Pods-BertQA.release.xcconfig */,
+				7595E796644E0735F1BD68A4 /* Pods-BertQA-SwiftUI.debug.xcconfig */,
+				6D06722FADA8CA7F3CCC3492 /* Pods-BertQA-SwiftUI.release.xcconfig */,
+				FA8F6BA054A264013FFDBD91 /* Pods-BertQA-UIKit.debug.xcconfig */,
+				67EE9FD8BFDA0BBBC2A8C538 /* Pods-BertQA-UIKit.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		8402440223D9BC0600704ABD /* Tokenizers */ = {
+			isa = PBXGroup;
+			children = (
+				8402440323D9BFDE00704ABD /* FullTokenizer.swift */,
+				8402440723D9C1FB00704ABD /* BasicTokenizer.swift */,
+				8402440523D9C18600704ABD /* WordpieceTokenizer.swift */,
+			);
+			path = Tokenizers;
+			sourceTree = "<group>";
+		};
+		840245242424CB63002D1DAD /* ViewInSwiftUI */ = {
+			isa = PBXGroup;
+			children = (
+				844C86FB2424CD67006DA707 /* Views */,
+				840245252424CB63002D1DAD /* AppDelegate.swift */,
+				840245272424CB63002D1DAD /* SceneDelegate.swift */,
+				844C87062424D019006DA707 /* KeyboardHeightObserver.swift */,
+				840245302424CB64002D1DAD /* LaunchScreen.storyboard */,
+				840245332424CB64002D1DAD /* Info.plist */,
+			);
+			path = ViewInSwiftUI;
+			sourceTree = "<group>";
+		};
+		840C6F322403A36000E6905E /* ML */ = {
+			isa = PBXGroup;
+			children = (
+				840C6F3C2403A39E00E6905E /* InputFeatures.swift */,
+				84433D4C240EA8EF00C983EA /* ContentData.swift */,
+				840C6F3E2403A39E00E6905E /* Result.swift */,
+				840C6F3D2403A39E00E6905E /* BertQAHandler.swift */,
+			);
+			path = ML;
+			sourceTree = "<group>";
+		};
+		841BD7242422698B0050D71C /* BertQACore */ = {
+			isa = PBXGroup;
+			children = (
+				842E65CD23CEDBA900AE9416 /* Resources */,
+				8475815523CDC64B0003472A /* Models */,
+				84E81C6223FFC2F600D50692 /* Extensions */,
+				842E65D023CEDD6F00AE9416 /* Constants.swift */,
+			);
+			path = BertQACore;
+			sourceTree = "<group>";
+		};
+		841BD7262422698B0050D71C /* ViewInUIKit */ = {
+			isa = PBXGroup;
+			children = (
+				842E65D223CEDF4700AE9416 /* Views */,
+				84F96F0023CDACA0009FBDF5 /* Controllers */,
+				84C3284E23B49E2E00A7980D /* AppDelegate.swift */,
+				84C3285223B49E2E00A7980D /* Main.storyboard */,
+				84C3285723B49E2F00A7980D /* LaunchScreen.storyboard */,
+				84C3285A23B49E2F00A7980D /* Info.plist */,
+			);
+			path = ViewInUIKit;
+			sourceTree = "<group>";
+		};
+		842E65CD23CEDBA900AE9416 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */,
+				840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */,
+				84551A6B23F2710100C71C16 /* vocab.txt */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		842E65D223CEDF4700AE9416 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */,
+				8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */,
+				84126CCB24111D5E00349A2A /* ControlPanelView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		844C86FB2424CD67006DA707 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				84D8402C243C4E3E00E0B769 /* ContentView.swift */,
+				84D8402B243C4E3E00E0B769 /* StatusView.swift */,
+				84D8402D243C4E3E00E0B769 /* SuggestedQuestionsView.swift */,
+				844C86FC2424CD7F006DA707 /* DatasetListView.swift */,
+				844C86FE2424CD97006DA707 /* DatasetDetailView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		8475815523CDC64B0003472A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				845B4FD32434856500943980 /* Dataset.swift */,
+				84E81C6023FFC2B400D50692 /* FileLoader.swift */,
+				8402440223D9BC0600704ABD /* Tokenizers */,
+				840C6F322403A36000E6905E /* ML */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		849401D7244462AB005F0C25 /* BertQATests */ = {
+			isa = PBXGroup;
+			children = (
+				849401EF24447883005F0C25 /* ExtensionTest */,
+				849401F624447883005F0C25 /* MLTest */,
+				849401F224447883005F0C25 /* TokenizerTest */,
+				849401DA244462AB005F0C25 /* Info.plist */,
+			);
+			path = BertQATests;
+			sourceTree = "<group>";
+		};
+		849401EF24447883005F0C25 /* ExtensionTest */ = {
+			isa = PBXGroup;
+			children = (
+				849401F024447883005F0C25 /* StringExtensionTest.swift */,
+				849401F124447883005F0C25 /* UnicodeScalarExtensionTest.swift */,
+			);
+			path = ExtensionTest;
+			sourceTree = "<group>";
+		};
+		849401F224447883005F0C25 /* TokenizerTest */ = {
+			isa = PBXGroup;
+			children = (
+				849401F324447883005F0C25 /* WordpieceTokenizerTest.swift */,
+				849401F424447883005F0C25 /* FullTokenizerTest.swift */,
+				849401F524447883005F0C25 /* BasicTokenizerTest.swift */,
+			);
+			path = TokenizerTest;
+			sourceTree = "<group>";
+		};
+		849401F624447883005F0C25 /* MLTest */ = {
+			isa = PBXGroup;
+			children = (
+				849401F724447883005F0C25 /* BertQAHandlerTest.swift */,
+			);
+			path = MLTest;
+			sourceTree = "<group>";
+		};
+		84B3C6A9240F74EA00BA6F5E /* RunScripts */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = RunScripts;
 			sourceTree = "<group>";
 		};
 		84C3284223B49E2E00A7980D = {
 			isa = PBXGroup;
 			children = (
-				84C3284D23B49E2E00A7980D /* BertQA */,
+				8475814D23CDC1660003472A /* README.md */,
+				841BD7242422698B0050D71C /* BertQACore */,
+				841BD7262422698B0050D71C /* ViewInUIKit */,
+				840245242424CB63002D1DAD /* ViewInSwiftUI */,
+				849401D7244462AB005F0C25 /* BertQATests */,
+				84C3285523B49E2F00A7980D /* Assets.xcassets */,
+				84B3C6A9240F74EA00BA6F5E /* RunScripts */,
 				84C3284C23B49E2E00A7980D /* Products */,
 				781038914BC670D9D4E03C4B /* Pods */,
 				5A57E91BD94E10B803571A3B /* Frameworks */,
@@ -70,32 +355,81 @@
 		84C3284C23B49E2E00A7980D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84C3284B23B49E2E00A7980D /* BertQA.app */,
+				84C3284B23B49E2E00A7980D /* BertQA-UIKit.app */,
+				848BC39924002091009434DE /* BertQATests.xctest */,
+				840245232424CB63002D1DAD /* BertQA-SwiftUI.app */,
+				849401D6244462AB005F0C25 /* BertQA-Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		84C3284D23B49E2E00A7980D /* BertQA */ = {
+		84E81C6223FFC2F600D50692 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				84C3284E23B49E2E00A7980D /* AppDelegate.swift */,
-				84C3285023B49E2E00A7980D /* ViewController.swift */,
-				84C3285223B49E2E00A7980D /* Main.storyboard */,
-				84C3285523B49E2F00A7980D /* Assets.xcassets */,
-				84C3285723B49E2F00A7980D /* LaunchScreen.storyboard */,
-				84C3285A23B49E2F00A7980D /* Info.plist */,
+				8433178D23E933AC001B0AE8 /* StringExtension.swift */,
+				84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */,
+				840C6F3B2403A39E00E6905E /* DataExtension.swift */,
 			);
-			path = BertQA;
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		84F96F0023CDACA0009FBDF5 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				8475815123CDC28C0003472A /* DataSetsTableViewController.swift */,
+				8475814F23CDC24D0003472A /* DataSetDetailViewController.swift */,
+				84F0354D2418B7380039B5D5 /* OptionViewController.swift */,
+				84F0354F2418B7800039B5D5 /* OptionTableViewController.swift */,
+			);
+			path = Controllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		84C3284A23B49E2E00A7980D /* BertQA */ = {
+		840245222424CB63002D1DAD /* BertQA-SwiftUI */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 84C3285D23B49E2F00A7980D /* Build configuration list for PBXNativeTarget "BertQA" */;
+			buildConfigurationList = 840245342424CB64002D1DAD /* Build configuration list for PBXNativeTarget "BertQA-SwiftUI" */;
+			buildPhases = (
+				F746FAE7EA2F78CAB43DFA3B /* [CP] Check Pods Manifest.lock */,
+				846918AB2425200800A90808 /* ShellScript */,
+				8402451F2424CB63002D1DAD /* Sources */,
+				840245202424CB63002D1DAD /* Frameworks */,
+				840245212424CB63002D1DAD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "BertQA-SwiftUI";
+			productName = ViewInSwiftUI;
+			productReference = 840245232424CB63002D1DAD /* BertQA-SwiftUI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		849401D5244462AB005F0C25 /* BertQA-Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 849401DD244462AB005F0C25 /* Build configuration list for PBXNativeTarget "BertQA-Tests" */;
+			buildPhases = (
+				849401D2244462AB005F0C25 /* Sources */,
+				849401D3244462AB005F0C25 /* Frameworks */,
+				849401D4244462AB005F0C25 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				849401DC244462AB005F0C25 /* PBXTargetDependency */,
+			);
+			name = "BertQA-Tests";
+			productName = "BertQA-Tests";
+			productReference = 849401D6244462AB005F0C25 /* BertQA-Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		84C3284A23B49E2E00A7980D /* BertQA-UIKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84C3285D23B49E2F00A7980D /* Build configuration list for PBXNativeTarget "BertQA-UIKit" */;
 			buildPhases = (
 				F18482CEB971E4CB207BA1C9 /* [CP] Check Pods Manifest.lock */,
+				84B3C6AC240F758B00BA6F5E /* ShellScript */,
 				84C3284723B49E2E00A7980D /* Sources */,
 				84C3284823B49E2E00A7980D /* Frameworks */,
 				84C3284923B49E2E00A7980D /* Resources */,
@@ -104,9 +438,9 @@
 			);
 			dependencies = (
 			);
-			name = BertQA;
+			name = "BertQA-UIKit";
 			productName = BertQA;
-			productReference = 84C3284B23B49E2E00A7980D /* BertQA.app */;
+			productReference = 84C3284B23B49E2E00A7980D /* BertQA-UIKit.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -115,10 +449,17 @@
 		84C3284323B49E2E00A7980D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1030;
+				LastSwiftUpdateCheck = 1120;
 				LastUpgradeCheck = 1030;
 				ORGANIZATIONNAME = tensorflow;
 				TargetAttributes = {
+					840245222424CB63002D1DAD = {
+						CreatedOnToolsVersion = 11.2.1;
+					};
+					849401D5244462AB005F0C25 = {
+						CreatedOnToolsVersion = 11.2.1;
+						TestTargetID = 84C3284A23B49E2E00A7980D;
+					};
 					84C3284A23B49E2E00A7980D = {
 						CreatedOnToolsVersion = 10.3;
 					};
@@ -137,18 +478,43 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				84C3284A23B49E2E00A7980D /* BertQA */,
+				84C3284A23B49E2E00A7980D /* BertQA-UIKit */,
+				840245222424CB63002D1DAD /* BertQA-SwiftUI */,
+				849401D5244462AB005F0C25 /* BertQA-Tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		840245212424CB63002D1DAD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				846918FA2425214D00A90808 /* vocab.txt in Resources */,
+				840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */,
+				844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */,
+				846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */,
+				84CBD8F92424DCBF00DC20AA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		849401D4244462AB005F0C25 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84C3284923B49E2E00A7980D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84551A6C23F2710100C71C16 /* vocab.txt in Resources */,
 				84C3285923B49E2F00A7980D /* LaunchScreen.storyboard in Resources */,
 				84C3285623B49E2F00A7980D /* Assets.xcassets in Resources */,
+				840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */,
+				8475814E23CDC1660003472A /* README.md in Resources */,
+				8498AA6D240FA5DF003ABA5E /* contents_from_squad_dict_format.json in Resources */,
 				84C3285423B49E2E00A7980D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,6 +522,40 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		846918AB2425200800A90808 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SRCROOT/RunScripts/download_resources.sh\n";
+		};
+		84B3C6AC240F758B00BA6F5E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SRCROOT/RunScripts/download_resources.sh\n";
+		};
 		F18482CEB971E4CB207BA1C9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -171,7 +571,29 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-BertQA-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-BertQA-UIKit-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F746FAE7EA2F78CAB43DFA3B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BertQA-SwiftUI-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -181,18 +603,93 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		8402451F2424CB63002D1DAD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84D84029243C4E0600E0B769 /* Result.swift in Sources */,
+				846918F32425213E00A90808 /* BasicTokenizer.swift in Sources */,
+				84D8402F243C4E3E00E0B769 /* ContentView.swift in Sources */,
+				846918F12425213B00A90808 /* FullTokenizer.swift in Sources */,
+				84D84030243C4E3E00E0B769 /* SuggestedQuestionsView.swift in Sources */,
+				840245262424CB63002D1DAD /* AppDelegate.swift in Sources */,
+				846918EC2425212F00A90808 /* UnicodeScalarExtension.swift in Sources */,
+				844C87072424D019006DA707 /* KeyboardHeightObserver.swift in Sources */,
+				844C87012424CE29006DA707 /* DatasetListView.swift in Sources */,
+				84D84026243C4DFB00E0B769 /* BertQAHandler.swift in Sources */,
+				846918EF2425213800A90808 /* FileLoader.swift in Sources */,
+				844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */,
+				840245282424CB63002D1DAD /* SceneDelegate.swift in Sources */,
+				846918EB2425212B00A90808 /* DataExtension.swift in Sources */,
+				846918ED2425213100A90808 /* StringExtension.swift in Sources */,
+				84D8402E243C4E3E00E0B769 /* StatusView.swift in Sources */,
+				844C87082424D03E006DA707 /* Constants.swift in Sources */,
+				84D84027243C4E0100E0B769 /* InputFeatures.swift in Sources */,
+				84D84028243C4E0300E0B769 /* ContentData.swift in Sources */,
+				845B4FD52434856A00943980 /* Dataset.swift in Sources */,
+				846918F52425214200A90808 /* WordpieceTokenizer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		849401D2244462AB005F0C25 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				849401FB24447883005F0C25 /* FullTokenizerTest.swift in Sources */,
+				849401F924447883005F0C25 /* UnicodeScalarExtensionTest.swift in Sources */,
+				849401F824447883005F0C25 /* StringExtensionTest.swift in Sources */,
+				849401FC24447883005F0C25 /* BasicTokenizerTest.swift in Sources */,
+				849401FA24447883005F0C25 /* WordpieceTokenizerTest.swift in Sources */,
+				849401FD24447883005F0C25 /* BertQAHandlerTest.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84C3284723B49E2E00A7980D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84C3285123B49E2E00A7980D /* ViewController.swift in Sources */,
+				845B4FD42434856500943980 /* Dataset.swift in Sources */,
+				840C6F402403A39E00E6905E /* InputFeatures.swift in Sources */,
+				84F0354E2418B7380039B5D5 /* OptionViewController.swift in Sources */,
+				842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */,
+				842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */,
+				84433D4D240EA8EF00C983EA /* ContentData.swift in Sources */,
+				8475815223CDC28C0003472A /* DataSetsTableViewController.swift in Sources */,
+				8402440623D9C18600704ABD /* WordpieceTokenizer.swift in Sources */,
+				8433178E23E933AC001B0AE8 /* StringExtension.swift in Sources */,
+				8402440823D9C1FB00704ABD /* BasicTokenizer.swift in Sources */,
+				840C6F422403A39E00E6905E /* Result.swift in Sources */,
 				84C3284F23B49E2E00A7980D /* AppDelegate.swift in Sources */,
+				840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */,
+				84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */,
+				8402440423D9BFDE00704ABD /* FullTokenizer.swift in Sources */,
+				840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */,
+				84E81C6123FFC2B400D50692 /* FileLoader.swift in Sources */,
+				84F035502418B7800039B5D5 /* OptionTableViewController.swift in Sources */,
+				8475815023CDC24D0003472A /* DataSetDetailViewController.swift in Sources */,
+				8496E7E123CF019C00386218 /* SuggestedQuestionButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		849401DC244462AB005F0C25 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84C3284A23B49E2E00A7980D /* BertQA-UIKit */;
+			targetProxy = 849401DB244462AB005F0C25 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
+		840245302424CB64002D1DAD /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				840245312424CB64002D1DAD /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
 		84C3285223B49E2E00A7980D /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -212,6 +709,88 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		840245352424CB64002D1DAD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7595E796644E0735F1BD68A4 /* Pods-BertQA-SwiftUI.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = ViewInSwiftUI/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-SwiftUI";
+				PRODUCT_NAME = "BertQA-SwiftUI";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		840245362424CB64002D1DAD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6D06722FADA8CA7F3CCC3492 /* Pods-BertQA-SwiftUI.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = ViewInSwiftUI/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-SwiftUI";
+				PRODUCT_NAME = "BertQA-SwiftUI";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		849401DE244462AB005F0C25 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = BertQATests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA.BertQA-Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BertQA-UIKit.app/BertQA-UIKit";
+			};
+			name = Debug;
+		};
+		849401DF244462AB005F0C25 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = BertQATests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA.BertQA-Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BertQA-UIKit.app/BertQA-UIKit";
+			};
+			name = Release;
+		};
 		84C3285B23B49E2F00A7980D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -330,19 +909,19 @@
 		};
 		84C3285E23B49E2F00A7980D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 37F95CAA32D15283DD33CF2F /* Pods-BertQA.debug.xcconfig */;
+			baseConfigurationReference = FA8F6BA054A264013FFDBD91 /* Pods-BertQA-UIKit.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = EQHXZ8M8AV;
-				INFOPLIST_FILE = BertQA/Info.plist;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = ViewInUIKit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.BertQA;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "Google Development";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-UIKit";
+				PRODUCT_NAME = "BertQA-UIKit";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -350,19 +929,19 @@
 		};
 		84C3285F23B49E2F00A7980D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 20076681A0E239448C8D4B05 /* Pods-BertQA.release.xcconfig */;
+			baseConfigurationReference = 67EE9FD8BFDA0BBBC2A8C538 /* Pods-BertQA-UIKit.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = EQHXZ8M8AV;
-				INFOPLIST_FILE = BertQA/Info.plist;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = ViewInUIKit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.BertQA;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "Google Development";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-UIKit";
+				PRODUCT_NAME = "BertQA-UIKit";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -371,6 +950,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		840245342424CB64002D1DAD /* Build configuration list for PBXNativeTarget "BertQA-SwiftUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				840245352424CB64002D1DAD /* Debug */,
+				840245362424CB64002D1DAD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		849401DD244462AB005F0C25 /* Build configuration list for PBXNativeTarget "BertQA-Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				849401DE244462AB005F0C25 /* Debug */,
+				849401DF244462AB005F0C25 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		84C3284623B49E2E00A7980D /* Build configuration list for PBXProject "BertQA" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -380,7 +977,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		84C3285D23B49E2F00A7980D /* Build configuration list for PBXNativeTarget "BertQA" */ = {
+		84C3285D23B49E2F00A7980D /* Build configuration list for PBXNativeTarget "BertQA-UIKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84C3285E23B49E2F00A7980D /* Debug */,
