@@ -1,0 +1,12 @@
+--- tensorflow/lite/tools/gen_op_registration_main.cc
++++ tensorflow/lite/tools/gen_op_registration_main.cc
+@@ -69,2 +66 @@ void GenerateFileContent(const std::string& tflite_path,
+-      fout << "#include \"" << tflite_path
+-           << "/experimental/micro/kernels/micro_ops.h\"\n";
++      fout << "#include \"" << tflite_path << "/micro/kernels/micro_ops.h\"\n";
+@@ -73 +69 @@ void GenerateFileContent(const std::string& tflite_path,
+-         << "/experimental/micro/micro_mutable_op_resolver.h\"\n";
++         << "/micro/micro_mutable_op_resolver.h\"\n";
+@@ -154 +150 @@ int main(int argc, char** argv) {
+-  bool for_micro;
++  bool for_micro = false;
