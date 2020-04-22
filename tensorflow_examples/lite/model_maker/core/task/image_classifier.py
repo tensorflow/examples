@@ -158,6 +158,7 @@ class ImageClassifier(classification_model.ClassificationModel):
         self.model_spec.mean_rgb,
         self.model_spec.stddev_rgb,
         use_augmentation=use_augmentation)
+    self.history = None  # Training history that returns from `keras_model.fit`.
 
   def _create_model(self, hparams=None):
     """Creates the classifier model for retraining."""
@@ -199,8 +200,9 @@ class ImageClassifier(classification_model.ClassificationModel):
     lib = hub_lib
     if isinstance(hparams, train_image_classifier_lib.HParams):
       lib = train_image_classifier_lib
-    return lib.train_model(self.model, hparams, train_data_and_size,
-                           validation_data_and_size)
+    self.history = lib.train_model(self.model, hparams, train_data_and_size,
+                                   validation_data_and_size)
+    return self.history
 
   def preprocess(self, image, label, is_training=False):
     return self.preprocessor(image, label, is_training)
