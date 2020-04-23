@@ -85,22 +85,37 @@ Then, you may be able to play with the app.
 ## Optional: How to build AAR package from source code.
 
 If you changed C++ ops or JNI from source code, you may want to build AAR from
-  source.
+source. This also requires `.tflite` models of your own in `testdata` or
+downloaded from Step 1.
 
 The procedure is to 1) build AAR package containing JNI (.so) lib, and 2) copy
-  to Folder `libs`.
+to Folder `libs`. (The following is tested under Linux and Mac OS.)
 
 ### Require: Bazel installed https://bazel.build/ (version >= 1.0.0).
 
-First, you need to set environment variables ANDROID_HOME and ANDROID_NDK_HOME
-  for Android SDK and NDK respectively.
+Firstly, current recommended bazel version is 3.0.0 to align with TensorFlow
+source code.
 
-```# Notes: Depend on YOUR OWN installation. For example.
+-   You may use [bazelisk](https://github.com/bazelbuild/bazelisk)
+    ([release](https://github.com/bazelbuild/bazelisk/releases)) to automaticlly
+    upgrades to the specific version via `.bazelversion` file.
+
+-   The WORKSPACE file will pull TensorFlow source code, and it futher requires
+    TensorFlow's python dependencies installed before building. (Tips: If you
+    notice some missing Python packages during `bazel` command, please use `pip
+    install <package>` to install it.)
+
+You need to set environment variables ANDROID_HOME and ANDROID_NDK_HOME for
+Android SDK and NDK respectively.
+
+```
+# Notes: Below is just one example. It depends on YOUR OWN installation.
 export ANDROID_HOME=$HOME/Android/Sdk
 export ANDROID_NDK_HOME=$HOME/Android/Sdk/ndk/20.0.5594570
 ```
 
-Use Bazel to build AAR package from JNI source code and include .so lib inside:
+Secondly, use Bazel to build AAR package from JNI source code and include .so
+lib inside:
 
 ```
 cd app
@@ -110,14 +125,14 @@ bazel build libs/cc:smartreply_runtime_aar
 
 By default, it builds ops for multiple cpus (with options: `--fat_apk_cpu=x86,x86_64,arm64-v8a,armeabi-v7a`).
 
-From your bazel root folder, copy AAR package to `libs` folder.
+Thirdly, copy AAR package to `libs` folder from your bazel root folder.
 
 ```
 cp bazel-bin/libs/cc/smartreply_runtime_aar.aar libs/smartreply_runtime_aar.aar
 ```
 
-If you want to build optimized package you may add options `-c opt` or
-  selectively choose some option in `--fat_apk_cpu`. For example,
+In addition, if you want to build optimized package you may add options `-c opt`
+or selectively choose some option in `--fat_apk_cpu`. For example,
 
 ```
 bazel build -c opt --fat_apk_cpu=arm64-v8a,armeabi-v7a cc:smartreply_runtime_aar

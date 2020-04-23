@@ -82,5 +82,5 @@ function test_pip_uninstall() {
 }
 
 test_pip_install
-# test_model_maker   # TODO(b/154565124): Import error occurs during tests.
+test_model_maker
 test_pip_uninstall
