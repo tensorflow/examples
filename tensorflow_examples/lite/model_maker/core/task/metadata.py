@@ -79,7 +79,7 @@ def get_model_info(model_spec, quantized=False, version="v1"):
 
   name = model_spec.name
   if quantized:
-    name.append("_quantized")
+    name += "_quantized"
   return ImageModelSpecificInfo(
       model_spec.name,
       version,
