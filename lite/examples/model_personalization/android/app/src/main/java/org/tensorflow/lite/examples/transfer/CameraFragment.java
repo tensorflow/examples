@@ -177,7 +177,7 @@ public class CameraFragment extends Fragment {
           try {
             predictions = tlModel.predict(rgbImage, modelImageSize, modelImageSize);
           }
-          catch (Exception e){
+          catch (NullPointerException e){
             return;
           }
           if (predictions == null) {
