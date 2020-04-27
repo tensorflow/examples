@@ -170,7 +170,18 @@ extension CVPixelBuffer {
 
     if isModelQuantized { return imageByteData }
 
-    let imageBytes = [UInt8](imageByteData)
-    return Data(copyingBufferOf: imageBytes.map { Float($0) / Constants.maxRGBValue })
+    // let imageBytes = [UInt8](imageByteData)
+    // return Data(copyingBufferOf: imageBytes.map { Float($0) / Constants.maxRGBValue })
+    
+    // Author: Vien
+    // Email: shavien1202@gmail.com
+    // Optimized from 30ms to 3ms
+    let imageBytes = Array<UInt8>(imageByteData)
+    var result: [Float] = Array(repeating: 0.0, count: imageBytes.count)
+    vDSP_vfltu8(imageBytes, 1, &result, 1, vDSP_Length(imageBytes.count))
+    var num = Float(1) / Float(Constants.maxRGBValue)
+    var floatData = [Float](repeating: 0.0, count: result.count)
+    vDSP_vsmul(result, 1, &num, &floatData, 1, vDSP_Length(result.count))
+    return Data(copyingBufferOf: floatData)
   }
 }
