@@ -32,13 +32,9 @@ FLAGS = flags.FLAGS
 
 
 def define_flags():
-  flags.DEFINE_string('tflite_filename', None,
-                      'File name to save tflite model.')
-  flags.DEFINE_string('label_filename', None, 'File name to save labels.')
-  flags.DEFINE_string('vocab_filename', None, 'File name to save vocabulary.')
-  flags.mark_flag_as_required('tflite_filename')
-  flags.mark_flag_as_required('label_filename')
-  flags.mark_flag_as_required('vocab_filename')
+  flags.DEFINE_string('export_dir', None,
+                      'The directory to save exported files.')
+  flags.mark_flag_as_required('export_dir')
 
 
 def download_demo_data(**kwargs):
@@ -51,12 +47,7 @@ def download_demo_data(**kwargs):
   return os.path.join(os.path.dirname(data_path), 'SST-2')  # folder name
 
 
-def run(data_dir,
-        tflite_filename,
-        label_filename,
-        vocab_filename,
-        spec='bert_classifier',
-        **kwargs):
+def run(data_dir, export_dir, spec='bert_classifier', **kwargs):
   """Runs demo."""
   # Chooses model specification that represents model.
   spec = model_spec.get(spec)
@@ -86,14 +77,13 @@ def run(data_dir,
   print('Eval accuracy: %f' % acc)
 
   # Exports to TFLite format.
-  model.export(tflite_filename, label_filename, vocab_filename)
+  model.export(export_dir)
 
 
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.tflite_filename, FLAGS.label_filename,
-      FLAGS.vocab_filename)
+  run(data_dir, FLAGS.export_dir)
 
 
 if __name__ == '__main__':

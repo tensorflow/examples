@@ -23,7 +23,6 @@ import tempfile
 
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 
 DEFAULT_QUANTIZATION_STEPS = 2000
 
@@ -41,19 +40,13 @@ def get_representative_dataset_gen(dataset, num_steps):
 class CustomModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
 
-  def __init__(self, model_export_format, model_spec, shuffle):
+  def __init__(self, model_spec, shuffle):
     """Initialize a instance with data, deploy mode and other related parameters.
 
     Args:
-      model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
       shuffle: Whether the data should be shuffled.
     """
-    if model_export_format != mef.ModelExportFormat.TFLITE:
-      raise ValueError('Model export format %s is not supported currently.' %
-                       str(model_export_format))
-
-    self.model_export_format = model_export_format
     self.model_spec = model_spec
     self.shuffle = shuffle
     self.model = None
@@ -104,21 +97,56 @@ class CustomModel(abc.ABC):
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     return ds
 
+  def _export_saved_model(self,
+                          filepath,
+                          overwrite=True,
+                          include_optimizer=True,
+                          save_format=None,
+                          signatures=None,
+                          options=None):
+    """Saves the model to Tensorflow SavedModel or a single HDF5 file.
+
+    Args:
+      filepath: String, path to SavedModel or H5 file to save the model.
+      overwrite: Whether to silently overwrite any existing file at the target
+        location, or provide the user with a manual prompt.
+      include_optimizer: If True, save optimizer's state together.
+      save_format: Either 'tf' or 'h5', indicating whether to save the model to
+        Tensorflow SavedModel or HDF5. Defaults to 'tf' in TF 2.X, and 'h5' in
+        TF 1.X.
+      signatures: Signatures to save with the SavedModel. Applicable to the 'tf'
+        format only. Please see the `signatures` argument in
+        `tf.saved_model.save` for details.
+      options: Optional `tf.saved_model.SaveOptions` object that specifies
+        options for saving to SavedModel.
+    """
+    if filepath is None:
+      raise ValueError(
+          "SavedModel filepath couldn't be None when exporting to SavedModel.")
+    self.model.save(filepath, overwrite, include_optimizer, save_format,
+                    signatures, options)
+
   def _export_tflite(self,
-                     tflite_filename,
+                     tflite_filepath,
                      quantized=False,
                      quantization_steps=None,
                      representative_data=None):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
-      tflite_filename: File name to save tflite model.
+      tflite_filepath: File path to save tflite model.
       quantized: boolean, if True, save quantized model.
       quantization_steps: Number of post-training quantization calibration steps
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
     """
+    if tflite_filepath is None:
+      raise ValueError(
+          "TFLite filepath couldn't be None when exporting to tflite.")
+
+    tf.compat.v1.logging.info('Exporting to tflite model in %s.',
+                              tflite_filepath)
     temp_dir = None
     if compat.get_tf_behavior() == 1:
       temp_dir = tempfile.TemporaryDirectory()
@@ -149,7 +177,5 @@ class CustomModel(abc.ABC):
     if temp_dir:
       temp_dir.cleanup()
 
-    with tf.io.gfile.GFile(tflite_filename, 'wb') as f:
+    with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
       f.write(tflite_model)
-
-    tf.compat.v1.logging.info('Export to tflite model in %s.', tflite_filename)

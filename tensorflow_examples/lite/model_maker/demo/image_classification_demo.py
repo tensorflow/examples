@@ -25,7 +25,6 @@ from absl import logging
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
-from tensorflow_examples.lite.model_maker.core.model_export_format import ModelExportFormat
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 
@@ -33,11 +32,9 @@ FLAGS = flags.FLAGS
 
 
 def define_flags():
-  flags.DEFINE_string('tflite_filename', None,
-                      'File name to save tflite model.')
-  flags.DEFINE_string('label_filename', None, 'File name to save labels.')
-  flags.mark_flag_as_required('tflite_filename')
-  flags.mark_flag_as_required('label_filename')
+  flags.DEFINE_string('export_dir', None,
+                      'The directory to save exported files.')
+  flags.mark_flag_as_required('export_dir')
 
 
 def download_demo_data(**kwargs):
@@ -50,11 +47,7 @@ def download_demo_data(**kwargs):
   return os.path.join(data_dir, '..', 'flower_photos')  # folder name
 
 
-def run(data_dir,
-        tflite_filename,
-        label_filename,
-        spec='efficientnet_lite0',
-        **kwargs):
+def run(data_dir, export_dir, spec='efficientnet_lite0', **kwargs):
   """Runs demo."""
   spec = model_spec.get(spec)
   data = ImageClassifierDataLoader.from_folder(data_dir)
@@ -63,20 +56,19 @@ def run(data_dir,
 
   model = image_classifier.create(
       train_data,
-      model_export_format=ModelExportFormat.TFLITE,
       model_spec=spec,
       validation_data=validation_data,
       **kwargs)
 
   _, acc = model.evaluate(test_data)
   print('Test accuracy: %f' % acc)
-  model.export(tflite_filename, label_filename)
+  model.export(export_dir)
 
 
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.tflite_filename, FLAGS.label_filename)
+  run(data_dir, FLAGS.export_dir)
 
 
 if __name__ == '__main__':

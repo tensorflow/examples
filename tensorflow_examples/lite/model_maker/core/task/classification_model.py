@@ -20,19 +20,17 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow.compat.v2 as tf
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 
 
 class ClassificationModel(custom_model.CustomModel):
   """"The abstract base class that represents a Tensorflow classification model."""
 
-  def __init__(self, model_export_format, model_spec, index_to_label,
-               num_classes, shuffle, train_whole_model):
+  def __init__(self, model_spec, index_to_label, num_classes, shuffle,
+               train_whole_model):
     """Initialize a instance with data, deploy mode and other related parameters.
 
     Args:
-      model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
       num_classes: Number of label classes.
@@ -41,12 +39,7 @@ class ClassificationModel(custom_model.CustomModel):
         classification layer on top. Otherwise, only train the top
         classification layer.
     """
-    if model_export_format != mef.ModelExportFormat.TFLITE:
-      raise ValueError('Model export format %s is not supported currently.' %
-                       str(model_export_format))
-
-    super(ClassificationModel, self).__init__(model_export_format, model_spec,
-                                              shuffle)
+    super(ClassificationModel, self).__init__(model_spec, shuffle)
     self.index_to_label = index_to_label
     self.num_classes = num_classes
     self.train_whole_model = train_whole_model
@@ -90,28 +83,10 @@ class ClassificationModel(custom_model.CustomModel):
 
     return label_prob
 
-  def _export_tflite(self,
-                     tflite_filename,
-                     label_filename,
-                     quantized=False,
-                     quantization_steps=None,
-                     representative_data=None):
-    """Converts the retrained model to tflite format and saves it.
+  def _export_labels(self, label_filepath):
+    if label_filepath is None:
+      raise ValueError("Label filepath couldn't be None when exporting labels.")
 
-    Args:
-      tflite_filename: File name to save tflite model.
-      label_filename: File name to save labels.
-      quantized: boolean, if True, save quantized model.
-      quantization_steps: Number of post-training quantization calibration steps
-        to run. Used only if `quantized` is True.
-      representative_data: Representative data used for post-training
-        quantization. Used only if `quantized` is True.
-    """
-    super(ClassificationModel,
-          self)._export_tflite(tflite_filename, quantized, quantization_steps,
-                               representative_data)
-
-    with tf.io.gfile.GFile(label_filename, 'w') as f:
+    tf.compat.v1.logging.info('Saving labels in %s.', label_filepath)
+    with tf.io.gfile.GFile(label_filepath, 'w') as f:
       f.write('\n'.join(self.index_to_label))
-
-    tf.compat.v1.logging.info('Saved labels in %s.', label_filename)

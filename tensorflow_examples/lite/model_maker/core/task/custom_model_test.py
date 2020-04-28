@@ -20,7 +20,6 @@ import os
 
 import numpy as np
 import tensorflow.compat.v2 as tf
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 
@@ -42,7 +41,6 @@ class CustomModelTest(tf.test.TestCase):
   def setUp(self):
     super(CustomModelTest, self).setUp()
     self.model = MockCustomModel(
-        model_export_format=mef.ModelExportFormat.TFLITE,
         model_spec=None,
         shuffle=False)
 
@@ -66,6 +64,13 @@ class CustomModelTest(tf.test.TestCase):
     tflite_file = os.path.join(self.get_temp_dir(), 'model.tflite')
     self.model._export_tflite(tflite_file)
     self._test_tflite(self.model.model, tflite_file, input_dim)
+
+  def test_export_saved_model(self):
+    self.model.model = test_util.build_model(input_shape=[4], num_classes=2)
+    saved_model_filepath = os.path.join(self.get_temp_dir(), 'saved_model/')
+    self.model._export_saved_model(saved_model_filepath)
+    self.assertTrue(os.path.isdir(saved_model_filepath))
+    self.assertNotEqual(len(os.listdir(saved_model_filepath)), 0)
 
   def test_export_tflite_quantized(self):
     input_dim = 4

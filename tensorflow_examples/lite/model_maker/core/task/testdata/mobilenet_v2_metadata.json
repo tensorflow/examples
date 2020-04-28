@@ -54,7 +54,7 @@
           },
           "associated_files": [
             {
-              "name": "label.txt",
+              "name": "labels.txt",
               "description": "Labels that mobilenet_v2 can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }

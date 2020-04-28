@@ -21,9 +21,9 @@ import numpy as np
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
 
@@ -63,7 +63,6 @@ class TextClassifierTest(tf.test.TestCase):
           self.text_dir, model_spec=model_spec)
       _ = text_classifier.create(
           all_data,
-          mef.ModelExportFormat.TFLITE,
           model_spec=model_spec,
       )
 
@@ -77,7 +76,6 @@ class TextClassifierTest(tf.test.TestCase):
 
     model = text_classifier.create(
         self.train_data,
-        mef.ModelExportFormat.TFLITE,
         model_spec=model_spec,
         epochs=1,
         batch_size=1,
@@ -94,14 +92,16 @@ class TextClassifierTest(tf.test.TestCase):
 
     model = text_classifier.create(
         self.train_data,
-        mef.ModelExportFormat.TFLITE,
         model_spec=model_spec,
         epochs=2,
         batch_size=4,
         shuffle=True)
     self._test_accuracy(model)
-    self._test_export_to_tflite(model)
     self._test_predict_top_k(model)
+    self._test_export_to_tflite(model)
+    self._test_export_to_saved_model(model)
+    self._test_export_labels(model)
+    self._test_export_vocab(model)
 
   def _test_accuracy(self, model, threshold=1.0):
     _, accuracy = model.evaluate(self.test_data)
@@ -114,17 +114,17 @@ class TextClassifierTest(tf.test.TestCase):
       self.assertEqual(model.index_to_label[label], predict_label)
       self.assertGreater(predict_prob, 0.5)
 
-  def _load_vocab(self, filename):
-    with tf.io.gfile.GFile(filename, 'r') as f:
+  def _load_vocab(self, filepath):
+    with tf.io.gfile.GFile(filepath, 'r') as f:
       return [vocab.strip('\n').split() for vocab in f]
 
-  def _load_labels(self, filename):
-    with tf.io.gfile.GFile(filename, 'r') as f:
+  def _load_labels(self, filepath):
+    with tf.io.gfile.GFile(filepath, 'r') as f:
       return [label.strip('\n') for label in f]
 
-  def _load_lite_model(self, filename):
-    self.assertTrue(os.path.isfile(filename))
-    with tf.io.gfile.GFile(filename, 'rb') as f:
+  def _load_lite_model(self, filepath):
+    self.assertTrue(os.path.isfile(filepath))
+    with tf.io.gfile.GFile(filepath, 'rb') as f:
       model_content = f.read()
     interpreter = tf.lite.Interpreter(model_content=model_content)
 
@@ -139,14 +139,16 @@ class TextClassifierTest(tf.test.TestCase):
 
     return lite_model
 
-  def _test_export_to_tflite(self, model):
-    tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
-    labels_output_file = os.path.join(self.get_temp_dir(), 'label')
-    vocab_output_file = os.path.join(self.get_temp_dir(), 'vocab')
-    model.export(tflite_output_file, labels_output_file, vocab_output_file)
+  def _test_export_labels(self, model):
+    labels_output_file = os.path.join(self.get_temp_dir(), 'labels.txt')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.LABEL)
 
     labels = self._load_labels(labels_output_file)
     self.assertEqual(labels, ['neg', 'pos'])
+
+  def _test_export_vocab(self, model):
+    vocab_output_file = os.path.join(self.get_temp_dir(), 'vocab')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.VOCAB)
 
     word_index = self._load_vocab(vocab_output_file)
     expected_predefined = [['<PAD>', '0'], ['<START>', '1'], ['<UNKNOWN>', '2']]
@@ -160,12 +162,23 @@ class TextClassifierTest(tf.test.TestCase):
     actual_index = [index for word, index in word_index[3:]]
     self.assertEqual(actual_index, expected_index)
 
+  def _test_export_to_tflite(self, model):
+    tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
+
     lite_model = self._load_lite_model(tflite_output_file)
     for x, y in self.test_data.dataset:
       input_batch = tf.cast(x, tf.float32)
       output_batch = lite_model(input_batch)
       prediction = np.argmax(output_batch[0])
       self.assertEqual(y, prediction)
+
+  def _test_export_to_saved_model(self, model):
+    save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.SAVED_MODEL)
+
+    self.assertTrue(os.path.isdir(save_model_output_path))
+    self.assertNotEqual(len(os.listdir(save_model_output_path)), 0)
 
 
 if __name__ == '__main__':

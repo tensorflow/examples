@@ -17,17 +17,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
 
 def create(train_data,
-           model_export_format=mef.ModelExportFormat.TFLITE,
            model_spec=ms.AverageWordVecModelSpec(),
            shuffle=False,
            batch_size=32,
@@ -37,7 +37,6 @@ def create(train_data,
 
   Args:
     train_data: Training data.
-    model_export_format: Model export format such as saved_model / tflite.
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
     batch_size: Batch size for training.
@@ -52,7 +51,6 @@ def create(train_data,
         model_spec.compat_tf_versions, compat.get_tf_behavior()))
 
   text_classifier = TextClassifier(
-      model_export_format,
       model_spec,
       train_data.index_to_label,
       train_data.num_classes,
@@ -68,7 +66,6 @@ class TextClassifier(classification_model.ClassificationModel):
   """TextClassifier class for inference and exporting to tflite."""
 
   def __init__(self,
-               model_export_format,
                model_spec,
                index_to_label,
                num_classes,
@@ -76,14 +73,12 @@ class TextClassifier(classification_model.ClassificationModel):
     """Init function for TextClassifier class.
 
     Args:
-      model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
       num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
     """
     super(TextClassifier, self).__init__(
-        model_export_format,
         model_spec,
         index_to_label,
         num_classes,
@@ -137,33 +132,76 @@ class TextClassifier(classification_model.ClassificationModel):
       model_input.set_shape(new_shape)
 
   def export(self,
-             tflite_filename,
-             label_filename,
-             vocab_filename,
-             quantized=False,
-             quantization_steps=None,
-             representative_data=None):
-    """Converts the retrained model based on `model_export_format`.
+             export_dir,
+             tflite_filename='model.tflite',
+             label_filename='labels.txt',
+             vocab_filename='vocab',
+             saved_model_filename='saved_model',
+             export_format=None,
+             **kwargs):
+    """Converts the retrained model based on `export_format`.
 
     Args:
-      tflite_filename: File name to save tflite model.
-      label_filename: File name to save labels.
-      vocab_filename: File name to save vocabulary.
+      export_dir: The directory to save exported files.
+      tflite_filename: File name to save tflite model. The full export path is
+        {export_dir}/{tflite_filename}.
+      label_filename: File name to save labels. The full export path is
+        {export_dir}/{label_filename}.
+      vocab_filename: File name to save vocabulary.  The full export path is
+        {export_dir}/{vocab_filename}.
+      saved_model_filename: Path to SavedModel or H5 file to save the model. The
+        full export path is
+        {export_dir}/{saved_model_filename}/{saved_model.pb|assets|variables}.
+      export_format: List of export format that could be saved_model, tflite,
+        label, vocab.
+      **kwargs: Other parameters like `quantized` for TFLITE model.
+    """
+    # Default export ExportFormat are TFLite models and labels.
+    if export_format is None:
+      export_format = [
+          ExportFormat.TFLITE, ExportFormat.LABEL, ExportFormat.VOCAB
+      ]
+    if not isinstance(export_format, list):
+      export_format = [export_format]
+
+    if not tf.io.gfile.exists(export_dir):
+      tf.io.gfile.makedirs(export_dir)
+
+    if ExportFormat.LABEL in export_format:
+      label_filepath = os.path.join(export_dir, label_filename)
+      self._export_labels(label_filepath)
+
+    if ExportFormat.TFLITE in export_format:
+      tflite_filepath = os.path.join(export_dir, tflite_filename)
+      self._export_tflite(tflite_filepath, **kwargs)
+
+    if ExportFormat.SAVED_MODEL in export_format:
+      saved_model_filepath = os.path.join(export_dir, saved_model_filename)
+      self._export_saved_model(saved_model_filepath, **kwargs)
+
+    if ExportFormat.VOCAB in export_format:
+      vocab_filepath = os.path.join(export_dir, vocab_filename)
+      self.model_spec.save_vocab(vocab_filepath)
+
+  def _export_tflite(self,
+                     tflite_filepath,
+                     quantized=False,
+                     quantization_steps=None,
+                     representative_data=None):
+    """Converts the retrained model to tflite format and saves it.
+
+    Args:
+      tflite_filepath: File path to save tflite model.
       quantized: boolean, if True, save quantized model.
       quantization_steps: Number of post-training quantization calibration steps
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
     """
-    if self.model_export_format != mef.ModelExportFormat.TFLITE:
-      raise ValueError('Model export format %s is not supported currently.' %
-                       self.model_export_format)
-
     # Sets batch size from None to 1 when converting to tflite.
     self._set_batch_size(self.model, batch_size=1)
-    self._export_tflite(tflite_filename, label_filename, quantized,
-                        quantization_steps, representative_data)
+    super(TextClassifier,
+          self)._export_tflite(tflite_filepath, quantized, quantization_steps,
+                               representative_data)
     # Sets batch size back to None to support retraining later.
     self._set_batch_size(self.model, batch_size=None)
-
-    self.model_spec.save_vocab(vocab_filename)

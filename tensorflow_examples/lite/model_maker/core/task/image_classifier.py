@@ -17,10 +17,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
@@ -38,7 +40,6 @@ def get_hub_lib_hparams(**kwargs):
 
 
 def create(train_data,
-           model_export_format=mef.ModelExportFormat.TFLITE,
            model_spec=ms.efficientnet_lite0_spec,
            shuffle=False,
            validation_data=None,
@@ -56,7 +57,6 @@ def create(train_data,
 
   Args:
     train_data: Training data.
-    model_export_format: Model export format such as saved_model / tflite.
     model_spec: Specification for the model.
     shuffle: Whether the data should be shuffled.
     validation_data: Validation data. If None, skips validation process.
@@ -107,7 +107,6 @@ def create(train_data,
         model_dir=model_dir)
 
   image_classifier = ImageClassifier(
-      model_export_format,
       model_spec,
       train_data.index_to_label,
       train_data.num_classes,
@@ -125,7 +124,6 @@ class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
 
   def __init__(self,
-               model_export_format,
                model_spec,
                index_to_label,
                num_classes,
@@ -135,7 +133,6 @@ class ImageClassifier(classification_model.ClassificationModel):
     """Init function for ImageClassifier class.
 
     Args:
-      model_export_format: Model export format such as saved_model / tflite.
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
       num_classes: Number of label classes.
@@ -148,8 +145,8 @@ class ImageClassifier(classification_model.ClassificationModel):
       use_augmentation: Use data augmentation for preprocessing.
     """
     super(ImageClassifier,
-          self).__init__(model_export_format, model_spec, index_to_label,
-                         num_classes, shuffle, hparams.do_fine_tuning)
+          self).__init__(model_spec, index_to_label, num_classes, shuffle,
+                         hparams.do_fine_tuning)
     self.hparams = hparams
     self.model = self._create_model()
     self.preprocessor = image_preprocessing.Preprocessor(
@@ -222,18 +219,63 @@ class ImageClassifier(classification_model.ClassificationModel):
     return ds
 
   def export(self,
-             tflite_filename,
-             label_filename,
-             quantized=False,
-             quantization_steps=None,
-             representative_data=None,
-             with_metadata=False,
-             export_metadata_json_file=False):
+             export_dir,
+             tflite_filename='model.tflite',
+             label_filename='labels.txt',
+             saved_model_filename='saved_model',
+             export_format=None,
+             **kwargs):
     """Converts the retrained model based on `model_export_format`.
 
     Args:
-      tflite_filename: File name to save tflite model.
-      label_filename: File name to save labels.
+      export_dir: The directory to save exported files.
+      tflite_filename: File name to save tflite model. The full export path is
+        {export_dir}/{tflite_filename}.
+      label_filename: File name to save labels. The full export path is
+        {export_dir}/{label_filename}.
+      saved_model_filename: Path to SavedModel or H5 file to save the model. The
+        full export path is
+        {export_dir}/{saved_model_filename}/{saved_model.pb|assets|variables}.
+      export_format: List of export format that could be saved_model, tflite,
+        label.
+      **kwargs: Other parameters like `quantized` for TFLITE model.
+    """
+    # Default export formats are TFLite models and labels.
+    if export_format is None:
+      export_format = [ExportFormat.TFLITE, ExportFormat.LABEL]
+    if not isinstance(export_format, list):
+      export_format = [export_format]
+
+    if not tf.io.gfile.exists(export_dir):
+      tf.io.gfile.makedirs(export_dir)
+
+    label_filepath = None
+    if ExportFormat.LABEL in export_format:
+      label_filepath = os.path.join(export_dir, label_filename)
+      self._export_labels(label_filepath)
+
+    if ExportFormat.TFLITE in export_format:
+      tflite_filepath = os.path.join(export_dir, tflite_filename)
+      self._export_tflite(tflite_filepath, label_filepath, **kwargs)
+
+    if ExportFormat.SAVED_MODEL in export_format:
+      saved_model_filepath = os.path.join(export_dir, saved_model_filename)
+      self._export_saved_model(saved_model_filepath, **kwargs)
+
+  def _export_tflite(self,
+                     tflite_filepath,
+                     label_filepath,
+                     quantized=False,
+                     quantization_steps=None,
+                     representative_data=None,
+                     with_metadata=False,
+                     export_metadata_json_file=False):
+    """Converts the retrained model to tflite format and saves it.
+
+
+    Args:
+      tflite_filepath: File path to save tflite model.
+      label_filepath: File path to save labels.
       quantized: boolean, if True, save quantized model.
       quantization_steps: Number of post-training quantization calibration steps
         to run. Used only if `quantized` is True.
@@ -244,23 +286,26 @@ class ImageClassifier(classification_model.ClassificationModel):
         True, export the metadata in the same directory as tflite model.Used
         only if `with_metadata` is True.
     """
-    if self.model_export_format != mef.ModelExportFormat.TFLITE:
-      raise ValueError('Model Export Format %s is not supported currently.' %
-                       self.model_export_format)
-    self._export_tflite(tflite_filename, label_filename, quantized,
-                        quantization_steps, representative_data)
+    super(ImageClassifier,
+          self)._export_tflite(tflite_filepath, quantized, quantization_steps,
+                               representative_data)
     if with_metadata:
       if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
         tf.compat.v1.logging.warning('Needs to install tflite-support package.')
         return
 
+      if label_filepath is None:
+        tf.compat.v1.logging.warning(
+            'Label filepath is needed when exporting TFLite with metadata.')
+        return
+
       model_info = metadata.get_model_info(self.model_spec, quantized=quantized)
       populator = metadata.MetadataPopulatorForImageClassifier(
-          tflite_filename, model_info, label_filename)
+          tflite_filepath, model_info, label_filepath)
       populator.populate()
 
       if export_metadata_json_file:
-        metadata.export_metadata_json_file(tflite_filename)
+        metadata.export_metadata_json_file(tflite_filepath)
 
   def _get_hparams_or_default(self, hparams):
     """Returns hparams if not none, otherwise uses default one."""

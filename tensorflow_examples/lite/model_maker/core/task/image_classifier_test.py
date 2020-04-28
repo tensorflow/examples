@@ -22,9 +22,9 @@ import os
 import numpy as np
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
-from tensorflow_examples.lite.model_maker.core import model_export_format as mef
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec
@@ -67,28 +67,27 @@ class ImageClassifierTest(tf.test.TestCase):
   def test_mobilenetv2_model(self):
     model = image_classifier.create(
         self.train_data,
-        mef.ModelExportFormat.TFLITE,
         model_spec.mobilenet_v2_spec,
         epochs=2,
         batch_size=4,
         shuffle=True)
     self._test_accuracy(model)
-    self._test_export_to_tflite(model)
     self._test_predict_top_k(model)
+    self._test_export_to_tflite(model)
     self._test_export_to_tflite_quantized(model, self.train_data)
     self._test_export_to_tflite_with_metadata(model)
+    self._test_export_to_saved_model(model)
+    self._test_export_labels(model)
 
   @test_util.test_in_tf_1
   def test_mobilenetv2_model_create_v1_incompatible(self):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
-      _ = image_classifier.create(self.train_data, mef.ModelExportFormat.TFLITE,
-                                  model_spec.mobilenet_v2_spec)
+      _ = image_classifier.create(self.train_data, model_spec.mobilenet_v2_spec)
 
   @test_util.test_in_tf_1and2
   def test_efficientnetlite0_model_with_model_maker_retraining_lib(self):
     model = image_classifier.create(
         self.train_data,
-        mef.ModelExportFormat.TFLITE,
         model_spec.efficientnet_lite0_spec,
         epochs=2,
         batch_size=4,
@@ -101,7 +100,6 @@ class ImageClassifierTest(tf.test.TestCase):
   def test_efficientnetlite0_model(self):
     model = image_classifier.create(
         self.train_data,
-        mef.ModelExportFormat.TFLITE,
         model_spec.efficientnet_lite0_spec,
         epochs=2,
         batch_size=4,
@@ -113,7 +111,6 @@ class ImageClassifierTest(tf.test.TestCase):
   def test_resnet_50_model(self):
     model = image_classifier.create(
         self.train_data,
-        mef.ModelExportFormat.TFLITE,
         model_spec.resnet_50_spec,
         epochs=2,
         batch_size=4,
@@ -152,12 +149,15 @@ class ImageClassifierTest(tf.test.TestCase):
 
     return lite_model
 
+  def _test_export_labels(self, model):
+    labels_output_file = os.path.join(self.get_temp_dir(), 'labels.txt')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.LABEL)
+    self._check_label_file(labels_output_file)
+
   def _test_export_to_tflite(self, model):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
-    labels_output_file = os.path.join(self.get_temp_dir(), 'label')
-    model.export(tflite_output_file, labels_output_file)
-    labels = self._load_labels(labels_output_file)
-    self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
+
+    model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
     lite_model = self._load_lite_model(tflite_output_file)
 
     test_ds = model._gen_dataset(
@@ -181,16 +181,18 @@ class ImageClassifierTest(tf.test.TestCase):
 
   def _test_export_to_tflite_quantized(self, model, representative_data):
     # Just test whether quantization will crash, can't guarantee the result.
-    tflite_output_file = os.path.join(self.get_temp_dir(),
-                                      'model_quantized.tflite')
-    labels_output_file = os.path.join(self.get_temp_dir(), 'label')
+    tflile_filename = 'model_quantized.tflite'
+    tflite_output_file = os.path.join(self.get_temp_dir(), tflile_filename)
     model.export(
-        tflite_output_file,
-        labels_output_file,
+        self.get_temp_dir(),
+        tflile_filename,
         quantized=True,
-        representative_data=representative_data)
+        representative_data=representative_data,
+        export_format=ExportFormat.TFLITE)
     self.assertTrue(os.path.isfile(tflite_output_file))
     self.assertGreater(os.path.getsize(tflite_output_file), 0)
+
+  def _check_label_file(self, labels_output_file):
     labels = self._load_labels(labels_output_file)
     self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
 
@@ -199,19 +201,18 @@ class ImageClassifierTest(tf.test.TestCase):
     tflite_output_file = os.path.join(self.get_temp_dir(),
                                       '%s.tflite' % model_name)
     json_output_file = os.path.join(self.get_temp_dir(), '%s.json' % model_name)
-    labels_output_file = os.path.join(self.get_temp_dir(), 'label.txt')
+    labels_output_file = os.path.join(self.get_temp_dir(), 'labels.txt')
 
     model.export(
-        tflite_output_file,
-        labels_output_file,
+        self.get_temp_dir(),
+        '%s.tflite' % model_name,
         with_metadata=True,
         export_metadata_json_file=True)
 
     self.assertTrue(os.path.isfile(tflite_output_file))
     self.assertGreater(os.path.getsize(tflite_output_file), 0)
 
-    labels = self._load_labels(labels_output_file)
-    self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
+    self._check_label_file(labels_output_file)
 
     if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
       return
@@ -219,6 +220,13 @@ class ImageClassifierTest(tf.test.TestCase):
     expected_json_file = test_util.get_test_data_path(
         'mobilenet_v2_metadata.json')
     self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
+
+  def _test_export_to_saved_model(self, model):
+    save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.SAVED_MODEL)
+
+    self.assertTrue(os.path.isdir(save_model_output_path))
+    self.assertNotEqual(len(os.listdir(save_model_output_path)), 0)
 
 
 if __name__ == '__main__':

@@ -60,11 +60,10 @@ class ImageClassificationDemoTest(tf.test.TestCase):
             file_hash='6f87fb78e9cc9ab41eff2015b380011d')
 
         tflite_filename = os.path.join(temp_dir, 'model.tflite')
-        label_filename = os.path.join(temp_dir, 'label.txt')
+        label_filename = os.path.join(temp_dir, 'labels.txt')
         image_classification_demo.run(
             data_dir,
-            tflite_filename,
-            label_filename,
+            temp_dir,
             spec='efficientnet_lite0',
             epochs=1,
             batch_size=1)

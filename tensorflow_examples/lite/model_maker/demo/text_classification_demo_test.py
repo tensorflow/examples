@@ -60,18 +60,12 @@ class TextClassificationDemoTest(tf.test.TestCase):
             file_hash='9f81648d4199384278b86e315dac217c')
 
         tflite_filename = os.path.join(temp_dir, 'model.tflite')
-        label_filename = os.path.join(temp_dir, 'label.txt')
-        vocab_filename = os.path.join(temp_dir, 'vocab.txt')
+        label_filename = os.path.join(temp_dir, 'labels.txt')
+        vocab_filename = os.path.join(temp_dir, 'vocab')
         # TODO(b/150597348): Bert model is out of memory when export to tflite.
         # Changed to a smaller bert models like mobilebert later for unittest.
         text_classification_demo.run(
-            data_dir,
-            tflite_filename,
-            label_filename,
-            vocab_filename,
-            spec='average_word_vec',
-            epochs=1,
-            batch_size=1)
+            data_dir, temp_dir, spec='average_word_vec', epochs=1, batch_size=1)
 
         self.assertTrue(tf.io.gfile.exists(tflite_filename))
         self.assertGreater(os.path.getsize(tflite_filename), 0)

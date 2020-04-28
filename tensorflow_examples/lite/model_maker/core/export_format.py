@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model export format such as saved_model / tflite."""
+"""Export format such as saved_model / tflite."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,6 +22,8 @@ from enum import unique
 
 
 @unique
-class ModelExportFormat(Enum):
-  TFLITE = 0
-  SAVEDMODEL = 1
+class ExportFormat(Enum):
+  TFLITE = "TFLITE"
+  SAVED_MODEL = "SAVED_MODEL"
+  LABEL = "LABEL"
+  VOCAB = "VOCAB"
