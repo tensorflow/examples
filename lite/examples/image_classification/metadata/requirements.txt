@@ -2,3 +2,4 @@
 absl-py
 tensorflow
 tflite-support
+flatbuffers==1.12

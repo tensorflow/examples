@@ -19,34 +19,45 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-# TODO(b/151191679): Create BUILD target for Metadata examples
+
 from absl import app
 from absl import flags
 import tensorflow as tf
 
-from tflite_support import flatbuffers
+import flatbuffers
+# pylint: disable=g-direct-tensorflow-import
 from tflite_support import metadata as _metadata
 from tflite_support import metadata_schema_py_generated as _metadata_fb
+# pylint: enable=g-direct-tensorflow-import
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string("model_file", None,
-                    "Path and file name to the TFLite model file.")
-flags.DEFINE_string("label_file", None, "Path to the label file.")
-flags.DEFINE_string("export_directory", None,
-                    "Path to save the TFLite model files with metadata.")
+
+
+def define_flags():
+  flags.DEFINE_string("model_file", None,
+                      "Path and file name to the TFLite model file.")
+  flags.DEFINE_string("label_file", None, "Path to the label file.")
+  flags.DEFINE_string("export_directory", None,
+                      "Path to save the TFLite model files with metadata.")
+  flags.mark_flag_as_required("model_file")
+  flags.mark_flag_as_required("label_file")
+  flags.mark_flag_as_required("export_directory")
 
 
 class ModelSpecificInfo(object):
   """Holds information that is specificly tied to an image classifier."""
 
   def __init__(self, name, version, image_width, image_height, image_min,
-               image_max):
+               image_max, mean, std, num_classes):
     self.name = name
     self.version = version
     self.image_width = image_width
     self.image_height = image_height
     self.image_min = image_min
     self.image_max = image_max
+    self.mean = mean
+    self.std = std
+    self.num_classes = num_classes
 
 
 _MODEL_INFO = {
@@ -57,7 +68,10 @@ _MODEL_INFO = {
             image_width=160,
             image_height=160,
             image_min=0,
-            image_max=255)
+            image_max=255,
+            mean=[127.5],
+            std=[127.5],
+            num_classes=1001)
 }
 
 
@@ -82,8 +96,8 @@ class MetadataPopulatorForImageClassifier(object):
     model_meta = _metadata_fb.ModelMetadataT()
     model_meta.name = self.model_info.name
     model_meta.description = ("Identify the most prominent object in the "
-                              "image from a set of 1,001 categories such as "
-                              "trees, animals, food, vehicles, person etc.")
+                              "image from a set of %d categories." %
+                              self.model_info.num_classes)
     model_meta.version = self.model_info.version
     model_meta.author = "TensorFlow"
     model_meta.license = ("Apache License. Version 2.0 "
@@ -95,8 +109,9 @@ class MetadataPopulatorForImageClassifier(object):
     input_meta.description = (
         "Input image to be classified. The expected image is {0} x {1}, with "
         "three channels (red, blue, and green) per pixel. Each value in the "
-        "tensor is a single byte between 0 and 255.".format(
-            self.model_info.image_width, self.model_info.image_height))
+        "tensor is a single byte between {2} and {3}.".format(
+            self.model_info.image_width, self.model_info.image_height,
+            self.model_info.image_min, self.model_info.image_max))
     input_meta.content = _metadata_fb.ContentT()
     input_meta.content.contentProperties = _metadata_fb.ImagePropertiesT()
     input_meta.content.contentProperties.colorSpace = (
@@ -107,8 +122,8 @@ class MetadataPopulatorForImageClassifier(object):
     input_normalization.optionsType = (
         _metadata_fb.ProcessUnitOptions.NormalizationOptions)
     input_normalization.options = _metadata_fb.NormalizationOptionsT()
-    input_normalization.options.mean = [127.5]
-    input_normalization.options.std = [127.5]
+    input_normalization.options.mean = self.model_info.mean
+    input_normalization.options.std = self.model_info.std
     input_meta.processUnits = [input_normalization]
     input_stats = _metadata_fb.StatsT()
     input_stats.max = [self.model_info.image_max]
@@ -118,7 +133,7 @@ class MetadataPopulatorForImageClassifier(object):
     # Creates output info.
     output_meta = _metadata_fb.TensorMetadataT()
     output_meta.name = "probability"
-    output_meta.description = "Probabilities of the 1001 labels respectively."
+    output_meta.description = "Probabilities of the %d labels respectively." % self.model_info.num_classes
     output_meta.content = _metadata_fb.ContentT()
     output_meta.content.content_properties = _metadata_fb.FeaturePropertiesT()
     output_meta.content.contentPropertiesType = (
@@ -188,4 +203,5 @@ def main(_):
 
 
 if __name__ == "__main__":
+  define_flags()
   app.run(main)
