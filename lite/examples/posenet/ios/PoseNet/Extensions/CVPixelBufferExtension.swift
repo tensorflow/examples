@@ -170,7 +170,13 @@ extension CVPixelBuffer {
 
     if isModelQuantized { return imageByteData }
 
-    let imageBytes = [UInt8](imageByteData)
-    return Data(copyingBufferOf: imageBytes.map { Float($0) / Constants.maxRGBValue })
+    // Optimized type conversion of the image data by using the Accelerate framework.
+    let imageBytes = Array<UInt8>(imageByteData)
+    var imageFloatVector: [Float] = Array(repeating: 0.0, count: imageBytes.count)
+    vDSP_vfltu8(imageBytes, 1, &imageFloatVector, 1, vDSP_Length(imageBytes.count))
+    var multiplier = Float(1) / Float(Constants.maxRGBValue)
+    var normalizedImageFloatVector = [Float](repeating: 0.0, count: imageFloatVector.count)
+    vDSP_vsmul(imageFloatVector, 1, &multiplier, &normalizedImageFloatVector, 1, vDSP_Length(imageFloatVector.count))
+    return Data(copyingBufferOf: normalizedImageFloatVector)
   }
 }
