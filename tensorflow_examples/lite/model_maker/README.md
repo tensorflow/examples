@@ -54,10 +54,10 @@ model = image_classifier.create(data)
 loss, accuracy = model.evaluate()
 ```
 
-4.  Export to Tensorflow Lite model.
+4.  Export to Tensorflow Lite model and label file in `export_dir`.
 
 ```python
-model.export('flower_classifier.tflite', 'flower_label.txt')
+model.export(export_dir='/tmp/')
 ```
 
 ## Notebook
