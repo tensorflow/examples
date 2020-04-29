@@ -268,6 +268,8 @@ class ImageClassifier(classification_model.ClassificationModel):
                      quantized=False,
                      quantization_steps=None,
                      representative_data=None,
+                     inference_input_type=tf.float32,
+                     inference_output_type=tf.float32,
                      with_metadata=False,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
@@ -281,6 +283,12 @@ class ImageClassifier(classification_model.ClassificationModel):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
+      inference_input_type: Target data type of real-number input arrays. Allows
+        for a different type for input arrays. Defaults to tf.float32. Must be
+        be `{tf.float32, tf.uint8, tf.int8}`
+      inference_output_type: Target data type of real-number output arrays.
+        Allows for a different type for output arrays. Defaults to tf.float32.
+         Must be `{tf.float32, tf.uint8, tf.int8}`
       with_metadata: Whether the output tflite model contains metadata.
       export_metadata_json_file: Whether to export metadata in json file. If
         True, export the metadata in the same directory as tflite model.Used
@@ -288,7 +296,8 @@ class ImageClassifier(classification_model.ClassificationModel):
     """
     super(ImageClassifier,
           self)._export_tflite(tflite_filepath, quantized, quantization_steps,
-                               representative_data)
+                               representative_data, inference_input_type,
+                               inference_output_type)
     if with_metadata:
       if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
         tf.compat.v1.logging.warning('Needs to install tflite-support package.')

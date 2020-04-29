@@ -143,7 +143,9 @@ class CustomModel(abc.ABC):
                      tflite_filepath,
                      quantized=False,
                      quantization_steps=None,
-                     representative_data=None):
+                     representative_data=None,
+                     inference_input_type=tf.float32,
+                     inference_output_type=tf.float32):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
@@ -153,6 +155,12 @@ class CustomModel(abc.ABC):
         to run. Used only if `quantized` is True.
       representative_data: Representative data used for post-training
         quantization. Used only if `quantized` is True.
+      inference_input_type: Target data type of real-number input arrays. Allows
+        for a different type for input arrays. Defaults to tf.float32. Must be
+        be `{tf.float32, tf.uint8, tf.int8}`
+      inference_output_type: Target data type of real-number output arrays.
+        Allows for a different type for output arrays. Defaults to tf.float32.
+         Must be `{tf.float32, tf.uint8, tf.int8}`
     """
     if tflite_filepath is None:
       raise ValueError(
@@ -181,8 +189,8 @@ class CustomModel(abc.ABC):
           get_representative_dataset_gen(ds, quantization_steps))
 
       converter.optimizations = [tf.lite.Optimize.DEFAULT]
-      converter.inference_input_type = tf.uint8
-      converter.inference_output_type = tf.uint8
+      converter.inference_input_type = inference_input_type
+      converter.inference_output_type = inference_output_type
       converter.target_spec.supported_ops = [
           tf.lite.OpsSet.TFLITE_BUILTINS_INT8
       ]
