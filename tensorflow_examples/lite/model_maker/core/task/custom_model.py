@@ -28,11 +28,24 @@ DEFAULT_QUANTIZATION_STEPS = 2000
 
 
 def get_representative_dataset_gen(dataset, num_steps):
+  """Gets the function that generates representative dataset for quantized."""
 
   def representative_dataset_gen():
     """Generates representative dataset for quantized."""
-    for image, _ in dataset.take(num_steps):
-      yield [image]
+    if compat.get_tf_behavior() == 2:
+      for image, _ in dataset.take(num_steps):
+        yield [image]
+    else:
+      iterator = tf.compat.v1.data.make_one_shot_iterator(
+          dataset.take(num_steps))
+      next_element = iterator.get_next()
+      with tf.compat.v1.Session() as sess:
+        while True:
+          try:
+            image, _ = sess.run(next_element)
+            yield [image]
+          except tf.errors.OutOfRangeError:
+            break
 
   return representative_dataset_gen
 

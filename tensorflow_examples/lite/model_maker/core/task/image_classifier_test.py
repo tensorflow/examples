@@ -106,6 +106,9 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
+    self._test_export_to_tflite_quantized(model, self.train_data)
+    self._test_export_to_tflite_with_metadata(
+        model, expected_json_file='efficientnet_lite0_metadata.json')
 
   @test_util.test_in_tf_2
   def test_resnet_50_model(self):
@@ -117,6 +120,8 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
+    self._test_export_to_tflite_quantized(model, self.train_data)
+    self._test_export_to_tflite_with_metadata(model)
 
   def _test_predict_top_k(self, model, threshold=0.7):
     topk = model.predict_top_k(self.test_data, batch_size=4)
@@ -196,7 +201,9 @@ class ImageClassifierTest(tf.test.TestCase):
     labels = self._load_labels(labels_output_file)
     self.assertEqual(labels, ['cyan', 'magenta', 'yellow'])
 
-  def _test_export_to_tflite_with_metadata(self, model):
+  def _test_export_to_tflite_with_metadata(self,
+                                           model,
+                                           expected_json_file=None):
     model_name = 'model_with_metadata'
     tflite_output_file = os.path.join(self.get_temp_dir(),
                                       '%s.tflite' % model_name)
@@ -217,9 +224,12 @@ class ImageClassifierTest(tf.test.TestCase):
     if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
       return
 
-    expected_json_file = test_util.get_test_data_path(
-        'mobilenet_v2_metadata.json')
-    self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
+    self.assertTrue(os.path.isfile(json_output_file))
+    self.assertGreater(os.path.getsize(json_output_file), 0)
+
+    if expected_json_file is not None:
+      expected_json_file = test_util.get_test_data_path(expected_json_file)
+      self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
   def _test_export_to_saved_model(self, model):
     save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')

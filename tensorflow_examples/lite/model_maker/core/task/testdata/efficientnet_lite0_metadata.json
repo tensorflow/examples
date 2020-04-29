@@ -1,5 +1,5 @@
 {
-  "name": "mobilenet_v2",
+  "name": "efficientnet_lite0",
   "description": "Identify the most prominent object in the image from a set of categories.",
   "version": "v1",
   "subgraph_metadata": [
@@ -55,7 +55,7 @@
           "associated_files": [
             {
               "name": "labels.txt",
-              "description": "Labels that mobilenet_v2 can recognize.",
+              "description": "Labels that efficientnet_lite0 can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
           ]
