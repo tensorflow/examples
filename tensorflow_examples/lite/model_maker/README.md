@@ -9,7 +9,7 @@ model for on-device ML applications.
 ## Requirements
 
 * Refer to
-[requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/requirements.txt)
+[requirements.txt](https://github.com/tensorflow/examples/blob/master/lite/examples/model_maker/requirements.txt)
 for dependent libraries that're needed to use the library and run the demo code.
 
 ## Installation
@@ -32,9 +32,10 @@ pip install .[model_maker]
 
 ## End-to-End Example
 
-For instance, it could have an end-to-end image
-classification example that utilizes this library with just 4 lines of
-code, each of which representing one step of the overall process:
+For instance, it could have an end-to-end image classification example that
+utilizes this library with just 4 lines of code, each of which representing one
+step of the overall process. For more detail, you could refer to
+[Colab for image classification](https://colab.research.google.com/github/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/image_classification.ipynb).
 
 1.   Load input data specific to an on-device ML app.
 
@@ -65,6 +66,5 @@ model.export(export_dir='/tmp/')
 Currently, we support image classification and text classification tasks and
 provide demo code and colab for each of them in demo folder.
 
-* [Colab for image classification](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/image_classification.ipynb)
-* [Colab for text classification](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/text_classification.ipynb)
-
+*   [Colab for image classification](https://colab.research.google.com/github/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/image_classification.ipynb)
+*   [Colab for text classification](https://colab.research.google.com/github/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/text_classification.ipynb)
