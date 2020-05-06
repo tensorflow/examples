@@ -8,3 +8,4 @@ tensorflow-datasets>=2.1.0
 fire
 flatbuffers==1.12
 absl-py
+tflite-support==0.1.0a0

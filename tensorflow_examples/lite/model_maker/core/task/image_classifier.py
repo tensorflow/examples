@@ -21,16 +21,18 @@ import os
 
 import tensorflow.compat.v2 as tf
 
+from tensorflow_examples.lite.model_maker.core.task import metadata_writer_for_image_classifier as metadata_writer
+
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
-from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import train_image_classifier_lib
 
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
+from tflite_support import metadata as _metadata  # pylint: disable=g-direct-tensorflow-import
 
 
 def get_hub_lib_hparams(**kwargs):
@@ -118,6 +120,35 @@ def create(train_data,
   image_classifier.train(train_data, validation_data)
 
   return image_classifier
+
+
+def _get_model_info(model_spec, num_classes, quantized=False, version='v1'):
+  """Gets the specific info for the image model."""
+
+  if not isinstance(model_spec, ms.ImageModelSpec):
+    raise ValueError('Currently only support models for image classification.')
+
+  name = model_spec.name
+  if quantized:
+    name += '_quantized'
+
+  if quantized and compat.get_tf_behavior() == 1:
+    image_min = 0
+    image_max = 255
+  else:
+    image_min = 0
+    image_max = 1
+
+  return metadata_writer.ModelSpecificInfo(
+      model_spec.name,
+      version,
+      image_width=model_spec.input_image_shape[1],
+      image_height=model_spec.input_image_shape[0],
+      mean=model_spec.mean_rgb,
+      std=model_spec.stddev_rgb,
+      image_min=image_min,
+      image_max=image_max,
+      num_classes=num_classes)
 
 
 class ImageClassifier(classification_model.ClassificationModel):
@@ -270,7 +301,7 @@ class ImageClassifier(classification_model.ClassificationModel):
                      representative_data=None,
                      inference_input_type=tf.float32,
                      inference_output_type=tf.float32,
-                     with_metadata=False,
+                     with_metadata=True,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
@@ -299,22 +330,34 @@ class ImageClassifier(classification_model.ClassificationModel):
                                representative_data, inference_input_type,
                                inference_output_type)
     if with_metadata:
-      if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
-        tf.compat.v1.logging.warning('Needs to install tflite-support package.')
-        return
-
       if label_filepath is None:
         tf.compat.v1.logging.warning(
             'Label filepath is needed when exporting TFLite with metadata.')
         return
 
-      model_info = metadata.get_model_info(self.model_spec, quantized=quantized)
-      populator = metadata.MetadataPopulatorForImageClassifier(
-          tflite_filepath, model_info, label_filepath)
+      model_basename = os.path.basename(tflite_filepath)
+      export_directory = os.path.dirname(tflite_filepath)
+      export_model_path = os.path.join(export_directory, model_basename)
+
+      model_info = _get_model_info(
+          self.model_spec, self.num_classes, quantized=quantized)
+      # Generate the metadata objects and put them in the model file
+      populator = metadata_writer.MetadataPopulatorForImageClassifier(
+          export_model_path, model_info, label_filepath)
       populator.populate()
 
+      # Validate the output model file by reading the metadata and produce
+      # a json file with the metadata under the export path
       if export_metadata_json_file:
-        metadata.export_metadata_json_file(tflite_filepath)
+        displayer = _metadata.MetadataDisplayer.with_model_file(
+            export_model_path)
+        export_json_file = os.path.join(
+            export_directory,
+            os.path.splitext(model_basename)[0] + '.json')
+
+        content = displayer.get_metadata_json()
+        with open(export_json_file, 'w') as f:
+          f.write(content)
 
   def _get_hparams_or_default(self, hparams):
     """Returns hparams if not none, otherwise uses default one."""

@@ -1,6 +1,6 @@
 {
   "name": "efficientnet_lite0",
-  "description": "Identify the most prominent object in the image from a set of categories.",
+  "description": "Identify the most prominent object in the image from a set of 3 categories.",
   "version": "v1",
   "subgraph_metadata": [
     {
@@ -40,7 +40,7 @@
       "output_tensor_metadata": [
         {
           "name": "probability",
-          "description": "Probabilities of the labels respectively.",
+          "description": "Probabilities of the 3 labels respectively.",
           "content": {
             "content_properties_type": "FeatureProperties"
           },
@@ -55,7 +55,7 @@
           "associated_files": [
             {
               "name": "labels.txt",
-              "description": "Labels that efficientnet_lite0 can recognize.",
+              "description": "Labels for objects that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
           ]
@@ -63,6 +63,6 @@
       ]
     }
   ],
-  "author": "TFLite Model Maker",
+  "author": "TensorFlow",
   "license": "Apache License. Version 2.0 http://www.apache.org/licenses/LICENSE-2.0."
 }

@@ -26,7 +26,6 @@ from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
-from tensorflow_examples.lite.model_maker.core.task import metadata
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 
 
@@ -220,9 +219,6 @@ class ImageClassifierTest(tf.test.TestCase):
     self.assertGreater(os.path.getsize(tflite_output_file), 0)
 
     self._check_label_file(labels_output_file)
-
-    if not metadata.TFLITE_SUPPORT_TOOLS_INSTALLED:
-      return
 
     self.assertTrue(os.path.isfile(json_output_file))
     self.assertGreater(os.path.getsize(json_output_file), 0)

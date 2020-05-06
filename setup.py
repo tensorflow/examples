@@ -55,9 +55,6 @@ REQUIRMENTS = 'tensorflow_examples/lite/model_maker/requirements.txt'.replace('/
 with open(REQUIRMENTS) as f:
   MODEL_MAKER_REQUIRE = [l.strip() for l in f.read().splitlines() if l.strip()]
 
-METADATA_REQUIRE = [
-    'tflite-support==0.1.0a0',
-]
 if sys.version_info.major == 3:
   # Packages only for Python 3
   pass
@@ -86,7 +83,6 @@ setup(
     extras_require={
         'tests': TESTS_REQUIRE,
         'model_maker': MODEL_MAKER_REQUIRE,
-        'metadata': METADATA_REQUIRE,
     },
     entry_points={
         'console_scripts': [
