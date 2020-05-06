@@ -93,7 +93,6 @@ public abstract class Classifier {
    * Creates a classifier with the provided configuration.
    *
    * @param activity The current Activity.
-   * @param model The model to use for classification.
    * @param device The device to use for classification.
    * @param numThreads The number of threads to use for classification.
    * @return A classifier with the desired configuration.
