@@ -18,6 +18,8 @@
 		8D3572E823FC81B600DBD36C /* StylePickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3572E723FC81B600DBD36C /* StylePickerViewController.swift */; };
 		8D3572E923FDB85100DBD36C /* style_predict_quantized_256.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 8D3572E623FC818500DBD36C /* style_predict_quantized_256.tflite */; };
 		8D3572EA23FDB85400DBD36C /* style_transfer_quantized_384.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 8D3572E423FC818500DBD36C /* style_transfer_quantized_384.tflite */; };
+		8DEEDCEC245245C6008007CF /* style_predict_f16_256.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 8D159EC2244917840060668E /* style_predict_f16_256.tflite */; };
+		8DEEDCED245245CC008007CF /* style_transfer_f16_384.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 8D159EC1244917830060668E /* style_transfer_f16_384.tflite */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		7F9738DC234071180058C202 /* StyleTransferer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyleTransferer.swift; sourceTree = "<group>"; };
 		7F9738E12341EFDD0058C202 /* TFLiteExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TFLiteExtension.swift; sourceTree = "<group>"; };
 		7F9738E62343CE9F0058C202 /* UIKitExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitExtension.swift; sourceTree = "<group>"; };
+		8D159EC1244917830060668E /* style_transfer_f16_384.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = style_transfer_f16_384.tflite; sourceTree = "<group>"; };
+		8D159EC2244917840060668E /* style_predict_f16_256.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = style_predict_f16_256.tflite; sourceTree = "<group>"; };
 		8D3572E423FC818500DBD36C /* style_transfer_quantized_384.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = style_transfer_quantized_384.tflite; sourceTree = "<group>"; };
 		8D3572E623FC818500DBD36C /* style_predict_quantized_256.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = style_predict_quantized_256.tflite; sourceTree = "<group>"; };
 		8D3572E723FC81B600DBD36C /* StylePickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StylePickerViewController.swift; sourceTree = "<group>"; };
@@ -87,6 +91,8 @@
 			children = (
 				8D3572E623FC818500DBD36C /* style_predict_quantized_256.tflite */,
 				8D3572E423FC818500DBD36C /* style_transfer_quantized_384.tflite */,
+				8D159EC2244917840060668E /* style_predict_f16_256.tflite */,
+				8D159EC1244917830060668E /* style_transfer_f16_384.tflite */,
 			);
 			path = model;
 			sourceTree = "<group>";
@@ -131,6 +137,7 @@
 				TargetAttributes = {
 					7F67811A23405195002A02F2 = {
 						CreatedOnToolsVersion = 11.0;
+						LastSwiftMigration = 1140;
 					};
 				};
 			};
@@ -160,7 +167,9 @@
 				7F67812B23405196002A02F2 /* LaunchScreen.storyboard in Resources */,
 				8D3572EA23FDB85400DBD36C /* style_transfer_quantized_384.tflite in Resources */,
 				7F67812823405196002A02F2 /* Assets.xcassets in Resources */,
+				8DEEDCEC245245C6008007CF /* style_predict_f16_256.tflite in Resources */,
 				7F67812623405195002A02F2 /* Main.storyboard in Resources */,
+				8DEEDCED245245CC008007CF /* style_transfer_f16_384.tflite in Resources */,
 				8D3572E923FDB85100DBD36C /* style_predict_quantized_256.tflite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -343,6 +352,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = EQHXZ8M8AV;
@@ -355,6 +365,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.examples.StyleTransfer;
 				PRODUCT_NAME = "TFL Style Transfer";
 				PROVISIONING_PROFILE_SPECIFIER = Placeholder;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -364,6 +377,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = EQHXZ8M8AV;
@@ -376,6 +390,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.examples.StyleTransfer;
 				PRODUCT_NAME = "TFL Style Transfer";
 				PROVISIONING_PROFILE_SPECIFIER = Placeholder;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

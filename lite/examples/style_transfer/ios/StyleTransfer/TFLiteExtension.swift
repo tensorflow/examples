@@ -44,7 +44,7 @@ extension UIImage {
   /// - Returns: The scaled image as data or `nil` if the image could not be scaled.
   func scaledData(with size: CGSize, isQuantized: Bool) -> Data? {
     guard let cgImage = self.cgImage else { return nil }
-    return UIImage.normalizedFloatData(from: cgImage, resizingTo: size)
+    return UIImage.normalizedData(from: cgImage, resizingTo: size, quantum: Float32.self)
   }
 
   /// Make the same image with orientation being `.up`.
@@ -168,13 +168,15 @@ extension UIImage {
     return context.makeImage()
   }
 
-  static func normalizedFloatData(from image: CGImage, resizingTo size: CGSize) -> Data? {
+  static func normalizedData<T>(from image: CGImage,
+                                resizingTo size: CGSize,
+                                quantum: T.Type) -> Data? where T: FloatingPoint {
     guard let normalizedImage = normalizeImage(image, resizingTo: size) else {
       return nil
     }
     guard let data = normalizedImage.dataProvider?.data as Data? else { return nil }
     // TF Lite expects an array of pixels in the form of floats normalized between 0 and 1.
-    var floatArray: [Float32]
+    var floatArray: [T]
 
     // A full list of pixel formats is listed in this document under Table 2-1:
     // https://developer.apple.com/library/archive/documentation/GraphicsImaging/Conceptual/drawingwithquartz2d/dq_context/dq_context.html#//apple_ref/doc/uid/TP30001066-CH203-CJBHBFFE
@@ -187,7 +189,7 @@ extension UIImage {
     // no alpha channel. The most significant bits are skipped.
     case 16:
       guard normalizedImage.bitsPerComponent == 5 else { return nil }
-      guard normalizedImage.alphaInfo.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue != 0 else {
+      guard normalizedImage.alphaInfo.rawValue & CGImageAlphaInfo.noneSkipFirst.rawValue != 0 else {
         return nil
       }
 
@@ -213,7 +215,7 @@ extension UIImage {
         }
       }()
 
-      let initializer: (inout UnsafeMutableBufferPointer<Float32>, inout Int) -> () =
+      let initializer: (inout UnsafeMutableBufferPointer<T>, inout Int) -> () =
       { bufferPointer, initializedCount in
         let redMask: UInt16   = UInt16(0b0111110000000000)
         let greenMask: UInt16 = UInt16(0b0000001111100000)
@@ -234,10 +236,10 @@ extension UIImage {
           let greenChannel = ((pixel & greenMask) &>> 5)
           let blueChannel  = ((pixel & blueMask) &>> 0)
 
-          let maximumChannelValue = Float32(31) // 2 ^ 5 - 1
-          let red   = Float32(redChannel) / maximumChannelValue
-          let green = Float32(greenChannel) / maximumChannelValue
-          let blue  = Float32(blueChannel) / maximumChannelValue
+          let maximumChannelValue = T(31) // 2 ^ 5 - 1
+          let red   = T(redChannel) / maximumChannelValue
+          let green = T(greenChannel) / maximumChannelValue
+          let blue  = T(blueChannel) / maximumChannelValue
 
           let pixelIndex = byteIndex / 2
           let floatIndex = pixelIndex * 3
@@ -248,8 +250,8 @@ extension UIImage {
 
         initializedCount = data.count / 2 * 3
       }
-      floatArray = [Float32](unsafeUninitializedCapacity: data.count / 2 * 3,
-                             initializingWith: initializer)
+      floatArray = [T](unsafeUninitializedCapacity: data.count / 2 * 3,
+                       initializingWith: initializer)
 
     // We discard the image's alpha channel before running the TF Lite model, so we can treat
     // alpha and non-alpha images identically.
@@ -269,7 +271,7 @@ extension UIImage {
       // Iterate over channels individually. Since the order of the channels in memory
       // may vary, we cannot add channels to the float buffer we pass to TF Lite in the
       // order that they are iterated over.
-      let initializer: (inout UnsafeMutableBufferPointer<Float32>, inout Int) -> () =
+      let initializer: (inout UnsafeMutableBufferPointer<T>, inout Int) -> () =
       { bufferPointer, initializedCount in
         let numberOfChannels = 4
         let alphaOffset: UInt8 = {
@@ -303,11 +305,11 @@ extension UIImage {
 
         // Make sure we add the pixel components to the float array in the right
         // order regardless of pixel endianness.
-        var rgbHolder: (red: Float32?, green: Float32?, blue: Float32?) = (nil, nil, nil)
+        var rgbHolder: (red: T?, green: T?, blue: T?) = (nil, nil, nil)
         var floatIndex = 0
 
-        func flushRGBs(_ rgbs: (red: Float32?, green: Float32?, blue: Float32?),
-                       to array: inout UnsafeMutableBufferPointer<Float32>,
+        func flushRGBs(_ rgbs: (red: T?, green: T?, blue: T?),
+                       to array: inout UnsafeMutableBufferPointer<T>,
                        at index: Int) {
           guard let red = rgbs.red, let green = rgbs.green, let blue = rgbs.blue else { return }
           array[index] = red
@@ -316,10 +318,10 @@ extension UIImage {
           floatIndex += 3
         }
 
-        let maximumChannelValue: Float32 = 255 // 2 ^ 8 - 1
+        let maximumChannelValue: T = 255 // 2 ^ 8 - 1
 
-        func normalizeChannel(_ channel: UInt8) -> Float32 {
-          return Float32(
+        func normalizeChannel(_ channel: UInt8) -> T {
+          return T(
             bigEndian ? channel.bigEndian : channel.littleEndian
           ) / maximumChannelValue
         }
@@ -352,8 +354,8 @@ extension UIImage {
         initializedCount = floatIndex
       }
 
-      floatArray = [Float32](unsafeUninitializedCapacity: data.count / 4 * 3,
-                             initializingWith: initializer)
+      floatArray = [T](unsafeUninitializedCapacity: data.count / 4 * 3,
+                       initializingWith: initializer)
 
     case _:
       print("Unsupported format from image: \(normalizedImage)")

@@ -26,58 +26,79 @@ class StyleTransferer {
 
   // MARK: - Initialization
 
+  /// Create a Style Transferer instance with a quantized Int8 model that runs inference on the CPU.
+  static func newCPUStyleTransferer(
+    completion: @escaping ((Result<StyleTransferer>) -> Void)
+  ) -> () {
+    return StyleTransferer.newInstance(transferModel: Constants.Int8.transferModel,
+                                       predictModel: Constants.Int8.predictModel,
+                                       useMetalDelegate: false,
+                                       completion: completion)
+  }
+
+  static func newGPUStyleTransferer(
+    completion: @escaping ((Result<StyleTransferer>) -> Void)
+  ) -> () {
+    return StyleTransferer.newInstance(transferModel: Constants.Float16.transferModel,
+                                       predictModel: Constants.Float16.predictModel,
+                                       useMetalDelegate: true,
+                                       completion: completion)
+  }
+
   /// Create a new Style Transferer instance.
-  static func newInstance(completion: @escaping ((Result<StyleTransferer>) -> Void)) {
+  static func newInstance(transferModel: String,
+                          predictModel: String,
+                          useMetalDelegate: Bool,
+                          completion: @escaping ((Result<StyleTransferer>) -> Void)) {
     // Create a dispatch queue to ensure all operations on the Intepreter will run serially.
     let tfLiteQueue = DispatchQueue(label: "org.tensorflow.examples.lite.style_transfer")
 
     // Run initialization in background thread to avoid UI freeze.
     tfLiteQueue.async {
       // Construct the path to the model file.
-      let transferModelPath = Bundle.main.path(
-        forResource: Constants.transferModelFileName,
-        ofType: Constants.modelFileExtension
-      )
-      let predictModelPath = Bundle.main.path(
-        forResource: Constants.predictModelFileName,
-        ofType: Constants.modelFileExtension
-      )
-      guard let transferModel = transferModelPath, let predictModel = predictModelPath
+      guard
+          let transferModelPath = Bundle.main.path(
+            forResource: transferModel,
+            ofType: Constants.modelFileExtension
+          ),
+          let predictModelPath = Bundle.main.path(
+            forResource: predictModel,
+            ofType: Constants.modelFileExtension
+          )
       else {
-        var errorMessage: [String] = []
-        if transferModelPath == nil {
-          errorMessage.append("\(Constants.transferModelFileName).\(Constants.modelFileExtension)")
-        }
-        if predictModelPath == nil {
-          errorMessage.append("\(Constants.predictModelFileName).\(Constants.modelFileExtension)")
-        }
-        completion(.error(InitializationError.invalidModel(errorMessage.joined(separator: ", "))))
+        completion(.error(InitializationError.invalidModel(
+          "One of the following models could not be loaded: \(transferModel), \(predictModel)"
+        )))
         return
       }
 
-      // Specify the options for the TF Lite `Interpreter`.
-      var options: Interpreter.Options?
-      var delegates: [Delegate]?
-#if targetEnvironment(simulator)
-      // Use CPU for inference as MetalDelegate does not support iOS simulator.
-      options = Interpreter.Options()
-      options?.threadCount = 8
-#else
-      // Use GPU on real device for inference as this model is fully supported.
-      delegates = [MetalDelegate()]
-#endif
+      // Specify the delegate for the TF Lite `Interpreter`.
+      let createDelegates: () -> [Delegate]? = {
+        if useMetalDelegate {
+          return [MetalDelegate()]
+        }
+        return nil
+      }
+      let createOptions: () -> Interpreter.Options? = {
+        if useMetalDelegate {
+          return nil
+        }
+        var options = Interpreter.Options()
+        options.threadCount = ProcessInfo.processInfo.processorCount >= 2 ? 2 : 1
+        return options
+      }
 
       do {
         // Create the `Interpreter`s.
         let predictInterpreter = try Interpreter(
-          modelPath: predictModel,
-          options: options,
-          delegates: delegates
+          modelPath: predictModelPath,
+          options: createOptions(),
+          delegates: createDelegates()
         )
         let transferInterpreter = try Interpreter(
-          modelPath: transferModel,
-          options: options,
-          delegates: delegates
+          modelPath: transferModelPath,
+          options: createOptions(),
+          delegates: createDelegates()
         )
 
         // Allocate memory for the model's input `Tensor`s.
@@ -120,15 +141,15 @@ class StyleTransferer {
   // MARK: - Style Transfer
 
   /// Run style transfer on a given image.
-  /// - Parameter styleImage: the image to use as a style reference.
-  /// - Parameter image: the target image.
-  /// - Parameter completion: the callback to receive the style transfer result.
-  func runStyleTransfer(
-    style styleImage: UIImage, image: UIImage, completion: @escaping ((Result<StyleTransferResult>) -> Void)
-  ) {
+  /// - Parameters
+  ///   - styleImage: the image to use as a style reference.
+  ///   - image: the target image.
+  ///   - completion: the callback to receive the style transfer result.
+  func runStyleTransfer(style styleImage: UIImage,
+                        image: UIImage,
+                        completion: @escaping ((Result<StyleTransferResult>) -> Void)) {
     tfLiteQueue.async {
       let outputTensor: Tensor
-      let inputSizeInPixels: CGSize
       let startTime: Date = Date()
       var preprocessingTime: TimeInterval = 0
       var stylePredictTime: TimeInterval = 0
@@ -243,8 +264,8 @@ class StyleTransferer {
   /// - Parameter size: The expected size of the output image.
   private func postprocessImageData(data: Data,
                                     size: CGSize = Constants.inputImageSize) -> CGImage? {
-    var width = Int(size.width)
-    var height = Int(size.height)
+    let width = Int(size.width)
+    let height = Int(size.height)
 
     let floats = data.toArray(type: Float32.self)
 
@@ -357,11 +378,23 @@ enum StyleTransferError: Error {
 // MARK: - Constants
 private enum Constants {
 
-  /// The TF Lite style prediction model file
-  static let predictModelFileName = "style_predict_quantized_256"
+  // Namespace for quantized Int8 models.
+  enum Int8 {
 
-  /// The TF Lite style transfer model file
-  static let transferModelFileName = "style_transfer_quantized_384"
+    static let predictModel = "style_predict_quantized_256"
+
+    static let transferModel = "style_transfer_quantized_384"
+
+  }
+
+  // Namespace for Float16 models, optimized for GPU inference.
+  enum Float16 {
+
+    static let predictModel = "style_predict_f16_256"
+
+    static let transferModel = "style_transfer_f16_384"
+
+  }
 
   static let modelFileExtension = "tflite"
 

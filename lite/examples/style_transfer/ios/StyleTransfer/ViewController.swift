@@ -13,14 +13,20 @@
 // limitations under the License.
 
 import UIKit
+import os
 
 class ViewController: UIViewController {
 
   /// Image picker for accessing the photo library or camera.
   private var imagePicker = UIImagePickerController()
 
-  /// Style transferer instance reponsible for running the TF model.
-  private var styleTransferer: StyleTransferer?
+  /// Style transferer instance reponsible for running the TF model. Uses a Int8-based model and
+  /// runs inference on the CPU.
+  private var cpuStyleTransferer: StyleTransferer?
+
+  /// Style transferer instance reponsible for running the TF model. Uses a Float16-based model and
+  /// runs inference on the GPU.
+  private var gpuStyleTransferer: StyleTransferer?
 
   /// Target image to transfer a style onto.
   private var targetImage: UIImage?
@@ -36,6 +42,7 @@ class ViewController: UIViewController {
   @IBOutlet weak var photoCameraButton: UIButton!
   @IBOutlet weak var segmentedControl: UISegmentedControl!
   @IBOutlet weak var cropSwitch: UISwitch!
+  @IBOutlet weak var useGPUSwitch: UISwitch!
   @IBOutlet weak var inferenceStatusLabel: UILabel!
   @IBOutlet weak var legendLabel: UILabel!
   @IBOutlet weak var styleImageView: UIImageView!
@@ -62,11 +69,24 @@ class ViewController: UIViewController {
       photoCameraButton.isEnabled = true
     }
 
-    // Initialize a style transferer instance.
-    StyleTransferer.newInstance { result in
+    // MetalDelegate is not available on iOS Simulator in Xcode versions below 11.
+    // If you're not able to run GPU-based inference in iOS simulator, please check
+    // your Xcode version.
+    useGPUSwitch.isOn = true
+
+    // Initialize new style transferer instances.
+    StyleTransferer.newCPUStyleTransferer { result in
       switch result {
-      case let .success(transferer):
-        self.styleTransferer = transferer
+      case .success(let transferer):
+        self.cpuStyleTransferer = transferer
+      case .error(let wrappedError):
+        print("Failed to initialize: \(wrappedError)")
+      }
+    }
+    StyleTransferer.newGPUStyleTransferer { result in
+      switch result {
+      case .success(let transferer):
+        self.gpuStyleTransferer = transferer
       case .error(let wrappedError):
         print("Failed to initialize: \(wrappedError)")
       }
@@ -164,8 +184,11 @@ extension ViewController {
   func runStyleTransfer(_ image: UIImage) {
     clearResults()
 
+    let shouldUseQuantizedFloat16 = useGPUSwitch.isOn
+    let transferer = shouldUseQuantizedFloat16 ? gpuStyleTransferer : cpuStyleTransferer
+
     // Make sure that the style transferer is initialized.
-    guard let styleTransferer = styleTransferer else {
+    guard let styleTransferer = transferer else {
       inferenceStatusLabel.text = "ERROR: Interpreter is not ready."
       return
     }
