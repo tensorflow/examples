@@ -266,8 +266,8 @@ class QuestionAnswerDataLoaderTest(tf.test.TestCase, parameterized.TestCase):
   @parameterized.parameters(
       ('train-v1.1.json', True, False, 1),
       ('dev-v1.1.json', False, False, 8),
-      ('train-v2.0.json', True, True, 14),
-      ('dev-v2.0.json', False, True, 16),
+      ('train-v2.0.json', True, True, 2),
+      ('dev-v2.0.json', False, True, 8),
   )
   def test_from_squad(self, test_file, is_training, version_2_with_negative,
                       size):

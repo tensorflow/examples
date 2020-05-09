@@ -43,7 +43,6 @@ def get_hub_lib_hparams(**kwargs):
 
 def create(train_data,
            model_spec=ms.efficientnet_lite0_spec,
-           shuffle=False,
            validation_data=None,
            batch_size=None,
            epochs=None,
@@ -51,6 +50,7 @@ def create(train_data,
            dropout_rate=None,
            learning_rate=None,
            momentum=None,
+           shuffle=False,
            use_augmentation=False,
            use_hub_library=True,
            warmup_steps=None,
@@ -60,7 +60,6 @@ def create(train_data,
   Args:
     train_data: Training data.
     model_spec: Specification for the model.
-    shuffle: Whether the data should be shuffled.
     validation_data: Validation data. If None, skips validation process.
     batch_size: Number of samples per training step. If `use_hub_library` is
       False, it represents the base learning rate when train batch size is 256
@@ -74,6 +73,7 @@ def create(train_data,
       the batch size.
     momentum: a Python float forwarded to the optimizer. Only used when
       `use_hub_library` is True.
+    shuffle: Whether the data should be shuffled.
     use_augmentation: Use data augmentation for preprocessing.
     use_hub_library: Use `make_image_classifier_lib` from tensorflow hub to
       retrain the model.
@@ -153,6 +153,11 @@ def _get_model_info(model_spec, num_classes, quantized=False, version='v1'):
 
 class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
+
+  DEFAULT_EXPORT_FORMAT = [ExportFormat.TFLITE, ExportFormat.LABEL]
+  ALLOWED_EXPORT_FORMAT = [
+      ExportFormat.TFLITE, ExportFormat.LABEL, ExportFormat.SAVED_MODEL
+  ]
 
   def __init__(self,
                model_spec,
@@ -271,14 +276,16 @@ class ImageClassifier(classification_model.ClassificationModel):
         label.
       **kwargs: Other parameters like `quantized` for TFLITE model.
     """
-    # Default export formats are TFLite models and labels.
-    if export_format is None:
-      export_format = [ExportFormat.TFLITE, ExportFormat.LABEL]
-    if not isinstance(export_format, list):
-      export_format = [export_format]
-
+    export_format = self._get_export_format(export_format)
     if not tf.io.gfile.exists(export_dir):
       tf.io.gfile.makedirs(export_dir)
+
+    if ExportFormat.SAVED_MODEL in export_format:
+      super(ImageClassifier, self).export(
+          export_dir,
+          saved_model_filename=saved_model_filename,
+          export_format=ExportFormat.SAVED_MODEL,
+          **kwargs)
 
     label_filepath = None
     if ExportFormat.LABEL in export_format:
@@ -288,10 +295,6 @@ class ImageClassifier(classification_model.ClassificationModel):
     if ExportFormat.TFLITE in export_format:
       tflite_filepath = os.path.join(export_dir, tflite_filename)
       self._export_tflite(tflite_filepath, label_filepath, **kwargs)
-
-    if ExportFormat.SAVED_MODEL in export_format:
-      saved_model_filepath = os.path.join(export_dir, saved_model_filename)
-      self._export_saved_model(saved_model_filepath, **kwargs)
 
   def _export_tflite(self,
                      tflite_filepath,

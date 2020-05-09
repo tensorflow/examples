@@ -23,16 +23,27 @@ import os
 import re
 import tempfile
 
-import tensorflow.compat.v2 as tf
+import tensorflow as tf
+from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core import file_util
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 
 import tensorflow_hub as hub
 from tensorflow_hub import registry
 
 from official.nlp import optimization
+
 from official.nlp.bert import configs as bert_configs
+from official.nlp.bert import run_squad_helper
+from official.nlp.bert import squad_evaluate_v1_1
+from official.nlp.bert import squad_evaluate_v2_0
 from official.nlp.bert import tokenization
+
+
 from official.nlp.data import classifier_data_lib
+from official.nlp.data import squad_lib
+
+from official.nlp.modeling import models
 from official.utils.misc import distribution_utils
 
 
@@ -370,7 +381,6 @@ class BertModelSpec(object):
 
   compat_tf_versions = _get_compat_tf_versions(2)
   need_gen_vocab = False
-  default_training_epochs = 3
 
   def __init__(
       self,
@@ -410,6 +420,9 @@ class BertModelSpec(object):
         True for uncased models and False for cased models.
       is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
     """
+    if compat.get_tf_behavior() not in self.compat_tf_versions:
+      raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
+          self.compat_tf_versions, compat.get_tf_behavior()))
     self.seq_len = seq_len
     self.dropout_rate = dropout_rate
     self.initializer_range = initializer_range
@@ -425,6 +438,7 @@ class BertModelSpec(object):
         distribution_strategy=distribution_strategy,
         num_gpus=num_gpus,
         tpu_address=tpu)
+    self.tpu = tpu
 
     self.uri = uri
 
@@ -495,8 +509,6 @@ class BertClassifierModelSpec(BertModelSpec):
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
                      steps_per_epoch, validation_steps, num_classes):
     """Creates classifier and runs the classifier training."""
-    if epochs is None:
-      epochs = self.default_training_epochs
 
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
     initial_lr = self.learning_rate
@@ -556,6 +568,82 @@ class BertClassifierModelSpec(BertModelSpec):
     return {'uri': self.uri, 'seq_len': self.seq_len}
 
 
+def dump_to_files(all_predictions, all_nbest_json, scores_diff_json,
+                  version_2_with_negative, output_dir):
+  """Save output to json files for question answering."""
+  output_prediction_file = os.path.join(output_dir, 'predictions.json')
+  output_nbest_file = os.path.join(output_dir, 'nbest_predictions.json')
+  output_null_log_odds_file = os.path.join(output_dir, 'null_odds.json')
+  tf.compat.v1.logging.info('Writing predictions to: %s',
+                            (output_prediction_file))
+  tf.compat.v1.logging.info('Writing nbest to: %s', (output_nbest_file))
+
+  squad_lib.write_to_json_files(all_predictions, output_prediction_file)
+  squad_lib.write_to_json_files(all_nbest_json, output_nbest_file)
+  if version_2_with_negative:
+    squad_lib.write_to_json_files(scores_diff_json, output_null_log_odds_file)
+
+
+def create_qa_model(bert_config,
+                    max_seq_length,
+                    initializer=None,
+                    hub_module_url=None,
+                    hub_module_trainable=True,
+                    is_tf2=True):
+  """Returns BERT qa model along with core BERT model to import weights.
+
+  Args:
+    bert_config: BertConfig, the config defines the core Bert model.
+    max_seq_length: integer, the maximum input sequence length.
+    initializer: Initializer for the final dense layer in the span labeler.
+      Defaulted to TruncatedNormal initializer.
+    hub_module_url: TF-Hub path/url to Bert module.
+    hub_module_trainable: True to finetune layers in the hub module.
+    is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
+
+  Returns:
+    A tuple of (1) keras model that outputs start logits and end logits and
+    (2) the core BERT transformer encoder.
+  """
+
+  if initializer is None:
+    initializer = tf.keras.initializers.TruncatedNormal(
+        stddev=bert_config.initializer_range)
+
+  input_word_ids = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_word_ids')
+  input_mask = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_mask')
+  input_type_ids = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_type_ids')
+
+  if is_tf2:
+    core_model = hub.KerasLayer(hub_module_url, trainable=hub_module_trainable)
+    pooled_output, sequence_output = core_model(
+        [input_word_ids, input_mask, input_type_ids])
+  else:
+    bert_model = hub_loader.HubKerasLayerV1V2(
+        hub_module_url,
+        signature='tokens',
+        signature_outputs_as_dict=True,
+        trainable=hub_module_trainable)
+    outputs = bert_model({
+        'input_ids': input_word_ids,
+        'input_mask': input_mask,
+        'segment_ids': input_type_ids
+    })
+
+    pooled_output = outputs['pooled_output']
+    sequence_output = outputs['sequence_output']
+
+  bert_encoder = tf.keras.Model(
+      inputs=[input_word_ids, input_mask, input_type_ids],
+      outputs=[sequence_output, pooled_output],
+      name='core_model')
+  return models.BertSpanLabeler(
+      network=bert_encoder, initializer=initializer), bert_encoder
+
+
 class BertQAModelSpec(BertModelSpec):
   """A specification of BERT model for question answering."""
 
@@ -568,14 +656,14 @@ class BertQAModelSpec(BertModelSpec):
       doc_stride=128,
       dropout_rate=0.1,
       initializer_range=0.02,
-      learning_rate=3e-5,
-      scale_loss=False,
-      steps_per_loop=1000,
+      learning_rate=8e-5,
       distribution_strategy='mirrored',
       num_gpus=-1,
       tpu='',
       trainable=True,
-      predict_batch_size=8):
+      predict_batch_size=8,
+      do_lower_case=True,
+      is_tf2=True):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -589,11 +677,6 @@ class BertQAModelSpec(BertModelSpec):
       initializer_range: The stdev of the truncated_normal_initializer for
         initializing all weight matrices.
       learning_rate: The initial learning rate for Adam.
-      scale_loss: Whether to divide the loss by number of replica inside the
-        per-replica loss function.
-      steps_per_loop: Number of steps per graph-mode loop. In order to reduce
-        communication in eager context, training logs are printed every
-        steps_per_loop.
       distribution_strategy:  A string specifying which distribution strategy to
         use. Accepted values are 'off', 'one_device', 'mirrored',
         'parameter_server', 'multi_worker_mirrored', and 'tpu' -- case
@@ -604,13 +687,15 @@ class BertQAModelSpec(BertModelSpec):
         available GPUs.
       tpu: TPU address to connect to.
       trainable: boolean, whether pretrain layer is trainable.
-      predict_batch_size: Batch size for prediction
+      predict_batch_size: Batch size for prediction.
+      do_lower_case: boolean, whether to lower case the input text. Should be
+        True for uncased models and False for cased models.
+      is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
     """
-    super(BertQAModelSpec,
-          self).__init__(uri, model_dir, seq_len, dropout_rate,
-                         initializer_range, learning_rate, scale_loss,
-                         steps_per_loop, distribution_strategy, num_gpus, tpu,
-                         trainable)
+    super(BertQAModelSpec, self).__init__(uri, model_dir, seq_len, dropout_rate,
+                                          initializer_range, learning_rate,
+                                          distribution_strategy, num_gpus, tpu,
+                                          trainable, do_lower_case, is_tf2)
     self.query_len = query_len
     self.doc_stride = doc_stride
     self.predict_batch_size = predict_batch_size
@@ -654,6 +739,167 @@ class BertQAModelSpec(BertModelSpec):
         'query_len': self.query_len,
         'doc_stride': self.doc_stride
     }
+
+  def train(self, train_input_fn, epochs, steps_per_epoch):
+    """Run bert QA training."""
+    warmup_steps = int(epochs * steps_per_epoch * 0.1)
+
+    def _get_qa_model():
+      """Get QA model and optimizer."""
+      qa_model, core_model = create_qa_model(
+          self.bert_config,
+          self.seq_len,
+          hub_module_url=self.uri,
+          hub_module_trainable=self.trainable,
+          is_tf2=self.is_tf2)
+      optimizer = optimization.create_optimizer(self.learning_rate,
+                                                steps_per_epoch * epochs,
+                                                warmup_steps)
+      qa_model.optimizer = optimizer
+      return qa_model, core_model
+
+    def _loss_fn(positions, logits):
+      """Get losss function for QA model."""
+      loss = tf.keras.losses.sparse_categorical_crossentropy(
+          positions, logits, from_logits=True)
+      return tf.reduce_mean(loss)
+
+    with distribution_utils.get_strategy_scope(self.strategy):
+      training_dataset = train_input_fn()
+      bert_model, _ = _get_qa_model()
+      optimizer = bert_model.optimizer
+
+      bert_model.compile(
+          optimizer=optimizer, loss=_loss_fn, loss_weights=[0.5, 0.5])
+
+    summary_dir = os.path.join(self.model_dir, 'summaries')
+    summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
+    checkpoint_path = os.path.join(self.model_dir, 'checkpoint')
+    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        checkpoint_path, save_weights_only=True)
+
+    bert_model.fit(
+        x=training_dataset,
+        steps_per_epoch=steps_per_epoch,
+        epochs=epochs,
+        callbacks=[summary_callback, checkpoint_callback])
+
+    return bert_model
+
+  def _predict_without_distribute_strategy(self, model, input_fn):
+    """Predicts the dataset without using distribute strategy."""
+    ds = input_fn()
+    all_results = []
+    for features, _ in ds:
+      outputs = model.predict_on_batch(features)
+      for unique_id, start_logits, end_logits in zip(features['unique_ids'],
+                                                     outputs[0], outputs[1]):
+        raw_result = run_squad_helper.RawResult(
+            unique_id=unique_id.numpy(),
+            start_logits=start_logits.tolist(),
+            end_logits=end_logits.tolist())
+        all_results.append(raw_result)
+        if len(all_results) % 100 == 0:
+          tf.compat.v1.logging.info('Made predictions for %d records.',
+                                    len(all_results))
+    return all_results
+
+  def _predict_with_distribute_strategy(self, model, input_fn, num_steps):
+    """Predicts the dataset using distribute strategy."""
+    predict_iterator = iter(
+        self.strategy.experimental_distribute_datasets_from_function(input_fn))
+
+    @tf.function
+    def predict_step(iterator):
+      """Predicts on distributed devices."""
+
+      def _replicated_step(inputs):
+        """Replicated prediction calculation."""
+        x, _ = inputs
+        unique_ids = x.pop('unique_ids')
+        start_logits, end_logits = model(x, training=False)
+        return dict(
+            unique_ids=unique_ids,
+            start_logits=start_logits,
+            end_logits=end_logits)
+
+      outputs = self.strategy.run(_replicated_step, args=(next(iterator),))
+      return tf.nest.map_structure(self.strategy.experimental_local_results,
+                                   outputs)
+
+    all_results = []
+    for _ in range(num_steps):
+      predictions = predict_step(predict_iterator)
+      for result in run_squad_helper.get_raw_results(predictions):
+        all_results.append(result)
+      if len(all_results) % 100 == 0:
+        tf.compat.v1.logging.info('Made predictions for %d records.',
+                                  len(all_results))
+    return all_results
+
+  def predict(self, model, input_fn, num_steps):
+    """Predicts the dataset from `input_fn` for `model`."""
+    if self.strategy:
+      return self._predict_with_distribute_strategy(model, input_fn, num_steps)
+    else:
+      return self._predict_without_distribute_strategy(model, input_fn)
+
+  def evaluate(self, model, input_fn, num_steps, eval_examples, eval_features,
+               predict_file, version_2_with_negative, max_answer_length,
+               null_score_diff_threshold, verbose_logging, output_dir):
+    """Evaluate QA model.
+
+    Args:
+      model: The model to be evaluated.
+      input_fn: Function that returns a tf.data.Dataset used for evaluation.
+      num_steps: Number of steps to evaluate the model.
+      eval_examples: List of `squad_lib.SquadExample` for evaluation data.
+      eval_features: List of `squad_lib.InputFeatures` for evaluation data.
+      predict_file: The input predict file.
+      version_2_with_negative: Whether the input predict file is SQuAD 2.0
+        format.
+      max_answer_length: The maximum length of an answer that can be generated.
+        This is needed because the start and end predictions are not conditioned
+        on one another.
+      null_score_diff_threshold: If null_score - best_non_null is greater than
+        the threshold, predict null. This is only used for SQuAD v2.
+      verbose_logging: If true, all of the warnings related to data processing
+        will be printed. A number of warnings are expected for a normal SQuAD
+        evaluation.
+      output_dir: The output directory to save output to json files:
+        predictions.json, nbest_predictions.json, null_odds.json. If None, skip
+        saving to json files.
+
+    Returns:
+      A dict contains two metrics: Exact match rate and F1 score.
+    """
+    all_results = self.predict(model, input_fn, num_steps)
+
+    all_predictions, all_nbest_json, scores_diff_json = (
+        squad_lib.postprocess_output(
+            eval_examples,
+            eval_features,
+            all_results,
+            n_best_size=20,
+            max_answer_length=max_answer_length,
+            do_lower_case=self.do_lower_case,
+            version_2_with_negative=version_2_with_negative,
+            null_score_diff_threshold=null_score_diff_threshold,
+            verbose=verbose_logging))
+
+    if output_dir is not None:
+      dump_to_files(all_predictions, all_nbest_json, scores_diff_json,
+                    version_2_with_negative, output_dir)
+
+    dataset_json = file_util.load_json_file(predict_file)
+    pred_dataset = dataset_json['data']
+
+    if version_2_with_negative:
+      eval_metrics = squad_evaluate_v2_0.evaluate(pred_dataset, all_predictions,
+                                                  scores_diff_json)
+    else:
+      eval_metrics = squad_evaluate_v1_1.evaluate(pred_dataset, all_predictions)
+    return eval_metrics
 
 
 # A dict for model specs to make it accessible by string key.

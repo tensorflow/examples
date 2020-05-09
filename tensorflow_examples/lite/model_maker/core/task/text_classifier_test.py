@@ -178,7 +178,7 @@ class TextClassifierTest(tf.test.TestCase):
     model.export(self.get_temp_dir(), export_format=ExportFormat.SAVED_MODEL)
 
     self.assertTrue(os.path.isdir(save_model_output_path))
-    self.assertNotEqual(len(os.listdir(save_model_output_path)), 0)
+    self.assertNotEmpty(os.listdir(save_model_output_path))
 
 
 if __name__ == '__main__':

@@ -25,7 +25,8 @@ import random
 import tempfile
 
 from absl import logging
-import tensorflow.compat.v2 as tf
+import tensorflow as tf
+from tensorflow_examples.lite.model_maker.core import file_util
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
@@ -47,8 +48,8 @@ def _load(tfrecord_file, meta_data_file, model_spec, is_training=None):
       model_spec.select_data_from_record,
       num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-  with tf.io.gfile.GFile(meta_data_file, 'rb') as reader:
-    meta_data = json.load(reader)
+  meta_data = file_util.load_json_file(meta_data_file)
+
   logging.info(
       'Load preprocessed data and metadata from %s and %s '
       'with size: %d', tfrecord_file, meta_data_file, meta_data['size'])
