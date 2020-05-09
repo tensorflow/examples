@@ -88,6 +88,7 @@
 		67EE9FD8BFDA0BBBC2A8C538 /* Pods-BertQA-UIKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-UIKit.release.xcconfig"; path = "Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit.release.xcconfig"; sourceTree = "<group>"; };
 		6D06722FADA8CA7F3CCC3492 /* Pods-BertQA-SwiftUI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-SwiftUI.release.xcconfig"; path = "Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI.release.xcconfig"; sourceTree = "<group>"; };
 		7595E796644E0735F1BD68A4 /* Pods-BertQA-SwiftUI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-SwiftUI.debug.xcconfig"; path = "Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI.debug.xcconfig"; sourceTree = "<group>"; };
+		7E5B19F92467606B003BC3C2 /* download_resources.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = download_resources.sh; sourceTree = "<group>"; };
 		8402440323D9BFDE00704ABD /* FullTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullTokenizer.swift; sourceTree = "<group>"; };
 		8402440523D9C18600704ABD /* WordpieceTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordpieceTokenizer.swift; sourceTree = "<group>"; };
 		8402440723D9C1FB00704ABD /* BasicTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicTokenizer.swift; sourceTree = "<group>"; };
@@ -332,6 +333,7 @@
 		84B3C6A9240F74EA00BA6F5E /* RunScripts */ = {
 			isa = PBXGroup;
 			children = (
+				7E5B19F92467606B003BC3C2 /* download_resources.sh */,
 			);
 			path = RunScripts;
 			sourceTree = "<group>";
