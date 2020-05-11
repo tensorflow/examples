@@ -6,6 +6,6 @@ target 'ImageSegmentation' do
   use_frameworks!
 
   # Pods for ImageSegmentation
-  pod 'TensorFlowLiteSwift', '0.0.1-nightly'
+  pod 'TensorFlowLiteSwift', '~> 0.0.1-nightly'
 
 end

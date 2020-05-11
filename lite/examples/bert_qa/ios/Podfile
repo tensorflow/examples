@@ -6,7 +6,7 @@ target 'BertQA-UIKit' do
   use_frameworks!
 
   # Pods for BertQA-UIKit
-  pod 'TensorFlowLiteSwift', '0.0.1-nightly'
+  pod 'TensorFlowLiteSwift', '~> 0.0.1-nightly'
 end
 
 target 'BertQA-SwiftUI' do
@@ -14,5 +14,5 @@ target 'BertQA-SwiftUI' do
   use_frameworks!
 
   # Pods for BertQA-SwiftUI
-  pod 'TensorFlowLiteSwift', '0.0.1-nightly'
+  pod 'TensorFlowLiteSwift', '~> 0.0.1-nightly'
 end
