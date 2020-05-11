@@ -217,9 +217,6 @@ class ImageSegmentator {
         preprocessingTime = now.timeIntervalSince(startTime)
         startTime = Date()
 
-        // Allocate memory for the model's input `Tensor`s.
-        try self.interpreter.allocateTensors()
-
         // Copy the RGB data to the input `Tensor`.
         try self.interpreter.copy(rgbData, toInputAt: 0)
 
