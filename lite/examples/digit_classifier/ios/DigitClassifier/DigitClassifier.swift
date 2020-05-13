@@ -99,7 +99,7 @@ class DigitClassifier {
             print("Failed to convert the image buffer to RGB data.")
             return
         }
-        
+
         // Copy the RGB data to the input `Tensor`.
         try self.interpreter.copy(rgbData, toInputAt: 0)
 
