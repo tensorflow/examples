@@ -360,9 +360,9 @@ class QuestionAnswerDataLoader(dataloader.DataLoader):
           squad_file=filename)
 
     meta_data, examples, features = cls._generate_tf_record_from_squad_file(
-        filename, model_spec.tokenizer, tfrecord_file, is_training,
-        model_spec.predict_batch_size, model_spec.seq_len, model_spec.query_len,
-        model_spec.doc_stride, version_2_with_negative)
+        filename, model_spec, tfrecord_file, is_training,
+        version_2_with_negative)
+
     _write_meta_data(meta_data_file, meta_data)
 
     dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec,
@@ -374,13 +374,9 @@ class QuestionAnswerDataLoader(dataloader.DataLoader):
   @classmethod
   def _generate_tf_record_from_squad_file(cls,
                                           input_file_path,
-                                          tokenizer,
+                                          model_spec,
                                           output_path,
                                           is_training,
-                                          predict_batch_size=8,
-                                          max_seq_length=384,
-                                          max_query_length=64,
-                                          doc_stride=128,
                                           version_2_with_negative=False):
     """Generates and saves training/validation data into a tf record file."""
     examples = squad_lib.read_squad_examples(
@@ -400,14 +396,10 @@ class QuestionAnswerDataLoader(dataloader.DataLoader):
     if is_training:
       batch_size = None
     else:
-      batch_size = predict_batch_size
+      batch_size = model_spec.predict_batch_size
 
-    number_of_examples = squad_lib.convert_examples_to_features(
+    number_of_examples = model_spec.convert_examples_to_features(
         examples=examples,
-        tokenizer=tokenizer,
-        max_seq_length=max_seq_length,
-        doc_stride=doc_stride,
-        max_query_length=max_query_length,
         is_training=is_training,
         output_fn=writer.process_feature if is_training else _append_feature,
         batch_size=batch_size)

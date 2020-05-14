@@ -128,6 +128,19 @@ class MockQAModelSpec(object):
         'doc_stride': self.doc_stride
     }
 
+  def convert_examples_to_features(self, examples, is_training, output_fn,
+                                   batch_size):
+    """Converts examples to features and write them into TFRecord file."""
+    return squad_lib.convert_examples_to_features(
+        examples=examples,
+        tokenizer=self.tokenizer,
+        max_seq_length=self.seq_len,
+        doc_stride=self.doc_stride,
+        max_query_length=self.query_len,
+        is_training=is_training,
+        output_fn=output_fn,
+        batch_size=batch_size)
+
 
 class LoaderFunctionTest(tf.test.TestCase):
 

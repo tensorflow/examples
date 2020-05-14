@@ -69,7 +69,11 @@ def _get_compat_tf_versions(compat_tf_versions=None):
 
 
 def get_num_gpus(num_gpus):
-  tot_num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
+  try:
+    tot_num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
+  except TypeError:
+    tf.compat.v1.logging.warning("Couldn't get the number of gpus.")
+    tot_num_gpus = max(0, num_gpus)
   if num_gpus > tot_num_gpus or num_gpus == -1:
     num_gpus = tot_num_gpus
   return num_gpus
@@ -144,6 +148,7 @@ class AverageWordVecModelSpec(object):
   compat_tf_versions = _get_compat_tf_versions(2)
   need_gen_vocab = True
   default_training_epochs = 2
+  convert_from_saved_model_tf2 = False
 
   def __init__(self,
                num_words=10000,
@@ -439,26 +444,47 @@ class BertModelSpec(object):
         num_gpus=num_gpus,
         tpu_address=tpu)
     self.tpu = tpu
-
     self.uri = uri
-
-    self.is_tf2 = is_tf2
-    self.vocab_file = os.path.join(
-        registry.resolver(uri), 'assets', 'vocab.txt')
     self.do_lower_case = do_lower_case
-
-    self.tokenizer = tokenization.FullTokenizer(self.vocab_file,
-                                                self.do_lower_case)
+    self.is_tf2 = is_tf2
 
     self.bert_config = bert_configs.BertConfig(
         0,
         initializer_range=self.initializer_range,
         hidden_dropout_prob=self.dropout_rate)
 
+    self.is_built = False
+
+  def build(self):
+    """Builds the class. Used for lazy initialization."""
+    if self.is_built:
+      return
+    self.vocab_file = os.path.join(
+        registry.resolver(self.uri), 'assets', 'vocab.txt')
+    self.tokenizer = tokenization.FullTokenizer(self.vocab_file,
+                                                self.do_lower_case)
+
   def save_vocab(self, vocab_filename):
     """Prints the file path to the vocabulary."""
+    if not self.is_built:
+      self.build()
     tf.io.gfile.copy(self.vocab_file, vocab_filename, overwrite=True)
     tf.compat.v1.logging.info('Saved vocabulary in %s.', vocab_filename)
+
+  def save(self, model, saved_model_path):
+    """Saves the model to SavedModel format. Used in TFLite converter."""
+    # pylint: disable=unnecessary-lambda
+    run_model = tf.function(lambda x: model(x))
+    # pylint: enable=unnecessary-lambda
+    concrete_func = run_model.get_concrete_function([
+        tf.TensorSpec([1, self.seq_len], tf.int32),
+        tf.TensorSpec([1, self.seq_len], tf.int32),
+        tf.TensorSpec([1, self.seq_len], tf.int32)
+    ])
+    if not tf.io.gfile.exists(saved_model_path):
+      tf.io.gfile.makedirs(saved_model_path)
+
+    model.save(saved_model_path, save_format='tf', signatures=concrete_func)
 
 
 class BertClassifierModelSpec(BertModelSpec):
@@ -487,6 +513,8 @@ class BertClassifierModelSpec(BertModelSpec):
 
   def convert_examples_to_features(self, examples, tfrecord_file, label_names):
     """Converts examples to features and write them into TFRecord file."""
+    if not self.is_built:
+      self.build()
     classifier_data_lib.file_based_convert_examples_to_features(
         examples, label_names, self.seq_len, self.tokenizer, tfrecord_file)
 
@@ -740,6 +768,22 @@ class BertQAModelSpec(BertModelSpec):
         'doc_stride': self.doc_stride
     }
 
+  def convert_examples_to_features(self, examples, is_training, output_fn,
+                                   batch_size):
+    """Converts examples to features and write them into TFRecord file."""
+    if not self.is_built:
+      self.build()
+
+    return squad_lib.convert_examples_to_features(
+        examples=examples,
+        tokenizer=self.tokenizer,
+        max_seq_length=self.seq_len,
+        doc_stride=self.doc_stride,
+        max_query_length=self.query_len,
+        is_training=is_training,
+        output_fn=output_fn,
+        batch_size=batch_size)
+
   def train(self, train_input_fn, epochs, steps_per_epoch):
     """Run bert QA training."""
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
@@ -902,6 +946,11 @@ class BertQAModelSpec(BertModelSpec):
     return eval_metrics
 
 
+mobilebert_classifier_spec = BertClassifierModelSpec(
+    uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
+    is_tf2=False,
+    distribution_strategy='off')
+
 # A dict for model specs to make it accessible by string key.
 MODEL_SPECS = {
     'efficientnet_lite0': efficientnet_lite0_spec,
@@ -915,6 +964,7 @@ MODEL_SPECS = {
     'bert': BertModelSpec,
     'bert_classifier': BertClassifierModelSpec,
     'bert_qa': BertQAModelSpec,
+    'mobilebert_classifier': mobilebert_classifier_spec
 }
 
 # List constants for supported models.
@@ -922,7 +972,9 @@ IMAGE_CLASSIFICATION_MODELS = [
     'efficientnet_lite0', 'efficientnet_lite1', 'efficientnet_lite2',
     'efficientnet_lite3', 'efficientnet_lite4', 'mobilenet_v2', 'resnet_50'
 ]
-TEXT_CLASSIFICATION_MODELS = ['bert_classifier', 'average_word_vec']
+TEXT_CLASSIFICATION_MODELS = [
+    'bert_classifier', 'average_word_vec', 'mobilebert_classifier'
+]
 QUESTION_ANSWERING_MODELS = ['bert_qa']
 
 
