@@ -25,6 +25,7 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 
@@ -187,11 +188,12 @@ class ImageClassifierTest(tf.test.TestCase):
     # Just test whether quantization will crash, can't guarantee the result.
     tflile_filename = 'model_quantized.tflite'
     tflite_output_file = os.path.join(self.get_temp_dir(), tflile_filename)
+    config = configs.QuantizationConfig.create_full_integer_quantization(
+        representative_data, is_integer_only=True)
     model.export(
         self.get_temp_dir(),
         tflile_filename,
-        quantized=True,
-        representative_data=representative_data,
+        quantization_config=config,
         export_format=ExportFormat.TFLITE)
     self.assertTrue(os.path.isfile(tflite_output_file))
     self.assertGreater(os.path.getsize(tflite_output_file), 0)

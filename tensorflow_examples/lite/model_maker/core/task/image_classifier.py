@@ -29,6 +29,7 @@ from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
+from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task import train_image_classifier_lib
 
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
@@ -122,22 +123,30 @@ def create(train_data,
   return image_classifier
 
 
-def _get_model_info(model_spec, num_classes, quantized=False, version='v1'):
+def _get_model_info(model_spec,
+                    num_classes,
+                    quantization_config=None,
+                    version='v1'):
   """Gets the specific info for the image model."""
 
   if not isinstance(model_spec, ms.ImageModelSpec):
     raise ValueError('Currently only support models for image classification.')
 
-  name = model_spec.name
-  if quantized:
-    name += '_quantized'
+  image_min = 0
+  image_max = 1
 
-  if quantized and compat.get_tf_behavior() == 1:
-    image_min = 0
-    image_max = 255
-  else:
-    image_min = 0
-    image_max = 1
+  name = model_spec.name
+  if quantization_config:
+    name += '_quantized'
+    # TODO(yuqili): Remove `compat.get_tf_behavior() == 1` once b/153576655 is
+    # fixed.
+    if compat.get_tf_behavior() == 1:
+      if quantization_config.inference_input_type == tf.uint8:
+        image_min = 0
+        image_max = 255
+      elif quantization_config.inference_input_type == tf.int8:
+        image_min = -128
+        image_max = 127
 
   return metadata_writer.ModelSpecificInfo(
       model_spec.name,
@@ -298,12 +307,8 @@ class ImageClassifier(classification_model.ClassificationModel):
 
   def _export_tflite(self,
                      tflite_filepath,
-                     label_filepath,
-                     quantized=False,
-                     quantization_steps=None,
-                     representative_data=None,
-                     inference_input_type=tf.float32,
-                     inference_output_type=tf.float32,
+                     label_filepath=None,
+                     quantization_config=None,
                      with_metadata=True,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
@@ -312,26 +317,14 @@ class ImageClassifier(classification_model.ClassificationModel):
     Args:
       tflite_filepath: File path to save tflite model.
       label_filepath: File path to save labels.
-      quantized: boolean, if True, save quantized model.
-      quantization_steps: Number of post-training quantization calibration steps
-        to run. Used only if `quantized` is True.
-      representative_data: Representative data used for post-training
-        quantization. Used only if `quantized` is True.
-      inference_input_type: Target data type of real-number input arrays. Allows
-        for a different type for input arrays. Defaults to tf.float32. Must be
-        be `{tf.float32, tf.uint8, tf.int8}`
-      inference_output_type: Target data type of real-number output arrays.
-        Allows for a different type for output arrays. Defaults to tf.float32.
-         Must be `{tf.float32, tf.uint8, tf.int8}`
+      quantization_config: Configuration for post-training quantization.
       with_metadata: Whether the output tflite model contains metadata.
       export_metadata_json_file: Whether to export metadata in json file. If
         True, export the metadata in the same directory as tflite model.Used
         only if `with_metadata` is True.
     """
-    super(ImageClassifier,
-          self)._export_tflite(tflite_filepath, quantized, quantization_steps,
-                               representative_data, inference_input_type,
-                               inference_output_type)
+    model_util.export_tflite(self.model, tflite_filepath, quantization_config,
+                             self._gen_dataset)
     if with_metadata:
       if label_filepath is None:
         tf.compat.v1.logging.warning(
@@ -343,7 +336,9 @@ class ImageClassifier(classification_model.ClassificationModel):
       export_model_path = os.path.join(export_directory, model_basename)
 
       model_info = _get_model_info(
-          self.model_spec, self.num_classes, quantized=quantized)
+          self.model_spec,
+          self.num_classes,
+          quantization_config=quantization_config)
       # Generate the metadata objects and put them in the model file
       populator = metadata_writer.MetadataPopulatorForImageClassifier(
           export_model_path, model_info, label_filepath)

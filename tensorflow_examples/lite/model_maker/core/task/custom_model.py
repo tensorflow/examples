@@ -19,36 +19,10 @@ from __future__ import print_function
 
 import abc
 import os
-import tempfile
 
 import tensorflow as tf
-from tensorflow_examples.lite.model_maker.core import compat
+
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-
-DEFAULT_QUANTIZATION_STEPS = 2000
-
-
-def get_representative_dataset_gen(dataset, num_steps):
-  """Gets the function that generates representative dataset for quantized."""
-
-  def representative_dataset_gen():
-    """Generates representative dataset for quantized."""
-    if compat.get_tf_behavior() == 2:
-      for image, _ in dataset.take(num_steps):
-        yield [image]
-    else:
-      iterator = tf.compat.v1.data.make_one_shot_iterator(
-          dataset.take(num_steps))
-      next_element = iterator.get_next()
-      with tf.compat.v1.Session() as sess:
-        while True:
-          try:
-            image, _ = sess.run(next_element)
-            yield [image]
-          except tf.errors.OutOfRangeError:
-            break
-
-  return representative_dataset_gen
 
 
 class CustomModel(abc.ABC):
@@ -226,63 +200,3 @@ class CustomModel(abc.ABC):
           "SavedModel filepath couldn't be None when exporting to SavedModel.")
     self.model.save(filepath, overwrite, include_optimizer, save_format,
                     signatures, options)
-
-  def _export_tflite(self,
-                     tflite_filepath,
-                     quantized=False,
-                     quantization_steps=None,
-                     representative_data=None,
-                     inference_input_type=tf.float32,
-                     inference_output_type=tf.float32):
-    """Converts the retrained model to tflite format and saves it.
-
-    Args:
-      tflite_filepath: File path to save tflite model.
-      quantized: boolean, if True, save quantized model.
-      quantization_steps: Number of post-training quantization calibration steps
-        to run. Used only if `quantized` is True.
-      representative_data: Representative data used for post-training
-        quantization. Used only if `quantized` is True.
-      inference_input_type: Target data type of real-number input arrays. Allows
-        for a different type for input arrays. Defaults to tf.float32. Must be
-        be `{tf.float32, tf.uint8, tf.int8}`
-      inference_output_type: Target data type of real-number output arrays.
-        Allows for a different type for output arrays. Defaults to tf.float32.
-         Must be `{tf.float32, tf.uint8, tf.int8}`
-    """
-    if tflite_filepath is None:
-      raise ValueError(
-          "TFLite filepath couldn't be None when exporting to tflite.")
-
-    temp_dir = None
-    if compat.get_tf_behavior() == 1:
-      temp_dir = tempfile.TemporaryDirectory()
-      save_path = os.path.join(temp_dir.name, 'saved_model')
-      self.model.save(save_path, include_optimizer=False, save_format='tf')
-      converter = tf.compat.v1.lite.TFLiteConverter.from_saved_model(save_path)
-    else:
-      converter = tf.lite.TFLiteConverter.from_keras_model(self.model)
-
-    if quantized:
-      if quantization_steps is None:
-        quantization_steps = DEFAULT_QUANTIZATION_STEPS
-      if representative_data is None:
-        raise ValueError(
-            'representative_data couldn\'t be None if model is quantized.')
-      ds = self._gen_dataset(
-          representative_data, batch_size=1, is_training=False)
-      converter.representative_dataset = tf.lite.RepresentativeDataset(
-          get_representative_dataset_gen(ds, quantization_steps))
-
-      converter.optimizations = [tf.lite.Optimize.DEFAULT]
-      converter.inference_input_type = inference_input_type
-      converter.inference_output_type = inference_output_type
-      converter.target_spec.supported_ops = [
-          tf.lite.OpsSet.TFLITE_BUILTINS_INT8
-      ]
-    tflite_model = converter.convert()
-    if temp_dir:
-      temp_dir.cleanup()
-
-    with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
-      f.write(tflite_model)

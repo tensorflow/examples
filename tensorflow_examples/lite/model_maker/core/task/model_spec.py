@@ -400,7 +400,8 @@ class BertModelSpec(object):
       tpu='',
       trainable=True,
       do_lower_case=True,
-      is_tf2=True):
+      is_tf2=True,
+      convert_from_saved_model_tf2=False):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -424,6 +425,8 @@ class BertModelSpec(object):
       do_lower_case: boolean, whether to lower case the input text. Should be
         True for uncased models and False for cased models.
       is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
+      convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF
+        2.x.
     """
     if compat.get_tf_behavior() not in self.compat_tf_versions:
       raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
@@ -453,6 +456,7 @@ class BertModelSpec(object):
         initializer_range=self.initializer_range,
         hidden_dropout_prob=self.dropout_rate)
 
+    self.convert_from_saved_model_tf2 = convert_from_saved_model_tf2
     self.is_built = False
 
   def build(self):
@@ -470,21 +474,6 @@ class BertModelSpec(object):
       self.build()
     tf.io.gfile.copy(self.vocab_file, vocab_filename, overwrite=True)
     tf.compat.v1.logging.info('Saved vocabulary in %s.', vocab_filename)
-
-  def save(self, model, saved_model_path):
-    """Saves the model to SavedModel format. Used in TFLite converter."""
-    # pylint: disable=unnecessary-lambda
-    run_model = tf.function(lambda x: model(x))
-    # pylint: enable=unnecessary-lambda
-    concrete_func = run_model.get_concrete_function([
-        tf.TensorSpec([1, self.seq_len], tf.int32),
-        tf.TensorSpec([1, self.seq_len], tf.int32),
-        tf.TensorSpec([1, self.seq_len], tf.int32)
-    ])
-    if not tf.io.gfile.exists(saved_model_path):
-      tf.io.gfile.makedirs(saved_model_path)
-
-    model.save(saved_model_path, save_format='tf', signatures=concrete_func)
 
 
 class BertClassifierModelSpec(BertModelSpec):
@@ -949,7 +938,9 @@ class BertQAModelSpec(BertModelSpec):
 mobilebert_classifier_spec = BertClassifierModelSpec(
     uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
     is_tf2=False,
-    distribution_strategy='off')
+    distribution_strategy='off',
+    convert_from_saved_model_tf2=True)
+
 
 # A dict for model specs to make it accessible by string key.
 MODEL_SPECS = {

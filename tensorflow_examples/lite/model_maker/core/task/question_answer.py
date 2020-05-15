@@ -136,34 +136,17 @@ class QuestionAnswer(custom_model.CustomModel):
         export_format=export_format,
         **kwargs)
 
-  def _export_tflite(self,
-                     tflite_filepath,
-                     quantized=False,
-                     quantization_steps=None,
-                     representative_data=None,
-                     inference_input_type=tf.float32,
-                     inference_output_type=tf.float32):
+  def _export_tflite(self, tflite_filepath, quantization_config=None):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
-      quantized: boolean, if True, save quantized model.
-      quantization_steps: Number of post-training quantization calibration steps
-        to run. Used only if `quantized` is True.
-      representative_data: Representative data used for post-training
-        quantization. Used only if `quantized` is True.
-      inference_input_type: Target data type of real-number input arrays. Allows
-        for a different type for input arrays. Defaults to tf.float32. Must be
-        be `{tf.float32, tf.uint8, tf.int8}`
-      inference_output_type: Target data type of real-number output arrays.
-        Allows for a different type for output arrays. Defaults to tf.float32.
-        Must be `{tf.float32, tf.uint8, tf.int8}`
+      quantization_config: Configuration for post-training quantization.
     """
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
-    super(QuestionAnswer,
-          self)._export_tflite(tflite_filepath, quantized, quantization_steps,
-                               representative_data, inference_input_type,
-                               inference_output_type)
+    model_util.export_tflite(self.model, tflite_filepath, quantization_config,
+                             self._gen_dataset,
+                             self.model_spec.convert_from_saved_model_tf2)
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(self.model, batch_size=None)

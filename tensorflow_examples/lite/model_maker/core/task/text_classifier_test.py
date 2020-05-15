@@ -24,6 +24,7 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
 
@@ -81,6 +82,26 @@ class TextClassifierTest(tf.test.TestCase):
         batch_size=1,
         shuffle=True)
     self._test_accuracy(model, 0.5)
+
+  @test_util.test_in_tf_2
+  def test_mobilebert_model(self):
+    model_spec = ms.mobilebert_classifier_spec
+    model_spec.seq_len = 2
+    model_spec.trainable = False
+    all_data = text_dataloader.TextClassifierDataLoader.from_folder(
+        self.text_dir, model_spec=model_spec)
+    # Splits data, 90% data for training, 10% for testing
+    self.train_data, self.test_data = all_data.split(0.9)
+
+    model = text_classifier.create(
+        self.train_data,
+        model_spec=model_spec,
+        epochs=1,
+        batch_size=1,
+        shuffle=True)
+    self._test_accuracy(model, 0.5)
+    self._test_export_to_tflite(model, test_predict_accuracy=False)
+    self._test_export_to_tflite_quant(model)
 
   @test_util.test_in_tf_2
   def test_average_wordvec_model(self):
@@ -162,16 +183,20 @@ class TextClassifierTest(tf.test.TestCase):
     actual_index = [index for word, index in word_index[3:]]
     self.assertEqual(actual_index, expected_index)
 
-  def _test_export_to_tflite(self, model):
+  def _test_export_to_tflite(self, model, test_predict_accuracy=True):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
     model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
 
-    lite_model = self._load_lite_model(tflite_output_file)
-    for x, y in self.test_data.dataset:
-      input_batch = tf.cast(x, tf.float32)
-      output_batch = lite_model(input_batch)
-      prediction = np.argmax(output_batch[0])
-      self.assertEqual(y, prediction)
+    self.assertTrue(tf.io.gfile.exists(tflite_output_file))
+    self.assertGreater(os.path.getsize(tflite_output_file), 0)
+
+    if test_predict_accuracy:
+      lite_model = self._load_lite_model(tflite_output_file)
+      for x, y in self.test_data.dataset:
+        input_batch = tf.cast(x, tf.float32)
+        output_batch = lite_model(input_batch)
+        prediction = np.argmax(output_batch[0])
+        self.assertEqual(y, prediction)
 
   def _test_export_to_saved_model(self, model):
     save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')
@@ -179,6 +204,20 @@ class TextClassifierTest(tf.test.TestCase):
 
     self.assertTrue(os.path.isdir(save_model_output_path))
     self.assertNotEmpty(os.listdir(save_model_output_path))
+
+  def _test_export_to_tflite_quant(self, model):
+    tflite_filename = 'model_quant.tflite'
+    tflite_output_file = os.path.join(self.get_temp_dir(), tflite_filename)
+    config = configs.QuantizationConfig.create_dynamic_range_quantization(
+        optimizations=[tf.lite.Optimize.OPTIMIZE_FOR_LATENCY])
+    model.export(
+        self.get_temp_dir(),
+        tflite_filename=tflite_filename,
+        export_format=ExportFormat.TFLITE,
+        quantization_config=config)
+
+    self.assertTrue(tf.io.gfile.exists(tflite_output_file))
+    self.assertGreater(os.path.getsize(tflite_output_file), 0)
 
 
 if __name__ == '__main__':
