@@ -19,6 +19,7 @@ from __future__ import print_function
 import os
 import numpy as np
 import tensorflow.compat.v2 as tf
+import unittest
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
@@ -84,6 +85,7 @@ class TextClassifierTest(tf.test.TestCase):
     self._test_accuracy(model, 0.5)
 
   @test_util.test_in_tf_2
+  @unittest.skip('Skipping due to b/156917372.')
   def test_mobilebert_model(self):
     model_spec = ms.mobilebert_classifier_spec
     model_spec.seq_len = 2
