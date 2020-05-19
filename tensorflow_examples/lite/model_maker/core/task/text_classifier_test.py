@@ -19,7 +19,6 @@ from __future__ import print_function
 import os
 import numpy as np
 import tensorflow.compat.v2 as tf
-import unittest
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
@@ -85,7 +84,6 @@ class TextClassifierTest(tf.test.TestCase):
     self._test_accuracy(model, 0.5)
 
   @test_util.test_in_tf_2
-  @unittest.skip('Skipping due to b/156917372.')
   def test_mobilebert_model(self):
     model_spec = ms.mobilebert_classifier_spec
     model_spec.seq_len = 2
@@ -102,8 +100,14 @@ class TextClassifierTest(tf.test.TestCase):
         batch_size=1,
         shuffle=True)
     self._test_accuracy(model, 0.5)
-    self._test_export_to_tflite(model, test_predict_accuracy=False)
-    self._test_export_to_tflite_quant(model)
+    error_message = 'Couldn\'t convert MobileBert to TFLite for now.'
+    with self.assertRaises(ValueError) as error:
+      self._test_export_to_tflite(model, test_predict_accuracy=False)
+    self.assertEqual(error_message, str(error.exception))
+
+    with self.assertRaises(ValueError) as error:
+      self._test_export_to_tflite_quant(model)
+    self.assertEqual(error_message, str(error.exception))
 
   @test_util.test_in_tf_2
   def test_average_wordvec_model(self):

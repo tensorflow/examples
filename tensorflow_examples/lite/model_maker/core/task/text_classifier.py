@@ -114,6 +114,10 @@ class TextClassifier(classification_model.ClassificationModel):
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
     """
+    # TODO(b/151761399): Removes these lines.
+    if hasattr(self.model_spec, 'uri') and 'mobilebert' in self.model_spec.uri:
+      raise ValueError('Couldn\'t convert MobileBert to TFLite for now.')
+
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
     model_util.export_tflite(self.model, tflite_filepath, quantization_config,
