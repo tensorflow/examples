@@ -100,6 +100,7 @@
 			children = (
 				AA9AC59D212D39FC000B4E9D /* ObjectDetection */,
 				AA9AC59C212D39FC000B4E9D /* Products */,
+				C5C06069A877002CD7A994EB /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -156,6 +157,13 @@
 			path = ModelDataHandler;
 			sourceTree = "<group>";
 		};
+		C5C06069A877002CD7A994EB /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -189,7 +197,7 @@
 				TargetAttributes = {
 					AA9AC59A212D39FC000B4E9D = {
 						CreatedOnToolsVersion = 9.4.1;
-						LastSwiftMigration = 0940;
+						LastSwiftMigration = 1140;
 					};
 				};
 			};
@@ -427,7 +435,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -454,7 +462,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
