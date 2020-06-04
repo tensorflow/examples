@@ -85,11 +85,9 @@ class ModelUtilTest(tf.test.TestCase):
     with tf.io.gfile.GFile(tflite_model_file, 'rb') as f:
       tflite_model = f.read()
 
-    random_input = tf.random.uniform(
-        shape=(1, input_dim),
-        minval=0,
-        maxval=max_input_value,
-        dtype=tf.float32)
+    np.random.seed(0)
+    random_input = np.random.uniform(
+        low=0, high=max_input_value, size=(1, input_dim)).astype(np.float32)
 
     # Gets output from keras model.
     keras_output = keras_model.predict(random_input)
@@ -97,12 +95,21 @@ class ModelUtilTest(tf.test.TestCase):
     # Gets output from tflite model.
     interpreter = tf.lite.Interpreter(model_content=tflite_model)
     interpreter.allocate_tensors()
-    interpreter.set_tensor(interpreter.get_input_details()[0]['index'],
-                           random_input)
+    input_details = interpreter.get_input_details()[0]
+    if input_details['dtype'] != np.float32:
+      # Quantize the input
+      scale, zero_point = input_details['quantization']
+      random_input = random_input / scale + zero_point
+      random_input = random_input.astype(input_details['dtype'])
+    interpreter.set_tensor(input_details['index'], random_input)
     interpreter.invoke()
-    lite_output = interpreter.get_tensor(
-        interpreter.get_output_details()[0]['index'])
-
+    output_details = interpreter.get_output_details()[0]
+    lite_output = interpreter.get_tensor(output_details['index'])
+    if output_details['dtype'] != np.float32:
+      # Dequantize the output
+      scale, zero_point = output_details['quantization']
+      lite_output = lite_output.astype(np.float32)
+      lite_output = (lite_output - zero_point) * scale
     self.assertTrue(np.allclose(lite_output, keras_output, atol=atol))
 
 

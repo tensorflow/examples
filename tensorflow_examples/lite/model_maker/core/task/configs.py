@@ -125,11 +125,9 @@ class QuantizationConfig(object):
       optimizations: A list of optimizations to apply when converting the model.
         If not set, use `[Optimize.DEFAULT]` by default.
       inference_input_type: Target data type of real-number input arrays. Used
-        only when `is_integer_only` is True. For TensorFlow 2, it is set to
-        `tf.float32`. For TensorFlow 1, it must be in `{tf.uint8, tf.int8}`.
+        only when `is_integer_only` is True. Must be in `{tf.uint8, tf.int8}`.
       inference_output_type: Target data type of real-number output arrays. Used
-        only when `is_integer_only` is True. For TensorFlow 2, it is set to
-        `tf.float32`. For TensorFlow 1, it must be in `{tf.uint8, tf.int8}`.
+        only when `is_integer_only` is True. Must be in `{tf.uint8, tf.int8}`.
       is_integer_only: If True, enforces full integer quantization for all ops
         including the input and output. If False, uses integer with float
         fallback (using default float input/output) that mean to fully integer
@@ -145,24 +143,14 @@ class QuantizationConfig(object):
           representative_data=representative_data,
           quantization_steps=quantization_steps)
     else:
-      if compat.get_tf_behavior() == 2:
-        # TODO(b/153576655): Replicate inference_input_type and
-        # inference_output_type flags in TFLiteConverterV2
-        tf.compat.v1.logging.warning(
-            'For integer only quantization, `inference_input_type` and '
-            '`inference_output_type` are set to tf.float32. Support for '
-            'tf.int8 and tf.uint8 will be added soon.')
-        inference_input_type = tf.float32
-        inference_output_type = tf.float32
-      else:
-        if inference_input_type not in [tf.uint8, tf.int8]:
-          raise ValueError('For integer only quantization, '
-                           '`inference_input_type` '
-                           'should be tf.int8 or tf.uint8.')
-        if inference_output_type not in [tf.uint8, tf.int8]:
-          raise ValueError('For integer only quantization, '
-                           '`inference_output_type` '
-                           'should be tf.int8 or tf.uint8.')
+      if inference_input_type not in [tf.uint8, tf.int8]:
+        raise ValueError('For integer only quantization, '
+                         '`inference_input_type` '
+                         'should be tf.uint8 or tf.int8.')
+      if inference_output_type not in [tf.uint8, tf.int8]:
+        raise ValueError('For integer only quantization, '
+                         '`inference_output_type` '
+                         'should be tf.uint8 or tf.int8.')
 
       return QuantizationConfig(
           optimizations,
