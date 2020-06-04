@@ -170,10 +170,10 @@ public class QaClient implements AutoCloseable {
     List<QaAnswer.Pos> origResults = new ArrayList<>();
     for (int start : startIndexes) {
       for (int end : endIndexes) {
-        if (!feature.tokenToOrigMap.containsKey(start)) {
+        if (!feature.tokenToOrigMap.containsKey(start + OUTPUT_OFFSET)) {
           continue;
         }
-        if (!feature.tokenToOrigMap.containsKey(end)) {
+        if (!feature.tokenToOrigMap.containsKey(end + OUTPUT_OFFSET)) {
           continue;
         }
         if (end < start) {
