@@ -56,6 +56,7 @@ def _mock_gen_dataset(data, batch_size=1, is_training=False):  # pylint: disable
 
 class ModelUtilTest(tf.test.TestCase):
 
+  @test_util.test_in_tf_1and2
   def test_export_tflite(self):
     input_dim = 4
     model = test_util.build_model(input_shape=[input_dim], num_classes=2)
@@ -63,6 +64,7 @@ class ModelUtilTest(tf.test.TestCase):
     model_util.export_tflite(model, tflite_file)
     self._test_tflite(model, tflite_file, input_dim)
 
+  @test_util.test_in_tf_1and2
   def test_export_tflite_quantized(self):
     input_dim = 4
     num_classes = 2

@@ -32,10 +32,11 @@ def _get_representative_dataset_gen(dataset, num_steps):
       for image, _ in dataset.take(num_steps):
         yield [image]
     else:
-      iterator = tf.compat.v1.data.make_one_shot_iterator(
+      iterator = tf.compat.v1.data.make_initializable_iterator(
           dataset.take(num_steps))
       next_element = iterator.get_next()
       with tf.compat.v1.Session() as sess:
+        sess.run(iterator.initializer)
         while True:
           try:
             image, _ = sess.run(next_element)

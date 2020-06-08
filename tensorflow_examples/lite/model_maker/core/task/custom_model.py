@@ -113,6 +113,7 @@ class CustomModel(abc.ABC):
     return ds
 
   def _get_export_format(self, export_format):
+    """Get export format."""
     if export_format is None:
       export_format = self.DEFAULT_EXPORT_FORMAT
 
