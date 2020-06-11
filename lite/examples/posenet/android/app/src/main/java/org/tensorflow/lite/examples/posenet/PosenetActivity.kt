@@ -43,10 +43,10 @@ import android.media.ImageReader.OnImageAvailableListener
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Process
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
-import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.util.Size
 import android.util.SparseIntArray
@@ -271,7 +271,6 @@ class PosenetActivity :
    * Sets up member variables related to camera.
    */
   private fun setUpCameraOutputs() {
-
     val activity = activity
     val manager = activity!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     try {
@@ -325,7 +324,9 @@ class PosenetActivity :
    * Opens the camera specified by [PosenetActivity.cameraId].
    */
   private fun openCamera() {
-    val permissionCamera = ContextCompat.checkSelfPermission(activity!!, Manifest.permission.CAMERA)
+    val permissionCamera = getContext()!!.checkPermission(
+      Manifest.permission.CAMERA, Process.myPid(), Process.myUid()
+    )
     if (permissionCamera != PackageManager.PERMISSION_GRANTED) {
       requestCameraPermission()
     }
@@ -596,7 +597,6 @@ class PosenetActivity :
    */
   private fun createCameraPreviewSession() {
     try {
-
       // We capture images from preview in YUV format.
       imageReader = ImageReader.newInstance(
         previewSize!!.width, previewSize!!.height, ImageFormat.YUV_420_888, 2

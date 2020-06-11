@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Process;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
@@ -62,7 +63,6 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -675,8 +675,7 @@ public class Camera2BasicFragment extends Fragment
         throw new RuntimeException("Time out waiting to lock camera opening.");
       }
 
-      if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
-          != PackageManager.PERMISSION_GRANTED) {
+      if (!allPermissionsGranted()) {
         // TODO: Consider calling
         //    ActivityCompat#requestPermissions
         // here to request the missing permissions, and then overriding
@@ -697,7 +696,7 @@ public class Camera2BasicFragment extends Fragment
 
   private boolean allPermissionsGranted() {
     for (String permission : getRequiredPermissions()) {
-      if (ContextCompat.checkSelfPermission(getActivity(), permission)
+      if (getContext().checkPermission(permission, Process.myPid(), Process.myUid())
           != PackageManager.PERMISSION_GRANTED) {
         return false;
       }

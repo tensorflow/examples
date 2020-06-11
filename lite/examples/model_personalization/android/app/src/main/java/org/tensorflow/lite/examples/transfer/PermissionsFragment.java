@@ -18,8 +18,8 @@ package org.tensorflow.lite.examples.transfer;
 import android.Manifest.permission;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Process;
 import android.widget.Toast;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 /**
@@ -46,7 +46,7 @@ public class PermissionsFragment extends Fragment {
 
   private boolean hasPermissions() {
     for (String permission : PERMISSIONS_REQUIRED) {
-      if (ContextCompat.checkSelfPermission(requireContext(), permission)
+      if (getContext().checkPermission(permission, Process.myPid(), Process.myUid())
           != PackageManager.PERMISSION_GRANTED) {
         return false;
       }

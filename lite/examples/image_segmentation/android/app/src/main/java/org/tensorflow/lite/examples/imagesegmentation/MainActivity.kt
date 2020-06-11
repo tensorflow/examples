@@ -24,8 +24,8 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Bundle
+import android.os.Process
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.util.Log
@@ -266,8 +266,8 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
    * Check if all permission specified in the manifest have been granted
    */
   private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-    ContextCompat.checkSelfPermission(
-      baseContext, it
+    checkPermission(
+      it, Process.myPid(), Process.myUid()
     ) == PackageManager.PERMISSION_GRANTED
   }
 
