@@ -45,10 +45,10 @@ function build_android_example {
   # Check if the directory contains a gradle wrapper.
   if [[ -x "$1/gradlew" ]]; then
     # Run the "build" task with the gradle wrapper.
-    ./gradlew clean build --stacktrace
+    ./gradlew clean assembleRelease --stacktrace
   elif [[ -x "$1/finish/gradlew" ]]; then
     # Accommodate codelab directory
-    ./finish/gradlew clean build --stacktrace
+    ./finish/gradlew clean assembleRelease --stacktrace
   else
     echo "ERROR: Gradle wrapper could not be found under ${RELATIVE_DIR}."
     exit 1
@@ -92,6 +92,6 @@ function build_smartreply_aar {
   echo
 }
 
-build_android_example "$1"
+time build_android_example "$1"
 
-build_smartreply_aar "$1"
+time build_smartreply_aar "$1"
