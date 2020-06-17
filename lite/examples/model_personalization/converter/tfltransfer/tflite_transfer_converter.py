@@ -139,6 +139,7 @@ class TFLiteTransferConverter(object):
       converter = tfv1.lite.TFLiteConverter.from_session(
           sess, [bottleneck, labels] + variables, [loss] + gradients)
 
+      converter.allow_custom_ops = True
       if self.head_model.train_requires_flex():
         converter.target_ops = [tf.lite.OpsSet.SELECT_TF_OPS]
       return converter.convert()
