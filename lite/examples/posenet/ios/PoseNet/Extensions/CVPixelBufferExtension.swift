@@ -120,7 +120,6 @@ extension CVPixelBuffer {
   /// - Returns: The RGB data representation of the image buffer or `nil` if the buffer could not be
   ///     converted.
   func rgbData(
-    byteCount: Int,
     isModelQuantized: Bool
   ) -> Data? {
     CVPixelBufferLockBaseAddress(self, .readOnly)
