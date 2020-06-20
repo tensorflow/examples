@@ -121,7 +121,7 @@ class KerasModelHead(object):
     bottleneck_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if key.endswith('_input')
+        if 'input' in key
     ]
     labels_names = [
         input_def.name
