@@ -18,7 +18,7 @@ package org.tensorflow.lite.examples.imagesegmentation
 
 import android.Manifest
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -106,8 +106,7 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
       )
     }
 
-    viewModel = ViewModelProviders.of(this)
-      .get(MLExecutionViewModel::class.java)
+    viewModel = AndroidViewModelFactory(application).create(MLExecutionViewModel::class.java)
     viewModel.resultingBitmap.observe(
       this,
       Observer { resultImage ->

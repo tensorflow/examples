@@ -18,7 +18,7 @@ package org.tensorflow.lite.examples.styletransfer
 
 import android.Manifest
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.hardware.camera2.CameraCharacteristics
@@ -119,8 +119,7 @@ class MainActivity :
       )
     }
 
-    viewModel = ViewModelProviders.of(this)
-      .get(MLExecutionViewModel::class.java)
+    viewModel = AndroidViewModelFactory(application).create(MLExecutionViewModel::class.java)
 
     viewModel.styledBitmap.observe(
       this,
