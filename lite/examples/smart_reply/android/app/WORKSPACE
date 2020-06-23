@@ -31,12 +31,11 @@ http_archive(
 
 http_archive(
     name = "org_tensorflow",
-    sha256 = "3a814b7b575b348b97aa6d231682195e2d9db808f550ae439ccb47f62cadb073",
-    strip_prefix = "tensorflow-2.2.0-rc3",
+    sha256 = "1f313adfbc52d4810a784d27d6b3887fec9d66e1ad67c0142e938fa4cf46fd0f",
+    strip_prefix = "tensorflow-fabcd8f89cd5975331994049705e15cb75f32e0c",
     urls = [
-        "https://github.com/tensorflow/tensorflow/archive/v2.2.0-rc3.tar.gz",  # 2020-04-14
+        "https://github.com/tensorflow/tensorflow/archive/fabcd8f89cd5975331994049705e15cb75f32e0c.tar.gz",   # 2020-06-18
     ],
-    patches = ["//libs/cc/misc:gen_selected_ops_main.patch"],
 )
 
 load("@org_tensorflow//tensorflow:version_check.bzl", "check_bazel_version_at_least")
