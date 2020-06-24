@@ -67,7 +67,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
         public void onSurfaceTextureAvailable(
             final SurfaceTexture texture, final int width, final int height) {
           availableSurfaceTexture = texture;
-          startCamera(texture);
+          startCamera();
         }
 
         @Override
@@ -118,7 +118,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
     // the SurfaceTextureListener).
 
     if (textureView.isAvailable()) {
-      startCamera(availableSurfaceTexture);
+      startCamera();
     } else {
       textureView.setSurfaceTextureListener(surfaceTextureListener);
     }
@@ -148,7 +148,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
     }
   }
   
-  private void startCamera(final SurfaceTexture texture) {
+  private void startCamera() {
     int index = getCameraId();
     camera = Camera.open(index);
 
@@ -171,7 +171,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
       parameters.setPreviewSize(previewSize.getWidth(), previewSize.getHeight());
       camera.setDisplayOrientation(90);
       camera.setParameters(parameters);
-      camera.setPreviewTexture(texture);
+      camera.setPreviewTexture(availableSurfaceTexture);
     } catch (IOException exception) {
       camera.release();
     }
