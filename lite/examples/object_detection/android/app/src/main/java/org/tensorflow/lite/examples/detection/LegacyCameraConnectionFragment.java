@@ -56,7 +56,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
   /** An {@link AutoFitTextureView} for camera preview. */
   private AutoFitTextureView textureView;
   private SurfaceTexture availableSurfaceTexture = null;
-  
+
   /**
    * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a {@link
    * TextureView}.
@@ -147,7 +147,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
       LOGGER.e(e, "Exception!");
     }
   }
-  
+
   private void startCamera() {
     int index = getCameraId();
     camera = Camera.open(index);
