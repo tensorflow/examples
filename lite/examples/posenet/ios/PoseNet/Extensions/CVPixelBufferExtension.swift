@@ -109,18 +109,14 @@ extension CVPixelBuffer {
     return result
   }
 
-  /// Returns the RGB `Data` representation of the given image buffer with the specified
-  /// `byteCount`.
+  /// Returns the RGB `Data` representation of the given image buffer.
   ///
   /// - Parameters:
-  ///   - byteCount: The expected byte count for the RGB data calculated using the values that the
-  ///       model was trained on: `batchSize * imageWidth * imageHeight * componentsCount`.
   ///   - isModelQuantized: Whether the model is quantized (i.e. fixed point values rather than
   ///       floating point values).
   /// - Returns: The RGB data representation of the image buffer or `nil` if the buffer could not be
   ///     converted.
   func rgbData(
-    byteCount: Int,
     isModelQuantized: Bool
   ) -> Data? {
     CVPixelBufferLockBaseAddress(self, .readOnly)
