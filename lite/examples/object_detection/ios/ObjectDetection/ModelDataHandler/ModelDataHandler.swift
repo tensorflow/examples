@@ -58,6 +58,10 @@ class ModelDataHandler: NSObject {
   let inputWidth = 300
   let inputHeight = 300
 
+  // image mean and std for floating model, should be consistent with parameters used in model training
+  let imageMean: Float = 127.5
+  let imageStd:  Float = 127.5
+
   // MARK: Private properties
   private var labels: [String] = []
 
@@ -316,7 +320,7 @@ class ModelDataHandler: NSObject {
     let bytes = Array<UInt8>(unsafeData: byteData)!
     var floats = [Float]()
     for i in 0..<bytes.count {
-      floats.append(Float(bytes[i]) / 255.0)
+      floats.append((Float(bytes[i]) - imageMean) / imageStd)
     }
     return Data(copyingBufferOf: floats)
   }
