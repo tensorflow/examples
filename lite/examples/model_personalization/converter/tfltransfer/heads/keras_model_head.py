@@ -57,6 +57,10 @@ class KerasModelHead(object):
       self._variable_names = [variable.name for variable in variables]
       self._initial_params = [variable.eval() for variable in variables]
 
+      trainable_variables = keras_model.trainable_variables
+      self._trainable_variable_names = [variable.name for variable in trainable_variables]
+	
+
     with tfv1.Session(graph=tf.Graph()) as sess:
       eval_metagraph = tfv1.saved_model.load(sess, ['eval'], saved_model_dir)
       self._eval_signature = eval_metagraph.signature_def.get('eval')
@@ -126,14 +130,15 @@ class KerasModelHead(object):
     labels_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if key.endswith('_target')
+        if 'target' in key
     ]
     if len(bottleneck_names) != 1 or len(labels_names) != 1:
       raise RuntimeError('Unexpected Keras eval signature inputs')
     bottleneck_name = bottleneck_names[0]
     labels_name = labels_names[0]
     loss_name = self._eval_signature.outputs['loss'].name
-
+	
+	
     input_map = {
         bottleneck_name: bottleneck,
         labels_name: labels,
@@ -143,12 +148,16 @@ class KerasModelHead(object):
         name=scope,
         input_map=input_map,
         return_elements=[loss_name])[0]
+    train_variables = [
+        tfv1.get_default_graph().get_tensor_by_name(scope + '/' + name)
+        for name in self._trainable_variable_names
+    ]
     variables = [
         tfv1.get_default_graph().get_tensor_by_name(scope + '/' + name)
         for name in self._variable_names
     ]
     with tf.name_scope(scope + '/backprop'):
-      gradients = tf.gradients(loss, variables, stop_gradients=variables)
+      gradients = tf.gradients(loss, train_variables, stop_gradients=train_variables)
     return loss, gradients, variables
 
   def generate_initial_params(self):
