@@ -26,8 +26,10 @@ extension CVPixelBuffer {
     let imageHeight = CVPixelBufferGetHeight(self)
 
     let pixelBufferType = CVPixelBufferGetPixelFormatType(self)
-
-    assert(pixelBufferType == kCVPixelFormatType_32BGRA)
+    
+    assert(pixelBufferType == kCVPixelFormatType_32BGRA ||
+           pixelBufferType == kCVPixelFormatType_32ARGB ||
+           pixelBufferType == kCVPixelFormatType_32RGBA)
 
     let inputImageRowBytes = CVPixelBufferGetBytesPerRow(self)
     let imageChannels = 4
