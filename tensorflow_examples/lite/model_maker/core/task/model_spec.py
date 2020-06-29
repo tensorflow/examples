@@ -71,7 +71,7 @@ def _get_compat_tf_versions(compat_tf_versions=None):
 def get_num_gpus(num_gpus):
   try:
     tot_num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
-  except TypeError:
+  except tf.errors.NotFoundError:
     tf.compat.v1.logging.warning("Couldn't get the number of gpus.")
     tot_num_gpus = max(0, num_gpus)
   if num_gpus > tot_num_gpus or num_gpus == -1:
