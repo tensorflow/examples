@@ -20,10 +20,12 @@ import functools
 import os
 
 from absl import flags
+import numpy as np
 
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
+from tensorflow_examples.lite.model_maker.core.task import model_util
 
 FLAGS = flags.FLAGS
 
@@ -118,3 +120,19 @@ def get_dataloader(data_size, input_shape, num_classes, max_input_value=1000):
   ds = tf.data.Dataset.from_tensor_slices((features, labels))
   data = dataloader.DataLoader(ds, data_size)
   return data
+
+
+def is_same_output(tflite_file,
+                   keras_model,
+                   input_tensors,
+                   model_spec=None,
+                   atol=1e-04):
+  """Whether the output of TFLite model is the same as keras model."""
+  # Gets output from lite model.
+  lite_runner = model_util.get_lite_runner(tflite_file, model_spec)
+  lite_output = lite_runner.run(input_tensors)
+
+  # Gets output from keras model.
+  keras_output = keras_model.predict_on_batch(input_tensors)
+
+  return np.allclose(lite_output, keras_output, atol=atol)
