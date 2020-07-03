@@ -220,7 +220,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self.assertTrue(os.path.isfile(tflite_output_file))
     self.assertGreater(os.path.getsize(tflite_output_file), 0)
 
-    self._check_label_file(labels_output_file)
+    self.assertFalse(os.path.isfile(labels_output_file))
 
     self.assertTrue(os.path.isfile(json_output_file))
     self.assertGreater(os.path.getsize(json_output_file), 0)

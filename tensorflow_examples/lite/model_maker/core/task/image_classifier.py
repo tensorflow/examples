@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import tempfile
 
 import tensorflow.compat.v2 as tf
 
@@ -296,27 +297,26 @@ class ImageClassifier(classification_model.ClassificationModel):
           export_format=ExportFormat.SAVED_MODEL,
           **kwargs)
 
-    label_filepath = None
-    if ExportFormat.LABEL in export_format:
+    if ExportFormat.TFLITE in export_format:
+      with_metadata = kwargs.get('with_metadata', True)
+      tflite_filepath = os.path.join(export_dir, tflite_filename)
+      self._export_tflite(tflite_filepath, **kwargs)
+    else:
+      with_metadata = False
+
+    if ExportFormat.LABEL in export_format and not with_metadata:
       label_filepath = os.path.join(export_dir, label_filename)
       self._export_labels(label_filepath)
 
-    if ExportFormat.TFLITE in export_format:
-      tflite_filepath = os.path.join(export_dir, tflite_filename)
-      self._export_tflite(tflite_filepath, label_filepath, **kwargs)
-
   def _export_tflite(self,
                      tflite_filepath,
-                     label_filepath=None,
                      quantization_config=None,
                      with_metadata=True,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
-
     Args:
       tflite_filepath: File path to save tflite model.
-      label_filepath: File path to save labels.
       quantization_config: Configuration for post-training quantization.
       with_metadata: Whether the output tflite model contains metadata.
       export_metadata_json_file: Whether to export metadata in json file. If
@@ -326,32 +326,26 @@ class ImageClassifier(classification_model.ClassificationModel):
     model_util.export_tflite(self.model, tflite_filepath, quantization_config,
                              self._gen_dataset)
     if with_metadata:
-      if label_filepath is None:
-        tf.compat.v1.logging.warning(
-            'Label filepath is needed when exporting TFLite with metadata.')
-        return
+      with tempfile.TemporaryDirectory() as temp_dir:
+        tf.compat.v1.logging.info(
+            'Label file is inside the TFLite model with metadata.')
+        label_filepath = os.path.join(temp_dir, 'labels.txt')
+        self._export_labels(label_filepath)
 
-      model_basename = os.path.basename(tflite_filepath)
-      export_directory = os.path.dirname(tflite_filepath)
-      export_model_path = os.path.join(export_directory, model_basename)
-
-      model_info = _get_model_info(
-          self.model_spec,
-          self.num_classes,
-          quantization_config=quantization_config)
-      # Generate the metadata objects and put them in the model file
-      populator = metadata_writer.MetadataPopulatorForImageClassifier(
-          export_model_path, model_info, label_filepath)
-      populator.populate()
+        model_info = _get_model_info(
+            self.model_spec,
+            self.num_classes,
+            quantization_config=quantization_config)
+        # Generate the metadata objects and put them in the model file
+        populator = metadata_writer.MetadataPopulatorForImageClassifier(
+            tflite_filepath, model_info, label_filepath)
+        populator.populate()
 
       # Validate the output model file by reading the metadata and produce
       # a json file with the metadata under the export path
       if export_metadata_json_file:
-        displayer = _metadata.MetadataDisplayer.with_model_file(
-            export_model_path)
-        export_json_file = os.path.join(
-            export_directory,
-            os.path.splitext(model_basename)[0] + '.json')
+        displayer = _metadata.MetadataDisplayer.with_model_file(tflite_filepath)
+        export_json_file = os.path.splitext(tflite_filepath)[0] + '.json'
 
         content = displayer.get_metadata_json()
         with open(export_json_file, 'w') as f:
