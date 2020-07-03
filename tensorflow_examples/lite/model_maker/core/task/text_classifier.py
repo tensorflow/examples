@@ -31,7 +31,8 @@ def create(train_data,
            validation_data=None,
            batch_size=32,
            epochs=3,
-           shuffle=False):
+           shuffle=False,
+           do_train=True):
   """Loads data and train the model for test classification.
 
   Args:
@@ -41,6 +42,7 @@ def create(train_data,
     batch_size: Batch size for training.
     epochs: Number of epochs for training.
     shuffle: Whether the data should be shuffled.
+    do_train: Whether to run training.
 
   Returns:
     TextClassifier
@@ -55,8 +57,11 @@ def create(train_data,
       train_data.num_classes,
       shuffle=shuffle)
 
-  tf.compat.v1.logging.info('Retraining the models...')
-  text_classifier.train(train_data, validation_data, epochs, batch_size)
+  if do_train:
+    tf.compat.v1.logging.info('Retraining the models...')
+    text_classifier.train(train_data, validation_data, epochs, batch_size)
+  else:
+    text_classifier.create_model()
 
   return text_classifier
 
@@ -91,6 +96,9 @@ class TextClassifier(classification_model.ClassificationModel):
         num_classes,
         shuffle,
         train_whole_model=True)
+
+  def create_model(self):
+    self.model = self.model_spec.create_model(self.num_classes)
 
   def train(self, train_data, validation_data=None, epochs=None, batch_size=32):
     """Feeds the training data for training."""

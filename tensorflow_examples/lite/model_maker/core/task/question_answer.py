@@ -25,7 +25,12 @@ from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_util
 
 
-def create(train_data, model_spec, batch_size=32, epochs=2, shuffle=False):
+def create(train_data,
+           model_spec,
+           batch_size=32,
+           epochs=2,
+           shuffle=False,
+           do_train=True):
   """Loads data and train the model for question answer.
 
   Args:
@@ -34,6 +39,7 @@ def create(train_data, model_spec, batch_size=32, epochs=2, shuffle=False):
     batch_size: Batch size for training.
     epochs: Number of epochs for training.
     shuffle: Whether the data should be shuffled.
+    do_train: Whether to run training.
 
   Returns:
     object of QuestionAnswer class.
@@ -44,8 +50,11 @@ def create(train_data, model_spec, batch_size=32, epochs=2, shuffle=False):
 
   model = QuestionAnswer(model_spec, shuffle=shuffle)
 
-  tf.compat.v1.logging.info('Retraining the models...')
-  model.train(train_data, epochs, batch_size)
+  if do_train:
+    tf.compat.v1.logging.info('Retraining the models...')
+    model.train(train_data, epochs, batch_size)
+  else:
+    model.create_model()
 
   return model
 
@@ -72,6 +81,9 @@ class QuestionAnswer(custom_model.CustomModel):
     self.model = self.model_spec.train(train_input_fn, epochs, steps_per_epoch)
 
     return self.model
+
+  def create_model(self):
+    self.model = self.model_spec.create_model()
 
   def evaluate(self,
                data,
@@ -102,9 +114,44 @@ class QuestionAnswer(custom_model.CustomModel):
     input_fn = self._get_dataset_fn(data, predict_batch_size, is_training=False)
     num_steps = int(data.size / predict_batch_size)
     return self.model_spec.evaluate(
-        self.model, input_fn, num_steps, data.examples, data.features,
+        self.model, None, input_fn, num_steps, data.examples, data.features,
         data.squad_file, data.version_2_with_negative, max_answer_length,
         null_score_diff_threshold, verbose_logging, output_dir)
+
+  def evaluate_tflite(self,
+                      tflite_filepath,
+                      data,
+                      max_answer_length=30,
+                      null_score_diff_threshold=0.0,
+                      verbose_logging=False,
+                      output_dir=None):
+    """Evaluate the model.
+
+    Args:
+      tflite_filepath: File path to the TFLite model.
+      data: Data to be evaluated.
+      max_answer_length: The maximum length of an answer that can be generated.
+        This is needed because the start and end predictions are not conditioned
+        on one another.
+      null_score_diff_threshold: If null_score - best_non_null is greater than
+        the threshold, predict null. This is only used for SQuAD v2.
+      verbose_logging: If true, all of the warnings related to data processing
+        will be printed. A number of warnings are expected for a normal SQuAD
+        evaluation.
+      output_dir: The output directory to save output to json files:
+        predictions.json, nbest_predictions.json, null_odds.json. If None, skip
+        saving to json files.
+
+    Returns:
+      A dict contains two metrics: Exact match rate and F1 score.
+    """
+    input_fn = self._get_dataset_fn(
+        data, global_batch_size=1, is_training=False)
+    return self.model_spec.evaluate(
+        None, tflite_filepath, input_fn, data.size, data.examples,
+        data.features, data.squad_file, data.version_2_with_negative,
+        max_answer_length, null_score_diff_threshold, verbose_logging,
+        output_dir)
 
   def export(self,
              export_dir,

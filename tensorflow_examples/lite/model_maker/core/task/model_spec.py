@@ -27,6 +27,7 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import file_util
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
+from tensorflow_examples.lite.model_maker.core.task import model_util
 
 import tensorflow_hub as hub
 from tensorflow_hub import registry
@@ -203,15 +204,11 @@ class AverageWordVecModelSpec(object):
       writer.write(tf_example.SerializeToString())
     writer.close()
 
-  def run_classifier(self, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps, num_classes):
-    """Creates classifier and runs the classifier training."""
-    if epochs is None:
-      epochs = self.default_training_epochs
-
+  def create_model(self, num_classes, optimizer='rmsprop'):
+    """Creates the keras model."""
     # Gets a classifier model.
     model = tf.keras.Sequential([
-        tf.keras.layers.InputLayer(input_shape=[self.seq_len]),
+        tf.keras.layers.InputLayer(input_shape=[self.seq_len], dtype=tf.int32),
         tf.keras.layers.Embedding(
             len(self.vocab), self.wordvec_dim, input_length=self.seq_len),
         tf.keras.layers.GlobalAveragePooling1D(),
@@ -220,6 +217,20 @@ class AverageWordVecModelSpec(object):
         tf.keras.layers.Dense(num_classes, activation='softmax')
     ])
 
+    model.compile(
+        optimizer=optimizer,
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy'])
+
+    return model
+
+  def run_classifier(self, train_input_fn, validation_input_fn, epochs,
+                     steps_per_epoch, validation_steps, num_classes):
+    """Creates classifier and runs the classifier training."""
+    if epochs is None:
+      epochs = self.default_training_epochs
+
+    model = self.create_model(num_classes)
     # Gets training and validation dataset
     train_ds = train_input_fn()
     validation_ds = None
@@ -227,11 +238,6 @@ class AverageWordVecModelSpec(object):
       validation_ds = validation_input_fn()
 
     # Trains the models.
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(),
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy'])
-
     model.fit(
         train_ds,
         epochs=epochs,
@@ -459,6 +465,18 @@ class BertModelSpec(object):
     self.convert_from_saved_model_tf2 = convert_from_saved_model_tf2
     self.is_built = False
 
+  def reorder_input_details(self, tflite_input_details):
+    """Reorders the tflite input details to map the order of keras model."""
+    for detail in tflite_input_details:
+      name = detail['name']
+      if 'input_word_ids' in name:
+        input_word_ids_detail = detail
+      elif 'input_mask' in name:
+        input_mask_detail = detail
+      elif 'input_type_ids' in name:
+        input_type_ids_detail = detail
+    return [input_word_ids_detail, input_mask_detail, input_type_ids_detail]
+
   def build(self):
     """Builds the class. Used for lazy initialization."""
     if self.is_built:
@@ -523,26 +541,15 @@ class BertClassifierModelSpec(BertModelSpec):
 
     return _classification_loss_fn
 
-  def run_classifier(self, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps, num_classes):
-    """Creates classifier and runs the classifier training."""
-
-    warmup_steps = int(epochs * steps_per_epoch * 0.1)
-    initial_lr = self.learning_rate
-
-    def _get_classifier_model():
-      """Gets a classifier model."""
-      classifier_model, core_model = create_classifier_model(
-          self.bert_config,
-          num_classes,
-          self.seq_len,
-          hub_module_url=self.uri,
-          hub_module_trainable=self.trainable,
-          is_tf2=self.is_tf2)
-
-      classifier_model.optimizer = optimization.create_optimizer(
-          initial_lr, steps_per_epoch * epochs, warmup_steps)
-      return classifier_model, core_model
+  def create_model(self, num_classes, optimizer='adam'):
+    """Creates the keras model."""
+    bert_model, _ = create_classifier_model(
+        self.bert_config,
+        num_classes,
+        self.seq_len,
+        hub_module_url=self.uri,
+        hub_module_trainable=self.trainable,
+        is_tf2=self.is_tf2)
 
     loss_fn = self._get_classification_loss_fn(num_classes)
 
@@ -552,16 +559,27 @@ class BertClassifierModelSpec(BertModelSpec):
       return tf.keras.metrics.SparseCategoricalAccuracy(
           'test_accuracy', dtype=tf.float32)
 
+    bert_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[metric_fn()])
+
+    return bert_model
+
+  def run_classifier(self, train_input_fn, validation_input_fn, epochs,
+                     steps_per_epoch, validation_steps, num_classes):
+    """Creates classifier and runs the classifier training."""
+
+    warmup_steps = int(epochs * steps_per_epoch * 0.1)
+    initial_lr = self.learning_rate
+
     with distribution_utils.get_strategy_scope(self.strategy):
       training_dataset = train_input_fn()
       evaluation_dataset = None
       if validation_input_fn is not None:
         evaluation_dataset = validation_input_fn()
-      bert_model, _ = _get_classifier_model()
-      optimizer = bert_model.optimizer
 
-      bert_model.compile(
-          optimizer=optimizer, loss=loss_fn, metrics=[metric_fn()])
+      optimizer = optimization.create_optimizer(initial_lr,
+                                                steps_per_epoch * epochs,
+                                                warmup_steps)
+      bert_model = self.create_model(num_classes, optimizer)
 
     summary_dir = os.path.join(self.model_dir, 'summaries')
     summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
@@ -773,23 +791,18 @@ class BertQAModelSpec(BertModelSpec):
         output_fn=output_fn,
         batch_size=batch_size)
 
+  def create_model(self):
+    qa_model, _ = create_qa_model(
+        self.bert_config,
+        self.seq_len,
+        hub_module_url=self.uri,
+        hub_module_trainable=self.trainable,
+        is_tf2=self.is_tf2)
+    return qa_model
+
   def train(self, train_input_fn, epochs, steps_per_epoch):
     """Run bert QA training."""
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
-
-    def _get_qa_model():
-      """Get QA model and optimizer."""
-      qa_model, core_model = create_qa_model(
-          self.bert_config,
-          self.seq_len,
-          hub_module_url=self.uri,
-          hub_module_trainable=self.trainable,
-          is_tf2=self.is_tf2)
-      optimizer = optimization.create_optimizer(self.learning_rate,
-                                                steps_per_epoch * epochs,
-                                                warmup_steps)
-      qa_model.optimizer = optimizer
-      return qa_model, core_model
 
     def _loss_fn(positions, logits):
       """Get losss function for QA model."""
@@ -799,8 +812,10 @@ class BertQAModelSpec(BertModelSpec):
 
     with distribution_utils.get_strategy_scope(self.strategy):
       training_dataset = train_input_fn()
-      bert_model, _ = _get_qa_model()
-      optimizer = bert_model.optimizer
+      bert_model = self.create_model()
+      optimizer = optimization.create_optimizer(self.learning_rate,
+                                                steps_per_epoch * epochs,
+                                                warmup_steps)
 
       bert_model.compile(
           optimizer=optimizer, loss=_loss_fn, loss_weights=[0.5, 0.5])
@@ -877,13 +892,43 @@ class BertQAModelSpec(BertModelSpec):
     else:
       return self._predict_without_distribute_strategy(model, input_fn)
 
-  def evaluate(self, model, input_fn, num_steps, eval_examples, eval_features,
-               predict_file, version_2_with_negative, max_answer_length,
-               null_score_diff_threshold, verbose_logging, output_dir):
+  def reorder_output_details(self, tflite_output_details):
+    """Reorders the tflite output details to map the order of keras model."""
+    # Swaps the output details since it's change the order.
+    start_logits_detail = tflite_output_details[1]
+    end_logits_detail = tflite_output_details[0]
+    return (start_logits_detail, end_logits_detail)
+
+  def predict_tflite(self, tflite_filepath, input_fn):
+    """Predicts the `input_fn` dataset for TFLite model in `tflite_filepath`."""
+    ds = input_fn()
+    all_results = []
+    lite_runner = model_util.LiteRunner(tflite_filepath,
+                                        self.reorder_input_details,
+                                        self.reorder_output_details)
+    for features, _ in ds:
+      outputs = lite_runner.run(features)
+      for unique_id, start_logits, end_logits in zip(features['unique_ids'],
+                                                     outputs[0], outputs[1]):
+        raw_result = run_squad_helper.RawResult(
+            unique_id=unique_id.numpy(),
+            start_logits=start_logits.tolist(),
+            end_logits=end_logits.tolist())
+        all_results.append(raw_result)
+        if len(all_results) % 100 == 0:
+          tf.compat.v1.logging.info('Made predictions for %d records.',
+                                    len(all_results))
+    return all_results
+
+  def evaluate(self, model, tflite_filepath, input_fn, num_steps, eval_examples,
+               eval_features, predict_file, version_2_with_negative,
+               max_answer_length, null_score_diff_threshold, verbose_logging,
+               output_dir):
     """Evaluate QA model.
 
     Args:
-      model: The model to be evaluated.
+      model: The keras model to be evaluated.
+      tflite_filepath: File path to the TFLite model.
       input_fn: Function that returns a tf.data.Dataset used for evaluation.
       num_steps: Number of steps to evaluate the model.
       eval_examples: List of `squad_lib.SquadExample` for evaluation data.
@@ -906,7 +951,17 @@ class BertQAModelSpec(BertModelSpec):
     Returns:
       A dict contains two metrics: Exact match rate and F1 score.
     """
-    all_results = self.predict(model, input_fn, num_steps)
+    if model is not None and tflite_filepath is not None:
+      raise ValueError('Exactly one of the paramaters `model` and '
+                       '`tflite_filepath` should be set.')
+    elif model is None and tflite_filepath is None:
+      raise ValueError('At least one of the parameters `model` and '
+                       '`tflite_filepath` are None.')
+
+    if tflite_filepath is not None:
+      all_results = self.predict_tflite(tflite_filepath, input_fn)
+    else:
+      all_results = self.predict(model, input_fn, num_steps)
 
     all_predictions, all_nbest_json, scores_diff_json = (
         squad_lib.postprocess_output(

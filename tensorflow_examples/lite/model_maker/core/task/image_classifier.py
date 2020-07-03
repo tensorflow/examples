@@ -56,7 +56,8 @@ def create(train_data,
            use_augmentation=False,
            use_hub_library=True,
            warmup_steps=None,
-           model_dir=None):
+           model_dir=None,
+           do_train=True):
   """Loads data and retrains the model based on data for image classification.
 
   Args:
@@ -84,6 +85,7 @@ def create(train_data,
       steps in two epochs. Only used when `use_hub_library` is False.
     model_dir: The location of the model checkpoint files. Only used when
       `use_hub_library` is False.
+    do_train: Whether to run training.
 
   Returns:
     An instance of ImageClassifier class.
@@ -118,8 +120,12 @@ def create(train_data,
       hparams=hparams,
       use_augmentation=use_augmentation)
 
-  tf.compat.v1.logging.info('Retraining the models...')
-  image_classifier.train(train_data, validation_data)
+  if do_train:
+    tf.compat.v1.logging.info('Retraining the models...')
+    image_classifier.train(train_data, validation_data)
+  else:
+    # Used in evaluation.
+    image_classifier.create_model(with_loss_and_metrics=True)
 
   return image_classifier
 
@@ -194,7 +200,6 @@ class ImageClassifier(classification_model.ClassificationModel):
           self).__init__(model_spec, index_to_label, num_classes, shuffle,
                          hparams.do_fine_tuning)
     self.hparams = hparams
-    self.model = self._create_model()
     self.preprocessor = image_preprocessing.Preprocessor(
         self.model_spec.input_image_shape,
         num_classes,
@@ -203,15 +208,24 @@ class ImageClassifier(classification_model.ClassificationModel):
         use_augmentation=use_augmentation)
     self.history = None  # Training history that returns from `keras_model.fit`.
 
-  def _create_model(self, hparams=None):
+  def _get_tflite_input_tensors(self, input_tensors):
+    """Gets the input tensors for the TFLite model."""
+    return input_tensors
+
+  def create_model(self, hparams=None, with_loss_and_metrics=False):
     """Creates the classifier model for retraining."""
     hparams = self._get_hparams_or_default(hparams)
 
     module_layer = hub_loader.HubKerasLayerV1V2(
         self.model_spec.uri, trainable=hparams.do_fine_tuning)
-    return hub_lib.build_model(module_layer, hparams,
-                               self.model_spec.input_image_shape,
-                               self.num_classes)
+    self.model = hub_lib.build_model(module_layer, hparams,
+                                     self.model_spec.input_image_shape,
+                                     self.num_classes)
+    if with_loss_and_metrics:
+      # Adds loss and metrics in the keras model.
+      self.model.compile(
+          loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
+          metrics=['accuracy'])
 
   def train(self, train_data, validation_data=None, hparams=None):
     """Feeds the training data for training.
@@ -225,6 +239,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
     """
+    self.create_model()
     hparams = self._get_hparams_or_default(hparams)
 
     train_ds = self._gen_dataset(

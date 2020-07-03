@@ -30,15 +30,9 @@ from tensorflow_examples.lite.model_maker.core.task import text_classifier
 
 
 class TextClassifierTest(tf.test.TestCase):
-  TEXT_PER_CLASS = 20
   TEST_LABELS_AND_TEXT = (('pos', 'super good'), ('neg', 'really bad.'))
 
-  def _gen(self):
-    for i, (_, text) in enumerate(self.TEST_LABELS_AND_TEXT):
-      for _ in range(self.TEXT_PER_CLASS):
-        yield text, i
-
-  def _gen_text_dir(self):
+  def _gen_text_dir(self, text_per_class=20):
     text_dir = os.path.join(self.get_temp_dir(), 'random_text_dir')
     if os.path.exists(text_dir):
       return text_dir
@@ -47,7 +41,7 @@ class TextClassifierTest(tf.test.TestCase):
     for class_name, text in self.TEST_LABELS_AND_TEXT:
       class_subdir = os.path.join(text_dir, class_name)
       os.mkdir(class_subdir)
-      for i in range(self.TEXT_PER_CLASS):
+      for i in range(text_per_class):
         with open(os.path.join(class_subdir, '%d.txt' % i), 'w') as f:
           f.write(text)
     return text_dir
@@ -55,6 +49,7 @@ class TextClassifierTest(tf.test.TestCase):
   def setUp(self):
     super(TextClassifierTest, self).setUp()
     self.text_dir = self._gen_text_dir()
+    self.tiny_text_dir = self._gen_text_dir(text_per_class=1)
 
   @test_util.test_in_tf_1
   def test_average_wordvec_model_create_v1_incompatible(self):
@@ -71,9 +66,9 @@ class TextClassifierTest(tf.test.TestCase):
   def test_bert_model(self):
     model_spec = ms.BertClassifierModelSpec(seq_len=2, trainable=False)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
-        self.text_dir, model_spec=model_spec)
-    # Splits data, 90% data for training, 10% for testing
-    self.train_data, self.test_data = all_data.split(0.9)
+        self.tiny_text_dir, model_spec=model_spec)
+    # Splits data, 50% data for training, 50% for testing
+    self.train_data, self.test_data = all_data.split(0.5)
 
     model = text_classifier.create(
         self.train_data,
@@ -81,7 +76,9 @@ class TextClassifierTest(tf.test.TestCase):
         epochs=1,
         batch_size=1,
         shuffle=True)
-    self._test_accuracy(model, 0.5)
+    self._test_accuracy(model, 0.0)
+    self._test_export_to_tflite(model, threshold=0.0)
+    self._test_model_without_training(model_spec)
 
   @test_util.test_in_tf_2
   def test_mobilebert_model(self):
@@ -89,9 +86,9 @@ class TextClassifierTest(tf.test.TestCase):
     model_spec.seq_len = 2
     model_spec.trainable = False
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
-        self.text_dir, model_spec=model_spec)
-    # Splits data, 90% data for training, 10% for testing
-    self.train_data, self.test_data = all_data.split(0.9)
+        self.tiny_text_dir, model_spec=model_spec)
+    # Splits data, 50% data for training, 50% for testing
+    self.train_data, self.test_data = all_data.split(0.5)
 
     model = text_classifier.create(
         self.train_data,
@@ -99,10 +96,10 @@ class TextClassifierTest(tf.test.TestCase):
         epochs=1,
         batch_size=1,
         shuffle=True)
-    self._test_accuracy(model, 0.5)
+    self._test_accuracy(model, 0.0)
     error_message = 'Couldn\'t convert MobileBert to TFLite for now.'
     with self.assertRaises(ValueError) as error:
-      self._test_export_to_tflite(model, test_predict_accuracy=False)
+      self._test_export_to_tflite(model, threshold=0.0)
     self.assertEqual(error_message, str(error.exception))
 
     with self.assertRaises(ValueError) as error:
@@ -129,10 +126,18 @@ class TextClassifierTest(tf.test.TestCase):
     self._test_export_to_saved_model(model)
     self._test_export_labels(model)
     self._test_export_vocab(model)
+    self._test_model_without_training(model_spec)
+
+  def _test_model_without_training(self, model_spec):
+    # Test without retraining.
+    model = text_classifier.create(
+        self.train_data, model_spec=model_spec, do_train=False)
+    self._test_accuracy(model, threshold=0.0)
+    self._test_export_to_tflite(model, threshold=0.0)
 
   def _test_accuracy(self, model, threshold=1.0):
     _, accuracy = model.evaluate(self.test_data)
-    self.assertEqual(accuracy, threshold)
+    self.assertGreaterEqual(accuracy, threshold)
 
   def _test_predict_top_k(self, model):
     topk = model.predict_top_k(self.test_data, batch_size=4)
@@ -148,23 +153,6 @@ class TextClassifierTest(tf.test.TestCase):
   def _load_labels(self, filepath):
     with tf.io.gfile.GFile(filepath, 'r') as f:
       return [label.strip('\n') for label in f]
-
-  def _load_lite_model(self, filepath):
-    self.assertTrue(os.path.isfile(filepath))
-    with tf.io.gfile.GFile(filepath, 'rb') as f:
-      model_content = f.read()
-    interpreter = tf.lite.Interpreter(model_content=model_content)
-
-    def lite_model(text):
-      interpreter.allocate_tensors()
-      input_index = interpreter.get_input_details()[0]['index']
-      input_shape = interpreter.get_input_details()[0]['shape']
-      interpreter.set_tensor(input_index, tf.reshape(text, input_shape))
-      interpreter.invoke()
-      output_index = interpreter.get_output_details()[0]['index']
-      return interpreter.get_tensor(output_index)
-
-    return lite_model
 
   def _test_export_labels(self, model):
     labels_output_file = os.path.join(self.get_temp_dir(), 'labels.txt')
@@ -189,20 +177,37 @@ class TextClassifierTest(tf.test.TestCase):
     actual_index = [index for word, index in word_index[3:]]
     self.assertEqual(actual_index, expected_index)
 
-  def _test_export_to_tflite(self, model, test_predict_accuracy=True):
+  def _test_export_to_tflite(self, model, threshold=1.0):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
     model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
 
     self.assertTrue(tf.io.gfile.exists(tflite_output_file))
     self.assertGreater(os.path.getsize(tflite_output_file), 0)
 
-    if test_predict_accuracy:
-      lite_model = self._load_lite_model(tflite_output_file)
-      for x, y in self.test_data.dataset:
-        input_batch = tf.cast(x, tf.float32)
-        output_batch = lite_model(input_batch)
-        prediction = np.argmax(output_batch[0])
-        self.assertEqual(y, prediction)
+    result = model.evaluate_tflite(tflite_output_file, self.test_data)
+    self.assertGreaterEqual(result['accuracy'], threshold)
+
+    spec = model.model_spec
+    if isinstance(spec, ms.AverageWordVecModelSpec):
+      random_inputs = np.random.randint(
+          low=0, high=len(spec.vocab), size=(1, spec.seq_len), dtype=np.int32)
+    elif isinstance(spec, ms.BertClassifierModelSpec):
+      input_word_ids = np.random.randint(
+          low=0,
+          high=len(spec.tokenizer.vocab),
+          size=(1, spec.seq_len),
+          dtype=np.int32)
+      input_mask = np.random.randint(
+          low=0, high=2, size=(1, spec.seq_len), dtype=np.int32)
+      input_type_ids = np.random.randint(
+          low=0, high=2, size=(1, spec.seq_len), dtype=np.int32)
+      random_inputs = (input_word_ids, input_mask, input_type_ids)
+    else:
+      raise ValueError('Unsupported model_spec type: %s' % str(type(spec)))
+
+    self.assertTrue(
+        test_util.is_same_output(tflite_output_file, model.model, random_inputs,
+                                 spec))
 
   def _test_export_to_saved_model(self, model):
     save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')

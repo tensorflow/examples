@@ -110,6 +110,13 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite_with_metadata(
         model, expected_json_file='efficientnet_lite0_metadata.json')
 
+  @test_util.test_in_tf_1and2
+  def test_efficientnetlite0_model_without_training(self):
+    model = image_classifier.create(
+        self.train_data, model_spec.efficientnet_lite0_spec, do_train=False)
+    self._test_accuracy(model, threshold=0.0)
+    self._test_export_to_tflite(model, threshold=0.0)
+
   @test_util.test_in_tf_2
   def test_resnet_50_model(self):
     model = image_classifier.create(
@@ -130,59 +137,32 @@ class ImageClassifierTest(tf.test.TestCase):
       self.assertEqual(model.index_to_label[label], predict_label)
       self.assertGreater(predict_prob, threshold)
 
-  def _test_accuracy(self, model, threashold=0.8):
+  def _test_accuracy(self, model, threshold=0.8):
     _, accuracy = model.evaluate(self.test_data)
-    self.assertGreater(accuracy, threashold)
+    self.assertGreater(accuracy, threshold)
 
   def _load_labels(self, filename):
     with tf.io.gfile.GFile(filename, 'r') as f:
       return [label.strip() for label in f]
-
-  def _load_lite_model(self, filename):
-    self.assertTrue(os.path.isfile(filename))
-    with tf.io.gfile.GFile(filename, 'rb') as f:
-      model_content = f.read()
-    interpreter = tf.lite.Interpreter(model_content=model_content)
-
-    def lite_model(images):
-      interpreter.allocate_tensors()
-      input_index = interpreter.get_input_details()[0]['index']
-      interpreter.set_tensor(input_index, images)
-      interpreter.invoke()
-      output_index = interpreter.get_output_details()[0]['index']
-      return interpreter.get_tensor(output_index)
-
-    return lite_model
 
   def _test_export_labels(self, model):
     labels_output_file = os.path.join(self.get_temp_dir(), 'labels.txt')
     model.export(self.get_temp_dir(), export_format=ExportFormat.LABEL)
     self._check_label_file(labels_output_file)
 
-  def _test_export_to_tflite(self, model):
+  def _test_export_to_tflite(self, model, threshold=1.0):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
 
     model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
-    lite_model = self._load_lite_model(tflite_output_file)
 
-    test_ds = model._gen_dataset(
-        self.test_data, batch_size=1, is_training=False)
-    if compat.get_tf_behavior() == 1:
-      iterator = test_ds.make_one_shot_iterator()
-      image_tensor, label_tensor = iterator.get_next()
-      with tf.compat.v1.Session() as sess:
-        for _ in range(self.test_data.size):
-          image, label = sess.run((image_tensor, label_tensor))
-          output_batch = lite_model(image)
-          prediction = np.argmax(output_batch[0])
-          label = np.argmax(label[0])
-          self.assertEqual(label, prediction)
-    else:
-      for image, label in test_ds:
-        output_batch = lite_model(image.numpy())
-        prediction = np.argmax(output_batch[0])
-        label = np.argmax(label.numpy()[0])
-        self.assertEqual(label, prediction)
+    result = model.evaluate_tflite(tflite_output_file, self.test_data)
+    self.assertGreaterEqual(result['accuracy'], threshold)
+
+    random_input = np.random.uniform(
+        size=[1] + model.model_spec.input_image_shape + [3]).astype(np.float32)
+    self.assertTrue(
+        test_util.is_same_output(tflite_output_file, model.model, random_input,
+                                 model.model_spec))
 
   def _test_export_to_tflite_quantized(self, model, representative_data):
     # Just test whether quantization will crash, can't guarantee the result.
