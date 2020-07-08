@@ -15,7 +15,7 @@ limitations under the License.
 package org.tensorflow.lite.examples.bertqa.ui;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import org.tensorflow.lite.examples.bertqa.R;
