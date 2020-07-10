@@ -26,7 +26,7 @@ extension CVPixelBuffer {
     let imageHeight = CVPixelBufferGetHeight(self)
 
     let pixelBufferType = CVPixelBufferGetPixelFormatType(self)
- 
+
     assert(pixelBufferType == kCVPixelFormatType_32BGRA ||
            pixelBufferType == kCVPixelFormatType_32ARGB)
 
