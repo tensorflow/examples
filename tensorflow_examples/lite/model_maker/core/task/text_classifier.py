@@ -29,7 +29,7 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 def create(train_data,
            model_spec=ms.AverageWordVecModelSpec(),
            validation_data=None,
-           batch_size=32,
+           batch_size=None,
            epochs=3,
            shuffle=False,
            do_train=True):
@@ -100,8 +100,14 @@ class TextClassifier(classification_model.ClassificationModel):
   def create_model(self):
     self.model = self.model_spec.create_model(self.num_classes)
 
-  def train(self, train_data, validation_data=None, epochs=None, batch_size=32):
+  def train(self,
+            train_data,
+            validation_data=None,
+            epochs=None,
+            batch_size=None):
     """Feeds the training data for training."""
+    if batch_size is None:
+      batch_size = self.model_spec.default_batch_size
     train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
         train_data, batch_size, is_training=True)
     validation_input_fn, validation_steps = self._get_input_fn_and_steps(
@@ -122,10 +128,6 @@ class TextClassifier(classification_model.ClassificationModel):
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
     """
-    # TODO(b/151761399): Removes these lines.
-    if hasattr(self.model_spec, 'uri') and 'mobilebert' in self.model_spec.uri:
-      raise ValueError('Couldn\'t convert MobileBert to TFLite for now.')
-
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
     model_util.export_tflite(self.model, tflite_filepath, quantization_config,

@@ -27,7 +27,7 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 
 def create(train_data,
            model_spec,
-           batch_size=32,
+           batch_size=None,
            epochs=2,
            shuffle=False,
            do_train=True):
@@ -73,8 +73,10 @@ class QuestionAnswer(custom_model.CustomModel):
     # also moved to DataLoader part.
     return raw_text, label
 
-  def train(self, train_data, epochs=None, batch_size=32):
+  def train(self, train_data, epochs=None, batch_size=None):
     """Feeds the training data for training."""
+    if batch_size is None:
+      batch_size = self.model_spec.default_batch_size
     train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
         train_data, batch_size, is_training=True)
 

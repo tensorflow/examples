@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import os
 
-from absl.testing import parameterized
 import numpy as np
 import tensorflow as tf
 
@@ -48,19 +47,17 @@ def _get_data(model_spec, version):
   return train_data, validation_data
 
 
-class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
+class QuestionAnswerTest(tf.test.TestCase):
 
   @test_util.test_in_tf_1
   def test_bert_model_v1_incompatible(self):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
       _ = ms.BertQAModelSpec(trainable=False)
 
-  @parameterized.parameters(
-      ('1.1'),
-      ('2.0'),
-  )
   @test_util.test_in_tf_2
-  def test_bert_model(self, version):
+  def test_bert_model(self):
+    # Only test squad1.1 since it takes too long time for this.
+    version = '1.1'
     model_spec = ms.BertQAModelSpec(trainable=False, predict_batch_size=1)
     train_data, validation_data = _get_data(model_spec, version)
     model = question_answer.create(
@@ -77,6 +74,19 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
     # Test without retraining.
     model = question_answer.create(
         train_data, model_spec=model_spec, do_train=False)
+    self._test_f1_score(model, validation_data, 0.0)
+    self._test_export_to_tflite(model, validation_data)
+
+  @test_util.test_in_tf_2
+  def test_mobilebert_model(self):
+    # Only test squad1.1 since it takes too long time for this.
+    version = '1.1'
+    model_spec = ms.mobilebert_qa_spec
+    model_spec.trainable = False
+    model_spec.predict_batch_size = 1
+    train_data, validation_data = _get_data(model_spec, version)
+    model = question_answer.create(
+        train_data, model_spec=model_spec, epochs=1, batch_size=1)
     self._test_f1_score(model, validation_data, 0.0)
     self._test_export_to_tflite(model, validation_data)
 

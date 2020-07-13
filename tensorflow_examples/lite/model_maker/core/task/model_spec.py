@@ -149,6 +149,7 @@ class AverageWordVecModelSpec(object):
   compat_tf_versions = _get_compat_tf_versions(2)
   need_gen_vocab = True
   default_training_epochs = 2
+  default_batch_size = 32
   convert_from_saved_model_tf2 = False
 
   def __init__(self,
@@ -392,6 +393,7 @@ class BertModelSpec(object):
 
   compat_tf_versions = _get_compat_tf_versions(2)
   need_gen_vocab = False
+  default_batch_size = 32
 
   def __init__(
       self,
@@ -698,7 +700,8 @@ class BertQAModelSpec(BertModelSpec):
       trainable=True,
       predict_batch_size=8,
       do_lower_case=True,
-      is_tf2=True):
+      is_tf2=True,
+      convert_from_saved_model_tf2=False):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -726,11 +729,14 @@ class BertQAModelSpec(BertModelSpec):
       do_lower_case: boolean, whether to lower case the input text. Should be
         True for uncased models and False for cased models.
       is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
+      convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF
+        2.x.
     """
-    super(BertQAModelSpec, self).__init__(uri, model_dir, seq_len, dropout_rate,
-                                          initializer_range, learning_rate,
-                                          distribution_strategy, num_gpus, tpu,
-                                          trainable, do_lower_case, is_tf2)
+    super(BertQAModelSpec,
+          self).__init__(uri, model_dir, seq_len, dropout_rate,
+                         initializer_range, learning_rate,
+                         distribution_strategy, num_gpus, tpu, trainable,
+                         do_lower_case, is_tf2, convert_from_saved_model_tf2)
     self.query_len = query_len
     self.doc_stride = doc_stride
     self.predict_batch_size = predict_batch_size
@@ -995,6 +1001,15 @@ mobilebert_classifier_spec = BertClassifierModelSpec(
     is_tf2=False,
     distribution_strategy='off',
     convert_from_saved_model_tf2=True)
+mobilebert_classifier_spec.default_batch_size = 48
+
+mobilebert_qa_spec = BertQAModelSpec(
+    uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
+    is_tf2=False,
+    distribution_strategy='off',
+    convert_from_saved_model_tf2=True,
+    learning_rate=5e-05)
+mobilebert_qa_spec.default_batch_size = 48
 
 
 # A dict for model specs to make it accessible by string key.
@@ -1010,7 +1025,8 @@ MODEL_SPECS = {
     'bert': BertModelSpec,
     'bert_classifier': BertClassifierModelSpec,
     'bert_qa': BertQAModelSpec,
-    'mobilebert_classifier': mobilebert_classifier_spec
+    'mobilebert_classifier': mobilebert_classifier_spec,
+    'mobilebert_qa': mobilebert_qa_spec,
 }
 
 # List constants for supported models.
@@ -1021,7 +1037,7 @@ IMAGE_CLASSIFICATION_MODELS = [
 TEXT_CLASSIFICATION_MODELS = [
     'bert_classifier', 'average_word_vec', 'mobilebert_classifier'
 ]
-QUESTION_ANSWERING_MODELS = ['bert_qa']
+QUESTION_ANSWERING_MODELS = ['bert_qa', 'mobilebert_qa']
 
 
 def get(spec_or_str):
