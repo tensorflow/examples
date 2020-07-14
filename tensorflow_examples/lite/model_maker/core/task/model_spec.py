@@ -72,8 +72,7 @@ def _get_compat_tf_versions(compat_tf_versions=None):
 def get_num_gpus(num_gpus):
   try:
     tot_num_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
-  except tf.errors.NotFoundError:
-    tf.compat.v1.logging.warning("Couldn't get the number of gpus.")
+  except (tf.errors.NotFoundError, tf.errors.InternalError):
     tot_num_gpus = max(0, num_gpus)
   if num_gpus > tot_num_gpus or num_gpus == -1:
     num_gpus = tot_num_gpus
@@ -380,6 +379,7 @@ def create_classifier_model(bert_config,
       num_labels,
       kernel_initializer=initializer,
       name='output',
+      activation='softmax',
       dtype=tf.float32)(
           output)
 
@@ -527,22 +527,6 @@ class BertClassifierModelSpec(BertModelSpec):
     classifier_data_lib.file_based_convert_examples_to_features(
         examples, label_names, self.seq_len, self.tokenizer, tfrecord_file)
 
-  def _get_classification_loss_fn(self, num_classes):
-    """Gets the classification loss function."""
-
-    def _classification_loss_fn(labels, logits):
-      """Classification loss."""
-      labels = tf.squeeze(labels)
-      log_probs = tf.nn.log_softmax(logits, axis=-1)
-      one_hot_labels = tf.one_hot(
-          tf.cast(labels, dtype=tf.int32), depth=num_classes, dtype=tf.float32)
-      per_example_loss = -tf.reduce_sum(
-          tf.cast(one_hot_labels, dtype=tf.float32) * log_probs, axis=-1)
-      loss = tf.reduce_mean(per_example_loss)
-      return loss
-
-    return _classification_loss_fn
-
   def create_model(self, num_classes, optimizer='adam'):
     """Creates the keras model."""
     bert_model, _ = create_classifier_model(
@@ -553,15 +537,16 @@ class BertClassifierModelSpec(BertModelSpec):
         hub_module_trainable=self.trainable,
         is_tf2=self.is_tf2)
 
-    loss_fn = self._get_classification_loss_fn(num_classes)
-
     # Defines evaluation metrics function, which will create metrics in the
     # correct device and strategy scope.
     def metric_fn():
       return tf.keras.metrics.SparseCategoricalAccuracy(
           'test_accuracy', dtype=tf.float32)
 
-    bert_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[metric_fn()])
+    bert_model.compile(
+        optimizer=optimizer,
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+        metrics=[metric_fn()])
 
     return bert_model
 
