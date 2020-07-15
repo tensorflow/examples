@@ -49,7 +49,7 @@ git clone https://github.com/tensorflow/models/
 cd models/research
 python3 setup.py build && python3 setup.py install
 ```
-* Download the MobileNet SSD trained on **[Open Images v4](https://storage.googleapis.com/openimages/web/factsfigures_v4.html)** **[here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md)**. Extract the pretrained TensorFlow model files.
+* Download the MobileNet SSD trained on **[Open Images v4](https://storage.googleapis.com/openimages/web/factsfigures_v4.html)** **[here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1_detection_zoo.md)**. Extract the pretrained TensorFlow model files.
 * Go to `models/research` directory and execute this code to get the frozen TensorFlow Lite graph.
 ```
 python3 object_detection/export_tflite_ssd_graph.py \
