@@ -80,7 +80,7 @@ function build_smartreply_aar {
   /usr/bin/gcc -v
   bazel version  # Get bazel version info.
   # Add --sandbox_debug to provide more info for testing.
-  bazel build --sandbox_debug //libs/cc/...
+  bazel build --sandbox_debug //libs/cc/... //libs/cc:smartreply_runtime_aar
   bazel test //libs/cc/...
 
   popd > /dev/null
