@@ -41,7 +41,7 @@ and
 to demonstrate the use of both floating point and
 [quantized](https://www.tensorflow.org/lite/performance/post_training_quantization)
 models. After the introduction of the
-[TensorFlow Lite Android Support Library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/support/java),
+[TensorFlow Lite Android Support Library](https://github.com/tensorflow/tflite-support/tree/master/tensorflow_lite_support/java)
 these subclasses mainly contain settings rather than processing logic.
 
 The `Classifier` class implements a static method, `create`, which is used to
