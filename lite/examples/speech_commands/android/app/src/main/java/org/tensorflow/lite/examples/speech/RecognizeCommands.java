@@ -124,7 +124,9 @@ public class RecognizeCommands {
     }
 
     /// refresh previous results buffer by adding new results and removing out of date results
-    previousResults = RefreshPreviousResultsBuffer(previousResults, averageWindowDurationMs, currentResults, currentTimeMS);
+    previousResults =
+        RefreshPreviousResultsBuffer(
+            previousResults, averageWindowDurationMs, currentResults, currentTimeMS);
 
     howManyResults = previousResults.size();
 
@@ -188,10 +190,15 @@ public class RecognizeCommands {
     return new RecognitionResult(currentTopLabel, currentTopScore, isNewCommand);
   }
 
-  public static Deque<Pair<Long, float[]>> RefreshPreviousResultsBuffer(Deque<Pair<Long, float[]>> previousResultsDeque, long averageWindowDurationMs, float[] currentResults, long currentTimeMS) {
+  public static Deque<Pair<Long, float[]>> RefreshPreviousResultsBuffer(
+      Deque<Pair<Long, float[]>> previousResultsDeque,
+      long averageWindowDurationMs,
+      float[] currentResults,
+      long currentTimeMS) {
 
     // Add the latest results to the head of the queue.
-    // Use clone to set by value, rather than reference, preventing new result overwriting old values
+    // Use clone to set by value, rather than reference, preventing new result overwriting old
+    // values
     previousResultsDeque.addLast(new Pair<Long, float[]>(currentTimeMS, currentResults.clone()));
 
     // Prune any earlier results that are too old for the averaging window.
@@ -203,6 +210,4 @@ public class RecognizeCommands {
 
     return previousResultsDeque;
   }
-
-
 }
