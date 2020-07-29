@@ -26,7 +26,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'tensorflow>=2.0.0rc0',
-        'Pillow>=6.2.2,<7.0',
+        'Pillow>=7.1.0',
         'scipy>=1.3.0,<2.0',
     ],
     entry_points={
