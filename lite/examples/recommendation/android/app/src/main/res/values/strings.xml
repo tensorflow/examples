@@ -1,0 +1,5 @@
+<resources>
+  <string name="tfe_re_app_name" translatable="false">TFL Recommendation</string>
+  <string name="tfe_re_instruction_text" translatable="false">Please select your favorite movies.</string>
+  <string name="tfe_re_recommendation_text" translatable="false">Our recommendation for you:</string>
+</resources>
