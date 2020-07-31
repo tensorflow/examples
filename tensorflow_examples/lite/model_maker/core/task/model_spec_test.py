@@ -222,9 +222,9 @@ class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
                                          maxval=num_classes,
                                          dtype=tf.dtypes.int32)
       x = {
-          'input_ids': batched_input_ids,
+          'input_word_ids': batched_input_ids,
           'input_mask': batched_input_mask,
-          'segment_ids': batched_segment_ids
+          'input_type_ids': batched_segment_ids
       }
       y = batched_labels
 
