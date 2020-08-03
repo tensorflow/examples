@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import json
 import os
-import time
 
 from absl import app
 from absl import flags
@@ -237,7 +236,7 @@ def main(_):
         epochs=FLAGS.num_epochs,
         eval_steps=FLAGS.num_eval_steps)
   elif FLAGS.run_mode == 'export':
-    export_dir = os.path.join(FLAGS.model_dir, 'export', str(int(time.time())))
+    export_dir = os.path.join(FLAGS.model_dir, 'export')
     logger.info('Exporting model to dir: {}'.format(export_dir))
     export(
         checkpoint_path=FLAGS.checkpoint_path,
