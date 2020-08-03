@@ -88,7 +88,7 @@ class QuestionAnswerTest(tf.test.TestCase):
     model = question_answer.create(
         train_data, model_spec=model_spec, epochs=1, batch_size=1)
     self._test_f1_score(model, validation_data, 0.0)
-    self._test_export_to_tflite(model, validation_data)
+    self._test_export_to_tflite(model, validation_data, atol=1e-02)
 
   def _test_f1_score(self, model, validation_data, threshold):
     metric = model.evaluate(validation_data)
@@ -101,7 +101,11 @@ class QuestionAnswerTest(tf.test.TestCase):
     self.assertTrue(os.path.isfile(vocab_output_file))
     self.assertGreater(os.path.getsize(vocab_output_file), 0)
 
-  def _test_export_to_tflite(self, model, validation_data, threshold=0.0):
+  def _test_export_to_tflite(self,
+                             model,
+                             validation_data,
+                             threshold=0.0,
+                             atol=1e-04):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
     model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
 
@@ -124,8 +128,12 @@ class QuestionAnswerTest(tf.test.TestCase):
     random_inputs = (input_word_ids, input_mask, input_type_ids)
 
     self.assertTrue(
-        test_util.is_same_output(tflite_output_file, model.model, random_inputs,
-                                 model.model_spec))
+        test_util.is_same_output(
+            tflite_output_file,
+            model.model,
+            random_inputs,
+            model.model_spec,
+            atol=atol))
 
   def _test_export_to_saved_model(self, model):
     save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')

@@ -686,7 +686,8 @@ class BertQAModelSpec(BertModelSpec):
       predict_batch_size=8,
       do_lower_case=True,
       is_tf2=True,
-      convert_from_saved_model_tf2=False):
+      convert_from_saved_model_tf2=False,
+      tflite_output_name=None):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -716,6 +717,7 @@ class BertQAModelSpec(BertModelSpec):
       is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
       convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF
         2.x.
+      tflite_output_name: Dict, output names for the TFLite model.
     """
     super(BertQAModelSpec,
           self).__init__(uri, model_dir, seq_len, dropout_rate,
@@ -725,6 +727,12 @@ class BertQAModelSpec(BertModelSpec):
     self.query_len = query_len
     self.doc_stride = doc_stride
     self.predict_batch_size = predict_batch_size
+    if tflite_output_name is None:
+      tflite_output_name = {
+          'start_logits': 'Identity_1',
+          'end_logits': 'Identity'
+      }
+    self.tflite_output_name = tflite_output_name
 
   def get_name_to_features(self, is_training):
     """Gets the dictionary describing the features."""
@@ -885,9 +893,12 @@ class BertQAModelSpec(BertModelSpec):
 
   def reorder_output_details(self, tflite_output_details):
     """Reorders the tflite output details to map the order of keras model."""
-    # Swaps the output details since it's change the order.
-    start_logits_detail = tflite_output_details[1]
-    end_logits_detail = tflite_output_details[0]
+    for detail in tflite_output_details:
+      name = detail['name']
+      if self.tflite_output_name['start_logits'] == name:
+        start_logits_detail = detail
+      if self.tflite_output_name['end_logits'] == name:
+        end_logits_detail = detail
     return (start_logits_detail, end_logits_detail)
 
   def predict_tflite(self, tflite_filepath, input_fn):
@@ -993,7 +1004,11 @@ mobilebert_qa_spec = BertQAModelSpec(
     is_tf2=False,
     distribution_strategy='off',
     convert_from_saved_model_tf2=True,
-    learning_rate=5e-05)
+    learning_rate=5e-05,
+    tflite_output_name={
+        'start_logits': 'StatefulPartitionedCall:1',
+        'end_logits': 'StatefulPartitionedCall:0'
+    })
 mobilebert_qa_spec.default_batch_size = 48
 
 
