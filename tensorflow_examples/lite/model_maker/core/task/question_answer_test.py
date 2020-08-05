@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import os
 
+from absl.testing import parameterized
 import numpy as np
 import tensorflow as tf
 
@@ -47,7 +48,7 @@ def _get_data(model_spec, version):
   return train_data, validation_data
 
 
-class QuestionAnswerTest(tf.test.TestCase):
+class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
 
   @test_util.test_in_tf_1
   def test_bert_model_v1_incompatible(self):
@@ -77,11 +78,15 @@ class QuestionAnswerTest(tf.test.TestCase):
     self._test_f1_score(model, validation_data, 0.0)
     self._test_export_to_tflite(model, validation_data)
 
+  @parameterized.parameters(
+      ('mobilebert_qa'),
+      ('mobilebert_qa_squad'),
+  )
   @test_util.test_in_tf_2
-  def test_mobilebert_model(self):
+  def test_mobilebert_model(self, spec):
     # Only test squad1.1 since it takes too long time for this.
     version = '1.1'
-    model_spec = ms.mobilebert_qa_spec
+    model_spec = ms.get(spec)
     model_spec.trainable = False
     model_spec.predict_batch_size = 1
     train_data, validation_data = _get_data(model_spec, version)

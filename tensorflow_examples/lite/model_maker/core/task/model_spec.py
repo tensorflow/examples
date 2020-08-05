@@ -666,6 +666,55 @@ def create_qa_model(bert_config,
       network=bert_encoder, initializer=initializer), bert_encoder
 
 
+def create_qa_model_from_squad(max_seq_length,
+                               hub_module_url,
+                               hub_module_trainable=True,
+                               is_tf2=False):
+  """Creates QA model the initialized from the model retrained on Squad dataset.
+
+  Args:
+    max_seq_length: integer, the maximum input sequence length.
+    hub_module_url: TF-Hub path/url to Bert module that's retrained on Squad
+      dataset.
+    hub_module_trainable: True to finetune layers in the hub module.
+    is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
+
+  Returns:
+    Keras model that outputs start logits and end logits.
+  """
+  if is_tf2:
+    raise ValueError('Only supports to load TensorFlow 1.x hub module.')
+
+  input_word_ids = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_word_ids')
+  input_mask = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_mask')
+  input_type_ids = tf.keras.layers.Input(
+      shape=(max_seq_length,), dtype=tf.int32, name='input_type_ids')
+
+  squad_bert = hub_loader.HubKerasLayerV1V2(
+      hub_module_url,
+      signature='squad',
+      signature_outputs_as_dict=True,
+      trainable=hub_module_trainable)
+
+  outputs = squad_bert({
+      'input_ids': input_word_ids,
+      'input_mask': input_mask,
+      'segment_ids': input_type_ids
+  })
+  start_logits = tf.keras.layers.Lambda(
+      tf.identity, name='start_positions')(
+          outputs['start_logits'])
+  end_logits = tf.keras.layers.Lambda(
+      tf.identity, name='end_positions')(
+          outputs['end_logits'])
+
+  return tf.keras.Model(
+      inputs=[input_word_ids, input_mask, input_type_ids],
+      outputs=[start_logits, end_logits])
+
+
 class BertQAModelSpec(BertModelSpec):
   """A specification of BERT model for question answering."""
 
@@ -687,7 +736,8 @@ class BertQAModelSpec(BertModelSpec):
       do_lower_case=True,
       is_tf2=True,
       convert_from_saved_model_tf2=False,
-      tflite_output_name=None):
+      tflite_output_name=None,
+      init_from_squad_model=False):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -718,6 +768,8 @@ class BertQAModelSpec(BertModelSpec):
       convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF
         2.x.
       tflite_output_name: Dict, output names for the TFLite model.
+      init_from_squad_model: boolean, whether to initialize from the model that
+        is already retrained on Squad 1.1.
     """
     super(BertQAModelSpec,
           self).__init__(uri, model_dir, seq_len, dropout_rate,
@@ -733,6 +785,7 @@ class BertQAModelSpec(BertModelSpec):
           'end_logits': 'Identity'
       }
     self.tflite_output_name = tflite_output_name
+    self.init_from_squad_model = init_from_squad_model
 
   def get_name_to_features(self, is_training):
     """Gets the dictionary describing the features."""
@@ -791,13 +844,18 @@ class BertQAModelSpec(BertModelSpec):
         batch_size=batch_size)
 
   def create_model(self):
-    qa_model, _ = create_qa_model(
-        self.bert_config,
-        self.seq_len,
-        hub_module_url=self.uri,
-        hub_module_trainable=self.trainable,
-        is_tf2=self.is_tf2)
-    return qa_model
+    """Creates the model for qa task."""
+    if self.init_from_squad_model:
+      return create_qa_model_from_squad(self.seq_len, self.uri, self.trainable,
+                                        self.is_tf2)
+    else:
+      qa_model, _ = create_qa_model(
+          self.bert_config,
+          self.seq_len,
+          hub_module_url=self.uri,
+          hub_module_trainable=self.trainable,
+          is_tf2=self.is_tf2)
+      return qa_model
 
   def train(self, train_input_fn, epochs, steps_per_epoch):
     """Run bert QA training."""
@@ -1011,6 +1069,18 @@ mobilebert_qa_spec = BertQAModelSpec(
     })
 mobilebert_qa_spec.default_batch_size = 48
 
+mobilebert_qa_squad_spec = BertQAModelSpec(
+    uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/squadv1/1',
+    is_tf2=False,
+    distribution_strategy='off',
+    convert_from_saved_model_tf2=True,
+    learning_rate=5e-05,
+    tflite_output_name={
+        'start_logits': 'StatefulPartitionedCall:1',
+        'end_logits': 'StatefulPartitionedCall:0'
+    },
+    init_from_squad_model=True)
+mobilebert_qa_squad_spec.default_batch_size = 48
 
 # A dict for model specs to make it accessible by string key.
 MODEL_SPECS = {
@@ -1027,6 +1097,7 @@ MODEL_SPECS = {
     'bert_qa': BertQAModelSpec,
     'mobilebert_classifier': mobilebert_classifier_spec,
     'mobilebert_qa': mobilebert_qa_spec,
+    'mobilebert_qa_squad': mobilebert_qa_squad_spec,
 }
 
 # List constants for supported models.
@@ -1037,7 +1108,7 @@ IMAGE_CLASSIFICATION_MODELS = [
 TEXT_CLASSIFICATION_MODELS = [
     'bert_classifier', 'average_word_vec', 'mobilebert_classifier'
 ]
-QUESTION_ANSWERING_MODELS = ['bert_qa', 'mobilebert_qa']
+QUESTION_ANSWERING_MODELS = ['bert_qa', 'mobilebert_qa', 'mobilebert_qa_squad']
 
 
 def get(spec_or_str):
