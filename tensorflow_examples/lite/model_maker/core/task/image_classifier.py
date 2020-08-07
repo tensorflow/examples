@@ -242,6 +242,12 @@ class ImageClassifier(classification_model.ClassificationModel):
     self.create_model()
     hparams = self._get_hparams_or_default(hparams)
 
+    if train_data.size < hparams.batch_size:
+      raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
+                       'than batch_size (%d). To solve this problem, set '
+                       'the batch_size smaller or increase the size of the '
+                       'train_data.' % (train_data.size, hparams.batch_size))
+
     train_ds = self._gen_dataset(
         train_data, hparams.batch_size, is_training=True)
     train_data_and_size = (train_ds, train_data.size)
