@@ -54,15 +54,16 @@ classifiers = [
     'Topic :: Software Development :: Libraries',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
-VERSION_PREFIX = '0.1.0'  # Version prefix, usually major.minor.micro.
+
 if nightly:
   project_name = '{}-nightly'.format(project_name)
-  version = '{:s}.dev{:s}'.format(VERSION_PREFIX, datestring)
+  version = '0.1.2'  # Version prefix, usually major.minor.micro.
+  version = '{:s}.dev{:s}'.format(version, datestring)
   classifiers += [
       'Development Status :: 4 - Beta',
   ]
 else:
-  version = VERSION_PREFIX
+  version = '0.1.1'
 
 # Path to folder model_maker.
 BASE_DIR = pathlib.Path(os.path.abspath(__file__)).parents[1]
