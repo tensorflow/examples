@@ -15,20 +15,20 @@ model for on-device ML applications.
 
 ## Installation
 
-Two alternative methods to install Model Maker library with its dependencies.
+There are two ways to install Model Maker.
 
-*   Install directly.
+*   Install a prebuilt pip package.
 
 ```shell
-pip install git+https://github.com/tensorflow/examples.git#egg=tensorflow-examples[model_maker]
+pip install tflite-model-maker
 ```
 
-*   Clone the repo from the HEAD, and then install with pip.
+*   Clone the source code from GitHub and install.
 
 ```shell
 git clone https://github.com/tensorflow/examples
-cd examples
-pip install .[model_maker]
+cd examples/tensorflow_examples/lite/model_maker/pip_package
+pip install -e .
 ```
 
 ## End-to-End Example
@@ -64,8 +64,10 @@ model.export(export_dir='/tmp/')
 
 ## Notebook
 
-Currently, we support image classification and text classification tasks and
-provide demo code and colab for each of them in demo folder.
+Currently, we support image classification, text classification and question
+answer tasks. Meanwhile, we provide demo code for each of them in demo folder.
 
+*   [Overview for Tensorflow Lite Model Maker](https://www.tensorflow.org/lite/guide/model_maker)
 *   [Colab for image classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_image_classification.ipynb)
 *   [Colab for text classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_text_classification.ipynb)
+*   [Colab for question answer](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_question_answer.ipynb)
