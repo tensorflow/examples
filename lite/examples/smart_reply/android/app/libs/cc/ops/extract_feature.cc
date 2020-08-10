@@ -60,6 +60,7 @@ bool IsValidNgram(const tflite::StringRef& strref) {
 
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   const TfLiteTensor* input = GetInput(context, node, 0);
+  TF_LITE_ENSURE(context, input != nullptr);
   int dim = input->dims->data[0];
   if (dim == 0) {
     // TFLite non-string output should have size greater than 0.
@@ -77,9 +78,12 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
 
 TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   const TfLiteTensor* input = GetInput(context, node, 0);
+  TF_LITE_ENSURE(context, input != nullptr);
   int num_strings = tflite::GetStringCount(input);
   TfLiteTensor* label = GetOutput(context, node, 0);
+  TF_LITE_ENSURE(context, label != nullptr);
   TfLiteTensor* weight = GetOutput(context, node, 1);
+  TF_LITE_ENSURE(context, weight != nullptr);
 
   std::map<int64_t, int> feature_id_counts;
   for (int i = 0; i < num_strings; i++) {
