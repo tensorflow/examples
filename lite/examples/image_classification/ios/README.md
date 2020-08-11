@@ -52,7 +52,7 @@ You can build it and run with the iPhone Simulator, but the app will raise a
     https://github.com/tensorflow/examples.git`
 
 2.  Install the pod to generate the workspace file: `bash cd
-    examples/lite/examples/image_classification/ios pod install`
+    examples/lite/examples/image_classification/ios && pod install`
 
 Note: If you have installed this pod before and that command doesn't work, try
 `pod update`.
