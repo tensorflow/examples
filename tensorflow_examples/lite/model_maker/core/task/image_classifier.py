@@ -145,15 +145,12 @@ def _get_model_info(model_spec,
   name = model_spec.name
   if quantization_config:
     name += '_quantized'
-    # TODO(yuqili): Remove `compat.get_tf_behavior() == 1` once b/153576655 is
-    # fixed.
-    if compat.get_tf_behavior() == 1:
-      if quantization_config.inference_input_type == tf.uint8:
-        image_min = 0
-        image_max = 255
-      elif quantization_config.inference_input_type == tf.int8:
-        image_min = -128
-        image_max = 127
+    if quantization_config.inference_input_type == tf.uint8:
+      image_min = 0
+      image_max = 255
+    elif quantization_config.inference_input_type == tf.int8:
+      image_min = -128
+      image_max = 127
 
   return metadata_writer.ModelSpecificInfo(
       model_spec.name,
