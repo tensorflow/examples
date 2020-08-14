@@ -883,6 +883,11 @@ class BertQAModelSpec(BertModelSpec):
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         checkpoint_path, save_weights_only=True)
 
+    if not bert_model.trainable_variables:
+      tf.compat.v1.logging.warning(
+          'Trainable variables in the model are empty.')
+      return bert_model
+
     bert_model.fit(
         x=training_dataset,
         steps_per_epoch=steps_per_epoch,

@@ -79,16 +79,15 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
     self._test_export_to_tflite(model, validation_data)
 
   @parameterized.parameters(
-      ('mobilebert_qa'),
-      ('mobilebert_qa_squad'),
+      ('mobilebert_qa', False),
+      ('mobilebert_qa_squad', True),
   )
   @test_util.test_in_tf_2
-  def test_mobilebert_model(self, spec):
-    self.skipTest('TODO(b/164095081): Fix breakage and re-enable')
+  def test_mobilebert_model(self, spec, trainable):
     # Only test squad1.1 since it takes too long time for this.
     version = '1.1'
     model_spec = ms.get(spec)
-    model_spec.trainable = False
+    model_spec.trainable = trainable
     model_spec.predict_batch_size = 1
     train_data, validation_data = _get_data(model_spec, version)
     model = question_answer.create(
