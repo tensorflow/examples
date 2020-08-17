@@ -56,10 +56,10 @@ class KerasModelHead(object):
       variables = tfv1.global_variables()
       self._variable_names = [variable.name for variable in variables]
       self._initial_params = [variable.eval() for variable in variables]
-
       trainable_variables = keras_model.trainable_variables
-      self._trainable_variable_names = [variable.name for variable in trainable_variables]
-	
+      self._trainable_variable_names = [
+          variable.name for variable in trainable_variables
+      ]
 
     with tfv1.Session(graph=tf.Graph()) as sess:
       eval_metagraph = tfv1.saved_model.load(sess, ['eval'], saved_model_dir)
@@ -91,13 +91,12 @@ class KerasModelHead(object):
       (predictions tensor, list of variable placeholders)
     """
     input_name = next(self._predict_signature.inputs.values().__iter__()).name
-    output_name = (
-        next(self._predict_signature.outputs.values().__iter__()).name)
-    output = tf.import_graph_def(
-        self._frozen_graph_def,
-        name=scope,
-        input_map={input_name: bottleneck},
-        return_elements=[output_name])[0]
+    output_name = (next(
+        self._predict_signature.outputs.values().__iter__()).name)
+    output = tf.import_graph_def(self._frozen_graph_def,
+                                 name=scope,
+                                 input_map={input_name: bottleneck},
+                                 return_elements=[output_name])[0]
     variable_tensors = [
         tfv1.get_default_graph().get_tensor_by_name(scope + '/' + name)
         for name in self._variable_names
@@ -125,29 +124,26 @@ class KerasModelHead(object):
     bottleneck_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if 'input' in key
+        if key.endswith('_input') or key.startswith('input_')
     ]
     labels_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if 'target' in key
+        if key.endswith('_target') or key.startswith('target_')
     ]
     if len(bottleneck_names) != 1 or len(labels_names) != 1:
       raise RuntimeError('Unexpected Keras eval signature inputs')
     bottleneck_name = bottleneck_names[0]
     labels_name = labels_names[0]
     loss_name = self._eval_signature.outputs['loss'].name
-	
-	
     input_map = {
         bottleneck_name: bottleneck,
         labels_name: labels,
     }
-    loss = tf.import_graph_def(
-        self._frozen_graph_def,
-        name=scope,
-        input_map=input_map,
-        return_elements=[loss_name])[0]
+    loss = tf.import_graph_def(self._frozen_graph_def,
+                               name=scope,
+                               input_map=input_map,
+                               return_elements=[loss_name])[0]
     train_variables = [
         tfv1.get_default_graph().get_tensor_by_name(scope + '/' + name)
         for name in self._trainable_variable_names
@@ -157,7 +153,9 @@ class KerasModelHead(object):
         for name in self._variable_names
     ]
     with tf.name_scope(scope + '/backprop'):
-      gradients = tf.gradients(loss, train_variables, stop_gradients=train_variables)
+      gradients = tf.gradients(loss,
+                               train_variables,
+                               stop_gradients=train_variables)
     return loss, gradients, variables
 
   def generate_initial_params(self):
@@ -204,19 +202,18 @@ class KerasModelHead(object):
         for output in self._eval_signature.outputs.values()
     ]
 
-    freeze_graph.freeze_graph(
-        input_graph=None,
-        input_saver=False,
-        input_binary=True,
-        input_checkpoint=None,
-        output_node_names=','.join(output_names),
-        restore_op_name=None,
-        filename_tensor_name=None,
-        output_graph=graph_def_file_name,
-        clear_devices=True,
-        initializer_nodes='',
-        input_saved_model_dir=saved_model_dir,
-        saved_model_tags='eval')
+    freeze_graph.freeze_graph(input_graph=None,
+                              input_saver=False,
+                              input_binary=True,
+                              input_checkpoint=None,
+                              output_node_names=','.join(output_names),
+                              restore_op_name=None,
+                              filename_tensor_name=None,
+                              output_graph=graph_def_file_name,
+                              clear_devices=True,
+                              initializer_nodes='',
+                              input_saved_model_dir=saved_model_dir,
+                              saved_model_tags='eval')
 
     const_graph_def = tfv1.GraphDef()
     with open(graph_def_file_name, 'rb') as graph_def_file:
