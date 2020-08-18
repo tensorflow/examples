@@ -182,7 +182,7 @@ In `ClassifierFloatMobileNet`, the normalized parameters are defined as:
 
 ```java
 private static final float PROBABILITY_MEAN = 0.0f;
-private static final float PROBABILITY_MEAN = 1.0f;
+private static final float PROBABILITY_STD = 1.0f;
 ```
 
 #### Run inference
