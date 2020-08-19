@@ -57,7 +57,7 @@ extension UIImage {
       index += 1
     }
     if isQuantized { return Data(scaledBytes) }
-    let scaledFloats = scaledBytes.map { Float32($0) / Constant.maxRGBValue }
+    let scaledFloats = scaledBytes.map { (Float32($0) - Constant.imageMean) / Constant.imageStd }
     return Data(copyingBufferOf: scaledFloats)
   }
 
@@ -204,5 +204,6 @@ extension Data {
 private enum Constant {
   static let jpegCompressionQuality: CGFloat = 0.8
   static let alphaComponent = (baseOffset: 4, moduloRemainder: 3)
-  static let maxRGBValue: Float32 = 255.0
+  static let imageMean: Float32 = 127.5
+  static let imageStd: Float32 = 127.5
 }

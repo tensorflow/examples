@@ -56,7 +56,9 @@ static const char kEndToken[] = "<E>";
 static const int32_t kMaxInputChars = 300;
 
 TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
-  tflite::StringRef input = tflite::GetString(GetInput(context, node, 0), 0);
+  const TfLiteTensor* input_tensor = GetInput(context, node, 0);
+  TF_LITE_ENSURE(context, input_tensor != nullptr);
+  tflite::StringRef input = tflite::GetString(input_tensor, 0);
 
   string result(absl::AsciiStrToLower(absl::string_view(input.str, input.len)));
   absl::StripAsciiWhitespace(&result);

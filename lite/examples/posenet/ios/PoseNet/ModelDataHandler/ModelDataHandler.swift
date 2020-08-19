@@ -182,7 +182,6 @@ class ModelDataHandler {
       * Model.input.channelSize
     guard
       let inputData = thumbnail.rgbData(
-        byteCount: byteCount,
         isModelQuantized: Model.isQuantized
       )
     else {

@@ -1,1 +1,2 @@
+rootProject.name = 'TFLite BERT Q&A Demo App'
 include ':app'

@@ -20,7 +20,9 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow.compat.v2 as tf
+from tensorflow_examples.lite.model_maker.core.data_util import data_util
 from tensorflow_examples.lite.model_maker.core.task import custom_model
+from tensorflow_examples.lite.model_maker.core.task import model_util
 
 
 class ClassificationModel(custom_model.CustomModel):
@@ -90,3 +92,38 @@ class ClassificationModel(custom_model.CustomModel):
     tf.compat.v1.logging.info('Saving labels in %s.', label_filepath)
     with tf.io.gfile.GFile(label_filepath, 'w') as f:
       f.write('\n'.join(self.index_to_label))
+
+  def evaluate_tflite(self, tflite_filepath, data):
+    """Evaluates the tflite model.
+
+    Args:
+      tflite_filepath: File path to the TFLite model.
+      data: Data to be evaluated.
+
+    Returns:
+      The evaluation result of TFLite model - accuracy.
+    """
+
+    ds = self._gen_dataset(data, batch_size=1, is_training=False)
+
+    predictions, labels = [], []
+
+    lite_runner = model_util.get_lite_runner(tflite_filepath, self.model_spec)
+    for i, (feature, label) in enumerate(data_util.generate_elements(ds)):
+      log_steps = 1000
+      tf.compat.v1.logging.log_every_n(tf.compat.v1.logging.INFO,
+                                       'Processing example: #%d\n%s', log_steps,
+                                       i, feature)
+
+      probabilities = lite_runner.run(feature)[0]
+      predictions.append(np.argmax(probabilities))
+
+      # Gets the ground-truth labels.
+      label = label[0]
+      if label.size > 1:  # one-hot tensor.
+        label = np.argmax(label)
+      labels.append(label)
+
+    predictions, labels = np.array(predictions), np.array(labels)
+    result = {'accuracy': (predictions == labels).mean()}
+    return result

@@ -21,12 +21,34 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 
 # Finds all <example_name>/android directories under lite/examples.
 # Runs the android build script for each of those directories.
+#
+# If two number arguments are provided, interpret them as "Part $1 of $2".
+# That is, split the app_dir_list into $2 parts, and only run the $1-th part.
 function build_android_examples {
-  # In case the one of the build fails, overwrite the exit code to 255, in order
-  # to make xargs to terminate early and stop processing the remaining builds.
-  find "${EXAMPLES_DIR}" -mindepth 2 -maxdepth 2 -type d -name android -print0 \
-    | xargs -0 -n1 -I{} bash -c \
-        "${SCRIPT_DIR}/build_android_app.sh \"{}\" || exit 255"
+  # NOTE: This script breaks if there are any spaces in the full path.
+  app_dir_list=( $(find "${EXAMPLES_DIR}" -mindepth 2 -maxdepth 2 -type d -name android | sort) )
+  target_list=( "${app_dir_list[@]}" )
+
+  num_re="^[0-9]+$"
+  if [[ "$1" =~ $num_re ]] && [[ "$2" =~ $num_re ]] && (( $1 <= $2 )); then
+    total=${#app_dir_list[@]}
+    batch_size=$(( $total / $2 ))
+    start=$(( $batch_size * ($1 - 1) ))
+    length=$batch_size
+
+    # Make sure to process all the remainder if this is the last batch.
+    if (( $1 == $2 )); then
+      length=$(( $length + $total % $2 ))
+    fi
+
+    # Take the sublist.
+    target_list=( "${app_dir_list[@]:$start:$length}" )
+  fi
+
+  # Run the builds in sequence.
+  for app_dir in "${target_list[@]}"; do
+    "${SCRIPT_DIR}/build_android_app.sh" "${app_dir}"
+  done
 }
 
-build_android_examples
+build_android_examples "$@"

@@ -55,6 +55,8 @@ public class LegacyCameraConnectionFragment extends Fragment {
   private int layout;
   /** An {@link AutoFitTextureView} for camera preview. */
   private AutoFitTextureView textureView;
+  private SurfaceTexture availableSurfaceTexture = null;
+
   /**
    * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a {@link
    * TextureView}.
@@ -64,41 +66,8 @@ public class LegacyCameraConnectionFragment extends Fragment {
         @Override
         public void onSurfaceTextureAvailable(
             final SurfaceTexture texture, final int width, final int height) {
-
-          int index = getCameraId();
-          camera = Camera.open(index);
-
-          try {
-            Camera.Parameters parameters = camera.getParameters();
-            List<String> focusModes = parameters.getSupportedFocusModes();
-            if (focusModes != null
-                && focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-              parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            }
-            List<Camera.Size> cameraSizes = parameters.getSupportedPreviewSizes();
-            Size[] sizes = new Size[cameraSizes.size()];
-            int i = 0;
-            for (Camera.Size size : cameraSizes) {
-              sizes[i++] = new Size(size.width, size.height);
-            }
-            Size previewSize =
-                CameraConnectionFragment.chooseOptimalSize(
-                    sizes, desiredSize.getWidth(), desiredSize.getHeight());
-            parameters.setPreviewSize(previewSize.getWidth(), previewSize.getHeight());
-            camera.setDisplayOrientation(90);
-            camera.setParameters(parameters);
-            camera.setPreviewTexture(texture);
-          } catch (IOException exception) {
-            camera.release();
-          }
-
-          camera.setPreviewCallbackWithBuffer(imageListener);
-          Camera.Size s = camera.getParameters().getPreviewSize();
-          camera.addCallbackBuffer(new byte[ImageUtils.getYUVByteSize(s.height, s.width)]);
-
-          textureView.setAspectRatio(s.height, s.width);
-
-          camera.startPreview();
+          availableSurfaceTexture = texture;
+          startCamera();
         }
 
         @Override
@@ -149,7 +118,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
     // the SurfaceTextureListener).
 
     if (textureView.isAvailable()) {
-      camera.startPreview();
+      startCamera();
     } else {
       textureView.setSurfaceTextureListener(surfaceTextureListener);
     }
@@ -177,6 +146,43 @@ public class LegacyCameraConnectionFragment extends Fragment {
     } catch (final InterruptedException e) {
       LOGGER.e(e, "Exception!");
     }
+  }
+
+  private void startCamera() {
+    int index = getCameraId();
+    camera = Camera.open(index);
+
+    try {
+      Camera.Parameters parameters = camera.getParameters();
+      List<String> focusModes = parameters.getSupportedFocusModes();
+      if (focusModes != null
+              && focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+      }
+      List<Camera.Size> cameraSizes = parameters.getSupportedPreviewSizes();
+      Size[] sizes = new Size[cameraSizes.size()];
+      int i = 0;
+      for (Camera.Size size : cameraSizes) {
+        sizes[i++] = new Size(size.width, size.height);
+      }
+      Size previewSize =
+              CameraConnectionFragment.chooseOptimalSize(
+                      sizes, desiredSize.getWidth(), desiredSize.getHeight());
+      parameters.setPreviewSize(previewSize.getWidth(), previewSize.getHeight());
+      camera.setDisplayOrientation(90);
+      camera.setParameters(parameters);
+      camera.setPreviewTexture(availableSurfaceTexture);
+    } catch (IOException exception) {
+      camera.release();
+    }
+
+    camera.setPreviewCallbackWithBuffer(imageListener);
+    Camera.Size s = camera.getParameters().getPreviewSize();
+    camera.addCallbackBuffer(new byte[ImageUtils.getYUVByteSize(s.height, s.width)]);
+
+    textureView.setAspectRatio(s.height, s.width);
+
+    camera.startPreview();
   }
 
   protected void stopCamera() {

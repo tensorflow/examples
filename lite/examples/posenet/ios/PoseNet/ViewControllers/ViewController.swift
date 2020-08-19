@@ -121,7 +121,7 @@ class ViewController: UIViewController {
     }
 
     do {
-      modelDataHandler = try ModelDataHandler(threadCount: changedCount)
+      modelDataHandler = try ModelDataHandler(threadCount: changedCount, delegate: delegate)
     } catch let error {
       fatalError(error.localizedDescription)
     }

@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import tempfile
 
 import tensorflow.compat.v2 as tf
 
@@ -55,7 +56,8 @@ def create(train_data,
            use_augmentation=False,
            use_hub_library=True,
            warmup_steps=None,
-           model_dir=None):
+           model_dir=None,
+           do_train=True):
   """Loads data and retrains the model based on data for image classification.
 
   Args:
@@ -83,6 +85,7 @@ def create(train_data,
       steps in two epochs. Only used when `use_hub_library` is False.
     model_dir: The location of the model checkpoint files. Only used when
       `use_hub_library` is False.
+    do_train: Whether to run training.
 
   Returns:
     An instance of ImageClassifier class.
@@ -117,8 +120,12 @@ def create(train_data,
       hparams=hparams,
       use_augmentation=use_augmentation)
 
-  tf.compat.v1.logging.info('Retraining the models...')
-  image_classifier.train(train_data, validation_data)
+  if do_train:
+    tf.compat.v1.logging.info('Retraining the models...')
+    image_classifier.train(train_data, validation_data)
+  else:
+    # Used in evaluation.
+    image_classifier.create_model(with_loss_and_metrics=True)
 
   return image_classifier
 
@@ -138,15 +145,12 @@ def _get_model_info(model_spec,
   name = model_spec.name
   if quantization_config:
     name += '_quantized'
-    # TODO(yuqili): Remove `compat.get_tf_behavior() == 1` once b/153576655 is
-    # fixed.
-    if compat.get_tf_behavior() == 1:
-      if quantization_config.inference_input_type == tf.uint8:
-        image_min = 0
-        image_max = 255
-      elif quantization_config.inference_input_type == tf.int8:
-        image_min = -128
-        image_max = 127
+    if quantization_config.inference_input_type == tf.uint8:
+      image_min = 0
+      image_max = 255
+    elif quantization_config.inference_input_type == tf.int8:
+      image_min = -128
+      image_max = 127
 
   return metadata_writer.ModelSpecificInfo(
       model_spec.name,
@@ -193,7 +197,6 @@ class ImageClassifier(classification_model.ClassificationModel):
           self).__init__(model_spec, index_to_label, num_classes, shuffle,
                          hparams.do_fine_tuning)
     self.hparams = hparams
-    self.model = self._create_model()
     self.preprocessor = image_preprocessing.Preprocessor(
         self.model_spec.input_image_shape,
         num_classes,
@@ -202,15 +205,24 @@ class ImageClassifier(classification_model.ClassificationModel):
         use_augmentation=use_augmentation)
     self.history = None  # Training history that returns from `keras_model.fit`.
 
-  def _create_model(self, hparams=None):
+  def _get_tflite_input_tensors(self, input_tensors):
+    """Gets the input tensors for the TFLite model."""
+    return input_tensors
+
+  def create_model(self, hparams=None, with_loss_and_metrics=False):
     """Creates the classifier model for retraining."""
     hparams = self._get_hparams_or_default(hparams)
 
     module_layer = hub_loader.HubKerasLayerV1V2(
         self.model_spec.uri, trainable=hparams.do_fine_tuning)
-    return hub_lib.build_model(module_layer, hparams,
-                               self.model_spec.input_image_shape,
-                               self.num_classes)
+    self.model = hub_lib.build_model(module_layer, hparams,
+                                     self.model_spec.input_image_shape,
+                                     self.num_classes)
+    if with_loss_and_metrics:
+      # Adds loss and metrics in the keras model.
+      self.model.compile(
+          loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
+          metrics=['accuracy'])
 
   def train(self, train_data, validation_data=None, hparams=None):
     """Feeds the training data for training.
@@ -224,7 +236,14 @@ class ImageClassifier(classification_model.ClassificationModel):
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
     """
+    self.create_model()
     hparams = self._get_hparams_or_default(hparams)
+
+    if train_data.size < hparams.batch_size:
+      raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
+                       'than batch_size (%d). To solve this problem, set '
+                       'the batch_size smaller or increase the size of the '
+                       'train_data.' % (train_data.size, hparams.batch_size))
 
     train_ds = self._gen_dataset(
         train_data, hparams.batch_size, is_training=True)
@@ -296,27 +315,26 @@ class ImageClassifier(classification_model.ClassificationModel):
           export_format=ExportFormat.SAVED_MODEL,
           **kwargs)
 
-    label_filepath = None
-    if ExportFormat.LABEL in export_format:
+    if ExportFormat.TFLITE in export_format:
+      with_metadata = kwargs.get('with_metadata', True)
+      tflite_filepath = os.path.join(export_dir, tflite_filename)
+      self._export_tflite(tflite_filepath, **kwargs)
+    else:
+      with_metadata = False
+
+    if ExportFormat.LABEL in export_format and not with_metadata:
       label_filepath = os.path.join(export_dir, label_filename)
       self._export_labels(label_filepath)
 
-    if ExportFormat.TFLITE in export_format:
-      tflite_filepath = os.path.join(export_dir, tflite_filename)
-      self._export_tflite(tflite_filepath, label_filepath, **kwargs)
-
   def _export_tflite(self,
                      tflite_filepath,
-                     label_filepath=None,
                      quantization_config=None,
                      with_metadata=True,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
-
     Args:
       tflite_filepath: File path to save tflite model.
-      label_filepath: File path to save labels.
       quantization_config: Configuration for post-training quantization.
       with_metadata: Whether the output tflite model contains metadata.
       export_metadata_json_file: Whether to export metadata in json file. If
@@ -326,32 +344,26 @@ class ImageClassifier(classification_model.ClassificationModel):
     model_util.export_tflite(self.model, tflite_filepath, quantization_config,
                              self._gen_dataset)
     if with_metadata:
-      if label_filepath is None:
-        tf.compat.v1.logging.warning(
-            'Label filepath is needed when exporting TFLite with metadata.')
-        return
+      with tempfile.TemporaryDirectory() as temp_dir:
+        tf.compat.v1.logging.info(
+            'Label file is inside the TFLite model with metadata.')
+        label_filepath = os.path.join(temp_dir, 'labels.txt')
+        self._export_labels(label_filepath)
 
-      model_basename = os.path.basename(tflite_filepath)
-      export_directory = os.path.dirname(tflite_filepath)
-      export_model_path = os.path.join(export_directory, model_basename)
-
-      model_info = _get_model_info(
-          self.model_spec,
-          self.num_classes,
-          quantization_config=quantization_config)
-      # Generate the metadata objects and put them in the model file
-      populator = metadata_writer.MetadataPopulatorForImageClassifier(
-          export_model_path, model_info, label_filepath)
-      populator.populate()
+        model_info = _get_model_info(
+            self.model_spec,
+            self.num_classes,
+            quantization_config=quantization_config)
+        # Generate the metadata objects and put them in the model file
+        populator = metadata_writer.MetadataPopulatorForImageClassifier(
+            tflite_filepath, model_info, label_filepath)
+        populator.populate()
 
       # Validate the output model file by reading the metadata and produce
       # a json file with the metadata under the export path
       if export_metadata_json_file:
-        displayer = _metadata.MetadataDisplayer.with_model_file(
-            export_model_path)
-        export_json_file = os.path.join(
-            export_directory,
-            os.path.splitext(model_basename)[0] + '.json')
+        displayer = _metadata.MetadataDisplayer.with_model_file(tflite_filepath)
+        export_json_file = os.path.splitext(tflite_filepath)[0] + '.json'
 
         content = displayer.get_metadata_json()
         with open(export_json_file, 'w') as f:

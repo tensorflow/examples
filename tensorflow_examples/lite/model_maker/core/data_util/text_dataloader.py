@@ -56,11 +56,12 @@ def _load(tfrecord_file, meta_data_file, model_spec, is_training=None):
   return dataset, meta_data
 
 
-def _get_cache_filenames(cache_dir, model_spec, data_name):
+def _get_cache_filenames(cache_dir, model_spec, data_name, is_training):
   """Gets cache tfrecord filename, metada filename and prefix of filenames."""
   hasher = hashlib.md5()
   hasher.update(data_name.encode('utf-8'))
   hasher.update(str(model_spec.get_config()).encode('utf-8'))
+  hasher.update(str(is_training).encode('utf-8'))
   cache_prefix = os.path.join(cache_dir, hasher.hexdigest())
   cache_tfrecord_file = cache_prefix + '.tfrecord'
   cache_meta_data_file = cache_prefix + '_meta_data'
@@ -74,12 +75,12 @@ def _write_meta_data(meta_data_file, meta_data):
     json.dump(meta_data, f)
 
 
-def _get_cache_info(cache_dir, data_name, model_spec):
+def _get_cache_info(cache_dir, data_name, model_spec, is_training):
   """Gets cache related information: whether is cached, related filenames."""
   if cache_dir is None:
     cache_dir = tempfile.mkdtemp()
   tfrecord_file, meta_data_file, file_prefix = _get_cache_filenames(
-      cache_dir, model_spec, data_name)
+      cache_dir, model_spec, data_name, is_training)
   is_cached = tf.io.gfile.exists(tfrecord_file) and tf.io.gfile.exists(
       meta_data_file)
 
@@ -292,7 +293,7 @@ class TextClassifierDataLoader(dataloader.DataLoader):
   def _get_cache_info(cls, cache_dir, data_name, model_spec, is_training):
     """Gets cache related information for text classifier."""
     is_cached, tfrecord_file, meta_data_file, file_prefix = _get_cache_info(
-        cache_dir, data_name, model_spec)
+        cache_dir, data_name, model_spec, is_training)
 
     vocab_file = file_prefix + '_vocab'
     if is_cached:
@@ -346,7 +347,7 @@ class QuestionAnswerDataLoader(dataloader.DataLoader):
     """
     file_base_name = os.path.basename(filename)
     is_cached, tfrecord_file, meta_data_file, _ = _get_cache_info(
-        cache_dir, file_base_name, model_spec)
+        cache_dir, file_base_name, model_spec, is_training)
     # If cached, directly loads data from cache directory.
     if is_cached and is_training:
       dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec,

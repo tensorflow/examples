@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:orientation="horizontal"
+    android:layout_alignParentStart="true"
+    android:baselineAligned="false">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:layout_margin="@dimen/movie_item_margin">
+
+    <Switch
+        android:id="@+id/movie_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:switchMinWidth="60dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/movie_title"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginLeft="35dp"
+        android:gravity="start|center_vertical"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textSize="14sp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="0"
+        app:layout_constraintStart_toEndOf="@+id/movie_switch"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="0" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

@@ -18,13 +18,12 @@ package org.tensorflow.lite.examples.styletransfer
 
 import android.Manifest
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.hardware.camera2.CameraCharacteristics
 import android.os.Bundle
 import android.os.Process
-import androidx.core.app.ActivityCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.util.Log
@@ -40,6 +39,7 @@ import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
@@ -119,8 +119,7 @@ class MainActivity :
       )
     }
 
-    viewModel = ViewModelProviders.of(this)
-      .get(MLExecutionViewModel::class.java)
+    viewModel = AndroidViewModelFactory(application).create(MLExecutionViewModel::class.java)
 
     viewModel.styledBitmap.observe(
       this,

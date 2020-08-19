@@ -36,6 +36,12 @@ class DataLoaderTest(tf.test.TestCase):
     for i, elem in enumerate(test_data.dataset):
       self.assertTrue((elem.numpy() == np.array([i, 0])).all())
 
+  def test_len(self):
+    size = 4
+    ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
+    data = dataloader.DataLoader(ds, size)
+    self.assertEqual(len(data), size)
+
 
 if __name__ == '__main__':
   tf.test.main()

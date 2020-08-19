@@ -63,6 +63,7 @@ class QuantizationConfig(object):
       inference_input_type=None,
       inference_output_type=None,
       supported_ops=None,
+      _experimental_new_quantizer=None,
   ):
     """Constructs QuantizationConfig.
 
@@ -81,6 +82,7 @@ class QuantizationConfig(object):
         must be `{tf.float32, tf.uint8, tf.int8}`.
       supported_ops: Set of OpsSet options supported by the device. Used to Set
         converter.target_spec.supported_ops.
+      _experimental_new_quantizer: Whether to enable experimental new quantizer.
     """
 
     if optimizations is None:
@@ -100,6 +102,7 @@ class QuantizationConfig(object):
     if supported_ops is not None and not isinstance(supported_ops, list):
       supported_ops = [supported_ops]
     self.supported_ops = supported_ops
+    self._experimental_new_quantizer = _experimental_new_quantizer
 
   @classmethod
   def create_dynamic_range_quantization(cls,
@@ -185,4 +188,7 @@ class QuantizationConfig(object):
       converter.inference_output_type = self.inference_output_type
     if self.supported_ops:
       converter.target_spec.supported_ops = self.supported_ops
+
+    if self._experimental_new_quantizer is not None:
+      converter._experimental_new_quantizer = self._experimental_new_quantizer  # pylint: disable=protected-access
     return converter

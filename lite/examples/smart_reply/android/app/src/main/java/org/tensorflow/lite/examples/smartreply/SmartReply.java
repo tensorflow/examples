@@ -15,7 +15,7 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.smartreply;
 
-import android.support.annotation.Keep;
+import androidx.annotation.Keep;
 
 /**
  * SmartReply contains predicted message, and confidence.

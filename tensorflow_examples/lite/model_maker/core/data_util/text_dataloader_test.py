@@ -163,23 +163,40 @@ class LoaderFunctionTest(tf.test.TestCase):
 
   def test_get_cache_filenames(self):
     tfrecord_file, meta_data_file, prefix = text_dataloader._get_cache_filenames(
-        cache_dir='/tmp', model_spec=self.model_spec, data_name='train')
+        cache_dir='/tmp',
+        model_spec=self.model_spec,
+        data_name='train',
+        is_training=True)
     self.assertTrue(tfrecord_file.startswith(prefix))
     self.assertTrue(meta_data_file.startswith(prefix))
 
     _, _, new_dir_prefix = text_dataloader._get_cache_filenames(
-        cache_dir='/tmp1', model_spec=self.model_spec, data_name='train')
+        cache_dir='/tmp1',
+        model_spec=self.model_spec,
+        data_name='train',
+        is_training=True)
     self.assertNotEqual(new_dir_prefix, prefix)
 
     _, _, new_model_spec_prefix = text_dataloader._get_cache_filenames(
         cache_dir='/tmp',
         model_spec=MockClassifierModelSpec(seq_len=8),
-        data_name='train')
+        data_name='train',
+        is_training=True)
     self.assertNotEqual(new_model_spec_prefix, prefix)
 
     _, _, new_data_name_prefix = text_dataloader._get_cache_filenames(
-        cache_dir='/tmp', model_spec=self.model_spec, data_name='test')
+        cache_dir='/tmp',
+        model_spec=self.model_spec,
+        data_name='test',
+        is_training=True)
     self.assertNotEqual(new_data_name_prefix, prefix)
+
+    _, _, new_is_training_false_prefix = text_dataloader._get_cache_filenames(
+        cache_dir='/tmp',
+        model_spec=self.model_spec,
+        data_name='train',
+        is_training=False)
+    self.assertNotEqual(new_is_training_false_prefix, prefix)
 
   def _get_tfrecord_file(self):
     tfrecord_file = os.path.join(self.get_temp_dir(), 'tmp.tfrecord')

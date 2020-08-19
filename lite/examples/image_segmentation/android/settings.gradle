@@ -1,2 +1,2 @@
-rootProject.name = 'Image Segmentation'
+rootProject.name = 'TFLite Image Segmentation Demo App'
 include ':app'

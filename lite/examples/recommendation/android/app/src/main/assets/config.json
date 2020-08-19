@@ -1,0 +1,7 @@
+{
+  "model": "recommendation_rnn_i10o100.tflite",
+  "inputLength": 10,
+  "outputLength": 100,
+  "topK": 10,
+  "movieList": "sorted_movie_vocab.json"
+}

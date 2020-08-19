@@ -44,6 +44,9 @@ class DataLoader(object):
     self.dataset = dataset
     self.size = size
 
+  def __len__(self):
+    return self.size
+
   def split(self, fraction):
     """Splits dataset into two sub-datasets with the given fraction.
 

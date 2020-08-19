@@ -21,6 +21,7 @@ import tempfile
 import unittest
 
 import tensorflow as tf
+from tensorflow.compat import v1 as tfv1
 from tensorflow.keras import layers
 from tensorflow.keras.regularizers import l2
 
@@ -47,7 +48,8 @@ class TestTfliteTransferConverter(unittest.TestCase):
             units=DEFAULT_INPUT_SIZE, input_shape=(DEFAULT_INPUT_SIZE,))
     ])
     model.build()
-    tf.keras.experimental.export_saved_model(model, cls._default_base_model_dir)
+    tfv1.keras.experimental.export_saved_model(model,
+                                               cls._default_base_model_dir)
 
   def setUp(self):
     super(TestTfliteTransferConverter, self).setUp()

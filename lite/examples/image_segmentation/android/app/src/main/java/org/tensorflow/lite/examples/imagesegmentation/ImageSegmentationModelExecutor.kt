@@ -235,8 +235,8 @@ class ImageSegmentationModelExecutor(
     private const val imageSegmentationModel = "deeplabv3_257_mv_gpu.tflite"
     private const val imageSize = 257
     const val NUM_CLASSES = 21
-    private const val IMAGE_MEAN = 128.0f
-    private const val IMAGE_STD = 128.0f
+    private const val IMAGE_MEAN = 127.5f
+    private const val IMAGE_STD = 127.5f
 
     val segmentColors = IntArray(NUM_CLASSES)
     val labelsArrays = arrayOf(

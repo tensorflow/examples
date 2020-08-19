@@ -24,9 +24,7 @@ set -x  # Verbose
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 
-# Keep a list of blacklisted android apps directories which should be excluded
-# from the builds.
-# TODO(b/154114877): Restore smart_reply after resolving aapt_version build issues.
+# Keep a list of android apps which should be excluded from the CI builds.
 SKIPPED_BUILDS="
 "
 
@@ -82,7 +80,7 @@ function build_smartreply_aar {
   /usr/bin/gcc -v
   bazel version  # Get bazel version info.
   # Add --sandbox_debug to provide more info for testing.
-  bazel build --sandbox_debug //libs/cc/...
+  bazel build --sandbox_debug //libs/cc/... //libs/cc:smartreply_runtime_aar
   bazel test //libs/cc/...
 
   popd > /dev/null

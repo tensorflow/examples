@@ -29,9 +29,10 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 def create(train_data,
            model_spec=ms.AverageWordVecModelSpec(),
            validation_data=None,
-           batch_size=32,
+           batch_size=None,
            epochs=3,
-           shuffle=False):
+           shuffle=False,
+           do_train=True):
   """Loads data and train the model for test classification.
 
   Args:
@@ -41,6 +42,7 @@ def create(train_data,
     batch_size: Batch size for training.
     epochs: Number of epochs for training.
     shuffle: Whether the data should be shuffled.
+    do_train: Whether to run training.
 
   Returns:
     TextClassifier
@@ -55,8 +57,11 @@ def create(train_data,
       train_data.num_classes,
       shuffle=shuffle)
 
-  tf.compat.v1.logging.info('Retraining the models...')
-  text_classifier.train(train_data, validation_data, epochs, batch_size)
+  if do_train:
+    tf.compat.v1.logging.info('Retraining the models...')
+    text_classifier.train(train_data, validation_data, epochs, batch_size)
+  else:
+    text_classifier.create_model()
 
   return text_classifier
 
@@ -92,8 +97,24 @@ class TextClassifier(classification_model.ClassificationModel):
         shuffle,
         train_whole_model=True)
 
-  def train(self, train_data, validation_data=None, epochs=None, batch_size=32):
+  def create_model(self):
+    self.model = self.model_spec.create_model(self.num_classes)
+
+  def train(self,
+            train_data,
+            validation_data=None,
+            epochs=None,
+            batch_size=None):
     """Feeds the training data for training."""
+    if batch_size is None:
+      batch_size = self.model_spec.default_batch_size
+
+    if train_data.size < batch_size:
+      raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
+                       'than batch_size (%d). To solve this problem, set '
+                       'the batch_size smaller or increase the size of the '
+                       'train_data.' % (train_data.size, batch_size))
+
     train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
         train_data, batch_size, is_training=True)
     validation_input_fn, validation_steps = self._get_input_fn_and_steps(
@@ -114,10 +135,6 @@ class TextClassifier(classification_model.ClassificationModel):
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
     """
-    # TODO(b/151761399): Removes these lines.
-    if hasattr(self.model_spec, 'uri') and 'mobilebert' in self.model_spec.uri:
-      raise ValueError('Couldn\'t convert MobileBert to TFLite for now.')
-
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
     model_util.export_tflite(self.model, tflite_filepath, quantization_config,

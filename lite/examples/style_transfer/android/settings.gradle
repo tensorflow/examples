@@ -1,2 +1,2 @@
+rootProject.name = 'TFLite Style Transfer Demo App'
 include ':app'
-rootProject.name='Style Transfer Sample'

@@ -193,6 +193,7 @@ class Posenet(
    * returns:
    *      person: a Person object containing data about keypoint locations and confidence scores
    */
+  @Suppress("UNCHECKED_CAST")
   fun estimateSinglePose(bitmap: Bitmap): Person {
     val estimationStartTimeNanos = SystemClock.elapsedRealtimeNanos()
     val inputArray = arrayOf(initInputArray(bitmap))

@@ -18,13 +18,12 @@ import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks.call
+import com.google.android.gms.tasks.TaskCompletionSource
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
-import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -42,19 +41,21 @@ class DigitClassifier(private val context: Context) {
   private var modelInputSize: Int = 0 // will be inferred from TF Lite model.
 
   fun initialize(): Task<Void> {
-    return call(
-      executorService,
-      Callable<Void> {
+    val task = TaskCompletionSource<Void>()
+    executorService.execute {
+      try {
         initializeInterpreter()
-        null
+        task.setResult(null)
+      } catch (e: IOException) {
+        task.setException(e)
       }
-    )
+    }
+    return task.task
   }
 
   @Throws(IOException::class)
   private fun initializeInterpreter() {
     // TODO: Load the TF Lite model from file and initialize an interpreter.
-
 
     // TODO: Read the model input shape from model file.
 
@@ -81,20 +82,21 @@ class DigitClassifier(private val context: Context) {
   }
 
   fun classifyAsync(bitmap: Bitmap): Task<String> {
-    return call(executorService, Callable<String> { classify(bitmap) })
+    val task = TaskCompletionSource<String>()
+    executorService.execute {
+      val result = classify(bitmap)
+      task.setResult(result)
+    }
+    return task.task
   }
 
   fun close() {
-    call(
-      executorService,
-      Callable<String> {
-        // TODO: close the TF Lite interpreter here
+    executorService.execute {
+      // TODO: close the TF Lite interpreter here
 
 
-        Log.d(TAG, "Closed TFLite interpreter.")
-        null
-      }
-    )
+      Log.d(TAG, "Closed TFLite interpreter.")
+    }
   }
 
   private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {

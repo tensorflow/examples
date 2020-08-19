@@ -22,8 +22,7 @@ EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 PROJECT_EXT=".xcodeproj"
 WORKSPACE_EXT=".xcworkspace"
 
-# Keep a list of blacklisted iOS apps directories which should be excluded from
-# the builds.
+# Keep a list of iOS apps which should be excluded from the CI builds.
 SKIPPED_BUILDS="
 gesture_classification/ios
 "
