@@ -70,11 +70,8 @@ class TextClassificationDemoTest(tf.test.TestCase):
         self.assertTrue(tf.io.gfile.exists(tflite_filename))
         self.assertGreater(os.path.getsize(tflite_filename), 0)
 
-        self.assertTrue(tf.io.gfile.exists(label_filename))
-        self.assertGreater(os.path.getsize(label_filename), 0)
-
-        self.assertTrue(tf.io.gfile.exists(vocab_filename))
-        self.assertGreater(os.path.getsize(vocab_filename), 0)
+        self.assertFalse(tf.io.gfile.exists(label_filename))
+        self.assertFalse(tf.io.gfile.exists(vocab_filename))
 
 
 if __name__ == '__main__':

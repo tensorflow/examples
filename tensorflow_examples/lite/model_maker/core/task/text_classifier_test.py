@@ -16,7 +16,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import filecmp
 import os
+
 import numpy as np
 import tensorflow.compat.v2 as tf
 
@@ -77,7 +79,10 @@ class TextClassifierTest(tf.test.TestCase):
         batch_size=1,
         shuffle=True)
     self._test_accuracy(model, 0.0)
-    self._test_export_to_tflite(model, threshold=0.0)
+    self._test_export_to_tflite(
+        model,
+        threshold=0.0,
+        expected_json_file='bert_classifier_metadata.json')
     self._test_model_without_training(model_spec)
 
   @test_util.test_in_tf_2
@@ -116,7 +121,10 @@ class TextClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model, threshold=0.0)
     self._test_predict_top_k(model)
-    self._test_export_to_tflite(model, threshold=0.0)
+    self._test_export_to_tflite(
+        model,
+        threshold=0.0,
+        expected_json_file='average_word_vec_metadata.json')
     self._test_export_to_saved_model(model)
     self._test_export_labels(model)
     self._test_export_vocab(model)
@@ -171,7 +179,11 @@ class TextClassifierTest(tf.test.TestCase):
     actual_index = [index for word, index in word_index[3:]]
     self.assertEqual(actual_index, expected_index)
 
-  def _test_export_to_tflite(self, model, threshold=1.0, atol=1e-04):
+  def _test_export_to_tflite(self,
+                             model,
+                             threshold=1.0,
+                             atol=1e-04,
+                             expected_json_file=None):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
     model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
 
@@ -202,6 +214,14 @@ class TextClassifierTest(tf.test.TestCase):
     self.assertTrue(
         test_util.is_same_output(
             tflite_output_file, model.model, random_inputs, spec, atol=atol))
+
+    json_output_file = os.path.join(self.get_temp_dir(), 'model.json')
+    self.assertTrue(os.path.isfile(json_output_file))
+    self.assertGreater(os.path.getsize(json_output_file), 0)
+
+    if expected_json_file is not None:
+      expected_json_file = test_util.get_test_data_path(expected_json_file)
+      self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
   def _test_export_to_saved_model(self, model):
     save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')

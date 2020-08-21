@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import filecmp
 import os
 
 from absl.testing import parameterized
@@ -65,7 +66,8 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
         train_data, model_spec=model_spec, epochs=1, batch_size=1)
     self._test_f1_score(model, validation_data, 0.0)
     self._test_export_vocab(model)
-    self._test_export_to_tflite(model, validation_data)
+    self._test_export_to_tflite(
+        model, validation_data, expected_json_file='bert_qa_metadata.json')
     self._test_export_to_saved_model(model)
     # Comments this due to Out of Memory Error.
     # self._test_model_without_training(model_spec, train_data, validation_data)
@@ -110,7 +112,8 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
                              model,
                              validation_data,
                              threshold=0.0,
-                             atol=1e-04):
+                             atol=1e-04,
+                             expected_json_file=None):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
     model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
 
@@ -139,6 +142,14 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
             random_inputs,
             model.model_spec,
             atol=atol))
+
+    json_output_file = os.path.join(self.get_temp_dir(), 'model.json')
+    self.assertTrue(os.path.isfile(json_output_file))
+    self.assertGreater(os.path.getsize(json_output_file), 0)
+
+    if expected_json_file is not None:
+      expected_json_file = test_util.get_test_data_path(expected_json_file)
+      self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
   def _test_export_to_saved_model(self, model):
     save_model_output_path = os.path.join(self.get_temp_dir(), 'saved_model')

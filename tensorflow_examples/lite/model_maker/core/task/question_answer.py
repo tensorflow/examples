@@ -17,12 +17,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+import tempfile
+
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_util
+from tensorflow_examples.lite.model_maker.core.task.metadata_writers.bert.question_answerer import metadata_writer_for_bert_question_answerer as metadata_writer
 
 
 def create(train_data,
@@ -57,6 +61,23 @@ def create(train_data,
     model.create_model()
 
   return model
+
+
+def _get_model_info(model_spec, vocab_file):
+  """Gets the specific info for the image model."""
+  return metadata_writer.QuestionAnswererInfo(
+      name=model_spec.name + ' Question and Answerer',
+      version='v1',
+      description=metadata_writer.DEFAULT_DESCRIPTION,
+      input_names=metadata_writer.bert_qa_inputs(
+          ids_name=model_spec.tflite_input_name['ids'],
+          mask_name=model_spec.tflite_input_name['mask'],
+          segment_ids_name=model_spec.tflite_input_name['segment_ids']),
+      output_names=metadata_writer.bert_qa_outputs(
+          start_logits_name=model_spec.tflite_output_name['start_logits'],
+          end_logits_name=model_spec.tflite_output_name['end_logits']),
+      tokenizer_type=metadata_writer.Tokenizer.BERT_TOKENIZER,
+      vocab_file=vocab_file)
 
 
 class QuestionAnswer(custom_model.CustomModel):
@@ -192,12 +213,17 @@ class QuestionAnswer(custom_model.CustomModel):
         export_format=export_format,
         **kwargs)
 
-  def _export_tflite(self, tflite_filepath, quantization_config=None):
+  def _export_tflite(self,
+                     tflite_filepath,
+                     quantization_config=None,
+                     with_metadata=True):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
+      with_metadata: Whether the output tflite model contains metadata. If True,
+        Exports metadata in json file as well.
     """
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
@@ -206,3 +232,15 @@ class QuestionAnswer(custom_model.CustomModel):
                              self.model_spec.convert_from_saved_model_tf2)
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(self.model, batch_size=None)
+
+    if with_metadata:
+      with tempfile.TemporaryDirectory() as temp_dir:
+        tf.compat.v1.logging.info(
+            'Vocab file is inside the TFLite model with metadata.')
+        vocab_filepath = os.path.join(temp_dir, 'vocab.txt')
+        self.model_spec.save_vocab(vocab_filepath)
+        model_info = _get_model_info(self.model_spec, vocab_filepath)
+        export_dir = os.path.dirname(tflite_filepath)
+        populator = metadata_writer.MetadataPopulatorForBertQuestionAndAnswer(
+            tflite_filepath, export_dir, model_info)
+        populator.populate()

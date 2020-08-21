@@ -157,21 +157,24 @@ class CustomModel(abc.ABC):
     if not tf.io.gfile.exists(export_dir):
       tf.io.gfile.makedirs(export_dir)
 
-    if ExportFormat.LABEL in export_format:
-      label_filepath = os.path.join(export_dir, label_filename)
-      self._export_labels(label_filepath)
-
     if ExportFormat.TFLITE in export_format:
+      with_metadata = kwargs.get('with_metadata', True)
       tflite_filepath = os.path.join(export_dir, tflite_filename)
       self._export_tflite(tflite_filepath, **kwargs)
+    else:
+      with_metadata = False
 
     if ExportFormat.SAVED_MODEL in export_format:
       saved_model_filepath = os.path.join(export_dir, saved_model_filename)
       self._export_saved_model(saved_model_filepath, **kwargs)
 
-    if ExportFormat.VOCAB in export_format:
+    if ExportFormat.VOCAB in export_format and not with_metadata:
       vocab_filepath = os.path.join(export_dir, vocab_filename)
       self.model_spec.save_vocab(vocab_filepath)
+
+    if ExportFormat.LABEL in export_format and not with_metadata:
+      label_filepath = os.path.join(export_dir, label_filename)
+      self._export_labels(label_filepath)
 
   def _export_saved_model(self,
                           filepath,

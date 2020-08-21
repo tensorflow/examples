@@ -156,7 +156,8 @@ class AverageWordVecModelSpec(object):
                seq_len=256,
                wordvec_dim=16,
                lowercase=True,
-               dropout_rate=0.2):
+               dropout_rate=0.2,
+               name='AverageWordVec'):
     """Initialze a instance with preprocessing and model paramaters.
 
     Args:
@@ -166,12 +167,14 @@ class AverageWordVecModelSpec(object):
       lowercase: Whether to convert all uppercase character to lowercase during
         preprocessing.
       dropout_rate: The rate for dropout.
+      name: Name of the object.
     """
     self.num_words = num_words
     self.seq_len = seq_len
     self.wordvec_dim = wordvec_dim
     self.lowercase = lowercase
     self.dropout_rate = dropout_rate
+    self.name = name
 
   def get_name_to_features(self):
     """Gets the dictionary describing the features."""
@@ -409,7 +412,9 @@ class BertModelSpec(object):
       trainable=True,
       do_lower_case=True,
       is_tf2=True,
-      convert_from_saved_model_tf2=False):
+      convert_from_saved_model_tf2=False,
+      name='Bert',
+      tflite_input_name=None):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -435,6 +440,8 @@ class BertModelSpec(object):
       is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
       convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF
         2.x.
+      name: The name of the object.
+      tflite_input_name: Dict, input names for the TFLite model.
     """
     if compat.get_tf_behavior() not in self.compat_tf_versions:
       raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
@@ -466,6 +473,15 @@ class BertModelSpec(object):
 
     self.convert_from_saved_model_tf2 = convert_from_saved_model_tf2
     self.is_built = False
+    self.name = name
+
+    if tflite_input_name is None:
+      tflite_input_name = {
+          'ids': 'input_word_ids',
+          'mask': 'input_mask',
+          'segment_ids': 'input_type_ids'
+      }
+    self.tflite_input_name = tflite_input_name
 
   def reorder_input_details(self, tflite_input_details):
     """Reorders the tflite input details to map the order of keras model."""
@@ -736,8 +752,10 @@ class BertQAModelSpec(BertModelSpec):
       do_lower_case=True,
       is_tf2=True,
       convert_from_saved_model_tf2=False,
+      tflite_input_name=None,
       tflite_output_name=None,
-      init_from_squad_model=False):
+      init_from_squad_model=False,
+      name='Bert'):
     """Initialze an instance with model paramaters.
 
     Args:
@@ -767,15 +785,18 @@ class BertQAModelSpec(BertModelSpec):
       is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
       convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF
         2.x.
+      tflite_input_name: Dict, input names for the TFLite model.
       tflite_output_name: Dict, output names for the TFLite model.
       init_from_squad_model: boolean, whether to initialize from the model that
         is already retrained on Squad 1.1.
+      name: Name of the object.
     """
     super(BertQAModelSpec,
           self).__init__(uri, model_dir, seq_len, dropout_rate,
                          initializer_range, learning_rate,
                          distribution_strategy, num_gpus, tpu, trainable,
-                         do_lower_case, is_tf2, convert_from_saved_model_tf2)
+                         do_lower_case, is_tf2, convert_from_saved_model_tf2,
+                         name, tflite_input_name)
     self.query_len = query_len
     self.doc_stride = doc_stride
     self.predict_batch_size = predict_batch_size
@@ -1055,11 +1076,23 @@ class BertQAModelSpec(BertModelSpec):
     return eval_metrics
 
 
+_MOBILEBERT_TFLITE_INPUT_NAME = {
+    'ids': 'serving_default_input_word_ids:0',
+    'mask': 'serving_default_input_mask:0',
+    'segment_ids': 'serving_default_input_type_ids:0'
+}
+_MOBILEBERT_TFLITE_OUTPUT_NAME = {
+    'start_logits': 'StatefulPartitionedCall:1',
+    'end_logits': 'StatefulPartitionedCall:0'
+}
+
 mobilebert_classifier_spec = BertClassifierModelSpec(
     uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
     is_tf2=False,
     distribution_strategy='off',
-    convert_from_saved_model_tf2=True)
+    convert_from_saved_model_tf2=True,
+    name='MobileBert',
+    tflite_input_name=_MOBILEBERT_TFLITE_INPUT_NAME)
 mobilebert_classifier_spec.default_batch_size = 48
 
 mobilebert_qa_spec = BertQAModelSpec(
@@ -1068,10 +1101,9 @@ mobilebert_qa_spec = BertQAModelSpec(
     distribution_strategy='off',
     convert_from_saved_model_tf2=True,
     learning_rate=5e-05,
-    tflite_output_name={
-        'start_logits': 'StatefulPartitionedCall:1',
-        'end_logits': 'StatefulPartitionedCall:0'
-    })
+    name='MobileBert',
+    tflite_input_name=_MOBILEBERT_TFLITE_INPUT_NAME,
+    tflite_output_name=_MOBILEBERT_TFLITE_OUTPUT_NAME)
 mobilebert_qa_spec.default_batch_size = 48
 
 mobilebert_qa_squad_spec = BertQAModelSpec(
@@ -1080,10 +1112,9 @@ mobilebert_qa_squad_spec = BertQAModelSpec(
     distribution_strategy='off',
     convert_from_saved_model_tf2=True,
     learning_rate=5e-05,
-    tflite_output_name={
-        'start_logits': 'StatefulPartitionedCall:1',
-        'end_logits': 'StatefulPartitionedCall:0'
-    },
+    name='MobileBert',
+    tflite_input_name=_MOBILEBERT_TFLITE_INPUT_NAME,
+    tflite_output_name=_MOBILEBERT_TFLITE_OUTPUT_NAME,
     init_from_squad_model=True)
 mobilebert_qa_squad_spec.default_batch_size = 48
 

@@ -17,6 +17,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+import tempfile
+
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
@@ -24,6 +27,8 @@ from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import model_util
+from tensorflow_examples.lite.model_maker.core.task.metadata_writers.bert.text_classifier import metadata_writer_for_bert_text_classifier as bert_metadata_writer
+from tensorflow_examples.lite.model_maker.core.task.metadata_writers.text_classifier import metadata_writer_for_text_classifier as metadata_writer
 
 
 def create(train_data,
@@ -64,6 +69,27 @@ def create(train_data,
     text_classifier.create_model()
 
   return text_classifier
+
+
+def _get_bert_model_info(model_spec, vocab_file, label_file):
+  return bert_metadata_writer.ClassifierSpecificInfo(
+      name=model_spec.name + ' text classifier',
+      version='v1',
+      description=bert_metadata_writer.DEFAULT_DESCRIPTION,
+      input_names=bert_metadata_writer.bert_qa_inputs(
+          ids_name=model_spec.tflite_input_name['ids'],
+          mask_name=model_spec.tflite_input_name['mask'],
+          segment_ids_name=model_spec.tflite_input_name['segment_ids']),
+      tokenizer_type=bert_metadata_writer.Tokenizer.BERT_TOKENIZER,
+      vocab_file=vocab_file,
+      label_file=label_file)
+
+
+def _get_model_info(model_name):
+  return metadata_writer.ModelSpecificInfo(
+      name=model_name + ' text classifier',
+      description='Classify text into predefined categories.',
+      version='v1')
 
 
 class TextClassifier(classification_model.ClassificationModel):
@@ -128,12 +154,17 @@ class TextClassifier(classification_model.ClassificationModel):
 
     return self.model
 
-  def _export_tflite(self, tflite_filepath, quantization_config=None):
+  def _export_tflite(self,
+                     tflite_filepath,
+                     quantization_config=None,
+                     with_metadata=True):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
+      with_metadata: Whether the output tflite model contains metadata. If True,
+        Exports metadata in json file as well.
     """
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
@@ -142,3 +173,30 @@ class TextClassifier(classification_model.ClassificationModel):
                              self.model_spec.convert_from_saved_model_tf2)
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(self.model, batch_size=None)
+
+    if with_metadata:
+      with tempfile.TemporaryDirectory() as temp_dir:
+        tf.compat.v1.logging.info('Vocab file and label file are inside the '
+                                  'TFLite model with metadata.')
+        vocab_filepath = os.path.join(temp_dir, 'vocab.txt')
+        self.model_spec.save_vocab(vocab_filepath)
+        label_filepath = os.path.join(temp_dir, 'labels.txt')
+        self._export_labels(label_filepath)
+
+        export_dir = os.path.dirname(tflite_filepath)
+        if isinstance(self.model_spec, ms.BertClassifierModelSpec):
+          model_info = _get_bert_model_info(self.model_spec, vocab_filepath,
+                                            label_filepath)
+          populator = bert_metadata_writer.MetadataPopulatorForBertTextClassifier(
+              tflite_filepath, export_dir, model_info)
+        elif isinstance(self.model_spec, ms.AverageWordVecModelSpec):
+          model_info = _get_model_info(self.model_spec.name)
+          populator = metadata_writer.MetadataPopulatorForTextClassifier(
+              tflite_filepath, export_dir, model_info, label_filepath,
+              vocab_filepath)
+        else:
+          raise ValueError('Model Specification is not supported to writing '
+                           'metadata into TFLite. Please set '
+                           '`with_metadata=False` or write metadata by '
+                           'yourself.')
+        populator.populate()

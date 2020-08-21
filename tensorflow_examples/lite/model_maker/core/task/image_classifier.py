@@ -304,27 +304,13 @@ class ImageClassifier(classification_model.ClassificationModel):
         label.
       **kwargs: Other parameters like `quantized` for TFLITE model.
     """
-    export_format = self._get_export_format(export_format)
-    if not tf.io.gfile.exists(export_dir):
-      tf.io.gfile.makedirs(export_dir)
-
-    if ExportFormat.SAVED_MODEL in export_format:
-      super(ImageClassifier, self).export(
-          export_dir,
-          saved_model_filename=saved_model_filename,
-          export_format=ExportFormat.SAVED_MODEL,
-          **kwargs)
-
-    if ExportFormat.TFLITE in export_format:
-      with_metadata = kwargs.get('with_metadata', True)
-      tflite_filepath = os.path.join(export_dir, tflite_filename)
-      self._export_tflite(tflite_filepath, **kwargs)
-    else:
-      with_metadata = False
-
-    if ExportFormat.LABEL in export_format and not with_metadata:
-      label_filepath = os.path.join(export_dir, label_filename)
-      self._export_labels(label_filepath)
+    super(ImageClassifier, self).export(
+        export_dir,
+        tflite_filename=tflite_filename,
+        label_filename=label_filename,
+        saved_model_filename=saved_model_filename,
+        export_format=export_format,
+        **kwargs)
 
   def _export_tflite(self,
                      tflite_filepath,
