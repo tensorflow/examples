@@ -10,7 +10,7 @@ task downloadLiteModel {
       download {
           src key
           dest "$projectDir/src/main/assets/" + value
-          overwrite false
+          overwrite true
       }
     }
 }

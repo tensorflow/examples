@@ -18,7 +18,7 @@ package org.tensorflow.lite.examples.recommendation;
 
 /** Config for recommendation app. */
 public final class Config {
-  private static final String DEFAULT_MODEL_PATH = "model_history10_top100.tflite";
+  private static final String DEFAULT_MODEL_PATH = "recommendation_rnn_i10o100.tflite";
   private static final String DEFAULT_MOVIE_LIST_PATH = "sorted_movie_vocab.json";
   private static final int DEFAULT_INPUT_LENGTH = 10;
   private static final int DEFAULT_OUTPUT_LENGTH = 100;
