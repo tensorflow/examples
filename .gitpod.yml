@@ -1,0 +1,9 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: pip install .
+
+vscode:
+  extensions:
+    - Dart-Code.flutter@3.13.2:Eu9AIooF0l9SZOqPOxXFHQ==
