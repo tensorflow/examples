@@ -107,16 +107,17 @@ public abstract class Classifier {
    * @param model The model to use for classification.
    * @param device The device to use for classification.
    * @param numThreads The number of threads to use for classification.
+   * @param fp16 Allow FP32 model to run on FP16 accelerators
    * @return A classifier with the desired configuration.
    */
-  public static Classifier create(Activity activity, Model model, Device device, int numThreads)
+  public static Classifier create(Activity activity, Model model, Device device, int numThreads, boolean fp16)
       throws IOException {
     if (model == Model.QUANTIZED_MOBILENET) {
       return new ClassifierQuantizedMobileNet(activity, device, numThreads);
     } else if (model == Model.FLOAT_MOBILENET) {
-      return new ClassifierFloatMobileNet(activity, device, numThreads);
+      return new ClassifierFloatMobileNet(activity, device, numThreads, fp16);
     } else if (model == Model.FLOAT_EFFICIENTNET) {
-      return new ClassifierFloatEfficientNet(activity, device, numThreads);
+      return new ClassifierFloatEfficientNet(activity, device, numThreads, fp16);
     } else if (model == Model.QUANTIZED_EFFICIENTNET) {
       return new ClassifierQuantizedEfficientNet(activity, device, numThreads);
     } else {
@@ -195,12 +196,13 @@ public abstract class Classifier {
   }
 
   /** Initializes a {@code Classifier}. */
-  protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
+  protected Classifier(Activity activity, Device device, int numThreads, boolean fp16) throws IOException {
     tfliteModel = FileUtil.loadMappedFile(activity, getModelPath());
     switch (device) {
       case NNAPI:
         nnApiDelegate = new NnApiDelegate();
         tfliteOptions.addDelegate(nnApiDelegate);
+        tfliteOptions.setAllowFp16PrecisionForFp32(fp16);
         break;
       case GPU:
         gpuDelegate = new GpuDelegate();

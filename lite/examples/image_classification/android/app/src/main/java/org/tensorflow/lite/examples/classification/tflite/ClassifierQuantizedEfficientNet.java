@@ -43,7 +43,7 @@ public class ClassifierQuantizedEfficientNet extends Classifier {
    */
   public ClassifierQuantizedEfficientNet(Activity activity, Device device, int numThreads)
       throws IOException {
-    super(activity, device, numThreads);
+    super(activity, device, numThreads, /*fp16=*/ false);
   }
 
   @Override

@@ -40,9 +40,9 @@ public class ClassifierFloatEfficientNet extends Classifier {
    *
    * @param activity
    */
-  public ClassifierFloatEfficientNet(Activity activity, Device device, int numThreads)
+  public ClassifierFloatEfficientNet(Activity activity, Device device, int numThreads, boolean fp16)
       throws IOException {
-    super(activity, device, numThreads);
+    super(activity, device, numThreads, fp16);
   }
 
   @Override
