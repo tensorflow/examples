@@ -53,6 +53,10 @@ def main(_):
       root_title='TensorFlow Lite Model Maker',
       py_modules=[('tflite_model_maker', tflite_model_maker)],
       code_url_prefix=FLAGS.code_url_prefix,
+      # Since model_maker imports from tensorflow_examples 'it'
+      # needs to use the tensorflow_examples path as the base_dir
+      # otherwise no docs are generated because they're in an 'external'
+      # module
       base_dir=str(pathlib.Path(tensorflow_examples.__file__).parent),
       search_hints=FLAGS.search_hints,
       site_path=FLAGS.site_path,
