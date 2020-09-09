@@ -31,6 +31,7 @@ import tflite_model_maker
 import tensorflow_examples
 
 from tensorflow_docs.api_generator import generate_lib
+from tensorflow_docs.api_generator import public_api
 
 flags.DEFINE_string('output_dir', '/tmp/mm_api/',
                     'The path to output the files to')
@@ -60,7 +61,7 @@ def main(_):
       base_dir=str(pathlib.Path(tensorflow_examples.__file__).parent),
       search_hints=FLAGS.search_hints,
       site_path=FLAGS.site_path,
-      callbacks=[])
+      callbacks=[public_api.explicit_package_contents_filter])
 
   doc_generator.build(output_dir=FLAGS.output_dir)
 
