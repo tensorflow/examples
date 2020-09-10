@@ -123,14 +123,17 @@ def _get_optimizer(learning_rate, gradient_clip_norm=None):
 
 
 def _get_metrics(eval_top_k):
-  """Gets model evaluation metrics."""
-  eval_metrics = [
-      metrics.BatchRecall(name='Recall/Recall_{0}'.format(k), top_k=k)
+  """Gets model evaluation metrics of both batch samples and full vocabulary."""
+  metrics_list = [
+      metrics.GlobalRecall(name=f'Global_Recall/Recall_{k}', top_k=k)
       for k in eval_top_k
   ]
-  batch_mean_rank = metrics.BatchMeanRank()
-  eval_metrics.append(batch_mean_rank)
-  return eval_metrics
+  metrics_list.append(metrics.GlobalMeanRank(name='global_mean_rank'))
+  metrics_list.extend(
+      metrics.BatchRecall(name=f'Batch_Recall/Recall_{k}', top_k=k)
+      for k in eval_top_k)
+  metrics_list.append(metrics.BatchMeanRank(name='batch_mean_rank'))
+  return metrics_list
 
 
 def build_keras_model(params):
@@ -140,7 +143,7 @@ def build_keras_model(params):
       optimizer=_get_optimizer(
           learning_rate=FLAGS.learning_rate,
           gradient_clip_norm=FLAGS.gradient_clip_norm),
-      loss=losses.BatchSoftmax(),
+      loss=losses.GlobalSoftmax(),
       metrics=_get_metrics(params['eval_top_k']))
   return model
 

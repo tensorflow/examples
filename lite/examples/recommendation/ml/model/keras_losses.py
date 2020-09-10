@@ -21,10 +21,10 @@ import tensorflow as tf
 
 
 class BatchSoftmax(tf.keras.losses.Loss):
-  """Compute batch softmax over similarities between context/label embeddings.
+  """Compute batch softmax over batch similarities.
 
-  Since model output is pre-calulated similarities matrix, y_pred is expected
-  to be the similarities matrix.
+  This softmax loss takes in-batch negatives without considering
+  negatives out of batch.
   """
 
   def __init__(self, name='batch_softmax', **kwargs):
@@ -32,13 +32,57 @@ class BatchSoftmax(tf.keras.losses.Loss):
 
   @tf.function
   def call(self, y_true: tf.Tensor, y_pred: tf.Tensor):
-    del y_true
+    """Compute in batch softmax loss.
+
+    Args:
+      y_true: the true labels with shape [batch_size, 1].
+      y_pred: pre-calculated similarities matrix between context embedding and
+        full vocab label embeddings, y_pred is expected to be the similarities
+        with shape [batch_size,label_embedding_vocab_size].
+
+    Returns:
+      The softmax loss with in-batch negatives.
+    """
     logits = tf.keras.backend.cast(y_pred, 'float32')
-    # Use the diagonal elements of similarities as labels for each row.
+    logits = tf.gather(y_pred, tf.transpose(y_true)[0], axis=1)
     full_labels = tf.eye(
         tf.shape(logits)[0], tf.shape(logits)[1], dtype=tf.dtypes.float32)
     batch_loss = tf.nn.softmax_cross_entropy_with_logits(
         labels=full_labels, logits=logits)
     loss = tf.reduce_mean(batch_loss)
-    tf.summary.scalar('loss', loss)
+    return loss
+
+
+class GlobalSoftmax(tf.keras.losses.Loss):
+  """Compute softmax over similarities.
+
+  This loss fuction computes softmax over similarities between context and
+  full vocab label embeddings, considering full label vocab non-label
+  predictions as negatives. This is currently the default loss in the model.
+  """
+
+  def __init__(self, name='global_softmax', **kwargs):
+    super(GlobalSoftmax, self).__init__(name=name, **kwargs)
+
+  @tf.function
+  def call(self, y_true: tf.Tensor, y_pred: tf.Tensor):
+    """Compute softmax loss with full vocab labels as negatives.
+
+    Args:
+      y_true: the true labels with shape [batch_size, 1].
+      y_pred: the pre-calculated similarities matrix with shape [batch_size,
+        label_embedding_vocab_size]
+
+    Returns:
+      The softmax loss with full vocab labels as negatives.
+    """
+    logits = tf.keras.backend.cast(y_pred, 'float32')
+    # Compose a metric to tell which column represents the similarity between
+    # the example and the label. For each row, only the item at index of the
+    # label of that example will be set as 1.
+    full_labels = tf.one_hot(
+        tf.transpose(y_true)[0], tf.shape(logits)[1], dtype=tf.dtypes.float32)
+    batch_loss = tf.nn.softmax_cross_entropy_with_logits(
+        labels=full_labels, logits=logits)
+    loss = tf.reduce_mean(batch_loss)
     return loss

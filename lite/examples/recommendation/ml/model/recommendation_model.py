@@ -77,6 +77,9 @@ class RecommendationModel(tf.keras.Model):
   def call(self, inputs):
     """Compute outputs by passing inputs through the model.
 
+    Here full vocab labels are used to produce dotproduct with context, all
+    non-label items in the vocab will be used as negatives.
+
     Args:
       inputs: The inputs to the model, which should be a dictionary having
         'context' and 'label' as keys. If it's not training mode, only 'context'
@@ -86,8 +89,12 @@ class RecommendationModel(tf.keras.Model):
       dotproduct similarity for training mode, top k prediction ids and scores
       for inference mode.
     """
+    # Compute the similarities between the context embedding and embeddings of
+    # all items in the vocabulary. Since the label embedding layer needs
+    # to take care of out-of-vocab ID 0, the size of it is item_vocab_size + 1.
+    full_vocab_item_ids = tf.range(self._item_vocab_size + 1)
     dotproduct = self._get_dotproduct_and_top_items(
-        input_context=inputs['context'], input_label=inputs['label'])[0]
+        input_context=inputs['context'], input_label=full_vocab_item_ids)[0]
     return dotproduct
 
   @tf.function

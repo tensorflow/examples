@@ -39,7 +39,8 @@ class RecommendationModelTest(tf.test.TestCase):
         shape=(1,), dtype=tf.int32, batch_size=batch_size, name="label")
     inputs = {"context": input_context, "label": input_label}
     logits = test_model(inputs)
-    self.assertAllEqual([batch_size, batch_size], logits.shape.as_list())
+    self.assertAllEqual([batch_size, config["item_vocab_size"] + 1],
+                        logits.shape.as_list())
 
   def test_model_serve(self):
     config = {
