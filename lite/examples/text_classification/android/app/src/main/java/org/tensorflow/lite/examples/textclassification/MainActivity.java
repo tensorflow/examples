@@ -31,6 +31,8 @@ import org.tensorflow.lite.examples.textclassification.TextClassificationClient.
 /** The main activity to provide interactions with users. */
 public class MainActivity extends AppCompatActivity {
   private static final String TAG = "TextClassificationDemo";
+  private static final String MODEL_PATH = "text_classification.tflite";
+
   private TextClassificationClient client;
 
   private TextView resultTextView;
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.tfe_tc_activity_main);
     Log.v(TAG, "onCreate");
 
-    client = new TextClassificationClient(getApplicationContext());
+    client = new TextClassificationClient(getApplicationContext(), MODEL_PATH);
     handler = new Handler();
     Button classifyButton = findViewById(R.id.button);
     classifyButton.setOnClickListener(

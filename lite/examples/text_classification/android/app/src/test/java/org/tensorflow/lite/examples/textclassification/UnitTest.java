@@ -34,10 +34,11 @@ import org.tensorflow.lite.examples.textclassification.TextClassificationClient.
 @RunWith(RobolectricTestRunner.class)
 public final class UnitTest {
   private TextClassificationClient client;
+  private static final String MODEL_PATH = "text_classification.tflite";
 
   @Before
   public void setUp() {
-    client = new TextClassificationClient(ApplicationProvider.getApplicationContext());
+    client = new TextClassificationClient(ApplicationProvider.getApplicationContext(), MODEL_PATH);
     client.load();
   }
 
@@ -51,7 +52,7 @@ public final class UnitTest {
     assertEquals(0, (int) client.getDic().get("<PAD>"));
     assertEquals(1, (int) client.getDic().get("<START>"));
     assertEquals(2, (int) client.getDic().get("<UNKNOWN>"));
-    assertEquals(4, (int) client.getDic().get("the"));
+    assertEquals(3, (int) client.getDic().get("the"));
   }
 
   @Test
@@ -63,12 +64,12 @@ public final class UnitTest {
 
   @Test
   public void inputPreprocessingTest() {
-    float[][] clientOutput = client.tokenizeInputText("hello,world!");
-    float[][] expectOutput = new float[1][256];
+    int[][] clientOutput = client.tokenizeInputText("hello,world!");
+    int[][] expectOutput = new int[1][256];
     Arrays.fill(expectOutput[0], 0, 255, 0);
     expectOutput[0][0] = 1; // Index for <START>
-    expectOutput[0][1] = 4825; // Index for "hello".
-    expectOutput[0][2] = 182; // Index for "world".
+    expectOutput[0][1] = 4845; // Index for "hello".
+    expectOutput[0][2] = 181; // Index for "world".
     assertArrayEquals(expectOutput, clientOutput);
   }
 

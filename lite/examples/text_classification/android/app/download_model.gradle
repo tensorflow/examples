@@ -1,5 +1,5 @@
 task downloadModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification.tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification_v2.tflite'
     dest project.ext.ASSET_DIR + '/text_classification.tflite'
     overwrite true
 }
