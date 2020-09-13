@@ -31,21 +31,21 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 
 import tensorflow_hub as hub
 from tensorflow_hub import registry
-
 from official.nlp import optimization
-
 from official.nlp.bert import configs as bert_configs
 from official.nlp.bert import run_squad_helper
 from official.nlp.bert import squad_evaluate_v1_1
 from official.nlp.bert import squad_evaluate_v2_0
 from official.nlp.bert import tokenization
-
-
 from official.nlp.data import classifier_data_lib
 from official.nlp.data import squad_lib
-
 from official.nlp.modeling import models
-from official.utils.misc import distribution_utils
+# pylint: disable=g-import-not-at-top,bare-except
+try:
+  from official.common import distribute_utils
+except:
+  from official.utils.misc import distribution_utils as distribute_utils
+# pylint: enable=g-import-not-at-top,bare-except
 
 
 def create_int_feature(values):
@@ -457,7 +457,7 @@ class BertModelSpec(object):
       self.model_dir = tempfile.mkdtemp()
 
     num_gpus = get_num_gpus(num_gpus)
-    self.strategy = distribution_utils.get_distribution_strategy(
+    self.strategy = distribute_utils.get_distribution_strategy(
         distribution_strategy=distribution_strategy,
         num_gpus=num_gpus,
         tpu_address=tpu)
@@ -573,7 +573,7 @@ class BertClassifierModelSpec(BertModelSpec):
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
     initial_lr = self.learning_rate
 
-    with distribution_utils.get_strategy_scope(self.strategy):
+    with distribute_utils.get_strategy_scope(self.strategy):
       training_dataset = train_input_fn()
       evaluation_dataset = None
       if validation_input_fn is not None:
@@ -888,7 +888,7 @@ class BertQAModelSpec(BertModelSpec):
           positions, logits, from_logits=True)
       return tf.reduce_mean(loss)
 
-    with distribution_utils.get_strategy_scope(self.strategy):
+    with distribute_utils.get_strategy_scope(self.strategy):
       training_dataset = train_input_fn()
       bert_model = self.create_model()
       optimizer = optimization.create_optimizer(self.learning_rate,
