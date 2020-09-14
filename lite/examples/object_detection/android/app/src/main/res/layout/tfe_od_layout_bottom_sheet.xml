@@ -140,7 +140,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:text="4"
+                android:text="1"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
 

@@ -23,6 +23,7 @@ import android.os.Trace;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -35,7 +36,6 @@ import java.util.Map;
 import java.util.Vector;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.examples.detection.env.Logger;
-import org.tensorflow.lite.support.metadata.MetadataExtractor;
 
 /**
  * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
@@ -110,10 +110,9 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
       throws IOException {
     final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel();
 
-    MappedByteBuffer modelFile = loadModelFile(assetManager, modelFilename);
-    MetadataExtractor metadata = new MetadataExtractor(modelFile);
-    BufferedReader br =
-        new BufferedReader(new InputStreamReader(metadata.getAssociatedFile(labelFilename)));
+    String actualFilename = labelFilename.split("file:///android_asset/")[1];
+    InputStream labelsInput = assetManager.open(actualFilename);
+    BufferedReader br = new BufferedReader(new InputStreamReader(labelsInput));
     String line;
     while ((line = br.readLine()) != null) {
       LOGGER.w(line);
@@ -124,9 +123,7 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
     d.inputSize = inputSize;
 
     try {
-      Interpreter.Options options = new Interpreter.Options();
-      options.setNumThreads(NUM_THREADS);
-      d.tfLite = new Interpreter(loadModelFile(assetManager, modelFilename), options);
+      d.tfLite = new Interpreter(loadModelFile(assetManager, modelFilename));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
