@@ -37,7 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.tensorflow.lite.examples.classification.tflite.Classifier;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
-import org.tensorflow.lite.examples.classification.tflite.Classifier.Model;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Recognition;
 
 /** Golden test for Image Classification Reference app. */
@@ -54,7 +53,7 @@ public class ClassifierTest {
   @Test
   public void classificationResultsShouldNotChange() throws IOException {
     ClassifierActivity activity = rule.getActivity();
-    Classifier classifier = Classifier.create(activity, Model.FLOAT_MOBILENET, Device.CPU, 1);
+    Classifier classifier = Classifier.create(activity, Device.CPU, 1);
     for (int i = 0; i < INPUTS.length; i++) {
       String imageFileName = INPUTS[i];
       String goldenOutputFileName = GOLDEN_OUTPUTS[i];

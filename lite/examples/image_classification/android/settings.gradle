@@ -1,2 +1,2 @@
 rootProject.name = 'TFLite Image Classification Demo App'
-include ':app'
+include ':app', ':lib_support', ':models'

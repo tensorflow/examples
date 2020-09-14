@@ -15,11 +15,14 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.classification.tflite;
 
+import static java.lang.Math.min;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.util.Log;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
@@ -29,7 +32,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
 import org.tensorflow.lite.gpu.GpuDelegate;
 import org.tensorflow.lite.nnapi.NnApiDelegate;
@@ -47,7 +49,7 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 /** A classifier specialized to label images using TensorFlow Lite. */
 public abstract class Classifier {
-  private static final Logger LOGGER = new Logger();
+  private static final String TAG = "Classifier";
 
   /** The model type used for classification. */
   public enum Model {
@@ -68,7 +70,6 @@ public abstract class Classifier {
   private static final int MAX_RESULTS = 3;
 
   /** The loaded TensorFlow Lite model. */
-  private MappedByteBuffer tfliteModel;
 
   /** Image size along the x axis. */
   private final int imageSizeX;
@@ -89,7 +90,7 @@ public abstract class Classifier {
   private final Interpreter.Options tfliteOptions = new Interpreter.Options();
 
   /** Labels corresponding to the output of the vision model. */
-  private List<String> labels;
+  private final List<String> labels;
 
   /** Input image TensorBuffer. */
   private TensorImage inputImageBuffer;
@@ -196,7 +197,7 @@ public abstract class Classifier {
 
   /** Initializes a {@code Classifier}. */
   protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
-    tfliteModel = FileUtil.loadMappedFile(activity, getModelPath());
+    MappedByteBuffer tfliteModel = FileUtil.loadMappedFile(activity, getModelPath());
     switch (device) {
       case NNAPI:
         nnApiDelegate = new NnApiDelegate();
@@ -235,7 +236,7 @@ public abstract class Classifier {
     // Creates the post processor for the output probability.
     probabilityProcessor = new TensorProcessor.Builder().add(getPostprocessNormalizeOp()).build();
 
-    LOGGER.d("Created a Tensorflow Lite Image Classifier.");
+    Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
   }
 
   /** Runs inference and returns the classification results. */
@@ -248,7 +249,7 @@ public abstract class Classifier {
     inputImageBuffer = loadImage(bitmap, sensorOrientation);
     long endTimeForLoadImage = SystemClock.uptimeMillis();
     Trace.endSection();
-    LOGGER.v("Timecost to load the image: " + (endTimeForLoadImage - startTimeForLoadImage));
+    Log.v(TAG, "Timecost to load the image: " + (endTimeForLoadImage - startTimeForLoadImage));
 
     // Runs the inference call.
     Trace.beginSection("runInference");
@@ -256,7 +257,7 @@ public abstract class Classifier {
     tflite.run(inputImageBuffer.getBuffer(), outputProbabilityBuffer.getBuffer().rewind());
     long endTimeForReference = SystemClock.uptimeMillis();
     Trace.endSection();
-    LOGGER.v("Timecost to run model inference: " + (endTimeForReference - startTimeForReference));
+    Log.v(TAG, "Timecost to run model inference: " + (endTimeForReference - startTimeForReference));
 
     // Gets the map of label and probability.
     Map<String, Float> labeledProbability =
@@ -282,7 +283,6 @@ public abstract class Classifier {
       nnApiDelegate.close();
       nnApiDelegate = null;
     }
-    tfliteModel = null;
   }
 
   /** Get the image size along the x axis. */
@@ -301,7 +301,7 @@ public abstract class Classifier {
     inputImageBuffer.load(bitmap);
 
     // Creates processor for the TensorImage.
-    int cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight());
+    int cropSize = min(bitmap.getWidth(), bitmap.getHeight());
     int numRotation = sensorOrientation / 90;
     // TODO(b/143564309): Fuse ops inside ImageProcessor.
     ImageProcessor imageProcessor =
@@ -333,7 +333,7 @@ public abstract class Classifier {
     }
 
     final ArrayList<Recognition> recognitions = new ArrayList<>();
-    int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
+    int recognitionsSize = min(pq.size(), MAX_RESULTS);
     for (int i = 0; i < recognitionsSize; ++i) {
       recognitions.add(pq.poll());
     }
