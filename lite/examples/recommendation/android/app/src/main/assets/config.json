@@ -1,5 +1,5 @@
 {
-  "model": "recommendation_rnn_i10o100.tflite",
+  "model": "recommendation_cnn_i10o100.tflite",
   "inputLength": 10,
   "outputLength": 100,
   "topK": 10,
