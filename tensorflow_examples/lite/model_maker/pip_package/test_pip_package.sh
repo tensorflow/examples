@@ -8,6 +8,7 @@ set -x
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 PYTHON_BIN="$(which python3.7)"
 PIP_BIN="$(which pip3.7)"
+PIP_FLAG="--user"
 CLI_BIN="tflite_model_maker"
 
 function build_pip_and_install {
@@ -34,7 +35,7 @@ function build_pip_and_install {
   rm -r -f dist   # Clean up distributions.
   ${PYTHON_BIN} setup.py ${ver?} sdist bdist_wheel
   local dist_pkg="$(ls dist/${pkg}*.whl)"
-  ${PIP_BIN} install ${dist_pkg?} --ignore-installed
+  ${PIP_BIN} install ${dist_pkg?} --ignore-installed ${PIP_FLAG}
 
   popd > /dev/null
   echo
