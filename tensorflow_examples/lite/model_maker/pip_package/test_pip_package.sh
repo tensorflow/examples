@@ -1,24 +1,23 @@
 #!/bin/bash
 # Test Model Maker's pip package.
-# sh test_pip_package.sh
+# bash test_pip_package.sh
 
 set -e
 set -x
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+source "${SCRIPT_DIR}/create_venv.sh"
+create_venv_or_activate  # Use virtualenv and activate.
+
 PYTHON_BIN="$(which python3.7)"
 PIP_BIN="$(which pip3.7)"
-PIP_FLAG="--user"
 CLI_BIN="tflite_model_maker"
 
 function build_pip_and_install {
   # Build and install pip package.
   if [[ "${PYTHON_BIN}" == "" ]]; then
     echo "python is not available."
-    exit 1
-  fi
-  if [[ "${PIP_BIN}" == "" ]]; then
-    echo "pip is not available."
     exit 1
   fi
 
@@ -35,7 +34,7 @@ function build_pip_and_install {
   rm -r -f dist   # Clean up distributions.
   ${PYTHON_BIN} setup.py ${ver?} sdist bdist_wheel
   local dist_pkg="$(ls dist/${pkg}*.whl)"
-  ${PIP_BIN} install ${dist_pkg?} --ignore-installed ${PIP_FLAG}
+  ${PIP_BIN} install ${dist_pkg?} --ignore-installed
 
   popd > /dev/null
   echo
@@ -67,16 +66,20 @@ function test_cli {
   yes | ${CLI_BIN}
 }
 
-echo "===== Test Model Maker (nightly) ====="
-build_pip_and_install --nightly
-test_import
-test_cli
-uninstall_pip --nightly
-echo
+function test_model_maker {
+  echo "===== Test Model Maker (nightly) ====="
+  build_pip_and_install --nightly
+  test_import
+  test_cli
+  uninstall_pip --nightly
+  echo
 
-echo "===== Test Model Maker (stable) ====="
-build_pip_and_install
-test_import
-test_cli
-uninstall_pip
-echo
+  echo "===== Test Model Maker (stable) ====="
+  build_pip_and_install
+  test_import
+  test_cli
+  uninstall_pip
+  echo
+}
+
+test_model_maker
