@@ -42,8 +42,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -51,12 +49,19 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
+import org.tensorflow.lite.Interpreter;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.MappedByteBuffer;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
@@ -64,7 +69,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import org.tensorflow.lite.Interpreter;
 
 /**
  * An activity that listens for audio and then uses a TensorFlow model to detect particular classes,
@@ -132,7 +136,7 @@ public class SpeechActivity extends Activity
   private Handler backgroundHandler;
 
   /** Memory-map the model file in Assets. */
-  private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename)
+  private static ByteBuffer loadModelFile(AssetManager assets, String modelFilename)
       throws IOException {
     AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
     FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
