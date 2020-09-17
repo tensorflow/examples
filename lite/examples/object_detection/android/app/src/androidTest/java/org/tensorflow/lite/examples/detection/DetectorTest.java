@@ -51,7 +51,7 @@ public class DetectorTest {
   private static final int MODEL_INPUT_SIZE = 300;
   private static final boolean IS_MODEL_QUANTIZED = true;
   private static final String MODEL_FILE = "detect.tflite";
-  private static final String LABELS_FILE = "file:///android_asset/labelmap.txt";
+  private static final String LABELS_FILE = "labelmap.txt";
   private static final Size IMAGE_SIZE = new Size(640, 480);
 
   private Classifier detector;
@@ -118,6 +118,7 @@ public class DetectorTest {
   private static boolean matchBoundingBoxes(RectF a, RectF b) {
     float areaA = a.width() * a.height();
     float areaB = b.width() * b.height();
+
     RectF overlapped =
         new RectF(
             max(a.left, b.left), max(a.top, b.top), min(a.right, b.right), min(a.bottom, b.bottom));
