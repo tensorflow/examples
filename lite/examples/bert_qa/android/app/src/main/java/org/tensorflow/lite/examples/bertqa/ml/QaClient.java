@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.support.metadata.MetadataExtractor;
 
 /** Interface to load TfLite model and provide predictions. */
 public class QaClient implements AutoCloseable {
@@ -69,6 +70,7 @@ public class QaClient implements AutoCloseable {
       ByteBuffer buffer = loadModelFile(this.context.getAssets());
       Interpreter.Options opt = new Interpreter.Options();
       opt.setNumThreads(NUM_LITE_THREADS);
+      loadDictionary(buffer);
       tflite = new Interpreter(buffer, opt);
       Log.v(TAG, "TFLite model loaded.");
     } catch (IOException ex) {
@@ -77,9 +79,10 @@ public class QaClient implements AutoCloseable {
   }
 
   @WorkerThread
-  public synchronized void loadDictionary() {
+  public synchronized void loadDictionary(ByteBuffer byteBuffer) {
     try {
-      loadDictionaryFile(this.context.getAssets());
+      MetadataExtractor metadata = new MetadataExtractor(byteBuffer);
+      loadDictionaryFile(metadata.getAssociatedFile(DIC_PATH));
       Log.v(TAG, "Dictionary loaded.");
     } catch (IOException ex) {
       Log.e(TAG, ex.getMessage());
@@ -112,9 +115,8 @@ public class QaClient implements AutoCloseable {
   }
 
   /** Load dictionary from assets. */
-  public void loadDictionaryFile(AssetManager assetManager) throws IOException {
-    try (InputStream ins = assetManager.open(DIC_PATH);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(ins))) {
+  public void loadDictionaryFile(InputStream inputStream) throws IOException {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
       int index = 0;
       while (reader.ready()) {
         String key = reader.readLine();

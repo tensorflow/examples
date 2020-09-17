@@ -150,7 +150,6 @@ public class QaActivity extends AppCompatActivity {
     handler.post(
         () -> {
           qaClient.loadModel();
-          qaClient.loadDictionary();
         });
 
     textToSpeech =

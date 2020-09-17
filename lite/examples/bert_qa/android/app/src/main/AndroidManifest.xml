@@ -29,7 +29,8 @@
 
     <activity
         android:name=".ui.QaActivity"
-        android:exported="false">
+        android:exported="false"
+        android:parentActivityName=".ui.DatasetListActivity">
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
           android:value=".ui.DatasetListActivity" />
