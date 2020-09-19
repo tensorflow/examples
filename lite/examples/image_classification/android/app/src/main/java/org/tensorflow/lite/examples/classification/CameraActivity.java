@@ -37,6 +37,11 @@ import android.os.Trace;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -51,6 +56,8 @@ import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 import org.tensorflow.lite.examples.classification.env.ImageUtils;
 import org.tensorflow.lite.examples.classification.env.Logger;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
@@ -65,6 +72,9 @@ public abstract class CameraActivity extends AppCompatActivity
   private static final Logger LOGGER = new Logger();
 
   private static final int PERMISSIONS_REQUEST = 1;
+  private TextToSpeech sp;
+  private String var="";
+  private String _charSeq="null";
 
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
   protected int previewWidth = 0;
@@ -179,6 +189,35 @@ public abstract class CameraActivity extends AppCompatActivity
     recognition1ValueTextView = findViewById(R.id.detected_item1_value);
     recognition2TextView = findViewById(R.id.detected_item2);
     recognition2ValueTextView = findViewById(R.id.detected_item2_value);
+    Context context;
+
+    TextToSpeech.OnInitListener listener;
+    sp = new TextToSpeech(getApplicationContext(),null);
+
+    recognitionTextView.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+          String _charSeq = s.toString();
+          sp.setPitch((float) 1);
+          sp.setSpeechRate((float) 1);
+          sp.speak(_charSeq, TextToSpeech.QUEUE_ADD, null);
+          var=_charSeq;
+
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+        if(_charSeq.equals(var)){
+          sp.stop();
+        }
+      }
+    });
 
     frameValueTextView = findViewById(R.id.frame_info);
     cropValueTextView = findViewById(R.id.crop_info);
