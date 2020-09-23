@@ -85,9 +85,9 @@ class ImageDataLoaderTest(tf.test.TestCase):
             os.path.join(self.image_path, 'tulips', '0.jpeg'))
       self.assertTrue((image.numpy() == raw_image_tensor.numpy()).all())
 
-  def test_load_from_tfds(self):
-    train_data, validation_data, test_data = image_dataloader.load_from_tfds(
-        'beans')
+  def test_from_tfds(self):
+    train_data, validation_data, test_data = \
+        image_dataloader.ImageClassifierDataLoader.from_tfds('beans')
     self.assertIsInstance(train_data.dataset, tf.data.Dataset)
     self.assertEqual(train_data.size, 1034)
     self.assertEqual(train_data.num_classes, 3)

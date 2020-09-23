@@ -45,21 +45,6 @@ def create_data(name, data, info, num_classes, label_names):
   return ImageClassifierDataLoader(data, size, num_classes, label_names)
 
 
-def load_from_tfds(name):
-  """Loads data from tensorflow_datasets."""
-  data, info = tfds.load(name, with_info=True)
-  if 'label' not in info.features:
-    raise ValueError('info.features need to contain \'label\' key.')
-  num_classes = info.features['label'].num_classes
-  label_names = info.features['label'].names
-
-  train_data = create_data('train', data, info, num_classes, label_names)
-  validation_data = create_data('validation', data, info, num_classes,
-                                label_names)
-  test_data = create_data('test', data, info, num_classes, label_names)
-  return train_data, validation_data, test_data
-
-
 class ImageClassifierDataLoader(dataloader.DataLoader):
   """DataLoader for image classifier."""
 
@@ -146,3 +131,18 @@ class ImageClassifierDataLoader(dataloader.DataLoader):
         all_label_size, ', '.join(label_names))
     return ImageClassifierDataLoader(image_label_ds, all_image_size,
                                      all_label_size, label_names)
+
+  @classmethod
+  def from_tfds(cls, name):
+    """Loads data from tensorflow_datasets."""
+    data, info = tfds.load(name, with_info=True)
+    if 'label' not in info.features:
+      raise ValueError('info.features need to contain \'label\' key.')
+    num_classes = info.features['label'].num_classes
+    label_names = info.features['label'].names
+
+    train_data = create_data('train', data, info, num_classes, label_names)
+    validation_data = create_data('validation', data, info, num_classes,
+                                  label_names)
+    test_data = create_data('test', data, info, num_classes, label_names)
+    return train_data, validation_data, test_data
