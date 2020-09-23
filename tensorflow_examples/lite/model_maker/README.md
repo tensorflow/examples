@@ -47,19 +47,21 @@ step of the overall process. For more detail, you could refer to
 1.   Load input data specific to an on-device ML app.
 
 ```python
+from tflite_model_maker import ImageClassifierDataLoader
 data = ImageClassifierDataLoader.from_folder('flower_photos/')
 ```
 
 2. Customize the TensorFlow model.
 
 ```python
+from tflite_model_maker import image_classifier
 model = image_classifier.create(data)
 ```
 
 3. Evaluate the model.
 
 ```python
-loss, accuracy = model.evaluate()
+loss, accuracy = model.evaluate(data)
 ```
 
 4.  Export to Tensorflow Lite model and label file in `export_dir`.
