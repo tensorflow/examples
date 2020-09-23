@@ -15,6 +15,7 @@
 # ==============================================================================
 
 set -e  # Exit immediately when one of the commands fails.
+set -x  # Verbose
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
