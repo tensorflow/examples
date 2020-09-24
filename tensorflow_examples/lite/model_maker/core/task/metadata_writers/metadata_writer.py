@@ -22,10 +22,9 @@ import abc
 import os
 
 import tensorflow as tf
-
 # pylint: disable=g-direct-tensorflow-import
-from tflite_support import metadata as _metadata
 from tflite_support import schema_py_generated as _schema_fb
+from tflite_support import metadata as _metadata
 # pylint: enable=g-direct-tensorflow-import
 
 
