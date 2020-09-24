@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.textclassification;
+package org.tensorflow.lite.examples.textclassification.client;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.util.Log;
-import androidx.annotation.WorkerThread;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,6 +30,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +40,12 @@ import org.tensorflow.lite.support.metadata.MetadataExtractor;
 
 /** Interface to load TfLite model and provide predictions. */
 public class TextClassificationClient {
-  private static final String TAG = "TextClassificationDemo";
+  private static final String TAG = "Interpreter";
 
-  private static final int SENTENCE_LEN = 256;  // The maximum length of an input sentence.
+  private static final int SENTENCE_LEN = 256; // The maximum length of an input sentence.
   // Simple delimiter to split words.
   private static final String SIMPLE_SPACE_OR_PUNCTUATION = " |\\,|\\.|\\!|\\?|\n";
+  private static final String MODEL_PATH = "text_classification.tflite";
   /*
    * Reserved values in ImdbDataSet dic:
    * dic["<PAD>"] = 0      used for padding
@@ -59,80 +60,24 @@ public class TextClassificationClient {
   private static final int MAX_RESULTS = 3;
 
   private final Context context;
-  private final String modelPath;
   private final Map<String, Integer> dic = new HashMap<>();
   private final List<String> labels = new ArrayList<>();
   private Interpreter tflite;
 
-  /** An immutable result returned by a TextClassifier describing what was classified. */
-  public static class Result {
-    /**
-     * A unique identifier for what has been classified. Specific to the class, not the instance of
-     * the object.
-     */
-    private final String id;
-
-    /** Display name for the result. */
-    private final String title;
-
-    /** A sortable score for how good the result is relative to others. Higher should be better. */
-    private final Float confidence;
-
-    public Result(final String id, final String title, final Float confidence) {
-      this.id = id;
-      this.title = title;
-      this.confidence = confidence;
-    }
-
-    public String getId() {
-      return id;
-    }
-
-    public String getTitle() {
-      return title;
-    }
-
-    public Float getConfidence() {
-      return confidence;
-    }
-
-    @Override
-    public String toString() {
-      String resultString = "";
-      if (id != null) {
-        resultString += "[" + id + "] ";
-      }
-
-      if (title != null) {
-        resultString += title + " ";
-      }
-
-      if (confidence != null) {
-        resultString += String.format("(%.1f%%) ", confidence * 100.0f);
-      }
-
-      return resultString.trim();
-    }
-  }
-  ;
-
-  public TextClassificationClient(Context context, String modelPath) {
+  public TextClassificationClient(Context context) {
     this.context = context;
-    this.modelPath = modelPath;
   }
 
   /** Load the TF Lite model and dictionary so that the client can start classifying text. */
-  @WorkerThread
   public void load() {
     loadModel();
   }
 
   /** Load TF Lite model. */
-  @WorkerThread
   private synchronized void loadModel() {
     try {
       // Load the TF Lite model
-      ByteBuffer buffer = loadModelFile(this.context.getAssets(), this.modelPath);
+      ByteBuffer buffer = loadModelFile(this.context.getAssets(), MODEL_PATH);
       tflite = new Interpreter(buffer);
       Log.v(TAG, "TFLite model loaded.");
 
@@ -149,14 +94,12 @@ public class TextClassificationClient {
       loadLabelFile(labelFile);
       Log.v(TAG, "Labels loaded.");
 
-
     } catch (IOException ex) {
       Log.e(TAG, "Error loading TF Lite model.\n", ex);
     }
   }
 
   /** Free up resources as the client is no longer needed. */
-  @WorkerThread
   public synchronized void unload() {
     tflite.close();
     dic.clear();
@@ -164,7 +107,6 @@ public class TextClassificationClient {
   }
 
   /** Classify an input string and returns the classification results. */
-  @WorkerThread
   public synchronized List<Result> classify(String text) {
     // Pre-prosessing.
     int[][] input = tokenizeInputText(text);
@@ -186,6 +128,7 @@ public class TextClassificationClient {
       results.add(pq.poll());
     }
 
+    Collections.sort(results);
     // Return the probability of each class.
     return results;
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.textclassification;
+package org.tensorflow.lite.examples.textclassification.client;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -28,17 +28,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.tensorflow.lite.examples.textclassification.TextClassificationClient.Result;
 
-/** Tests of {@link org.tensorflow.lite.examples.textclassification.TextClassificationClient} */
+/** Tests of {@link TextClassificationClient} */
 @RunWith(RobolectricTestRunner.class)
 public final class UnitTest {
   private TextClassificationClient client;
-  private static final String MODEL_PATH = "text_classification.tflite";
 
   @Before
   public void setUp() {
-    client = new TextClassificationClient(ApplicationProvider.getApplicationContext(), MODEL_PATH);
+    client = new TextClassificationClient(ApplicationProvider.getApplicationContext());
     client.load();
   }
 

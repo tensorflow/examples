@@ -26,12 +26,12 @@ import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import java.util.List;
-import org.tensorflow.lite.examples.textclassification.TextClassificationClient.Result;
+import org.tensorflow.lite.examples.textclassification.client.Result;
+import org.tensorflow.lite.examples.textclassification.client.TextClassificationClient;
 
 /** The main activity to provide interactions with users. */
 public class MainActivity extends AppCompatActivity {
   private static final String TAG = "TextClassificationDemo";
-  private static final String MODEL_PATH = "text_classification.tflite";
 
   private TextClassificationClient client;
 
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.tfe_tc_activity_main);
     Log.v(TAG, "onCreate");
 
-    client = new TextClassificationClient(getApplicationContext(), MODEL_PATH);
+    client = new TextClassificationClient(getApplicationContext());
     handler = new Handler();
     Button classifyButton = findViewById(R.id.button);
     classifyButton.setOnClickListener(
@@ -98,8 +98,7 @@ public class MainActivity extends AppCompatActivity {
           String textToShow = "Input: " + inputText + "\nOutput:\n";
           for (int i = 0; i < results.size(); i++) {
             Result result = results.get(i);
-            textToShow +=
-                String.format("    %s: %s\n", result.getTitle(), result.getConfidence());
+            textToShow += String.format("    %s: %s\n", result.getTitle(), result.getConfidence());
           }
           textToShow += "---------\n";
 
