@@ -1,103 +1,39 @@
-def targetFolder = "src/main/assets"
-def modelFloatDownloadUrl = "http://download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_1.0_224.tgz"
-def modelQuantDownloadUrl = "http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224_quant.tgz"
-def modelEfficientNetFloatDownloadUrl = "http://download.tensorflow.org/models/tflite/efficientnet-lite/efficientnet-lite0-fp32_2020_03_03.zip"
-def modelEfficientNetQuantDownloadUrl = "http://download.tensorflow.org/models/tflite/efficientnet-lite/efficientnet-lite0-int8_2020_03_03.zip"
-def localCacheFloat = "build/intermediates/mobilenet_v1_1.0_224.tgz"
-def localCacheQuant = "build/intermediates/mobilenet_v1_1.0_224_quant.tgz"
-def localCacheEfficientNetFloat = "build/intermediates/efficientnet-lite0-fp32_2020_03_03.zip"
-def localCacheEfficientNetQuant = "build/intermediates/efficientnet-lite0-int8_2020_03_03.zip"
+def modelFloatDownloadUrl = "https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224/1/metadata/1?lite-format=tflite"
+def modelFloatFile = "mobilenet_v1_1.0_224.tflite"
+def modelQuantDownloadUrl = "https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224_quantized/1/metadata/1?lite-format=tflite"
+def modelQuantFile = "mobilenet_v1_1.0_224_quant.tflite"
+def modelEfficientNetFloatDownloadUrl = "https://tfhub.dev/tensorflow/lite-model/efficientnet/lite0/fp32/2?lite-format=tflite"
+def modelEfficientNetFloatFile = "efficientnet-lite0-fp32.tflite"
+def modelEfficientNetQuantDownloadUrl = "https://tfhub.dev/tensorflow/lite-model/efficientnet/lite0/int8/2?lite-format=tflite"
+def modelEfficientNetQuantFile = "efficientnet-lite0-int8.tflite"
 
 
-task downloadModelFloat(type: DownloadUrlTask) {
-    doFirst {
-        println "Downloading ${modelFloatDownloadUrl}"
-    }
-    sourceUrl = "${modelFloatDownloadUrl}"
-    target = file("${localCacheFloat}")
+task downloadModelFloat(type: Download) {
+    src "${modelFloatDownloadUrl}"
+    dest project.ext.ASSET_DIR + "/${modelFloatFile}"
+    overwrite false
 }
 
-task downloadModelQuant(type: DownloadUrlTask) {
-    doFirst {
-        println "Downloading ${modelQuantDownloadUrl}"
-    }
-    sourceUrl = "${modelQuantDownloadUrl}"
-    target = file("${localCacheQuant}")
+
+task downloadModelQuant(type: Download) {
+    src "${modelQuantDownloadUrl}"
+    dest project.ext.ASSET_DIR + "/${modelQuantFile}"
+    overwrite false
 }
 
-task downloadEfficientNetFloat(type: DownloadUrlTask) {
-    doFirst {
-        println "Downloading ${modelEfficientNetFloatDownloadUrl}"
-    }
-    sourceUrl = "${modelEfficientNetFloatDownloadUrl}"
-    target = file("${localCacheEfficientNetFloat}")
+task downloadEfficientNetFloat(type: Download) {
+    src "${modelEfficientNetFloatDownloadUrl}"
+    dest project.ext.ASSET_DIR + "/${modelEfficientNetFloatFile}"
+    overwrite false
 }
 
-task downloadEfficientNetQuant(type: DownloadUrlTask) {
-    doFirst {
-        println "Downloading ${modelEfficientNetQuantDownloadUrl}"
-    }
-    sourceUrl = "${modelEfficientNetQuantDownloadUrl}"
-    target = file("${localCacheEfficientNetQuant}")
+task downloadEfficientNetQuant(type: Download) {
+    src "${modelEfficientNetQuantDownloadUrl}"
+    dest project.ext.ASSET_DIR + "/${modelEfficientNetQuantFile}"
+    overwrite false
 }
 
-task unzipModelFloat(type: Copy, dependsOn: 'downloadModelFloat') {
-    doFirst {
-        println "Unzipping ${localCacheFloat}"
-    }
-    from tarTree("${localCacheFloat}")
-    into "${targetFolder}"
-}
-
-task unzipModelQuant(type: Copy, dependsOn: 'downloadModelQuant') {
-    doFirst {
-        println "Unzipping ${localCacheQuant}"
-    }
-    from tarTree("${localCacheQuant}")
-    into "${targetFolder}"
-}
-
-task unzipModelEfficientNetFloat(type: Copy, dependsOn: 'downloadEfficientNetFloat') {
-    doFirst {
-        println "Unzipping ${localCacheEfficientNetFloat}"
-    }
-    from zipTree("${localCacheEfficientNetFloat}")
-    into "${targetFolder}"
-}
-
-task unzipModelEfficientNetQuant(type: Copy, dependsOn: 'downloadEfficientNetQuant') {
-    doFirst {
-        println "Unzipping ${localCacheEfficientNetQuant}"
-    }
-    from zipTree("${localCacheEfficientNetQuant}")
-    into "${targetFolder}"
-}
-
-task cleanUnusedFiles(type: Delete, dependsOn: ['unzipModelFloat', 'unzipModelQuant', 'unzipModelEfficientNetFloat', 'unzipModelEfficientNetQuant']) {
-    delete fileTree("${targetFolder}").matching {
-        include "*.pb"
-        include "*.ckpt.*"
-        include "*.pbtxt*"
-        include "*.quant_info.*"
-        include "*.meta"
-    }
-}
-
-class DownloadUrlTask extends DefaultTask {
-    @Input
-    String sourceUrl
-
-    @OutputFile
-    File target
-
-    @TaskAction
-    void download() {
-        ant.get(src: sourceUrl, dest: target)
-    }
-}
-
-preBuild.dependsOn unzipModelFloat
-preBuild.dependsOn unzipModelQuant
-preBuild.dependsOn unzipModelEfficientNetFloat
-preBuild.dependsOn unzipModelEfficientNetQuant
-preBuild.dependsOn cleanUnusedFiles
+preBuild.dependsOn downloadModelFloat
+preBuild.dependsOn downloadModelQuant
+preBuild.dependsOn downloadEfficientNetFloat
+preBuild.dependsOn downloadEfficientNetQuant
