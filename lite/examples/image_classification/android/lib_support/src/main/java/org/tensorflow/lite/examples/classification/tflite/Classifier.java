@@ -49,7 +49,7 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 /** A classifier specialized to label images using TensorFlow Lite. */
 public abstract class Classifier {
-  public static final String TAG = "ClassifierWithSupport";
+  private static final String TAG = "Classifier";
 
   /** The model type used for classification. */
   public enum Model {
@@ -307,9 +307,6 @@ public abstract class Classifier {
     ImageProcessor imageProcessor =
         new ImageProcessor.Builder()
             .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-            // TODO(b/169379396): investigate the impact of the resize algorithm on accuracy.
-            // To get the same inference results as lib_task_api, which is built on top of the Task
-            // Library, use ResizeMethod.BILINEAR.
             .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.NEAREST_NEIGHBOR))
             .add(new Rot90Op(numRotation))
             .add(getPreprocessNormalizeOp())

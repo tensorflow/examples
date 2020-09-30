@@ -30,14 +30,14 @@ numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
 ### Classifier
 
 The file
-[`Classifier.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/Classifier.java)
+[`Classifier.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/app/src/main/java/org/tensorflow/lite/examples/classification/tflite/Classifier.java)
 contains most of the complex logic for processing the camera input and running
 inference.
 
 Two subclasses of the file exist, in
-[`ClassifierFloatMobileNet.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/ClassifierFloatMobileNet.java)
+[`ClassifierFloatMobileNet.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/app/src/main/java/org/tensorflow/lite/examples/classification/tflite/ClassifierFloatMobileNet.java)
 and
-[`ClassifierQuantizedMobileNet.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/ClassifierQuantizedMobileNet.java),
+[`ClassifierQuantizedMobileNet.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/app/src/main/java/org/tensorflow/lite/examples/classification/tflite/ClassifierQuantizedMobileNet.java),
 to demonstrate the use of both floating point and
 [quantized](https://www.tensorflow.org/lite/performance/post_training_quantization)
 models. After the introduction of the
