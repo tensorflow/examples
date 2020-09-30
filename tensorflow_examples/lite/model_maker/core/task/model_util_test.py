@@ -66,17 +66,20 @@ class ModelUtilTest(tf.test.TestCase):
 
   @test_util.test_in_tf_1and2
   def test_export_tflite_quantized(self):
-    input_dim = 4
+    input_dim = 4000
     num_classes = 2
     max_input_value = 5
     model = test_util.build_model([input_dim], num_classes)
     tflite_file = os.path.join(self.get_temp_dir(), 'model_quantized.tflite')
 
-    for config in _get_quantization_config_list(input_dim, num_classes,
-                                                max_input_value):
+    quant_configs = _get_quantization_config_list(input_dim, num_classes,
+                                                  max_input_value)
+    model_sizes = [9088, 9536, 9600, 17280]
+    for config, model_size in zip(quant_configs, model_sizes):
       model_util.export_tflite(model, tflite_file, config, _mock_gen_dataset)
       self._test_tflite(
           model, tflite_file, input_dim, max_input_value, atol=1e-01)
+      self.assertNear(os.path.getsize(tflite_file), model_size, 300)
 
   def _test_tflite(self,
                    keras_model,
