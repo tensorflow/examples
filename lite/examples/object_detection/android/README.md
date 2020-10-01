@@ -79,7 +79,7 @@ bazel run //tensorflow/lite/tools:visualize \
 ```
 
 * Get `labelmap.txt` from the second column of **[class-descriptions-boxable](https://storage.googleapis.com/openimages/2018_04/class-descriptions-boxable.csv)**.
-* In `DetectorActivity.java` set `TF_OD_API_IS_QUANTIZED` to `false` and in `TFLiteObjectDetectionAPIModel.java` set `labelOffset` to `0`.
+* In `DetectorActivity.java` set `TF_OD_API_IS_QUANTIZED` to `false`.
 
 
 ### Additional Note
