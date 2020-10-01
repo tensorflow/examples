@@ -49,7 +49,8 @@ public class ClassifierTest {
       new ActivityTestRule<>(ClassifierActivity.class);
 
   private static final String[] INPUTS = {"fox.jpg"};
-  private static final String[] GOLDEN_OUTPUTS = {"fox-mobilenet_v1_1.0_224.txt"};
+  private static final String[] GOLDEN_OUTPUTS_SUPPORT = {"fox-mobilenet_v1_1.0_224_support.txt"};
+  private static final String[] GOLDEN_OUTPUTS_TASK = {"fox-mobilenet_v1_1.0_224_task_api.txt"};
 
   @Test
   public void classificationResultsShouldNotChange() throws IOException {
@@ -57,7 +58,16 @@ public class ClassifierTest {
     Classifier classifier = Classifier.create(activity, Model.FLOAT_MOBILENET, Device.CPU, 1);
     for (int i = 0; i < INPUTS.length; i++) {
       String imageFileName = INPUTS[i];
-      String goldenOutputFileName = GOLDEN_OUTPUTS[i];
+      String goldenOutputFileName;
+      // TODO(b/169379396): investigate the impact of the resize algorithm on accuracy.
+      // This is a temporary workaround to set different golden rest results as the preprocessing
+      // of lib_support and lib_task_api are different. Will merge them once the above TODO is
+      // resolved.
+      if (Classifier.TAG.equals("ClassifierWithSupport")) {
+        goldenOutputFileName = GOLDEN_OUTPUTS_SUPPORT[i];
+      } else {
+        goldenOutputFileName = GOLDEN_OUTPUTS_TASK[i];
+      }
       Bitmap input = loadImage(imageFileName);
       List<Recognition> goldenOutput = loadRecognitions(goldenOutputFileName);
 

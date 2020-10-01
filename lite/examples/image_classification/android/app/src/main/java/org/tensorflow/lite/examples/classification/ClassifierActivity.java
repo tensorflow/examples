@@ -145,8 +145,13 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
       LOGGER.d(
           "Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
       classifier = Classifier.create(this, model, device, numThreads);
-    } catch (IOException e) {
+    } catch (IOException | IllegalArgumentException e) {
       LOGGER.e(e, "Failed to create classifier.");
+      runOnUiThread(
+          () -> {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+          });
+      return;
     }
 
     // Updates the input image size.
