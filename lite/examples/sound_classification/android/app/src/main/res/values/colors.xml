@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="gray400">#BDBDBD</color>
+    <color name="gray500">#9E9E9E</color>
+    <color name="gray600">#757575</color>
+    <color name="gray700">#616161</color>
+    <color name="gray800">#424242</color>
+    <color name="gray900">#212121</color>
+
+    <color name="dark_blue_gray700">#344955</color>
+    <color name="dark_blue_gray800">#232F34</color>
+    <color name="dark_blue_gray600">#4A6572</color>
+    <color name="orange500">#F9AA33</color>
+
+    <color name="light_blue">#5d85c8</color>
+</resources>
