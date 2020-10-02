@@ -55,12 +55,10 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
@@ -94,7 +92,6 @@ public class Camera2BasicFragment extends Fragment
   private boolean runClassifier = false;
   private boolean checkedPermissions = false;
   private TextView textView;
-  private ToggleButton toggle;
   private NumberPicker np;
   private ImageClassifier classifier;
   private LinearLayout upLayout,
@@ -323,14 +320,6 @@ public class Camera2BasicFragment extends Fragment
   public void onViewCreated(final View view, Bundle savedInstanceState) {
     textureView = (AutoFitTextureView) view.findViewById(R.id.texture);
     textView = (TextView) view.findViewById(R.id.text);
-    toggle = (ToggleButton) view.findViewById(R.id.button);
-
-    toggle.setOnCheckedChangeListener(
-        new CompoundButton.OnCheckedChangeListener() {
-          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            classifier.setUseNNAPI(isChecked);
-          }
-        });
 
     np = (NumberPicker) view.findViewById(R.id.np);
     np.setMinValue(1);

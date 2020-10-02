@@ -89,6 +89,7 @@ public abstract class ImageClassifier {
 
   /** Initializes an {@code ImageClassifier}. */
   ImageClassifier(Activity activity) throws IOException {
+    // TODO(b/169965231): Add support for delegates.
     tflite = new Interpreter(loadModelFile(activity));
     labelList = loadLabelList(activity);
     imgData =
@@ -148,10 +149,6 @@ public abstract class ImageClassifier {
     for (int j = 0; j < numLabels; ++j) {
       setProbability(j, filterLabelProbArray[FILTER_STAGES - 1][j]);
     }
-  }
-
-  public void setUseNNAPI(Boolean nnapi) {
-    if (tflite != null) tflite.setUseNNAPI(nnapi);
   }
 
   public void setNumThreads(int num_threads) {
