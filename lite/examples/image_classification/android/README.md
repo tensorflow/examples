@@ -2,8 +2,8 @@
 
 ## Overview
 
-This is an example application for [TensorFlow Lite](https://tensorflow.org/lite)
-on Android. It uses
+This is an example application for
+[TensorFlow Lite](https://tensorflow.org/lite) on Android. It uses
 [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview)
 to continuously classify whatever it sees from the device's back camera.
 Inference is performed using the TensorFlow Lite Java API. The demo app
@@ -13,8 +13,8 @@ classifications. It allows the user to choose between a floating point or
 model, select the thread count, and decide whether to run on CPU, GPU, or via
 [NNAPI](https://developer.android.com/ndk/guides/neuralnetworks).
 
-These instructions walk you through building and
-running the demo on an Android device. For an explanation of the source, see
+These instructions walk you through building and running the demo on an Android
+device. For an explanation of the source, see
 [TensorFlow Lite Android image classification example](EXPLORE_THE_CODE.md).
 
 <!-- TODO(b/124116863): Add app screenshot. -->
@@ -29,7 +29,8 @@ chosen EfficientNet (lite0) has comparable speed with MobileNetV1, and on the
 ImageNet dataset, EfficientNet-lite0 out performs MobileNetV1 by ~4% in terms of
 top-1 accuracy.
 
-For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
+For details of the model used, visit
+[Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
 
 Downloading, extracting, and placing the model in the assets folder is managed
 automatically by download.gradle.
@@ -68,6 +69,20 @@ You will need Android SDK configured in the settings. You'll need at least SDK
 version 23. The `build.gradle` file will prompt you to download any missing
 libraries.
 
+This Image Classification Android reference app demonstrates two implementation
+solutions,
+[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_task_api)
+that leverages the out-of-box API from the
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier),
+and
+[`lib_support`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support)
+that creates the custom inference pipleline using the
+[TensorFlow Lite Support Library](https://www.tensorflow.org/lite/inference_with_metadata/lite_support).
+You can change the build variant to whichever one you want to build and run—just
+go to `Build > Select Build Variant` and select one from the drop-down menu. See
+[configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
+for more details.
+
 The file `download.gradle` directs gradle to download the two models used in the
 example, placing them into `assets`.
 
@@ -102,6 +117,7 @@ the app the first time, the app will request permission to access the camera.
 Re-installing the app may require you to uninstall the previous installations.
 
 ## Assets folder
-_Do not delete the assets folder content_. If you explicitly deleted the
-files, choose `Build -> Rebuild` to re-download the deleted model files into the
-assets folder.
+
+_Do not delete the assets folder content_. If you explicitly deleted the files,
+choose `Build -> Rebuild` to re-download the deleted model files into the assets
+folder.

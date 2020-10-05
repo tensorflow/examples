@@ -29,36 +29,118 @@ numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
 
 ### Classifier
 
-The file
-[`Classifier.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/Classifier.java)
-contains most of the complex logic for processing the camera input and running
-inference.
-
-Two subclasses of the file exist, in
-[`ClassifierFloatMobileNet.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/ClassifierFloatMobileNet.java)
+This Image Classification Android reference app demonstrates two implementation
+solutions,
+[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_task_api)
+that leverages the out-of-box API from the
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier),
 and
-[`ClassifierQuantizedMobileNet.java`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/ClassifierQuantizedMobileNet.java),
-to demonstrate the use of both floating point and
+[`lib_support`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support)
+that creates the custom inference pipleline using the
+[TensorFlow Lite Support Library](https://www.tensorflow.org/lite/inference_with_metadata/lite_support).
+
+Both solutions implement the file `Classifier.java` (see
+[the one in lib_task_api](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_task_api/src/main/java/org/tensorflow/lite/examples/classification/tflite/Classifier.java)
+and
+[the one in lib_support](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support/src/main/java/org/tensorflow/lite/examples/classification/tflite/Classifier.java))
+that contains most of the complex logic for processing the camera input and
+running inference.
+
+Two subclasses of the `Classifier` exist, as in `ClassifierFloatMobileNet.java`
+and `ClassifierQuantizedMobileNet.java`, which contain settings for both
+floating point and
 [quantized](https://www.tensorflow.org/lite/performance/post_training_quantization)
-models. After the introduction of the
-[TensorFlow Lite Android Support Library](https://github.com/tensorflow/tflite-support/tree/master/tensorflow_lite_support/java)
-these subclasses mainly contain settings rather than processing logic.
+models.
 
 The `Classifier` class implements a static method, `create`, which is used to
 instantiate the appropriate subclass based on the supplied model type (quantized
 vs floating point).
 
-#### Load model and create interpreter
+#### Using the TensorFlow Lite Task Library
+
+Inference can be done using just a few lines of code with the
+[`ImageClassifier`](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier)
+in the TensorFlow Lite Task Library.
+
+##### Load model and create ImageClassifier
+
+`ImageClassifier` expects a model populated with the
+[model metadata](https://www.tensorflow.org/lite/convert/metadata) and the label
+file. See the
+[model compatibility requirements](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier#model_compatibility_requirements)
+for more details.
+
+`ImageClassifierOptions` allows manipulation on various inference options, such
+as setting the maximum number of top scored results to return using
+`setMaxResults(MAX_RESULTS)`, and setting the score threshold using
+`setScoreThreshold(scoreThreshold)`.
+
+```java
+// Create the ImageClassifier instance.
+ImageClassifierOptions options =
+    ImageClassifierOptions.builder().setMaxResults(MAX_RESULTS).build();
+imageClassifier = ImageClassifier.createFromFileAndOptions(activity,
+    getModelPath(), options);
+```
+
+`ImageClassifier` currently does not support configuring delegates and
+multithread, but those are on our roadmap. Please stay tuned!
+
+##### Run inference
+
+`ImageClassifier` contains builtin logic to preprocess the input image, such as
+rotating and resizing an image. Processing options can be configured through
+`ImageProcessingOptions`. In the following example, input images are rotated to
+the up-right angle and cropped to the center as the model expects a square input
+(`224x224`). See the
+[Java doc of `ImageClassifier`](https://github.com/tensorflow/tflite-support/blob/195b574f0aa9856c618b3f1ad87bd185cddeb657/tensorflow_lite_support/java/src/java/org/tensorflow/lite/task/core/vision/ImageProcessingOptions.java#L22)
+for more details about how the underlying image processing is performed.
+
+```java
+TensorImage inputImage = TensorImage.fromBitmap(bitmap);
+int width = bitmap.getWidth();
+int height = bitmap.getHeight();
+int cropSize = min(width, height);
+ImageProcessingOptions imageOptions =
+    ImageProcessingOptions.builder()
+        .setOrientation(getOrientation(sensorOrientation))
+        // Set the ROI to the center of the image.
+        .setRoi(
+            new Rect(
+                /*left=*/ (width - cropSize) / 2,
+                /*top=*/ (height - cropSize) / 2,
+                /*right=*/ (width + cropSize) / 2,
+                /*bottom=*/ (height + cropSize) / 2))
+        .build();
+
+List<Classifications> results = imageClassifier.classify(inputImage,
+    imageOptions);
+```
+
+The output of `ImageClassifier` is a list of `Classifications` instance, where
+each `Classifications` element is a single head classification result. All the
+demo models are single head models, therefore, `results` only contains one
+`Classifications` object. Use `Classifications.getCategories()` to get a list of
+top-k categories as specified with `MAX_RESULTS`. Each `Category` object
+contains the srting label and the score of that category.
+
+To match the implementation of
+[`lib_support`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support),
+`results` is converted into `List<Recognition>` in the method,
+`getRecognitions`.
+
+#### Using the TensorFlow Lite Support Library
+
+##### Load model and create interpreter
 
 To perform inference, we need to load a model file and instantiate an
 `Interpreter`. This happens in the constructor of the `Classifier` class, along
 with loading the list of class labels. Information about the device type and
 number of threads is used to configure the `Interpreter` via the
 `Interpreter.Options` instance passed into its constructor. Note that if a GPU,
-DSP (Digital Signal Processor) or NPU (Neural Processing Unit)
-is available, a
-[`Delegate`](https://www.tensorflow.org/lite/performance/delegates) can be
-used to take full advantage of these hardware.
+DSP (Digital Signal Processor) or NPU (Neural Processing Unit) is available, a
+[`Delegate`](https://www.tensorflow.org/lite/performance/delegates) can be used
+to take full advantage of these hardware.
 
 Please note that there are performance edge cases and developers are adviced to
 test with a representative set of devices prior to production.
@@ -96,7 +178,7 @@ interpreter, for example by setting the number of threads (`.setNumThreads(1)`)
 or enabling [NNAPI](https://developer.android.com/ndk/guides/neuralnetworks)
 (`.addDelegate(nnApiDelegate)`).
 
-#### Pre-process bitmap image
+##### Pre-process bitmap image
 
 Next in the `Classifier` constructor, we take the input camera bitmap image,
 convert it to a `TensorImage` format for efficient processing and pre-process
@@ -140,7 +222,7 @@ private static final float IMAGE_MEAN = 0.0f;
 private static final float IMAGE_STD = 1.0f;
 ```
 
-#### Allocate output object
+##### Allocate output object
 
 Initiate the output `TensorBuffer` for the output of the model.
 
@@ -185,7 +267,7 @@ private static final float PROBABILITY_MEAN = 0.0f;
 private static final float PROBABILITY_STD = 1.0f;
 ```
 
-#### Run inference
+##### Run inference
 
 Inference is performed using the following in `Classifier` class:
 
@@ -194,7 +276,7 @@ tflite.run(inputImageBuffer.getBuffer(),
     outputProbabilityBuffer.getBuffer().rewind());
 ```
 
-#### Recognize image
+##### Recognize image
 
 Rather than call `run` directly, the method `recognizeImage` is used. It accepts
 a bitmap and sensor orientation, runs inference, and returns a sorted `List` of
