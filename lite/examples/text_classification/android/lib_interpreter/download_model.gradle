@@ -4,11 +4,4 @@ task downloadModelFile(type: Download) {
     overwrite true
 }
 
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleDebug') {
-        task.dependsOn 'downloadModelFile'
-    }
-    if (task.name == 'assembleRelease') {
-        task.dependsOn 'downloadModelFile'
-    }
-}
+preBuild.dependsOn downloadModelFile
