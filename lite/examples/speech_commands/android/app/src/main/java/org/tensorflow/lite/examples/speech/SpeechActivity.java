@@ -88,6 +88,8 @@ public class SpeechActivity extends Activity
   private static final String LABEL_FILENAME = "file:///android_asset/conv_actions_labels.txt";
   private static final String MODEL_FILENAME = "file:///android_asset/conv_actions_frozen.tflite";
 
+  private static final String HANDLE_THREAD_NAME = "CameraBackground";
+
   // UI elements.
   private static final int REQUEST_RECORD_AUDIO = 13;
   private static final String LOG_TAG = SpeechActivity.class.getSimpleName();
@@ -108,6 +110,8 @@ public class SpeechActivity extends Activity
   private LinearLayout gestureLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
 
+  private MappedByteBuffer tfLiteModel;
+  private Interpreter.Options tfLiteOptions;
   private Interpreter tfLite;
   private ImageView bottomSheetArrowImageView;
 
@@ -179,7 +183,8 @@ public class SpeechActivity extends Activity
 
     String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
     try {
-      tfLite = new Interpreter(loadModelFile(getAssets(), actualModelFilename));
+      tfLiteModel = loadModelFile(getAssets(), actualModelFilename);
+      tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -514,36 +519,45 @@ public class SpeechActivity extends Activity
 
   @Override
   public void onClick(View v) {
+    if ((v.getId() != R.id.plus) && (v.getId() != R.id.minus)) {
+      return;
+    }
+
+    String threads = threadsTextView.getText().toString().trim();
+    int numThreads = Integer.parseInt(threads);
     if (v.getId() == R.id.plus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
       numThreads++;
-      threadsTextView.setText(String.valueOf(numThreads));
-      //            tfLite.setNumThreads(numThreads);
-      int finalNumThreads = numThreads;
-      backgroundHandler.post(() -> tfLite.setNumThreads(finalNumThreads));
-    } else if (v.getId() == R.id.minus) {
-      String threads = threadsTextView.getText().toString().trim();
-      int numThreads = Integer.parseInt(threads);
+    } else {
       if (numThreads == 1) {
         return;
       }
       numThreads--;
-      threadsTextView.setText(String.valueOf(numThreads));
-      tfLite.setNumThreads(numThreads);
-      int finalNumThreads = numThreads;
-      backgroundHandler.post(() -> tfLite.setNumThreads(finalNumThreads));
     }
+
+    final int finalNumThreads = numThreads;
+    threadsTextView.setText(String.valueOf(finalNumThreads));
+    backgroundHandler.post(
+        () -> {
+          tfLiteOptions.setNumThreads(finalNumThreads);
+          recreateInterpreter();
+        });
   }
 
   @Override
   public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-    backgroundHandler.post(() -> tfLite.setUseNNAPI(isChecked));
+    backgroundHandler.post(
+        () -> {
+          tfLiteOptions.setUseNNAPI(isChecked);
+          recreateInterpreter();
+        });
     if (isChecked) apiSwitchCompat.setText("NNAPI");
     else apiSwitchCompat.setText("TFLITE");
   }
 
-  private static final String HANDLE_THREAD_NAME = "CameraBackground";
+  private void recreateInterpreter() {
+    tfLite.close();
+    tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
+  }
 
   private void startBackgroundThread() {
     backgroundThread = new HandlerThread(HANDLE_THREAD_NAME);

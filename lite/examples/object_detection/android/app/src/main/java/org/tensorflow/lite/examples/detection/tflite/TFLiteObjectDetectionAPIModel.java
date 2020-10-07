@@ -77,6 +77,8 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
 
   private ByteBuffer imgData;
 
+  private MappedByteBuffer tfLiteModel;
+  private Interpreter.Options tfLiteOptions;
   private Interpreter tfLite;
 
   private TFLiteObjectDetectionAPIModel() {}
@@ -126,7 +128,9 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
     try {
       Interpreter.Options options = new Interpreter.Options();
       options.setNumThreads(NUM_THREADS);
-      d.tfLite = new Interpreter(loadModelFile(assetManager, modelFilename), options);
+      d.tfLite = new Interpreter(modelFile, options);
+      d.tfLiteModel = modelFile;
+      d.tfLiteOptions = options;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -236,14 +240,31 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
   }
 
   @Override
-  public void close() {}
+  public void close() {
+    if (tfLite != null) {
+      tfLite.close();
+      tfLite = null;
+    }
+  }
 
-  public void setNumThreads(int num_threads) {
-    if (tfLite != null) tfLite.setNumThreads(num_threads);
+  @Override
+  public void setNumThreads(int numThreads) {
+    if (tfLite != null) {
+      tfLiteOptions.setNumThreads(numThreads);
+      recreateInterpreter();
+    }
   }
 
   @Override
   public void setUseNNAPI(boolean isChecked) {
-    if (tfLite != null) tfLite.setUseNNAPI(isChecked);
+    if (tfLite != null) {
+      tfLiteOptions.setUseNNAPI(isChecked);
+      recreateInterpreter();
+    }
+  }
+
+  private void recreateInterpreter() {
+    tfLite.close();
+    tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
   }
 }
