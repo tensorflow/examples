@@ -24,27 +24,27 @@ protocol CameraFeedManagerDelegate: class {
   func didOutput(pixelBuffer: CVPixelBuffer)
 
   /**
-   This method initimates that the camera permissions have been denied.
+   This method intimates that the camera permissions have been denied.
    */
   func presentCameraPermissionsDeniedAlert()
 
   /**
-   This method initimates that there was an error in video configurtion.
+   This method intimates that there was an error in video configuration.
    */
   func presentVideoConfigurationErrorAlert()
 
   /**
-   This method initimates that a session runtime error occured.
+   This method intimates that a session runtime error occurred.
    */
-  func sessionRunTimeErrorOccured()
+  func sessionRunTimeErrorOccurred()
 
   /**
-   This method initimates that the session was interrupted.
+   This method intimates that the session was interrupted.
    */
   func sessionWasInterrupted(canResumeManually resumeManually: Bool)
 
   /**
-   This method initimates that the session interruption has ended.
+   This method intimates that the session interruption has ended.
    */
   func sessionInterruptionEnded()
 
@@ -217,7 +217,7 @@ class CameraFeedManager: NSObject {
   }
 
   /**
-   This method tries to an AVCaptureDeviceInput to the current AVCaptureSession.
+   This method tries to add an AVCaptureDeviceInput to the current AVCaptureSession.
    */
   private func addVideoDeviceInput() -> Bool {
 
@@ -243,7 +243,7 @@ class CameraFeedManager: NSObject {
   }
 
   /**
-   This method tries to an AVCaptureVideoDataOutput to the current AVCaptureSession.
+   This method tries to add an AVCaptureVideoDataOutput to the current AVCaptureSession.
    */
   private func addVideoDataOutput() -> Bool {
 
@@ -262,7 +262,7 @@ class CameraFeedManager: NSObject {
 
   // MARK: Notification Observer Handling
   private func addObservers() {
-    NotificationCenter.default.addObserver(self, selector: #selector(CameraFeedManager.sessionRuntimeErrorOccured(notification:)), name: NSNotification.Name.AVCaptureSessionRuntimeError, object: session)
+    NotificationCenter.default.addObserver(self, selector: #selector(CameraFeedManager.sessionRuntimeErrorOccurred(notification:)), name: NSNotification.Name.AVCaptureSessionRuntimeError, object: session)
     NotificationCenter.default.addObserver(self, selector: #selector(CameraFeedManager.sessionWasInterrupted(notification:)), name: NSNotification.Name.AVCaptureSessionWasInterrupted, object: session)
     NotificationCenter.default.addObserver(self, selector: #selector(CameraFeedManager.sessionInterruptionEnded), name: NSNotification.Name.AVCaptureSessionInterruptionEnded, object: session)
   }
@@ -298,7 +298,7 @@ class CameraFeedManager: NSObject {
     self.delegate?.sessionInterruptionEnded()
   }
 
-  @objc func sessionRuntimeErrorOccured(notification: Notification) {
+  @objc func sessionRuntimeErrorOccurred(notification: Notification) {
     guard let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError else {
       return
     }
@@ -311,12 +311,12 @@ class CameraFeedManager: NSObject {
           self.startSession()
         } else {
           DispatchQueue.main.async {
-            self.delegate?.sessionRunTimeErrorOccured()
+            self.delegate?.sessionRunTimeErrorOccurred()
           }
         }
       }
     } else {
-      self.delegate?.sessionRunTimeErrorOccured()
+      self.delegate?.sessionRunTimeErrorOccurred()
 
     }
   }

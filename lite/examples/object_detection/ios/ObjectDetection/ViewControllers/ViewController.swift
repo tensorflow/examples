@@ -32,7 +32,7 @@ class ViewController: UIViewController {
   private let labelOffset: CGFloat = 10.0
   private let animationDuration = 0.5
   private let collapseTransitionThreshold: CGFloat = -30.0
-  private let expandThransitionThreshold: CGFloat = 30.0
+  private let expandTransitionThreshold: CGFloat = 30.0
   private let delayBetweenInferencesMs: Double = 200
 
   // MARK: Instance Variables
@@ -155,7 +155,7 @@ extension ViewController: CameraFeedManagerDelegate {
   }
 
   // MARK: Session Handling Alerts
-  func sessionRunTimeErrorOccured() {
+  func sessionRunTimeErrorOccurred() {
 
     // Handles session run time error by updating the UI and providing a button if session can be manually resumed.
     self.resumeButton.isHidden = false
@@ -163,7 +163,7 @@ extension ViewController: CameraFeedManagerDelegate {
 
   func sessionWasInterrupted(canResumeManually resumeManually: Bool) {
 
-    // Updates the UI when session is interupted.
+    // Updates the UI when session is interrupted.
     if resumeManually {
       self.resumeButton.isHidden = false
     }
@@ -186,7 +186,7 @@ extension ViewController: CameraFeedManagerDelegate {
 
   func presentVideoConfigurationErrorAlert() {
 
-    let alertController = UIAlertController(title: "Confirguration Failed", message: "Configuration of camera has failed.", preferredStyle: .alert)
+    let alertController = UIAlertController(title: "Configuration Failed", message: "Configuration of camera has failed.", preferredStyle: .alert)
     let okAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
     alertController.addAction(okAction)
 
@@ -421,7 +421,7 @@ extension ViewController {
     if currentHeight - height <= collapseTransitionThreshold {
       bottomSpace = inferenceViewController!.collapsedHeight - bottomSheetView.bounds.size.height
     }
-    else if currentHeight - height >= expandThransitionThreshold {
+    else if currentHeight - height >= expandTransitionThreshold {
       bottomSpace = 0.0
     }
     else {
