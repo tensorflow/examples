@@ -917,28 +917,13 @@ class BertQAModelSpec(BertModelSpec):
 
     return bert_model
 
-  def _predict_without_distribute_strategy(self, model, input_fn):
-    """Predicts the dataset without using distribute strategy."""
-    ds = input_fn()
-    all_results = []
-    for features, _ in ds:
-      outputs = model.predict_on_batch(features)
-      for unique_id, start_logits, end_logits in zip(features['unique_ids'],
-                                                     outputs[0], outputs[1]):
-        raw_result = run_squad_helper.RawResult(
-            unique_id=unique_id.numpy(),
-            start_logits=start_logits.tolist(),
-            end_logits=end_logits.tolist())
-        all_results.append(raw_result)
-        if len(all_results) % 100 == 0:
-          tf.compat.v1.logging.info('Made predictions for %d records.',
-                                    len(all_results))
-    return all_results
-
-  def _predict_with_distribute_strategy(self, model, input_fn, num_steps):
+  def _predict(self, model, input_fn, num_steps):
     """Predicts the dataset using distribute strategy."""
+    # TODO(wangtz): We should probably set default strategy as self.strategy
+    # if not specified.
+    strategy = self.strategy or tf.distribute.get_strategy()
     predict_iterator = iter(
-        self.strategy.experimental_distribute_datasets_from_function(input_fn))
+        strategy.experimental_distribute_datasets_from_function(input_fn))
 
     @tf.function
     def predict_step(iterator):
@@ -954,9 +939,8 @@ class BertQAModelSpec(BertModelSpec):
             start_logits=start_logits,
             end_logits=end_logits)
 
-      outputs = self.strategy.run(_replicated_step, args=(next(iterator),))
-      return tf.nest.map_structure(self.strategy.experimental_local_results,
-                                   outputs)
+      outputs = strategy.run(_replicated_step, args=(next(iterator),))
+      return tf.nest.map_structure(strategy.experimental_local_results, outputs)
 
     all_results = []
     for _ in range(num_steps):
@@ -970,10 +954,7 @@ class BertQAModelSpec(BertModelSpec):
 
   def predict(self, model, input_fn, num_steps):
     """Predicts the dataset from `input_fn` for `model`."""
-    if self.strategy:
-      return self._predict_with_distribute_strategy(model, input_fn, num_steps)
-    else:
-      return self._predict_without_distribute_strategy(model, input_fn)
+    return self._predict(model, input_fn, num_steps)
 
   def reorder_output_details(self, tflite_output_details):
     """Reorders the tflite output details to map the order of keras model."""
