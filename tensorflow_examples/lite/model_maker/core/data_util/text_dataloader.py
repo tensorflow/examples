@@ -87,37 +87,8 @@ def _get_cache_info(cache_dir, data_name, model_spec, is_training):
   return is_cached, tfrecord_file, meta_data_file, file_prefix
 
 
-class TextClassifierDataLoader(dataloader.DataLoader):
+class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for text classifier."""
-
-  def __init__(self, dataset, size, num_classes, index_to_label):
-    super(TextClassifierDataLoader, self).__init__(dataset, size)
-    self.num_classes = num_classes
-    self.index_to_label = index_to_label
-
-  def split(self, fraction):
-    """Splits dataset into two sub-datasets with the given fraction.
-
-    Primarily used for splitting the data set into training and testing sets.
-
-    Args:
-      fraction: float, demonstrates the fraction of the first returned
-        subdataset in the original data.
-
-    Returns:
-      The splitted two sub dataset.
-    """
-    ds = self.dataset
-
-    train_size = int(self.size * fraction)
-    trainset = TextClassifierDataLoader(
-        ds.take(train_size), train_size, self.num_classes, self.index_to_label)
-
-    test_size = self.size - train_size
-    testset = TextClassifierDataLoader(
-        ds.skip(train_size), test_size, self.num_classes, self.index_to_label)
-
-    return trainset, testset
 
   @classmethod
   def from_folder(cls,

@@ -45,37 +45,8 @@ def create_data(name, data, info, num_classes, label_names):
   return ImageClassifierDataLoader(data, size, num_classes, label_names)
 
 
-class ImageClassifierDataLoader(dataloader.DataLoader):
+class ImageClassifierDataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for image classifier."""
-
-  def __init__(self, dataset, size, num_classes, index_to_label):
-    super(ImageClassifierDataLoader, self).__init__(dataset, size)
-    self.num_classes = num_classes
-    self.index_to_label = index_to_label
-
-  def split(self, fraction):
-    """Splits dataset into two sub-datasets with the given fraction.
-
-    Primarily used for splitting the data set into training and testing sets.
-
-    Args:
-      fraction: float, demonstrates the fraction of the first returned
-        subdataset in the original data.
-
-    Returns:
-      The splitted two sub dataset.
-    """
-    ds = self.dataset
-
-    train_size = int(self.size * fraction)
-    trainset = ImageClassifierDataLoader(
-        ds.take(train_size), train_size, self.num_classes, self.index_to_label)
-
-    test_size = self.size - train_size
-    testset = ImageClassifierDataLoader(
-        ds.skip(train_size), test_size, self.num_classes, self.index_to_label)
-
-    return trainset, testset
 
   @classmethod
   def from_folder(cls, filename, shuffle=True):

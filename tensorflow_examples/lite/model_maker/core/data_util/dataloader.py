@@ -57,14 +57,56 @@ class DataLoader(object):
         subdataset in the original data.
 
     Returns:
-      The splitted two sub dataset.
+      The splitted two sub datasets.
     """
+    return self._split(fraction)
+
+  def _split(self, fraction, *args):
+    """Actual implementation for `split` method and returns sub-class instances.
+
+    Child DataLoader, if requires additional constructor arguments, should
+      implement their own `split` method by calling `_split` with all arguments
+      to the constructor.
+
+    Args:
+      fraction: float, demonstrates the fraction of the first returned
+        subdataset in the original data.
+      *args: additional arguments passed to the sub-class constructor.
+
+    Returns:
+      The splitted two sub datasets.
+    """
+    assert (fraction > 0 and fraction < 1)
+
     ds = self.dataset
 
     train_size = int(self.size * fraction)
-    trainset = DataLoader(ds.take(train_size), train_size)
+    trainset = self.__class__(ds.take(train_size), train_size, *args)
 
     test_size = self.size - train_size
-    testset = DataLoader(ds.skip(test_size), test_size)
+    testset = self.__class__(ds.skip(train_size), test_size, *args)
 
     return trainset, testset
+
+
+class ClassificationDataLoader(DataLoader):
+  """DataLoader for classification models."""
+
+  def __init__(self, dataset, size, num_classes, index_to_label):
+    super(ClassificationDataLoader, self).__init__(dataset, size)
+    self.num_classes = num_classes
+    self.index_to_label = index_to_label
+
+  def split(self, fraction):
+    """Splits dataset into two sub-datasets with the given fraction.
+
+    Primarily used for splitting the data set into training and testing sets.
+
+    Args:
+      fraction: float, demonstrates the fraction of the first returned
+        subdataset in the original data.
+
+    Returns:
+      The splitted two sub datasets.
+    """
+    return self._split(fraction, self.num_classes, self.index_to_label)

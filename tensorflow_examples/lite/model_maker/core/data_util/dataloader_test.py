@@ -29,6 +29,8 @@ class DataLoaderTest(tf.test.TestCase):
     train_data, test_data = data.split(0.5)
 
     self.assertEqual(train_data.size, 2)
+    self.assertIsInstance(train_data, dataloader.DataLoader)
+    self.assertIsInstance(test_data, dataloader.DataLoader)
     for i, elem in enumerate(train_data.dataset):
       self.assertTrue((elem.numpy() == np.array([i, 1])).all())
 
@@ -41,6 +43,50 @@ class DataLoaderTest(tf.test.TestCase):
     ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
     data = dataloader.DataLoader(ds, size)
     self.assertEqual(len(data), size)
+
+
+class ClassificationDataLoaderTest(tf.test.TestCase):
+
+  def test_split(self):
+
+    class MagicClassificationDataLoader(dataloader.ClassificationDataLoader):
+
+      def __init__(self, dataset, size, num_classes, index_to_label, value):
+        super(MagicClassificationDataLoader,
+              self).__init__(dataset, size, num_classes, index_to_label)
+        self.value = value
+
+      def split(self, fraction):
+        return self._split(fraction, self.num_classes, self.index_to_label,
+                           self.value)
+
+    # Some dummy inputs.
+    magic_value = 42
+    num_classes = 2
+    index_to_label = (False, True)
+
+    # Create data loader from sample data.
+    ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
+    data = MagicClassificationDataLoader(ds, len(ds), num_classes,
+                                         index_to_label, magic_value)
+
+    # Train/Test data split.
+    fraction = .25
+    train_data, test_data = data.split(fraction)
+
+    # `split` should return instances of child DataLoader.
+    self.assertIsInstance(train_data, MagicClassificationDataLoader)
+    self.assertIsInstance(test_data, MagicClassificationDataLoader)
+
+    # Make sure number of entries are right.
+    self.assertEqual(train_data.size, fraction * len(ds))
+    self.assertEqual(test_data.size, len(ds) - len(train_data.dataset))
+
+    # Make sure attributes propagated correctly.
+    self.assertEqual(train_data.num_classes, num_classes)
+    self.assertEqual(test_data.index_to_label, index_to_label)
+    self.assertEqual(train_data.value, magic_value)
+    self.assertEqual(test_data.value, magic_value)
 
 
 if __name__ == '__main__':
