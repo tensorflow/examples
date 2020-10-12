@@ -31,14 +31,14 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import org.tensorflow.lite.examples.detection.customview.OverlayView;
 import org.tensorflow.lite.examples.detection.customview.OverlayView.DrawCallback;
 import org.tensorflow.lite.examples.detection.env.BorderedText;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
-import org.tensorflow.lite.examples.detection.tflite.Classifier;
+import org.tensorflow.lite.examples.detection.tflite.Detector;
 import org.tensorflow.lite.examples.detection.tflite.TFLiteObjectDetectionAPIModel;
 import org.tensorflow.lite.examples.detection.tracking.MultiBoxTracker;
 
@@ -64,7 +64,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   OverlayView trackingOverlay;
   private Integer sensorOrientation;
 
-  private Classifier detector;
+  private Detector detector;
 
   private long lastProcessingTimeMs;
   private Bitmap rgbFrameBitmap = null;
@@ -105,10 +105,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
       cropSize = TF_OD_API_INPUT_SIZE;
     } catch (final IOException e) {
       e.printStackTrace();
-      LOGGER.e(e, "Exception initializing classifier!");
+      LOGGER.e(e, "Exception initializing Detector!");
       Toast toast =
           Toast.makeText(
-              getApplicationContext(), "Classifier could not be initialized", Toast.LENGTH_SHORT);
+              getApplicationContext(), "Detector could not be initialized", Toast.LENGTH_SHORT);
       toast.show();
       finish();
     }
@@ -178,7 +178,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           public void run() {
             LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
-            final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
+            final List<Detector.Recognition> results = detector.recognizeImage(croppedBitmap);
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
@@ -195,10 +195,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 break;
             }
 
-            final List<Classifier.Recognition> mappedRecognitions =
-                new LinkedList<Classifier.Recognition>();
+            final List<Detector.Recognition> mappedRecognitions =
+                new ArrayList<Detector.Recognition>();
 
-            for (final Classifier.Recognition result : results) {
+            for (final Detector.Recognition result : results) {
               final RectF location = result.getLocation();
               if (location != null && result.getConfidence() >= minimumConfidence) {
                 canvas.drawRect(location, paint);

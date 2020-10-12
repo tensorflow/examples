@@ -40,8 +40,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
-import org.tensorflow.lite.examples.detection.tflite.Classifier;
-import org.tensorflow.lite.examples.detection.tflite.Classifier.Recognition;
+import org.tensorflow.lite.examples.detection.tflite.Detector;
+import org.tensorflow.lite.examples.detection.tflite.Detector.Recognition;
 import org.tensorflow.lite.examples.detection.tflite.TFLiteObjectDetectionAPIModel;
 
 /** Golden test for Object Detection Reference app. */
@@ -54,7 +54,7 @@ public class DetectorTest {
   private static final String LABELS_FILE = "labelmap.txt";
   private static final Size IMAGE_SIZE = new Size(640, 480);
 
-  private Classifier detector;
+  private Detector detector;
   private Bitmap croppedBitmap;
   private Matrix frameToCropTransform;
   private Matrix cropToFrameTransform;

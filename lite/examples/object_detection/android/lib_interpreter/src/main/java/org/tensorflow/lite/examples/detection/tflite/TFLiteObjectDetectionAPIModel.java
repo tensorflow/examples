@@ -15,11 +15,14 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.detection.tflite;
 
+import static java.lang.Math.min;
+
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.os.Trace;
+import android.util.Log;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,26 +31,27 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.examples.detection.env.Logger;
 import org.tensorflow.lite.support.metadata.MetadataExtractor;
 
 /**
- * Wrapper for frozen detection models trained using the Tensorflow Object Detection API:
- * - https://github.com/tensorflow/models/tree/master/research/object_detection
- * where you can find the training code.
+ * Wrapper for frozen detection models trained using the Tensorflow Object Detection API: -
+ * https://github.com/tensorflow/models/tree/master/research/object_detection where you can find the
+ * training code.
  *
- * To use pretrained models in the API or convert to TF Lite models, please see docs for details:
- * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
- * - https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
+ * <p>To use pretrained models in the API or convert to TF Lite models, please see docs for details:
+ * -
+ * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+ * -
+ * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
  */
-public class TFLiteObjectDetectionAPIModel implements Classifier {
-  private static final Logger LOGGER = new Logger();
+public class TFLiteObjectDetectionAPIModel implements Detector {
+  private static final String TAG = "TFLiteObjectDetectionAPIModel";
 
   // Only return this many results.
   private static final int NUM_DETECTIONS = 10;
@@ -60,7 +64,7 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
   // Config values.
   private int inputSize;
   // Pre-allocated buffers.
-  private Vector<String> labels = new Vector<String>();
+  private final List<String> labels = new ArrayList<>();
   private int[] intValues;
   // outputLocations: array of shape [Batchsize, NUM_DETECTIONS,4]
   // contains the location of detected boxes
@@ -103,7 +107,7 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
    * @param inputSize The size of image input
    * @param isQuantized Boolean representing model is quantized or not
    */
-  public static Classifier create(
+  public static Detector create(
       final AssetManager assetManager,
       final String modelFilename,
       final String labelFilename,
@@ -114,14 +118,16 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
 
     MappedByteBuffer modelFile = loadModelFile(assetManager, modelFilename);
     MetadataExtractor metadata = new MetadataExtractor(modelFile);
-    BufferedReader br =
-        new BufferedReader(new InputStreamReader(metadata.getAssociatedFile(labelFilename)));
-    String line;
-    while ((line = br.readLine()) != null) {
-      LOGGER.w(line);
-      d.labels.add(line);
+    try (BufferedReader br =
+        new BufferedReader(
+            new InputStreamReader(
+                metadata.getAssociatedFile(labelFilename), Charset.defaultCharset()))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        Log.w(TAG, line);
+        d.labels.add(line);
+      }
     }
-    br.close();
 
     d.inputSize = inputSize;
 
@@ -210,7 +216,7 @@ public class TFLiteObjectDetectionAPIModel implements Classifier {
     // For example, your model's NUM_DETECTIONS = 20, but sometimes it only outputs 16 predictions
     // If you don't use the output's numDetections, you'll get nonsensical data
     int numDetectionsOutput =
-        Math.min(
+        min(
             NUM_DETECTIONS,
             (int) numDetections[0]); // cast from float to integer, use min for safety
 

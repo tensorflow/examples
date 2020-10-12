@@ -20,7 +20,7 @@ import android.graphics.RectF;
 import java.util.List;
 
 /** Generic interface for interacting with different recognition engines. */
-public interface Classifier {
+public interface Detector {
   List<Recognition> recognizeImage(Bitmap bitmap);
 
   void enableStatLogging(final boolean debug);
@@ -29,11 +29,11 @@ public interface Classifier {
 
   void close();
 
-  void setNumThreads(int num_threads);
+  void setNumThreads(int numThreads);
 
   void setUseNNAPI(boolean isChecked);
 
-  /** An immutable result returned by a Classifier describing what was recognized. */
+  /** An immutable result returned by a Detector describing what was recognized. */
   public class Recognition {
     /**
      * A unique identifier for what has been recognized. Specific to the class, not the instance of

@@ -1,15 +1,7 @@
-
 task downloadModelFile(type: Download) {
     src 'https://tfhub.dev/tensorflow/lite-model/ssd_mobilenet_v1/1/metadata/2?lite-format=tflite'
     dest project.ext.ASSET_DIR + '/detect.tflite'
     overwrite false
 }
 
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleDebug') {
-        task.dependsOn 'downloadModelFile'
-    }
-    if (task.name == 'assembleRelease') {
-        task.dependsOn 'downloadModelFile'
-    }
-}
+preBuild.dependsOn downloadModelFile
