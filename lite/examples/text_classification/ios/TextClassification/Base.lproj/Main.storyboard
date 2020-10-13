@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="FY1-QU-hgX">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--TFL Text Classification-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="TFL_TextClassification" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Classify text" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="nZM-FA-Zjl">
+                                <rect key="frame" x="20" y="828" width="374" height="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                            </textField>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="pUW-WU-S9u">
+                                <rect key="frame" x="0.0" y="88" width="414" height="732"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="top" secondItem="pUW-WU-S9u" secondAttribute="bottom" constant="8" id="Ex0-jj-Wkf"/>
+                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="I6r-au-B4U"/>
+                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="Lu6-pn-6nH"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="nZM-FA-Zjl" secondAttribute="trailing" constant="20" id="RqI-Yy-5U8"/>
+                            <constraint firstItem="pUW-WU-S9u" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="aHW-JJ-UOs"/>
+                            <constraint firstItem="pUW-WU-S9u" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="rcQ-pQ-RMI"/>
+                            <constraint firstItem="pUW-WU-S9u" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="sJY-qg-kMR"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="TFL Text Classification" id="oaa-bg-hKo"/>
+                    <connections>
+                        <outlet property="tableView" destination="pUW-WU-S9u" id="yBB-Od-M0K"/>
+                        <outlet property="textField" destination="nZM-FA-Zjl" id="2AA-GC-miW"/>
+                        <outlet property="textFieldBottomConstraint" destination="Lu6-pn-6nH" id="kfQ-x5-oRK"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1042.0289855072465" y="138.61607142857142"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="gSB-fK-87g">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="FY1-QU-hgX" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="c5o-X8-QDu">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="RJb-Gv-YNb"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="RPB-y3-xT7" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="131.8840579710145" y="138.61607142857142"/>
+        </scene>
+    </scenes>
+    <color key="tintColor" red="0.93044394249999995" green="0.47058212760000001" blue="0.18419533969999999" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+</document>
