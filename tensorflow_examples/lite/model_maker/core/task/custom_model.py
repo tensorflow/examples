@@ -28,8 +28,8 @@ from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 class CustomModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
 
-  DEFAULT_EXPORT_FORMAT = []
-  ALLOWED_EXPORT_FORMAT = []
+  DEFAULT_EXPORT_FORMAT = ()
+  ALLOWED_EXPORT_FORMAT = ()
 
   def __init__(self, model_spec, shuffle):
     """Initialize a instance with data, deploy mode and other related parameters.
@@ -117,8 +117,8 @@ class CustomModel(abc.ABC):
     if export_format is None:
       export_format = self.DEFAULT_EXPORT_FORMAT
 
-    if not isinstance(export_format, list):
-      export_format = [export_format]
+    if not isinstance(export_format, (list, tuple)):
+      export_format = (export_format,)
 
     # Checks whether each export format is allowed.
     for e_format in export_format:

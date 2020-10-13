@@ -95,13 +95,10 @@ def _get_model_info(model_name):
 class TextClassifier(classification_model.ClassificationModel):
   """TextClassifier class for inference and exporting to tflite."""
 
-  DEFAULT_EXPORT_FORMAT = [
-      ExportFormat.TFLITE, ExportFormat.LABEL, ExportFormat.VOCAB
-  ]
-  ALLOWED_EXPORT_FORMAT = [
-      ExportFormat.TFLITE, ExportFormat.LABEL, ExportFormat.VOCAB,
-      ExportFormat.SAVED_MODEL
-  ]
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
+                           ExportFormat.VOCAB)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
+                           ExportFormat.VOCAB, ExportFormat.SAVED_MODEL)
 
   def __init__(self,
                model_spec,

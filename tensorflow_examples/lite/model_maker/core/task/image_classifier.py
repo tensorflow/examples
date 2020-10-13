@@ -167,10 +167,9 @@ def _get_model_info(model_spec,
 class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
 
-  DEFAULT_EXPORT_FORMAT = [ExportFormat.TFLITE, ExportFormat.LABEL]
-  ALLOWED_EXPORT_FORMAT = [
-      ExportFormat.TFLITE, ExportFormat.LABEL, ExportFormat.SAVED_MODEL
-  ]
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
+                           ExportFormat.SAVED_MODEL)
 
   def __init__(self,
                model_spec,

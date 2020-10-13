@@ -83,10 +83,9 @@ def _get_model_info(model_spec, vocab_file):
 class QuestionAnswer(custom_model.CustomModel):
   """QuestionAnswer class for inference and exporting to tflite."""
 
-  DEFAULT_EXPORT_FORMAT = [ExportFormat.TFLITE, ExportFormat.VOCAB]
-  ALLOWED_EXPORT_FORMAT = [
-      ExportFormat.TFLITE, ExportFormat.VOCAB, ExportFormat.SAVED_MODEL
-  ]
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.VOCAB)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.VOCAB,
+                           ExportFormat.SAVED_MODEL)
 
   def preprocess(self, raw_text, label):
     """Preprocess the text."""
