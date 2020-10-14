@@ -8,4 +8,4 @@ fire
 flatbuffers==1.12
 absl-py
 tflite-support==0.1.0rc3.dev2
-tf-nightly==2.4.0.dev20200810
+tf-nightly==2.4.0.dev20201012
