@@ -110,8 +110,8 @@ public class SpeechActivity extends Activity
   private LinearLayout gestureLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
 
+  private final Interpreter.Options tfLiteOptions = new Interpreter.Options();
   private MappedByteBuffer tfLiteModel;
-  private Interpreter.Options tfLiteOptions;
   private Interpreter tfLite;
   private ImageView bottomSheetArrowImageView;
 
