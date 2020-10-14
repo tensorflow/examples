@@ -27,7 +27,7 @@ def generate_elements(ds):
     for element in ds.as_numpy_iterator():
       yield element
   else:
-    iterator = ds.make_one_shot_iterator()
+    iterator = tf.compat.v1.data.make_one_shot_iterator(ds)
     next_element = iterator.get_next()
     with tf.compat.v1.Session() as sess:
       try:
