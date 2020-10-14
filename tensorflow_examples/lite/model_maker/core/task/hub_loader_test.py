@@ -41,12 +41,22 @@ class HubKerasLayerV1V2Test(tf.test.TestCase, parameterized.TestCase):
   def test_trainable_varaible(self):
     path = test_util.get_test_data_path("hub_module_v1_mini_train")
     layer = hub_loader.HubKerasLayerV1V2(path, trainable=True)
+    # Checks trainable variables.
     self.assertLen(layer.trainable_variables, 2)
-    self.assertLen(layer.variables, 4)
+    self.assertEqual(layer.trainable_variables[0].name, "a:0")
+    self.assertEqual(layer.trainable_variables[1].name, "b:0")
+    self.assertEqual(layer.variables, layer.trainable_variables)
+    # Checks non-trainable variables.
+    self.assertEmpty(layer.non_trainable_variables)
 
     layer = hub_loader.HubKerasLayerV1V2(path, trainable=False)
+    # Checks trainable variables.
     self.assertEmpty(layer.trainable_variables)
-    self.assertLen(layer.variables, 2)
+    # Checks non-trainable variables.
+    self.assertLen(layer.non_trainable_variables, 2)
+    self.assertEqual(layer.non_trainable_variables[0].name, "a:0")
+    self.assertEqual(layer.non_trainable_variables[1].name, "b:0")
+    self.assertEqual(layer.variables, layer.non_trainable_variables)
 
 
 if __name__ == "__main__":

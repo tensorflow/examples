@@ -48,7 +48,8 @@ class HubKerasLayerV1V2(hub.KerasLayer):
 
   def _setup_layer_v1(self, trainable=False, **kwargs):
     """Constructs keras layer with relevant weights and losses."""
-    super(HubKerasLayerV1V2, self)._setup_layer(trainable=trainable, **kwargs)
+    # Initialize an empty layer, then add_weight() etc. as needed.
+    super(hub.KerasLayer, self).__init__(trainable=trainable, **kwargs)
 
     if not self._is_hub_module_v1:
       raise ValueError(
@@ -56,6 +57,8 @@ class HubKerasLayerV1V2(hub.KerasLayer):
 
     # v2 trainable_variable:
     if hasattr(self._func, 'trainable_variables'):
+      for v in self._func.trainable_variables:
+        self._add_existing_weight(v, trainable=True)
       trainable_variables = {id(v) for v in self._func.trainable_variables}
     else:
       trainable_variables = set()
@@ -71,6 +74,22 @@ class HubKerasLayerV1V2(hub.KerasLayer):
         for v in dep.ref:
           if id(v) not in trainable_variables:
             self._add_existing_weight(v, trainable=True)
+            trainable_variables.add(id(v))
+
+    # Adds non-trainable variables.
+    if hasattr(self._func, 'variables'):
+      for v in self._func.variables:
+        if id(v) not in trainable_variables:
+          self._add_existing_weight(v, trainable=False)
+
+    # Forward the callable's regularization losses (if any).
+    if hasattr(self._func, 'regularization_losses'):
+      for l in self._func.regularization_losses:
+        if not callable(l):
+          raise ValueError(
+              'hub.KerasLayer(obj) expects obj.regularization_losses to be an '
+              'iterable of callables, each returning a scalar loss term.')
+        self.add_loss(self._call_loss_if_trainable(l))  # Supports callables.
 
   def _check_trainability_v1(self):
     """"Ignores trainability checks for V1."""
