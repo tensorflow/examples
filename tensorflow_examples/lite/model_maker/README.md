@@ -73,7 +73,7 @@ model.export(export_dir='/tmp/')
 Currently, we support image classification, text classification and question
 answer tasks. Meanwhile, we provide demo code for each of them in demo folder.
 
-*   [Overview for Tensorflow Lite Model Maker](https://www.tensorflow.org/lite/guide/model_maker)
+*   [Overview for TensorFlow Lite Model Maker](https://www.tensorflow.org/lite/guide/model_maker)
 *   [Colab for image classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_image_classification.ipynb)
 *   [Colab for text classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_text_classification.ipynb)
 *   [Colab for question answer](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_question_answer.ipynb)
