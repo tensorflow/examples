@@ -17,13 +17,16 @@ model for on-device ML applications.
 
 There are two ways to install Model Maker.
 
-*   Install a prebuilt pip package.
+*   Install a prebuilt pip package:
+    [`tflite-model-maker`](https://pypi.org/project/tflite-model-maker/).
 
 ```shell
 pip install tflite-model-maker
 ```
 
-If you want to install nightly version, please follow the command:
+If you want to install nightly version
+[`tflite-model-maker-nightly`](https://pypi.org/project/tflite-model-maker-nightly/),
+please follow the command:
 
 ```shell
 pip install tflite-model-maker-nightly
