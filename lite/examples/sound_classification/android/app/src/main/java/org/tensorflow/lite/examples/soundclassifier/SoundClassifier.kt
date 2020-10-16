@@ -53,7 +53,7 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     /** Path of the converted model label file, relative to the assets/ directory.  */
     val metadataPath: String = "labels.txt",
     /** Path of the converted .tflite file, relative to the assets/ directory.  */
-    val modelPath: String = "combined_model.tflite",
+    val modelPath: String = "sound_classifier.tflite",
     /** The required audio sample rate in Hz.  */
     val sampleRate: Int = 44_100,
     /** How many milliseconds to sleep between successive audio sample pulls.  */
