@@ -17,6 +17,7 @@ package org.tensorflow.lite.examples.detection.tflite;
 
 import static java.lang.Math.min;
 
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -46,12 +47,14 @@ import org.tensorflow.lite.support.metadata.MetadataExtractor;
  *
  * <p>To use pretrained models in the API or convert to TF Lite models, please see docs for details:
  * -
- * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+ * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1_detection_zoo.md
+ * -
+ * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md
  * -
  * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
  */
 public class TFLiteObjectDetectionAPIModel implements Detector {
-  private static final String TAG = "TFLiteObjectDetectionAPIModel";
+  private static final String TAG = "TFLiteObjectDetectionAPIModelWithInterpreter";
 
   // Only return this many results.
   private static final int NUM_DETECTIONS = 10;
@@ -101,14 +104,13 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   /**
    * Initializes a native TensorFlow session for classifying images.
    *
-   * @param assetManager The asset manager to be used to load assets.
-   * @param modelFilename The filepath of the model GraphDef protocol buffer.
-   * @param labelFilename The filepath of label file for classes.
+   * @param modelFilename The model file path relative to the assets folder
+   * @param labelFilename The label file path relative to the assets folder
    * @param inputSize The size of image input
    * @param isQuantized Boolean representing model is quantized or not
    */
   public static Detector create(
-      final AssetManager assetManager,
+      final Context context,
       final String modelFilename,
       final String labelFilename,
       final int inputSize,
@@ -116,7 +118,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
       throws IOException {
     final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel();
 
-    MappedByteBuffer modelFile = loadModelFile(assetManager, modelFilename);
+    MappedByteBuffer modelFile = loadModelFile(context.getAssets(), modelFilename);
     MetadataExtractor metadata = new MetadataExtractor(modelFile);
     try (BufferedReader br =
         new BufferedReader(

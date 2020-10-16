@@ -97,7 +97,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     try {
       detector =
           TFLiteObjectDetectionAPIModel.create(
-              getAssets(),
+              this,
               TF_OD_API_MODEL_FILE,
               TF_OD_API_LABELS_FILE,
               TF_OD_API_INPUT_SIZE,
@@ -246,11 +246,33 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   @Override
   protected void setUseNNAPI(final boolean isChecked) {
-    runInBackground(() -> detector.setUseNNAPI(isChecked));
+    runInBackground(
+        () -> {
+          try {
+            detector.setUseNNAPI(isChecked);
+          } catch (UnsupportedOperationException e) {
+            LOGGER.e(e, "Failed to set \"Use NNAPI\".");
+            runOnUiThread(
+                () -> {
+                  Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+          }
+        });
   }
 
   @Override
   protected void setNumThreads(final int numThreads) {
-    runInBackground(() -> detector.setNumThreads(numThreads));
+    runInBackground(
+        () -> {
+          try {
+            detector.setNumThreads(numThreads);
+          } catch (IllegalArgumentException e) {
+            LOGGER.e(e, "Failed to set multithreads.");
+            runOnUiThread(
+                () -> {
+                  Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+          }
+        });
   }
 }

@@ -61,11 +61,9 @@ public class DetectorTest {
 
   @Before
   public void setUp() throws IOException {
-    AssetManager assetManager =
-        InstrumentationRegistry.getInstrumentation().getContext().getAssets();
     detector =
         TFLiteObjectDetectionAPIModel.create(
-            assetManager,
+            InstrumentationRegistry.getInstrumentation().getContext(),
             MODEL_FILE,
             LABELS_FILE,
             MODEL_INPUT_SIZE,

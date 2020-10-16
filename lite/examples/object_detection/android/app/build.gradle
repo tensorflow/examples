@@ -29,6 +29,17 @@ android {
     lintOptions {
         abortOnError false
     }
+    flavorDimensions "tfliteInference"
+    productFlavors {
+       // The TFLite inference is built using the TFLite Java API.
+       interpreter {
+           dimension "tfliteInference"
+       }
+       // The TFLite inference is built using the TFLite Task library.
+       taskApi {
+           dimension "tfliteInference"
+       }
+    }
 }
 
 // import DownloadModels task
@@ -37,13 +48,12 @@ project.ext.TMP_DIR   = project.buildDir.toString() + '/downloads'
 
 // Download default models; if you wish to use your own models then
 // place them in the "assets" directory and comment out this line.
-//apply from: "download_model.gradle"
-
 apply from:'download_model.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
-    implementation project(":lib_interpreter")
+    interpreterImplementation project(":lib_interpreter")
+    taskApiImplementation project(":lib_task_api")
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
