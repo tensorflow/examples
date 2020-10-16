@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.imagesegmentation
+package org.tensorflow.lite.examples.imagesegmentation.tflite
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -31,6 +31,7 @@ import java.nio.channels.FileChannel
 import kotlin.collections.HashSet
 import kotlin.random.Random
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.examples.imagesegmentation.utils.ImageUtils
 import org.tensorflow.lite.gpu.GpuDelegate
 
 /**

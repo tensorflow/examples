@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.imagesegmentation
+package org.tensorflow.lite.examples.imagesegmentation.utils
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

@@ -24,6 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.tensorflow.lite.examples.imagesegmentation.tflite.ImageSegmentationModelExecutor
+import org.tensorflow.lite.examples.imagesegmentation.tflite.ModelExecutionResult
+import org.tensorflow.lite.examples.imagesegmentation.utils.ImageUtils
 
 class MLExecutionViewModel : ViewModel() {
 

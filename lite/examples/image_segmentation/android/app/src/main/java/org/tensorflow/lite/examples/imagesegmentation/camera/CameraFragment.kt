@@ -58,7 +58,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.tensorflow.lite.examples.imagesegmentation.ImageUtils
+import org.tensorflow.lite.examples.imagesegmentation.utils.ImageUtils
 
 class CameraFragment : Fragment() {
 
@@ -252,30 +252,30 @@ class CameraFragment : Fragment() {
    * suspend coroutine
    */
   private suspend fun startCaptureSession(device: CameraDevice):
-  CameraCaptureSession = suspendCoroutine { cont ->
+    CameraCaptureSession = suspendCoroutine { cont ->
 
-    // Create list of Surfaces where the camera will output frames
-    val targets: MutableList<Surface> =
-      arrayOf(viewFinder.holder.surface, imageReader.surface).toMutableList()
+      // Create list of Surfaces where the camera will output frames
+      val targets: MutableList<Surface> =
+        arrayOf(viewFinder.holder.surface, imageReader.surface).toMutableList()
 
-    // Create a capture session using the predefined targets; this also involves defining the
-    // session state callback to be notified of when the session is ready
-    device.createCaptureSession(
-      targets,
-      object : CameraCaptureSession.StateCallback() {
-        override fun onConfigureFailed(session: CameraCaptureSession) {
-          val exc = RuntimeException(
-            "Camera ${device.id} session configuration failed, see log for details"
-          )
-          Log.e(TAG, exc.message, exc)
-          cont.resumeWithException(exc)
-        }
+      // Create a capture session using the predefined targets; this also involves defining the
+      // session state callback to be notified of when the session is ready
+      device.createCaptureSession(
+        targets,
+        object : CameraCaptureSession.StateCallback() {
+          override fun onConfigureFailed(session: CameraCaptureSession) {
+            val exc = RuntimeException(
+              "Camera ${device.id} session configuration failed, see log for details"
+            )
+            Log.e(TAG, exc.message, exc)
+            cont.resumeWithException(exc)
+          }
 
-        override fun onConfigured(session: CameraCaptureSession) = cont.resume(session)
-      },
-      cameraHandler
-    )
-  }
+          override fun onConfigured(session: CameraCaptureSession) = cont.resume(session)
+        },
+        cameraHandler
+      )
+    }
 
   fun takePicture() {
     // Perform I/O heavy operations in a different scope

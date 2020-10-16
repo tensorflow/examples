@@ -1,2 +1,2 @@
 rootProject.name = 'TFLite Image Segmentation Demo App'
-include ':app'
+include ':app', ':lib_interpreter', ':lib_utils'
