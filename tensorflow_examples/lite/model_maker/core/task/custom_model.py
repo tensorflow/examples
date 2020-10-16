@@ -37,7 +37,7 @@ class CustomModel(abc.ABC):
 
     Args:
       model_spec: Specification for the model.
-      shuffle: Whether the data should be shuffled.
+      shuffle: Whether the training data should be shuffled.
     """
     self.model_spec = model_spec
     self.shuffle = shuffle
