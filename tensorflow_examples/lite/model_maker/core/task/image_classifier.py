@@ -44,7 +44,7 @@ def get_hub_lib_hparams(**kwargs):
 
 
 def create(train_data,
-           model_spec=ms.efficientnet_lite0_spec,
+           model_spec='efficientnet_lite0',
            validation_data=None,
            batch_size=None,
            epochs=None,
@@ -90,6 +90,7 @@ def create(train_data,
   Returns:
     An instance of ImageClassifier class.
   """
+  model_spec = ms.get(model_spec)
   if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
     raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
         model_spec.compat_tf_versions, compat.get_tf_behavior()))

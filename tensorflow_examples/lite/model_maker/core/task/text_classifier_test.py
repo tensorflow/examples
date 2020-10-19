@@ -87,9 +87,7 @@ class TextClassifierTest(tf.test.TestCase):
 
   @test_util.test_in_tf_2
   def test_mobilebert_model(self):
-    model_spec = ms.mobilebert_classifier_spec
-    model_spec.seq_len = 2
-    model_spec.trainable = False
+    model_spec = ms.mobilebert_classifier_spec(seq_len=2, trainable=False)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
         self.tiny_text_dir, model_spec=model_spec)
     # Splits data, 50% data for training, 50% for testing

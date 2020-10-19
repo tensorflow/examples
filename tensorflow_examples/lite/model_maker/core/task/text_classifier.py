@@ -32,7 +32,7 @@ from tensorflow_examples.lite.model_maker.core.task.metadata_writers.text_classi
 
 
 def create(train_data,
-           model_spec=ms.AverageWordVecModelSpec(),
+           model_spec='average_word_vec',
            validation_data=None,
            batch_size=None,
            epochs=3,
@@ -52,6 +52,7 @@ def create(train_data,
   Returns:
     TextClassifier
   """
+  model_spec = ms.get(model_spec)
   if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
     raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
         model_spec.compat_tf_versions, compat.get_tf_behavior()))

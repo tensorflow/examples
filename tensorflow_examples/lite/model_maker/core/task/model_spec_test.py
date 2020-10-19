@@ -46,7 +46,7 @@ class ModelSpecTest(tf.test.TestCase):
     self.assertIsInstance(spec, ms.AverageWordVecModelSpec)
 
     spec = ms.get(ms.mobilenet_v2_spec)
-    self.assertEqual(spec, ms.mobilenet_v2_spec)
+    self.assertIsInstance(spec, ms.ImageModelSpec)
 
     with self.assertRaises(KeyError):
       ms.get('not_exist_model_spec')

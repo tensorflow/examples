@@ -93,7 +93,7 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
   @classmethod
   def from_folder(cls,
                   filename,
-                  model_spec=ms.AverageWordVecModelSpec(),
+                  model_spec='average_word_vec',
                   is_training=True,
                   class_labels=None,
                   shuffle=True,
@@ -117,6 +117,7 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
     Returns:
       TextDataset containing text, labels and other related info.
     """
+    model_spec = ms.get(model_spec)
     data_root = os.path.abspath(filename)
     folder_name = os.path.basename(data_root)
 
@@ -173,7 +174,7 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
                text_column,
                label_column,
                fieldnames=None,
-               model_spec=ms.AverageWordVecModelSpec(),
+               model_spec='average_word_vec',
                is_training=True,
                delimiter=',',
                quotechar='"',
@@ -198,6 +199,7 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
     Returns:
       TextDataset containing text, labels and other related info.
     """
+    model_spec = ms.get(model_spec)
     csv_name = os.path.basename(filename)
 
     is_cached, tfrecord_file, meta_data_file, vocab_file = cls._get_cache_info(
@@ -316,6 +318,7 @@ class QuestionAnswerDataLoader(dataloader.DataLoader):
     Returns:
       QuestionAnswerDataLoader object.
     """
+    model_spec = ms.get(model_spec)
     file_base_name = os.path.basename(filename)
     is_cached, tfrecord_file, meta_data_file, _ = _get_cache_info(
         cache_dir, file_base_name, model_spec, is_training)

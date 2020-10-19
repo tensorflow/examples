@@ -67,7 +67,7 @@ class ImageClassifierTest(tf.test.TestCase):
   def test_mobilenetv2_model(self):
     model = image_classifier.create(
         self.train_data,
-        model_spec.mobilenet_v2_spec,
+        model_spec.mobilenet_v2_spec(),
         epochs=1,
         batch_size=1,
         shuffle=True)
@@ -82,13 +82,14 @@ class ImageClassifierTest(tf.test.TestCase):
   @test_util.test_in_tf_1
   def test_mobilenetv2_model_create_v1_incompatible(self):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
-      _ = image_classifier.create(self.train_data, model_spec.mobilenet_v2_spec)
+      _ = image_classifier.create(self.train_data,
+                                  model_spec.mobilenet_v2_spec())
 
   @test_util.test_in_tf_1and2
   def test_efficientnetlite0_model_with_model_maker_retraining_lib(self):
     model = image_classifier.create(
         self.train_data,
-        model_spec.efficientnet_lite0_spec,
+        model_spec.efficientnet_lite0_spec(),
         epochs=1,
         batch_size=1,
         shuffle=True,
@@ -100,7 +101,7 @@ class ImageClassifierTest(tf.test.TestCase):
   def test_efficientnetlite0_model(self):
     model = image_classifier.create(
         self.train_data,
-        model_spec.efficientnet_lite0_spec,
+        model_spec.efficientnet_lite0_spec(),
         epochs=1,
         batch_size=1,
         shuffle=True)
@@ -113,7 +114,7 @@ class ImageClassifierTest(tf.test.TestCase):
   @test_util.test_in_tf_1and2
   def test_efficientnetlite0_model_without_training(self):
     model = image_classifier.create(
-        self.train_data, model_spec.efficientnet_lite0_spec, do_train=False)
+        self.train_data, model_spec.efficientnet_lite0_spec(), do_train=False)
     self._test_accuracy(model, threshold=0.0)
     self._test_export_to_tflite(model, threshold=0.0)
 
@@ -121,7 +122,7 @@ class ImageClassifierTest(tf.test.TestCase):
   def test_resnet_50_model(self):
     model = image_classifier.create(
         self.train_data,
-        model_spec.resnet_50_spec,
+        model_spec.resnet_50_spec(),
         epochs=1,
         batch_size=1,
         shuffle=True)
