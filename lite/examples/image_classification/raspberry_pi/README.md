@@ -15,7 +15,7 @@ camera input.
 
 Before you begin, you need to [set up your Raspberry Pi](
 https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up) with
-Raspbian (preferably updated to Buster).
+Raspberry Pi OS (preferably updated to Buster).
 
 You also need to [connect and configure the Pi Camera](
 https://www.raspberrypi.org/documentation/configuration/camera.md).
