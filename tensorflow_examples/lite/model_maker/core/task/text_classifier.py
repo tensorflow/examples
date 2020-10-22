@@ -144,11 +144,14 @@ class TextClassifier(classification_model.ClassificationModel):
     validation_input_fn, validation_steps = self._get_input_fn_and_steps(
         validation_data, batch_size, is_training=False)
 
-    self.model = self.model_spec.run_classifier(train_input_fn,
-                                                validation_input_fn, epochs,
-                                                steps_per_epoch,
-                                                validation_steps,
-                                                self.num_classes)
+    self.model = self.model_spec.run_classifier(
+        train_input_fn,
+        validation_input_fn,
+        epochs,
+        steps_per_epoch,
+        validation_steps,
+        self.num_classes,
+        callbacks=self._keras_callbacks(model_dir=self.model_spec.model_dir))
 
     return self.model
 

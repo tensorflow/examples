@@ -197,7 +197,8 @@ class AverageWordVecModelSpec(object):
                dropout_rate=0.2,
                name='AverageWordVec',
                default_training_epochs=2,
-               default_batch_size=32):
+               default_batch_size=32,
+               model_dir=None):
     """Initialze a instance with preprocessing and model paramaters.
 
     Args:
@@ -210,6 +211,7 @@ class AverageWordVecModelSpec(object):
       name: Name of the object.
       default_training_epochs: Default training epochs for training.
       default_batch_size: Default batch size for training.
+      model_dir: The location of the model checkpoint files.
     """
     self.num_words = num_words
     self.seq_len = seq_len
@@ -219,6 +221,10 @@ class AverageWordVecModelSpec(object):
     self.name = name
     self.default_training_epochs = default_training_epochs
     self.default_batch_size = default_batch_size
+
+    self.model_dir = model_dir
+    if self.model_dir is None:
+      self.model_dir = tempfile.mkdtemp()
 
   def get_name_to_features(self):
     """Gets the dictionary describing the features."""
@@ -272,7 +278,7 @@ class AverageWordVecModelSpec(object):
     return model
 
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps, num_classes):
+                     steps_per_epoch, validation_steps, num_classes, **kwargs):
     """Creates classifier and runs the classifier training."""
     if epochs is None:
       epochs = self.default_training_epochs
@@ -290,7 +296,8 @@ class AverageWordVecModelSpec(object):
         epochs=epochs,
         steps_per_epoch=steps_per_epoch,
         validation_data=validation_ds,
-        validation_steps=validation_steps)
+        validation_steps=validation_steps,
+        **kwargs)
 
     return model
 
@@ -612,7 +619,7 @@ class BertClassifierModelSpec(BertModelSpec):
     return bert_model
 
   def run_classifier(self, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps, num_classes):
+                     steps_per_epoch, validation_steps, num_classes, **kwargs):
     """Creates classifier and runs the classifier training."""
 
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
@@ -629,19 +636,13 @@ class BertClassifierModelSpec(BertModelSpec):
                                                 warmup_steps)
       bert_model = self.create_model(num_classes, optimizer)
 
-    summary_dir = os.path.join(self.model_dir, 'summaries')
-    summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
-    checkpoint_path = os.path.join(self.model_dir, 'checkpoint')
-    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        checkpoint_path, save_weights_only=True)
-
     bert_model.fit(
         x=training_dataset,
         validation_data=evaluation_dataset,
         steps_per_epoch=steps_per_epoch,
         epochs=epochs,
         validation_steps=validation_steps,
-        callbacks=[summary_callback, checkpoint_callback])
+        **kwargs)
 
     return bert_model
 
@@ -925,7 +926,7 @@ class BertQAModelSpec(BertModelSpec):
           is_tf2=self.is_tf2)
       return qa_model
 
-  def train(self, train_input_fn, epochs, steps_per_epoch):
+  def train(self, train_input_fn, epochs, steps_per_epoch, **kwargs):
     """Run bert QA training."""
     warmup_steps = int(epochs * steps_per_epoch * 0.1)
 
@@ -945,12 +946,6 @@ class BertQAModelSpec(BertModelSpec):
       bert_model.compile(
           optimizer=optimizer, loss=_loss_fn, loss_weights=[0.5, 0.5])
 
-    summary_dir = os.path.join(self.model_dir, 'summaries')
-    summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
-    checkpoint_path = os.path.join(self.model_dir, 'checkpoint')
-    checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-        checkpoint_path, save_weights_only=True)
-
     if not bert_model.trainable_variables:
       tf.compat.v1.logging.warning(
           'Trainable variables in the model are empty.')
@@ -960,7 +955,7 @@ class BertQAModelSpec(BertModelSpec):
         x=training_dataset,
         steps_per_epoch=steps_per_epoch,
         epochs=epochs,
-        callbacks=[summary_callback, checkpoint_callback])
+        **kwargs)
 
     return bert_model
 
