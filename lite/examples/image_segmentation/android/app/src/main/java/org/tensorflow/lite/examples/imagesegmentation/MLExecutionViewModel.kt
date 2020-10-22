@@ -19,6 +19,7 @@ package org.tensorflow.lite.examples.imagesegmentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import android.util.Log
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -27,6 +28,8 @@ import kotlinx.coroutines.launch
 import org.tensorflow.lite.examples.imagesegmentation.tflite.ImageSegmentationModelExecutor
 import org.tensorflow.lite.examples.imagesegmentation.tflite.ModelExecutionResult
 import org.tensorflow.lite.examples.imagesegmentation.utils.ImageUtils
+
+private const val TAG = "MLExecutionViewModel"
 
 class MLExecutionViewModel : ViewModel() {
 
@@ -42,7 +45,7 @@ class MLExecutionViewModel : ViewModel() {
   // was created
   fun onApplyModel(
     filePath: String,
-    imageSegmentationModel: ImageSegmentationModelExecutor,
+    imageSegmentationModel: ImageSegmentationModelExecutor?,
     inferenceThread: ExecutorCoroutineDispatcher
   ) {
     viewModelScope.launch(inferenceThread) {
@@ -50,9 +53,13 @@ class MLExecutionViewModel : ViewModel() {
         ImageUtils.decodeBitmap(
           File(filePath)
         )
-
-      val result = imageSegmentationModel.execute(contentImage)
-      _resultingBitmap.postValue(result)
+      try {
+        val result = imageSegmentationModel?.execute(contentImage)
+        _resultingBitmap.postValue(result)
+      } catch (e: Exception) {
+        Log.e(TAG, "Fail to execute ImageSegmentationModelExecutor: ${e.message}")
+        _resultingBitmap.postValue(null)
+      }
     }
   }
 }

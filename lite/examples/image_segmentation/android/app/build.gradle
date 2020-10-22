@@ -36,6 +36,18 @@ android {
     lintOptions {
       abortOnError false
     }
+
+    flavorDimensions "tfliteInference"
+    productFlavors {
+       // The TFLite inference is built using the TFLite Java API.
+       interpreter {
+           dimension "tfliteInference"
+       }
+       // The TFLite inference is built using the TFLite Task library.
+       taskApi {
+           dimension "tfliteInference"
+       }
+   }
 }
 
 // App assets folder:
@@ -46,7 +58,8 @@ apply from: 'download.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(":lib_interpreter")
+    interpreterImplementation project(":lib_interpreter")
+    taskApiImplementation project(":lib_task_api")
     implementation project(":lib_utils")
 
     implementation 'androidx.appcompat:appcompat:1.1.0'

@@ -28,7 +28,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
-import kotlin.collections.HashSet
 import kotlin.random.Random
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.imagesegmentation.utils.ImageUtils
@@ -96,7 +95,7 @@ class ImageSegmentationModelExecutor(
       Log.d(TAG, "Time to run the model $imageSegmentationTime")
 
       maskFlatteningTime = SystemClock.uptimeMillis()
-      val (maskImageApplied, maskOnly, itensFound) =
+      val (maskImageApplied, maskOnly, itemsFound) =
         convertBytebufferMaskToBitmap(
           segmentationMasks, imageSize, imageSize, scaledBitmap,
           segmentColors
@@ -112,7 +111,7 @@ class ImageSegmentationModelExecutor(
         scaledBitmap,
         maskOnly,
         formatExecutionLog(),
-        itensFound
+        itemsFound
       )
     } catch (e: Exception) {
       val exceptionLog = "something went wrong: ${e.message}"
@@ -128,7 +127,7 @@ class ImageSegmentationModelExecutor(
         emptyBitmap,
         emptyBitmap,
         exceptionLog,
-        HashSet(0)
+        HashMap<String, Int>()
       )
     }
   }
@@ -189,7 +188,7 @@ class ImageSegmentationModelExecutor(
     imageHeight: Int,
     backgroundImage: Bitmap,
     colors: IntArray
-  ): Triple<Bitmap, Bitmap, Set<Int>> {
+  ): Triple<Bitmap, Bitmap, Map<String, Int>> {
     val conf = Bitmap.Config.ARGB_8888
     val maskBitmap = Bitmap.createBitmap(imageWidth, imageHeight, conf)
     val resultBitmap = Bitmap.createBitmap(imageWidth, imageHeight, conf)
@@ -200,7 +199,7 @@ class ImageSegmentationModelExecutor(
         imageHeight
       )
     val mSegmentBits = Array(imageWidth) { IntArray(imageHeight) }
-    val itemsFound = HashSet<Int>()
+    val itemsFound = HashMap<String, Int>()
     inputBuffer.rewind()
 
     for (y in 0 until imageHeight) {
@@ -216,8 +215,9 @@ class ImageSegmentationModelExecutor(
             mSegmentBits[x][y] = c
           }
         }
-
-        itemsFound.add(mSegmentBits[x][y])
+        val label = labelsArrays[mSegmentBits[x][y]]
+        val color = colors[mSegmentBits[x][y]]
+        itemsFound.put(label, color)
         val newPixelColor = ColorUtils.compositeColors(
           colors[mSegmentBits[x][y]],
           scaledBackgroundImage.getPixel(x, y)
@@ -232,7 +232,7 @@ class ImageSegmentationModelExecutor(
 
   companion object {
 
-    private const val TAG = "ImageSegmentationMExec"
+    public const val TAG = "SegmentationInterpreter"
     private const val imageSegmentationModel = "deeplabv3_257_mv_gpu.tflite"
     private const val imageSize = 257
     const val NUM_CLASSES = 21
