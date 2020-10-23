@@ -8,5 +8,5 @@ fire>=0.3.1
 flatbuffers==1.12
 absl-py>=0.10.0
 tflite-support==0.1.0rc3.dev2
-tf-nightly==2.4.0.dev20200811
-tf-estimator-nightly==2.4.0.dev2020081101
+tf-nightly==2.4.0.dev20200902
+tf-estimator-nightly==2.4.0.dev2020090201
