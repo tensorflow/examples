@@ -120,7 +120,7 @@ class ClassificationModel(custom_model.CustomModel):
                                        'Processing example: #%d\n%s', log_steps,
                                        i, feature)
 
-      probabilities = lite_runner.run(feature)[0]
+      probabilities = lite_runner.run(feature)
       predictions.append(np.argmax(probabilities))
 
       # Gets the ground-truth labels.

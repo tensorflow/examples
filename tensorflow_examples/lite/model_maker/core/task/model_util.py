@@ -158,11 +158,12 @@ class LiteRunner(object):
 
     Args:
       input_tensors: List / Dict of the input tensors of the TFLite model. The
-        order should be the same as the keras model if it's a list.
+        order should be the same as the keras model if it's a list. It also
+        accepts tensor directly if the model has only 1 input.
 
     Returns:
-      List of the output tensors of the TFLite model. The order should be the
-      same as the keras model.
+      List of the output tensors for multi-output models, otherwise just
+        the output tensor. The order should be the same as the keras model.
     """
     if not isinstance(input_tensors, list) and \
        not isinstance(input_tensors, tuple) and \
@@ -193,4 +194,6 @@ class LiteRunner(object):
         output_tensor = (output_tensor - zero_point) * scale
       output_tensors.append(output_tensor)
 
+    if len(output_tensors) == 1:
+      return output_tensors[0]
     return output_tensors
