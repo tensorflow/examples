@@ -21,12 +21,17 @@ from __future__ import print_function
 import numpy as np
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.data_util import data_util
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_util
 
 
 class ClassificationModel(custom_model.CustomModel):
   """"The abstract base class that represents a Tensorflow classification model."""
+
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
+                           ExportFormat.SAVED_MODEL)
 
   def __init__(self, model_spec, index_to_label, num_classes, shuffle,
                train_whole_model):

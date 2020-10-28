@@ -29,8 +29,8 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 class CustomModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
 
-  DEFAULT_EXPORT_FORMAT = ()
-  ALLOWED_EXPORT_FORMAT = ()
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.SAVED_MODEL)
 
   def __init__(self, model_spec, shuffle):
     """Initialize a instance with data, deploy mode and other related parameters.
