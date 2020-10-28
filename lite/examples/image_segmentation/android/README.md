@@ -35,6 +35,21 @@ permission prompts that appear on your phone. Select `Run -> Run app.` Select
 the deployment target in the connected devices to the device on which the app
 will be installed. This will install the app on the device.
 
+This image segmentation Android reference app demonstrates two implementation
+solutions,
+[lib_task_api](https://github.com/tensorflow/examples/tree/master/lite/examples/image_segmentation/android/lib_task_api)
+that leverages the out-of-box API from the
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_segmenter),
+and
+[lib_interpreter](https://github.com/tensorflow/examples/tree/master/lite/examples/image_segmentation/android/lib_interpreter)
+that creates the custom inference pipleline using the
+[TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
+You can change the build variant to whichever one you want to build and run —
+just go to `Build > Select Build Variant` and select one from the drop-down
+menu. See
+[configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
+for more details.
+
 To test the app, open the app called `TFL Image Segmentation` on your device.
 Re-installing the app may require you to uninstall the previous installations.
 
