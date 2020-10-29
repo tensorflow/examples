@@ -90,8 +90,8 @@ class BinaryClassificationBaseSpec(abc.ABC):
     pass
 
   @abc.abstractmethod
-  def run_classifier(self, model, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps):
+  def run_classifier(self, model, epochs, train_ds, train_steps, validation_ds,
+                     validation_steps, **kwargs):
     pass
 
   # Default dummy augmentation.
