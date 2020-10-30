@@ -196,8 +196,8 @@ class ImageClassifier(classification_model.ClassificationModel):
     super(ImageClassifier,
           self).__init__(model_spec, index_to_label, num_classes, shuffle,
                          hparams.do_fine_tuning)
-    self.hparams = hparams
-    self.preprocessor = image_preprocessing.Preprocessor(
+    self._hparams = hparams
+    self._preprocessor = image_preprocessing.Preprocessor(
         self.model_spec.input_image_shape,
         num_classes,
         self.model_spec.mean_rgb,
@@ -266,7 +266,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     return self.history
 
   def preprocess(self, image, label, is_training=False):
-    return self.preprocessor(image, label, is_training)
+    return self._preprocessor(image, label, is_training)
 
   def _gen_dataset(self, data, batch_size=32, is_training=True):
     """Generates training / validation dataset."""
@@ -357,4 +357,4 @@ class ImageClassifier(classification_model.ClassificationModel):
 
   def _get_hparams_or_default(self, hparams):
     """Returns hparams if not none, otherwise uses default one."""
-    return hparams if hparams else self.hparams
+    return hparams if hparams else self._hparams
