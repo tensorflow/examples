@@ -49,3 +49,19 @@ def get_tf_behavior():
     int, 1 or 2 indicating the behavior version.
   """
   return _tf_behavior_version
+
+
+def get_compat_tf_versions(compat_tf_versions=None):
+  """Gets compatible tf versions (default: [2]).
+
+  Args:
+    compat_tf_versions: int, int list or None, indicates compatible versions.
+
+  Returns:
+    A list of compatible tf versions.
+  """
+  if compat_tf_versions is None:
+    compat_tf_versions = [2]
+  if not isinstance(compat_tf_versions, list):
+    compat_tf_versions = [compat_tf_versions]
+  return compat_tf_versions

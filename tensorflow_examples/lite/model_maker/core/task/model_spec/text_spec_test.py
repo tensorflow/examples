@@ -36,22 +36,6 @@ def _gen_examples():
   return examples
 
 
-class ModelSpecTest(tf.test.TestCase):
-
-  def test_get(self):
-    spec = ms.get('mobilenet_v2')
-    self.assertIsInstance(spec, ms.ImageModelSpec)
-
-    spec = ms.get('average_word_vec')
-    self.assertIsInstance(spec, ms.AverageWordVecModelSpec)
-
-    spec = ms.get(ms.mobilenet_v2_spec)
-    self.assertIsInstance(spec, ms.ImageModelSpec)
-
-    with self.assertRaises(KeyError):
-      ms.get('not_exist_model_spec')
-
-
 def _get_dataset_from_tfrecord(tfrecord_file, name_to_features):
 
   def _parse_function(example_proto):
