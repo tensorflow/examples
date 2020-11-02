@@ -51,14 +51,13 @@ class ClassificationDataLoaderTest(tf.test.TestCase):
 
     class MagicClassificationDataLoader(dataloader.ClassificationDataLoader):
 
-      def __init__(self, dataset, size, num_classes, index_to_label, value):
+      def __init__(self, dataset, size, index_to_label, value):
         super(MagicClassificationDataLoader,
-              self).__init__(dataset, size, num_classes, index_to_label)
+              self).__init__(dataset, size, index_to_label)
         self.value = value
 
       def split(self, fraction):
-        return self._split(fraction, self.num_classes, self.index_to_label,
-                           self.value)
+        return self._split(fraction, self.index_to_label, self.value)
 
     # Some dummy inputs.
     magic_value = 42
@@ -67,8 +66,8 @@ class ClassificationDataLoaderTest(tf.test.TestCase):
 
     # Create data loader from sample data.
     ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
-    data = MagicClassificationDataLoader(ds, len(ds), num_classes,
-                                         index_to_label, magic_value)
+    data = MagicClassificationDataLoader(ds, len(ds), index_to_label,
+                                         magic_value)
 
     # Train/Test data split.
     fraction = .25

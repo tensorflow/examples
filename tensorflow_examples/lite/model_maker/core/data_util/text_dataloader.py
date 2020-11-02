@@ -238,7 +238,6 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
 
     dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec)
     return TextClassifierDataLoader(dataset, meta_data['size'],
-                                    meta_data['num_classes'],
                                     meta_data['index_to_label'])
 
   @classmethod

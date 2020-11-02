@@ -92,10 +92,13 @@ class DataLoader(object):
 class ClassificationDataLoader(DataLoader):
   """DataLoader for classification models."""
 
-  def __init__(self, dataset, size, num_classes, index_to_label):
+  def __init__(self, dataset, size, index_to_label):
     super(ClassificationDataLoader, self).__init__(dataset, size)
-    self.num_classes = num_classes
     self.index_to_label = index_to_label
+
+  @property
+  def num_classes(self):
+    return len(self.index_to_label)
 
   def split(self, fraction):
     """Splits dataset into two sub-datasets with the given fraction.
@@ -109,4 +112,4 @@ class ClassificationDataLoader(DataLoader):
     Returns:
       The splitted two sub datasets.
     """
-    return self._split(fraction, self.num_classes, self.index_to_label)
+    return self._split(fraction, self.index_to_label)

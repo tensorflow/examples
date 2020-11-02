@@ -54,7 +54,7 @@ class ImageClassifierTest(tf.test.TestCase):
         self._gen, (tf.uint8, tf.int64), (tf.TensorShape(
             [self.IMAGE_SIZE, self.IMAGE_SIZE, 3]), tf.TensorShape([])))
     data = image_dataloader.ImageClassifierDataLoader(
-        ds, self.IMAGES_PER_CLASS * 3, 3, ['cyan', 'magenta', 'yellow'])
+        ds, self.IMAGES_PER_CLASS * 3, ['cyan', 'magenta', 'yellow'])
     return data
 
   def setUp(self):

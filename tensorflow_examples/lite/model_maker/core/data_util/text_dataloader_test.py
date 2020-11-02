@@ -249,7 +249,7 @@ class TextClassifierDataLoaderTest(tf.test.TestCase):
 
   def test_split(self):
     ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
-    data = text_dataloader.TextClassifierDataLoader(ds, 4, 2, ['pos', 'neg'])
+    data = text_dataloader.TextClassifierDataLoader(ds, 4, ['pos', 'neg'])
     train_data, test_data = data.split(0.5)
 
     self.assertEqual(train_data.size, 2)
