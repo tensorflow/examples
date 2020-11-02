@@ -403,6 +403,7 @@ class BertModelSpec(object):
           'segment_ids': 'input_type_ids'
       }
     self.tflite_input_name = tflite_input_name
+    self.default_batch_size = default_batch_size
 
   def reorder_input_details(self, tflite_input_details):
     """Reorders the tflite input details to map the order of keras model."""
@@ -1043,4 +1044,3 @@ def mobilebert_qa_squad_spec(**kwargs):
           default_batch_size=48),
       **kwargs)
   return BertQAModelSpec(**args)
-

@@ -87,7 +87,8 @@ class TextClassifierTest(tf.test.TestCase):
 
   @test_util.test_in_tf_2
   def test_mobilebert_model(self):
-    model_spec = ms.mobilebert_classifier_spec(seq_len=2, trainable=False)
+    model_spec = ms.mobilebert_classifier_spec(
+        seq_len=2, trainable=False, default_batch_size=1)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
         self.tiny_text_dir, model_spec=model_spec)
     # Splits data, 50% data for training, 50% for testing
@@ -97,7 +98,6 @@ class TextClassifierTest(tf.test.TestCase):
         self.train_data,
         model_spec=model_spec,
         epochs=1,
-        batch_size=1,
         shuffle=True)
     self._test_accuracy(model, 0.0)
     self._test_export_to_tflite(model, threshold=0.0, atol=1e-2)
