@@ -61,8 +61,8 @@ class ClassificationModel(custom_model.CustomModel):
     Returns:
       The loss value and accuracy.
     """
-    ds = self._gen_dataset(data, batch_size, is_training=False)
-
+    ds = data.gen_dataset(
+        batch_size, is_training=False, preprocess=self.preprocess)
     return self.model.evaluate(ds)
 
   def predict_top_k(self, data, k=1, batch_size=32):
@@ -78,7 +78,8 @@ class ClassificationModel(custom_model.CustomModel):
     """
     if k < 0:
       raise ValueError('K should be equal or larger than 0.')
-    ds = self._gen_dataset(data, batch_size, is_training=False)
+    ds = data.gen_dataset(
+        batch_size, is_training=False, preprocess=self.preprocess)
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)
@@ -108,8 +109,8 @@ class ClassificationModel(custom_model.CustomModel):
     Returns:
       The evaluation result of TFLite model - accuracy.
     """
-
-    ds = self._gen_dataset(data, batch_size=1, is_training=False)
+    ds = data.gen_dataset(
+        batch_size=1, is_training=False, preprocess=self.preprocess)
 
     predictions, labels = [], []
 

@@ -71,8 +71,8 @@ class QuantizationConfig(object):
     Args:
       optimizations: A list of optimizations to apply when converting the model.
         If not set, use `[Optimize.DEFAULT]` by default.
-      representative_data: Representative data used for post-training
-        quantization.
+      representative_data: A DataLoader holding representative data for
+        post-training quantization.
       quantization_steps: Number of post-training quantization calibration steps
         to run.
       inference_input_type: Target data type of real-number input arrays. Allows
@@ -179,16 +179,13 @@ class QuantizationConfig(object):
     """Creates configuration for float16 quantization."""
     return QuantizationConfig(optimizations, supported_types=[tf.float16])
 
-  def get_converter_with_quantization(self, converter, gen_dataset_fn=None):
+  def get_converter_with_quantization(self, converter, preprocess=None):
     """Gets TFLite converter with settings for quantization."""
     converter.optimizations = self.optimizations
 
     if self.representative_data is not None:
-      if gen_dataset_fn is None:
-        raise ValueError('Must provide "gen_dataset_fn" when'
-                         '"representative_data" is not None.')
-      ds = gen_dataset_fn(
-          self.representative_data, batch_size=1, is_training=False)
+      ds = self.representative_data.gen_dataset(
+          batch_size=1, is_training=False, preprocess=preprocess)
       converter.representative_dataset = tf.lite.RepresentativeDataset(
           _get_representative_dataset_gen(ds, self.quantization_steps))
 

@@ -43,19 +43,6 @@ class CustomModelTest(tf.test.TestCase):
         model_spec=None,
         shuffle=False)
 
-  def test_gen_dataset(self):
-    input_dim = 8
-    data = test_util.get_dataloader(
-        data_size=2, input_shape=[input_dim], num_classes=2)
-
-    ds = self.model._gen_dataset(data, batch_size=1, is_training=False)
-    expected = list(data.dataset.as_numpy_iterator())
-    for i, (feature, label) in enumerate(ds):
-      expected_feature = [expected[i][0]]
-      expected_label = [expected[i][1]]
-      self.assertTrue((feature.numpy() == expected_feature).any())
-      self.assertEqual(label.numpy(), expected_label)
-
   def test_export_saved_model(self):
     self.model.model = test_util.build_model(input_shape=[4], num_classes=2)
     saved_model_filepath = os.path.join(self.get_temp_dir(), 'saved_model/')

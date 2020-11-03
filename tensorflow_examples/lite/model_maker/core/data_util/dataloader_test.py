@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow.compat.v2 as tf
+from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 
 
@@ -31,11 +32,11 @@ class DataLoaderTest(tf.test.TestCase):
     self.assertEqual(train_data.size, 2)
     self.assertIsInstance(train_data, dataloader.DataLoader)
     self.assertIsInstance(test_data, dataloader.DataLoader)
-    for i, elem in enumerate(train_data.dataset):
+    for i, elem in enumerate(train_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 1])).all())
 
     self.assertEqual(test_data.size, 2)
-    for i, elem in enumerate(test_data.dataset):
+    for i, elem in enumerate(test_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 0])).all())
 
   def test_len(self):
@@ -43,6 +44,29 @@ class DataLoaderTest(tf.test.TestCase):
     ds = tf.data.Dataset.from_tensor_slices([[0, 1], [1, 1], [0, 0], [1, 0]])
     data = dataloader.DataLoader(ds, size)
     self.assertEqual(len(data), size)
+
+  def test_gen_dataset(self):
+    input_dim = 8
+    data = test_util.get_dataloader(
+        data_size=2, input_shape=[input_dim], num_classes=2)
+
+    ds = data.gen_dataset()
+    self.assertEqual(len(ds), 2)
+    for (feature, label) in ds:
+      self.assertTrue((tf.shape(feature).numpy() == np.array([1, 8])).all())
+      self.assertTrue((tf.shape(label).numpy() == np.array([1])).all())
+
+    ds2 = data.gen_dataset(batch_size=2)
+    self.assertEqual(len(ds2), 1)
+    for (feature, label) in ds2:
+      self.assertTrue((tf.shape(feature).numpy() == np.array([2, 8])).all())
+      self.assertTrue((tf.shape(label).numpy() == np.array([2])).all())
+
+    ds3 = data.gen_dataset(batch_size=2, is_training=True, shuffle=True)
+    self.assertEqual(ds3.cardinality(), tf.data.INFINITE_CARDINALITY)
+    for (feature, label) in ds3.take(10):
+      self.assertTrue((tf.shape(feature).numpy() == np.array([2, 8])).all())
+      self.assertTrue((tf.shape(label).numpy() == np.array([2])).all())
 
 
 class ClassificationDataLoaderTest(tf.test.TestCase):
@@ -79,7 +103,7 @@ class ClassificationDataLoaderTest(tf.test.TestCase):
 
     # Make sure number of entries are right.
     self.assertEqual(train_data.size, fraction * len(ds))
-    self.assertEqual(test_data.size, len(ds) - len(train_data.dataset))
+    self.assertEqual(test_data.size, len(ds) - len(train_data.gen_dataset()))
 
     # Make sure attributes propagated correctly.
     self.assertEqual(train_data.num_classes, num_classes)

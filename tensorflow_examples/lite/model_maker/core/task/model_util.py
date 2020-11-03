@@ -51,18 +51,17 @@ class DummyContextManager(object):
 def export_tflite(model,
                   tflite_filepath,
                   quantization_config=None,
-                  gen_dataset_fn=None,
-                  convert_from_saved_model_tf2=False):
+                  convert_from_saved_model_tf2=False,
+                  preprocess=None):
   """Converts the retrained model to tflite format and saves it.
 
   Args:
     model: model to be converted to tflite.
     tflite_filepath: File path to save tflite model.
     quantization_config: Configuration for post-training quantization.
-    gen_dataset_fn: Function to generate tf.data.dataset from
-      `representative_data`. Used only when `representative_data` in
-      `quantization_config` is setted.
     convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF 2.x.
+    preprocess: A preprocess function to apply on the dataset.
+        # TODO(wangtz): Remove when preprocess is split off from CustomModel.
   """
   if tflite_filepath is None:
     raise ValueError(
@@ -85,7 +84,7 @@ def export_tflite(model,
 
     if quantization_config:
       converter = quantization_config.get_converter_with_quantization(
-          converter, gen_dataset_fn)
+          converter, preprocess)
 
     tflite_model = converter.convert()
 

@@ -17,6 +17,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
+
+
+def _shard(ds, input_pipeline_context):
+  # The dataset is always sharded by number of hosts.
+  # num_input_pipelines is the number of hosts rather than number of cores.
+  if (input_pipeline_context and
+      input_pipeline_context.num_input_pipelines > 1):
+    ds = ds.shard(input_pipeline_context.num_input_pipelines,
+                  input_pipeline_context.input_pipeline_id)
+  return ds
+
 
 class DataLoader(object):
   """This class provides generic utilities for loading customized domain data that will be used later in model retraining.
@@ -41,8 +53,31 @@ class DataLoader(object):
       size: The size of the dataset. tf.data.Dataset donesn't support a function
         to get the length directly since it's lazy-loaded and may be infinite.
     """
-    self.dataset = dataset
+    self._dataset = dataset
     self.size = size
+
+  def gen_dataset(self,
+                  batch_size=1,
+                  is_training=False,
+                  shuffle=False,
+                  input_pipeline_context=None,
+                  preprocess=None):
+    """Generate a shared tf.data.Dataset."""
+    ds = self._dataset
+    ds = _shard(ds, input_pipeline_context)
+
+    if preprocess:
+      ds = ds.map(preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+    if is_training:
+      if shuffle:
+        ds = ds.shuffle(buffer_size=min(self.size, 100))
+      ds = ds.repeat()
+
+    ds = ds.batch(batch_size)
+    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+    # TODO(b/171449557): Consider converting ds to distributed ds here.
+    return ds
 
   def __len__(self):
     return self.size
@@ -78,7 +113,7 @@ class DataLoader(object):
     """
     assert (fraction > 0 and fraction < 1)
 
-    ds = self.dataset
+    ds = self._dataset
 
     train_size = int(self.size * fraction)
     trainset = self.__class__(ds.take(train_size), train_size, *args)

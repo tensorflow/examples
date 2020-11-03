@@ -205,6 +205,9 @@ class ImageClassifier(classification_model.ClassificationModel):
         use_augmentation=use_augmentation)
     self.history = None  # Training history that returns from `keras_model.fit`.
 
+  def preprocess(self, sample, label, is_training=False):
+    return self._preprocessor(sample, label, is_training)
+
   def _get_tflite_input_tensors(self, input_tensors):
     """Gets the input tensors for the TFLite model."""
     return input_tensors
@@ -245,15 +248,22 @@ class ImageClassifier(classification_model.ClassificationModel):
                        'the batch_size smaller or increase the size of the '
                        'train_data.' % (train_data.size, hparams.batch_size))
 
-    train_ds = self._gen_dataset(
-        train_data, hparams.batch_size, is_training=True)
+    # TODO(b/171449557): Consider refactoring this code
+    def train_preprocesor(image, label):
+      return self._preprocessor(image, label, is_training=True)
+
+    train_ds = train_data.gen_dataset(
+        hparams.batch_size,
+        is_training=True,
+        shuffle=self.shuffle,
+        preprocess=train_preprocesor)
     train_data_and_size = (train_ds, train_data.size)
 
     validation_ds = None
     validation_size = 0
     if validation_data is not None:
-      validation_ds = self._gen_dataset(
-          validation_data, hparams.batch_size, is_training=False)
+      validation_ds = validation_data.gen_dataset(
+          hparams.batch_size, is_training=False, preprocess=self.preprocess)
       validation_size = validation_data.size
     validation_data_and_size = (validation_ds, validation_size)
 
@@ -264,23 +274,6 @@ class ImageClassifier(classification_model.ClassificationModel):
     self.history = lib.train_model(self.model, hparams, train_data_and_size,
                                    validation_data_and_size)
     return self.history
-
-  def preprocess(self, image, label, is_training=False):
-    return self._preprocessor(image, label, is_training)
-
-  def _gen_dataset(self, data, batch_size=32, is_training=True):
-    """Generates training / validation dataset."""
-    ds = data.dataset
-    ds = ds.map(lambda image, label: self.preprocess(image, label, is_training))
-
-    if is_training:
-      if self.shuffle:
-        ds = ds.shuffle(buffer_size=min(data.size, 100))
-      ds = ds.repeat()
-
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
 
   def export(self,
              export_dir,
@@ -327,8 +320,11 @@ class ImageClassifier(classification_model.ClassificationModel):
         True, export the metadata in the same directory as tflite model.Used
         only if `with_metadata` is True.
     """
-    model_util.export_tflite(self.model, tflite_filepath, quantization_config,
-                             self._gen_dataset)
+    model_util.export_tflite(
+        self.model,
+        tflite_filepath,
+        quantization_config,
+        preprocess=self.preprocess)
     if with_metadata:
       with tempfile.TemporaryDirectory() as temp_dir:
         tf.compat.v1.logging.info(

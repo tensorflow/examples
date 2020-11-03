@@ -174,11 +174,11 @@ class BinaryClassifier(custom_model.CustomModel):
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
 
   def evaluate(self, data, batch_size=4):
-    ds = self._gen_dataset(data, batch_size, is_training=False)
+    ds = data.gen_dataset(batch_size, is_training=False)
     return self.model.evaluate(ds, return_dict=True)
 
   def evaluate_tflite(self, tflite_filepath, data):
-    ds = self._gen_dataset(data, batch_size=1, is_training=False)
+    ds = data.gen_dataset(batch_size=1, is_training=False)
 
     predictions, labels = [], []
 

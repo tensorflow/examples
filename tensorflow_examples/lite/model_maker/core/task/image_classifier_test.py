@@ -133,7 +133,7 @@ class ImageClassifierTest(tf.test.TestCase):
 
   def _test_predict_top_k(self, model, threshold=0.0):
     topk = model.predict_top_k(self.test_data, batch_size=4)
-    for i, (_, label) in enumerate(self.test_data.dataset):
+    for i, (_, label) in enumerate(self.test_data.gen_dataset().unbatch()):
       predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
       self.assertEqual(model.index_to_label[label], predict_label)
       self.assertGreaterEqual(predict_prob, threshold)

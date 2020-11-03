@@ -42,7 +42,8 @@ def patch_data_loader():
     data_loader = from_folder_fn(*args, **kwargs)
     if data_loader.size > 10:  # Trim dataset to at most 10.
       data_loader.size = 10
-      data_loader.dataset = data_loader.dataset.take(data_loader.size)
+      # TODO(b/171449557): Change this once the dataset is lazily loaded.
+      data_loader._dataset = data_loader._dataset.take(10)
     return data_loader
 
   return patch.object(

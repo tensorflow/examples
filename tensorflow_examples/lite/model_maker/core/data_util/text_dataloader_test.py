@@ -253,13 +253,13 @@ class TextClassifierDataLoaderTest(tf.test.TestCase):
     train_data, test_data = data.split(0.5)
 
     self.assertEqual(train_data.size, 2)
-    for i, elem in enumerate(train_data.dataset):
+    for i, elem in enumerate(train_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 1])).all())
     self.assertEqual(train_data.num_classes, 2)
     self.assertEqual(train_data.index_to_label, ['pos', 'neg'])
 
     self.assertEqual(test_data.size, 2)
-    for i, elem in enumerate(test_data.dataset):
+    for i, elem in enumerate(test_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 0])).all())
     self.assertEqual(test_data.num_classes, 2)
     self.assertEqual(test_data.index_to_label, ['pos', 'neg'])
@@ -285,7 +285,7 @@ class TextClassifierDataLoaderTest(tf.test.TestCase):
     self.assertEqual(data.size, 2)
     self.assertEqual(data.num_classes, 2)
     self.assertEqual(data.index_to_label, ['neg', 'pos'])
-    for input_ids, label in data.dataset:
+    for input_ids, label in data.gen_dataset():
       self.assertTrue(label.numpy() == 1 or label.numpy() == 0)
       actual_input_ids = [label.numpy()] * model_spec.seq_len
       self.assertTrue((input_ids.numpy() == actual_input_ids).all())

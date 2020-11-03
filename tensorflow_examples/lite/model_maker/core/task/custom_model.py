@@ -69,11 +69,13 @@ class CustomModel(abc.ABC):
       """Returns tf.data.Dataset for question answer retraining."""
       batch_size = ctx.get_per_replica_batch_size(
           global_batch_size) if ctx else global_batch_size
-      dataset = self._gen_dataset(
-          input_data,
+      dataset = input_data.gen_dataset(
           batch_size,
           is_training=is_training,
-          input_pipeline_context=ctx)
+          # TODO(wangtz): Consider moving `shuffle` to DataLoader.
+          shuffle=self.shuffle,
+          input_pipeline_context=ctx,
+          preprocess=self.preprocess)
       return dataset
 
     return _dataset_fn
@@ -87,31 +89,6 @@ class CustomModel(abc.ABC):
       input_fn = self._get_dataset_fn(data, batch_size, is_training)
       steps = data.size // batch_size
     return input_fn, steps
-
-  def _gen_dataset(self,
-                   data,
-                   batch_size=32,
-                   is_training=True,
-                   input_pipeline_context=None):
-    """Generates training / validation dataset."""
-    # The dataset is always sharded by number of hosts.
-    # num_input_pipelines is the number of hosts rather than number of cores.
-    ds = data.dataset
-    if input_pipeline_context and input_pipeline_context.num_input_pipelines > 1:
-      ds = ds.shard(input_pipeline_context.num_input_pipelines,
-                    input_pipeline_context.input_pipeline_id)
-
-    ds = ds.map(
-        self.preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-
-    if is_training:
-      if self.shuffle:
-        ds = ds.shuffle(buffer_size=min(data.size, 100))
-      ds = ds.repeat()
-
-    ds = ds.batch(batch_size)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
-    return ds
 
   def _get_export_format(self, export_format):
     """Get export format."""
@@ -213,8 +190,7 @@ class CustomModel(abc.ABC):
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
     """
-    model_util.export_tflite(self.model, tflite_filepath, quantization_config,
-                             self._gen_dataset)
+    model_util.export_tflite(self.model, tflite_filepath, quantization_config)
 
   def _keras_callbacks(self, model_dir):
     """Returns a list of default keras callbacks for `model.fit`."""
