@@ -219,5 +219,7 @@ class ImageClassifierTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
+  # Load compressed models from tensorflow_hub
+  os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
   compat.setup_tf_behavior(tf_version=2)
   tf.test.main()
