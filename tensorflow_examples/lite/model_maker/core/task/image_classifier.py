@@ -25,7 +25,6 @@ import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.task import metadata_writer_for_image_classifier as metadata_writer
 
 from tensorflow_examples.lite.model_maker.core import compat
-from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
@@ -167,10 +166,6 @@ def _get_model_info(model_spec,
 
 class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
-
-  DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL)
-  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
-                           ExportFormat.SAVED_MODEL)
 
   def __init__(self,
                model_spec,

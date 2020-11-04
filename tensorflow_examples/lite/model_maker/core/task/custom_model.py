@@ -18,12 +18,23 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import inspect
 import os
 
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import model_util
+
+
+def _get_params(f, **kwargs):
+  """Gets parameters of the function `f` from `**kwargs`."""
+  parameters = inspect.signature(f).parameters
+  f_kwargs = {}  # kwargs for the function `f`
+  for param_name in parameters.keys():
+    if param_name in kwargs:
+      f_kwargs[param_name] = kwargs.pop(param_name)
+  return f_kwargs, kwargs
 
 
 class CustomModel(abc.ABC):
@@ -90,10 +101,18 @@ class CustomModel(abc.ABC):
       steps = data.size // batch_size
     return input_fn, steps
 
-  def _get_export_format(self, export_format):
+  def _get_default_export_format(self, **kwargs):
+    """Gets the default export format."""
+    if kwargs.get('with_metadata', True):
+      export_format = (ExportFormat.TFLITE)
+    else:
+      export_format = self.DEFAULT_EXPORT_FORMAT
+    return export_format
+
+  def _get_export_format(self, export_format, **kwargs):
     """Get export format."""
     if export_format is None:
-      export_format = self.DEFAULT_EXPORT_FORMAT
+      export_format = self._get_default_export_format(**kwargs)
 
     if not isinstance(export_format, (list, tuple)):
       export_format = (export_format,)
@@ -130,7 +149,7 @@ class CustomModel(abc.ABC):
         label, vocab.
       **kwargs: Other parameters like `quantized` for TFLITE model.
     """
-    export_format = self._get_export_format(export_format)
+    export_format = self._get_export_format(export_format, **kwargs)
 
     if not tf.io.gfile.exists(export_dir):
       tf.io.gfile.makedirs(export_dir)
@@ -138,21 +157,37 @@ class CustomModel(abc.ABC):
     if ExportFormat.TFLITE in export_format:
       with_metadata = kwargs.get('with_metadata', True)
       tflite_filepath = os.path.join(export_dir, tflite_filename)
-      self._export_tflite(tflite_filepath, **kwargs)
+      export_tflite_kwargs, kwargs = _get_params(self._export_tflite, **kwargs)
+      self._export_tflite(tflite_filepath, **export_tflite_kwargs)
     else:
       with_metadata = False
 
     if ExportFormat.SAVED_MODEL in export_format:
       saved_model_filepath = os.path.join(export_dir, saved_model_filename)
-      self._export_saved_model(saved_model_filepath, **kwargs)
+      export_saved_model_kwargs, kwargs = _get_params(self._export_saved_model,
+                                                      **kwargs)
+      self._export_saved_model(saved_model_filepath,
+                               **export_saved_model_kwargs)
 
-    if ExportFormat.VOCAB in export_format and not with_metadata:
+    if ExportFormat.VOCAB in export_format:
+      if with_metadata:
+        tf.compat.v1.logging.warn('Export a separated vocab file even though '
+                                  'vocab file is already inside the TFLite '
+                                  'model with metadata.')
       vocab_filepath = os.path.join(export_dir, vocab_filename)
       self.model_spec.save_vocab(vocab_filepath)
 
-    if ExportFormat.LABEL in export_format and not with_metadata:
+    if ExportFormat.LABEL in export_format:
+      if with_metadata:
+        tf.compat.v1.logging.warn('Export a separated label file even though '
+                                  'label file is already inside the TFLite '
+                                  'model with metadata.')
       label_filepath = os.path.join(export_dir, label_filename)
       self._export_labels(label_filepath)
+
+    if kwargs:
+      tf.compat.v1.logging.warn('Encountered unknown parameters: ' +
+                                str(kwargs))
 
   def _export_saved_model(self,
                           filepath,
