@@ -76,4 +76,6 @@ class ImageClassificationDemoTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
+  # Load compressed models from tensorflow_hub
+  os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
   tf.test.main()
