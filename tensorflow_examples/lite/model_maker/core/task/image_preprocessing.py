@@ -48,7 +48,7 @@ class Preprocessor(object):
     """Image preprocessing method with data augmentation."""
     image_size = self.input_shape[0]
     if is_training:
-      image = preprocess_for_train(image, self.input_shape[0])
+      image = preprocess_for_train(image, image_size)
     else:
       image = preprocess_for_eval(image, image_size)
 
