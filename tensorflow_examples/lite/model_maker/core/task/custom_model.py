@@ -98,7 +98,7 @@ class CustomModel(abc.ABC):
       steps = 0
     else:
       input_fn = self._get_dataset_fn(data, batch_size, is_training)
-      steps = data.size // batch_size
+      steps = len(data) // batch_size
     return input_fn, steps
 
   def _get_default_export_format(self, **kwargs):

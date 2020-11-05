@@ -100,11 +100,11 @@ class QuestionAnswer(custom_model.CustomModel):
     if batch_size is None:
       batch_size = self.model_spec.default_batch_size
 
-    if train_data.size < batch_size:
+    if len(train_data) < batch_size:
       raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
                        'than batch_size (%d). To solve this problem, set '
                        'the batch_size smaller or increase the size of the '
-                       'train_data.' % (train_data.size, batch_size))
+                       'train_data.' % (len(train_data), batch_size))
 
     train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
         train_data, batch_size, is_training=True)
@@ -143,7 +143,7 @@ class QuestionAnswer(custom_model.CustomModel):
     """
     predict_batch_size = self.model_spec.predict_batch_size
     input_fn = self._get_dataset_fn(data, predict_batch_size, is_training=False)
-    num_steps = int(data.size / predict_batch_size)
+    num_steps = int(len(data) / predict_batch_size)
     return self.model_spec.evaluate(
         self.model, None, input_fn, num_steps, data.examples, data.features,
         data.squad_file, data.version_2_with_negative, max_answer_length,
@@ -179,7 +179,7 @@ class QuestionAnswer(custom_model.CustomModel):
     input_fn = self._get_dataset_fn(
         data, global_batch_size=1, is_training=False)
     return self.model_spec.evaluate(
-        None, tflite_filepath, input_fn, data.size, data.examples,
+        None, tflite_filepath, input_fn, len(data), data.examples,
         data.features, data.squad_file, data.version_2_with_negative,
         max_answer_length, null_score_diff_threshold, verbose_logging,
         output_dir)

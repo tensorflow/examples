@@ -54,7 +54,7 @@ class DataLoader(object):
         to get the length directly since it's lazy-loaded and may be infinite.
     """
     self._dataset = dataset
-    self.size = size
+    self._size = size
 
   def gen_dataset(self,
                   batch_size=1,
@@ -79,7 +79,7 @@ class DataLoader(object):
         # TODO(wangtz): Do we want to do shuffle before / after repeat?
         # Shuffle after repeat will give a more randomized dataset and mix the
         # epoch boundary: https://www.tensorflow.org/guide/data
-        ds = ds.shuffle(buffer_size=min(self.size, buffer_size))
+        ds = ds.shuffle(buffer_size=min(self._size, buffer_size))
       ds = ds.repeat()
 
     ds = ds.batch(batch_size)
@@ -88,7 +88,7 @@ class DataLoader(object):
     return ds
 
   def __len__(self):
-    return self.size
+    return self._size
 
   def split(self, fraction):
     """Splits dataset into two sub-datasets with the given fraction.
@@ -123,10 +123,10 @@ class DataLoader(object):
 
     ds = self._dataset
 
-    train_size = int(self.size * fraction)
+    train_size = int(self._size * fraction)
     trainset = self.__class__(ds.take(train_size), train_size, *args)
 
-    test_size = self.size - train_size
+    test_size = self._size - train_size
     testset = self.__class__(ds.skip(train_size), test_size, *args)
 
     return trainset, testset

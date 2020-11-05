@@ -147,11 +147,11 @@ class BinaryClassifier(custom_model.CustomModel):
     super(BinaryClassifier, self).__init__(spec, shuffle)
 
   def train(self, train_data, validation_data, epochs=10, batch_size=4):
-    if train_data.size < batch_size:
+    if len(train_data) < batch_size:
       raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
                        'than batch_size (%d). To solve this problem, set '
                        'the batch_size smaller or increase the size of the '
-                       'train_data.' % (train_data.size, batch_size))
+                       'train_data.' % (len(train_data), batch_size))
 
     with distribute_utils.get_strategy_scope(self.model_spec.strategy):
       train_input_fn, train_steps = self._get_input_fn_and_steps(
@@ -221,7 +221,7 @@ def train_xor_model(export_dir):
   quantization = configs.QuantizationConfig.create_full_integer_quantization(
       is_integer_only=True,
       representative_data=test_data,
-      quantization_steps=test_data.size)
+      quantization_steps=len(test_data))
   classifier.export(
       export_dir,
       quantization_config=quantization,

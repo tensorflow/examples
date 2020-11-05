@@ -56,13 +56,13 @@ class ImageDataLoaderTest(tf.test.TestCase):
     data = image_dataloader.ImageClassifierDataLoader(ds, 4, ['pos', 'neg'])
     train_data, test_data = data.split(0.5)
 
-    self.assertEqual(train_data.size, 2)
+    self.assertEqual(len(train_data), 2)
     for i, elem in enumerate(train_data._dataset):
       self.assertTrue((elem.numpy() == np.array([i, 1])).all())
     self.assertEqual(train_data.num_classes, 2)
     self.assertEqual(train_data.index_to_label, ['pos', 'neg'])
 
-    self.assertEqual(test_data.size, 2)
+    self.assertEqual(len(test_data), 2)
     for i, elem in enumerate(test_data._dataset):
       self.assertTrue((elem.numpy() == np.array([i, 0])).all())
     self.assertEqual(test_data.num_classes, 2)
@@ -72,7 +72,7 @@ class ImageDataLoaderTest(tf.test.TestCase):
     data = image_dataloader.ImageClassifierDataLoader.from_folder(
         self.image_path)
 
-    self.assertEqual(data.size, 2)
+    self.assertEqual(len(data), 2)
     self.assertEqual(data.num_classes, 2)
     self.assertEqual(data.index_to_label, ['daisy', 'tulips'])
     for image, label in data.gen_dataset():
@@ -89,19 +89,19 @@ class ImageDataLoaderTest(tf.test.TestCase):
     train_data, validation_data, test_data = \
         image_dataloader.ImageClassifierDataLoader.from_tfds('beans')
     self.assertIsInstance(train_data.gen_dataset(), tf.data.Dataset)
-    self.assertEqual(train_data.size, 1034)
+    self.assertEqual(len(train_data), 1034)
     self.assertEqual(train_data.num_classes, 3)
     self.assertEqual(train_data.index_to_label,
                      ['angular_leaf_spot', 'bean_rust', 'healthy'])
 
     self.assertIsInstance(validation_data.gen_dataset(), tf.data.Dataset)
-    self.assertEqual(validation_data.size, 133)
+    self.assertEqual(len(validation_data), 133)
     self.assertEqual(validation_data.num_classes, 3)
     self.assertEqual(validation_data.index_to_label,
                      ['angular_leaf_spot', 'bean_rust', 'healthy'])
 
     self.assertIsInstance(test_data.gen_dataset(), tf.data.Dataset)
-    self.assertEqual(test_data.size, 128)
+    self.assertEqual(len(test_data), 128)
     self.assertEqual(test_data.num_classes, 3)
     self.assertEqual(test_data.index_to_label,
                      ['angular_leaf_spot', 'bean_rust', 'healthy'])

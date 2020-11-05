@@ -29,13 +29,13 @@ class DataLoaderTest(tf.test.TestCase):
     data = dataloader.DataLoader(ds, 4)
     train_data, test_data = data.split(0.5)
 
-    self.assertEqual(train_data.size, 2)
+    self.assertEqual(len(train_data), 2)
     self.assertIsInstance(train_data, dataloader.DataLoader)
     self.assertIsInstance(test_data, dataloader.DataLoader)
     for i, elem in enumerate(train_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 1])).all())
 
-    self.assertEqual(test_data.size, 2)
+    self.assertEqual(len(test_data), 2)
     for i, elem in enumerate(test_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 0])).all())
 
@@ -102,8 +102,9 @@ class ClassificationDataLoaderTest(tf.test.TestCase):
     self.assertIsInstance(test_data, MagicClassificationDataLoader)
 
     # Make sure number of entries are right.
-    self.assertEqual(train_data.size, fraction * len(ds))
-    self.assertEqual(test_data.size, len(ds) - len(train_data.gen_dataset()))
+    self.assertEqual(len(train_data.gen_dataset()), len(train_data))
+    self.assertEqual(len(train_data), fraction * len(ds))
+    self.assertEqual(len(test_data), len(ds) - len(train_data))
 
     # Make sure attributes propagated correctly.
     self.assertEqual(train_data.num_classes, num_classes)

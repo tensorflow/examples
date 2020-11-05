@@ -141,7 +141,7 @@ class TextClassifierTest(tf.test.TestCase):
 
   def _test_predict_top_k(self, model):
     topk = model.predict_top_k(self.test_data, batch_size=1)
-    for i in range(self.test_data.size):
+    for i in range(len(self.test_data)):
       predict_label, predict_prob = topk[i][0][0], topk[i][0][1]
       self.assertIn(predict_label, model.index_to_label)
       self.assertGreater(predict_prob, 0.5)

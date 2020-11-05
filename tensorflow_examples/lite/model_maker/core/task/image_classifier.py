@@ -237,11 +237,11 @@ class ImageClassifier(classification_model.ClassificationModel):
     self.create_model()
     hparams = self._get_hparams_or_default(hparams)
 
-    if train_data.size < hparams.batch_size:
+    if len(train_data) < hparams.batch_size:
       raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
                        'than batch_size (%d). To solve this problem, set '
                        'the batch_size smaller or increase the size of the '
-                       'train_data.' % (train_data.size, hparams.batch_size))
+                       'train_data.' % (len(train_data), hparams.batch_size))
 
     # TODO(b/171449557): Consider refactoring this code
     def train_preprocesor(image, label):
@@ -252,14 +252,14 @@ class ImageClassifier(classification_model.ClassificationModel):
         is_training=True,
         shuffle=self.shuffle,
         preprocess=train_preprocesor)
-    train_data_and_size = (train_ds, train_data.size)
+    train_data_and_size = (train_ds, len(train_data))
 
     validation_ds = None
     validation_size = 0
     if validation_data is not None:
       validation_ds = validation_data.gen_dataset(
           hparams.batch_size, is_training=False, preprocess=self.preprocess)
-      validation_size = validation_data.size
+      validation_size = len(validation_data)
     validation_data_and_size = (validation_ds, validation_size)
 
     # Trains the models.

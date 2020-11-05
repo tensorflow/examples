@@ -133,11 +133,11 @@ class TextClassifier(classification_model.ClassificationModel):
     if batch_size is None:
       batch_size = self.model_spec.default_batch_size
 
-    if train_data.size < batch_size:
+    if len(train_data) < batch_size:
       raise ValueError('The size of the train_data (%d) couldn\'t be smaller '
                        'than batch_size (%d). To solve this problem, set '
                        'the batch_size smaller or increase the size of the '
-                       'train_data.' % (train_data.size, batch_size))
+                       'train_data.' % (len(train_data), batch_size))
 
     train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
         train_data, batch_size, is_training=True)
