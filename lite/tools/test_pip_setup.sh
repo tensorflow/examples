@@ -35,22 +35,19 @@ function test_pip_install {
     echo "pip is not available."
     exit 1
   fi
+  PIP_DIR="${WORKSPACE_DIR}/tensorflow_examples/lite/model_maker/pip_package"
 
   ${PIP_BIN} install --upgrade pip ${PIP_OPTIONS}
 
-  echo "=== TEST PIP INSTASLL IN: ${WORKSPACE_DIR} ==="
+  echo "=== TEST PIP INSTASLL IN: ${PIP_DIR} ==="
 
-  pushd "${WORKSPACE_DIR}" > /dev/null
+  pushd "${PIP_DIR}" > /dev/null
 
-  # Replace version in setup.py to avoid error if there is no .git folder:
-  # "version = subprocess.check_output(...)" -> "version = '0.0.1-test'"
-  echo "--- Begin replacing version in setup.py ---"
-  sed -i "s/^version = /version = '0.0.1-test' # /g" setup.py
   cat setup.py
   echo "--- End of setup.py ---"
 
   # Run pip install.
-  ${PIP_BIN} install -e .[model_maker,tests,metadata] ${PIP_OPTIONS}
+  ${PIP_BIN} install -e . ${PIP_OPTIONS}
 
   popd > /dev/null
   echo
@@ -61,12 +58,15 @@ function test_model_maker() {
   TEST_DIR="${WORKSPACE_DIR}/tensorflow_examples/lite/model_maker"
 
   echo "=== BEGIN UNIT TESTS FOR: ${TEST_DIR} ==="
+
+  # Tests are excluded from pip, so need to be in root folder to test.
   pushd "${WORKSPACE_DIR}" > /dev/null
 
   # Set environment variables: test_srcdir for unit tests; and then run tests
   # one by one.
   export TEST_SRCDIR=${TEST_DIR}
-  find "${TEST_DIR}" -name "*_test.py" -print0 | xargs -0 -I{} ${PYTHON_BIN?} {}
+  # Tests all but "*v1_test".
+  find "${TEST_DIR}" -name "*[^v][^1]_test.py" -print0 | xargs -0 -I{} ${PYTHON_BIN?} {}
 
   popd > /dev/null
   echo "=== END UNIT TESTS: ${TEST_DIR} ==="
@@ -76,7 +76,7 @@ function test_model_maker() {
 
 function test_pip_uninstall() {
   echo "=== TO UNINSTASLL PACKAGE ==="
-  yes | ${PIP_BIN} uninstall tensorflow-examples
+  yes | ${PIP_BIN} uninstall tflite-model-maker
   echo
   echo
 }
