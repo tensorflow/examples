@@ -81,7 +81,8 @@ with BASE_DIR.joinpath('README.md').open() as readme_file:
 
 def get_required_packages():
   """Gets packages inside requirements.txt."""
-  with BASE_DIR.joinpath('requirements.txt').open() as f:
+  filename = 'requirements_nightly.txt' if nightly else 'requirements.txt'
+  with BASE_DIR.joinpath(filename).open() as f:
     required_pkgs = [l.strip() for l in f.read().splitlines()]
     required_pkgs = list(
         filter(lambda line: line and not line.startswith('#'), required_pkgs))

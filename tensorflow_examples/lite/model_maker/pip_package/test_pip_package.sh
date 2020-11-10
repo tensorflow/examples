@@ -6,6 +6,7 @@ set -e
 set -x
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+WORKSPACE_DIR="$(realpath "${SCRIPT_DIR}/../../../../")"
 
 source "${SCRIPT_DIR}/create_venv.sh"
 create_venv_or_activate  # Use virtualenv and activate.
@@ -66,20 +67,40 @@ function test_cli {
   yes | ${CLI_BIN}
 }
 
-function test_model_maker {
-  echo "===== Test Model Maker (nightly) ====="
-  build_pip_and_install --nightly
-  test_import
-  test_cli
-  uninstall_pip --nightly
-  echo
+function test_unittest {
+  TEST_DIR="${WORKSPACE_DIR}/tensorflow_examples/lite/model_maker"
 
-  echo "===== Test Model Maker (stable) ====="
-  build_pip_and_install
-  test_import
-  test_cli
-  uninstall_pip
+  echo "=== BEGIN UNIT TESTS FOR: ${TEST_DIR} ==="
+
+  # Tests are excluded from pip, so need to be in root folder to test.
+  pushd "${WORKSPACE_DIR}" > /dev/null
+
+  # Set environment variables: test_srcdir for unit tests; and then run tests
+  # one by one.
+  export TEST_SRCDIR=${TEST_DIR}
+  # Tests all but "*v1_test".
+  find "${TEST_DIR}" -name "*[^v][^1]_test.py" -print0 | xargs -0 -I{} ${PYTHON_BIN?} {}
+
+  popd > /dev/null
+  echo "=== END UNIT TESTS: ${TEST_DIR} ==="
+  echo
   echo
 }
 
+function test_model_maker {
+  if [[ "$1" == "--nightly" ]]; then
+    echo "===== Test Model Maker (nightly) ====="
+  else
+   echo "===== Test Model Maker (stable) ====="
+  fi
+
+  build_pip_and_install $1
+  test_import
+  test_cli
+  test_unittest
+  uninstall_pip $1
+  echo
+}
+
+test_model_maker --nightly
 test_model_maker
