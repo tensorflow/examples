@@ -21,10 +21,12 @@ import fire
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 from tensorflow_examples.lite.model_maker.demo import image_classification_demo
+from tensorflow_examples.lite.model_maker.demo import question_answer_demo
 from tensorflow_examples.lite.model_maker.demo import text_classification_demo
 
 _IMAGE_MODELS = model_spec.IMAGE_CLASSIFICATION_MODELS
 _TEXT_MODELS = model_spec.TEXT_CLASSIFICATION_MODELS
+_QA_MODELS = model_spec.QUESTION_ANSWERING_MODELS
 
 
 class FormatDoc(object):
@@ -52,53 +54,63 @@ class ModelMakerCLI(object):
   @FormatDoc(MODELS=_IMAGE_MODELS)
   def image_classification(self,
                            data_dir,
-                           tflite_filename,
-                           label_filename,
+                           export_dir,
                            spec='efficientnet_lite0',
                            **kwargs):
     """Run Image classification.
 
     Args:
       data_dir: str, input directory of training data. (required)
-      tflite_filename: str, output path to export tflite file. (required)
-      label_filename: str, output path to export label file. (required)
+      export_dir: str, output directory to export files. (required)
       spec: str, model_name. Valid: {MODELS}, default: efficientnet_lite0.
       **kwargs: --epochs: int, epoch num to run. More: see `create` function.
     """
     # Convert types
     data_dir = str(data_dir)
-    tflite_filename = str(tflite_filename)
-    label_filename = str(label_filename)
+    export_dir = str(export_dir)
 
-    image_classification_demo.run(data_dir, tflite_filename, label_filename,
-                                  spec, **kwargs)
+    image_classification_demo.run(data_dir, export_dir, spec, **kwargs)
 
   @FormatDoc(MODELS=_TEXT_MODELS)
   def text_classification(self,
                           data_dir,
-                          tflite_filename,
-                          label_filename,
-                          vocab_filename,
-                          spec='bert',
+                          export_dir,
+                          spec='mobilebert_classifier',
                           **kwargs):
     r"""Run text classification.
 
     Args:
       data_dir: str, input directory of training data. (required)
-      tflite_filename: str, output path to export tflite file. (required)
-      label_filename: str, output path to export label file. (required)
-      vocab_filename: str, output path to export vocab file. (required)
-      spec: str, model_name. Valid: {MODELS}, default: bert.
+      export_dir: str, output directory to export files. (required)
+      spec: str, model_name. Valid: {MODELS}, default: mobilebert_classifier.
       **kwargs: --epochs: int, epoch num to run. More: see `create` function.
     """
     # Convert types
     data_dir = str(data_dir)
-    tflite_filename = str(tflite_filename)
-    label_filename = str(label_filename)
-    vocab_filename = str(vocab_filename)
+    export_dir = str(export_dir)
+    text_classification_demo.run(data_dir, export_dir, spec, **kwargs)
 
-    text_classification_demo.run(data_dir, tflite_filename, label_filename,
-                                 vocab_filename, spec, **kwargs)
+  @FormatDoc(MODELS=_QA_MODELS)
+  def question_answer(self,
+                      train_data_path,
+                      validation_data_path,
+                      export_dir,
+                      spec='mobilebert_qa_squad',
+                      **kwargs):
+    r"""Run question answer.
+
+    Args:
+      train_data_path: str, input path of training data. (required)
+      validation_data_path: str, input path of training data. (required)
+      export_dir: str, output directory to export files. (required)
+      spec: str, model_name. Valid: {MODELS}, default: mobilebert_qa.
+      **kwargs: --epochs: int, epoch num to run. More: see `create` function.
+    """
+    # Convert types
+    train_data_path = str(train_data_path)
+    validation_data_path = str(validation_data_path)
+    question_answer_demo.run(train_data_path, validation_data_path, export_dir,
+                             spec, **kwargs)
 
 
 def main():
