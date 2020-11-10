@@ -24,6 +24,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 
+DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
+
 
 def set_batch_size(model, batch_size):
   """Sets batch size for the model."""
@@ -164,6 +166,7 @@ class LiteRunner(object):
       List of the output tensors for multi-output models, otherwise just
         the output tensor. The order should be the same as the keras model.
     """
+
     if not isinstance(input_tensors, list) and \
        not isinstance(input_tensors, tuple) and \
        not isinstance(input_tensors, dict):
@@ -172,9 +175,7 @@ class LiteRunner(object):
     interpreter = self.interpreter
     for i, input_detail in enumerate(self.input_details):
       input_tensor = _get_input_tensor(input_tensors, self.input_details, i)
-
-      default_scale, default_zero_point = 0, 0
-      if input_detail['quantization'] != (default_scale, default_zero_point):
+      if input_detail['quantization'] != (DEFAULT_SCALE, DEFAULT_ZERO_POINT):
         # Quantize the input
         scale, zero_point = input_detail['quantization']
         input_tensor = input_tensor / scale + zero_point
@@ -186,7 +187,7 @@ class LiteRunner(object):
     output_tensors = []
     for output_detail in self.output_details:
       output_tensor = interpreter.get_tensor(output_detail['index'])
-      if output_detail['quantization'] != (0, 0):
+      if output_detail['quantization'] != (DEFAULT_SCALE, DEFAULT_ZERO_POINT):
         # Dequantize the output
         scale, zero_point = output_detail['quantization']
         output_tensor = output_tensor.astype(np.float32)
