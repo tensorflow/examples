@@ -1,0 +1,41 @@
+task downloadESRGANModelFile() {
+    download {
+        src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/esrgan/ESRGAN.tflite'
+        dest project.ext.ASSET_DIR + '/ESRGAN.tflite'
+        overwrite false
+    }
+}
+
+task downloadTFLiteJARFile() {
+    download {
+        src "https://bintray.com/google/tensorflow/download_file?file_path=org%2Ftensorflow%2Ftensorflow-lite%2F2.3.0%2Ftensorflow-lite-2.3.0.aar"
+        dest "${project.rootDir}/libraries/tensorflow-lite-2.3.0.aar"
+        overwrite false
+        retries 5
+    }
+}
+
+task downloadTFLiteGPUDelegateJARFile() {
+    download {
+        src "https://bintray.com/google/tensorflow/download_file?file_path=org%2Ftensorflow%2Ftensorflow-lite-gpu%2F2.3.0%2Ftensorflow-lite-gpu-2.3.0.aar"
+        dest "${project.rootDir}/libraries/tensorflow-lite-gpu-2.3.0.aar"
+        overwrite false
+        retries 5
+    }
+}
+
+task fetchTFLiteLibs() {
+    copy {
+        from zipTree("${project.rootDir}/libraries/tensorflow-lite-2.3.0.aar")
+        into "${project.rootDir}/libraries/tensorflowlite/"
+        include "headers/tensorflow/lite/c/*h"
+        include "headers/tensorflow/lite/*h"
+        include "jni/**/libtensorflowlite_jni.so"
+    }
+    copy {
+        from zipTree("${project.rootDir}/libraries/tensorflow-lite-gpu-2.3.0.aar")
+        into "${project.rootDir}/libraries/tensorflowlite-gpu/"
+        include "headers/tensorflow/lite/delegates/gpu/*h"
+        include "jni/**/libtensorflowlite_gpu_jni.so"
+    }
+}

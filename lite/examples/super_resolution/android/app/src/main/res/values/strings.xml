@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name" translatable="false">TFL Super Resolution</string>
+    <string name="choose_image" translatable="false">Choose a low resolution image below:</string>
+    <string name="low_resolution_1" translatable="false">insect head</string>
+    <string name="low_resolution_2" translatable="false">lights</string>
+    <string name="low_resolution_3" translatable="false">cat ear</string>
+    <string name="chosen_image_text" translatable="false">You are using low resolution image: None.</string>
+    <string name="simple_explanation" translatable="false">(Clicking UPSAMPLE button below will use TFLite to generate a corresponding high resolution image based on your chosen image.)</string>
+    <string name="super_resolution_image" translatable="false">Super resolution image:</string>
+    <string name="natively_scaled_image" translatable="false">Android ImageView-scaled image:</string>
+    <string name="upsample" translatable="false">Upsample</string>
+    <string name="gpu" translatable="false">GPU</string>
+</resources>

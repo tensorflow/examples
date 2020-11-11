@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00000000">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/tfl2_logo_dark" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="?attr/actionBarSize">
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose_image"
+                    android:textSize="14sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/low_resolution_image_1"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginRight="5dp"
+                        android:contentDescription="@string/low_resolution_1" />
+
+                    <ImageView
+                        android:id="@+id/low_resolution_image_2"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginRight="5dp"
+                        android:contentDescription="@string/low_resolution_2" />
+
+                    <ImageView
+                        android:id="@+id/low_resolution_image_3"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:contentDescription="@string/low_resolution_3" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/chosen_image_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chosen_image_text"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/simple_explanation"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/upsample_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/upsample" />
+
+                <LinearLayout
+                    android:id="@+id/result_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="invisible">
+                    <TextView
+                        android:id="@+id/super_resolution_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/super_resolution_image"
+                        android:textSize="14sp" />
+
+                    <ImageView
+                        android:id="@+id/super_resolution_image"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:contentDescription="@string/super_resolution_image" />
+
+                    <TextView
+                        android:id="@+id/natively_scaled_image_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:text="@string/natively_scaled_image"
+                        android:textSize="14sp" />
+
+                    <ImageView
+                        android:id="@+id/natively_scaled_image"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:contentDescription="@string/natively_scaled_image" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <include layout="@layout/bottom_sheet_layout" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
