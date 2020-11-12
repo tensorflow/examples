@@ -270,36 +270,6 @@ class ImageClassifier(classification_model.ClassificationModel):
                                    validation_data_and_size)
     return self.history
 
-  def export(self,
-             export_dir,
-             tflite_filename='model.tflite',
-             label_filename='labels.txt',
-             saved_model_filename='saved_model',
-             export_format=None,
-             **kwargs):
-    """Converts the retrained model based on `model_export_format`.
-
-    Args:
-      export_dir: The directory to save exported files.
-      tflite_filename: File name to save tflite model. The full export path is
-        {export_dir}/{tflite_filename}.
-      label_filename: File name to save labels. The full export path is
-        {export_dir}/{label_filename}.
-      saved_model_filename: Path to SavedModel or H5 file to save the model. The
-        full export path is
-        {export_dir}/{saved_model_filename}/{saved_model.pb|assets|variables}.
-      export_format: List of export format that could be saved_model, tflite,
-        label.
-      **kwargs: Other parameters like `quantized` for TFLITE model.
-    """
-    super(ImageClassifier, self).export(
-        export_dir,
-        tflite_filename=tflite_filename,
-        label_filename=label_filename,
-        saved_model_filename=saved_model_filename,
-        export_format=export_format,
-        **kwargs)
-
   def _export_tflite(self,
                      tflite_filepath,
                      quantization_config=None,

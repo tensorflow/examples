@@ -89,12 +89,6 @@ class QuestionAnswer(custom_model.CustomModel):
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.VOCAB,
                            ExportFormat.SAVED_MODEL)
 
-  def preprocess(self, raw_text, label):
-    """Preprocess the text."""
-    # TODO(yuqili): remove this method once preprocess for image classifier is
-    # also moved to DataLoader part.
-    return raw_text, label
-
   def train(self, train_data, epochs=None, batch_size=None):
     """Feeds the training data for training."""
     if batch_size is None:
@@ -183,36 +177,6 @@ class QuestionAnswer(custom_model.CustomModel):
         data.features, data.squad_file, data.version_2_with_negative,
         max_answer_length, null_score_diff_threshold, verbose_logging,
         output_dir)
-
-  def export(self,
-             export_dir,
-             tflite_filename='model.tflite',
-             vocab_filename='vocab',
-             saved_model_filename='saved_model',
-             export_format=None,
-             **kwargs):
-    """Converts the retrained model based on `export_format`.
-
-    Args:
-      export_dir: The directory to save exported files.
-      tflite_filename: File name to save tflite model. The full export path is
-        {export_dir}/{tflite_filename}.
-      vocab_filename: File name to save vocabulary.  The full export path is
-        {export_dir}/{vocab_filename}.
-      saved_model_filename: Path to SavedModel or H5 file to save the model. The
-        full export path is
-        {export_dir}/{saved_model_filename}/{saved_model.pb|assets|variables}.
-      export_format: List of export format that could be saved_model, tflite,
-        label, vocab.
-      **kwargs: Other parameters like `quantized` for TFLITE model.
-    """
-    super(QuestionAnswer, self).export(
-        export_dir,
-        tflite_filename=tflite_filename,
-        vocab_filename=vocab_filename,
-        saved_model_filename=saved_model_filename,
-        export_format=export_format,
-        **kwargs)
 
   def _export_tflite(self,
                      tflite_filepath,
