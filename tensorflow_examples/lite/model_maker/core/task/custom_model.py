@@ -53,12 +53,9 @@ class CustomModel(abc.ABC):
     self.model_spec = model_spec
     self.shuffle = shuffle
     self.model = None
-
-  def preprocess(self, sample_data, label):
-    """Preprocess the data."""
     # TODO(yuqili): remove this method once preprocess for image classifier is
     # also moved to DataLoader part.
-    return sample_data, label
+    self.preprocess = None
 
   @abc.abstractmethod
   def train(self, train_data, validation_data=None, **kwargs):

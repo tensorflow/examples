@@ -192,16 +192,13 @@ class ImageClassifier(classification_model.ClassificationModel):
           self).__init__(model_spec, index_to_label, num_classes, shuffle,
                          hparams.do_fine_tuning)
     self._hparams = hparams
-    self._preprocessor = image_preprocessing.Preprocessor(
+    self.preprocess = image_preprocessing.Preprocessor(
         self.model_spec.input_image_shape,
         num_classes,
         self.model_spec.mean_rgb,
         self.model_spec.stddev_rgb,
         use_augmentation=use_augmentation)
     self.history = None  # Training history that returns from `keras_model.fit`.
-
-  def preprocess(self, sample, label, is_training=False):
-    return self._preprocessor(sample, label, is_training)
 
   def _get_tflite_input_tensors(self, input_tensors):
     """Gets the input tensors for the TFLite model."""
@@ -243,15 +240,11 @@ class ImageClassifier(classification_model.ClassificationModel):
                        'the batch_size smaller or increase the size of the '
                        'train_data.' % (len(train_data), hparams.batch_size))
 
-    # TODO(b/171449557): Consider refactoring this code
-    def train_preprocesor(image, label):
-      return self._preprocessor(image, label, is_training=True)
-
     train_ds = train_data.gen_dataset(
         hparams.batch_size,
         is_training=True,
         shuffle=self.shuffle,
-        preprocess=train_preprocesor)
+        preprocess=self.preprocess)
     train_data_and_size = (train_ds, len(train_data))
 
     validation_ds = None

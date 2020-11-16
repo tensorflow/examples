@@ -17,6 +17,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import functools
+
 import tensorflow as tf
 
 
@@ -62,11 +64,27 @@ class DataLoader(object):
                   shuffle=False,
                   input_pipeline_context=None,
                   preprocess=None):
-    """Generate a shared tf.data.Dataset."""
+    """Generate a shared and batched tf.data.Dataset for training/evaluation.
+
+    Args:
+      batch_size: A integer, the returned dataset will be batched by this size.
+      is_training: A boolean, when True, the returned dataset will be optionally
+        shuffled and repeated as an endless dataset.
+      shuffle: A boolean, when True, the returned dataset will be shuffled to
+        create randomness during model training.
+      input_pipeline_context: A InputContext instance, used to shared dataset
+        among multiple workers when distribution strategy is used.
+      preprocess: A function taking three arguments in order, feature, label and
+        boolean is_training.
+
+    Returns:
+      A TF dataset ready to be consumed by Keras model.
+    """
     ds = self._dataset
     ds = _shard(ds, input_pipeline_context)
 
     if preprocess:
+      preprocess = functools.partial(preprocess, is_training=is_training)
       ds = ds.map(preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
     if is_training:
