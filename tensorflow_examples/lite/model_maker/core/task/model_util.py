@@ -23,6 +23,7 @@ import tempfile
 import numpy as np
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflowjs.converters import converter as tfjs_converter
 
 DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
 
@@ -197,3 +198,17 @@ class LiteRunner(object):
     if len(output_tensors) == 1:
       return output_tensors[0]
     return output_tensors
+
+
+def export_tfjs(keras_saved_model, output_dir, **kwargs):
+  """Exports saved model to tfjs.
+
+  https://www.tensorflow.org/js/guide/conversion?hl=en
+
+  Args:
+    keras_saved_model: Saved model from Keras.
+    output_dir: Output TF.js model dir.
+    **kwargs: Other options.
+  """
+  tfjs_converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
+      keras_saved_model, output_dir, **kwargs)
