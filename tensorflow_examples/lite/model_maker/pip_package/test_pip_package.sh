@@ -32,9 +32,6 @@ function build_pip_and_install {
   echo "------ build pip and install -----"
   pushd "${SCRIPT_DIR}" > /dev/null
 
-  # Upgrade pip
-  ${PIP_BIN} install --upgrade pip
-
   rm -r -f dist   # Clean up distributions.
   ${PYTHON_BIN} setup.py ${ver?} sdist bdist_wheel
   local dist_pkg="$(ls dist/${pkg}*.whl)"
@@ -94,7 +91,7 @@ function test_model_maker {
   if [[ "$1" == "--nightly" ]]; then
     echo "===== Test Model Maker (nightly) ====="
   else
-    echo "===== Test Model Maker (stable) ====="
+   echo "===== Test Model Maker (stable) ====="
   fi
 
   build_pip_and_install $1

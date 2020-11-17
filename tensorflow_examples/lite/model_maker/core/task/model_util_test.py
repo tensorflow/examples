@@ -95,22 +95,6 @@ class ModelUtilTest(tf.test.TestCase):
         test_util.is_same_output(
             tflite_model_file, keras_model, random_input, atol=atol))
 
-  @test_util.test_in_tf_1and2
-  def test_export_tfjs(self):
-    input_dim = 4000
-    num_classes = 2
-    model = test_util.build_model([input_dim], num_classes)
-
-    saved_model_dir = os.path.join(self.get_temp_dir(), 'saved_model_for_js')
-    output_dir = os.path.join(self.get_temp_dir(), 'tfjs')
-
-    model.save(saved_model_dir)
-    model_util.export_tfjs(saved_model_dir, output_dir)
-    self.assertTrue(os.path.exists(output_dir))
-
-    expected_model_json = os.path.join(output_dir, 'model.json')
-    self.assertTrue(os.path.exists(expected_model_json))
-
 
 if __name__ == '__main__':
   tf.test.main()

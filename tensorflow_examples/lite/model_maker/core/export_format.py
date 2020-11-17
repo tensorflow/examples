@@ -17,13 +17,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import enum
+from enum import Enum
+from enum import unique
 
 
-@enum.unique
-class ExportFormat(enum.Enum):
+@unique
+class ExportFormat(Enum):
   TFLITE = "TFLITE"
   SAVED_MODEL = "SAVED_MODEL"
   LABEL = "LABEL"
   VOCAB = "VOCAB"
-  TFJS = "TFJS"
