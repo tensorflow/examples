@@ -33,14 +33,12 @@ class ClassificationModel(custom_model.CustomModel):
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
                            ExportFormat.SAVED_MODEL)
 
-  def __init__(self, model_spec, index_to_label, num_classes, shuffle,
-               train_whole_model):
+  def __init__(self, model_spec, index_to_label, shuffle, train_whole_model):
     """Initialize a instance with data, deploy mode and other related parameters.
 
     Args:
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
-      num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
       train_whole_model: If true, the Hub module is trained together with the
         classification layer on top. Otherwise, only train the top
@@ -48,7 +46,7 @@ class ClassificationModel(custom_model.CustomModel):
     """
     super(ClassificationModel, self).__init__(model_spec, shuffle)
     self.index_to_label = index_to_label
-    self.num_classes = num_classes
+    self.num_classes = len(index_to_label)
     self.train_whole_model = train_whole_model
 
   def evaluate(self, data, batch_size=32):

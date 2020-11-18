@@ -115,7 +115,6 @@ def create(train_data,
   image_classifier = ImageClassifier(
       model_spec,
       train_data.index_to_label,
-      train_data.num_classes,
       shuffle=shuffle,
       hparams=hparams,
       use_augmentation=use_augmentation)
@@ -170,7 +169,6 @@ class ImageClassifier(classification_model.ClassificationModel):
   def __init__(self,
                model_spec,
                index_to_label,
-               num_classes,
                shuffle=True,
                hparams=hub_lib.get_default_hparams(),
                use_augmentation=False):
@@ -179,7 +177,6 @@ class ImageClassifier(classification_model.ClassificationModel):
     Args:
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
-      num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
       hparams: A namedtuple of hyperparameters. This function expects
         .dropout_rate: The fraction of the input units to drop, used in dropout
@@ -188,9 +185,9 @@ class ImageClassifier(classification_model.ClassificationModel):
           classification layer on top.
       use_augmentation: Use data augmentation for preprocessing.
     """
-    super(ImageClassifier,
-          self).__init__(model_spec, index_to_label, num_classes, shuffle,
-                         hparams.do_fine_tuning)
+    super(ImageClassifier, self).__init__(model_spec, index_to_label, shuffle,
+                                          hparams.do_fine_tuning)
+    num_classes = len(index_to_label)
     self._hparams = hparams
     self.preprocess = image_preprocessing.Preprocessor(
         self.model_spec.input_image_shape,

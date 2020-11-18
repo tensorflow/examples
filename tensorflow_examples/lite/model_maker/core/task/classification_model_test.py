@@ -43,7 +43,6 @@ class ClassificationModelTest(tf.test.TestCase):
     self.model = MockClassificationModel(
         model_spec=None,
         index_to_label=['pos', 'neg'],
-        num_classes=2,
         train_whole_model=False,
         shuffle=False)
 

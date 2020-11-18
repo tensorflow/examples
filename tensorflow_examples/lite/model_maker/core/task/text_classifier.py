@@ -60,7 +60,6 @@ def create(train_data,
   text_classifier = TextClassifier(
       model_spec,
       train_data.index_to_label,
-      train_data.num_classes,
       shuffle=shuffle)
 
   if do_train:
@@ -104,20 +103,17 @@ class TextClassifier(classification_model.ClassificationModel):
   def __init__(self,
                model_spec,
                index_to_label,
-               num_classes,
                shuffle=True):
     """Init function for TextClassifier class.
 
     Args:
       model_spec: Specification for the model.
       index_to_label: A list that map from index to label class name.
-      num_classes: Number of label classes.
       shuffle: Whether the data should be shuffled.
     """
     super(TextClassifier, self).__init__(
         model_spec,
         index_to_label,
-        num_classes,
         shuffle,
         train_whole_model=True)
 
