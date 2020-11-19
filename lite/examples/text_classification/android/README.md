@@ -51,18 +51,20 @@ Follow the steps below to build and run the sample Android app.
 *   If you already have an Android emulator installed in Android Studio, select
     a virtual device with API level higher than 15.
 
-*   Click `Run` to run the demo app on your Android device. \
-    This Text Classification Android reference app demonstrates two
-    implementation solutions,
-    [lib_task_api](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
-    that leverages the out-of-box API from the
-    [TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/text_classifier),
-    and
-    [lib_interpreter](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_interpreter)
-    that creates the custom inference pipleline using the
-    [TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
-    You can change the build variant to whichever one you want to build and
-    run—just go to `Build > Select Build Variant` and select one from the
-    drop-down menu. See
-    [configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
-    for more details.
+*   Click `Run` to run the demo app on your Android device.
+
+#### Switch between inference solutions (Task library vs TFLite Interpreter)
+
+This Text Classification Android reference app demonstrates two implementation
+solutions,
+[lib_task_api](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
+that leverages the out-of-box API from the
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/text_classifier),
+and
+[lib_interpreter](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_interpreter)
+that creates the custom inference pipleline using the
+[TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
+You can change the build variant to whichever one you want to build and run—just
+go to `Build > Select Build Variant` and select one from the drop-down menu. See
+[configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
+for more details.

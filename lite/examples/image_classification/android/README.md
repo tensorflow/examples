@@ -69,6 +69,8 @@ You will need Android SDK configured in the settings. You'll need at least SDK
 version 23. The `build.gradle` file will prompt you to download any missing
 libraries.
 
+#### Switch between inference solutions (Task library vs Support Library)
+
 This Image Classification Android reference app demonstrates two implementation
 solutions,
 [`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_task_api)

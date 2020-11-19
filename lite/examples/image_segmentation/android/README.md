@@ -35,6 +35,8 @@ permission prompts that appear on your phone. Select `Run -> Run app.` Select
 the deployment target in the connected devices to the device on which the app
 will be installed. This will install the app on the device.
 
+#### Switch between inference solutions (Task library vs TFLite Interpreter)
+
 This image segmentation Android reference app demonstrates two implementation
 solutions,
 [lib_task_api](https://github.com/tensorflow/examples/tree/master/lite/examples/image_segmentation/android/lib_task_api)
