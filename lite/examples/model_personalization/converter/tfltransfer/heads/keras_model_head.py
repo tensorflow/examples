@@ -121,12 +121,12 @@ class KerasModelHead(object):
     bottleneck_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if key.endswith('_input')
+        if 'input' in key
     ]
     labels_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if key.endswith('_target')
+        if 'target' in key
     ]
     if len(bottleneck_names) != 1 or len(labels_names) != 1:
       raise RuntimeError('Unexpected Keras eval signature inputs')
