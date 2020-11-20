@@ -41,7 +41,7 @@ class KerasModelHead(object):
   def __init__(self, keras_model):
     # Convert Keras model to SavedModel.
     saved_model_dir = tempfile.mkdtemp('tflite-transfer-keras-model')
-    tfv1.keras.experimental.export_saved_model(keras_model, saved_model_dir)
+    tf.keras.experimental.export_saved_model(keras_model, saved_model_dir)
 
     # Pre-fetch some information about the model.
     with tfv1.Session(graph=tf.Graph()) as sess:
@@ -56,6 +56,10 @@ class KerasModelHead(object):
       variables = tfv1.global_variables()
       self._variable_names = [variable.name for variable in variables]
       self._initial_params = [variable.eval() for variable in variables]
+      trainable_variables = keras_model.trainable_variables
+      self._trainable_variable_names = [
+          variable.name for variable in trainable_variables
+      ]
 
     with tfv1.Session(graph=tf.Graph()) as sess:
       eval_metagraph = tfv1.saved_model.load(sess, ['eval'], saved_model_dir)
@@ -121,19 +125,18 @@ class KerasModelHead(object):
     bottleneck_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if key.endswith('_input')
+        if key.endswith('_input') or key.startswith('input_')
     ]
     labels_names = [
         input_def.name
         for key, input_def in self._eval_signature.inputs.items()
-        if key.endswith('_target')
+        if key.endswith('_target') or key.startswith('target_')
     ]
     if len(bottleneck_names) != 1 or len(labels_names) != 1:
       raise RuntimeError('Unexpected Keras eval signature inputs')
     bottleneck_name = bottleneck_names[0]
     labels_name = labels_names[0]
     loss_name = self._eval_signature.outputs['loss'].name
-
     input_map = {
         bottleneck_name: bottleneck,
         labels_name: labels,
@@ -143,12 +146,17 @@ class KerasModelHead(object):
         name=scope,
         input_map=input_map,
         return_elements=[loss_name])[0]
+    train_variables = [
+        tfv1.get_default_graph().get_tensor_by_name(scope + '/' + name)
+        for name in self._trainable_variable_names
+    ]
     variables = [
         tfv1.get_default_graph().get_tensor_by_name(scope + '/' + name)
         for name in self._variable_names
     ]
     with tf.name_scope(scope + '/backprop'):
-      gradients = tf.gradients(loss, variables, stop_gradients=variables)
+      gradients = tf.gradients(
+          loss, train_variables, stop_gradients=train_variables)
     return loss, gradients, variables
 
   def generate_initial_params(self):
