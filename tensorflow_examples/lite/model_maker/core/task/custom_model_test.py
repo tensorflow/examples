@@ -23,13 +23,14 @@ import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
+from tensorflow_examples.lite.model_maker.core.task import model_util
 
 
 class MockCustomModel(custom_model.CustomModel):
 
   DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL)
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
-                           ExportFormat.SAVED_MODEL)
+                           ExportFormat.SAVED_MODEL, ExportFormat.TFJS)
 
   def _export_labels(self, label_filepath):
     with open(label_filepath, 'w') as f:
@@ -100,6 +101,11 @@ class CustomModelTest(tf.test.TestCase):
         include_optimizer=False)
     self._check_nonempty_file(os.path.join(export_path, 'model.tflite'))
     self._check_nonempty_dir(os.path.join(export_path, 'saved_model'))
+
+    if model_util.HAS_TFJS:
+      export_path = os.path.join(self.get_temp_dir(), 'export4/')
+      self.model.export(export_path, export_format=[ExportFormat.TFJS])
+      self._check_nonempty_file(os.path.join(export_path, 'model.json'))
 
 
 if __name__ == '__main__':

@@ -43,6 +43,7 @@ def set_batch_size(model, batch_size):
 
 
 def _create_temp_dir(convert_from_saved_model):
+  """Creates temp dir, if True is given."""
   if convert_from_saved_model:
     return tempfile.TemporaryDirectory()
   else:
@@ -207,17 +208,27 @@ class LiteRunner(object):
     return output_tensors
 
 
-def export_tfjs(keras_saved_model, output_dir, **kwargs):
+def export_tfjs(keras_or_saved_model, output_dir, **kwargs):
   """Exports saved model to tfjs.
 
   https://www.tensorflow.org/js/guide/conversion?hl=en
 
   Args:
-    keras_saved_model: Saved model from Keras.
+    keras_or_saved_model: Keras or saved model.
     output_dir: Output TF.js model dir.
     **kwargs: Other options.
   """
   if not HAS_TFJS:
     return
-  tfjs_converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
-      keras_saved_model, output_dir, **kwargs)
+
+  # For Keras model, creates a saved model first in a temp dir. Otherwise,
+  # convert directly.
+  is_keras = isinstance(keras_or_saved_model, tf.keras.Model)
+  with _create_temp_dir(is_keras) as temp_dir_name:
+    if is_keras:
+      keras_or_saved_model.save(temp_dir_name, save_format='tf')
+      path = temp_dir_name
+    else:
+      path = keras_or_saved_model
+    tfjs_converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
+        path, output_dir, **kwargs)

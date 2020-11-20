@@ -41,7 +41,8 @@ class CustomModel(abc.ABC):
   """"The abstract base class that represents a Tensorflow classification model."""
 
   DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE)
-  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.SAVED_MODEL)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.SAVED_MODEL,
+                           ExportFormat.TFJS)
 
   def __init__(self, model_spec, shuffle):
     """Initialize a instance with data, deploy mode and other related parameters.
@@ -166,6 +167,9 @@ class CustomModel(abc.ABC):
       self._export_saved_model(saved_model_filepath,
                                **export_saved_model_kwargs)
 
+    if ExportFormat.TFJS in export_format:
+      self._export_tfjs(export_dir)
+
     if ExportFormat.VOCAB in export_format:
       if with_metadata:
         tf.compat.v1.logging.warn('Export a separated vocab file even though '
@@ -223,6 +227,14 @@ class CustomModel(abc.ABC):
       quantization_config: Configuration for post-training quantization.
     """
     model_util.export_tflite(self.model, tflite_filepath, quantization_config)
+
+  def _export_tfjs(self, tfjs_filepath):
+    """Converts the retrained model to tflite format.
+
+    Args:
+      tfjs_filepath: File path to save tflite model.
+    """
+    model_util.export_tfjs(self.model, tfjs_filepath)
 
   def _keras_callbacks(self, model_dir):
     """Returns a list of default keras callbacks for `model.fit`."""
