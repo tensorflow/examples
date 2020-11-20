@@ -1,4 +1,4 @@
-# TensorFlow Lite BERT QA iOS Example Example Application
+# TensorFlow Lite BERT QA iOS Example Application
 
 ![UIKit screencast]       | ![SwiftUI screencast]
 :-----------------------: | :-------------------------:
