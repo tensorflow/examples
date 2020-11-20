@@ -671,7 +671,7 @@ class BertQAModelSpec(BertModelSpec):
       tflite_input_name=None,
       tflite_output_name=None,
       init_from_squad_model=False,
-      default_batch_size=32,
+      default_batch_size=16,
       name='Bert'):
     """Initialze an instance with model paramaters.
 
@@ -1019,11 +1019,11 @@ def mobilebert_qa_spec(**kwargs):
           is_tf2=False,
           distribution_strategy='off',
           convert_from_saved_model_tf2=True,
-          learning_rate=5e-05,
+          learning_rate=4e-05,
           name='MobileBert',
           tflite_input_name=_MOBILEBERT_TFLITE_INPUT_NAME,
           tflite_output_name=_MOBILEBERT_TFLITE_OUTPUT_NAME,
-          default_batch_size=48),
+          default_batch_size=32),
       **kwargs)
   return BertQAModelSpec(**args)
 
@@ -1036,11 +1036,11 @@ def mobilebert_qa_squad_spec(**kwargs):
           is_tf2=False,
           distribution_strategy='off',
           convert_from_saved_model_tf2=True,
-          learning_rate=5e-05,
+          learning_rate=4e-05,
           name='MobileBert',
           tflite_input_name=_MOBILEBERT_TFLITE_INPUT_NAME,
           tflite_output_name=_MOBILEBERT_TFLITE_OUTPUT_NAME,
           init_from_squad_model=True,
-          default_batch_size=48),
+          default_batch_size=32),
       **kwargs)
   return BertQAModelSpec(**args)
