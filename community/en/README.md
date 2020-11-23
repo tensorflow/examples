@@ -1,6 +1,8 @@
-# TensorFlow Community
+__DEPRECATED__
 
-Join the [TensorFlow community](https://www.tensorflow.org/community) and read
-the [contributing guide](../CONTRIBUTING.md).
+This directory is deprecated and no longer accepting pull requests.
 
-Send pull requests here for new documentation and examples. 
+There are many ways to connect to the
+[TensorFlow community](https://www.tensorflow.org/community) including
+[SIG projects](https://github.com/tensorflow/community/tree/master/sigs) and
+[ML GDE initiatives](https://github.com/ml-gde).
