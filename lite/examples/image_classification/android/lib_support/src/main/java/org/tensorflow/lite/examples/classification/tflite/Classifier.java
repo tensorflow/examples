@@ -208,6 +208,7 @@ public abstract class Classifier {
         tfliteOptions.addDelegate(gpuDelegate);
         break;
       case CPU:
+        tfliteOptions.setUseXNNPACK(true);
         break;
     }
     tfliteOptions.setNumThreads(numThreads);

@@ -136,6 +136,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     try {
       Interpreter.Options options = new Interpreter.Options();
       options.setNumThreads(NUM_THREADS);
+      options.setUseXNNPACK(true);
       d.tfLite = new Interpreter(modelFile, options);
       d.tfLiteModel = modelFile;
       d.tfLiteOptions = options;
