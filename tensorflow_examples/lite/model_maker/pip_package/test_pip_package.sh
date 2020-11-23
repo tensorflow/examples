@@ -81,8 +81,12 @@ function test_unittest {
   # Set environment variables: test_srcdir for unit tests; and then run tests
   # one by one.
   export TEST_SRCDIR=${TEST_DIR}
-  # Tests all but "*v1_test".
-  find "${TEST_DIR}" -name "*[^v][^1]_test.py" -print0 | xargs -0 -I{} ${PYTHON_BIN?} {}
+  # Tests all, excluding "*v1_test" and "tensorflowjs".
+  find "${TEST_DIR}" -name "*_test.py" \
+        ! -name "*v1_test.py" \
+        ! -wholename "*tfjs*" \
+        -print0 | \
+    xargs -0 -I{} ${PYTHON_BIN?} {}
 
   popd > /dev/null
   echo "=== END UNIT TESTS: ${TEST_DIR} ==="

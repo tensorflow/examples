@@ -32,6 +32,7 @@ import datetime
 import os
 import pathlib
 import shutil
+import subprocess
 import sys
 
 from setuptools import find_namespace_packages
@@ -72,6 +73,7 @@ OFFICIAL_NAMESPACE = 'tflite_model_maker'  # Official package namespace.
 MODEL_MAKER_CONSOLE = 'tflite_model_maker=tflite_model_maker.cli.cli:main'
 PIP_PKG_PATH = BASE_DIR.joinpath('pip_package')
 SRC_NAME = 'src'  # To create folder `pip_package/src`
+BUILD_ROOT = PIP_PKG_PATH.joinpath(SRC_NAME)
 
 DESCRIPTION = ('TFLite Model Maker: a model customization library for on-device'
                ' applications.')
@@ -108,17 +110,16 @@ def _create_py_with_content(filepath, content):
 def prepare_package_src():
   """Prepares src folder, and returns packages with dir mapping."""
   lib_names = LIB_NAMESPACE.split('.')
-  build_root = PIP_PKG_PATH.joinpath(SRC_NAME)
-  lib_pkg = build_root.joinpath(*lib_names)
+  lib_pkg = BUILD_ROOT.joinpath(*lib_names)
 
-  # Cleanup
-  if build_root.exists():
-    shutil.rmtree(str(build_root), ignore_errors=True)
+  # Cleanup if `src` folder exists
+  if BUILD_ROOT.exists():
+    shutil.rmtree(str(BUILD_ROOT), ignore_errors=True)
 
   # Prepare __init__.py.
   _ensure_dir_created(lib_pkg)
   for i in range(len(lib_names) + 1):
-    dirpath = build_root.joinpath(*lib_names[:i])
+    dirpath = BUILD_ROOT.joinpath(*lib_names[:i])
     init_file = dirpath.joinpath('__init__.py')
     if not init_file.exists():
       _create_py_with_content(init_file, None)
@@ -150,12 +151,12 @@ def prepare_package_src():
 
   # Create namespace mapping.
   offical_names = OFFICIAL_NAMESPACE.split('.')
-  official_pkg = build_root.joinpath(*offical_names)
+  official_pkg = BUILD_ROOT.joinpath(*offical_names)
 
   # Prepare __init__.py.
   _ensure_dir_created(official_pkg)
   for i in range(len(offical_names) + 1):
-    dirpath = build_root.joinpath(*offical_names[:i])
+    dirpath = BUILD_ROOT.joinpath(*offical_names[:i])
     init_file = dirpath.joinpath('__init__.py')
     if not init_file.exists():
       _create_py_with_content(init_file, None)
@@ -177,13 +178,58 @@ def prepare_package_src():
     official_py = official_pkg.joinpath(p)
     shutil.copy2(str(build_py), str(official_py))
 
+  extra = {}
+  if nightly:
+    # For nightly, proceeed with addtional preparation.
+    extra_nightly = _prepare_nightly()
+    extra.update(extra_nightly)
+
   # Return package.
-  namespace_packages = find_namespace_packages(where=build_root)
+  namespace_packages = find_namespace_packages(where=BUILD_ROOT)
   package_dir_mapping = {'': SRC_NAME}
-  return namespace_packages, package_dir_mapping
+
+  extra.update(
+      packages=namespace_packages,
+      package_dir=package_dir_mapping,
+  )
+  return extra
 
 
-packages, package_dir = prepare_package_src()
+def _prepare_nightly():
+  """Prepares nightly and gets extra setup config.
+
+  For nightly, tflite-model-maker will pack `tensorflowjs` python source code.
+
+  TODO(tianlin): tensorflowjs pip requires stable tensorflow instead of nightly,
+  which conflicts with tflite-model-maker-nightly. Thus, we include its python
+  code directly.
+
+  Returns:
+    dict: extra kwargs for setup.
+  """
+  tfjs_git = 'https://github.com/tensorflow/tfjs'
+  tfjs_path = PIP_PKG_PATH.joinpath('tfjs')
+
+  # Remove existing tfjs and git clone.
+  if tfjs_path.exists():
+    shutil.rmtree(str(tfjs_path), ignore_errors=True)
+  cmd = ['git', 'clone', tfjs_git, str(tfjs_path)]
+  print('Running git clone: {}'.format(cmd))
+  subprocess.check_call(cmd)
+
+  # Copy `tensorflowjs` python code to `src` and release with tflite-model-maker
+  src_folder = str(
+      tfjs_path.joinpath('tfjs-converter', 'python', 'tensorflowjs'))
+  dst_folder = str(BUILD_ROOT.joinpath('tensorflowjs'))
+  shutil.copytree(
+      src_folder,
+      dst_folder,
+      ignore=lambda _, names: set(s for s in names if s.endswith('_test.py')))
+
+  return {'package_data': {'tensorflowjs/op_list': ['*.json']}}
+
+
+setup_extra = prepare_package_src()
 
 setup(
     name=project_name,
@@ -196,8 +242,6 @@ setup(
     url='http://github.com/tensorflow/examples',
     download_url='https://github.com/tensorflow/examples/tags',
     license='Apache 2.0',
-    package_dir=package_dir,
-    packages=packages,
     scripts=[],
     install_requires=get_required_packages(),
     entry_points={
@@ -205,4 +249,4 @@ setup(
     },
     classifiers=classifiers,
     keywords=['tensorflow', 'lite', 'model customization', 'transfer learning'],
-)
+    **setup_extra)
