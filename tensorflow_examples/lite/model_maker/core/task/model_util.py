@@ -232,3 +232,11 @@ def export_tfjs(keras_or_saved_model, output_dir, **kwargs):
       path = keras_or_saved_model
     tfjs_converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
         path, output_dir, **kwargs)
+
+
+def load_tfjs_keras_model(model_path):
+  if not HAS_TFJS:
+    raise ImportError('tensorflowjs is required to load this model. Please run '
+                      '`pip install tensorflowjs` to install.')
+  return tfjs_converter.keras_tfjs_loader.load_keras_model(
+      model_path, load_weights=True)
