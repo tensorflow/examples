@@ -6,11 +6,11 @@ demonstrates [image classification](https://www.tensorflow.org/lite/models/image
 ## Explore the code
 
 The app is written entirely in Swift and uses the TensorFlow Lite
-[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/swift)
+[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/swift)
 for performing image classification.
 
 Note: Objective-C developers should use the TensorFlow Lite
-[Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/objc).
+[Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/objc).
 
 We're now going to walk through the most important parts of the sample code.
 
@@ -54,7 +54,8 @@ extension ViewController: CameraFeedManagerDelegate {
 The Swift class `ModelDataHandler`, defined in
 [`ModelDataHandler.swift`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/ios/ImageClassification/ModelDataHandler/ModelDataHandler.swift),
 handles all data preprocessing and makes calls to run inference on a given frame
-using the TensorFlow Lite [`Interpreter`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/experimental/swift/Sources/Interpreter.swift).
+using the TensorFlow Lite
+[`Interpreter`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/swift/Sources/Interpreter.swift).
 It then formats the inferences obtained from invoking the `Interpreter` and
 returns the top N results for a successful inference.
 
@@ -140,7 +141,7 @@ private func rgbDataFromBuffer(
 
 Here's the code for getting the `RGB` data representation of the pixel buffer,
 copying that data to the input
-[`Tensor`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/experimental/swift/Sources/Tensor.swift),
+[`Tensor`](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/swift/Sources/Tensor.swift),
 and running inference by invoking the `Interpreter`:
 
 ```swift
