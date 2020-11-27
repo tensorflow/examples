@@ -41,29 +41,28 @@ class KerasModelHead(object):
   def __init__(self, keras_model):
     # Convert Keras model to SavedModel.
     saved_model_dir = tempfile.mkdtemp('tflite-transfer-keras-model')
-    tf.keras.experimental.export_saved_model(keras_model, saved_model_dir)
+    keras_model.save(saved_model_dir, save_format='tf')
 
     # Pre-fetch some information about the model.
-    with tfv1.Session(graph=tf.Graph()) as sess:
-      metagraph = tfv1.saved_model.load(sess, [tf.saved_model.SERVING],
-                                        saved_model_dir)
-      self._predict_signature = metagraph.signature_def.get('serving_default')
+    loaded_model = tf.saved_model.load(
+        saved_model_dir, tags=[tf.saved_model.SERVING])
+    self._predict_signature = loaded_model.signatures['serving_default']
 
-      input_def = next(self._predict_signature.inputs.values().__iter__())
-      self._input_shape = tuple(
-          dim.size for dim in input_def.tensor_shape.dim[1:])
+    input_def = next(self._predict_signature.inputs.values().__iter__())
+    self._input_shape = tuple(
+        dim.size for dim in input_def.tensor_shape.dim[1:])
 
-      variables = tfv1.global_variables()
-      self._variable_names = [variable.name for variable in variables]
-      self._initial_params = [variable.eval() for variable in variables]
-      trainable_variables = keras_model.trainable_variables
-      self._trainable_variable_names = [
-          variable.name for variable in trainable_variables
-      ]
+    variables = keras_model.variables
+    self._variable_names = [variable.name for variable in variables]
+    self._initial_params = [variable.eval() for variable in variables]
+    trainable_variables = keras_model.trainable_variables
+    self._trainable_variable_names = [
+        variable.name for variable in trainable_variables
+    ]
 
-    with tfv1.Session(graph=tf.Graph()) as sess:
-      eval_metagraph = tfv1.saved_model.load(sess, ['eval'], saved_model_dir)
-      self._eval_signature = eval_metagraph.signature_def.get('eval')
+    loaded_model = tf.saved_model.load(
+        saved_model_dir, tags=[tf.saved_model.SERVING])
+    self._eval_signature = loaded_model.signatures['serving_default']
 
     if len(self._predict_signature.inputs) != 1:
       raise ValueError('Only single-input head models are supported')

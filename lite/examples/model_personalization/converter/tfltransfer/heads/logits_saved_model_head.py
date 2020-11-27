@@ -45,17 +45,16 @@ class LogitsSavedModelHead(object):
     self.signature_key = signature_key
 
     # Pre-fetch some information about the model.
-    with tfv1.Session(graph=tf.Graph()) as sess:
-      metagraph = tfv1.saved_model.load(sess, [tag], model_dir)
-      self._signature = metagraph.signature_def.get(signature_key)
+    loaded_model = tf.saved_model.load(model_dir, tags=[tag])
+    self._signature = loaded_model.signatures[signature_key]
 
-      input_def = next(self._signature.inputs.values().__iter__())
-      self._input_shape = tuple(
-          dim.size for dim in input_def.tensor_shape.dim[1:])
+    input_def = next(self._signature.inputs.values().__iter__())
+    self._input_shape = tuple(
+        dim.size for dim in input_def.tensor_shape.dim[1:])
 
-      variables = tfv1.global_variables()
-      self._variable_names = [variable.name for variable in variables]
-      self._initial_params = [variable.eval() for variable in variables]
+    variables = tfv1.global_variables()
+    self._variable_names = [variable.name for variable in variables]
+    self._initial_params = [variable.eval() for variable in variables]
 
     if len(self._signature.inputs) != 1:
       raise ValueError('Only single-input head models are supported')

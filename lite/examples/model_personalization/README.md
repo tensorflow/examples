@@ -143,8 +143,7 @@ directory.
 The more flexible option is to prepare the models you want to
 use as base and head as TensorFlow SavedModels.
 
-If you are using Keras and Tensorflow 2.x use `tf.keras.models.save_model`, for the legacy models using Keras and TensorFlow 1.x use `tf.keras.experimental.export_saved_model`.
-
+In TF2.x, please use `keras_model.save(..., save_format='tf')`.
 
 Suppose your SavedModels are in directories `model_A` and `model_B`.
 Then by executing the following a personalizable model will be
