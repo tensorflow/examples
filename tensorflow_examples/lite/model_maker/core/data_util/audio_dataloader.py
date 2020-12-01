@@ -104,6 +104,43 @@ class ExamplesHelper(object):
     return self._examples, labels
 
 
+def _resample_and_cut(cache_path, spec, example, label):
+  """Resample and cut the audio files into snippets."""
+
+  def _new_path(i):
+    # Note that `splitext` handles hidden files differently and here we just
+    # assume that audio files are not hidden files.
+    # os.path.splitext('/root/path/.wav') => ('/root/path/.wav', '')
+    # instead of ('/root/path/', '.wav') as this code expects.
+    filename_without_extension = os.path.splitext(os.path.basename(example))[0]
+    new_filename = filename_without_extension + '_%d.wav' % i
+    return os.path.join(cache_path, label, new_filename)
+
+  sampling_rate, xs = wavfile.read(example)
+  if xs.dtype != np.int16:
+    raise ValueError(
+        'DataLoader expects 16 bit PCM encoded WAV files, but {} has type {}'
+        .format(example, xs.dtype))
+
+  # Extract snippets.
+  n_samples_per_snippet = int(spec.snippet_duration_sec * sampling_rate)
+  begin_index = 0
+  count = 0
+  while begin_index + n_samples_per_snippet <= len(xs):
+    snippet = xs[begin_index:begin_index + n_samples_per_snippet]
+    if spec.target_sample_rate != sampling_rate:
+      # Resample, librosa.resample only works with float32.
+      # Ref: https://github.com/bmcfee/resampy/issues/44
+      snippet = snippet.astype(np.float32)
+      snippet = librosa.resample(
+          snippet, orig_sr=sampling_rate,
+          target_sr=spec.target_sample_rate).astype(np.int16)
+    wavfile.write(_new_path(count), spec.target_sample_rate, xs)
+    begin_index += n_samples_per_snippet
+    count += 1
+  return count
+
+
 class DataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for audio tasks."""
 
@@ -119,47 +156,18 @@ class DataLoader(dataloader.ClassificationDataLoader):
     """Resample and extract audio snippets in wav format under `cache_path`."""
     os.makedirs(cache_path, exist_ok=True)
 
-    def _resampled_path(file, label, i):
-      # Note that `splitext` handles hidden files differently and here we just
-      # assume that audio files are not hidden files.
-      # os.path.splitext('/root/path/.wav') => ('/root/path/.wav', '')
-      # instead of ('/root/path/', '.wav') as this code expects.
-      filename_without_extension = os.path.splitext(os.path.basename(file))[0]
-      new_filename = filename_without_extension + '_%d.wav' % i
-      return os.path.join(cache_path, label, new_filename)
-
     # List all .wav files.
     helper = ExamplesHelper(src_path, lambda s: s.endswith('.wav'))
     examples, labels = helper.examples_and_labels()
     total_samples = 0
 
+    print('Processing audio files:')
+    bar = tf.keras.utils.Progbar(len(labels), unit_name='file')
+
     for example, label in zip(examples, labels):
+      bar.add(1)
       os.makedirs(os.path.join(cache_path, label), exist_ok=True)
-
-      sampling_rate, xs = wavfile.read(example)
-      if xs.dtype != np.int16:
-        raise ValueError(
-            'DataLoader expects 16 bit PCM encoded WAV files, but {} has type {}'
-            .format(example, xs.dtype))
-
-      # Extract snippets.
-      n_samples_per_snippet = int(spec.snippet_duration_sec * sampling_rate)
-      begin_index = 0
-      i = 0
-      while begin_index + n_samples_per_snippet <= len(xs):
-        snippet = xs[begin_index:begin_index + n_samples_per_snippet]
-        if spec.target_sample_rate != sampling_rate:
-          # Resample, librosa.resample only works with float32.
-          # Ref: https://github.com/bmcfee/resampy/issues/44
-          snippet = snippet.astype(np.float32)
-          snippet = librosa.resample(
-              snippet, orig_sr=sampling_rate,
-              target_sr=spec.target_sample_rate).astype(np.int16)
-        wavfile.write(
-            _resampled_path(example, label, i), spec.target_sample_rate, xs)
-        begin_index += n_samples_per_snippet
-        total_samples += 1
-        i += 1
+      total_samples += _resample_and_cut(cache_path, spec, example, label)
 
     return total_samples
 
@@ -238,5 +246,5 @@ class DataLoader(dataloader.ClassificationDataLoader):
       cnt = cls._create_cache(spec, data_path, cache_dir)
       if cnt == 0:
         raise ValueError('No audio files found.')
-      tf.compat.v1.logging.info('Cached %d audio samples.', cnt)
+      print('Cached %d audio samples.', cnt)
     return cls._from_cache(spec, cache_dir, is_training, shuffle)
