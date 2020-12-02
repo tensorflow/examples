@@ -181,10 +181,11 @@ class DataLoader(dataloader.ClassificationDataLoader):
 
     path_ds = tf.data.Dataset.from_tensor_slices(examples)
     label_ds = tf.data.Dataset.from_tensor_slices(labels)
+    ds = tf.data.Dataset.zip((path_ds, label_ds))
     autotune = tf.data.AUTOTUNE
 
     @tf.function
-    def _load_wav(filepath):
+    def _load_wav(filepath, label):
       file_contents = tf.io.read_file(filepath)
       # shape: (target_sample_rate, None)
       wav = tf.audio.decode_wav(
@@ -195,21 +196,20 @@ class DataLoader(dataloader.ClassificationDataLoader):
       wav = tf.squeeze(wav, axis=-1)
       # shape: (1, target_sample_rate)
       wav = tf.expand_dims(wav, 0)
-      return wav
+      return wav, label
 
     @tf.function
-    def _crop(waveform):
+    def _crop(waveform, label):
       # shape: (1, expected_waveform_len)
       cropped = tf.slice(
           waveform, begin=[0, 0], size=[1, spec.expected_waveform_len])
-      return cropped
+      return cropped, label
 
-    wav_ds = path_ds.map(_load_wav, num_parallel_calls=autotune)
-    wav_ds = wav_ds.map(_crop, num_parallel_calls=autotune)
-    wav_ds = wav_ds.map(spec.preprocess, num_parallel_calls=autotune)
+    ds = ds.map(_load_wav, num_parallel_calls=autotune)
+    ds = ds.map(_crop, num_parallel_calls=autotune)
+    ds = ds.map(spec.preprocess, num_parallel_calls=autotune)
     if is_training:
-      wav_ds = wav_ds.map(spec.data_augmentation, num_parallel_calls=autotune)
-    ds = tf.data.Dataset.zip((wav_ds, label_ds))
+      ds = ds.map(spec.data_augmentation, num_parallel_calls=autotune)
 
     tf.compat.v1.logging.info('Loaded %d audio samples.', len(ds))
     return DataLoader(ds, len(ds), index_to_labels)

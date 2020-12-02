@@ -51,12 +51,14 @@ class BaseSpec(abc.ABC):
     pass
 
   # Default dummy augmentation that will be applied to train samples.
-  def data_augmentation(self, x):
-    return x
+  @tf.function
+  def data_augmentation(self, x, label):
+    return x, label
 
   # Default dummy preprocessing that will be applied to all data samples.
-  def preprocess(self, x):
-    return x
+  @tf.function
+  def preprocess(self, x, label):
+    return x, label
 
 
 def _remove_suffix_if_possible(text, suffix):
@@ -109,8 +111,9 @@ class BrowserFFTSpec(BaseSpec):
     self._preprocess_model = _load_browser_fft_preprocess_model()
     self._tfjs_sc_model = _load_tfjs_speech_command_model()
 
-  def preprocess(self, x):
-    return self._preprocess_model(x)
+  @tf.function
+  def preprocess(self, x, label):
+    return self._preprocess_model(x), label
 
   def create_model(self, num_classes):
     if num_classes <= 1:

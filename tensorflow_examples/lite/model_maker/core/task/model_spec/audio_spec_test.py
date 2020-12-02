@@ -82,7 +82,7 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     labels = tf.data.Dataset.from_tensor_slices(
         np.random.randint(low=0, high=num_classes, size=total_samples))
     dataset = tf.data.Dataset.zip((wav_ds, labels)).batch(batch_size)
-    dataset = dataset.map(lambda xs, ys: (self._spec.preprocess(xs), ys))
+    dataset = dataset.map(self._spec.preprocess)
 
     model = self._spec.create_model(num_classes)
     self._spec.run_classifier(
