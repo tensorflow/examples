@@ -98,7 +98,8 @@ class TextClassifier(classification_model.ClassificationModel):
   DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
                            ExportFormat.VOCAB)
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
-                           ExportFormat.VOCAB, ExportFormat.SAVED_MODEL)
+                           ExportFormat.VOCAB, ExportFormat.SAVED_MODEL,
+                           ExportFormat.TFJS)
 
   def __init__(self,
                model_spec,

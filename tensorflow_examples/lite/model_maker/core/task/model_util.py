@@ -23,14 +23,8 @@ import tempfile
 import numpy as np
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflowjs.converters import converter as tfjs_converter
 
-# TODO(tianlin): Conditional import only if tensorflowjs is installed, because
-# tensorflowjs requires a stable `tensorflow` package rather than `tf-nightly`.
-try:
-  from tensorflowjs.converters import converter as tfjs_converter  # pylint: disable=g-import-not-at-top
-  HAS_TFJS = True
-except ImportError as e:
-  HAS_TFJS = False
 
 DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
 
@@ -218,15 +212,13 @@ def export_tfjs(keras_or_saved_model, output_dir, **kwargs):
     output_dir: Output TF.js model dir.
     **kwargs: Other options.
   """
-  if not HAS_TFJS:
-    return
-
   # For Keras model, creates a saved model first in a temp dir. Otherwise,
   # convert directly.
   is_keras = isinstance(keras_or_saved_model, tf.keras.Model)
   with _create_temp_dir(is_keras) as temp_dir_name:
     if is_keras:
-      keras_or_saved_model.save(temp_dir_name, save_format='tf')
+      keras_or_saved_model.save(
+          temp_dir_name, include_optimizer=False, save_format='tf')
       path = temp_dir_name
     else:
       path = keras_or_saved_model
@@ -235,8 +227,6 @@ def export_tfjs(keras_or_saved_model, output_dir, **kwargs):
 
 
 def load_tfjs_keras_model(model_path):
-  if not HAS_TFJS:
-    raise ImportError('tensorflowjs is required to load this model. Please run '
-                      '`pip install tensorflowjs` to install.')
+  """Loads tfjs keras model from path."""
   return tfjs_converter.keras_tfjs_loader.load_keras_model(
       model_path, load_weights=True)

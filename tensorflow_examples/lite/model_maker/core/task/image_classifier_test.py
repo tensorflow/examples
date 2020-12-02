@@ -78,6 +78,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite_with_metadata(model)
     self._test_export_to_saved_model(model)
     self._test_export_labels(model)
+    self._test_export_to_tfjs(model)
 
   @test_util.test_in_tf_1
   def test_mobilenetv2_model_create_v1_incompatible(self):
@@ -110,6 +111,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite_quantized(model, self.train_data)
     self._test_export_to_tflite_with_metadata(
         model, expected_json_file='efficientnet_lite0_metadata.json')
+    self._test_export_to_tfjs(model)
 
   @test_util.test_in_tf_1and2
   def test_efficientnetlite0_model_without_training(self):
@@ -130,6 +132,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite(model)
     self._test_export_to_tflite_quantized(model, self.train_data)
     self._test_export_to_tflite_with_metadata(model)
+    self._test_export_to_tfjs(model)
 
   def _test_predict_top_k(self, model, threshold=0.0):
     topk = model.predict_top_k(self.test_data, batch_size=4)
@@ -216,6 +219,13 @@ class ImageClassifierTest(tf.test.TestCase):
 
     self.assertTrue(os.path.isdir(save_model_output_path))
     self.assertNotEqual(len(os.listdir(save_model_output_path)), 0)
+
+  def _test_export_to_tfjs(self, model):
+    output_path = os.path.join(self.get_temp_dir(), 'tfjs')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.TFJS)
+
+    self.assertTrue(os.path.isdir(output_path))
+    self.assertNotEqual(len(os.listdir(output_path)), 0)
 
 
 if __name__ == '__main__':

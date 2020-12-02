@@ -103,10 +103,9 @@ class ModelUtilTest(tf.test.TestCase):
 
     output_dir = os.path.join(self.get_temp_dir(), 'tfjs')
     model_util.export_tfjs(model, output_dir)
-    if model_util.HAS_TFJS:
-      self.assertTrue(os.path.exists(output_dir))
-      expected_model_json = os.path.join(output_dir, 'model.json')
-      self.assertTrue(os.path.exists(expected_model_json))
+    self.assertTrue(os.path.exists(output_dir))
+    expected_model_json = os.path.join(output_dir, 'model.json')
+    self.assertTrue(os.path.exists(expected_model_json))
 
   @test_util.test_in_tf_1and2
   def test_export_tfjs_saved_model(self):
@@ -116,12 +115,12 @@ class ModelUtilTest(tf.test.TestCase):
 
     saved_model_dir = os.path.join(self.get_temp_dir(), 'saved_model_for_js')
     model.save(saved_model_dir)
+
     output_dir = os.path.join(self.get_temp_dir(), 'tfjs')
     model_util.export_tfjs(saved_model_dir, output_dir)
-    if model_util.HAS_TFJS:
-      self.assertTrue(os.path.exists(output_dir))
-      expected_model_json = os.path.join(output_dir, 'model.json')
-      self.assertTrue(os.path.exists(expected_model_json))
+    self.assertTrue(os.path.exists(output_dir))
+    expected_model_json = os.path.join(output_dir, 'model.json')
+    self.assertTrue(os.path.exists(expected_model_json))
 
 
 if __name__ == '__main__':

@@ -104,6 +104,16 @@ class TextClassifierTest(tf.test.TestCase):
     self._test_export_to_tflite_quant(model)
 
   @test_util.test_in_tf_2
+  def test_mobilebert_model_without_training_for_tfjs(self):
+    model_spec = ms.mobilebert_classifier_spec(
+        seq_len=2, trainable=False, default_batch_size=1)
+    all_data = text_dataloader.TextClassifierDataLoader.from_folder(
+        self.text_dir, model_spec=model_spec)
+    self.train_data, self.test_data = all_data.split(0.5)
+    with self.assertRaises(Exception):  # Raise an error when reloading model.
+      self._test_model_without_training(model_spec)
+
+  @test_util.test_in_tf_2
   def test_average_wordvec_model(self):
     model_spec = ms.AverageWordVecModelSpec(seq_len=2)
     all_data = text_dataloader.TextClassifierDataLoader.from_folder(
@@ -134,6 +144,7 @@ class TextClassifierTest(tf.test.TestCase):
         self.train_data, model_spec=model_spec, do_train=False)
     self._test_accuracy(model, threshold=0.0)
     self._test_export_to_tflite(model, threshold=0.0)
+    self._test_export_to_tfjs(model)
 
   def _test_accuracy(self, model, threshold=1.0):
     _, accuracy = model.evaluate(self.test_data)
@@ -227,6 +238,13 @@ class TextClassifierTest(tf.test.TestCase):
 
     self.assertTrue(os.path.isdir(save_model_output_path))
     self.assertNotEmpty(os.listdir(save_model_output_path))
+
+  def _test_export_to_tfjs(self, model):
+    output_path = os.path.join(self.get_temp_dir(), 'tfjs')
+    model.export(self.get_temp_dir(), export_format=ExportFormat.TFJS)
+
+    self.assertTrue(os.path.isdir(output_path))
+    self.assertNotEmpty(os.listdir(output_path))
 
   def _test_export_to_tflite_quant(self, model):
     tflite_filename = 'model_quant.tflite'

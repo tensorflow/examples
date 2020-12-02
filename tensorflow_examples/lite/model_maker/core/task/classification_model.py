@@ -31,7 +31,7 @@ class ClassificationModel(custom_model.CustomModel):
 
   DEFAULT_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL)
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.LABEL,
-                           ExportFormat.SAVED_MODEL)
+                           ExportFormat.SAVED_MODEL, ExportFormat.TFJS)
 
   def __init__(self, model_spec, index_to_label, shuffle, train_whole_model):
     """Initialize a instance with data, deploy mode and other related parameters.

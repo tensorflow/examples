@@ -128,6 +128,7 @@ class CustomModel(abc.ABC):
              label_filename='labels.txt',
              vocab_filename='vocab',
              saved_model_filename='saved_model',
+             tfjs_folder_name='tfjs',
              export_format=None,
              **kwargs):
     """Converts the retrained model based on `export_format`.
@@ -138,11 +139,13 @@ class CustomModel(abc.ABC):
         {export_dir}/{tflite_filename}.
       label_filename: File name to save labels. The full export path is
         {export_dir}/{label_filename}.
-      vocab_filename: File name to save vocabulary.  The full export path is
+      vocab_filename: File name to save vocabulary. The full export path is
         {export_dir}/{vocab_filename}.
       saved_model_filename: Path to SavedModel or H5 file to save the model. The
         full export path is
         {export_dir}/{saved_model_filename}/{saved_model.pb|assets|variables}.
+      tfjs_folder_name: Folder name to save tfjs model. The full export path is
+        {export_dir}/{tfjs_folder_name}.
       export_format: List of export format that could be saved_model, tflite,
         label, vocab.
       **kwargs: Other parameters like `quantized` for TFLITE model.
@@ -168,7 +171,8 @@ class CustomModel(abc.ABC):
                                **export_saved_model_kwargs)
 
     if ExportFormat.TFJS in export_format:
-      self._export_tfjs(export_dir)
+      tfjs_output_path = os.path.join(export_dir, tfjs_folder_name)
+      self._export_tfjs(tfjs_output_path)
 
     if ExportFormat.VOCAB in export_format:
       if with_metadata:
