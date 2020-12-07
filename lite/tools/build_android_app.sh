@@ -25,7 +25,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
 
 # Keep a list of android apps which should be excluded from the CI builds.
+# TODO(b/174960787): fix image_segmentation build
 SKIPPED_BUILDS="
+image_segmentation/android
 "
 
 function build_android_example {
