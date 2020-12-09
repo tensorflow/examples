@@ -78,12 +78,13 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     np.random.seed(seed)
 
     wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
-    wav_ds = wav_ds.map(fill_shape([self._spec.expected_waveform_len]))
+    wav_ds = wav_ds.map(fill_shape([1, self._spec.expected_waveform_len]))
 
     labels = tf.data.Dataset.from_tensor_slices(
         np.random.randint(low=0, high=num_classes, size=total_samples))
-    dataset = tf.data.Dataset.zip((wav_ds, labels)).batch(batch_size)
+    dataset = tf.data.Dataset.zip((wav_ds, labels))
     dataset = dataset.map(self._spec.preprocess)
+    dataset = dataset.batch(batch_size)
 
     model = self._spec.create_model(num_classes)
     self._spec.run_classifier(

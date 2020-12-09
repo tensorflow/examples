@@ -110,10 +110,11 @@ class BrowserFFTSpec(BaseSpec):
     super(BrowserFFTSpec, self).__init__(model_dir, strategy)
     self._preprocess_model = _load_browser_fft_preprocess_model()
     self._tfjs_sc_model = _load_tfjs_speech_command_model()
+    self.expected_waveform_len = self._preprocess_model.input_shape[-1]
 
   @tf.function
   def preprocess(self, x, label):
-    return self._preprocess_model(x), label
+    return tf.squeeze(self._preprocess_model(x), axis=0), label
 
   def create_model(self, num_classes):
     if num_classes <= 1:
