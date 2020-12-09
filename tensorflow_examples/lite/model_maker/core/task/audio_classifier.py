@@ -20,6 +20,7 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
+from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
@@ -61,9 +62,10 @@ def create(train_data,
 class AudioClassifier(classification_model.ClassificationModel):
   """Audio classifier for training/inference and exporing."""
 
-  # TODO(b/171848856): Add TFLite/TFJS export.
-  DEFAULT_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.SAVED_MODEL)
-  ALLOWED_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.SAVED_MODEL)
+  # TODO(b/171848856): Add TFJS export.
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.TFLITE)
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.TFLITE,
+                           ExportFormat.SAVED_MODEL)
 
   def _get_dataset_and_steps(self, data, batch_size, is_training):
     if not data:
@@ -98,3 +100,16 @@ class AudioClassifier(classification_model.ClassificationModel):
           validation_ds,
           validation_steps,
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
+
+  def _export_tflite(self, tflite_filepath, quantization_config=None):
+    """Converts the retrained model to tflite format and saves it.
+
+    Args:
+      tflite_filepath: File path to save tflite model.
+      quantization_config: Configuration for post-training quantization.
+    """
+    # Allow model_spec to override this method.
+    fn = getattr(self.model_spec, 'export_tflite', None)
+    if not callable(fn):
+      fn = model_util.export_tflite
+    fn(self.model, tflite_filepath, quantization_config)

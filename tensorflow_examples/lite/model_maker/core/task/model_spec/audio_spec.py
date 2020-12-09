@@ -145,3 +145,27 @@ class BrowserFFTSpec(BaseSpec):
         epochs=epochs,
         **kwargs)
     return hist
+
+  def export_tflite(self, model, tflite_filepath, quantization_config=None):
+    """Converts the retrained model to tflite format and saves it.
+
+    This method overrides the default `CustomModel._export_tflite` method, and
+    include the pre-processing in the exported TFLite library since support
+    library can't handle audio tasks yet.
+
+    Args:
+      model: An instance of the keras classification model to be exported.
+      tflite_filepath: File path to save tflite model.
+      quantization_config: Configuration for post-training quantization.
+    """
+    combined = tf.keras.Sequential()
+    combined.add(self._preprocess_model)
+    combined.add(model)
+    # Set expected input shape with batch = 1
+    combined.build([1, self.expected_waveform_len])
+    model_util.export_tflite(
+        combined,
+        tflite_filepath,
+        quantization_config,
+        supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,
+                       tf.lite.OpsSet.SELECT_TF_OPS))

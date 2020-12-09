@@ -54,10 +54,19 @@ class AudioClassifierTest(tf.test.TestCase):
     self.assertGreater(acc, .5)
 
     # Export the model to saved model.
-    saved_model_output_path = os.path.join(spec.model_dir, 'saved_model')
+    output_path = os.path.join(spec.model_dir, 'saved_model')
     task.export(spec.model_dir, export_format=ExportFormat.SAVED_MODEL)
-    self.assertTrue(os.path.isdir(saved_model_output_path))
-    self.assertNotEqual(len(os.listdir(saved_model_output_path)), 0)
+    self.assertTrue(os.path.isdir(output_path))
+    self.assertNotEqual(len(os.listdir(output_path)), 0)
+
+    # Export the model to TFLite.
+    output_path = os.path.join(spec.model_dir, 'float.tflite')
+    task.export(
+        spec.model_dir,
+        tflite_filename='float.tflite',
+        export_format=ExportFormat.TFLITE)
+    self.assertTrue(tf.io.gfile.exists(output_path))
+    self.assertGreater(os.path.getsize(output_path), 0)
 
 
 if __name__ == '__main__':

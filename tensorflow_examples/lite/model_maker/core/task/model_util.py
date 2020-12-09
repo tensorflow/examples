@@ -57,7 +57,8 @@ def export_tflite(model,
                   tflite_filepath,
                   quantization_config=None,
                   convert_from_saved_model_tf2=False,
-                  preprocess=None):
+                  preprocess=None,
+                  supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,)):
   """Converts the retrained model to tflite format and saves it.
 
   Args:
@@ -67,6 +68,7 @@ def export_tflite(model,
     convert_from_saved_model_tf2: Convert to TFLite from saved_model in TF 2.x.
     preprocess: A preprocess function to apply on the dataset.
         # TODO(wangtz): Remove when preprocess is split off from CustomModel.
+    supported_ops: A list of supported ops in the converted TFLite file.
   """
   if tflite_filepath is None:
     raise ValueError(
@@ -91,6 +93,7 @@ def export_tflite(model,
       converter = quantization_config.get_converter_with_quantization(
           converter, preprocess)
 
+    converter.target_spec.supported_ops = supported_ops
     tflite_model = converter.convert()
 
   with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
