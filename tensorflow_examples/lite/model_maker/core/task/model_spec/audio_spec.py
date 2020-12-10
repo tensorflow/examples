@@ -161,11 +161,18 @@ class BrowserFFTSpec(BaseSpec):
     combined = tf.keras.Sequential()
     combined.add(self._preprocess_model)
     combined.add(model)
-    # Set expected input shape with batch = 1
-    combined.build([1, self.expected_waveform_len])
+    # Build the model.
+    combined.build([None, self.expected_waveform_len])
+
+    # Sets batch size from None to 1 when converting to tflite.
+    model_util.set_batch_size(model, batch_size=1)
+
     model_util.export_tflite(
         combined,
         tflite_filepath,
         quantization_config,
         supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,
                        tf.lite.OpsSet.SELECT_TF_OPS))
+
+    # Sets batch size back to None to support retraining later.
+    model_util.set_batch_size(model, batch_size=None)

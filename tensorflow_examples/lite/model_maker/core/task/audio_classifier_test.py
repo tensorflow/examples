@@ -36,7 +36,9 @@ class AudioClassifierTest(tf.test.TestCase):
       return np.random.rand(*shape) * (1 << 15)
 
     np.random.seed(123)
+    tf.random.set_seed(123)
 
+    # Prepare data.
     spec = audio_spec.BrowserFFTSpec()
     dataset_shape = (1, spec.expected_waveform_len)
     sounds = [pcm(dataset_shape) for category in range(2)]
@@ -44,11 +46,15 @@ class AudioClassifierTest(tf.test.TestCase):
     index_to_labels = ['sound1', 'sound2']
     ds = tf.data.Dataset.zip((tf.data.Dataset.from_tensor_slices(sounds),
                               tf.data.Dataset.from_tensor_slices(labels)))
-    ds = ds.map(spec.preprocess)
-    data_loader = audio_dataloader.DataLoader(ds, len(ds), index_to_labels)
+    preprocessed_ds = ds.map(spec.preprocess)
+    data_loader = audio_dataloader.DataLoader(preprocessed_ds,
+                                              len(preprocessed_ds),
+                                              index_to_labels)
 
-    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=100)
+    # Train a floating point model.
+    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=50)
 
+    # Evaluate trained model
     _, acc = task.evaluate(data_loader)
     # Better than random guessing.
     self.assertGreater(acc, .5)
@@ -67,6 +73,19 @@ class AudioClassifierTest(tf.test.TestCase):
         export_format=ExportFormat.TFLITE)
     self.assertTrue(tf.io.gfile.exists(output_path))
     self.assertGreater(os.path.getsize(output_path), 0)
+
+    # Evaluate accurarcy on TFLite model.
+
+    # Create a new dataset without preprocessing since preprocessing has been
+    # packaged inside TFLite model.
+    squeezed_ds = ds.map(lambda x, y: (tf.squeeze(tf.cast(x, tf.float32)), y))
+    tflite_dataloader = audio_dataloader.DataLoader(squeezed_ds,
+                                                    len(squeezed_ds),
+                                                    index_to_labels)
+
+    # Evaluate accurarcy on float model.
+    result = task.evaluate_tflite(output_path, tflite_dataloader)
+    self.assertGreater(result['accuracy'], .5)
 
 
 if __name__ == '__main__':
