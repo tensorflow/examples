@@ -18,6 +18,8 @@ These instructions walk you through running the demo on an Android device.
     the instructions on the website.
 
 *   Android Studio 3.2 or later.
+    - Gradle 4.6 or higher.
+    - SDK Build Tools 28.0.3 or higher.
 
 *   You need an Android device or Android emulator and Android development
     environment with minimum API 15.
