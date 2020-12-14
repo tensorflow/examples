@@ -15,7 +15,9 @@
 
 import inspect
 
+
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
+from tensorflow_examples.lite.model_maker.core.task.model_spec import recommendation_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite0_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite1_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite2_spec
@@ -61,6 +63,11 @@ MODEL_SPECS = {
 
     # Audio classification
     'audio_browser_fft': audio_spec.BrowserFFTSpec,
+
+    # Recommendation
+    'recommendation_bow': recommendation_spec.recommendation_bow_spec,
+    'recommendation_cnn': recommendation_spec.recommendation_cnn_spec,
+    'recommendation_rnn': recommendation_spec.recommendation_rnn_spec,
 }
 
 # List constants for supported models.
@@ -73,6 +80,11 @@ TEXT_CLASSIFICATION_MODELS = [
 ]
 QUESTION_ANSWERING_MODELS = ['bert_qa', 'mobilebert_qa', 'mobilebert_qa_squad']
 AUDIO_CLASSIFICATION_MODELS = ['audio_browser_fft']
+RECOMMENDATION_MODELS = [
+    'recommendation_bow',
+    'recommendation_rnn',
+    'recommendation_cnn',
+]
 
 
 def get(spec_or_str):

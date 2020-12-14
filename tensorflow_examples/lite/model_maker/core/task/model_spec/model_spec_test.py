@@ -18,12 +18,18 @@ from __future__ import print_function
 
 import os
 
+from absl.testing import parameterized
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
+MODELS = (
+    ms.IMAGE_CLASSIFICATION_MODELS + ms.TEXT_CLASSIFICATION_MODELS +
+    ms.QUESTION_ANSWERING_MODELS + ms.AUDIO_CLASSIFICATION_MODELS +
+    ms.RECOMMENDATION_MODELS)
 
-class ModelSpecTest(tf.test.TestCase):
+
+class ModelSpecTest(tf.test.TestCase, parameterized.TestCase):
 
   def test_get(self):
     spec = ms.get('mobilenet_v2')
@@ -35,6 +41,12 @@ class ModelSpecTest(tf.test.TestCase):
     spec = ms.get(ms.mobilenet_v2_spec)
     self.assertIsInstance(spec, ms.ImageModelSpec)
 
+  @parameterized.parameters(MODELS)
+  def test_get_not_none(self, model):
+    spec = ms.get(model)
+    self.assertIsNotNone(spec)
+
+  def test_get_raises(self):
     with self.assertRaises(KeyError):
       ms.get('not_exist_model_spec')
 

@@ -30,35 +30,38 @@ from model import utils
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string('training_data_filepattern', None,
-                    'File pattern of the training data.')
-flags.DEFINE_string('testing_data_filepattern', None,
-                    'File pattern of the training data.')
-flags.DEFINE_string('model_dir', None, 'Directory to store checkpoints.')
-flags.DEFINE_string(
-    'params_path', None,
-    'Path to the json file containing params needed to run '
-    'p13n recommendation model.')
-flags.DEFINE_integer('batch_size', 1, 'Training batch size.')
-flags.DEFINE_float('learning_rate', 0.1, 'Learning rate.')
-flags.DEFINE_integer('steps_per_epoch', 10,
-                     'Number of steps to run in each epoch.')
-flags.DEFINE_integer('num_epochs', 10000, 'Number of training epochs.')
-flags.DEFINE_integer('num_eval_steps', 1000, 'Number of eval steps.')
-flags.DEFINE_enum('run_mode', 'train_and_eval', ['train_and_eval', 'export'],
-                  'Mode of the launcher, default value is: train_and_eval')
-flags.DEFINE_float('gradient_clip_norm', 1.0,
-                   'gradient_clip_norm <= 0 meaning no clip.')
-flags.DEFINE_integer('max_history_length', 10, 'Max length of user history.')
-flags.DEFINE_integer('num_predictions', 100,
-                     'Num of top predictions to output.')
-flags.DEFINE_string(
-    'encoder_type', 'bow', 'Type of the encoder for context'
-    'encoding, the value could be ["bow", "rnn", "cnn"].')
-flags.DEFINE_string('checkpoint_path', '', 'Path to the checkpoint.')
-
 CONTEXT = 'context'
 LABEL = 'label'
+
+
+def define_flags():
+  """Define flags."""
+  flags.DEFINE_string('training_data_filepattern', None,
+                      'File pattern of the training data.')
+  flags.DEFINE_string('testing_data_filepattern', None,
+                      'File pattern of the training data.')
+  flags.DEFINE_string('model_dir', None, 'Directory to store checkpoints.')
+  flags.DEFINE_string(
+      'params_path', None,
+      'Path to the json file containing params needed to run '
+      'p13n recommendation model.')
+  flags.DEFINE_integer('batch_size', 1, 'Training batch size.')
+  flags.DEFINE_float('learning_rate', 0.1, 'Learning rate.')
+  flags.DEFINE_integer('steps_per_epoch', 10,
+                       'Number of steps to run in each epoch.')
+  flags.DEFINE_integer('num_epochs', 10000, 'Number of training epochs.')
+  flags.DEFINE_integer('num_eval_steps', 1000, 'Number of eval steps.')
+  flags.DEFINE_enum('run_mode', 'train_and_eval', ['train_and_eval', 'export'],
+                    'Mode of the launcher, default value is: train_and_eval')
+  flags.DEFINE_float('gradient_clip_norm', 1.0,
+                     'gradient_clip_norm <= 0 meaning no clip.')
+  flags.DEFINE_integer('max_history_length', 10, 'Max length of user history.')
+  flags.DEFINE_integer('num_predictions', 100,
+                       'Num of top predictions to output.')
+  flags.DEFINE_string(
+      'encoder_type', 'bow', 'Type of the encoder for context'
+      'encoding, the value could be ["bow", "rnn", "cnn"].')
+  flags.DEFINE_string('checkpoint_path', '', 'Path to the checkpoint.')
 
 
 class SimpleCheckpoint(tf.keras.callbacks.Callback):
@@ -250,4 +253,5 @@ def main(_):
 
 
 if __name__ == '__main__':
+  define_flags()
   app.run(main)
