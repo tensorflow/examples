@@ -73,12 +73,15 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
     FLAGS.encoder_type = 'cnn'
     FLAGS.num_predictions = 10
     FLAGS.max_history_length = 10
+    FLAGS.batch_size = 1
 
   def testModelFnTrainModeExecute(self):
     """Verifies that 'model_fn' can be executed in train and eval mode."""
     self.params['encoder_type'] = FLAGS.encoder_type
-    train_input_fn = launcher.get_input_fn(FLAGS.training_data_filepattern)
-    eval_input_fn = launcher.get_input_fn(FLAGS.testing_data_filepattern)
+    train_input_fn = launcher.get_input_fn(FLAGS.training_data_filepattern,
+                                           FLAGS.batch_size)
+    eval_input_fn = launcher.get_input_fn(FLAGS.testing_data_filepattern,
+                                          FLAGS.batch_size)
     model = launcher.build_keras_model(params=self.params)
     launcher.train_and_eval(
         model=model,
@@ -96,8 +99,10 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
     """Verifies model can be exported to savedmodel and tflite model."""
     self.params['encoder_type'] = FLAGS.encoder_type
     self.params['num_predictions'] = FLAGS.num_predictions
-    train_input_fn = launcher.get_input_fn(FLAGS.training_data_filepattern)
-    eval_input_fn = launcher.get_input_fn(FLAGS.testing_data_filepattern)
+    train_input_fn = launcher.get_input_fn(FLAGS.training_data_filepattern,
+                                           FLAGS.batch_size)
+    eval_input_fn = launcher.get_input_fn(FLAGS.testing_data_filepattern,
+                                          FLAGS.batch_size)
     model = launcher.build_keras_model(params=self.params)
     launcher.train_and_eval(
         model=model,
@@ -142,4 +147,5 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
+  launcher.define_flags()
   tf.test.main()

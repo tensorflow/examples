@@ -76,7 +76,7 @@ class SimpleCheckpoint(tf.keras.callbacks.Callback):
     self.checkpoint_manager.save(checkpoint_number=step_counter)
 
 
-def get_input_fn(data_filepattern):
+def get_input_fn(data_filepattern, batch_size):
   """Get input_fn for recommendation model estimator."""
 
   def decode_example(serialized_proto):
@@ -112,7 +112,7 @@ def get_input_fn(data_filepattern):
     d = d.repeat()
     d = d.shuffle(buffer_size=100)
     d = d.map(decode_example)
-    d = d.batch(FLAGS.batch_size, drop_remainder=True)
+    d = d.batch(batch_size, drop_remainder=True)
     d = d.prefetch(1)
     return d
 
@@ -226,8 +226,9 @@ def main(_):
   params['num_predictions'] = FLAGS.num_predictions
 
   logger.info('Setting up train and eval input_fns.')
-  train_input_fn = get_input_fn(FLAGS.training_data_filepattern)
-  eval_input_fn = get_input_fn(FLAGS.testing_data_filepattern)
+  train_input_fn = get_input_fn(FLAGS.training_data_filepattern,
+                                FLAGS.batch_size)
+  eval_input_fn = get_input_fn(FLAGS.testing_data_filepattern, FLAGS.batch_size)
 
   logger.info('Build keras model for mode: {}.'.format(FLAGS.run_mode))
   model = build_keras_model(params=params)
