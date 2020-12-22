@@ -23,5 +23,12 @@ import tensorflow as tf
 
 
 def load_json_file(json_file):
+  """Loads json data from file."""
   with tf.io.gfile.GFile(json_file, 'r') as reader:
     return json.load(reader)
+
+
+def write_json_file(json_file, data):
+  """Writes json data into file."""
+  with tf.io.gfile.GFile(json_file, 'w') as f:
+    json.dump(data, f)

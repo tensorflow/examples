@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import csv
 import hashlib
-import json
 import os
 import random
 import tempfile
@@ -67,12 +66,6 @@ def _get_cache_filenames(cache_dir, model_spec, data_name, is_training):
   cache_meta_data_file = cache_prefix + '_meta_data'
 
   return cache_tfrecord_file, cache_meta_data_file, cache_prefix
-
-
-def _write_meta_data(meta_data_file, meta_data):
-  """Writes meta data into file."""
-  with tf.io.gfile.GFile(meta_data_file, 'w') as f:
-    json.dump(meta_data, f)
 
 
 def _get_cache_info(cache_dir, data_name, model_spec, is_training):
@@ -259,7 +252,7 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
         'num_classes': len(label_names),
         'index_to_label': label_names
     }
-    _write_meta_data(meta_data_file, meta_data)
+    file_util.write_json_file(meta_data_file, meta_data)
 
   @classmethod
   def _get_cache_info(cls, cache_dir, data_name, model_spec, is_training):
@@ -337,7 +330,7 @@ class QuestionAnswerDataLoader(dataloader.DataLoader):
         filename, model_spec, tfrecord_file, is_training,
         version_2_with_negative)
 
-    _write_meta_data(meta_data_file, meta_data)
+    file_util.write_json_file(meta_data_file, meta_data)
 
     dataset, meta_data = _load(tfrecord_file, meta_data_file, model_spec,
                                is_training)
