@@ -11,3 +11,5 @@ urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1
 tflite-support-nightly
 tf-nightly
 librosa>=0.5
+lxml>=4.6.1
+PyYAML>=5.1

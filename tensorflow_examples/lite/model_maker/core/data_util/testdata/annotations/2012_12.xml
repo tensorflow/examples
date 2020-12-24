@@ -1,0 +1,20 @@
+<annotation>
+  <folder></folder>
+  <filename>2012_12.jpg</filename>
+  <size>
+    <width>256</width>
+    <height>256</height>
+  </size>
+  <object>
+    <difficult>1</difficult>
+    <bndbox>
+      <xmin>64</xmin>
+      <ymin>64</ymin>
+      <xmax>192</xmax>
+      <ymax>192</ymax>
+    </bndbox>
+    <name>person</name>
+    <truncated>0</truncated>
+    <pose></pose>
+  </object>
+</annotation>
