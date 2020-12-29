@@ -58,13 +58,13 @@ classifiers = [
 
 if nightly:
   project_name = '{}-nightly'.format(project_name)
-  version = '0.2.4'  # Version prefix, usually major.minor.micro.
+  version = '0.2.5'  # Version prefix, usually major.minor.micro.
   version = '{:s}.dev{:s}'.format(version, datestring)
   classifiers += [
       'Development Status :: 4 - Beta',
   ]
 else:
-  version = '0.2.3'
+  version = '0.2.4'
 
 # Path to folder model_maker.
 BASE_DIR = pathlib.Path(os.path.abspath(__file__)).parents[1]
