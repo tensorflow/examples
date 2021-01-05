@@ -81,14 +81,26 @@ with BASE_DIR.joinpath('README.md').open() as readme_file:
   LONG_DESCRIPTION = readme_file.read()
 
 
-def get_required_packages():
-  """Gets packages inside requirements.txt."""
-  filename = 'requirements_nightly.txt' if nightly else 'requirements.txt'
-  with BASE_DIR.joinpath(filename).open() as f:
+def _read_required_packages(fpath):
+  with fpath.open() as f:
     required_pkgs = [l.strip() for l in f.read().splitlines()]
     required_pkgs = list(
         filter(lambda line: line and not line.startswith('#'), required_pkgs))
-    return required_pkgs
+  return required_pkgs
+
+
+def get_required_packages():
+  """Gets packages inside requirements.txt."""
+  # Gets third party's required packages.
+  fpath = BASE_DIR.joinpath('third_party', 'efficientdet', 'requirements.txt')
+  required_pkgs = _read_required_packages(fpath)
+
+  # Gets model maker's required packages
+  filename = 'requirements_nightly.txt' if nightly else 'requirements.txt'
+  fpath = BASE_DIR.joinpath(filename)
+  required_pkgs += _read_required_packages(fpath)
+
+  return required_pkgs
 
 
 def _ensure_dir_created(dirpath):
