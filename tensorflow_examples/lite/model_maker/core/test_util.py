@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import functools
 import os
+import shutil
 
 from absl import flags
 import numpy as np
@@ -47,6 +48,21 @@ def get_test_data_path(file_or_dirname):
       if f.endswith(file_or_dirname):
         return os.path.join(directory, f)
   raise ValueError("No %s in test directory" % file_or_dirname)
+
+
+def get_cache_dir(temp_dir, filename):
+  """Gets `cache_dir` for `tf.keras.utils.get_file` function."""
+  # Copies SST-2.zip in testdata folder to a temp folder since
+  # `tf.keras.utils.get_file` needed writability of the path.
+  try:
+    src_path = get_test_data_path(filename)
+    dest_path = os.path.join(temp_dir, "datasets")
+    if not tf.io.gfile.exists(dest_path):
+      tf.io.gfile.mkdir(dest_path)
+    shutil.copy2(src_path, dest_path)
+    return temp_dir
+  except ValueError:  # There's no testdata.
+    return None
 
 
 def test_in_tf_1(fn):

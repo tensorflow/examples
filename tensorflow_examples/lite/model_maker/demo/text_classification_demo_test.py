@@ -27,10 +27,6 @@ from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import 
 from tensorflow_examples.lite.model_maker.demo import text_classification_demo
 
 
-def get_cache_dir():
-  return os.path.join(test_util.get_test_data_path('demo'), 'testdata')
-
-
 from_csv_fn = TextClassifierDataLoader.from_csv
 
 
@@ -57,7 +53,7 @@ class TextClassificationDemoTest(tf.test.TestCase):
       with tempfile.TemporaryDirectory() as temp_dir:
         # Use cached training data if exists.
         data_dir = text_classification_demo.download_demo_data(
-            cache_dir=get_cache_dir(),
+            cache_dir=test_util.get_cache_dir(temp_dir, 'SST-2.zip'),
             file_hash='9f81648d4199384278b86e315dac217c')
 
         tflite_filename = os.path.join(temp_dir, 'model.tflite')

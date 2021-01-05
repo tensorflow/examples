@@ -41,7 +41,7 @@ def download_demo_data(**kwargs):
   """Downloads demo data, and returns directory path."""
   data_path = tf.keras.utils.get_file(
       fname='SST-2.zip',
-      origin='https://firebasestorage.googleapis.com/v0/b/mtl-sentence-representations.appspot.com/o/data%2FSST-2.zip?alt=media&token=aabc5f6b-e466-44a2-b9b4-cf6337f84ac8',
+      origin='https://dl.fbaipublicfiles.com/glue/data/SST-2.zip',
       extract=True,
       **kwargs)
   return os.path.join(os.path.dirname(data_path), 'SST-2')  # folder name
