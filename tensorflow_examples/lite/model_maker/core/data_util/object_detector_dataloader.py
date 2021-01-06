@@ -28,16 +28,10 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 import yaml
 
-HAS_OBJECT_DETECTION = True
-try:
-  # pylint: disable=g-import-not-at-top
-  from efficientdet import dataloader as det_dataloader
-  from efficientdet.dataset import create_pascal_tfrecord
-  from efficientdet.dataset import tfrecord_util
-  from efficientdet.keras import label_util
-  # pylint: enable=g-import-not-at-top
-except ImportError:
-  HAS_OBJECT_DETECTION = False
+from tensorflow_examples.lite.model_maker.third_party.efficientdet import dataloader as det_dataloader
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset import create_pascal_tfrecord
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset import tfrecord_util
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 
 
 def _get_cache_prefix(image_dir, annotations_dir, annotations_list):
@@ -130,8 +124,6 @@ class DataLoader(dataloader.DataLoader):
         https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5
           for the description of COCO data format.
     """
-    if not HAS_OBJECT_DETECTION:
-      raise NotImplementedError("Haven't support object detection yet.")
     super(DataLoader, self).__init__(dataset=None, size=size)
     self.tfrecord_file_patten = tfrecord_file_patten
     self.label_map = _get_label_map(label_map)
