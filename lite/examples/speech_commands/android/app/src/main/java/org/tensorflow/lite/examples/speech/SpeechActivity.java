@@ -102,6 +102,7 @@ public class SpeechActivity extends Activity
   boolean shouldContinueRecognition = true;
   private Thread recognitionThread;
   private final ReentrantLock recordingBufferLock = new ReentrantLock();
+  private final ReentrantLock tfLiteLock = new ReentrantLock();
 
   private List<String> labels = new ArrayList<String>();
   private List<String> displayedLabels = new ArrayList<>();
@@ -184,13 +185,10 @@ public class SpeechActivity extends Activity
     String actualModelFilename = MODEL_FILENAME.split("file:///android_asset/", -1)[1];
     try {
       tfLiteModel = loadModelFile(getAssets(), actualModelFilename);
-      tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
+      recreateInterpreter();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
-    tfLite.resizeInput(0, new int[] {RECORDING_LENGTH, 1});
-    tfLite.resizeInput(1, new int[] {1});
 
     // Start the recording and recognition threads.
     requestMicrophonePermission();
@@ -426,7 +424,12 @@ public class SpeechActivity extends Activity
       outputMap.put(0, outputScores);
 
       // Run the model.
-      tfLite.runForMultipleInputsOutputs(inputArray, outputMap);
+      tfLiteLock.lock();
+      try {
+        tfLite.runForMultipleInputsOutputs(inputArray, outputMap);
+      } finally {
+        tfLiteLock.unlock();
+      }
 
       // Use the smoother to figure out if we've had a real recognition event.
       long currentTime = System.currentTimeMillis();
@@ -555,8 +558,18 @@ public class SpeechActivity extends Activity
   }
 
   private void recreateInterpreter() {
-    tfLite.close();
-    tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
+    tfLiteLock.lock();
+    try {
+      if (tfLite != null) {
+        tfLite.close();
+        tfLite = null;
+      }
+      tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
+      tfLite.resizeInput(0, new int[] {RECORDING_LENGTH, 1});
+      tfLite.resizeInput(1, new int[] {1});
+    } finally {
+      tfLiteLock.unlock();
+    }
   }
 
   private void startBackgroundThread() {
