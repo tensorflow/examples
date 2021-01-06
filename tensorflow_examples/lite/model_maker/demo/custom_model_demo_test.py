@@ -21,12 +21,7 @@ import tempfile
 
 import tensorflow as tf
 
-from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.demo import custom_model_demo
-
-
-def get_cache_dir():
-  return os.path.join(test_util.get_test_data_path('demo'), 'testdata')
 
 
 class DemoTest(tf.test.TestCase):
