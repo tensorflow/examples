@@ -205,14 +205,36 @@ class DataLoader(dataloader.ClassificationDataLoader):
           waveform, begin=[0, 0], size=[1, spec.expected_waveform_len])
       return cropped, label
 
+    @tf.function
+    def _elements_finite(preprocess_data, unused_label):
+      # Make sure that the data sent to the model does not contain nan or inf
+      # values. This should be the last filter applied to the dataset.
+      # Arguably we could possibly apply this filter to all tasks.
+      return tf.math.reduce_all(tf.math.is_finite(preprocess_data))
+
+    ds_max_len = len(ds)
+
     ds = ds.map(_load_wav, num_parallel_calls=autotune)
     ds = ds.map(_crop, num_parallel_calls=autotune)
     ds = ds.map(spec.preprocess, num_parallel_calls=autotune)
     if is_training:
       ds = ds.map(spec.data_augmentation, num_parallel_calls=autotune)
 
-    tf.compat.v1.logging.info('Loaded %d audio samples.', len(ds))
-    return DataLoader(ds, len(ds), index_to_labels)
+    # Filter out examples with nan or inf values. Without this filter, training
+    # might not work with loss = nan on some dataset.
+    # But having this filter means that we're not able to get the dataset length
+    # accurately. This will impact the behavior of `split` method and cause
+    # the eval (and test) dataset to have less element than expected.
+    # As long as the train and eval dataset is not empty, this should not be an
+    # issue for training/evaluate. The `steps_per_epoch` and `validation_steps`
+    # parameter in Keras is only a reference value. The training/evaluate loop
+    # will break early once the datasest is exhausted.
+    # TODO(b/171848856): If we run preprocessing while creating the cache, we
+    # won't need this filter during training time.
+    ds = ds.filter(_elements_finite)
+
+    tf.compat.v1.logging.info('Loaded %d audio samples.', ds_max_len)
+    return DataLoader(ds, ds_max_len, index_to_labels)
 
   @classmethod
   def from_folder(cls, spec, data_path, is_training=True, shuffle=True):
