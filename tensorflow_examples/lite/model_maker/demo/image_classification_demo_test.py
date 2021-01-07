@@ -27,10 +27,6 @@ from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import
 from tensorflow_examples.lite.model_maker.demo import image_classification_demo
 
 
-def get_cache_dir():
-  return os.path.join(test_util.get_test_data_path('demo'), 'testdata')
-
-
 from_folder_fn = ImageClassifierDataLoader.from_folder
 
 
@@ -57,7 +53,7 @@ class ImageClassificationDemoTest(tf.test.TestCase):
       with tempfile.TemporaryDirectory() as temp_dir:
         # Use cached training data if exists.
         data_dir = image_classification_demo.download_demo_data(
-            cache_dir=get_cache_dir(),
+            cache_dir=test_util.get_cache_dir(temp_dir, 'flower_photos.tgz'),
             file_hash='6f87fb78e9cc9ab41eff2015b380011d')
 
         tflite_filename = os.path.join(temp_dir, 'model.tflite')

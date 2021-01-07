@@ -42,9 +42,9 @@ def download_demo_data(**kwargs):
   data_dir = tf.keras.utils.get_file(
       fname='flower_photos.tgz',
       origin='https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz',
-      untar=True,
+      extract=True,
       **kwargs)
-  return os.path.join(data_dir, '..', 'flower_photos')  # folder name
+  return os.path.join(os.path.dirname(data_dir), 'flower_photos')  # folder name
 
 
 def run(data_dir, export_dir, spec='efficientnet_lite0', **kwargs):
