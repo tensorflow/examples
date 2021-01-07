@@ -268,5 +268,5 @@ class DataLoader(dataloader.ClassificationDataLoader):
       cnt = cls._create_cache(spec, data_path, cache_dir)
       if cnt == 0:
         raise ValueError('No audio files found.')
-      print('Cached %d audio samples.', cnt)
+      print('Cached {} audio samples.'.format(cnt))
     return cls._from_cache(spec, cache_dir, is_training, shuffle)
