@@ -109,5 +109,4 @@ function test_model_maker {
   echo
 }
 
-test_model_maker --nightly
-test_model_maker
+test_model_maker $1
