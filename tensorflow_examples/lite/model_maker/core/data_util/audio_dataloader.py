@@ -122,22 +122,26 @@ def _resample_and_cut(cache_path, spec, example, label):
         'DataLoader expects 16 bit PCM encoded WAV files, but {} has type {}'
         .format(example, xs.dtype))
 
+  # Resample.
+  if spec.target_sample_rate != sampling_rate:
+    # Resample, librosa.resample only works with float32.
+    # Ref: https://github.com/bmcfee/resampy/issues/44
+    xs = xs.astype(np.float32)
+    xs = librosa.resample(
+        xs, orig_sr=sampling_rate,
+        target_sr=spec.target_sample_rate).astype(np.int16)
+
   # Extract snippets.
-  n_samples_per_snippet = int(spec.snippet_duration_sec * sampling_rate)
+  n_samples_per_snippet = int(spec.snippet_duration_sec *
+                              spec.target_sample_rate)
   begin_index = 0
   count = 0
   while begin_index + n_samples_per_snippet <= len(xs):
     snippet = xs[begin_index:begin_index + n_samples_per_snippet]
-    if spec.target_sample_rate != sampling_rate:
-      # Resample, librosa.resample only works with float32.
-      # Ref: https://github.com/bmcfee/resampy/issues/44
-      snippet = snippet.astype(np.float32)
-      snippet = librosa.resample(
-          snippet, orig_sr=sampling_rate,
-          target_sr=spec.target_sample_rate).astype(np.int16)
-    wavfile.write(_new_path(count), spec.target_sample_rate, xs)
+    wavfile.write(_new_path(count), spec.target_sample_rate, snippet)
     begin_index += n_samples_per_snippet
     count += 1
+
   return count
 
 

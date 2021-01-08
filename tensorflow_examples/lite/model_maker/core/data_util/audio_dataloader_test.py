@@ -116,9 +116,9 @@ class AudioDataLoaderTest(tf.test.TestCase):
     write_sample(folder_path, 'command1', '0.1s.wav', 44100, .1, value=2)
     # Not long enough for 2 files, the remaining .5s will be skipped.
     write_sample(folder_path, 'command2', '1.5s.wav', 44100, 1.5, value=3)
-    # Skipped
+    # Skipped, too short.
     write_sample(folder_path, 'command0', '0.1s.wav', 4410, .1, value=4)
-    # Resampled
+    # Resampled, after resample, the content becomes [4 5 5 ... 4 5 4]
     write_sample(folder_path, 'command0', '1.8s.wav', 4410, 1.8, value=5)
     # Ignored due to wrong file extension
     write_sample(folder_path, 'command0', '1.8s.bak', 4410, 1.8, value=6)
@@ -147,7 +147,7 @@ class AudioDataLoaderTest(tf.test.TestCase):
         spec, folder_path, shuffle=False)
     expected_labels = iter(
         ['background', 'background', 'command0', 'command1', 'command2'])
-    expected_values = iter([0., 0., 5., 1., 3.])
+    expected_values = iter([0., 0., 4., 1., 3.])
     for feature, label_idx in consistent_loader.gen_dataset().unbatch():
       self.assertEqual(consistent_loader.index_to_label[label_idx],
                        next(expected_labels))
