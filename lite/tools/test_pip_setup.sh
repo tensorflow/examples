@@ -24,4 +24,4 @@ WORKSPACE_DIR="$(realpath "${SCRIPT_DIR}/../..")"
 TEST_SCRIPT="${WORKSPACE_DIR}/tensorflow_examples/lite/model_maker/pip_package/test_pip_package.sh"
 
 # Test model maker's pip package.
-"${TEST_SCRIPT}"
+"${TEST_SCRIPT}" $1
