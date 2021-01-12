@@ -64,7 +64,7 @@ class QuantizationConfig(object):
       inference_output_type=None,
       supported_ops=None,
       supported_types=None,
-      _experimental_new_quantizer=None,
+      experimental_new_quantizer=None,
   ):
     """Constructs QuantizationConfig.
 
@@ -87,7 +87,7 @@ class QuantizationConfig(object):
         Supported values are types exported by lite.constants. Frequently, an
         optimization choice is driven by the most compact (i.e. smallest) type
         in this list (default [constants.FLOAT]).
-      _experimental_new_quantizer: Whether to enable experimental new quantizer.
+      experimental_new_quantizer: Whether to enable experimental new quantizer.
     """
 
     if optimizations is None:
@@ -112,7 +112,7 @@ class QuantizationConfig(object):
       supported_types = [supported_types]
     self.supported_types = supported_types
 
-    self._experimental_new_quantizer = _experimental_new_quantizer
+    self.experimental_new_quantizer = experimental_new_quantizer
 
   @classmethod
   def create_dynamic_range_quantization(cls,
@@ -198,6 +198,6 @@ class QuantizationConfig(object):
     if self.supported_types:
       converter.target_spec.supported_types = self.supported_types
 
-    if self._experimental_new_quantizer is not None:
-      converter._experimental_new_quantizer = self._experimental_new_quantizer  # pylint: disable=protected-access
+    if self.experimental_new_quantizer is not None:
+      converter.experimental_new_quantizer = self.experimental_new_quantizer
     return converter
