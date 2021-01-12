@@ -76,9 +76,28 @@ class SimpleCheckpoint(tf.keras.callbacks.Callback):
     self.checkpoint_manager.save(checkpoint_number=step_counter)
 
 
-def get_input_fn(data_filepattern, batch_size):
-  """Get input_fn for recommendation model estimator."""
+class InputFn:
+  """InputFn for recommendation model estimator."""
 
+  def __init__(self,
+               data_filepattern,
+               batch_size=10,
+               shuffle=True,
+               repeat=True):
+    """Init input fn.
+
+    Args:
+      data_filepattern: str, file pattern. (allow wild match like ? and *)
+      batch_size: int, batch examples with a given size.
+      shuffle: boolean, whether to shuffle examples.
+      repeat: boolean, whether to repeat examples.
+    """
+    self.data_filepattern = data_filepattern
+    self.batch_size = batch_size
+    self.shuffle = shuffle
+    self.repeat = repeat
+
+  @staticmethod
   def decode_example(serialized_proto):
     """Decode single serialized example."""
     name_to_features = dict(
@@ -98,25 +117,27 @@ def get_input_fn(data_filepattern, batch_size):
     features['label'] = record_features['label']
     return features, record_features['label']
 
-  def input_fn():
+  @staticmethod
+  def read_dataset(data_filepattern):
+    input_files = utils.GetShardFilenames(data_filepattern)
+    return tf.data.TFRecordDataset(input_files)
+
+  def __call__(self):
     """An input_fn satisfying the TF estimator spec.
 
     Returns:
       a Dataset where each element is a batch of `features` dicts, passed to the
       Estimator model_fn.
-
     """
-    input_files = utils.GetShardFilenames(data_filepattern)
-    d = tf.data.TFRecordDataset(input_files)
-    d.shuffle(len(input_files))
-    d = d.repeat()
-    d = d.shuffle(buffer_size=100)
-    d = d.map(decode_example)
-    d = d.batch(batch_size, drop_remainder=True)
-    d = d.prefetch(1)
+    d = self.read_dataset(self.data_filepattern)
+    if self.repeat:
+      d = d.repeat()
+    if self.shuffle:
+      buffer_size = max(3 * self.batch_size, 100)
+      d = d.shuffle(buffer_size=buffer_size)
+    d = d.map(self.decode_example)
+    d = d.batch(self.batch_size, drop_remainder=True)
     return d
-
-  return input_fn
 
 
 def _get_optimizer(learning_rate, gradient_clip_norm=None):
@@ -139,15 +160,19 @@ def _get_metrics(eval_top_k):
   return metrics_list
 
 
-def build_keras_model(params):
-  """Construct and compile recommendation keras model."""
-  model = recommendation_model.RecommendationModel(params)
+def compile_model(model, params, learning_rate, gradient_clip_norm):
+  """Compile keras model."""
   model.compile(
       optimizer=_get_optimizer(
-          learning_rate=FLAGS.learning_rate,
-          gradient_clip_norm=FLAGS.gradient_clip_norm),
+          learning_rate=learning_rate, gradient_clip_norm=gradient_clip_norm),
       loss=losses.GlobalSoftmax(),
       metrics=_get_metrics(params['eval_top_k']))
+
+
+def build_keras_model(params, learning_rate, gradient_clip_norm):
+  """Construct and compile recommendation keras model."""
+  model = recommendation_model.RecommendationModel(params)
+  compile_model(model, params, learning_rate, gradient_clip_norm)
   return model
 
 
@@ -185,7 +210,7 @@ def train_and_eval(model, model_dir, train_input_fn, eval_input_fn,
   return model
 
 
-def export(checkpoint_path, export_dir, params):
+def export(checkpoint_path, export_dir, params, max_history_length):
   """Export savedmodel."""
   model = recommendation_model.RecommendationModel(params)
   checkpoint = tf.train.Checkpoint(model=model)
@@ -194,7 +219,7 @@ def export(checkpoint_path, export_dir, params):
       tf.saved_model.DEFAULT_SERVING_SIGNATURE_DEF_KEY:
           model.serve.get_concrete_function(
               input_context=tf.TensorSpec(
-                  shape=[FLAGS.max_history_length],
+                  shape=[max_history_length],
                   dtype=tf.dtypes.int32,
                   name='context'))
   }
@@ -226,12 +251,12 @@ def main(_):
   params['num_predictions'] = FLAGS.num_predictions
 
   logger.info('Setting up train and eval input_fns.')
-  train_input_fn = get_input_fn(FLAGS.training_data_filepattern,
-                                FLAGS.batch_size)
-  eval_input_fn = get_input_fn(FLAGS.testing_data_filepattern, FLAGS.batch_size)
+  train_input_fn = InputFn(FLAGS.training_data_filepattern, FLAGS.batch_size)
+  eval_input_fn = InputFn(FLAGS.testing_data_filepattern, FLAGS.batch_size)
 
   logger.info('Build keras model for mode: {}.'.format(FLAGS.run_mode))
-  model = build_keras_model(params=params)
+  model = build_keras_model(params, FLAGS.learning_rate,
+                            FLAGS.gradient_clip_norm)
 
   if FLAGS.run_mode == 'train_and_eval':
     train_and_eval(
@@ -248,7 +273,8 @@ def main(_):
     export(
         checkpoint_path=FLAGS.checkpoint_path,
         export_dir=export_dir,
-        params=params)
+        params=params,
+        max_history_length=FLAGS.max_history_length)
     logger.info('Converting model to tflite model.')
     export_tflite(export_dir)
 

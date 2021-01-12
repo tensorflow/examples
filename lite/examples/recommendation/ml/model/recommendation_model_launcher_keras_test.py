@@ -78,11 +78,12 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
   def testModelFnTrainModeExecute(self):
     """Verifies that 'model_fn' can be executed in train and eval mode."""
     self.params['encoder_type'] = FLAGS.encoder_type
-    train_input_fn = launcher.get_input_fn(FLAGS.training_data_filepattern,
-                                           FLAGS.batch_size)
-    eval_input_fn = launcher.get_input_fn(FLAGS.testing_data_filepattern,
-                                          FLAGS.batch_size)
-    model = launcher.build_keras_model(params=self.params)
+    train_input_fn = launcher.InputFn(FLAGS.training_data_filepattern,
+                                      FLAGS.batch_size)
+    eval_input_fn = launcher.InputFn(FLAGS.testing_data_filepattern,
+                                     FLAGS.batch_size)
+    model = launcher.build_keras_model(self.params, FLAGS.learning_rate,
+                                       FLAGS.gradient_clip_norm)
     launcher.train_and_eval(
         model=model,
         model_dir=FLAGS.model_dir,
@@ -99,11 +100,12 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
     """Verifies model can be exported to savedmodel and tflite model."""
     self.params['encoder_type'] = FLAGS.encoder_type
     self.params['num_predictions'] = FLAGS.num_predictions
-    train_input_fn = launcher.get_input_fn(FLAGS.training_data_filepattern,
-                                           FLAGS.batch_size)
-    eval_input_fn = launcher.get_input_fn(FLAGS.testing_data_filepattern,
-                                          FLAGS.batch_size)
-    model = launcher.build_keras_model(params=self.params)
+    train_input_fn = launcher.InputFn(FLAGS.training_data_filepattern,
+                                      FLAGS.batch_size)
+    eval_input_fn = launcher.InputFn(FLAGS.testing_data_filepattern,
+                                     FLAGS.batch_size)
+    model = launcher.build_keras_model(self.params, FLAGS.learning_rate,
+                                       FLAGS.gradient_clip_norm)
     launcher.train_and_eval(
         model=model,
         model_dir=FLAGS.model_dir,
@@ -117,7 +119,8 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
     launcher.export(
         checkpoint_path=latest_checkpoint,
         export_dir=export_dir,
-        params=self.params)
+        params=self.params,
+        max_history_length=FLAGS.max_history_length)
     savedmodel_path = os.path.join(export_dir, 'saved_model.pb')
     self.assertTrue(os.path.exists(savedmodel_path))
     imported = tf.saved_model.load(export_dir, tags=None)
