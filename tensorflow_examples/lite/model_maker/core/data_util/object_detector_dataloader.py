@@ -53,7 +53,7 @@ def _get_object_detector_cache_filenames(cache_dir, image_dir, annotations_dir,
   """Gets cache filenames for obejct detector."""
   if cache_dir is None:
     cache_dir = tempfile.mkdtemp()
-    print('Create the cache directory: %s.', cache_dir)
+    print('Create the cache directory: %s.' % cache_dir)
   cache_prefix = _get_cache_prefix(image_dir, annotations_dir, annotations_list)
   cache_prefix = os.path.join(cache_dir, cache_prefix)
 
@@ -211,7 +211,12 @@ class DataLoader(dataloader.DataLoader):
     for idx, name in label_map_dict.items():
       label_name2id_dict[name] = idx
     writers = [tf.io.TFRecordWriter(path) for path in tfrecord_files]
+
     ann_json_dict = {'images': [], 'annotations': [], 'categories': []}
+    for class_id, class_name in label_map_dict.items():
+      c = {'supercategory': 'none', 'id': class_id, 'name': class_name}
+      ann_json_dict['categories'].append(c)
+
     # Gets the paths to annotations.
     if annotations_list:
       ann_path_list = [
@@ -246,7 +251,7 @@ class DataLoader(dataloader.DataLoader):
       writer.close()
 
     with tf.io.gfile.GFile(annotations_json_file, 'w') as f:
-      json.dump(ann_json_dict, f)
+      json.dump(ann_json_dict, f, indent=2)
 
   def gen_dataset(self,
                   model_spec,

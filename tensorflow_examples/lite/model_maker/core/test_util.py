@@ -19,9 +19,11 @@ from __future__ import print_function
 import functools
 import os
 import shutil
+import tempfile
 
 from absl import flags
 import numpy as np
+import PIL.Image
 
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
@@ -136,6 +138,31 @@ def get_dataloader(data_size, input_shape, num_classes, max_input_value=1000):
   ds = tf.data.Dataset.from_tensor_slices((features, labels))
   data = dataloader.DataLoader(ds, data_size)
   return data
+
+
+def create_pascal_voc(temp_dir=None):
+  """Creates test data with PASCAL VOC format."""
+  if temp_dir is None or not tf.io.gfile.exists(temp_dir):
+    temp_dir = tempfile.mkdtemp()
+
+  # Saves the image into images_dir.
+  image_file_name = "2012_12.jpg"
+  image_data = np.random.rand(256, 256, 3)
+  images_dir = os.path.join(temp_dir, "images")
+  os.mkdir(images_dir)
+  save_path = os.path.join(images_dir, image_file_name)
+  image = PIL.Image.fromarray(image_data, "RGB")
+  image.save(save_path)
+
+  # Gets the annonation path.
+  annotations_path = get_test_data_path("2012_12.xml")
+  annotations_dir = os.path.dirname(annotations_path)
+
+  label_map = {
+      1: "person",
+      2: "notperson",
+  }
+  return images_dir, annotations_dir, label_map
 
 
 def is_same_output(tflite_file,

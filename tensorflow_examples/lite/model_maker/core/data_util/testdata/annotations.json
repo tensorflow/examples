@@ -1,0 +1,39 @@
+{
+  "images": [
+    {
+      "file_name": "2012_12.jpg",
+      "height": 256,
+      "width": 256,
+      "id": 1
+    }
+  ],
+  "annotations": [
+    {
+      "area": 16384,
+      "iscrowd": 0,
+      "image_id": 1,
+      "bbox": [
+        64,
+        64,
+        128,
+        128
+      ],
+      "category_id": 1,
+      "id": 1,
+      "ignore": 0,
+      "segmentation": []
+    }
+  ],
+  "categories": [
+    {
+      "supercategory": "none",
+      "id": 1,
+      "name": "person"
+    },
+    {
+      "supercategory": "none",
+      "id": 2,
+      "name": "notperson"
+    }
+  ]
+}

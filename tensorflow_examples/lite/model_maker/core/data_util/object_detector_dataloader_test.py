@@ -16,10 +16,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import filecmp
 import os
 
 import numpy as np
-import PIL.Image
+
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import test_util
 
@@ -40,28 +41,9 @@ class MockDetectorModelSpec(object):
 
 class ObjectDectectorDataLoaderTest(tf.test.TestCase):
 
-  def _create_pascal_voc(self):
-    # Saves the image into images_dir.
-    image_file_name = '2012_12.jpg'
-    image_data = np.random.rand(256, 256, 3)
-    images_dir = os.path.join(self.get_temp_dir(), 'images')
-    os.mkdir(images_dir)
-    save_path = os.path.join(images_dir, image_file_name)
-    image = PIL.Image.fromarray(image_data, 'RGB')
-    image.save(save_path)
-
-    # Gets the annonation path.
-    annotations_path = test_util.get_test_data_path('2012_12.xml')
-    annotations_dir = os.path.dirname(annotations_path)
-
-    label_map = {
-        1: 'person',
-        2: 'notperson',
-    }
-    return images_dir, annotations_dir, label_map
-
   def test_from_pascal_voc(self):
-    images_dir, annotations_dir, label_map = self._create_pascal_voc()
+    images_dir, annotations_dir, label_map = test_util.create_pascal_voc(
+        self.get_temp_dir())
     model_spec = MockDetectorModelSpec('efficientdet-lite0')
 
     data = object_detector_dataloader.DataLoader.from_pascal_voc(
@@ -70,6 +52,11 @@ class ObjectDectectorDataLoaderTest(tf.test.TestCase):
     self.assertIsInstance(data, object_detector_dataloader.DataLoader)
     self.assertLen(data, 1)
     self.assertEqual(data.label_map, label_map)
+
+    self.assertTrue(os.path.isfile(data.annotations_json_file))
+    self.assertGreater(os.path.getsize(data.annotations_json_file), 0)
+    expected_json_file = test_util.get_test_data_path('annotations.json')
+    self.assertTrue(filecmp.cmp(data.annotations_json_file, expected_json_file))
 
     ds = data.gen_dataset(model_spec, batch_size=1, is_training=False)
     for i, (images, labels) in enumerate(ds):
