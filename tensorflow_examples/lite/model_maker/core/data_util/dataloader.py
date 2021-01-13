@@ -63,7 +63,8 @@ class DataLoader(object):
                   is_training=False,
                   shuffle=False,
                   input_pipeline_context=None,
-                  preprocess=None):
+                  preprocess=None,
+                  drop_remainder=False):
     """Generate a shared and batched tf.data.Dataset for training/evaluation.
 
     Args:
@@ -76,6 +77,7 @@ class DataLoader(object):
         among multiple workers when distribution strategy is used.
       preprocess: A function taking three arguments in order, feature, label and
         boolean is_training.
+      drop_remainder: boolean, whether the finaly batch drops remainder.
 
     Returns:
       A TF dataset ready to be consumed by Keras model.
@@ -100,7 +102,7 @@ class DataLoader(object):
         ds = ds.shuffle(buffer_size=min(self._size, buffer_size))
       ds = ds.repeat()
 
-    ds = ds.batch(batch_size)
+    ds = ds.batch(batch_size, drop_remainder=drop_remainder)
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     # TODO(b/171449557): Consider converting ds to distributed ds here.
     return ds
