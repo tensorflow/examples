@@ -19,7 +19,7 @@ import tensorflow as tf  # pylint: disable=unused-import
 
 HAS_RECOMMENDATION = True
 try:
-  from tensorflow_examples.lite.examples.recommendation.ml.model import recommendation_model as rm  # pylint: disable=g-import-not-at-top
+  from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model as rm  # pylint: disable=g-import-not-at-top
 except ImportError:
   HAS_RECOMMENDATION = False
 
