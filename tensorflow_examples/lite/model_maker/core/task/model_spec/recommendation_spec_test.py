@@ -17,6 +17,7 @@ from absl.testing import parameterized
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core.task.model_spec import recommendation_spec
+from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model as _rm
 
 
 class RecommendationSpecTest(tf.test.TestCase, parameterized.TestCase):
@@ -29,10 +30,7 @@ class RecommendationSpecTest(tf.test.TestCase, parameterized.TestCase):
   def test_create_recommendation_model(self, encoder_type):
     spec = recommendation_spec.RecommendationSpec(encoder_type)
     model = spec.create_model()
-    if recommendation_spec.HAS_RECOMMENDATION:
-      self.assertIsInstance(model, recommendation_spec.rm.RecommendationModel)
-    else:
-      self.assertIsNone(model)
+    self.assertIsInstance(model, _rm.RecommendationModel)
 
 
 if __name__ == '__main__':

@@ -16,16 +16,14 @@
 import functools
 
 import tensorflow as tf  # pylint: disable=unused-import
-
-HAS_RECOMMENDATION = True
-try:
-  from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model as rm  # pylint: disable=g-import-not-at-top
-except ImportError:
-  HAS_RECOMMENDATION = False
+from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model as _rm
 
 
 class RecommendationSpec(object):
   """Recommendation model spec."""
+
+  compat_tf_versions = compat.get_compat_tf_versions(2)
 
   def __init__(self,
                encoder_type='bow',
@@ -36,7 +34,9 @@ class RecommendationSpec(object):
                hidden_layer_dim_ratios=None,
                conv_num_filter_ratios=None,
                conv_kernel_size=None,
-               lstm_num_units=None):
+               lstm_num_units=None,
+               eval_top_k=None,
+               batch_size=16):
     """Initialize spec.
 
     Args:
@@ -51,14 +51,22 @@ class RecommendationSpec(object):
         ratios based on context_embedding_dim.
       conv_kernel_size: int, for 'rnn', Conv1D layers' kernel size.
       lstm_num_units: int, for 'rnn', LSTM layer's unit number.
+      eval_top_k: list of int, evaluation metrics for a list of top k.
+      batch_size: int, default batch size.
     """
     hidden_layer_dim_ratios = hidden_layer_dim_ratios or [1.0, 0.5, 0.25]
+
+    if encoder_type not in ('bow', 'cnn', 'rnn'):
+      raise ValueError('Not valid encoder_type: {}'.format(encoder_type))
 
     if encoder_type == 'cnn':
       conv_num_filter_ratios = conv_num_filter_ratios or [2, 4]
       conv_kernel_size = conv_kernel_size or 4
     elif encoder_type == 'rnn':
       lstm_num_units = lstm_num_units or 16
+
+    if eval_top_k is None:
+      eval_top_k = [1, 5, 10]
 
     self.encoder_type = encoder_type
     self.context_embedding_dim = context_embedding_dim
@@ -69,8 +77,10 @@ class RecommendationSpec(object):
     self.conv_num_filter_ratios = conv_num_filter_ratios
     self.conv_kernel_size = conv_kernel_size
     self.lstm_num_units = lstm_num_units
+    self.eval_top_k = eval_top_k
+    self.batch_size = batch_size
 
-    self._params = {
+    self.params = {
         'encoder_type': encoder_type,
         'context_embedding_dim': context_embedding_dim,
         'label_embedding_dim': label_embedding_dim,
@@ -80,13 +90,16 @@ class RecommendationSpec(object):
         'conv_num_filter_ratios': conv_num_filter_ratios,
         'conv_kernel_size': conv_kernel_size,
         'lstm_num_units': lstm_num_units,
+        'eval_top_k': eval_top_k,
     }
 
   def create_model(self):
-    """Creates recommendation model based on params."""
-    if not HAS_RECOMMENDATION:
-      return None
-    return rm.RecommendationModel(self._params)
+    """Creates recommendation model based on params.
+
+    Returns:
+      Keras model.
+    """
+    return _rm.RecommendationModel(self.params)
 
 
 recommendation_bow_spec = functools.partial(
