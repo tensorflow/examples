@@ -1,4 +1,6 @@
-tf-models-nightly
+# TODO(b/177629432): Change to tf-models-nightly once NotFoundError is fixed
+# with tensorflow-text-nightly.
+tf-models-official>=2.4.0
 tf-hub-nightly
 numpy>=1.17.3
 pillow>=7.0.0
