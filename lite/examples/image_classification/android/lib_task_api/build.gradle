@@ -41,7 +41,6 @@ dependencies {
     implementation project(":models")
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
-    // Build off of nightly TensorFlow Lite Task Library
-    implementation('org.tensorflow:tensorflow-lite-task-vision:0.0.0-nightly') { changing = true }
-    implementation('org.tensorflow:tensorflow-lite-metadata:0.0.0-nightly') { changing = true }
+    implementation 'org.tensorflow:tensorflow-lite-task-vision:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
 }

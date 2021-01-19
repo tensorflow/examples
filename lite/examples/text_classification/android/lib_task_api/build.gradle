@@ -5,7 +5,7 @@ android {
     compileSdkVersion 28
     buildToolsVersion "29.0.0"
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -36,7 +36,7 @@ project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
 apply from:'download_model.gradle'
 
 dependencies {
-    implementation 'org.tensorflow:tensorflow-lite-task-text:0.0.0-nightly'
+    implementation 'org.tensorflow:tensorflow-lite-task-text:0.1.0'
     implementation 'org.jetbrains:annotations:15.0'
 
     testImplementation 'androidx.test:core:1.2.0'
