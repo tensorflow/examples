@@ -81,10 +81,13 @@ Extract the zip to get the .tflite and label file.
 ### Custom model used
 
 This example shows you how to perform TensorFlow Lite object detection using a
-custom model. * Clone the TensorFlow models GitHub repository to your computer.
-`git clone https://github.com/tensorflow/models/` * Build and install this
+custom model.
+* Clone the TensorFlow models GitHub repository to your computer.
+`git clone https://github.com/tensorflow/models/`
+* Build and install this
 repository. `cd models/research python3 setup.py build && python3 setup.py
-install` * Download the MobileNet SSD trained on
+install`
+* Download the MobileNet SSD trained on
 **[Open Images v4](https://storage.googleapis.com/openimages/web/factsfigures_v4.html)**
 **[here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1_detection_zoo.md)**.
 Extract the pretrained TensorFlow model files. * Go to `models/research`
@@ -93,7 +96,8 @@ directory and execute this code to get the frozen TensorFlow Lite graph.
 object_detection/samples/configs/ssd_mobilenet_v2_oid_v4.config \
 --trained_checkpoint_prefix <directory with
 ssd_mobilenet_v2_oid_v4_2018_12_12>/model.ckpt \ --output_directory
-exported_model` * Convert the frozen graph to the TFLite model. `tflite_convert
+exported_model`
+* Convert the frozen graph to the TFLite model. `tflite_convert
 \ --input_shape=1,300,300,3 \ --input_arrays=normalized_input_image_tensor \
 --output_arrays=TFLite_Detection_PostProcess,TFLite_Detection_PostProcess:1,TFLite_Detection_PostProcess:2,TFLite_Detection_PostProcess:3
 \ --allow_custom_ops \ --graph_def_file=exported_model/tflite_graph.pb \
