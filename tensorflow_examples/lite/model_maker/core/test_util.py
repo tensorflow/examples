@@ -45,7 +45,7 @@ def test_srcdir():
 
 def get_test_data_path(file_or_dirname):
   """Return full test data path."""
-  for directory, subdirs, files in tf.io.gfile.walk(test_srcdir()):
+  for (directory, subdirs, files) in tf.io.gfile.walk(test_srcdir()):
     for f in subdirs + files:
       if f.endswith(file_or_dirname):
         return os.path.join(directory, f)
