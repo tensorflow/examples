@@ -117,3 +117,16 @@ class ObjectDetector(custom_model.CustomModel):
 
     return self.model_spec.evaluate(self.model, ds, steps,
                                     data.annotations_json_file)
+
+  def _export_saved_model(self, saved_model_dir):
+    """Saves the model to Tensorflow SavedModel."""
+    self.model_spec.export_saved_model(saved_model_dir)
+
+  def _export_tflite(self, tflite_filepath, quantization_config=None):
+    """Converts the retrained model to tflite format and saves it.
+
+    Args:
+      tflite_filepath: File path to save tflite model.
+      quantization_config: Configuration for post-training quantization.
+    """
+    self.model_spec.export_tflite(tflite_filepath, quantization_config)

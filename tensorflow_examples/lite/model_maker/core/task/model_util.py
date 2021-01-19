@@ -91,7 +91,7 @@ def export_tflite(model,
 
     if quantization_config:
       converter = quantization_config.get_converter_with_quantization(
-          converter, preprocess)
+          converter, preprocess=preprocess)
 
     converter.target_spec.supported_ops = supported_ops
     tflite_model = converter.convert()

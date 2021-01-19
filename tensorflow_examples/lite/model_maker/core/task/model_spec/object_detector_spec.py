@@ -24,10 +24,13 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import coco_metric
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import hparams_config
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import efficientdet_keras
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import inference
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import postprocess
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import train
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import train_lib
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import util_keras
 
 
 def _get_ordered_label_map(label_map):
@@ -237,3 +240,92 @@ class EfficientDetModelSpec(object):
         name = 'AP_/%s' % label_map[cid]
         metric_dict[name] = metrics[i + len(evaluator.metric_names)]
     return metric_dict
+
+  def export_saved_model(self,
+                         saved_model_dir,
+                         batch_size=None,
+                         pre_mode='infer',
+                         post_mode='global'):
+    """Saves the model to Tensorflow SavedModel.
+
+    Args:
+      saved_model_dir: Folder path for saved model.
+      batch_size: Batch size to be saved in saved_model.
+      pre_mode: Pre-processing Mode in ExportModel, must be {None, 'infer'}.
+      post_mode: Post-processing Mode in ExportModel, must be {None, 'global',
+        'per_class'}.
+    """
+    # Create EfficientDetModel with latest checkpoint.
+    config = self.config
+    model = efficientdet_keras.EfficientDetModel(config=config)
+    model.build((batch_size, *config.image_size, 3))
+    if config.model_dir:
+      util_keras.restore_ckpt(
+          model,
+          config.model_dir,
+          config['moving_average_decay'],
+          skip_mismatch=False)
+    else:
+      # EfficientDetModel is random initialized without restoring the
+      # checkpoint. This is mainly used in object_detector_test and shouldn't be
+      #  used if we want to export trained model.
+      tf.compat.v1.logging.warn('Need to restore the checkpoint for '
+                                'EfficientDet.')
+    # Gets tf.TensorSpec.
+    if pre_mode is None:
+      # Input is the preprocessed image that's already resized to a certain
+      # input shape.
+      input_spec = tf.TensorSpec(
+          shape=[batch_size, *config.image_size, 3],
+          dtype=tf.float32,
+          name='images')
+    else:
+      # Input is that raw image that can be in any input shape,
+      input_spec = tf.TensorSpec(
+          shape=[batch_size, None, None, 3], dtype=tf.uint8, name='images')
+
+    export_model = inference.ExportModel(
+        model, pre_mode=pre_mode, post_mode=post_mode)
+    tf.saved_model.save(
+        export_model,
+        saved_model_dir,
+        signatures=export_model.__call__.get_concrete_function(input_spec))
+
+  def export_tflite(self, tflite_filepath, quantization_config=None):
+    """Converts the retrained model to tflite format and saves it.
+
+    The exported TFLite model has the following inputs & outputs:
+    One input:
+      image: a float32 tensor of shape[1, height, width, 3] containing the
+        normalized input image. `self.config.image_size` is [height, width].
+
+    Four Outputs:
+      detection_boxes: a float32 tensor of shape [1, num_boxes, 4] with box
+        locations.
+      detection_classes: a float32 tensor of shape [1, num_boxes] with class
+        indices.
+      detection_scores: a float32 tensor of shape [1, num_boxes] with class
+        scores.
+      num_boxes: a float32 tensor of size 1 containing the number of detected
+        boxes.
+
+    Args:
+      tflite_filepath: File path to save tflite model.
+      quantization_config: Configuration for post-training quantization.
+    """
+    with tempfile.TemporaryDirectory() as temp_dir:
+      self.export_saved_model(
+          temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
+      converter = tf.lite.TFLiteConverter.from_saved_model(temp_dir)
+      if quantization_config:
+        converter = quantization_config.get_converter_with_quantization(
+            converter, model_spec=self)
+
+      # TFLITE_BUILTINS is needed for TFLite's custom NMS op for integer only
+      # quantization.
+      if tf.lite.OpsSet.TFLITE_BUILTINS not in converter.target_spec.supported_ops:
+        converter.target_spec.supported_ops += [tf.lite.OpsSet.TFLITE_BUILTINS]
+      tflite_model = converter.convert()
+
+      with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
+        f.write(tflite_model)

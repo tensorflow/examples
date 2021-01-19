@@ -91,14 +91,10 @@ def _read_required_packages(fpath):
 
 def get_required_packages():
   """Gets packages inside requirements.txt."""
-  # Gets third party's required packages.
-  fpath = BASE_DIR.joinpath('third_party', 'efficientdet', 'requirements.txt')
-  required_pkgs = _read_required_packages(fpath)
-
   # Gets model maker's required packages
   filename = 'requirements_nightly.txt' if nightly else 'requirements.txt'
   fpath = BASE_DIR.joinpath(filename)
-  required_pkgs += _read_required_packages(fpath)
+  required_pkgs = _read_required_packages(fpath)
 
   return required_pkgs
 

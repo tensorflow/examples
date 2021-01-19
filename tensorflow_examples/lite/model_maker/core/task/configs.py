@@ -179,13 +179,13 @@ class QuantizationConfig(object):
     """Creates configuration for float16 quantization."""
     return QuantizationConfig(optimizations, supported_types=[tf.float16])
 
-  def get_converter_with_quantization(self, converter, preprocess=None):
+  def get_converter_with_quantization(self, converter, **kwargs):
     """Gets TFLite converter with settings for quantization."""
     converter.optimizations = self.optimizations
 
     if self.representative_data is not None:
       ds = self.representative_data.gen_dataset(
-          batch_size=1, is_training=False, preprocess=preprocess)
+          batch_size=1, is_training=False, **kwargs)
       converter.representative_dataset = tf.lite.RepresentativeDataset(
           _get_representative_dataset_gen(ds, self.quantization_steps))
 

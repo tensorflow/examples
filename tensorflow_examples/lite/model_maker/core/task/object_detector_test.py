@@ -22,6 +22,8 @@ import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import object_detector
 from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 
@@ -47,6 +49,38 @@ class ObjectDetectorTest(tf.test.TestCase):
     metrics = task.evaluate(data, batch_size=1)
     self.assertIsInstance(metrics, dict)
     self.assertGreaterEqual(metrics['AP'], 0)
+
+    # Export the model to saved model.
+    spec.config.model_dir = None  # Don't restore checkpoint.
+    output_path = os.path.join(self.get_temp_dir(), 'saved_model')
+    task.export(self.get_temp_dir(), export_format=ExportFormat.SAVED_MODEL)
+    self.assertTrue(os.path.isdir(output_path))
+    self.assertNotEqual(len(os.listdir(output_path)), 0)
+
+    # Export the model to TFLite model.
+    output_path = os.path.join(self.get_temp_dir(), 'float.tflite')
+    task.export(
+        self.get_temp_dir(),
+        tflite_filename='float.tflite',
+        export_format=ExportFormat.TFLITE)
+    self.assertTrue(tf.io.gfile.exists(output_path))
+    self.assertGreater(os.path.getsize(output_path), 0)
+
+    # Export the model to quantized TFLite model.
+    # TODO(b/175173304): Skips the test for stable tensorflow 2.4 for now since
+    # it fails. Will revert this change after TF upgrade.
+    if tf.__version__.startswith('2.4'):
+      return
+    output_path = os.path.join(self.get_temp_dir(), 'model_quantized.tflite')
+    config = configs.QuantizationConfig.create_full_integer_quantization(
+        data, is_integer_only=True)
+    task.export(
+        self.get_temp_dir(),
+        tflite_filename='model_quantized.tflite',
+        quantization_config=config,
+        export_format=ExportFormat.TFLITE)
+    self.assertTrue(os.path.isfile(output_path))
+    self.assertGreater(os.path.getsize(output_path), 0)
 
 
 if __name__ == '__main__':
