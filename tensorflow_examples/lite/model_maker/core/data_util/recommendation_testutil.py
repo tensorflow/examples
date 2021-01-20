@@ -28,7 +28,7 @@ USER_SIZE = 50
 TRAIN_SIZE = 4900
 TEST_SIZE = 50
 VOCAB_SIZE = 101
-ITEM_SIZE = 999
+MAX_ITEM_ID = 999
 
 
 def _generate_fake_data(data_dir):
@@ -41,6 +41,7 @@ def _generate_fake_data(data_dir):
                UserID::Gender::Age::Occupation::Zip-code.
   - ratings.dat: movie ratings by users, with format per line:
                UserID::MovieID::Rating::Timestamp
+  It aligns with movielens dataset. IDs start from 1, and 0 is reserved for OOV.
 
   Args:
     data_dir: str, dir name to generate dataset.

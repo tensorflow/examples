@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for Recommendation dataloader."""
-
+import collections
 import os
 
 import tensorflow.compat.v2 as tf
@@ -57,9 +57,15 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
 
     self.assertEqual(len(train_loader), _testutil.TRAIN_SIZE)
     self.assertIsNotNone(train_loader._dataset)
+    self.assertIsInstance(train_loader.vocab, collections.OrderedDict)
+    self.assertEqual(len(train_loader.vocab), _testutil.VOCAB_SIZE)
+    self.assertEqual(train_loader.max_vocab_id, _testutil.MAX_ITEM_ID)
 
     self.assertEqual(len(test_loader), _testutil.TEST_SIZE)
     self.assertIsNotNone(test_loader._dataset)
+    self.assertEqual(len(test_loader.vocab), _testutil.VOCAB_SIZE)
+    self.assertIsInstance(test_loader.vocab, collections.OrderedDict)
+    self.assertEqual(test_loader.max_vocab_id, _testutil.MAX_ITEM_ID)
 
   def test_split(self):
     with _testutil.patch_download_and_extract_data(self.movielens_dir):
@@ -73,14 +79,6 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
 
     self.assertEqual(len(test1), expected_size1)
     self.assertIsNotNone(test1._dataset)
-
-  def test_load_vocab_and_item_size(self):
-    with _testutil.patch_download_and_extract_data(self.movielens_dir):
-      test_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'test', self.test_tempdir)
-    vocab, item_size = test_loader.load_vocab_and_item_size()
-    self.assertEqual(len(vocab), _testutil.VOCAB_SIZE)
-    self.assertEqual(item_size, _testutil.ITEM_SIZE)
 
   def test_gen_dataset(self):
     with _testutil.patch_download_and_extract_data(self.movielens_dir):

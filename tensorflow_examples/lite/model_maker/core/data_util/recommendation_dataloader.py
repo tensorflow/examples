@@ -13,6 +13,7 @@
 # limitations under the License.
 """Recommendation dataloader class."""
 
+import collections
 import json
 import os
 
@@ -27,7 +28,7 @@ from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model im
 class RecommendationDataLoader(dataloader.DataLoader):
   """Recommendation data loader."""
 
-  def __init__(self, dataset, size, vocab_file):
+  def __init__(self, dataset, size, vocab):
     """Init data loader.
 
     Dataset is tf.data.Dataset of examples, containing:
@@ -37,17 +38,21 @@ class RecommendationDataLoader(dataloader.DataLoader):
       - 'label': int64[1], label id to predict.
     where context is controlled by `max_context_length` in generating examples.
 
-    The vocab file should be json format of: a list of list[size=4], where the 4
-    elements are ordered as:
-      [id=int, title=str, genres=str joined with '|', count=int]
+    The vocab should be a dict maps `id` to `item`, where:
+    - id: int
+    - item: a vocab entry. For example, for movielens, the item is a dict:
+        {'id': int, 'title': str, 'genres': list[str], 'count': int}
 
     Args:
       dataset: tf.data.Dataset for recommendation.
       size: int, dataset size.
-      vocab_file: str, vocab file in json format.
+      vocab: list of dict, each vocab item is described above.
     """
     super(RecommendationDataLoader, self).__init__(dataset, size)
-    self.vocab_file = vocab_file
+    if not isinstance(vocab, dict):
+      raise ValueError('Expect vocab to be a dict, but got: {}'.format(vocab))
+    self.vocab = vocab
+    self.max_vocab_id = max(self.vocab.keys())  # The max id in the vocab.
 
   def gen_dataset(self,
                   batch_size=1,
@@ -67,9 +72,10 @@ class RecommendationDataLoader(dataloader.DataLoader):
     )
 
   def split(self, fraction):
-    return self._split(fraction, self.vocab_file)
+    return self._split(fraction, self.vocab)
 
-  def load_vocab_and_item_size(self):
+  @classmethod
+  def load_vocab(cls, vocab_file):
     """Loads vocab from file.
 
     The vocab file should be json format of: a list of list[size=4], where the 4
@@ -77,28 +83,30 @@ class RecommendationDataLoader(dataloader.DataLoader):
       [id=int, title=str, genres=str joined with '|', count=int]
     It is generated when preparing movielens dataset.
 
+    Args:
+      vocab_file: str, path to vocab file.
+
     Returns:
-      vocab list: a list of vocab dict representing movies
+      vocab: an OrderedDict maps id to item. Each item represents a movie
          {
            'id': int,
            'title': str,
-           'genres': list of str,
+           'genres': list[str],
            'count': int,
          }
-      item size: int, the max id of all vocab.
     """
-    with tf.io.gfile.GFile(self.vocab_file) as f:
+    with tf.io.gfile.GFile(vocab_file) as f:
       vocab_json = json.load(f)
-      vocab = []
+      vocab = collections.OrderedDict()
       for v in vocab_json:
-        vocab.append({
-            'id': v[0],
+        item = {
+            'id': int(v[0]),
             'title': v[1],
             'genres': v[2].split('|'),
-            'count': v[3],
-        })
-      item_size = max((v['id'] for v in vocab))
-      return vocab, item_size
+            'count': int(v[3]),
+        }
+        vocab[item['id']] = item
+      return vocab
 
   @staticmethod
   def read_as_dataset(filepattern):
@@ -117,8 +125,7 @@ class RecommendationDataLoader(dataloader.DataLoader):
                                   vocab_filename,
                                   meta_filename,
                                   min_timeline_length=3,
-                                  max_context_length=10,
-                                  build_movie_vocab=True):
+                                  max_context_length=10):
     """Prepare movielens datasets, and returns a dict contains meta."""
     train_file = os.path.join(generated_dir, train_filename)
     test_file = os.path.join(generated_dir, test_filename)
@@ -130,7 +137,7 @@ class RecommendationDataLoader(dataloader.DataLoader):
           output_dir=generated_dir,
           min_timeline_length=min_timeline_length,
           max_context_length=max_context_length,
-          build_movie_vocab=build_movie_vocab,
+          build_movie_vocab=True,
           train_filename=train_filename,
           test_filename=test_filename,
           vocab_filename=vocab_filename,
@@ -146,7 +153,6 @@ class RecommendationDataLoader(dataloader.DataLoader):
                      raw_data_dir,
                      min_timeline_length=3,
                      max_context_length=10,
-                     build_movie_vocab=True,
                      train_filename='train_movielens_1m.tfrecord',
                      test_filename='test_movielens_1m.tfrecord',
                      vocab_filename='movie_vocab.json',
@@ -165,7 +171,6 @@ class RecommendationDataLoader(dataloader.DataLoader):
       raw_data_dir: str, path to download raw data, and unzip.
       min_timeline_length: int, min timeline length to split train/eval set.
       max_context_length: int, max context length as the input.
-      build_movie_vocab: boolean, whether to build movie vocab.
       train_filename: str, generated file name for training data.
       test_filename: str, generated file name for test data.
       vocab_filename: str, generated file name for vocab data.
@@ -185,11 +190,12 @@ class RecommendationDataLoader(dataloader.DataLoader):
         vocab_filename=vocab_filename,
         meta_filename=meta_filename,
         min_timeline_length=min_timeline_length,
-        max_context_length=max_context_length,
-        build_movie_vocab=build_movie_vocab)
+        max_context_length=max_context_length)
+
+    vocab = cls.load_vocab(meta['vocab_file'])
     if data_tag == 'train':
       ds = cls.read_as_dataset(meta['train_file'])
-      return cls(ds, meta['train_size'], meta['vocab_file'])
+      return cls(ds, meta['train_size'], vocab)
     elif data_tag == 'test':
       ds = cls.read_as_dataset(meta['test_file'])
-      return cls(ds, meta['test_size'], meta['vocab_file'])
+      return cls(ds, meta['test_size'], vocab)
