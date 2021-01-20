@@ -32,7 +32,6 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import 
 flags.DEFINE_string('tpu', None, 'The Cloud TPU name.')
 flags.DEFINE_string('gcp_project', None, 'Project name.')
 flags.DEFINE_string('tpu_zone', None, 'GCE zone name.')
-
 flags.DEFINE_integer('eval_samples', None, 'Number of eval samples.')
 flags.DEFINE_string('val_file_pattern', None,
                     'Glob for eval tfrecords, e.g. coco/val-*.tfrecord.')
