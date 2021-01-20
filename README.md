@@ -4,7 +4,7 @@
   <img src="https://www.tensorflow.org/images/tf_logo_social.png" /><br /><br />
 </div>
 
-<h2>Most important links!</h2>
+ <h2>Most important links!</h2>
 
 * [Community examples](./community)
 * [Course materials](./courses/udacity_deep_learning) for the [Deep Learning](https://www.udacity.com/course/deep-learning--ud730) class on Udacity
