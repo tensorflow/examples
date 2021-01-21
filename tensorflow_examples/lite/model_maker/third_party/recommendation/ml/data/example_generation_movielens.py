@@ -63,26 +63,35 @@ def define_flags():
                        "The maximun length of user context history.")
 
 
-def download_and_extract_data(data_directory, url=MOVIELENS_1M_URL):
+def download_and_extract_data(data_directory,
+                              url=MOVIELENS_1M_URL,
+                              fname=MOVIELENS_ZIP_FILENAME,
+                              file_hash=MOVIELENS_ZIP_HASH,
+                              extracted_dir_name=MOVIELENS_EXTRACTED_DIR):
   """Download and extract zip containing MovieLens data to a given directory.
 
   Args:
     data_directory: Local path to extract dataset to.
     url: Direct path to MovieLens dataset .zip file. See constants above for
       examples.
+    fname: str, zip file name to download.
+    file_hash: str, SHA-256 file hash.
+    extracted_dir_name: str, extracted dir name under data_directory.
 
   Returns:
     Downloaded and extracted data file directory.
   """
+  if not tf.io.gfile.exists(data_directory):
+    tf.io.gfile.makedirs(data_directory)
   path_to_zip = tf.keras.utils.get_file(
-      fname=MOVIELENS_ZIP_FILENAME,
+      fname=fname,
       origin=url,
-      file_hash=MOVIELENS_ZIP_HASH,
+      file_hash=file_hash,
       hash_algorithm="sha256",
       extract=True,
       cache_dir=data_directory)
   extracted_file_dir = os.path.join(
-      os.path.dirname(path_to_zip), MOVIELENS_EXTRACTED_DIR)
+      os.path.dirname(path_to_zip), extracted_dir_name)
   return extracted_file_dir
 
 
@@ -184,7 +193,7 @@ def write_vocab_json(vocab_movies, filename):
     json.dump(vocab_movies, jsonfile, indent=2)
 
 
-def generate_datasets(data_dir,
+def generate_datasets(extracted_data_dir,
                       output_dir,
                       min_timeline_length,
                       max_context_length,
@@ -193,11 +202,7 @@ def generate_datasets(data_dir,
                       test_filename=OUTPUT_TESTING_DATA_FILENAME,
                       vocab_filename=OUTPUT_MOVIE_VOCAB_FILENAME):
   """Generates train and test datasets as TFRecord, and returns stats."""
-  if not tf.io.gfile.exists(data_dir):
-    tf.io.gfile.makedirs(data_dir)
-
-  extracted_file_dir = download_and_extract_data(data_directory=data_dir)
-  ratings_df, movies_df = read_data(data_directory=extracted_file_dir)
+  ratings_df, movies_df = read_data(extracted_data_dir)
   timelines, movie_counts = convert_to_timelines(ratings_df)
   train_examples, test_examples = generate_examples_from_timelines(
       timelines=timelines,
@@ -226,7 +231,8 @@ def generate_datasets(data_dir,
 
 
 def main(_):
-  stats = generate_datasets(FLAGS.data_dir, FLAGS.output_dir,
+  extracted_file_dir = download_and_extract_data(FLAGS.data_dir)
+  stats = generate_datasets(extracted_file_dir, FLAGS.output_dir,
                             FLAGS.min_timeline_length, FLAGS.max_context_length,
                             FLAGS.build_movie_vocab)
   tf.compat.v1.logging.info("Generated dataset: %s", stats)

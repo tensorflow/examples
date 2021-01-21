@@ -14,6 +14,7 @@
 """Tests for recommendation task."""
 import os
 
+from absl.testing import parameterized
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core.data_util import recommendation_dataloader as _dl
@@ -22,16 +23,15 @@ from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import recommendation
 
 
-class RecommendationTest(tf.test.TestCase):
+class RecommendationTest(parameterized.TestCase, tf.test.TestCase):
 
   def setUp(self):
     super().setUp()
     _testutil.setup_fake_testdata(self)
-    with _testutil.patch_download_and_extract_data(self.movielens_dir):
-      self.train_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'train', self.test_tempdir)
-      self.test_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'test', self.test_tempdir)
+    self.train_loader = _dl.RecommendationDataLoader.from_movielens(
+        self.dataset_dir, 'train')
+    self.test_loader = _dl.RecommendationDataLoader.from_movielens(
+        self.dataset_dir, 'test')
 
     self.model_spec_options = dict(
         context_embedding_dim=16,
@@ -40,11 +40,16 @@ class RecommendationTest(tf.test.TestCase):
         hidden_layer_dim_ratios=[1, 1],
     )
 
-  def test_create(self):
+  @parameterized.parameters(
+      ('recommendation_bow'),
+      ('recommendation_cnn'),
+      ('recommendation_rnn'),
+  )
+  def test_create(self, model_spec):
     model_dir = os.path.join(self.test_tempdir, 'recommendation_create')
     model = recommendation.create(
         self.train_loader,
-        'recommendation_bow',
+        model_spec,
         self.model_spec_options,
         model_dir,
         steps_per_epoch=1)

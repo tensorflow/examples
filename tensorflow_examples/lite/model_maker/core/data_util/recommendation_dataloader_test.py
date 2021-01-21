@@ -26,34 +26,41 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
     super().setUp()
     _testutil.setup_fake_testdata(self)
 
-  def test_prepare_movielens_datasets(self):
+  def test_download_and_extract_data(self):
+    with _testutil.patch_download_and_extract_data(self.dataset_dir) as fn:
+      out_dir = _dl.RecommendationDataLoader.download_and_extract_movielens(
+          self.download_dir)
+      fn.called_once_with(self.download_dir)
+      self.assertEqual(out_dir, self.dataset_dir)
+
+  def test_generate_movielens_examples(self):
     loader = _dl.RecommendationDataLoader
-    with _testutil.patch_download_and_extract_data(self.movielens_dir):
-      stats = loader._prepare_movielens_datasets(
-          self.test_tempdir, self.generated_dir, 'train.tfrecord',
-          'test.tfrecord', 'movie_vocab.json', 'meta.json')
+    gen_dir = os.path.join(self.dataset_dir, 'generated_examples')
+    stats = loader._generate_movielens_examples(self.dataset_dir, gen_dir,
+                                                'train.tfrecord',
+                                                'test.tfrecord',
+                                                'movie_vocab.json', 'meta.json')
     self.assertDictContainsSubset(
         {
-            'train_file': os.path.join(self.generated_dir, 'train.tfrecord'),
-            'test_file': os.path.join(self.generated_dir, 'test.tfrecord'),
-            'vocab_file': os.path.join(self.generated_dir, 'movie_vocab.json'),
+            'train_file': os.path.join(gen_dir, 'train.tfrecord'),
+            'test_file': os.path.join(gen_dir, 'test.tfrecord'),
+            'vocab_file': os.path.join(gen_dir, 'movie_vocab.json'),
             'train_size': _testutil.TRAIN_SIZE,
             'test_size': _testutil.TEST_SIZE,
             'vocab_size': _testutil.VOCAB_SIZE,
         }, stats)
 
-    self.assertTrue(os.path.exists(self.movielens_dir))
-    self.assertGreater(len(os.listdir(self.movielens_dir)), 0)
+    self.assertTrue(os.path.exists(gen_dir))
+    self.assertGreater(len(os.listdir(gen_dir)), 0)
 
-    meta_file = os.path.join(self.generated_dir, 'meta.json')
+    meta_file = os.path.join(gen_dir, 'meta.json')
     self.assertTrue(os.path.exists(meta_file))
 
   def test_from_movielens(self):
-    with _testutil.patch_download_and_extract_data(self.movielens_dir):
-      train_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'train', self.test_tempdir)
-      test_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'test', self.test_tempdir)
+    train_loader = _dl.RecommendationDataLoader.from_movielens(
+        self.dataset_dir, 'train')
+    test_loader = _dl.RecommendationDataLoader.from_movielens(
+        self.dataset_dir, 'test')
 
     self.assertEqual(len(train_loader), _testutil.TRAIN_SIZE)
     self.assertIsNotNone(train_loader._dataset)
@@ -68,9 +75,8 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
     self.assertEqual(test_loader.max_vocab_id, _testutil.MAX_ITEM_ID)
 
   def test_split(self):
-    with _testutil.patch_download_and_extract_data(self.movielens_dir):
-      test_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'test', self.test_tempdir)
+    test_loader = _dl.RecommendationDataLoader.from_movielens(
+        self.dataset_dir, 'test')
     test0, test1 = test_loader.split(0.1)
     expected_size0 = int(0.1 * _testutil.TEST_SIZE)
     expected_size1 = _testutil.TEST_SIZE - expected_size0
@@ -81,9 +87,8 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
     self.assertIsNotNone(test1._dataset)
 
   def test_gen_dataset(self):
-    with _testutil.patch_download_and_extract_data(self.movielens_dir):
-      test_loader = _dl.RecommendationDataLoader.from_movielens(
-          self.generated_dir, 'test', self.test_tempdir)
+    test_loader = _dl.RecommendationDataLoader.from_movielens(
+        self.dataset_dir, 'test')
     ds = test_loader.gen_dataset(10, is_training=False)
     self.assertIsInstance(ds, tf.data.Dataset)
 

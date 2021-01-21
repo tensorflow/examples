@@ -87,19 +87,17 @@ def setup_fake_testdata(obj):
 
   This function creates new attrs:
   - test_tempdir: temporary dir (optional), if not exists.
-  - datasets_dir: datasets dir to mock downloaded dir.
-  - movielens_dir: extracted dir for movielens data.
-  - generated_dir: generated dir after preprocessing movielens data.
+  - download_dir: datasets dir for downloaded zip.
+  - dataset_dir: extracted dir for movielens data.
 
   Args:
     obj: object, usually TestCase instance's self or cls.
   """
   if not hasattr(obj, 'test_tempdir'):
     obj.test_tempdir = tempfile.mkdtemp()
-  obj.datasets_dir = os.path.join(obj.test_tempdir, 'datasets')
-  obj.movielens_dir = os.path.join(obj.datasets_dir, 'fake_movielens')
-  _generate_fake_data(obj.movielens_dir)
-  obj.generated_dir = os.path.join(obj.test_tempdir, 'generated_data')
+  obj.download_dir = os.path.join(obj.test_tempdir, 'download')
+  obj.dataset_dir = os.path.join(obj.download_dir, 'fake_movielens')
+  _generate_fake_data(obj.dataset_dir)
 
 
 def patch_download_and_extract_data(data_dir):

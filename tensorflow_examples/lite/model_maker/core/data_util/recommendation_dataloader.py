@@ -117,24 +117,29 @@ class RecommendationDataLoader(dataloader.DataLoader):
         num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
   @classmethod
-  def _prepare_movielens_datasets(cls,
-                                  raw_data_dir,
-                                  generated_dir,
-                                  train_filename,
-                                  test_filename,
-                                  vocab_filename,
-                                  meta_filename,
-                                  min_timeline_length=3,
-                                  max_context_length=10):
-    """Prepare movielens datasets, and returns a dict contains meta."""
-    train_file = os.path.join(generated_dir, train_filename)
-    test_file = os.path.join(generated_dir, test_filename)
-    meta_file = os.path.join(generated_dir, meta_filename)
+  def download_and_extract_movielens(cls, download_dir):
+    """Downloads and extracts movielens dataset, then returns extracted dir."""
+    return _gen.download_and_extract_data(download_dir)
+
+  @classmethod
+  def _generate_movielens_examples(cls,
+                                   data_dir,
+                                   generated_examples_dir,
+                                   train_filename,
+                                   test_filename,
+                                   vocab_filename,
+                                   meta_filename,
+                                   min_timeline_length=3,
+                                   max_context_length=10):
+    """Generate movielens examples, and returns a dict contains meta."""
+    train_file = os.path.join(generated_examples_dir, train_filename)
+    test_file = os.path.join(generated_examples_dir, test_filename)
+    meta_file = os.path.join(generated_examples_dir, meta_filename)
     # Create dataset and meta, only if they are not existed.
     if not all([os.path.exists(f) for f in (train_file, test_file, meta_file)]):
       stats = _gen.generate_datasets(
-          data_dir=raw_data_dir,
-          output_dir=generated_dir,
+          data_dir,
+          output_dir=generated_examples_dir,
           min_timeline_length=min_timeline_length,
           max_context_length=max_context_length,
           build_movie_vocab=True,
@@ -148,9 +153,9 @@ class RecommendationDataLoader(dataloader.DataLoader):
 
   @classmethod
   def from_movielens(cls,
-                     generated_dir,
+                     data_dir,
                      data_tag,
-                     raw_data_dir,
+                     generated_examples_dir=None,
                      min_timeline_length=3,
                      max_context_length=10,
                      train_filename='train_movielens_1m.tfrecord',
@@ -166,9 +171,10 @@ class RecommendationDataLoader(dataloader.DataLoader):
     - Or, zip file: http://files.grouplens.org/datasets/movielens/ml-1m.zip
 
     Args:
-      generated_dir: str, path to generate preprocessed examples.
+      data_dir: str, path to dataset containing (unzipped) text data.
       data_tag: str, specify dataset in {'train', 'test'}.
-      raw_data_dir: str, path to download raw data, and unzip.
+      generated_examples_dir: str, path to generate preprocessed examples.
+        (default: same as data_dir)
       min_timeline_length: int, min timeline length to split train/eval set.
       max_context_length: int, max context length as the input.
       train_filename: str, generated file name for training data.
@@ -182,9 +188,12 @@ class RecommendationDataLoader(dataloader.DataLoader):
     if data_tag not in ('train', 'test'):
       raise ValueError(
           'Expected data_tag is train or test, but got {}'.format(data_tag))
-    meta = cls._prepare_movielens_datasets(
-        raw_data_dir,
-        generated_dir,
+    if not generated_examples_dir:
+      # By default, set generated examples dir to data_dir
+      generated_examples_dir = data_dir
+    meta = cls._generate_movielens_examples(
+        data_dir,
+        generated_examples_dir,
         train_filename=train_filename,
         test_filename=test_filename,
         vocab_filename=vocab_filename,
