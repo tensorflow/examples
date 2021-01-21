@@ -60,9 +60,10 @@ class RecommendationDataLoader(dataloader.DataLoader):
                   shuffle=False,
                   input_pipeline_context=None,
                   preprocess=None,
-                  drop_remainder=True):
+                  drop_remainder=True,
+                  total_steps=None):
     """Generates dataset, and overwrites default drop_remainder = True."""
-    return super(RecommendationDataLoader, self).gen_dataset(
+    ds = super(RecommendationDataLoader, self).gen_dataset(
         batch_size=batch_size,
         is_training=is_training,
         shuffle=shuffle,
@@ -70,6 +71,13 @@ class RecommendationDataLoader(dataloader.DataLoader):
         preprocess=preprocess,
         drop_remainder=drop_remainder,
     )
+    # TODO(tianlin): Consider to move the num_batches below to the super class.
+    # Calculate steps by train data, if it is not set.
+    if total_steps:
+      num_batches = total_steps
+    else:
+      num_batches = self._size // batch_size
+    return ds.take(num_batches)
 
   def split(self, fraction):
     return self._split(fraction, self.vocab)
