@@ -262,17 +262,6 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
   @Override
   protected void setNumThreads(final int numThreads) {
-    runInBackground(
-        () -> {
-          try {
-            detector.setNumThreads(numThreads);
-          } catch (IllegalArgumentException e) {
-            LOGGER.e(e, "Failed to set multithreads.");
-            runOnUiThread(
-                () -> {
-                  Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-          }
-        });
+    runInBackground(() -> detector.setNumThreads(numThreads));
   }
 }

@@ -19,8 +19,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Trace;
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.task.vision.detector.Detection;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector;
@@ -49,8 +51,13 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   /** Only return this many results. */
   private static final int NUM_DETECTIONS = 10;
 
+  private final MappedByteBuffer modelBuffer;
+
   /** An instance of the driver class to run model inference with Tensorflow Lite. */
-  private final ObjectDetector objectDetector;
+  private ObjectDetector objectDetector;
+
+  /** Builder of the options used to config the ObjectDetector. */
+  private final ObjectDetectorOptions.Builder optionsBuilder;
 
   /**
    * Initializes a native TensorFlow session for classifying images.
@@ -75,9 +82,9 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   private TFLiteObjectDetectionAPIModel(Context context, String modelFilename) throws IOException {
-    ObjectDetectorOptions options =
-        ObjectDetectorOptions.builder().setMaxResults(NUM_DETECTIONS).build();
-    objectDetector = ObjectDetector.createFromFileAndOptions(context, modelFilename, options);
+    modelBuffer = FileUtil.loadMappedFile(context, modelFilename);
+    optionsBuilder = ObjectDetectorOptions.builder().setMaxResults(NUM_DETECTIONS);
+    objectDetector = ObjectDetector.createFromBufferAndOptions(modelBuffer, optionsBuilder.build());
   }
 
   @Override
@@ -121,10 +128,9 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
 
   @Override
   public void setNumThreads(int numThreads) {
-    if (numThreads != 1) {
-      throw new IllegalArgumentException(
-          "Manipulating the numbers of threads is not allowed in the Task"
-              + " library currently. The current implementation runs on single thread.");
+    if (objectDetector != null) {
+      optionsBuilder.setNumThreads(numThreads);
+      recreateDetector();
     }
   }
 
@@ -133,5 +139,10 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     throw new UnsupportedOperationException(
         "Manipulating the hardware accelerators is not allowed in the Task"
             + " library currently. Only CPU is allowed.");
+  }
+
+  private void recreateDetector() {
+    objectDetector.close();
+    objectDetector = ObjectDetector.createFromBufferAndOptions(modelBuffer, optionsBuilder.build());
   }
 }

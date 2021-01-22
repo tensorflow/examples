@@ -165,15 +165,18 @@ public abstract class Classifier {
 
   /** Initializes a {@code Classifier}. */
   protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
-    if (device != Device.CPU || numThreads != 1) {
+    if (device != Device.CPU) {
       throw new IllegalArgumentException(
-          "Manipulating the hardware accelerators and numbers of threads is not allowed in the Task"
-              + " library currently. Only CPU + single thread is allowed.");
+          "Manipulating the hardware accelerators is not allowed in the Task"
+              + " library currently. Only CPU is allowed.");
     }
 
     // Create the ImageClassifier instance.
     ImageClassifierOptions options =
-        ImageClassifierOptions.builder().setMaxResults(MAX_RESULTS).build();
+        ImageClassifierOptions.builder()
+            .setMaxResults(MAX_RESULTS)
+            .setNumThreads(numThreads)
+            .build();
     imageClassifier = ImageClassifier.createFromFileAndOptions(activity, getModelPath(), options);
     Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
 

@@ -150,7 +150,7 @@ class ImageSegmentationModelExecutor(
     val sb = StringBuilder()
     sb.append("Input Image Size: $imageWidth x $imageHeight\n")
     sb.append("GPU enabled: $useGPU\n")
-    sb.append("Number of threads: $NUM_THREAD\n")
+    sb.append("Number of threads: $NUM_THREADS\n")
     sb.append("ImageSegmenter execution time: $imageSegmentationTime ms\n")
     sb.append("Mask creation time: $maskFlatteningTime ms\n")
     sb.append("Full execution time: $fullTimeExecutionTime ms\n")
@@ -163,7 +163,7 @@ class ImageSegmentationModelExecutor(
 
   companion object {
     public const val TAG = "SegmentationTask"
-    private const val NUM_THREAD = 1
+    private const val NUM_THREADS = 4
     private const val IMAGE_SEGMENTATION_MODEL = "deeplabv3_257_mv_gpu.tflite"
     private const val ALPHA_VALUE = 128
   }
