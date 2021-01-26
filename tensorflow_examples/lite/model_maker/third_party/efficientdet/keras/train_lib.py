@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Training related libraries."""
-import functools
 import math
 import os
 import re
@@ -863,40 +862,19 @@ class EfficientDetNetTrainHub(EfficientDetNetTrain):
     # class/box output prediction network.
     num_anchors = len(config.aspect_ratios) * config.num_scales
 
-    if config.separable_conv:
-      conv2d_layer = functools.partial(
-          tf.keras.layers.SeparableConv2D, depth_multiplier=1)
-    else:
-      conv2d_layer = tf.keras.layers.Conv2D
-    self.classes = conv2d_layer(
-        config.num_classes * num_anchors,
-        kernel_size=3,
-        bias_initializer=tf.constant_initializer(-np.log((1 - 0.01) / 0.01)),
-        padding='same',
+    conv2d_layer = efficientdet_keras.ClassNet.conv2d_layer(
+        config.separable_conv, config.data_format)
+    self.classes = efficientdet_keras.ClassNet.classes_layer(
+        conv2d_layer,
+        config.num_classes,
+        num_anchors,
         name='class_net/class-predict')
 
-    if config.separable_conv:
-      self.boxes = tf.keras.layers.SeparableConv2D(
-          filters=4 * num_anchors,
-          depth_multiplier=1,
-          pointwise_initializer=tf.initializers.variance_scaling(),
-          depthwise_initializer=tf.initializers.variance_scaling(),
-          data_format=config.data_format,
-          kernel_size=3,
-          activation=None,
-          bias_initializer=tf.zeros_initializer(),
-          padding='same',
-          name='box_net/box-predict')
-    else:
-      self.boxes = tf.keras.layers.Conv2D(
-          filters=4 * num_anchors,
-          kernel_initializer=tf.random_normal_initializer(stddev=0.01),
-          data_format=config.data_format,
-          kernel_size=3,
-          activation=None,
-          bias_initializer=tf.zeros_initializer(),
-          padding='same',
-          name='box_net/box-predict')
+    self.boxes = efficientdet_keras.BoxNet.boxes_layer(
+        config.separable_conv,
+        num_anchors,
+        config.data_format,
+        name='box_net/box-predict')
 
     log_dir = os.path.join(self.config.model_dir, 'train_images')
     self.summary_writer = tf.summary.create_file_writer(log_dir)

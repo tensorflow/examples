@@ -401,18 +401,8 @@ class ClassNet(tf.keras.layers.Layer):
     self.bns = []
     self.grad_checkpoint = grad_checkpoint
     self.feature_only = feature_only
-    if separable_conv:
-      conv2d_layer = functools.partial(
-          tf.keras.layers.SeparableConv2D,
-          depth_multiplier=1,
-          data_format=data_format,
-          pointwise_initializer=tf.initializers.variance_scaling(),
-          depthwise_initializer=tf.initializers.variance_scaling())
-    else:
-      conv2d_layer = functools.partial(
-          tf.keras.layers.Conv2D,
-          data_format=data_format,
-          kernel_initializer=tf.random_normal_initializer(stddev=0.01))
+
+    conv2d_layer = self.conv2d_layer(separable_conv, data_format)
     for i in range(self.repeats):
       # If using SeparableConv2D
       self.conv_ops.append(
@@ -435,12 +425,8 @@ class ClassNet(tf.keras.layers.Layer):
             ))
       self.bns.append(bn_per_level)
 
-    self.classes = conv2d_layer(
-        num_classes * num_anchors,
-        kernel_size=3,
-        bias_initializer=tf.constant_initializer(-np.log((1 - 0.01) / 0.01)),
-        padding='same',
-        name='class-predict')
+    self.classes = self.classes_layer(
+        conv2d_layer, num_classes, num_anchors, name='class-predict')
 
   @tf.autograph.experimental.do_not_convert
   def _conv_bn_act(self, image, i, level_id, training):
@@ -475,6 +461,33 @@ class ClassNet(tf.keras.layers.Layer):
         class_outputs.append(self.classes(image))
 
     return class_outputs
+
+  @classmethod
+  def conv2d_layer(cls, separable_conv, data_format):
+    """Gets the conv2d layer in ClassNet class."""
+    if separable_conv:
+      conv2d_layer = functools.partial(
+          tf.keras.layers.SeparableConv2D,
+          depth_multiplier=1,
+          data_format=data_format,
+          pointwise_initializer=tf.initializers.variance_scaling(),
+          depthwise_initializer=tf.initializers.variance_scaling())
+    else:
+      conv2d_layer = functools.partial(
+          tf.keras.layers.Conv2D,
+          data_format=data_format,
+          kernel_initializer=tf.random_normal_initializer(stddev=0.01))
+    return conv2d_layer
+
+  @classmethod
+  def classes_layer(cls, conv2d_layer, num_classes, num_anchors, name):
+    """Gets the classes layer in ClassNet class."""
+    return conv2d_layer(
+        num_classes * num_anchors,
+        kernel_size=3,
+        bias_initializer=tf.constant_initializer(-np.log((1 - 0.01) / 0.01)),
+        padding='same',
+        name=name)
 
 
 class BoxNet(tf.keras.layers.Layer):
@@ -574,28 +587,8 @@ class BoxNet(tf.keras.layers.Layer):
                 name='box-%d-bn-%d' % (i, level)))
       self.bns.append(bn_per_level)
 
-    if self.separable_conv:
-      self.boxes = tf.keras.layers.SeparableConv2D(
-          filters=4 * self.num_anchors,
-          depth_multiplier=1,
-          pointwise_initializer=tf.initializers.variance_scaling(),
-          depthwise_initializer=tf.initializers.variance_scaling(),
-          data_format=self.data_format,
-          kernel_size=3,
-          activation=None,
-          bias_initializer=tf.zeros_initializer(),
-          padding='same',
-          name='box-predict')
-    else:
-      self.boxes = tf.keras.layers.Conv2D(
-          filters=4 * self.num_anchors,
-          kernel_initializer=tf.random_normal_initializer(stddev=0.01),
-          data_format=self.data_format,
-          kernel_size=3,
-          activation=None,
-          bias_initializer=tf.zeros_initializer(),
-          padding='same',
-          name='box-predict')
+      self.boxes = self.boxes_layer(
+          separable_conv, num_anchors, data_format, name='box-predict')
 
   @tf.autograph.experimental.do_not_convert
   def _conv_bn_act(self, image, i, level_id, training):
@@ -631,6 +624,32 @@ class BoxNet(tf.keras.layers.Layer):
         box_outputs.append(self.boxes(image))
 
     return box_outputs
+
+  @classmethod
+  def boxes_layer(cls, separable_conv, num_anchors, data_format, name):
+    """Gets the conv2d layer in BoxNet class."""
+    if separable_conv:
+      return tf.keras.layers.SeparableConv2D(
+          filters=4 * num_anchors,
+          depth_multiplier=1,
+          pointwise_initializer=tf.initializers.variance_scaling(),
+          depthwise_initializer=tf.initializers.variance_scaling(),
+          data_format=data_format,
+          kernel_size=3,
+          activation=None,
+          bias_initializer=tf.zeros_initializer(),
+          padding='same',
+          name=name)
+    else:
+      return tf.keras.layers.Conv2D(
+          filters=4 * num_anchors,
+          kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+          data_format=data_format,
+          kernel_size=3,
+          activation=None,
+          bias_initializer=tf.zeros_initializer(),
+          padding='same',
+          name=name)
 
 
 class SegmentationHead(tf.keras.layers.Layer):
