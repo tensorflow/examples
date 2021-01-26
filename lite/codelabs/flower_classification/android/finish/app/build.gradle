@@ -41,8 +41,8 @@ dependencies {
 
     // Build off of nightly TensorFlow Lite
     // TODO: Add TFLite dependencies
-    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
-    implementation('org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly') { changing = true }
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly-SNAPSHOT'
 
     implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
 

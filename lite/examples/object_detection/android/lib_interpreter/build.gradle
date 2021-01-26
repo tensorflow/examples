@@ -42,6 +42,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
     // Build off of nightly TensorFlow Lite
-    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
-    implementation ('org.tensorflow:tensorflow-lite-metadata:0.0.0-nightly') { changing = true }
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.0.0-nightly-SNAPSHOT'
  }

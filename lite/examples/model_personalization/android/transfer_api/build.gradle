@@ -43,8 +43,8 @@ dependencies {
 
     // This dependency is compileOnly so that the user of this library can select between
     // different TFLite distributions (e.g. with or without Flex).
-    compileOnly 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    compileOnly 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
 
     // Model used for tests does not require Flex.
-    androidTestImplementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    androidTestImplementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
 }

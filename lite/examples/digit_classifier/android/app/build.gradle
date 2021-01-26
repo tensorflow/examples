@@ -51,7 +51,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-tasks:17.0.0"
 
     // TF Lite
-    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
