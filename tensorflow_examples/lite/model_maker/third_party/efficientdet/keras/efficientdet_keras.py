@@ -928,7 +928,12 @@ class EfficientDetNet(tf.keras.Model):
 class EfficientDetModel(EfficientDetNet):
   """EfficientDet full keras model with pre and post processing."""
 
-  def _preprocessing(self, raw_images, image_size, mode=None):
+  def _preprocessing(self,
+                     raw_images,
+                     image_size,
+                     mean_rgb,
+                     stddev_rgb,
+                     mode=None):
     """Preprocess images before feeding to the network."""
     if not mode:
       return raw_images, None
@@ -941,7 +946,7 @@ class EfficientDetModel(EfficientDetNet):
     def map_fn(image):
       input_processor = dataloader.DetectionInputProcessor(
           image, image_size)
-      input_processor.normalize_image()
+      input_processor.normalize_image(mean_rgb, stddev_rgb)
       input_processor.set_scale_factors_to_output_size()
       image = input_processor.resize_and_crop_image()
       image_scale = input_processor.image_scale_to_original
@@ -993,7 +998,9 @@ class EfficientDetModel(EfficientDetNet):
     config = self.config
 
     # preprocess.
-    inputs, scales = self._preprocessing(inputs, config.image_size, pre_mode)
+    inputs, scales = self._preprocessing(inputs, config.image_size,
+                                         config.mean_rgb, config.stddev_rgb,
+                                         pre_mode)
     # network.
     outputs = super().call(inputs, training)
 

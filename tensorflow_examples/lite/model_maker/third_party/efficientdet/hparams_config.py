@@ -220,6 +220,9 @@ def default_detection_configs():
   h.clip_gradients_norm = 10.0
   h.num_epochs = 300
   h.data_format = 'channels_last'
+  # The default image normalization is identical to Cloud TPU ResNet.
+  h.mean_rgb = [0.485 * 255, 0.456 * 255, 0.406 * 255]
+  h.stddev_rgb = [0.229 * 255, 0.224 * 255, 0.225 * 255]
 
   # classification loss
   h.label_smoothing = 0.0  # 0.1 is a good default
@@ -382,6 +385,8 @@ efficientdet_model_param_dict = {
 
 efficientdet_lite_param_dict = {
     # lite models are in progress and subject to changes.
+    # mean_rgb and stddev_rgb are consistent with EfficientNet-Lite models in
+    # https://github.com/tensorflow/tpu/blob/master/models/official/efficientnet/lite/efficientnet_lite_builder.py#L28
     'efficientdet-lite0':
         dict(
             name='efficientdet-lite0',
@@ -393,6 +398,8 @@ efficientdet_lite_param_dict = {
             act_type='relu',
             fpn_weight_method='sum',
             anchor_scale=3.0,
+            mean_rgb=127.0,
+            stddev_rgb=128.0,
         ),
     'efficientdet-lite1':
         dict(
@@ -405,6 +412,8 @@ efficientdet_lite_param_dict = {
             act_type='relu',
             fpn_weight_method='sum',
             anchor_scale=3.0,
+            mean_rgb=127.0,
+            stddev_rgb=128.0,
         ),
     'efficientdet-lite2':
         dict(
@@ -417,6 +426,8 @@ efficientdet_lite_param_dict = {
             act_type='relu',
             fpn_weight_method='sum',
             anchor_scale=3.0,
+            mean_rgb=127.0,
+            stddev_rgb=128.0,
         ),
     'efficientdet-lite3':
         dict(
@@ -428,6 +439,8 @@ efficientdet_lite_param_dict = {
             box_class_repeats=4,
             act_type='relu',
             fpn_weight_method='sum',
+            mean_rgb=127.0,
+            stddev_rgb=128.0,
         ),
     'efficientdet-lite4':
         dict(
@@ -439,6 +452,8 @@ efficientdet_lite_param_dict = {
             box_class_repeats=4,
             act_type='relu',
             fpn_weight_method='sum',
+            mean_rgb=127.0,
+            stddev_rgb=128.0,
         ),
 }
 

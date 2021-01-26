@@ -34,19 +34,23 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.visualize imp
 from tensorflow.python.client import timeline  # pylint: disable=g-direct-tensorflow-import
 
 
-def image_preprocess(image, image_size: Union[int, Tuple[int, int]]):
+def image_preprocess(image, image_size: Union[int, Tuple[int, int]], mean_rgb,
+                     stddev_rgb):
   """Preprocess image for inference.
 
   Args:
     image: input image, can be a tensor or a numpy arary.
     image_size: single integer of image size for square image or tuple of two
       integers, in the format of (image_height, image_width).
+    mean_rgb: Mean value of RGB, can be a list of float or a float value.
+    stddev_rgb: Standard deviation of RGB, can be a list of float or a float
+      value.
 
   Returns:
     (image, scale): a tuple of processed image and its scale.
   """
   input_processor = dataloader.DetectionInputProcessor(image, image_size)
-  input_processor.normalize_image()
+  input_processor.normalize_image(mean_rgb, stddev_rgb)
   input_processor.set_scale_factors_to_output_size()
   image = input_processor.resize_and_crop_image()
   image_scale = input_processor.image_scale_to_original
@@ -65,6 +69,8 @@ def batch_image_files_decode(image_files):
 
 def batch_image_preprocess(raw_images,
                            image_size: Union[int, Tuple[int, int]],
+                           mean_rgb,
+                           stddev_rgb,
                            batch_size: int = None):
   """Preprocess batched images for inference.
 
@@ -72,6 +78,9 @@ def batch_image_preprocess(raw_images,
     raw_images: a list of images, each image can be a tensor or a numpy arary.
     image_size: single integer of image size for square image or tuple of two
       integers, in the format of (image_height, image_width).
+    mean_rgb: Mean value of RGB, can be a list of float or a float value.
+    stddev_rgb: Standard deviation of RGB, can be a list of float or a float
+      value.
     batch_size: if None, use map_fn to deal with dynamic batch size.
 
   Returns:
@@ -79,7 +88,11 @@ def batch_image_preprocess(raw_images,
   """
   if not batch_size:
     # map_fn is a little bit slower due to some extra overhead.
-    map_fn = functools.partial(image_preprocess, image_size=image_size)
+    map_fn = functools.partial(
+        image_preprocess,
+        image_size=image_size,
+        mean_rgb=mean_rgb,
+        stddev_rgb=stddev_rgb)
     images, scales = tf.map_fn(
         map_fn, raw_images, dtype=(tf.float32, tf.float32), back_prop=False)
     return (images, scales)
@@ -87,7 +100,8 @@ def batch_image_preprocess(raw_images,
   # If batch size is known, use a simple loop.
   scales, images = [], []
   for i in range(batch_size):
-    image, scale = image_preprocess(raw_images[i], image_size)
+    image, scale = image_preprocess(raw_images[i], image_size, mean_rgb,
+                                    stddev_rgb)
     scales.append(scale)
     images.append(image)
   images = tf.stack(images)
@@ -95,14 +109,21 @@ def batch_image_preprocess(raw_images,
   return (images, scales)
 
 
-def build_inputs(image_path_pattern: Text, image_size: Union[int, Tuple[int,
-                                                                        int]]):
+def build_inputs(
+    image_path_pattern: Text,
+    image_size: Union[int, Tuple[int, int]],
+    mean_rgb,
+    stddev_rgb,
+):
   """Read and preprocess input images.
 
   Args:
     image_path_pattern: a path to indicate a single or multiple files.
     image_size: single integer of image size for square image or tuple of two
       integers, in the format of (image_height, image_width).
+    mean_rgb: Mean value of RGB, can be a list of float or a float value.
+    stddev_rgb: Standard deviation of RGB, can be a list of float or a float
+      value.
 
   Returns:
     (raw_images, images, scales): raw images, processed images, and scales.
@@ -114,7 +135,7 @@ def build_inputs(image_path_pattern: Text, image_size: Union[int, Tuple[int,
   for f in tf.io.gfile.glob(image_path_pattern):
     image = Image.open(f)
     raw_images.append(image)
-    image, scale = image_preprocess(image, image_size)
+    image, scale = image_preprocess(image, image_size, mean_rgb, stddev_rgb)
     images.append(image)
     scales.append(scale)
   if not images:
@@ -429,6 +450,8 @@ class ServingDriver(object):
       raw_images = batch_image_files_decode(image_files)
       raw_images = tf.identity(raw_images, name='image_arrays')
       images, scales = batch_image_preprocess(raw_images, params['image_size'],
+                                              params['mean_rgb'],
+                                              params['stddev_rgb'],
                                               self.batch_size)
       if params['data_format'] == 'channels_first':
         images = tf.transpose(images, [0, 3, 1, 2])
@@ -667,7 +690,9 @@ class InferenceDriver(object):
     with tf.Session() as sess:
       # Buid inputs and preprocessing.
       raw_images, images, scales = build_inputs(image_path_pattern,
-                                                params['image_size'])
+                                                params['image_size'],
+                                                params['mean_rgb'],
+                                                params['stddev_rgb'])
       if params['data_format'] == 'channels_first':
         images = tf.transpose(images, [0, 3, 1, 2])
       # Build model.
