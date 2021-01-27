@@ -54,7 +54,7 @@ class MockSpec(audio_spec.BaseSpec):
     return None
 
 
-class AudioDataLoaderTest(tf.test.TestCase):
+class Base(tf.test.TestCase):
 
   def _get_folder_path(self, sub_folder_name):
     folder_path = os.path.join(self.get_temp_dir(), sub_folder_name)
@@ -63,6 +63,33 @@ class AudioDataLoaderTest(tf.test.TestCase):
     tf.compat.v1.logging.info('Test path: %s', folder_path)
     os.mkdir(folder_path)
     return folder_path
+
+
+class LoadFromESC50Test(Base):
+
+  def test_spec(self):
+    folder_path = self._get_folder_path('test_examples_helper')
+
+    spec = audio_spec.YAMNetSpec()
+    audio_dataloader.DataLoader.from_esc50(spec, folder_path)
+
+    spec = audio_spec.BrowserFFTSpec()
+    with self.assertRaises(AssertionError):
+      audio_dataloader.DataLoader.from_esc50(spec, folder_path)
+
+
+class LoadFromFolderTest(Base):
+
+  def test_spec(self):
+    folder_path = self._get_folder_path('test_examples_helper')
+    write_sample(folder_path, 'unknown', '2s.wav', 44100, 2, value=1)
+
+    spec = audio_spec.YAMNetSpec()
+    with self.assertRaises(AssertionError):
+      audio_dataloader.DataLoader.from_folder(spec, folder_path)
+
+    spec = audio_spec.BrowserFFTSpec()
+    audio_dataloader.DataLoader.from_folder(spec, folder_path)
 
   def test_examples_helper(self):
     root = self._get_folder_path('test_examples_helper')

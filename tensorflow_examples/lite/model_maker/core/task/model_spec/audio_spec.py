@@ -176,3 +176,8 @@ class BrowserFFTSpec(BaseSpec):
 
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(model, batch_size=None)
+
+
+# TODO(b/178083096): Refactor this class and BaseSpec to have a common interface
+class YAMNetSpec:
+  pass

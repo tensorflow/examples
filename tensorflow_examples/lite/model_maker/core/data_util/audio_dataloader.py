@@ -26,6 +26,7 @@ import numpy as np
 from scipy.io import wavfile
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
+from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
 def _list_files(path):
@@ -265,6 +266,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
       AudioDataLoader containing audio spectrogram (or any data type returned by
       spec.preprocess) and labels.
     """
+    assert isinstance(spec, audio_spec.BaseSpec)
     root_dir = os.path.abspath(data_path)
     cache_dir = os.path.join(root_dir, 'cache')
 
@@ -274,3 +276,24 @@ class DataLoader(dataloader.ClassificationDataLoader):
         raise ValueError('No audio files found.')
       print('Cached {} audio samples.'.format(cnt))
     return cls._from_cache(spec, cache_dir, is_training, shuffle)
+
+  @classmethod
+  def from_esc50(cls, spec, data_path):
+    """Load ESC50 style audio samples.
+
+    ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
+    Audio files should be put in ${data_path}/audio
+    Metadata file should be put in ${data_path}/meta/esc50.csv
+
+    Note that only YAMNet model is supported.
+
+    Args:
+      spec: An instance of audio_spec.YAMNet
+      data_path: string, location to the audio files.
+
+    Returns:
+      An instance of AudioDataLoader containing audio samples and labels.
+    """
+    # TODO(b/178083096): remove this restriction.
+    assert isinstance(spec, audio_spec.YAMNetSpec)
+    return NotImplemented
