@@ -15,11 +15,11 @@ limitations under the License.
 package org.tensorflow.lite.examples.bertqa.ui;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import com.google.android.material.chip.Chip;
 import org.tensorflow.lite.examples.bertqa.R;
 

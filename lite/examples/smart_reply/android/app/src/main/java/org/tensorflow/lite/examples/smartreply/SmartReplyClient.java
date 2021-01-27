@@ -17,8 +17,8 @@ package org.tensorflow.lite.examples.smartreply;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import androidx.annotation.Keep;
 import android.util.Log;
+import androidx.annotation.Keep;
 import androidx.annotation.WorkerThread;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
