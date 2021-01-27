@@ -27,8 +27,6 @@ CLASS_OFFSET = 1
 # TFLite-specific constants.
 TFLITE_MAX_CLASSES_PER_DETECTION = 1
 TFLITE_DETECTION_POSTPROCESS_FUNC = 'TFLite_Detection_PostProcess'
-# TODO(b/175166514): Parametrize TFLITE_MAX_DETECTIONS & TFLITE_USE_REGULAR_NMS.
-TFLITE_MAX_DETECTIONS = 10
 # TFLite fast NMS == postprocess_global (less accurate)
 # TFLite regular NMS == postprocess_per_class
 TFLITE_USE_REGULAR_NMS = False
@@ -264,10 +262,11 @@ def tflite_nms_implements_signature(params):
   nms_configs = params['nms_configs']
   iou_thresh = nms_configs['iou_thresh'] or 0.5
   score_thresh = nms_configs['score_thresh'] or float('-inf')
+  max_detections = params['tflite_max_detections']
 
   implements_signature = [
       'name: "%s"' % TFLITE_DETECTION_POSTPROCESS_FUNC,
-      'attr { key: "max_detections" value { i: %d } }' % TFLITE_MAX_DETECTIONS,
+      'attr { key: "max_detections" value { i: %d } }' % max_detections,
       'attr { key: "max_classes_per_detection" value { i: %d } }' %
       TFLITE_MAX_CLASSES_PER_DETECTION,
       'attr { key: "use_regular_nms" value { b: %s } }' %

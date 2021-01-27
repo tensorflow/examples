@@ -264,6 +264,7 @@ def default_detection_configs():
       'max_nms_inputs': 0,
       'max_output_size': 100,
   }
+  h.tflite_max_detections = 100
 
   # version.
   h.fpn_name = None
