@@ -34,7 +34,8 @@ class EfficientDetModelSpecTest(tf.test.TestCase):
     hub_path = test_util.get_test_data_path('fake_effdet_lite0_hub')
     cls._spec = object_detector_spec.EfficientDetModelSpec(
         model_name='efficientdet-lite0', uri=hub_path, hparams=dict(map_freq=1))
-    cls.model = cls._spec.create_model()
+    with cls._spec.ds_strategy.scope():
+      cls.model = cls._spec.create_model()
 
   def test_create_model(self):
     self.assertIsInstance(self.model, tf.keras.Model)
@@ -44,15 +45,17 @@ class EfficientDetModelSpecTest(tf.test.TestCase):
     self.assertLen(box_outputs, 5)
 
   def test_train(self):
-    model = self._spec.train(
-        self.model,
-        train_dataset=self._gen_input(),
-        steps_per_epoch=1,
-        val_dataset=self._gen_input(),
-        validation_steps=1,
-        epochs=1,
-        batch_size=1)
-    self.assertIsInstance(model, tf.keras.Model)
+    with self._spec.ds_strategy.scope():
+      model = self._spec.create_model()
+      model = self._spec.train(
+          model,
+          train_dataset=self._gen_input(),
+          steps_per_epoch=1,
+          val_dataset=self._gen_input(),
+          validation_steps=1,
+          epochs=1,
+          batch_size=1)
+      self.assertIsInstance(model, tf.keras.Model)
 
   def test_evaluate(self):
     metrics = self._spec.evaluate(
