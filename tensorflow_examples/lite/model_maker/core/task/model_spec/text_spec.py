@@ -835,7 +835,7 @@ class BertQAModelSpec(BertModelSpec):
     # if not specified.
     strategy = self.strategy or tf.distribute.get_strategy()
     predict_iterator = iter(
-        strategy.experimental_distribute_datasets_from_function(input_fn))
+        strategy.distribute_datasets_from_function(input_fn))
 
     @tf.function
     def predict_step(iterator):

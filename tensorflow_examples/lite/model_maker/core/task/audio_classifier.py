@@ -73,8 +73,8 @@ class AudioClassifier(classification_model.ClassificationModel):
     # TODO(b/171449557): Put this into DataLoader.
     input_fn, steps = self._get_input_fn_and_steps(
         data, batch_size, is_training=is_training)
-    dataset = tf.distribute.get_strategy(
-    ).experimental_distribute_datasets_from_function(input_fn)
+    dataset = tf.distribute.get_strategy().distribute_datasets_from_function(
+        input_fn)
     return dataset, steps
 
   def train(self, train_data, validation_data, epochs, batch_size):

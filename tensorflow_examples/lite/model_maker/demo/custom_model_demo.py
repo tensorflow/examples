@@ -135,8 +135,8 @@ class Spec(BinaryClassificationBaseSpec):
 
 def _get_dataset(dataset_fn):
   """Helper function to get dataset with current distribute strategy."""
-  return tf.distribute.get_strategy(
-  ).experimental_distribute_datasets_from_function(dataset_fn)
+  return tf.distribute.get_strategy().distribute_datasets_from_function(
+      dataset_fn)
 
 
 class BinaryClassifier(custom_model.CustomModel):
