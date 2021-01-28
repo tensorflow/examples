@@ -37,9 +37,9 @@ class BaseSpec(abc.ABC):
     tf.compat.v1.logging.info('Checkpoints are stored in %s', self.model_dir)
     self.strategy = strategy or tf.distribute.get_strategy()
 
-    self.expected_waveform_len = 44032
-    self.target_sample_rate = 44100
-    self.snippet_duration_sec = 1.
+  @abc.abstractproperty
+  def target_sample_rate(self):
+    pass
 
   @abc.abstractmethod
   def create_model(self, num_classes):
@@ -110,7 +110,13 @@ class BrowserFFTSpec(BaseSpec):
     super(BrowserFFTSpec, self).__init__(model_dir, strategy)
     self._preprocess_model = _load_browser_fft_preprocess_model()
     self._tfjs_sc_model = _load_tfjs_speech_command_model()
+
     self.expected_waveform_len = self._preprocess_model.input_shape[-1]
+    self.snippet_duration_sec = 1.
+
+  @property
+  def target_sample_rate(self):
+    return 44100
 
   @tf.function
   def preprocess(self, x, label):

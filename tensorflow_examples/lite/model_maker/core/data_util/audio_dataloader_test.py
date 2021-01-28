@@ -47,11 +47,20 @@ def write_sample(root,
 
 class MockSpec(audio_spec.BaseSpec):
 
+  def __init__(self, *args, **kwargs):
+    super(MockSpec, self).__init__(*args, **kwargs)
+    self.snippet_duration_sec = 1.
+    self.expected_waveform_len = 44100
+
   def create_model(self):
     return None
 
   def run_classifier(self, *args, **kwargs):
     return None
+
+  @property
+  def target_sample_rate(self):
+    return 44100
 
 
 class Base(tf.test.TestCase):
