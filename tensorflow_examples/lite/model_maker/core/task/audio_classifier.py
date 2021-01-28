@@ -27,7 +27,7 @@ from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 def create(train_data,
            model_spec,
            validation_data=None,
-           batch_size=256,
+           batch_size=32,
            epochs=1,
            model_dir=None,
            do_train=True):
