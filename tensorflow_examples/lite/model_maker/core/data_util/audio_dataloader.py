@@ -192,11 +192,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
     @tf.function
     def _load_wav(filepath, label):
       file_contents = tf.io.read_file(filepath)
-      # shape: (target_sample_rate, None)
-      wav = tf.audio.decode_wav(
-          file_contents,
-          desired_channels=-1,
-          desired_samples=spec.target_sample_rate).audio
+      # shape: (target_sample_rate, 1)
+      wav, _ = tf.audio.decode_wav(file_contents, desired_channels=1)
       # shape: (target_sample_rate,)
       wav = tf.squeeze(wav, axis=-1)
       # shape: (1, target_sample_rate)
