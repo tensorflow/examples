@@ -95,7 +95,7 @@ def run(data_dir, export_dir, spec='audio_browser_fft', **kwargs):
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_dataset()
-  run(data_dir, FLAGS.export_dir)
+  run(data_dir, export_dir=FLAGS.export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':
