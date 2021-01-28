@@ -120,7 +120,12 @@ class BrowserFFTSpec(BaseSpec):
 
   @tf.function
   def preprocess(self, x, label):
-    return tf.squeeze(self._preprocess_model(x), axis=0), label
+    # x has shape (1, expected_waveform_len)
+    y = self._preprocess_model(x)
+    # y has shape (1, embedding_len)
+    y = tf.squeeze(y, axis=0)
+    # y has shape (embedding_len,)
+    return y, label
 
   def create_model(self, num_classes):
     if num_classes <= 1:

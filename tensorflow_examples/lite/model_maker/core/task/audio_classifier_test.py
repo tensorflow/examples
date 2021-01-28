@@ -19,6 +19,7 @@ from __future__ import print_function
 import os
 
 import numpy as np
+from scipy.io import wavfile
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader
@@ -27,32 +28,50 @@ from tensorflow_examples.lite.model_maker.core.task import audio_classifier
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
+class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
+
+  @tf.function
+  def preprocess(self, x, label):
+    return tf.squeeze(x, axis=0), label
+
+
+def write_sample(root,
+                 category,
+                 file_name,
+                 sample_rate,
+                 duration_sec,
+                 dtype=np.int16):
+  os.makedirs(os.path.join(root, category), exist_ok=True)
+  xs = np.random.rand(int(sample_rate * duration_sec),) * (1 << 15)
+  xs = xs.astype(dtype)
+  full_path = os.path.join(root, category, file_name)
+  wavfile.write(full_path, sample_rate, xs)
+  return full_path
+
+
 class AudioClassifierTest(tf.test.TestCase):
 
   def testBrowserFFT(self):
 
-    def pcm(shape):
-      # Convert random number between (0, 1] to int16
-      return np.random.rand(*shape) * (1 << 15)
+    temp_folder = self.get_temp_dir()
+    cat1 = write_sample(temp_folder, 'cat', '1.wav', 44100, duration_sec=1)
+    cat2 = write_sample(temp_folder, 'cat', '2.wav', 44100, duration_sec=2)
+    dog1 = write_sample(temp_folder, 'dog', '1.wav', 44100, duration_sec=3)
+    dog2 = write_sample(temp_folder, 'dog', '2.wav', 44100, duration_sec=4)
+    index_to_labels = ['cat', 'dog']
 
     np.random.seed(123)
     tf.random.set_seed(123)
 
     # Prepare data.
     spec = audio_spec.BrowserFFTSpec()
-    dataset_shape = (1, spec.expected_waveform_len)
-    sounds = [pcm(dataset_shape) for category in range(2)]
-    labels = list(range(2))
-    index_to_labels = ['sound1', 'sound2']
-    ds = tf.data.Dataset.zip((tf.data.Dataset.from_tensor_slices(sounds),
-                              tf.data.Dataset.from_tensor_slices(labels)))
-    preprocessed_ds = ds.map(spec.preprocess)
-    data_loader = audio_dataloader.DataLoader(preprocessed_ds,
-                                              len(preprocessed_ds),
-                                              index_to_labels)
+    ds = tf.data.Dataset.from_tensor_slices(([cat1, cat2, dog1,
+                                              dog2], [0, 0, 1, 1]))
+    data_loader = audio_dataloader.DataLoader(ds, len(ds), index_to_labels,
+                                              spec)
 
     # Train a floating point model.
-    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=50)
+    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=35)
 
     # Evaluate trained model
     _, acc = task.evaluate(data_loader)
@@ -78,10 +97,9 @@ class AudioClassifierTest(tf.test.TestCase):
 
     # Create a new dataset without preprocessing since preprocessing has been
     # packaged inside TFLite model.
-    squeezed_ds = ds.map(lambda x, y: (tf.squeeze(tf.cast(x, tf.float32)), y))
-    tflite_dataloader = audio_dataloader.DataLoader(squeezed_ds,
-                                                    len(squeezed_ds),
-                                                    index_to_labels)
+    spec = BrowserFFTWithoutPreprocessing()
+    tflite_dataloader = audio_dataloader.DataLoader(ds, len(ds),
+                                                    index_to_labels, spec)
 
     # Evaluate accurarcy on float model.
     result = task.evaluate_tflite(output_path, tflite_dataloader)

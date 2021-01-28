@@ -18,7 +18,6 @@ from __future__ import division
 from __future__ import print_function
 
 import bisect
-import functools
 import os
 import random
 
@@ -150,6 +149,13 @@ def _resample_and_cut(cache_path, spec, example, label):
 class DataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for audio tasks."""
 
+  def __init__(self, dataset, size, index_to_label, spec):
+    super(DataLoader, self).__init__(dataset, size, index_to_label)
+    self._spec = spec
+
+  def split(self, fraction):
+    return self._split(fraction, self.index_to_label, self._spec)
+
   @classmethod
   def _has_cache(cls, cache_path):
     if not tf.io.gfile.exists(cache_path):
@@ -188,56 +194,9 @@ class DataLoader(dataloader.ClassificationDataLoader):
     path_ds = tf.data.Dataset.from_tensor_slices(examples)
     label_ds = tf.data.Dataset.from_tensor_slices(labels)
     ds = tf.data.Dataset.zip((path_ds, label_ds))
-    autotune = tf.data.AUTOTUNE
 
-    @tf.function
-    def _load_wav(filepath, label):
-      file_contents = tf.io.read_file(filepath)
-      # shape: (target_sample_rate, 1)
-      wav, _ = tf.audio.decode_wav(file_contents, desired_channels=1)
-      # shape: (target_sample_rate,)
-      wav = tf.squeeze(wav, axis=-1)
-      # shape: (1, target_sample_rate)
-      wav = tf.expand_dims(wav, 0)
-      return wav, label
-
-    @tf.function
-    def _crop(waveform, label):
-      # shape: (1, expected_waveform_len)
-      cropped = tf.slice(
-          waveform, begin=[0, 0], size=[1, spec.expected_waveform_len])
-      return cropped, label
-
-    @tf.function
-    def _elements_finite(preprocess_data, unused_label):
-      # Make sure that the data sent to the model does not contain nan or inf
-      # values. This should be the last filter applied to the dataset.
-      # Arguably we could possibly apply this filter to all tasks.
-      return tf.math.reduce_all(tf.math.is_finite(preprocess_data))
-
-    ds_max_len = len(ds)
-
-    ds = ds.map(_load_wav, num_parallel_calls=autotune)
-    ds = ds.map(_crop, num_parallel_calls=autotune)
-    ds = ds.map(spec.preprocess, num_parallel_calls=autotune)
-    if is_training:
-      ds = ds.map(spec.data_augmentation, num_parallel_calls=autotune)
-
-    # Filter out examples with nan or inf values. Without this filter, training
-    # might not work with loss = nan on some dataset.
-    # But having this filter means that we're not able to get the dataset length
-    # accurately. This will impact the behavior of `split` method and cause
-    # the eval (and test) dataset to have less element than expected.
-    # As long as the train and eval dataset is not empty, this should not be an
-    # issue for training/evaluate. The `steps_per_epoch` and `validation_steps`
-    # parameter in Keras is only a reference value. The training/evaluate loop
-    # will break early once the datasest is exhausted.
-    # TODO(b/171848856): If we run preprocessing while creating the cache, we
-    # won't need this filter during training time.
-    ds = ds.filter(_elements_finite)
-
-    tf.compat.v1.logging.info('Loaded %d audio samples.', ds_max_len)
-    return DataLoader(ds, ds_max_len, index_to_labels)
+    tf.compat.v1.logging.info('Loaded %d audio files.', len(ds))
+    return DataLoader(ds, len(ds), index_to_labels, spec)
 
   @classmethod
   def from_folder(cls, spec, data_path, is_training=True, shuffle=True):
@@ -299,12 +258,46 @@ class DataLoader(dataloader.ClassificationDataLoader):
     Returns:
       A TF dataset ready to be consumed by Keras model.
     """
+    # This argument is only used for image dataset for now. Audio preprocessing
+    # is defined in the spec.
+    _ = preprocess
     ds = self._dataset
+    spec = self._spec
+    autotune = tf.data.AUTOTUNE
+
     ds = dataloader.shard(ds, input_pipeline_context)
 
-    if preprocess:
-      preprocess = functools.partial(preprocess, is_training=is_training)
-      ds = ds.map(preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+    @tf.function
+    def _load_wav(filepath, label):
+      file_contents = tf.io.read_file(filepath)
+      # shape: (target_sample_rate, 1)
+      wav, _ = tf.audio.decode_wav(file_contents, desired_channels=1)
+      # shape: (target_sample_rate,)
+      wav = tf.squeeze(wav, axis=-1)
+      # shape: (1, target_sample_rate)
+      wav = tf.expand_dims(wav, 0)
+      return wav, label
+
+    @tf.function
+    def _crop(waveform, label):
+      # shape: (1, expected_waveform_len)
+      cropped = tf.slice(
+          waveform, begin=[0, 0], size=[1, spec.expected_waveform_len])
+      return cropped, label
+
+    @tf.function
+    def _elements_finite(preprocess_data, unused_label):
+      # Make sure that the data sent to the model does not contain nan or inf
+      # values. This should be the last filter applied to the dataset.
+      # Arguably we could possibly apply this filter to all tasks.
+      return tf.math.reduce_all(tf.math.is_finite(preprocess_data))
+
+    ds = ds.map(_load_wav, num_parallel_calls=autotune)
+    ds = ds.map(_crop, num_parallel_calls=autotune)
+    ds = ds.map(spec.preprocess, num_parallel_calls=autotune)
+    if is_training:
+      ds = ds.map(spec.data_augmentation, num_parallel_calls=autotune)
+    ds = ds.filter(_elements_finite)
 
     if is_training:
       if shuffle:
