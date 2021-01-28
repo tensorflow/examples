@@ -121,8 +121,7 @@ class RecommendationDataLoader(dataloader.DataLoader):
     """Reads file pattern as dataset."""
     dataset = _launcher.InputFn.read_dataset(filepattern)
     return dataset.map(
-        _launcher.InputFn.decode_example,
-        num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        _launcher.InputFn.decode_example, num_parallel_calls=tf.data.AUTOTUNE)
 
   @classmethod
   def download_and_extract_movielens(cls, download_dir):

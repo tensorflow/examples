@@ -44,8 +44,7 @@ def _load(tfrecord_file, meta_data_file, model_spec, is_training=None):
 
   dataset = input_pipeline.single_file_dataset(tfrecord_file, name_to_features)
   dataset = dataset.map(
-      model_spec.select_data_from_record,
-      num_parallel_calls=tf.data.experimental.AUTOTUNE)
+      model_spec.select_data_from_record, num_parallel_calls=tf.data.AUTOTUNE)
 
   meta_data = file_util.load_json_file(meta_data_file)
 

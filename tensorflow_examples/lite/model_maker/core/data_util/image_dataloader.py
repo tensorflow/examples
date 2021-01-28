@@ -87,7 +87,7 @@ class ImageClassifierDataLoader(dataloader.ClassificationDataLoader):
 
     path_ds = tf.data.Dataset.from_tensor_slices(all_image_paths)
 
-    autotune = tf.data.experimental.AUTOTUNE
+    autotune = tf.data.AUTOTUNE
     image_ds = path_ds.map(load_image, num_parallel_calls=autotune)
 
     # Loads label.

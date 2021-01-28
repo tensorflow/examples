@@ -87,7 +87,7 @@ class DataLoader(object):
 
     if preprocess:
       preprocess = functools.partial(preprocess, is_training=is_training)
-      ds = ds.map(preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+      ds = ds.map(preprocess, num_parallel_calls=tf.data.AUTOTUNE)
 
     if is_training:
       if shuffle:
@@ -103,7 +103,7 @@ class DataLoader(object):
       ds = ds.repeat()
 
     ds = ds.batch(batch_size, drop_remainder=drop_remainder)
-    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+    ds = ds.prefetch(tf.data.AUTOTUNE)
     # TODO(b/171449557): Consider converting ds to distributed ds here.
     return ds
 
