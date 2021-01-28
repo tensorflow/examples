@@ -33,6 +33,7 @@ def define_flags():
   flags.DEFINE_string('export_dir', None,
                       'The directory to save exported files.')
   flags.mark_flag_as_required('export_dir')
+  flags.DEFINE_string('spec', 'bert_qa', 'The QA model to run.')
 
 
 def download_demo_data(**kwargs):
@@ -78,7 +79,7 @@ def main(_):
   logging.set_verbosity(logging.INFO)
 
   train_data_path, validation_data_path = download_demo_data()
-  run(train_data_path, validation_data_path, FLAGS.export_dir)
+  run(train_data_path, validation_data_path, FLAGS.export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':

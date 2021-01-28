@@ -33,6 +33,8 @@ def define_flags():
   flags.DEFINE_string('data_dir', None, 'The directory to save dataset.')
   flags.DEFINE_string('export_dir', None,
                       'The directory to save exported files.')
+  flags.DEFINE_string('spec', 'recommendation_bow',
+                      'The recommendation model to run.')
   flags.mark_flag_as_required('export_dir')
 
 
@@ -83,7 +85,7 @@ def run(data_dir,
 def main(_):
   logging.set_verbosity(logging.INFO)
   extracted_dir = download_data(FLAGS.data_dir)
-  run(extracted_dir, FLAGS.export_dir)
+  run(extracted_dir, FLAGS.export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':
