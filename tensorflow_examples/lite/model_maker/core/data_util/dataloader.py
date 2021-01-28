@@ -22,7 +22,7 @@ import functools
 import tensorflow as tf
 
 
-def _shard(ds, input_pipeline_context):
+def shard(ds, input_pipeline_context):
   # The dataset is always sharded by number of hosts.
   # num_input_pipelines is the number of hosts rather than number of cores.
   if (input_pipeline_context and
@@ -83,7 +83,7 @@ class DataLoader(object):
       A TF dataset ready to be consumed by Keras model.
     """
     ds = self._dataset
-    ds = _shard(ds, input_pipeline_context)
+    ds = shard(ds, input_pipeline_context)
 
     if preprocess:
       preprocess = functools.partial(preprocess, is_training=is_training)

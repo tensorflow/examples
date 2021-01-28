@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import bisect
+import functools
 import os
 import random
 
@@ -273,6 +274,54 @@ class DataLoader(dataloader.ClassificationDataLoader):
         raise ValueError('No audio files found.')
       print('Cached {} audio samples.'.format(cnt))
     return cls._from_cache(spec, cache_dir, is_training, shuffle)
+
+  def gen_dataset(self,
+                  batch_size=1,
+                  is_training=False,
+                  shuffle=False,
+                  input_pipeline_context=None,
+                  preprocess=None,
+                  drop_remainder=False):
+    """Generate a shared and batched tf.data.Dataset for training/evaluation.
+
+    Args:
+      batch_size: A integer, the returned dataset will be batched by this size.
+      is_training: A boolean, when True, the returned dataset will be optionally
+        shuffled and repeated as an endless dataset.
+      shuffle: A boolean, when True, the returned dataset will be shuffled to
+        create randomness during model training.
+      input_pipeline_context: A InputContext instance, used to shared dataset
+        among multiple workers when distribution strategy is used.
+      preprocess: A function taking three arguments in order, feature, label and
+        boolean is_training.
+      drop_remainder: boolean, whether the finaly batch drops remainder.
+
+    Returns:
+      A TF dataset ready to be consumed by Keras model.
+    """
+    ds = self._dataset
+    ds = dataloader.shard(ds, input_pipeline_context)
+
+    if preprocess:
+      preprocess = functools.partial(preprocess, is_training=is_training)
+      ds = ds.map(preprocess, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
+    if is_training:
+      if shuffle:
+        # Shuffle size should be bigger than the batch_size. Otherwise it's only
+        # shuffling within the batch, which equals to not having shuffle.
+        buffer_size = 3 * batch_size
+        # But since we are doing shuffle before repeat, it doesn't make sense to
+        # shuffle more than total available entries.
+        # TODO(wangtz): Do we want to do shuffle before / after repeat?
+        # Shuffle after repeat will give a more randomized dataset and mix the
+        # epoch boundary: https://www.tensorflow.org/guide/data
+        ds = ds.shuffle(buffer_size=min(self._size, buffer_size))
+
+    ds = ds.batch(batch_size, drop_remainder=drop_remainder)
+    ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+    # TODO(b/171449557): Consider converting ds to distributed ds here.
+    return ds
 
   @classmethod
   def from_esc50(cls, spec, data_path):

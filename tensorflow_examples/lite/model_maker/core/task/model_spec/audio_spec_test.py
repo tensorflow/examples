@@ -88,12 +88,7 @@ class BrowserFFTSpecTest(tf.test.TestCase):
 
     model = self._spec.create_model(num_classes)
     self._spec.run_classifier(
-        model,
-        epochs=1,
-        train_ds=dataset,
-        train_steps=total_samples // batch_size,
-        validation_ds=dataset,
-        validation_steps=total_samples // batch_size)
+        model, epochs=1, train_ds=dataset, validation_ds=dataset)
 
   def test_binary_classification(self):
     self._train(total_samples=10, num_classes=2, batch_size=2, seed=100)

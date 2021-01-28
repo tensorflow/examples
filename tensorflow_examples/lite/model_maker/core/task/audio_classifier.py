@@ -86,9 +86,9 @@ class AudioClassifier(classification_model.ClassificationModel):
                        'train_data.' % (len(train_data), batch_size))
 
     with self.model_spec.strategy.scope():
-      train_ds, train_steps = self._get_dataset_and_steps(
+      train_ds, _ = self._get_dataset_and_steps(
           train_data, batch_size, is_training=True)
-      validation_ds, validation_steps = self._get_dataset_and_steps(
+      validation_ds, _ = self._get_dataset_and_steps(
           validation_data, batch_size, is_training=False)
 
       self.model = self.model_spec.create_model(train_data.num_classes)
@@ -96,9 +96,7 @@ class AudioClassifier(classification_model.ClassificationModel):
           self.model,
           epochs,
           train_ds,
-          train_steps,
           validation_ds,
-          validation_steps,
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
 
   def _export_tflite(self, tflite_filepath, quantization_config=None):

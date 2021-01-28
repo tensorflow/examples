@@ -136,20 +136,14 @@ class BrowserFFTSpec(BaseSpec):
       layer.trainable = False
     return model
 
-  def run_classifier(self, model, epochs, train_ds, train_steps, validation_ds,
-                     validation_steps, **kwargs):
+  def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
     model.compile(
         optimizer='sgd',
         loss='sparse_categorical_crossentropy',
         metrics=['acc'])
 
     hist = model.fit(
-        train_ds,
-        steps_per_epoch=train_steps,
-        validation_data=validation_ds,
-        validation_steps=validation_steps,
-        epochs=epochs,
-        **kwargs)
+        train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)
     return hist
 
   def export_tflite(self, model, tflite_filepath, quantization_config=None):
