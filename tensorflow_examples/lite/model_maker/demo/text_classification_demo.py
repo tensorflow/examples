@@ -25,6 +25,7 @@ from absl import logging
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
 
@@ -34,6 +35,7 @@ FLAGS = flags.FLAGS
 def define_flags():
   flags.DEFINE_string('export_dir', None,
                       'The directory to save exported files.')
+  flags.DEFINE_string('spec', 'bert_classifier', 'The text classifier to run.')
   flags.mark_flag_as_required('export_dir')
 
 
@@ -76,14 +78,18 @@ def run(data_dir, export_dir, spec='bert_classifier', **kwargs):
   _, acc = model.evaluate(validation_data)
   print('Eval accuracy: %f' % acc)
 
-  # Exports to TFLite format.
-  model.export(export_dir)
+  # Exports to TFLite and SavedModel, with label and vocab files.
+  export_format = [
+      ExportFormat.TFLITE,
+      ExportFormat.SAVED_MODEL,
+  ]
+  model.export(export_dir, export_format=export_format)
 
 
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.export_dir)
+  run(data_dir, FLAGS.export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':

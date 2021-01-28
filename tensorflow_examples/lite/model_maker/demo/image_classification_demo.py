@@ -24,7 +24,9 @@ from absl import flags
 from absl import logging
 
 import tensorflow as tf
+
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 
@@ -34,6 +36,8 @@ FLAGS = flags.FLAGS
 def define_flags():
   flags.DEFINE_string('export_dir', None,
                       'The directory to save exported files.')
+  flags.DEFINE_string('spec', 'efficientnet_lite0',
+                      'The image classifier to run.')
   flags.mark_flag_as_required('export_dir')
 
 
@@ -62,13 +66,19 @@ def run(data_dir, export_dir, spec='efficientnet_lite0', **kwargs):
 
   _, acc = model.evaluate(test_data)
   print('Test accuracy: %f' % acc)
-  model.export(export_dir)
+
+  # Exports to TFLite and SavedModel, with label file.
+  export_format = [
+      ExportFormat.TFLITE,
+      ExportFormat.SAVED_MODEL,
+  ]
+  model.export(export_dir, export_format=export_format)
 
 
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.export_dir)
+  run(data_dir, FLAGS.export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':
