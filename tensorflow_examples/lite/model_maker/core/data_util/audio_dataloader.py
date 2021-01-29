@@ -22,8 +22,6 @@ import os
 import random
 
 import librosa
-import numpy as np
-from scipy.io import wavfile
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
@@ -105,47 +103,6 @@ class ExamplesHelper(object):
     return self._examples, labels
 
 
-def _resample_and_cut(cache_path, spec, example, label):
-  """Resample and cut the audio files into snippets."""
-
-  def _new_path(i):
-    # Note that `splitext` handles hidden files differently and here we just
-    # assume that audio files are not hidden files.
-    # os.path.splitext('/root/path/.wav') => ('/root/path/.wav', '')
-    # instead of ('/root/path/', '.wav') as this code expects.
-    filename_without_extension = os.path.splitext(os.path.basename(example))[0]
-    new_filename = filename_without_extension + '_%d.wav' % i
-    return os.path.join(cache_path, label, new_filename)
-
-  sampling_rate, xs = wavfile.read(example)
-  if xs.dtype != np.int16:
-    raise ValueError(
-        'DataLoader expects 16 bit PCM encoded WAV files, but {} has type {}'
-        .format(example, xs.dtype))
-
-  # Resample.
-  if spec.target_sample_rate != sampling_rate:
-    # Resample, librosa.resample only works with float32.
-    # Ref: https://github.com/bmcfee/resampy/issues/44
-    xs = xs.astype(np.float32)
-    xs = librosa.resample(
-        xs, orig_sr=sampling_rate,
-        target_sr=spec.target_sample_rate).astype(np.int16)
-
-  # Extract snippets.
-  n_samples_per_snippet = int(spec.snippet_duration_sec *
-                              spec.target_sample_rate)
-  begin_index = 0
-  count = 0
-  while begin_index + n_samples_per_snippet <= len(xs):
-    snippet = xs[begin_index:begin_index + n_samples_per_snippet]
-    wavfile.write(_new_path(count), spec.target_sample_rate, snippet)
-    begin_index += n_samples_per_snippet
-    count += 1
-
-  return count
-
-
 class DataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for audio tasks."""
 
@@ -155,48 +112,6 @@ class DataLoader(dataloader.ClassificationDataLoader):
 
   def split(self, fraction):
     return self._split(fraction, self.index_to_label, self._spec)
-
-  @classmethod
-  def _has_cache(cls, cache_path):
-    if not tf.io.gfile.exists(cache_path):
-      return False
-    cache_examples = _list_files(cache_path)
-    return len(cache_examples) > 1
-
-  @classmethod
-  def _create_cache(cls, spec, src_path, cache_path):
-    """Resample and extract audio snippets in wav format under `cache_path`."""
-    os.makedirs(cache_path, exist_ok=True)
-
-    # List all .wav files.
-    helper = ExamplesHelper(src_path, lambda s: s.endswith('.wav'))
-    examples, labels = helper.examples_and_labels()
-    total_samples = 0
-
-    print('Processing audio files:')
-    bar = tf.keras.utils.Progbar(len(labels), unit_name='file')
-
-    for example, label in zip(examples, labels):
-      bar.add(1)
-      os.makedirs(os.path.join(cache_path, label), exist_ok=True)
-      total_samples += _resample_and_cut(cache_path, spec, example, label)
-
-    return total_samples
-
-  @classmethod
-  def _from_cache(cls, spec, cache_path, is_training, shuffle):
-    helper = ExamplesHelper(cache_path)
-    if shuffle:
-      helper.shuffle()
-    examples, labels = helper.examples_and_label_indices()
-    index_to_labels = helper.sorted_cateogries
-
-    path_ds = tf.data.Dataset.from_tensor_slices(examples)
-    label_ds = tf.data.Dataset.from_tensor_slices(labels)
-    ds = tf.data.Dataset.zip((path_ds, label_ds))
-
-    tf.compat.v1.logging.info('Loaded %d audio files.', len(ds))
-    return DataLoader(ds, len(ds), index_to_labels, spec)
 
   @classmethod
   def from_folder(cls, spec, data_path, is_training=True, shuffle=True):
@@ -225,14 +140,19 @@ class DataLoader(dataloader.ClassificationDataLoader):
     """
     assert isinstance(spec, audio_spec.BaseSpec)
     root_dir = os.path.abspath(data_path)
-    cache_dir = os.path.join(root_dir, 'cache')
+    helper = ExamplesHelper(root_dir, lambda s: s.endswith('.wav'))
+    if shuffle:
+      helper.shuffle()
+    examples, labels = helper.examples_and_label_indices()
 
-    if not cls._has_cache(cache_dir):
-      cnt = cls._create_cache(spec, data_path, cache_dir)
-      if cnt == 0:
-        raise ValueError('No audio files found.')
-      print('Cached {} audio samples.'.format(cnt))
-    return cls._from_cache(spec, cache_dir, is_training, shuffle)
+    if not examples:
+      raise ValueError('No audio files found.')
+
+    wav_ds = tf.data.Dataset.from_tensor_slices(examples)
+    label_ds = tf.data.Dataset.from_tensor_slices(labels)
+    ds = tf.data.Dataset.zip((wav_ds, label_ds))
+
+    return DataLoader(ds, len(ds), helper.sorted_cateogries, spec)
 
   def gen_dataset(self,
                   batch_size=1,
@@ -270,20 +190,40 @@ class DataLoader(dataloader.ClassificationDataLoader):
     @tf.function
     def _load_wav(filepath, label):
       file_contents = tf.io.read_file(filepath)
-      # shape: (target_sample_rate, 1)
-      wav, _ = tf.audio.decode_wav(file_contents, desired_channels=1)
-      # shape: (target_sample_rate,)
+      # shape: (audio_samples, 1), dtype: float32
+      wav, sample_rate = tf.audio.decode_wav(file_contents, desired_channels=1)
+      # shape: (audio_samples,)
       wav = tf.squeeze(wav, axis=-1)
-      # shape: (1, target_sample_rate)
-      wav = tf.expand_dims(wav, 0)
-      return wav, label
+      return wav, sample_rate, label
+
+    # This is a eager mode numpy_function. It can be converted to a tf.function
+    # using https://www.tensorflow.org/io/api_docs/python/tfio/audio/resample
+    def _resample_numpy(waveform, sample_rate, label):
+      waveform = librosa.resample(
+          waveform, orig_sr=sample_rate, target_sr=spec.target_sample_rate)
+      return waveform, label
+
+    def _resample(waveform, sample_rate, label):
+      return tf.numpy_function(
+          _resample_numpy,
+          inp=(waveform, sample_rate, label),
+          Tout=[tf.float32, tf.int32])
 
     @tf.function
-    def _crop(waveform, label):
-      # shape: (1, expected_waveform_len)
-      cropped = tf.slice(
-          waveform, begin=[0, 0], size=[1, spec.expected_waveform_len])
-      return cropped, label
+    def _ensure_length(wav, unused_label):
+      return len(wav) >= spec.expected_waveform_len
+
+    @tf.function
+    def _split(wav, label):
+      # wav shape: (audio_samples, )
+      chunks = tf.math.floordiv(len(wav), spec.expected_waveform_len)
+      unused = tf.math.floormod(len(wav), spec.expected_waveform_len)
+      # Drop unused data
+      wav = wav[:len(wav) - unused]
+      # Split the audio sample into multiple chunks
+      wav = tf.reshape(wav, (chunks, 1, spec.expected_waveform_len))
+
+      return wav, tf.repeat(tf.expand_dims(label, 0), len(wav))
 
     @tf.function
     def _elements_finite(preprocess_data, unused_label):
@@ -293,7 +233,9 @@ class DataLoader(dataloader.ClassificationDataLoader):
       return tf.math.reduce_all(tf.math.is_finite(preprocess_data))
 
     ds = ds.map(_load_wav, num_parallel_calls=autotune)
-    ds = ds.map(_crop, num_parallel_calls=autotune)
+    ds = ds.map(_resample, num_parallel_calls=autotune)
+    ds = ds.filter(_ensure_length)
+    ds = ds.map(_split, num_parallel_calls=autotune).unbatch()
     ds = ds.map(spec.preprocess, num_parallel_calls=autotune)
     if is_training:
       ds = ds.map(spec.data_augmentation, num_parallel_calls=autotune)

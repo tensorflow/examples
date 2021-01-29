@@ -136,14 +136,6 @@ class LoadFromFolderTest(Base):
       spec = MockSpec(model_dir=folder_path)
       audio_dataloader.DataLoader.from_folder(spec, folder_path)
 
-  def test_check_encoding(self):
-    folder_path = self._get_folder_path('test_check_encoding')
-    write_sample(
-        folder_path, 'unknown', '2s.wav', 44100, 2, value=0, dtype=np.uint8)
-    with self.assertRaisesRegexp(ValueError, '16 bit PCM'):
-      spec = MockSpec(model_dir=folder_path)
-      audio_dataloader.DataLoader.from_folder(spec, folder_path)
-
   def test_from_folder(self):
     folder_path = self._get_folder_path('test_from_folder')
     write_sample(folder_path, 'background', '2s.wav', 44100, 2, value=0)
@@ -162,37 +154,13 @@ class LoadFromFolderTest(Base):
     spec = MockSpec(model_dir=folder_path)
     loader = audio_dataloader.DataLoader.from_folder(spec, folder_path)
 
-    self.assertEqual(len(loader), 5)
+    # 6 files with .wav extennsion
+    self.assertEqual(len(loader), 6)
     self.assertEqual(loader.index_to_label,
                      ['background', 'command0', 'command1', 'command2'])
 
-    def is_cached(filename):
-      path = os.path.join(folder_path, 'cache', filename)
-      self.assertTrue(tf.io.gfile.exists(path))
-      sampling_rate, _ = wavfile.read(path)
-      self.assertEqual(sampling_rate, 44100)
-
-    is_cached('background/2s_0.wav')
-    is_cached('background/2s_1.wav')
-    is_cached('command1/1s_0.wav')
-    is_cached('command2/1.5s_0.wav')
-    is_cached('command0/1.8s_0.wav')
-
-    # Consistent dataset.
-    consistent_loader = audio_dataloader.DataLoader.from_folder(
-        spec, folder_path, shuffle=False)
-    expected_labels = iter(
-        ['background', 'background', 'command0', 'command1', 'command2'])
-    expected_values = iter([0., 0., 4., 1., 3.])
-    for feature, label_idx in consistent_loader.gen_dataset().unbatch():
-      self.assertEqual(consistent_loader.index_to_label[label_idx],
-                       next(expected_labels))
-      self.assertEqual(feature.shape, (1, spec.expected_waveform_len))
-      self.assertEqual(feature.dtype, tf.float32)
-      # tf.audio.decode_wav op scales the int16 PCM to float value between -1
-      # and 1 so the multiplier is 1 << 15
-      # Check tensorflow/core/lib/wav/wav_io.cc for the implementation.
-      self.assertNear(feature[0][0] * (1 << 15), next(expected_values), 1e-4)
+    # 5 valid audio snippets
+    self.assertEqual(len(list(loader.gen_dataset())), 5)
 
 
 if __name__ == '__main__':
