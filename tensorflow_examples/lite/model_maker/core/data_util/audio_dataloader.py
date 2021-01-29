@@ -185,6 +185,10 @@ class DataLoader(dataloader.ClassificationDataLoader):
     spec = self._spec
     autotune = tf.data.AUTOTUNE
 
+    options = tf.data.Options()
+    options.experimental_deterministic = False
+    ds = ds.with_options(options)
+
     ds = dataloader.shard(ds, input_pipeline_context)
 
     @tf.function
