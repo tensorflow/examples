@@ -49,7 +49,6 @@ class MockSpec(audio_spec.BaseSpec):
 
   def __init__(self, *args, **kwargs):
     super(MockSpec, self).__init__(*args, **kwargs)
-    self.snippet_duration_sec = 1.
     self.expected_waveform_len = 44100
 
   def create_model(self):
@@ -61,6 +60,30 @@ class MockSpec(audio_spec.BaseSpec):
   @property
   def target_sample_rate(self):
     return 44100
+
+  def preprocess_ds(self, ds, is_training=False):
+    _ = is_training
+
+    @tf.function
+    def _ensure_length(wav, unused_label):
+      return len(wav) >= self.expected_waveform_len
+
+    @tf.function
+    def _split(wav, label):
+      # wav shape: (audio_samples, )
+      chunks = tf.math.floordiv(len(wav), self.expected_waveform_len)
+      unused = tf.math.floormod(len(wav), self.expected_waveform_len)
+      # Drop unused data
+      wav = wav[:len(wav) - unused]
+      # Split the audio sample into multiple chunks
+      wav = tf.reshape(wav, (chunks, 1, self.expected_waveform_len))
+
+      return wav, tf.repeat(tf.expand_dims(label, 0), len(wav))
+
+    autotune = tf.data.AUTOTUNE
+    ds = ds.filter(_ensure_length)
+    ds = ds.map(_split, num_parallel_calls=autotune).unbatch()
+    return ds
 
 
 class Base(tf.test.TestCase):

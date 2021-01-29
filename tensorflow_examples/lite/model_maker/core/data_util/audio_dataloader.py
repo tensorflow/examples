@@ -124,9 +124,10 @@ class DataLoader(dataloader.ClassificationDataLoader):
     corresponds to an example. Each .wav file is mono (single-channel) and has
     the typical 16 bit pulse-code modulation (PCM) encoding.
 
-    - .wav files are expected to be spec.snippet_duration_sec long. DataLoader
-    ignores files with shorter duration and extracts snippets from .wav files
-    with longer duration.
+    - .wav files will be resampled to spec.target_sample_rate then fed into
+    spec.preprocess_ds for split and other operations. Normally long wav files
+    will be split into multiple snippets. And wav files shorter than a certain
+    threshold will be ignored.
 
     Args:
       spec: instance of audio_spec.BaseSpec.
@@ -135,8 +136,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
       shuffle: boolean, if True, random shuffle data.
 
     Returns:
-      AudioDataLoader containing audio spectrogram (or any data type returned by
-      spec.preprocess) and labels.
+      AudioDataLoader containing audio spectrogram (or any data type generated
+      by spec.preprocess_ds) and labels.
     """
     assert isinstance(spec, audio_spec.BaseSpec)
     root_dir = os.path.abspath(data_path)
@@ -180,7 +181,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
     """
     # This argument is only used for image dataset for now. Audio preprocessing
     # is defined in the spec.
-    _ = preprocess
+    del preprocess
     ds = self._dataset
     spec = self._spec
     autotune = tf.data.AUTOTUNE
@@ -214,35 +215,16 @@ class DataLoader(dataloader.ClassificationDataLoader):
           Tout=[tf.float32, tf.int32])
 
     @tf.function
-    def _ensure_length(wav, unused_label):
-      return len(wav) >= spec.expected_waveform_len
-
-    @tf.function
-    def _split(wav, label):
-      # wav shape: (audio_samples, )
-      chunks = tf.math.floordiv(len(wav), spec.expected_waveform_len)
-      unused = tf.math.floormod(len(wav), spec.expected_waveform_len)
-      # Drop unused data
-      wav = wav[:len(wav) - unused]
-      # Split the audio sample into multiple chunks
-      wav = tf.reshape(wav, (chunks, 1, spec.expected_waveform_len))
-
-      return wav, tf.repeat(tf.expand_dims(label, 0), len(wav))
-
-    @tf.function
     def _elements_finite(preprocess_data, unused_label):
       # Make sure that the data sent to the model does not contain nan or inf
       # values. This should be the last filter applied to the dataset.
       # Arguably we could possibly apply this filter to all tasks.
-      return tf.math.reduce_all(tf.math.is_finite(preprocess_data))
+      return tf.size(preprocess_data) > 0 and tf.math.reduce_all(
+          tf.math.is_finite(preprocess_data))
 
     ds = ds.map(_load_wav, num_parallel_calls=autotune)
     ds = ds.map(_resample, num_parallel_calls=autotune)
-    ds = ds.filter(_ensure_length)
-    ds = ds.map(_split, num_parallel_calls=autotune).unbatch()
-    ds = ds.map(spec.preprocess, num_parallel_calls=autotune)
-    if is_training:
-      ds = ds.map(spec.data_augmentation, num_parallel_calls=autotune)
+    ds = spec.preprocess_ds(ds, is_training=is_training)
     ds = ds.filter(_elements_finite)
 
     if is_training:

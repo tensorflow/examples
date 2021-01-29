@@ -50,15 +50,10 @@ class BaseSpec(abc.ABC):
                      steps_per_epoch, validation_steps):
     pass
 
-  # Default dummy augmentation that will be applied to train samples.
-  @tf.function
-  def data_augmentation(self, x, label):
-    return x, label
-
-  # Default dummy preprocessing that will be applied to all data samples.
-  @tf.function
-  def preprocess(self, x, label):
-    return x, label
+  def preprocess_ds(self, ds, is_training=False):
+    """Returns a preprocessed dataset."""
+    _ = is_training
+    return ds
 
 
 def _remove_suffix_if_possible(text, suffix):
@@ -112,20 +107,45 @@ class BrowserFFTSpec(BaseSpec):
     self._tfjs_sc_model = _load_tfjs_speech_command_model()
 
     self.expected_waveform_len = self._preprocess_model.input_shape[-1]
-    self.snippet_duration_sec = 1.
 
   @property
   def target_sample_rate(self):
     return 44100
 
   @tf.function
-  def preprocess(self, x, label):
+  def _ensure_length(self, wav, unused_label):
+    return len(wav) >= self.expected_waveform_len
+
+  @tf.function
+  def _split(self, wav, label):
+    """Split the long audio samples into multiple trunks."""
+    # wav shape: (audio_samples, )
+    chunks = tf.math.floordiv(len(wav), self.expected_waveform_len)
+    unused = tf.math.floormod(len(wav), self.expected_waveform_len)
+    # Drop unused data
+    wav = wav[:len(wav) - unused]
+    # Split the audio sample into multiple chunks
+    wav = tf.reshape(wav, (chunks, 1, self.expected_waveform_len))
+
+    return wav, tf.repeat(tf.expand_dims(label, 0), len(wav))
+
+  @tf.function
+  def _preprocess(self, x, label):
     # x has shape (1, expected_waveform_len)
-    y = self._preprocess_model(x)
+    spectrum = self._preprocess_model(x)
     # y has shape (1, embedding_len)
-    y = tf.squeeze(y, axis=0)
+    spectrum = tf.squeeze(spectrum, axis=0)
     # y has shape (embedding_len,)
-    return y, label
+    return spectrum, label
+
+  def preprocess_ds(self, ds, is_training=False):
+    del is_training
+
+    autotune = tf.data.AUTOTUNE
+    ds = ds.filter(self._ensure_length)
+    ds = ds.map(self._split, num_parallel_calls=autotune).unbatch()
+    ds = ds.map(self._preprocess, num_parallel_calls=autotune)
+    return ds
 
   def create_model(self, num_classes):
     if num_classes <= 1:

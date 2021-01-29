@@ -30,9 +30,16 @@ from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
 
-  @tf.function
-  def preprocess(self, x, label):
-    return tf.squeeze(x, axis=0), label
+  def preprocess_ds(self, ds, is_training=False):
+    _ = is_training
+
+    @tf.function
+    def _crop(wav, label):
+      wav = wav[:self.expected_waveform_len]
+      return wav, label
+
+    ds = ds.map(_crop)
+    return ds
 
 
 def write_sample(root,
@@ -71,7 +78,7 @@ class AudioClassifierTest(tf.test.TestCase):
                                               spec)
 
     # Train a floating point model.
-    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=35)
+    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=15)
 
     # Evaluate trained model
     _, acc = task.evaluate(data_loader)
@@ -103,7 +110,7 @@ class AudioClassifierTest(tf.test.TestCase):
 
     # Evaluate accurarcy on float model.
     result = task.evaluate_tflite(output_path, tflite_dataloader)
-    self.assertGreater(result['accuracy'], .5)
+    self.assertGreaterEqual(result['accuracy'], .5)
 
 
 if __name__ == '__main__':
