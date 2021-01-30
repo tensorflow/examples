@@ -45,8 +45,7 @@ class BrowserFFTSpecTest(tf.test.TestCase):
                      (None, None, 232, 1))
     self.assertEqual(self._spec._tfjs_sc_model.input_shape, (None, 43, 232, 1))
     self.assertEqual(self._spec._tfjs_sc_model.output_shape, (None, 20))
-    # The following line doesn't work with bazel yet.
-    # self.assertEqual(model.input_shape, (None, 43, 232, 1))
+    self.assertEqual(model.input_shape, (None, 43, 232, 1))
     self.assertEqual(model.output_shape, (None, 10))
 
   def test_create_model(self):
