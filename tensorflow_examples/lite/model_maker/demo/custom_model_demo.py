@@ -66,10 +66,7 @@ class DataLoader(dataloader.DataLoader):
       # Add some randomness in train/validation data split.
       ds = ds.shuffle(len(ds))
 
-    # Test data doesn't need data augmentation.
-    if is_training:
-      ds = ds.map(lambda x, y: (spec.data_augmentation(x), y))
-
+    ds = spec.preprocess_ds(ds, is_training=is_training)
     return cls(ds, len(ds))
 
 
@@ -94,17 +91,24 @@ class BinaryClassificationBaseSpec(abc.ABC):
                      validation_steps, **kwargs):
     pass
 
-  # Default dummy augmentation.
-  def data_augmentation(self, x):
-    return x
+  def preprocess_ds(self, ds, is_training=False):
+    del is_training
+    return ds
 
 
 class Spec(BinaryClassificationBaseSpec):
   """Spec for XOR problem, contains a model with a single hidden layer."""
 
-  def data_augmentation(self, x):
-    """Add some random noise on the input sample."""
-    return tf.random.normal(tf.shape(x), stddev=0.1) + x
+  def preprocess_ds(self, ds, is_training=False):
+
+    @tf.function
+    def _add_noise(x, y):
+      """Add some random noise on the input sample."""
+      return tf.random.normal(tf.shape(x), stddev=0.1) + x, y
+
+    if is_training:
+      ds = ds.map(_add_noise)
+    return ds
 
   def create_model(self):
     model = tf.keras.Sequential()
