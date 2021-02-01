@@ -28,29 +28,54 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import postprocess
 
-flags.DEFINE_integer('eval_samples', None, 'Number of eval samples.')
-flags.DEFINE_string('val_file_pattern', None,
-                    'Glob for eval tfrecords, e.g. coco/val-*.tfrecord.')
-flags.DEFINE_string('val_json_file', None,
-                    'Groudtruth, e.g. annotations/instances_val2017.json.')
-flags.DEFINE_string('model_name', 'efficientdet-d0', 'Model name to use.')
-flags.DEFINE_string('tflite_path', None, 'Path to TFLite model.')
-flags.DEFINE_string('hparams', '', 'Comma separated k=v pairs or a yaml file')
 FLAGS = flags.FLAGS
 
 DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
 
 
+def define_flags():
+  """Define the flags."""
+  flags.DEFINE_integer('eval_samples', None, 'Number of eval samples.')
+  flags.DEFINE_string('val_file_pattern', None,
+                      'Glob for eval tfrecords, e.g. coco/val-*.tfrecord.')
+  flags.DEFINE_string('val_json_file', None,
+                      'Groudtruth, e.g. annotations/instances_val2017.json.')
+  flags.DEFINE_string('model_name', 'efficientdet-d0', 'Model name to use.')
+  flags.DEFINE_string('tflite_path', None, 'Path to TFLite model.')
+  flags.DEFINE_bool(
+      'only_network', False,
+      'TFLite model only contains EfficientDetNet without post-processing NMS op.'
+  )
+  flags.DEFINE_bool('pre_class_nms', False, 'Use pre_class_nms for evaluation.')
+  flags.DEFINE_string('hparams', '', 'Comma separated k=v pairs or a yaml file')
+  flags.mark_flag_as_required('val_file_pattern')
+  flags.mark_flag_as_required('tflite_path')
+
+
 class LiteRunner(object):
   """Runs inference with TF Lite model."""
 
-  def __init__(self, tflite_model_path):
-    """Initializes Lite runner with tflite model file."""
+  def __init__(self, tflite_model_path, only_network=False):
+    """Initializes Lite runner with tflite model file.
+
+    Args:
+      tflite_model_path: Path to TFLite model file.
+      only_network: boolean, If True, TFLite model only contains EfficientDetNet
+        without post-processing NMS op. If False, TFLite model contains custom
+        NMS op.
+    """
     self.interpreter = tf.lite.Interpreter(tflite_model_path)
     self.interpreter.allocate_tensors()
     # Get input and output tensors.
     self.input_details = self.interpreter.get_input_details()
     self.output_details = self.interpreter.get_output_details()
+    self.only_network = only_network
+    if self.only_network:
+      # TFLite with only_network=True changed the order of output. Sort it
+      # according to tensor name.
+      # TFLite with only_network=False  doesn't change the order since the
+      # latest op is cutom NMS op.
+      self.output_details = sorted(self.output_details, key=lambda a: a['name'])
 
   def run(self, image):
     """Runs inference with Lite model."""
@@ -76,12 +101,27 @@ class LiteRunner(object):
         output_tensor = (output_tensor - zero_point) * scale
       return output_tensor
 
-    num_boxes = int(len(output_details) / 2)
-    cls_outputs, box_outputs = [], []
-    for i in range(num_boxes):
-      cls_outputs.append(get_output(i))
-      box_outputs.append(get_output(i + num_boxes))
-    return cls_outputs, box_outputs
+    output_size = len(output_details)
+    if not self.only_network:
+      # TFLite model with post-processing.
+      # Four Outputs:
+      #   detection_boxes: a float32 tensor of shape [1, num_boxes, 4] with box
+      #     locations
+      #   detection_classes: a float32 tensor of shape [1, num_boxes]
+      #     with class indices
+      #   detection_scores: a float32 tensor of shape [1, num_boxes]
+      #     with class scores
+      #   num_boxes: a float32 tensor of size 1 containing the number of
+      #     detected boxes
+      return [get_output(i) for i in range(output_size)]
+    else:
+      # TFLite model only contains network without post-processing.
+      num_boxes = int(output_size / 2)
+      cls_outputs, box_outputs = [], []
+      for i in range(num_boxes):
+        cls_outputs.append(get_output(i))
+        box_outputs.append(get_output(i + num_boxes))
+      return cls_outputs, box_outputs
 
 
 def main(_):
@@ -109,15 +149,33 @@ def main(_):
     ds = ds.take((eval_samples + batch_size - 1) // batch_size)
 
   # Network
-  lite_runner = LiteRunner(FLAGS.tflite_path)
+  lite_runner = LiteRunner(FLAGS.tflite_path, FLAGS.only_network)
   eval_samples = FLAGS.eval_samples or 5000
   pbar = tf.keras.utils.Progbar((eval_samples + batch_size - 1) // batch_size)
   for i, (images, labels) in enumerate(ds):
-    cls_outputs, box_outputs = lite_runner.run(images)
-    detections = postprocess.generate_detections(config, cls_outputs,
-                                                 box_outputs,
-                                                 labels['image_scales'],
-                                                 labels['source_ids'])
+    if not FLAGS.only_network:
+      nms_boxes_bs, nms_classes_bs, nms_scores_bs, _ = lite_runner.run(images)
+      nms_classes_bs += postprocess.CLASS_OFFSET
+
+      height, width = utils.parse_image_size(config.image_size)
+      normalize_factor = tf.constant([height, width, height, width],
+                                     dtype=tf.float32)
+      nms_boxes_bs *= normalize_factor
+      if labels['image_scales'] is not None:
+        scales = tf.expand_dims(tf.expand_dims(labels['image_scales'], -1), -1)
+        nms_boxes_bs = nms_boxes_bs * tf.cast(scales, nms_boxes_bs.dtype)
+      detections = postprocess.generate_detections_from_nms_output(
+          nms_boxes_bs, nms_classes_bs, nms_scores_bs, labels['source_ids'])
+    else:
+      cls_outputs, box_outputs = lite_runner.run(images)
+      detections = postprocess.generate_detections(
+          config,
+          cls_outputs,
+          box_outputs,
+          labels['image_scales'],
+          labels['source_ids'],
+          pre_class_nms=FLAGS.pre_class_nms)
+
     detections = postprocess.transform_detections(detections)
     evaluator.update_state(labels['groundtruth_data'].numpy(),
                            detections.numpy())
@@ -137,7 +195,6 @@ def main(_):
 
 
 if __name__ == '__main__':
-  flags.mark_flag_as_required('val_file_pattern')
-  flags.mark_flag_as_required('tflite_path')
+  define_flags()
   logging.set_verbosity(logging.WARNING)
   app.run(main)

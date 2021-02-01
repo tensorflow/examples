@@ -490,12 +490,49 @@ def postprocess_per_class(params, cls_outputs, box_outputs, image_scales=None):
   return per_class_nms(params, boxes, scores, classes, image_scales)
 
 
+def generate_detections_from_nms_output(nms_boxes_bs,
+                                        nms_classes_bs,
+                                        nms_scores_bs,
+                                        image_ids,
+                                        original_image_widths=None,
+                                        flip=False):
+  """Generating [id, x, y, w, h, score, class] from NMS outputs."""
+
+  image_ids_bs = tf.cast(tf.expand_dims(image_ids, -1), nms_scores_bs.dtype)
+  if flip:
+    detections_bs = [
+        image_ids_bs * tf.ones_like(nms_scores_bs),
+        # the mirrored location of the left edge is the image width
+        # minus the position of the right edge
+        original_image_widths - nms_boxes_bs[:, :, 3],
+        nms_boxes_bs[:, :, 0],
+        # the mirrored location of the right edge is the image width
+        # minus the position of the left edge
+        original_image_widths - nms_boxes_bs[:, :, 1],
+        nms_boxes_bs[:, :, 2],
+        nms_scores_bs,
+        nms_classes_bs,
+    ]
+  else:
+    detections_bs = [
+        image_ids_bs * tf.ones_like(nms_scores_bs),
+        nms_boxes_bs[:, :, 1],
+        nms_boxes_bs[:, :, 0],
+        nms_boxes_bs[:, :, 3],
+        nms_boxes_bs[:, :, 2],
+        nms_scores_bs,
+        nms_classes_bs,
+    ]
+  return tf.stack(detections_bs, axis=-1, name='detections')
+
+
 def generate_detections(params,
                         cls_outputs,
                         box_outputs,
                         image_scales,
                         image_ids,
-                        flip=False):
+                        flip=False,
+                        pre_class_nms=True):
   """A legacy interface for generating [id, x, y, w, h, score, class]."""
   _, width = utils.parse_image_size(params['image_size'])
 
@@ -534,37 +571,18 @@ def generate_detections(params,
             detections[:, 6],
         ], axis=-1)
       detections_bs.append(detections)
-    return tf.stack(detections_bs, axis=0, name='detnections')
+    return tf.stack(detections_bs, axis=0, name='detections')
 
-  nms_boxes_bs, nms_scores_bs, nms_classes_bs, _ = postprocess_per_class(
+  if pre_class_nms:
+    postprocess = postprocess_per_class
+  else:
+    postprocess = postprocess_global
+  nms_boxes_bs, nms_scores_bs, nms_classes_bs, _ = postprocess(
       params, cls_outputs, box_outputs, image_scales)
 
-  image_ids_bs = tf.cast(tf.expand_dims(image_ids, -1), nms_scores_bs.dtype)
-  if flip:
-    detections_bs = [
-        image_ids_bs * tf.ones_like(nms_scores_bs),
-        # the mirrored location of the left edge is the image width
-        # minus the position of the right edge
-        original_image_widths - nms_boxes_bs[:, :, 3],
-        nms_boxes_bs[:, :, 0],
-        # the mirrored location of the right edge is the image width
-        # minus the position of the left edge
-        original_image_widths - nms_boxes_bs[:, :, 1],
-        nms_boxes_bs[:, :, 2],
-        nms_scores_bs,
-        nms_classes_bs,
-    ]
-  else:
-    detections_bs = [
-        image_ids_bs * tf.ones_like(nms_scores_bs),
-        nms_boxes_bs[:, :, 1],
-        nms_boxes_bs[:, :, 0],
-        nms_boxes_bs[:, :, 3],
-        nms_boxes_bs[:, :, 2],
-        nms_scores_bs,
-        nms_classes_bs,
-    ]
-  return tf.stack(detections_bs, axis=-1, name='detnections')
+  return generate_detections_from_nms_output(nms_boxes_bs, nms_classes_bs,
+                                             nms_scores_bs, image_ids,
+                                             original_image_widths, flip)
 
 
 def transform_detections(detections):

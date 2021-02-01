@@ -61,7 +61,9 @@ flags.DEFINE_integer(
     'num_calibration_steps', 2000,
     'Number of post-training quantization calibration steps to run.')
 flags.DEFINE_bool('debug', False, 'Debug mode.')
-flags.DEFINE_bool('only_network', False, 'Model only contains network')
+flags.DEFINE_bool(
+    'only_network', False,
+    'Model only contains EfficientDetNet without pre/post-processing.')
 FLAGS = flags.FLAGS
 
 
