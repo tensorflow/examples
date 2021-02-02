@@ -190,7 +190,7 @@ def default_detection_configs():
 
   # dataset specific parameters
   # TODO(tanmingxing): update this to be 91 for COCO, and 21 for pascal.
-  h.num_classes = 90  # 1+ actual classes, 0 is reserved for background.
+  h.num_classes = 90  # actual classes, 0 is reserved for background.
   h.seg_num_classes = 3  # segmentation classes
   h.heads = ['object_detection']  # 'object_detection', 'segmentation'
 
