@@ -42,7 +42,7 @@ class BaseSpec(abc.ABC):
     pass
 
   @abc.abstractmethod
-  def create_model(self, num_classes):
+  def create_model(self, num_classes, train_whole_model=False):
     pass
 
   @abc.abstractmethod
@@ -147,7 +147,7 @@ class BrowserFFTSpec(BaseSpec):
     ds = ds.map(self._preprocess, num_parallel_calls=autotune)
     return ds
 
-  def create_model(self, num_classes):
+  def create_model(self, num_classes, train_whole_model=False):
     if num_classes <= 1:
       raise ValueError(
           'AudioClassifier expects `num_classes` to be greater than 1')
@@ -155,10 +155,11 @@ class BrowserFFTSpec(BaseSpec):
     for layer in self._tfjs_sc_model.layers[:-1]:
       model.add(layer)
     model.add(tf.keras.layers.Dense(units=num_classes, activation='softmax'))
-    # Freeze all but the last layer of the model. The last layer will be
-    # fine-tuned during transfer learning.
-    for layer in model.layers[:-1]:
-      layer.trainable = False
+    if not train_whole_model:
+      # Freeze all but the last layer of the model. The last layer will be
+      # fine-tuned during transfer learning.
+      for layer in model.layers[:-1]:
+        layer.trainable = False
     return model
 
   def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):

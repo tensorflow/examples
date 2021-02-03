@@ -30,7 +30,8 @@ def create(train_data,
            batch_size=32,
            epochs=1,
            model_dir=None,
-           do_train=True):
+           do_train=True,
+           train_whole_model=False):
   """Loads data and retrains the model.
 
   Args:
@@ -43,6 +44,8 @@ def create(train_data,
     epochs: Number of epochs for training.
     model_dir: The location of the model checkpoint files.
     do_train: Whether to run training.
+    train_whole_model: Boolean. By default, only the classification head is
+      trained. When True, the base model is also trained.
 
   Returns:
     An instance of AudioClassifier class.
@@ -53,7 +56,7 @@ def create(train_data,
       model_spec,
       train_data.index_to_label,
       shuffle=True,
-      train_whole_model=False)
+      train_whole_model=train_whole_model)
   if do_train:
     task.train(train_data, validation_data, epochs, batch_size)
   return task
@@ -91,7 +94,8 @@ class AudioClassifier(classification_model.ClassificationModel):
       validation_ds, _ = self._get_dataset_and_steps(
           validation_data, batch_size, is_training=False)
 
-      self.model = self.model_spec.create_model(train_data.num_classes)
+      self.model = self.model_spec.create_model(
+          train_data.num_classes, train_whole_model=self.train_whole_model)
       return self.model_spec.run_classifier(
           self.model,
           epochs,
