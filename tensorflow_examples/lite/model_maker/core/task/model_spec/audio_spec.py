@@ -23,6 +23,7 @@ import tempfile
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.task import model_util
+import tensorflow_hub as hub
 
 
 class BaseSpec(abc.ABC):
@@ -46,8 +47,7 @@ class BaseSpec(abc.ABC):
     pass
 
   @abc.abstractmethod
-  def run_classifier(self, model, train_input_fn, validation_input_fn, epochs,
-                     steps_per_epoch, validation_steps):
+  def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
     pass
 
   def preprocess_ds(self, ds, is_training=False):
@@ -164,7 +164,7 @@ class BrowserFFTSpec(BaseSpec):
 
   def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
     model.compile(
-        optimizer='sgd',
+        optimizer='adam',
         loss='sparse_categorical_crossentropy',
         metrics=['acc'])
 
@@ -204,6 +204,49 @@ class BrowserFFTSpec(BaseSpec):
     model_util.set_batch_size(model, batch_size=None)
 
 
-# TODO(b/178083096): Refactor this class and BaseSpec to have a common interface
-class YAMNetSpec:
-  pass
+class YAMNetSpec(BaseSpec):
+  """Audio classification model spec using YAMNet embedding."""
+
+  def __init__(self,
+               model_dir: None = None,
+               strategy: None = None,
+               yamnet_model_handle='https://tfhub.dev/google/yamnet/1'):
+    super(YAMNetSpec, self).__init__(model_dir, strategy)
+    self._yamnet_model_handle = yamnet_model_handle
+    self._yamnet_model = hub.load(yamnet_model_handle)
+
+  @property
+  def target_sample_rate(self):
+    return 16000
+
+  def create_model(self, num_classes):
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(1024), dtype=tf.float32, name='embedding'),
+        tf.keras.layers.Dense(512, activation='relu'),
+        tf.keras.layers.Dense(num_classes, activation='softmax')
+    ])
+    return model
+
+  def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
+    model.compile(
+        optimizer='sgd',
+        loss='sparse_categorical_crossentropy',
+        metrics=['acc'])
+
+    hist = model.fit(
+        train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)
+    return hist
+
+  @tf.function
+  def _extract_embedding(self, wav, label):
+    _, embeddings, _ = self._yamnet_model(wav)  # (chunks, 1024)
+    chunks = tf.shape(embeddings)[0]
+    labels = tf.repeat(tf.expand_dims(label, 0), chunks)  # (chunks,)
+    return embeddings, labels
+
+  def preprocess_ds(self, ds, is_training=False):
+    _ = is_training
+
+    autotune = tf.data.AUTOTUNE
+    ds = ds.map(self._extract_embedding, num_parallel_calls=autotune).unbatch()
+    return ds

@@ -117,8 +117,7 @@ class LoadFromFolderTest(Base):
     write_sample(folder_path, 'unknown', '2s.wav', 44100, 2, value=1)
 
     spec = audio_spec.YAMNetSpec()
-    with self.assertRaises(AssertionError):
-      audio_dataloader.DataLoader.from_folder(spec, folder_path)
+    audio_dataloader.DataLoader.from_folder(spec, folder_path)
 
     spec = audio_spec.BrowserFFTSpec()
     audio_dataloader.DataLoader.from_folder(spec, folder_path)

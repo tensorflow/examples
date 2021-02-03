@@ -17,16 +17,97 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 import numpy as np
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
-class BaseSpecTest(tf.test.TestCase):
+class YAMNetSpecTest(tf.test.TestCase):
 
-  def test_unable_to_instantiate_baseclass(self):
-    with self.assertRaisesRegex(TypeError, 'Can\'t instantiate abstract class'):
-      audio_spec.BaseSpec()
+  @classmethod
+  def setUpClass(cls):
+    super(YAMNetSpecTest, cls).setUpClass()
+    cls._spec = audio_spec.YAMNetSpec()
+
+  def _test_preprocess(self, input_shape, input_count, output_shape,
+                       output_count):
+    wav_ds = tf.data.Dataset.from_tensor_slices([tf.ones(input_shape)] *
+                                                input_count)
+    label_ds = tf.data.Dataset.range(input_count)
+
+    ds = tf.data.Dataset.zip((wav_ds, label_ds))
+    ds = self._spec.preprocess_ds(ds)
+
+    chunks = output_count // input_count
+
+    cnt = 0
+    for item, label in ds:
+      cnt += 1
+    self.assertEqual(cnt, output_count)
+
+    # More thorough checks.
+    cnt = 0
+    for item, label in ds:
+      self.assertEqual(output_shape, item.shape)
+      self.assertEqual(label, cnt // chunks)
+      cnt += 1
+
+  def test_preprocess(self):
+    # YAMNet does padding on the input.
+    self._test_preprocess(
+        input_shape=(10,), input_count=2, output_shape=(1024,), output_count=2)
+    # Split the input data into trunks
+    self._test_preprocess(
+        input_shape=(16000 * 2,),
+        input_count=2,
+        output_shape=(1024,),
+        output_count=8)
+    self._test_preprocess(
+        input_shape=(8000,),
+        input_count=1,
+        output_shape=(1024,),
+        output_count=1)
+
+  def test_create_model(self):
+    model = self._spec.create_model(10)
+    self.assertEqual(model.input_shape, (None, 1024))
+    self.assertEqual(model.output_shape, (None, 10))
+
+  def _train(self, total_samples, num_classes, batch_size, seed):
+    tf.keras.backend.clear_session()
+
+    def fill_shape(new_shape):
+
+      def fn(value):
+        return tf.cast(tf.fill(dims=new_shape, value=value), tf.float32)
+
+      return fn
+
+    tf.random.set_seed(seed)
+    np.random.seed(seed)
+
+    wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
+    wav_ds = wav_ds.map(fill_shape([
+        16000,
+    ]))
+
+    labels = tf.data.Dataset.from_tensor_slices(
+        np.random.randint(low=0, high=num_classes, size=total_samples))
+    dataset = tf.data.Dataset.zip((wav_ds, labels))
+    dataset = self._spec.preprocess_ds(dataset)
+    dataset = dataset.batch(batch_size)
+
+    model = self._spec.create_model(num_classes)
+    self._spec.run_classifier(
+        model, epochs=1, train_ds=dataset, validation_ds=dataset)
+
+  def test_binary_classification(self):
+    self._train(total_samples=10, num_classes=2, batch_size=2, seed=100)
+
+  def test_basic_training(self):
+    self._train(total_samples=20, num_classes=3, batch_size=2, seed=100)
 
 
 class BrowserFFTSpecTest(tf.test.TestCase):
@@ -99,4 +180,6 @@ class BrowserFFTSpecTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
+  # Load compressed models from tensorflow_hub
+  os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
   tf.test.main()
