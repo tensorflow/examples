@@ -17,7 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import glob
 import hashlib
 import json
 import os
@@ -33,8 +32,12 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset impor
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset import tfrecord_util
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 
+ANN_JSON_FILE_SUFFIX = '_annotations.json'
+META_DATA_FILE_SUFFIX = '_meta_data.yaml'
 
-def _get_cache_prefix(image_dir, annotations_dir, annotations_list):
+
+def _get_cache_prefix_filename(image_dir, annotations_dir, annotations_list,
+                               num_shards):
   """Get the prefix for cached files."""
 
   def _get_dir_basename(dirname):
@@ -45,24 +48,38 @@ def _get_cache_prefix(image_dir, annotations_dir, annotations_list):
   hasher.update(_get_dir_basename(annotations_dir).encode('utf-8'))
   if annotations_list:
     hasher.update(' '.join(sorted(annotations_list)).encode('utf-8'))
+  hasher.update(str(num_shards).encode('utf-8'))
   return hasher.hexdigest()
 
 
-def _get_object_detector_cache_filenames(cache_dir, image_dir, annotations_dir,
-                                         annotations_list, num_shards):
+def _get_object_detector_cache_filenames(cache_dir,
+                                         image_dir,
+                                         annotations_dir,
+                                         annotations_list,
+                                         num_shards,
+                                         cache_prefix_filename=None):
   """Gets cache filenames for obejct detector."""
   if cache_dir is None:
     cache_dir = tempfile.mkdtemp()
-    print('Create the cache directory: %s.' % cache_dir)
-  cache_prefix = _get_cache_prefix(image_dir, annotations_dir, annotations_list)
-  cache_prefix = os.path.join(cache_dir, cache_prefix)
+  if not tf.io.gfile.exists(cache_dir):
+    tf.io.gfile.makedirs(cache_dir)
+
+  if cache_prefix_filename is None:
+    cache_prefix_filename = _get_cache_prefix_filename(image_dir,
+                                                       annotations_dir,
+                                                       annotations_list,
+                                                       num_shards)
+  cache_prefix = os.path.join(cache_dir, cache_prefix_filename)
+  print(
+      'Cache will be stored in %s with prefix filename %s. Cache_prefix is %s' %
+      (cache_dir, cache_prefix_filename, cache_prefix))
 
   tfrecord_files = [
       cache_prefix + '-%05d-of-%05d.tfrecord' % (i, num_shards)
       for i in range(num_shards)
   ]
-  annotations_json_file = cache_prefix + '_annotations.json'
-  meta_data_file = cache_prefix + '_meta_data.yaml'
+  annotations_json_file = cache_prefix + ANN_JSON_FILE_SUFFIX
+  meta_data_file = cache_prefix + META_DATA_FILE_SUFFIX
 
   all_cached_files = tfrecord_files + [annotations_json_file, meta_data_file]
   is_cached = all(os.path.exists(path) for path in all_cached_files)
@@ -138,8 +155,9 @@ class DataLoader(dataloader.DataLoader):
                       ignore_difficult_instances=False,
                       num_shards=100,
                       max_num_images=None,
-                      cache_dir=None):
-    """Loads from dataset with PASCAL VOC format.
+                      cache_dir=None,
+                      cache_prefix_filename=None):
+    """c dataset with PASCAL VOC format.
 
     Refer to
     https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5#:~:text=Pascal%20VOC%20is%20an%20XML,for%20training%2C%20testing%20and%20validation
@@ -171,9 +189,13 @@ class DataLoader(dataloader.DataLoader):
         `difficult` can be set inside `object` item in the annotation xml file.
       num_shards: Number of shards for output file.
       max_num_images: Max number of imags to process.
-      cache_dir: The cache directory to save TFRecord and json file. When
-        cache_dir is not set, a temporary folder will be created and will not be
-        removed automatically after training which makes it can be used later.
+      cache_dir: The cache directory to save TFRecord, metadata and json file.
+        When cache_dir is not set, a temporary folder will be created and will
+        not be removed automatically after training which makes it can be used
+        later.
+      cache_prefix_filename: The cache prefix filename. If not set, will
+        automatically generate it based on `image_dir`, `annotations_dir` and
+        `annotations_list`.
 
     Returns:
       ObjectDetectorDataLoader object.
@@ -182,7 +204,7 @@ class DataLoader(dataloader.DataLoader):
     is_cached, cache_prefix, tfrecord_files, ann_json_file, meta_data_file = \
         _get_object_detector_cache_filenames(cache_dir, images_dir,
                                              annotations_dir, annotations_list,
-                                             num_shards)
+                                             num_shards, cache_prefix_filename)
     # If not cached, write data into tfrecord_file_paths and
     # annotations_json_file_path.
     # If `num_shards` differs, it's still not cached.
@@ -192,12 +214,36 @@ class DataLoader(dataloader.DataLoader):
                                  num_shards, max_num_images, tfrecord_files,
                                  ann_json_file, meta_data_file)
 
-    tfrecord_file_patten = cache_prefix + '-*-of-%05d.tfrecord' % num_shards
-    if not glob.glob(tfrecord_file_patten):
+    return cls.from_cache(cache_prefix)
+
+  @classmethod
+  def from_cache(cls, cache_prefix):
+    """Loads the data from cache.
+
+    Args:
+      cache_prefix: The cache prefix including the cache directory and the cache
+        prefix filename, e.g: '/tmp/cache/train'.
+
+    Returns:
+      ObjectDetectorDataLoader object.
+    """
+    # Gets TFRecord files.
+    tfrecord_file_patten = cache_prefix + '*.tfrecord'
+    if not tf.io.gfile.glob(tfrecord_file_patten):
       raise ValueError('TFRecord files are empty.')
 
+    # Loads meta_data.
+    meta_data_file = cache_prefix + META_DATA_FILE_SUFFIX
+    if not tf.io.gfile.exists(meta_data_file):
+      raise ValueError('Metadata file %s doesn\'t exist.' % meta_data_file)
     with tf.io.gfile.GFile(meta_data_file, 'r') as f:
       meta_data = yaml.load(f, Loader=yaml.FullLoader)
+
+    # Gets annotation json file.
+    ann_json_file = cache_prefix + ANN_JSON_FILE_SUFFIX
+    if not tf.io.gfile.exists(ann_json_file):
+      ann_json_file = None
+
     return DataLoader(tfrecord_file_patten, meta_data['size'],
                       meta_data['label_map'], ann_json_file)
 
