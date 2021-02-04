@@ -33,6 +33,20 @@ from tensorflow_docs.api_generator import public_api
 import tensorflow_examples
 import tflite_model_maker
 
+import yaml
+
+
+class OrderedDumper(yaml.dumper.Dumper):
+  pass
+
+
+def _dict_representer(dumper, data):
+  """Force yaml to output dictionaries in order, not alphabetically."""
+  return dumper.represent_dict(data.items())
+
+
+OrderedDumper.add_representer(dict, _dict_representer)
+
 flags.DEFINE_string('output_dir', '/tmp/mm_api/',
                     'The path to output the files to')
 
@@ -63,6 +77,39 @@ def main(_):
       callbacks=[public_api.explicit_package_contents_filter])
 
   doc_generator.build(output_dir=FLAGS.output_dir)
+
+  toc_file = pathlib.Path(FLAGS.output_dir) / 'tflite_model_maker/_toc.yaml'
+  toc = yaml.safe_load(toc_file.read_text())
+
+  ## Nest all sub-modules under the root module instead of beside it.
+  #
+  # Before:
+  #
+  #  mm
+  #  mm.compat
+  #  mm.configs
+  #
+  # After:
+  #
+  #  mm
+  #    compat
+  #    configs
+
+  # The first item of the toc is the root module.
+  mm = toc['toc'][0]
+  mm['status'] = 'experimental'
+  # Shorten the title, and insert each sub-modules into the root module's
+  # "section"
+  sub_sections = mm['section']
+  # The remaining items are the submodules
+  for section in toc['toc'][1:]:
+    section['title'] = section['title'].replace('tflite_model_maker.', '')
+    sub_sections.append(section)
+  # replace the list of (sub)modules with the root module.
+  toc['toc'] = [mm]
+
+  with toc_file.open('w') as f:
+    yaml.dump(toc, f, Dumper=OrderedDumper)
 
 
 if __name__ == '__main__':
