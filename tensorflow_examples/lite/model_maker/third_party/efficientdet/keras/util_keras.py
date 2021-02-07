@@ -13,10 +13,17 @@
 # limitations under the License.
 # ==============================================================================
 """Common keras utils."""
+import collections
+
 from typing import Text
 from absl import logging
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
+
+# Prefix variable name mapping from keras model to the hub module checkpoint.
+HUB_CPT_NAME = collections.OrderedDict([('class_net/class-predict/', 'classes'),
+                                        ('box_net/box-predict/', 'boxes'),
+                                        ('', 'base_model')])
 
 
 def build_batch_norm(is_training_bn: bool,
@@ -93,6 +100,31 @@ def average_name(ema, var):
       var.name.split(':')[0] + '/' + ema.name, mark_as_used=False)
 
 
+def load_from_hub_checkpoint(model, ckpt_path_or_file):
+  """Loads EfficientDetNet weights from EfficientDetNetTrainHub checkpoint."""
+
+  def _get_cpt_var_name(var_name):
+    for name_prefix, hub_name_prefix in HUB_CPT_NAME.items():
+      if var_name.startswith(name_prefix):
+        cpt_var_name = var_name[len(name_prefix):]  # remove the name_prefix
+        cpt_var_name = cpt_var_name.replace('/', '.S')
+        cpt_var_name = hub_name_prefix + '/' + cpt_var_name
+        if name_prefix:
+          cpt_var_name = cpt_var_name.replace(':0', '')
+        break
+
+    return cpt_var_name + '/.ATTRIBUTES/VARIABLE_VALUE'
+
+  for var in model.weights:
+    cpt_var_name = _get_cpt_var_name(var.name)
+    var.assign(tf.train.load_variable(ckpt_path_or_file, cpt_var_name))
+
+    logging.log_first_n(
+        logging.INFO,
+        'Init %s from %s (%s)' % (var.name, cpt_var_name, ckpt_path_or_file),
+        10)
+
+
 def restore_ckpt(model,
                  ckpt_path_or_file,
                  ema_decay=0.9998,
@@ -113,7 +145,14 @@ def restore_ckpt(model,
 
   if (tf.train.list_variables(ckpt_path_or_file)[0][0] ==
       '_CHECKPOINTABLE_OBJECT_GRAPH'):
-    model.load_weights(ckpt_path_or_file)
+    try:
+      model.load_weights(ckpt_path_or_file)
+    except AssertionError:
+      # The checkpoint for  EfficientDetNetTrainHub and EfficientDetNet are not
+      # the same. If we trained from EfficientDetNetTrainHub using hub module
+      # and then want to use the weight in EfficientDetNet, it needed to
+      # manually load the model checkpoint.
+      load_from_hub_checkpoint(model, ckpt_path_or_file)
   else:
     if ema_decay > 0:
       ema = tf.train.ExponentialMovingAverage(decay=0.0)

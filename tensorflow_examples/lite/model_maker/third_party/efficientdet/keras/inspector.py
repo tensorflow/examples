@@ -186,5 +186,5 @@ def main(_):
 
 
 if __name__ == '__main__':
-  logging.set_verbosity(logging.INFO)
+  logging.set_verbosity(logging.ERROR)
   app.run(main)
