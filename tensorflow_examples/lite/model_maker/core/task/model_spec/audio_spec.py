@@ -99,7 +99,7 @@ def _load_tfjs_speech_command_model():
 
 
 class BrowserFFTSpec(BaseSpec):
-  """Audio classification model spec using Browswer FFT as preprocessing."""
+  """Audio classification model spec using Browser FFT as preprocessing."""
 
   def __init__(self, model_dir=None, strategy=None):
     super(BrowserFFTSpec, self).__init__(model_dir, strategy)
