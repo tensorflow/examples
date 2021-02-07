@@ -25,7 +25,7 @@ def create(train_data,
            epochs=None,
            batch_size=None,
            do_train=True):
-  """Loads data and train the model for test classification.
+  """Loads data and train the model for object detection.
 
   Args:
     train_data: Training data.
@@ -36,7 +36,7 @@ def create(train_data,
     do_train: Whether to run training.
 
   Returns:
-    TextClassifier
+    ObjectDetector
   """
   model_spec = ms.get(model_spec)
   if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
