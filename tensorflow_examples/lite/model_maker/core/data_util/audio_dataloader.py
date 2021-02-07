@@ -78,7 +78,7 @@ class ExamplesHelper(object):
     return self._sorted_categories
 
   def shuffle(self):
-    return random.shuffle(self._examples)
+    random.shuffle(self._examples)
 
   def _get_label(self, example):
     """Parses the example path and return the label string."""
