@@ -66,8 +66,7 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
         train_data, model_spec=model_spec, epochs=1, batch_size=1)
     self._test_f1_score(model, validation_data, 0.0)
     self._test_export_vocab(model)
-    self._test_export_to_tflite(
-        model, validation_data, expected_json_file='bert_qa_metadata.json')
+    self._test_export_to_tflite(model, validation_data)
     self._test_export_to_saved_model(model)
     # Comments this due to Out of Memory Error.
     # self._test_model_without_training(model_spec, train_data, validation_data)

@@ -79,10 +79,7 @@ class TextClassifierTest(tf.test.TestCase):
         batch_size=1,
         shuffle=True)
     self._test_accuracy(model, 0.0)
-    self._test_export_to_tflite(
-        model,
-        threshold=0.0,
-        expected_json_file='bert_classifier_metadata.json')
+    self._test_export_to_tflite(model, threshold=0.0)
     self._test_model_without_training(model_spec)
 
   @test_util.test_in_tf_2
