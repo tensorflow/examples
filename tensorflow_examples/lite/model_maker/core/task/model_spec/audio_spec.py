@@ -219,7 +219,7 @@ class YAMNetSpec(BaseSpec):
   def target_sample_rate(self):
     return 16000
 
-  def create_model(self, num_classes):
+  def create_model(self, num_classes, train_whole_model=False):
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=(1024), dtype=tf.float32, name='embedding'),
         tf.keras.layers.Dense(512, activation='relu'),
