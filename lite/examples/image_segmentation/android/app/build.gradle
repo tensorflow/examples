@@ -45,6 +45,7 @@ android {
        }
        // The TFLite inference is built using the TFLite Task library.
        taskApi {
+           getIsDefault().set(true)
            dimension "tfliteInference"
        }
    }

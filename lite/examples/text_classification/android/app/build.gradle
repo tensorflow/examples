@@ -36,6 +36,7 @@ android {
             dimension "tfliteInference"
         }
         taskApi {
+            getIsDefault().set(true)
             dimension "tfliteInference"
         }
     }
