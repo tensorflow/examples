@@ -56,15 +56,31 @@ Follow the steps below to build and run the sample Android app.
 #### Switch between inference solutions (Task library vs TFLite Interpreter)
 
 This Text Classification Android reference app demonstrates two implementation
-solutions,
-[lib_task_api](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
+solutions:
+
+(1)
+[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
 that leverages the out-of-box API from the
-[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/text_classifier),
-and
-[lib_interpreter](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_interpreter)
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/text_classifier);
+
+(2)
+[`lib_interpreter`](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_interpreter)
 that creates the custom inference pipleline using the
 [TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
-You can change the build variant to whichever one you want to build and run—just
-go to `Build > Select Build Variant` and select one from the drop-down menu. See
+
+The [`build.gradle`](app/build.gradle) inside `app` folder shows how to change
+`flavorDimensions "tfliteInference"` to switch between the two solutions.
+
+Inside **Android Studio**, you can change the build variant to whichever one you
+want to build and run—just go to `Build > Select Build Variant` and select one
+from the drop-down menu. See
 [configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
 for more details.
+
+For gradle CLI, running `./gradlew build` can create APKs for both solutions
+under `app/build/outputs/apk`.
+
+*Note: If you simply want the out-of-box API to run the app, we recommend
+`lib_task_api`for inference. If you want to customize your own models and
+control the detail of inputs and outputs, it might be easier to adapt your model
+inputs and outputs by using `lib_interpreter`.*

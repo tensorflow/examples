@@ -72,18 +72,34 @@ libraries.
 #### Switch between inference solutions (Task library vs Support Library)
 
 This Image Classification Android reference app demonstrates two implementation
-solutions,
+solutions:
+
+(1)
 [`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_task_api)
 that leverages the out-of-box API from the
-[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier),
-and
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier);
+
+(2)
 [`lib_support`](https://github.com/tensorflow/examples/tree/master/lite/examples/image_classification/android/lib_support)
 that creates the custom inference pipleline using the
 [TensorFlow Lite Support Library](https://www.tensorflow.org/lite/inference_with_metadata/lite_support).
-You can change the build variant to whichever one you want to build and run—just
-go to `Build > Select Build Variant` and select one from the drop-down menu. See
+
+The [`build.gradle`](app/build.gradle) inside `app` folder shows how to change
+`flavorDimensions "tfliteInference"` to switch between the two solutions.
+
+Inside **Android Studio**, you can change the build variant to whichever one you
+want to build and run—just go to `Build > Select Build Variant` and select one
+from the drop-down menu. See
 [configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
 for more details.
+
+For gradle CLI, running `./gradlew build` can create APKs under
+`app/build/outputs/apk` for both solutions.
+
+*Note: If you simply want the out-of-box API to run the app, we recommend
+`lib_task_api` for inference. If you want to customize your own models and
+control the detail of inputs and outputs, it might be easier to adapt your model
+inputs and outputs by using `lib_support`.*
 
 The file `download.gradle` directs gradle to download the two models used in the
 example, placing them into `assets`.
