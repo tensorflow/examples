@@ -112,7 +112,7 @@ public class DetectorTest {
     return abs(a - b) < 0.01;
   }
 
-  // Bounding Box tolerance: overlapped area > 90% of each one
+  // Bounding Box tolerance: overlapped area > 95% of each one
   private static boolean matchBoundingBoxes(RectF a, RectF b) {
     float areaA = a.width() * a.height();
     float areaB = b.width() * b.height();
@@ -121,7 +121,7 @@ public class DetectorTest {
         new RectF(
             max(a.left, b.left), max(a.top, b.top), min(a.right, b.right), min(a.bottom, b.bottom));
     float overlappedArea = overlapped.width() * overlapped.height();
-    return overlappedArea > 0.9 * areaA && overlappedArea > 0.9 * areaB;
+    return overlappedArea > 0.95 * areaA && overlappedArea > 0.95 * areaB;
   }
 
   private static Bitmap loadImage(String fileName) throws Exception {
