@@ -179,9 +179,9 @@ class AverageWordVecModelSpec(object):
       for token in tokens:
         vocab_counter[token] += 1
 
-    vocab_freq = vocab_counter.most_common(self.num_words)
+    self.vocab_freq = vocab_counter.most_common(self.num_words)
     vocab_list = [self.PAD, self.START, self.UNKNOWN
-                 ] + [word for word, _ in vocab_freq]
+                 ] + [word for word, _ in self.vocab_freq]
     self.vocab = collections.OrderedDict(
         ((v, i) for i, v in enumerate(vocab_list)))
     return self.vocab
