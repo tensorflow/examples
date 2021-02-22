@@ -157,7 +157,7 @@ class DataLoader(dataloader.DataLoader):
                       max_num_images=None,
                       cache_dir=None,
                       cache_prefix_filename=None):
-    """c dataset with PASCAL VOC format.
+    """Loads from dataset with PASCAL VOC format.
 
     Refer to
     https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5#:~:text=Pascal%20VOC%20is%20an%20XML,for%20training%2C%20testing%20and%20validation
