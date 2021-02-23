@@ -549,17 +549,6 @@ class PosenetActivity :
       paint
     )
 
-//    val rt = Runtime.getRuntime()
-//    canvas.drawText(
-//      "Native/JVM: %.2f/%.2f GB".format(
-//        Debug.getNativeHeapSize() / (1024 * 1024 * 1024.0),
-//        (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024 * 1024.0)
-//      ),
-//      (15.0f * widthRatio),
-//      (90.0f * heightRatio + bottom),
-//      paint
-//    )
-
     // Draw!
     surfaceHolder!!.unlockCanvasAndPost(canvas)
   }
