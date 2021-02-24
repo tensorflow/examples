@@ -35,8 +35,6 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.CaptureResult
-import android.hardware.camera2.TotalCaptureResult
 import android.media.Image
 import android.media.ImageReader
 import android.media.ImageReader.OnImageAvailableListener
@@ -175,25 +173,6 @@ class PosenetActivity :
     override fun onError(cameraDevice: CameraDevice, error: Int) {
       onDisconnected(cameraDevice)
       this@PosenetActivity.activity?.finish()
-    }
-  }
-
-  /**
-   * A [CameraCaptureSession.CaptureCallback] that handles events related to JPEG capture.
-   */
-  private val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-    override fun onCaptureProgressed(
-      session: CameraCaptureSession,
-      request: CaptureRequest,
-      partialResult: CaptureResult
-    ) {
-    }
-
-    override fun onCaptureCompleted(
-      session: CameraCaptureSession,
-      request: CaptureRequest,
-      result: TotalCaptureResult
-    ) {
     }
   }
 
@@ -631,7 +610,7 @@ class PosenetActivity :
               previewRequest = previewRequestBuilder!!.build()
               captureSession!!.setRepeatingRequest(
                 previewRequest!!,
-                captureCallback, backgroundHandler
+                null, null
               )
             } catch (e: CameraAccessException) {
               Log.e(TAG, e.toString())
