@@ -35,7 +35,7 @@ extension CVPixelBuffer {
       os_log("Resizing Error: source area is out of index", type: .error)
       return nil
     }
-    guard abs(rect.size.width / rect.size.height - source.size.width / source.size.height) < 1e-5
+    guard abs(size.width / size.height - source.size.width / source.size.height) < 1e-5
     else {
       os_log(
         "Resizing Error: source image ratio and destination image ratio is different",
