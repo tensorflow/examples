@@ -51,7 +51,22 @@ function build_ios_example {
   pushd "$1" > /dev/null
 
   # Cleanly install the dependencies
-  pod install --repo-update --clean-install
+  # Retry a few times to workaround intermittent download errors.
+  MAX_RETRY=3
+  INSTALLED=false
+  for i in $(seq 1 ${MAX_RETRY})
+  do
+    echo "Trying to install dependencies... (trial $i)"
+    if pod install --repo-update --clean-install; then
+      INSTALLED=true
+      break
+    fi
+  done
+
+  if [[ "${INSTALLED}" == false ]]; then
+    echo "Exceeded the max retry limit (${MAX_RETRY}) of pod install command."
+    exit 1
+  fi
 
   # Extract the scheme names.
   PROJECT_NAME="$(find * -maxdepth 0 -type d -name "*${PROJECT_EXT}")"
