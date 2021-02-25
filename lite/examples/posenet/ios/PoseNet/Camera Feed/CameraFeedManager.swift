@@ -23,7 +23,7 @@ import os
     _ manager: CameraFeedManager, didOutput pixelBuffer: CVPixelBuffer
   )
 
-  /// This method informs that a session runtime error occured.
+  /// This method informs that a session runtime error occurred.
   func cameraFeedManagerDidEncounterSessionRunTimeError(_ manager: CameraFeedManager)
 
   /// This method informs that the session was interrupted.
@@ -34,7 +34,7 @@ import os
   /// This method informs that the session interruption has ended.
   func cameraFeedManagerDidEndSessionInterruption(_ manager: CameraFeedManager)
 
-  /// This method informs that there was an error in video configurtion.
+  /// This method informs that there was an error in video configuration.
   func presentVideoConfigurationErrorAlert(_ manager: CameraFeedManager)
 
   /// This method informs that the camera permissions have been denied.
@@ -50,7 +50,7 @@ enum CameraConfiguration {
 }
 
 /// This class manages all camera related functionalities.
-// MARK: - Camera Related Functionalies Manager
+// MARK: - Camera Related Functionality Manager
 class CameraFeedManager: NSObject {
   // MARK: Camera Related Instance Variables
   private let session: AVCaptureSession = AVCaptureSession()
