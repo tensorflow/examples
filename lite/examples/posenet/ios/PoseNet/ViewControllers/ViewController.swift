@@ -339,7 +339,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 // MARK: - Private enums
-/// UI coinstraint values
+/// UI constraint values
 fileprivate enum Traits {
   static let normalCellHeight: CGFloat = 35.0
   static let separatorCellHeight: CGFloat = 25.0
