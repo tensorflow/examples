@@ -19,7 +19,7 @@ enum Constants {
   static let rgbPixelChannels = 3
   static let maxRGBValue: Float32 = 255.0
 
-  // MARK: - Constants related to the model interperter
+  // MARK: - Constants related to the model interpreter
   static let defaultThreadCount = 2
   static let defaultDelegate: Delegates = .CPU
 }

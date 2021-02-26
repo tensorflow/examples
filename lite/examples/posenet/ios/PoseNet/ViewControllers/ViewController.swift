@@ -37,8 +37,8 @@ class ViewController: UIViewController {
   var delegate: Delegates = Constants.defaultDelegate
 
   // MARK: Result Variables
-  // Inferenced data to render.
-  private var inferencedData: InferencedData?
+  // Inferred data to render.
+  private var inferredData: InferredData?
 
   // Minimum score to render the result.
   private let minimumScore: Float = 0.5
@@ -250,8 +250,8 @@ extension ViewController: CameraFeedManagerDelegate {
       return
     }
 
-    // Udpate `inferencedData` to render data in `tableView`.
-    inferencedData = InferencedData(score: result.score, times: times)
+    // Update `inferredData` to render data in `tableView`.
+    inferredData = InferredData(score: result.score, times: times)
 
     // Draw result.
     DispatchQueue.main.async {
@@ -296,7 +296,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     guard let section = InferenceSections(rawValue: indexPath.section) else {
       return cell
     }
-    guard let data = inferencedData else { return cell }
+    guard let data = inferredData else { return cell }
 
     var fieldName: String
     var info: String
@@ -339,14 +339,14 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 // MARK: - Private enums
-/// UI coinstraint values
+/// UI constraint values
 fileprivate enum Traits {
   static let normalCellHeight: CGFloat = 35.0
   static let separatorCellHeight: CGFloat = 25.0
   static let bottomSpacing: CGFloat = 30.0
 }
 
-fileprivate struct InferencedData {
+fileprivate struct InferredData {
   var score: Float
   var times: Times
 }

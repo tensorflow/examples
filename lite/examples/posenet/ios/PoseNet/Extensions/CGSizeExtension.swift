@@ -17,7 +17,7 @@ import Accelerate
 import Foundation
 
 extension CGSize {
-  /// Returns `CGAfineTransform` to resize `self` to fit in destination size, keeping aspect ratio
+  /// Returns `CGAffineTransform` to resize `self` to fit in destination size, keeping aspect ratio
   /// of `self`. `self` image is resized to be inscribe to destination size and located in center of
   /// destination.
   ///
