@@ -374,6 +374,8 @@ class ServingDriver:
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
         converter.target_spec.supported_types = [tf.float16]
       elif tflite == 'INT8':
+        # Enables MLIR-based post-training quantization.
+        converter.experimental_new_quantizer = True
         if file_pattern:
           config = hparams_config.get_efficientdet_config(self.model_name)
           config.override(self.params)
@@ -396,7 +398,6 @@ class ServingDriver:
         converter.representative_dataset = representative_dataset_gen
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
         converter.inference_input_type = tf.uint8
-        converter.inference_output_type = tf.uint8
         # TFLite's custom NMS op isn't supported by post-training quant,
         # so we add TFLITE_BUILTINS as well.
         supported_ops = [
