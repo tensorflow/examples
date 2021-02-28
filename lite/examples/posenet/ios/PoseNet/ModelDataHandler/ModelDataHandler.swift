@@ -176,10 +176,7 @@ class ModelDataHandler {
     }
 
     // Remove the alpha component from the image buffer to get the initialized `Data`.
-    guard
-      let inputData = thumbnail.rgbData(
-        isModelQuantized: Model.isQuantized
-      )
+    guard let inputData = thumbnail.rgbData(isModelQuantized: Model.isQuantized)
     else {
       os_log("Failed to convert the image buffer to RGB data.", type: .error)
       return nil
