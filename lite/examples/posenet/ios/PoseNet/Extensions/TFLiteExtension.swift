@@ -59,7 +59,7 @@ struct FlatArray<Element: AdditiveArithmetic> {
     }
 
     var result = 0
-    for i in 0..<dimensions.count {
+    for i in dimensions.indices {
       guard dimensions[i] > index[i] else {
         fatalError("Invalid index: \(index[i]) is bigger than \(dimensions[i])")
       }
