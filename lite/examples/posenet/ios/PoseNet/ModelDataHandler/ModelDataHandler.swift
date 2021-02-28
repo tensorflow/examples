@@ -214,8 +214,9 @@ class ModelDataHandler {
       var maxCol = 0
       for row in 0..<Model.output.height {
         for col in 0..<Model.output.width {
-          if heats[0, row, col, keypoint] > maxValue {
-            maxValue = heats[0, row, col, keypoint]
+          let value = heats[0, row, col, keypoint]
+          if value > maxValue {
+            maxValue = value
             maxRow = row
             maxCol = col
           }
