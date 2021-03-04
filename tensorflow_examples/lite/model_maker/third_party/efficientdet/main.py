@@ -74,9 +74,9 @@ flags.DEFINE_multi_integer(
 flags.DEFINE_integer('train_batch_size', 64, 'global training batch size')
 flags.DEFINE_integer('eval_batch_size', 1, 'global evaluation batch size')
 flags.DEFINE_integer('eval_samples', 5000, 'Number of samples for eval.')
-flags.DEFINE_integer('iterations_per_loop', 100,
+flags.DEFINE_integer('iterations_per_loop', 1000,
                      'Number of iterations per TPU training loop')
-flags.DEFINE_integer('save_checkpoints_steps', 100,
+flags.DEFINE_integer('save_checkpoints_steps', 1000,
                      'Number of iterations per checkpoint save')
 flags.DEFINE_string(
     'train_file_pattern', None,
