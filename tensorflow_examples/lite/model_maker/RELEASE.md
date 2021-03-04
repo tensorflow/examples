@@ -4,6 +4,11 @@ Refactor the code to be more flexible and extentable without changing API.
 
 Add executable test script for pip package.
 
+## 0.2.5
+
+*   Update tensorflow-hub version in requirements.txt to fix incompatible error
+    when installing pip package.
+
 ## 0.2.4
 
 *   Update stable tensorflow version in requirements.txt.

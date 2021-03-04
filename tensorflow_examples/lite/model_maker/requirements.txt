@@ -1,5 +1,5 @@
 tf-models-official==2.3.0
-tensorflow-hub>=0.8.0
+tensorflow-hub<0.10>=0.8.0
 numpy>=1.17.3
 pillow>=7.0.0
 sentencepiece>=0.1.91
