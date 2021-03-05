@@ -57,7 +57,7 @@ function build_ios_example {
   for i in $(seq 1 ${MAX_RETRY})
   do
     echo "Trying to install dependencies... (trial $i)"
-    if pod install --repo-update --clean-install; then
+    if pod install --verbose --repo-update --clean-install; then
       INSTALLED=true
       break
     fi
