@@ -39,6 +39,7 @@ function build_pip_and_install {
   ${PYTHON_BIN} setup.py ${ver?} sdist bdist_wheel
   local dist_pkg="$(ls dist/${pkg}*.whl)"
   ${PIP_BIN} install ${dist_pkg?} --ignore-installed
+  ${PIP_BIN} install pycocotools
 
   popd > /dev/null
   echo

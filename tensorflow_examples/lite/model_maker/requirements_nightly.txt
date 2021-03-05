@@ -1,6 +1,6 @@
 # TODO(b/177629432): Change to tf-models-nightly and tensorflow once
 # NotFoundError is fixed with tensorflow-text-nightly.
-tf-models-official>=2.4.0
+tf-models-official==2.3.0
 tf-hub-nightly
 numpy>=1.17.3
 pillow>=7.0.0
@@ -22,4 +22,3 @@ tfa-nightly
 neural-structured-learning>=1.3.1
 tensorflow-model-optimization>=0.5
 Cython>=0.29.13
-pycocotools>=2.0.2
