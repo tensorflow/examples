@@ -80,6 +80,7 @@ class YAMNetSpecTest(tf.test.TestCase):
 
     def fill_shape(new_shape):
 
+      @tf.function
       def fn(value):
         return tf.cast(tf.fill(dims=new_shape, value=value), tf.float32)
 
