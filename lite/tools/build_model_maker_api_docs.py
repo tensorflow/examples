@@ -57,7 +57,8 @@ flags.DEFINE_string('code_url_prefix',
 flags.DEFINE_bool('search_hints', True,
                   'Include metadata search hints in the generated files')
 
-flags.DEFINE_string('site_path', '/', 'Path prefix in the _toc.yaml')
+flags.DEFINE_string('site_path', '/lite/api_docs/python',
+                    'Path prefix in the _toc.yaml')
 
 FLAGS = flags.FLAGS
 
