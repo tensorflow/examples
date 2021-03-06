@@ -20,6 +20,7 @@ import tempfile
 from absl import logging
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import coco_metric
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import hparams_config
@@ -257,6 +258,7 @@ class EfficientDetModelSpec(object):
     """
     # Create EfficientDetModel with latest checkpoint.
     config = self.config
+    tf.keras.backend.clear_session()
     model = efficientdet_keras.EfficientDetModel(config=config)
     model.build((batch_size, *config.image_size, 3))
     if config.model_dir:
@@ -329,3 +331,53 @@ class EfficientDetModelSpec(object):
 
       with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
         f.write(tflite_model)
+
+
+def efficientdet_lite0_spec(**kwargs):
+  args = util.dict_with_default(
+      default_dict=dict(
+          model_name='efficientdet-lite0',
+          uri='https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1'
+      ),
+      **kwargs)
+  return EfficientDetModelSpec(**args)
+
+
+def efficientdet_lite1_spec(**kwargs):
+  args = util.dict_with_default(
+      default_dict=dict(
+          model_name='efficientdet-lite1',
+          uri='https://tfhub.dev/tensorflow/efficientdet/lite1/feature-vector/1'
+      ),
+      **kwargs)
+  return EfficientDetModelSpec(**args)
+
+
+def efficientdet_lite2_spec(**kwargs):
+  args = util.dict_with_default(
+      default_dict=dict(
+          model_name='efficientdet-lite2',
+          uri='https://tfhub.dev/tensorflow/efficientdet/lite2/feature-vector/1'
+      ),
+      **kwargs)
+  return EfficientDetModelSpec(**args)
+
+
+def efficientdet_lite3_spec(**kwargs):
+  args = util.dict_with_default(
+      default_dict=dict(
+          model_name='efficientdet-lite3',
+          uri='https://tfhub.dev/tensorflow/efficientdet/lite3/feature-vector/1'
+      ),
+      **kwargs)
+  return EfficientDetModelSpec(**args)
+
+
+def efficientdet_lite4_spec(**kwargs):
+  args = util.dict_with_default(
+      default_dict=dict(
+          model_name='efficientdet-lite4',
+          uri='https://tfhub.dev/tensorflow/efficientdet/lite4/feature-vector/1'
+      ),
+      **kwargs)
+  return EfficientDetModelSpec(**args)

@@ -18,23 +18,22 @@ from __future__ import print_function
 
 import os
 
+from absl import logging
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import configs
+from tensorflow_examples.lite.model_maker.core.task import model_spec
 from tensorflow_examples.lite.model_maker.core.task import object_detector
-from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 
 
 class ObjectDetectorTest(tf.test.TestCase):
 
   def testEfficientDetLite0(self):
     # Gets model specification.
-    hub_path = test_util.get_test_data_path('fake_effdet_lite0_hub')
-    spec = object_detector_spec.EfficientDetModelSpec(
-        model_name='efficientdet-lite0', uri=hub_path)
+    spec = model_spec.get('efficientdet_lite0')
 
     # Prepare data.
     images_dir, annotations_dir, label_map = test_util.create_pascal_voc(
@@ -51,7 +50,6 @@ class ObjectDetectorTest(tf.test.TestCase):
     self.assertGreaterEqual(metrics['AP'], 0)
 
     # Export the model to saved model.
-    spec.config.model_dir = None  # Don't restore checkpoint.
     output_path = os.path.join(self.get_temp_dir(), 'saved_model')
     task.export(self.get_temp_dir(), export_format=ExportFormat.SAVED_MODEL)
     self.assertTrue(os.path.isdir(output_path))
@@ -84,6 +82,7 @@ class ObjectDetectorTest(tf.test.TestCase):
 
 
 if __name__ == '__main__':
+  logging.set_verbosity(logging.ERROR)
   # Load compressed models from tensorflow_hub
   os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
   compat.setup_tf_behavior(tf_version=2)

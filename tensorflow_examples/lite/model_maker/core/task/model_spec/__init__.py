@@ -17,6 +17,7 @@ import inspect
 
 
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
+from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec import recommendation_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite0_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite1_spec
@@ -68,6 +69,13 @@ MODEL_SPECS = {
     'recommendation_bow': recommendation_spec.recommendation_bow_spec,
     'recommendation_cnn': recommendation_spec.recommendation_cnn_spec,
     'recommendation_rnn': recommendation_spec.recommendation_rnn_spec,
+
+    # Object detection
+    'efficientdet_lite0': object_detector_spec.efficientdet_lite0_spec,
+    'efficientdet_lite1': object_detector_spec.efficientdet_lite1_spec,
+    'efficientdet_lite2': object_detector_spec.efficientdet_lite2_spec,
+    'efficientdet_lite3': object_detector_spec.efficientdet_lite3_spec,
+    'efficientdet_lite4': object_detector_spec.efficientdet_lite4_spec,
 }
 
 # List constants for supported models.
@@ -84,6 +92,13 @@ RECOMMENDATION_MODELS = [
     'recommendation_bow',
     'recommendation_rnn',
     'recommendation_cnn',
+]
+OBJECT_DETECTION_MODELS = [
+    'efficientdet_lite0',
+    'efficientdet_lite1',
+    'efficientdet_lite2',
+    'efficientdet_lite3',
+    'efficientdet_lite4',
 ]
 
 
