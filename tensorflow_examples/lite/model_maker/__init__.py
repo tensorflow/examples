@@ -16,8 +16,10 @@
 from tensorflow_examples.lite.model_maker.core import compat
 
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
 from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.data_util.object_detector_dataloader import DataLoader as ObjectDetectorDataloader
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import QuestionAnswerDataLoader
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
 
@@ -26,5 +28,6 @@ from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
+from tensorflow_examples.lite.model_maker.core.task import object_detector
 from tensorflow_examples.lite.model_maker.core.task import question_answer
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
