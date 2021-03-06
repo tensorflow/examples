@@ -250,3 +250,38 @@ class YAMNetSpec(BaseSpec):
     autotune = tf.data.AUTOTUNE
     ds = ds.map(self._extract_embedding, num_parallel_calls=autotune).unbatch()
     return ds
+
+  def export_tflite(self, model, tflite_filepath, quantization_config=None):
+    """Converts the retrained model to tflite format and saves it.
+
+    This method overrides the default `CustomModel._export_tflite` method, and
+    include the spectrom extraction in the model.
+
+    The exported model has input shape (1, number of wav samples)
+
+    Args:
+      model: An instance of the keras classification model to be exported.
+      tflite_filepath: File path to save tflite model.
+      quantization_config: Configuration for post-training quantization.
+    """
+
+    embedding_extraction_layer = hub.KerasLayer(
+        self._yamnet_model_handle, trainable=False)
+
+    keras_input = tf.keras.Input(
+        shape=(None,), dtype=tf.float32, name='audio')  # (1, wav)
+    reshaped_input = tf.reshape(keras_input, (-1,))  # (wav)
+
+    _, embeddings, _ = embedding_extraction_layer(reshaped_input)
+    serving_outputs = model(embeddings)
+    serving_outputs = tf.math.reduce_mean(serving_outputs, axis=0)
+    serving_model = tf.keras.Model(keras_input, serving_outputs)
+
+    # TODO(b/164229433): Remove SELECT_TF_OPS once changes in the bug are
+    # released.
+    model_util.export_tflite(
+        serving_model,
+        tflite_filepath,
+        quantization_config,
+        supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,
+                       tf.lite.OpsSet.SELECT_TF_OPS))

@@ -104,6 +104,13 @@ class YAMNetSpecTest(tf.test.TestCase):
     self._spec.run_classifier(
         model, epochs=1, train_ds=dataset, validation_ds=dataset)
 
+    # Test tflite export
+    tflite_filepath = os.path.join(self.get_temp_dir(), 'model.tflite')
+    self._spec.export_tflite(model, tflite_filepath)
+    expected_model_size = 16 * 1000 * 1000
+    self.assertNear(
+        os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
+
   def test_binary_classification(self):
     self._train(total_samples=10, num_classes=2, batch_size=2, seed=100)
 
@@ -172,6 +179,13 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     model = self._spec.create_model(num_classes)
     self._spec.run_classifier(
         model, epochs=1, train_ds=dataset, validation_ds=dataset)
+
+    # Test tflite export
+    tflite_filepath = os.path.join(self.get_temp_dir(), 'model.tflite')
+    self._spec.export_tflite(model, tflite_filepath)
+    expected_model_size = 6 * 1000 * 1000
+    self.assertNear(
+        os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
 
   def test_binary_classification(self):
     self._train(total_samples=10, num_classes=2, batch_size=2, seed=100)
