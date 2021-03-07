@@ -136,6 +136,9 @@ def restore_ckpt(model,
     ckpt_path_or_file: the path or file for checkpoint.
     ema_decay: ema decay rate. If None or zero or negative value, disable ema.
     skip_mismatch: whether to skip variables if shape mismatch.
+
+  Raises:
+    KeyError: if access unexpected variables.
   """
   if ckpt_path_or_file == '_':
     logging.info('Running test: do not load any ckpt.')
@@ -171,21 +174,27 @@ def restore_ckpt(model,
         var_dict[v.name.split(':')[0]] = v
     # try to load graph-based checkpoint with ema support,
     # else load checkpoint via keras.load_weights which doesn't support ema.
+    reader = tf.train.load_checkpoint(ckpt_path_or_file)
+    var_shape_map = reader.get_variable_to_shape_map()
     for i, (key, var) in enumerate(var_dict.items()):
-      try:
-        var.assign(tf.train.load_variable(ckpt_path_or_file, key))
-        if i < 10:
-          logging.info('Init %s from %s (%s)', var.name, key, ckpt_path_or_file)
-      except tf.errors.NotFoundError as e:
-        if skip_mismatch:
-          logging.warning('Not found %s in %s', key, ckpt_path_or_file)
+      if key in var_shape_map:
+        if var_shape_map[key] != var.shape:
+          msg = 'Shape mismatch: %s' % key
+          if skip_mismatch:
+            logging.warning(msg)
+          else:
+            raise ValueError(msg)
         else:
-          raise e
-      except ValueError as e:
+          var.assign(reader.get_tensor(key), read_value=False)
+          if i < 10:
+            logging.info('Init %s from %s (%s)', var.name, key,
+                         ckpt_path_or_file)
+      else:
+        msg = 'Not found %s in %s' % (key, ckpt_path_or_file)
         if skip_mismatch:
-          logging.warning('%s: %s', key, e)
+          logging.warning(msg)
         else:
-          raise e
+          raise KeyError(msg)
 
 
 def fp16_to_fp32_nested(input_nested):
@@ -213,3 +222,20 @@ def fp16_to_fp32_nested(input_nested):
   else:
     return input_nested
   return out_tensor_dict
+
+
+### The following code breaks COCO training.
+# def get_batch_norm(bn_class):
+#   def _wrapper(*args, **kwargs):
+#     if not kwargs.get('name', None):
+#       kwargs['name'] = 'tpu_batch_normalization'
+#     return bn_class(*args, **kwargs)
+#   return _wrapper
+
+# if tf.compat.v1.executing_eagerly_outside_functions():
+#   utils.BatchNormalization = get_batch_norm(
+#       tf.keras.layers.BatchNormalization)
+#   utils.SyncBatchNormalization = get_batch_norm(
+#       tf.keras.layers.experimental.SyncBatchNormalization)
+#   utils.TpuBatchNormalization = get_batch_norm(
+#       tf.keras.layers.experimental.SyncBatchNormalization)

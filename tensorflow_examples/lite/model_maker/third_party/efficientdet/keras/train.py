@@ -56,7 +56,7 @@ def define_flags():
       help='GRPC URL of the eval master. Set to an appropriate value when '
       'running on CPU/GPU')
   flags.DEFINE_string('eval_name', default=None, help='Eval job name')
-  flags.DEFINE_enum('strategy', None, ['tpu', 'gpus', ''],
+  flags.DEFINE_enum('strategy', '', ['tpu', 'gpus', ''],
                     'Training: gpus for multi-gpu, if None, use TF default.')
 
   flags.DEFINE_integer(
@@ -78,7 +78,7 @@ def define_flags():
   flags.DEFINE_integer('batch_size', 64, 'training batch size')
   flags.DEFINE_integer('eval_samples', 5000, 'The number of samples for '
                        'evaluation.')
-  flags.DEFINE_integer('steps_per_execution', 200,
+  flags.DEFINE_integer('steps_per_execution', 1,
                        'Number of steps per training execution.')
   flags.DEFINE_string(
       'train_file_pattern', None,
@@ -90,7 +90,8 @@ def define_flags():
       'COCO validation JSON containing golden bounding boxes. If None, use the '
       'ground truth from the dataloader. Ignored if testdev_dir is not None.')
 
-  flags.DEFINE_string('mode', 'traineval', 'job mode: train, traineval.')
+  flags.DEFINE_enum('mode', 'traineval', ['train', 'traineval'],
+                    'job mode: train, traineval.')
   flags.DEFINE_string(
       'hub_module_url', None, 'TF-Hub path/url to EfficientDet module.'
       'If specified, pretrained_ckpt flag should not be used.')
@@ -163,7 +164,7 @@ def main(_):
       tf.config.experimental.set_memory_growth(gpu, True)
 
   if FLAGS.debug:
-    tf.config.experimental_run_functions_eagerly(True)
+    tf.config.run_functions_eagerly(True)
     tf.debugging.set_log_device_placement(True)
     os.environ['TF_DETERMINISTIC_OPS'] = '1'
     tf.random.set_seed(FLAGS.tf_random_seed)
@@ -202,8 +203,8 @@ def main(_):
   config.override(params, True)
   # set mixed precision policy by keras api.
   precision = utils.get_precision(config.strategy, config.mixed_precision)
-  policy = tf.keras.mixed_precision.experimental.Policy(precision)
-  tf.keras.mixed_precision.experimental.set_policy(policy)
+  policy = tf.keras.mixed_precision.Policy(precision)
+  tf.keras.mixed_precision.set_global_policy(policy)
 
   def get_dataset(is_training, config):
     file_pattern = (

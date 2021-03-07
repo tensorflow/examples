@@ -145,7 +145,7 @@ class Config(object):
           """Recursively merge two nested dictionary."""
           for k in src.keys():
             if ((k in target and isinstance(target[k], dict) and
-                 isinstance(src[k], collections.abc.Mapping))):
+                 isinstance(src[k], collections.Mapping))):
               merge_dict_recursive(target[k], src[k])
             else:
               target[k] = src[k]
@@ -190,7 +190,7 @@ def default_detection_configs():
 
   # dataset specific parameters
   # TODO(tanmingxing): update this to be 91 for COCO, and 21 for pascal.
-  h.num_classes = 90  # actual classes, 0 is reserved for background.
+  h.num_classes = 90  # 1+ actual classes, 0 is reserved for background.
   h.seg_num_classes = 3  # segmentation classes
   h.heads = ['object_detection']  # 'object_detection', 'segmentation'
 
@@ -384,6 +384,14 @@ efficientdet_model_param_dict = {
         ),
 }
 
+
+lite_common_param = dict(
+    mean_rgb=127.0,
+    stddev_rgb=128.0,
+    act_type='relu6',
+    fpn_weight_method='sum',
+)
+
 efficientdet_lite_param_dict = {
     # lite models are in progress and subject to changes.
     # mean_rgb and stddev_rgb are consistent with EfficientNet-Lite models in
@@ -396,11 +404,8 @@ efficientdet_lite_param_dict = {
             fpn_num_filters=64,
             fpn_cell_repeats=3,
             box_class_repeats=3,
-            act_type='relu6',
-            fpn_weight_method='sum',
             anchor_scale=3.0,
-            mean_rgb=127.0,
-            stddev_rgb=128.0,
+            **lite_common_param,
         ),
     'efficientdet-lite1':
         dict(
@@ -410,11 +415,8 @@ efficientdet_lite_param_dict = {
             fpn_num_filters=88,
             fpn_cell_repeats=4,
             box_class_repeats=3,
-            act_type='relu6',
-            fpn_weight_method='sum',
             anchor_scale=3.0,
-            mean_rgb=127.0,
-            stddev_rgb=128.0,
+            **lite_common_param,
         ),
     'efficientdet-lite2':
         dict(
@@ -424,11 +426,8 @@ efficientdet_lite_param_dict = {
             fpn_num_filters=112,
             fpn_cell_repeats=5,
             box_class_repeats=3,
-            act_type='relu6',
-            fpn_weight_method='sum',
             anchor_scale=3.0,
-            mean_rgb=127.0,
-            stddev_rgb=128.0,
+            **lite_common_param,
         ),
     'efficientdet-lite3':
         dict(
@@ -438,10 +437,7 @@ efficientdet_lite_param_dict = {
             fpn_num_filters=160,
             fpn_cell_repeats=6,
             box_class_repeats=4,
-            act_type='relu6',
-            fpn_weight_method='sum',
-            mean_rgb=127.0,
-            stddev_rgb=128.0,
+            **lite_common_param,
         ),
     'efficientdet-lite4':
         dict(
@@ -451,10 +447,7 @@ efficientdet_lite_param_dict = {
             fpn_num_filters=224,
             fpn_cell_repeats=7,
             box_class_repeats=4,
-            act_type='relu6',
-            fpn_weight_method='sum',
-            mean_rgb=127.0,
-            stddev_rgb=128.0,
+            **lite_common_param,
         ),
 }
 

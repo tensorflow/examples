@@ -108,7 +108,7 @@ Notably,
 
 There are two types of latency: network latency and end-to-end latency.
 
-(1) To measure the network latency (from the fist conv to the last class/box
+(1) To measure the network latency (from the first conv to the last class/box
 prediction output), use the following command:
 
     !python model_inspect.py --runmode=bm --model_name=efficientdet-d0
@@ -281,7 +281,7 @@ Download data and checkpoints.
 
 Create a config file for the PASCAL VOC dataset called voc_config.yaml and put this in it.
 
-      num_classes: 20
+      num_classes: 21
       var_freeze_expr: '(efficientnet|fpn_cells|resample_p6)'
       label_map: {1: aeroplane, 2: bicycle, 3: bird, 4: boat, 5: bottle, 6: bus, 7: car, 8: cat, 9: chair, 10: cow, 11: diningtable, 12: dog, 13: horse, 14: motorbike, 15: person, 16: pottedplant, 17: sheep, 18: sofa, 19: train, 20: tvmonitor}
 
@@ -369,7 +369,7 @@ For more instructions about training on TPUs, please refer to the following tuto
 
   * EfficientNet tutorial: https://cloud.google.com/tpu/docs/tutorials/efficientnet
 
-## 11. Reducing Memory Usage when Training EfficientDets on GPU. (The current approach doesn't support mirrored multi GPU or mixed-precision training)
+## 11. Reducing Memory Usage when Training EfficientDets on GPU.
 
 EfficientDets use a lot of GPU memory for a few reasons:
 

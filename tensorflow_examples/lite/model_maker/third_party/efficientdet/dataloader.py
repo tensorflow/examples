@@ -48,11 +48,21 @@ class InputProcessor:
     self._crop_offset_y = tf.constant(0)
     self._crop_offset_x = tf.constant(0)
 
+  @property
+  def image(self):
+    return self._image
+
+  @image.setter
+  def image(self, image):
+    self._image = image
+
   def normalize_image(self, mean_rgb, stddev_rgb):
     """Normalize the image to zero mean and unit variance."""
+    # The image normalization is identical to Cloud TPU ResNet.
     self._image = tf.cast(self._image, dtype=tf.float32)
     self._image -= tf.constant(mean_rgb, shape=(1, 1, 3), dtype=tf.float32)
     self._image /= tf.constant(stddev_rgb, shape=(1, 1, 3), dtype=tf.float32)
+    return self._image
 
   def set_training_random_scale_factors(self,
                                         scale_min,
@@ -118,6 +128,7 @@ class InputProcessor:
 
   def resize_and_crop_image(self, method=tf.image.ResizeMethod.BILINEAR):
     """Resize input image and crop it to the self._output dimension."""
+    dtype = self._image.dtype
     scaled_image = tf.image.resize(
         self._image, [self._scaled_height, self._scaled_width], method=method)
     scaled_image = scaled_image[self._crop_offset_y:self._crop_offset_y +
@@ -127,7 +138,8 @@ class InputProcessor:
     output_image = tf.image.pad_to_bounding_box(scaled_image, 0, 0,
                                                 self._output_size[0],
                                                 self._output_size[1])
-    return output_image
+    self._image = tf.cast(output_image, dtype)
+    return self._image
 
 
 class DetectionInputProcessor(InputProcessor):
@@ -340,8 +352,7 @@ class InputReader:
       classes = pad_to_fixed_size(classes, -1,
                                   [self._max_instances_per_image, 1])
       if params['mixed_precision']:
-        dtype = (
-            tf.keras.mixed_precision.experimental.global_policy().compute_dtype)
+        dtype = tf.keras.mixed_precision.global_policy().compute_dtype
         image = tf.cast(image, dtype=dtype)
         box_targets = tf.nest.map_structure(
             lambda box_target: tf.cast(box_target, dtype=dtype), box_targets)
@@ -405,8 +416,6 @@ class InputReader:
     seed = params['tf_random_seed'] if self._debug else None
     dataset = tf.data.Dataset.list_files(
         self._file_pattern, shuffle=self._is_training, seed=seed)
-    if self._is_training:
-      dataset = dataset.repeat()
     if input_context:
       dataset = dataset.shard(input_context.num_input_pipelines,
                               input_context.input_pipeline_id)
@@ -419,7 +428,7 @@ class InputReader:
       return dataset
 
     dataset = dataset.interleave(
-        _prefetch_dataset, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        _prefetch_dataset, num_parallel_calls=tf.data.AUTOTUNE)
     dataset = dataset.with_options(self.dataset_options)
     if self._is_training:
       dataset = dataset.shuffle(64, seed=seed)
@@ -434,12 +443,14 @@ class InputReader:
                                                  anchor_labeler, params)
     # pylint: enable=g-long-lambda
     dataset = dataset.map(
-        map_fn, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        map_fn, num_parallel_calls=tf.data.AUTOTUNE)
     dataset = dataset.prefetch(batch_size)
     dataset = dataset.batch(batch_size, drop_remainder=params['drop_remainder'])
     dataset = dataset.map(
         lambda *args: self.process_example(params, batch_size, *args))
-    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+    dataset = dataset.prefetch(tf.data.AUTOTUNE)
+    if self._is_training:
+      dataset = dataset.repeat()
     if self._use_fake_data:
       # Turn this dataset into a semi-fake dataset which always loop at the
       # first batch. This reduces variance in performance and is useful in

@@ -309,10 +309,9 @@ def get_optimizer(params):
         optimizer, average_decay=moving_average_decay, dynamic_decay=True)
   precision = utils.get_precision(params['strategy'], params['mixed_precision'])
   if precision == 'mixed_float16' and params['loss_scale']:
-    optimizer = tf.keras.mixed_precision.experimental.LossScaleOptimizer(
+    optimizer = tf.keras.mixed_precision.LossScaleOptimizer(
         optimizer,
-        loss_scale=tf.mixed_precision.experimental.DynamicLossScale(
-            params['loss_scale']))
+        initial_scale=params['loss_scale'])
   return optimizer
 
 
@@ -776,17 +775,18 @@ class EfficientDetNetTrain(efficientdet_keras.EfficientDetNet):
       loss_vals['reg_l2_loss'] = reg_l2_loss
       total_loss += tf.cast(reg_l2_loss, loss_dtype)
       if isinstance(self.optimizer,
-                    tf.keras.mixed_precision.experimental.LossScaleOptimizer):
+                    tf.keras.mixed_precision.LossScaleOptimizer):
         scaled_loss = self.optimizer.get_scaled_loss(total_loss)
+        optimizer = self.optimizer.inner_optimizer
       else:
         scaled_loss = total_loss
+        optimizer = self.optimizer
     loss_vals['loss'] = total_loss
-    loss_vals['learning_rate'] = self.optimizer.learning_rate(
-        self.optimizer.iterations)
+    loss_vals['learning_rate'] = optimizer.learning_rate(optimizer.iterations)
     trainable_vars = self._freeze_vars()
     scaled_gradients = tape.gradient(scaled_loss, trainable_vars)
     if isinstance(self.optimizer,
-                  tf.keras.mixed_precision.experimental.LossScaleOptimizer):
+                  tf.keras.mixed_precision.LossScaleOptimizer):
       gradients = self.optimizer.get_unscaled_gradients(scaled_gradients)
     else:
       gradients = scaled_gradients

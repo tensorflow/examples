@@ -34,8 +34,7 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.visualize imp
 from tensorflow.python.client import timeline  # pylint: disable=g-direct-tensorflow-import
 
 
-def image_preprocess(image, image_size: Union[int, Tuple[int, int]], mean_rgb,
-                     stddev_rgb):
+def image_preprocess(image, image_size, mean_rgb, stddev_rgb):
   """Preprocess image for inference.
 
   Args:
@@ -180,7 +179,7 @@ def build_model(model_name: Text, inputs: tf.Tensor, **kwargs):
     model_arch = det_model_fn.get_model_arch(model_name)
 
   cls_outputs, box_outputs = utils.build_model_with_precision(
-      precision, model_arch, inputs, False, model_name, **kwargs)
+      precision, model_arch, inputs, model_name, **kwargs)
 
   if mixed_precision:
     # Post-processing has multiple places with hard-coded float32.

@@ -28,12 +28,13 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import inference
 
 flags.DEFINE_string('model_name', 'efficientdet-d0', 'Model.')
-flags.DEFINE_string('mode', 'infer',
-                    'Run mode: {dry, infer, export, benchmark}')
+flags.DEFINE_enum('mode', 'infer',
+                  ['infer', 'dry', 'export', 'benchmark', 'video'], 'Run mode.')
 flags.DEFINE_string('trace_filename', None, 'Trace file name.')
 
 flags.DEFINE_integer('bm_runs', 10, 'Number of benchmark runs.')
-flags.DEFINE_string('tensorrt', None, 'TensorRT mode: {None, FP32, FP16, INT8}')
+flags.DEFINE_enum('tensorrt', '', ['', 'FP32', 'FP16', 'INT8'],
+                  'TensorRT mode.')
 flags.DEFINE_integer('batch_size', 1, 'Batch size for inference.')
 flags.DEFINE_integer('image_size', -1, 'Input image size for inference.')
 
@@ -54,16 +55,14 @@ flags.DEFINE_string('output_video', None,
 
 # For saved model.
 flags.DEFINE_string('saved_model_dir', None, 'Folder path for saved model.')
-flags.DEFINE_string('tflite', None, 'tflite type: {FP32, FP16, INT8}.')
+flags.DEFINE_enum('tflite', '', ['', 'FP32', 'FP16', 'INT8'], 'tflite type.')
 flags.DEFINE_string('file_pattern', None,
                     'Glob for tfrecords, e.g. coco/val-*.tfrecord.')
 flags.DEFINE_integer(
     'num_calibration_steps', 2000,
     'Number of post-training quantization calibration steps to run.')
 flags.DEFINE_bool('debug', False, 'Debug mode.')
-flags.DEFINE_bool(
-    'only_network', False,
-    'Model only contains EfficientDetNet without pre/post-processing.')
+flags.DEFINE_bool('only_network', False, 'Model only contains network')
 FLAGS = flags.FLAGS
 
 
@@ -186,5 +185,5 @@ def main(_):
 
 
 if __name__ == '__main__':
-  logging.set_verbosity(logging.ERROR)
+  logging.set_verbosity(logging.INFO)
   app.run(main)

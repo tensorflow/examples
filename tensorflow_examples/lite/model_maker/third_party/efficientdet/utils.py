@@ -219,9 +219,10 @@ class SyncBatchNormalization(tf.keras.layers.BatchNormalization):
       # Compute variance using: Var[X]= E[X^2] - E[X]^2.
       shard_square_of_mean = tf.math.square(shard_mean)
       shard_mean_of_square = shard_variance + shard_square_of_mean
-      group_mean, group_mean_of_square = (
-          replica_context.all_reduce(tf.distribute.ReduceOp.MEAN,
-                                     [shard_mean, shard_mean_of_square]))
+      group_mean = replica_context.all_reduce(
+          tf.distribute.ReduceOp.MEAN, shard_mean)
+      group_mean_of_square = replica_context.all_reduce(
+          tf.distribute.ReduceOp.MEAN, shard_mean_of_square)
       group_variance = group_mean_of_square - tf.math.square(group_mean)
       return (group_mean, group_variance)
     else:
@@ -255,9 +256,7 @@ def batch_norm_class(is_training, strategy=None):
   if is_training and strategy == 'tpu':
     return TpuBatchNormalization
   elif is_training and strategy == 'gpus':
-    # TODO(fsx950223): use SyncBatchNorm after TF bug is fixed (incorrect nccl
-    # all_reduce). See https://github.com/tensorflow/tensorflow/issues/41980
-    return BatchNormalization
+    return SyncBatchNormalization
   else:
     return BatchNormalization
 
@@ -463,7 +462,7 @@ def archive_ckpt(ckpt_eval, ckpt_objective, ckpt_path):
     dest = os.path.join(dst_dir, os.path.basename(f))
     tf.io.gfile.copy(f, dest, overwrite=True)
   ckpt_state = tf.train.generate_checkpoint_state_proto(
-      dst_dir, model_checkpoint_path=ckpt_name)
+      dst_dir, model_checkpoint_path=os.path.join(dst_dir, ckpt_name))
   with tf.io.gfile.GFile(os.path.join(dst_dir, 'checkpoint'), 'w') as f:
     f.write(str(ckpt_state))
   with tf.io.gfile.GFile(os.path.join(dst_dir, 'best_eval.txt'), 'w') as f:
@@ -551,7 +550,7 @@ def get_precision(strategy: str, mixed_precision: bool = False):
     if strategy == 'tpu':
       return 'mixed_bfloat16'
 
-    if tf.config.experimental.list_physical_devices('GPU'):
+    if tf.config.list_physical_devices('GPU'):
       return 'mixed_float16'
 
     # TODO(fsx950223): Fix CPU float16 inference
@@ -582,13 +581,12 @@ def float16_scope():
     yield varscope
 
 
-def set_precision_policy(policy_name: Text = None, loss_scale: bool = False):
+def set_precision_policy(policy_name: Text = None):
   """Set precision policy according to the name.
 
   Args:
     policy_name: precision policy name, one of 'float32', 'mixed_float16',
       'mixed_bfloat16', or None.
-    loss_scale: whether to use loss scale (only for training).
   """
   if not policy_name:
     return
@@ -598,15 +596,11 @@ def set_precision_policy(policy_name: Text = None, loss_scale: bool = False):
   tf.compat.v1.keras.layers.enable_v2_dtype_behavior()
   # mixed_float16 training is not supported for now, so disable loss_scale.
   # float32 and mixed_bfloat16 do not need loss scale for training.
-  if loss_scale:
-    policy = tf2.keras.mixed_precision.experimental.Policy(policy_name)
-  else:
-    policy = tf2.keras.mixed_precision.experimental.Policy(
-        policy_name, loss_scale=None)
-  tf2.keras.mixed_precision.experimental.set_policy(policy)
+  policy = tf2.keras.mixed_precision.Policy(policy_name)
+  tf2.keras.mixed_precision.set_global_policy(policy)
 
 
-def build_model_with_precision(pp, mm, ii, tt, *args, **kwargs):
+def build_model_with_precision(pp, mm, ii, *args, **kwargs):
   """Build model with its inputs/params for a specified precision context.
 
   This is highly specific to this codebase, and not intended to be general API.
@@ -617,7 +611,6 @@ def build_model_with_precision(pp, mm, ii, tt, *args, **kwargs):
     pp: A string, precision policy name, such as "mixed_float16".
     mm: A function, for rmodel builder.
     ii: A tensor, for model inputs.
-    tt: A bool, If true, it is for training; otherwise, it is for eval.
     *args: A list of model arguments.
     **kwargs: A dict, extra model parameters.
 
@@ -629,13 +622,11 @@ def build_model_with_precision(pp, mm, ii, tt, *args, **kwargs):
     inputs = tf.cast(ii, tf.bfloat16)
     with tf.tpu.bfloat16_scope():
       outputs = mm(inputs, *args, **kwargs)
-    set_precision_policy('float32')
   elif pp == 'mixed_float16':
-    set_precision_policy(pp, loss_scale=tt)
+    set_precision_policy(pp)
     inputs = tf.cast(ii, tf.float16)
     with float16_scope():
       outputs = mm(inputs, *args, **kwargs)
-    set_precision_policy('float32')
   elif not pp or pp == 'float32':
     outputs = mm(ii, *args, **kwargs)
   else:

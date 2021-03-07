@@ -180,8 +180,8 @@ class ServingDriver:
     mixed_precision = self.params.get('mixed_precision', None)
     precision = utils.get_precision(
         self.params.get('strategy', None), mixed_precision)
-    policy = tf.keras.mixed_precision.experimental.Policy(precision)
-    tf.keras.mixed_precision.experimental.set_policy(policy)
+    policy = tf.keras.mixed_precision.Policy(precision)
+    tf.keras.mixed_precision.set_global_policy(policy)
 
   @property
   def model(self):

@@ -53,9 +53,9 @@ def main(_):
   config.override(FLAGS.hparams)
 
   # Use 'mixed_float16' if running on GPUs.
-  policy = tf.keras.mixed_precision.experimental.Policy('float32')
-  tf.keras.mixed_precision.experimental.set_policy(policy)
-  tf.config.experimental_run_functions_eagerly(FLAGS.debug)
+  policy = tf.keras.mixed_precision.Policy('float32')
+  tf.keras.mixed_precision.set_global_policy(policy)
+  tf.config.run_functions_eagerly(FLAGS.debug)
 
   # Create and run the model.
   model = efficientdet_keras.EfficientDetModel(config=config)

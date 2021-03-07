@@ -37,7 +37,6 @@ def to_list(inputs):
     return [inputs[k] for k in sorted(inputs.keys())]
   if isinstance(inputs, list):
     return inputs
-  raise ValueError('Unrecognized inputs : {}'.format(inputs))
 
 
 def batch_map_fn(map_fn, inputs, *args):
@@ -587,13 +586,14 @@ def generate_detections(params,
 
 def transform_detections(detections):
   """A transforms detections in [id, x1, y1, x2, y2, score, class] form to [id, x, y, w, h, score, class]."""
-  return tf.stack([
-      detections[:, :, 0],
-      detections[:, :, 1],
-      detections[:, :, 2],
-      detections[:, :, 3] - detections[:, :, 1],
-      detections[:, :, 4] - detections[:, :, 2],
-      detections[:, :, 5],
-      detections[:, :, 6],
-  ],
-                  axis=-1)
+  return tf.stack(  #
+      [
+          detections[:, :, 0],
+          detections[:, :, 1],
+          detections[:, :, 2],
+          detections[:, :, 3] - detections[:, :, 1],
+          detections[:, :, 4] - detections[:, :, 2],
+          detections[:, :, 5],
+          detections[:, :, 6],
+      ],
+      axis=-1)

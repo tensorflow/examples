@@ -341,7 +341,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
 
   precision = utils.get_precision(params['strategy'], params['mixed_precision'])
   cls_outputs, box_outputs = utils.build_model_with_precision(
-      precision, model_fn, features, params['is_training_bn'])
+      precision, model_fn, features)
 
   levels = cls_outputs.keys()
   for level in levels:
