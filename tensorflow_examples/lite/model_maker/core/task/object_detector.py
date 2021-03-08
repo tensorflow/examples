@@ -63,7 +63,9 @@ class ObjectDetector(custom_model.CustomModel):
       tf.compat.v1.logging.warn(
           'Label map is not the same as the previous label_map in model_spec.')
     model_spec.config.label_map = label_map
-    model_spec.config.num_classes = len(label_map)
+    # TODO(yuqili): num_classes = 1 have some issues during training. Thus we
+    # make minimum num_classes=2 for now.
+    model_spec.config.num_classes = max(2, max(label_map.keys()))
 
   def create_model(self):
     self.model = self.model_spec.create_model()

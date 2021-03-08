@@ -43,6 +43,7 @@ class ObjectDetectorTest(tf.test.TestCase):
 
     # Train the model.
     task = object_detector.create(data, spec, batch_size=1, epochs=1)
+    self.assertEqual(spec.config.num_classes, 2)
 
     # Evaluate trained model
     metrics = task.evaluate(data, batch_size=1)
