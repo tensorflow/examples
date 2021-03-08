@@ -179,6 +179,14 @@ class LiteRunner(object):
       input_tensors = [input_tensors]
 
     interpreter = self.interpreter
+
+    # Reshape inputs
+    for i, input_detail in enumerate(self.input_details):
+      input_tensor = _get_input_tensor(input_tensors, self.input_details, i)
+      interpreter.resize_tensor_input(input_detail['index'], input_tensor.shape)
+    interpreter.allocate_tensors()
+
+    # Feed input to the interpreter
     for i, input_detail in enumerate(self.input_details):
       input_tensor = _get_input_tensor(input_tensors, self.input_details, i)
       if input_detail['quantization'] != (DEFAULT_SCALE, DEFAULT_ZERO_POINT):

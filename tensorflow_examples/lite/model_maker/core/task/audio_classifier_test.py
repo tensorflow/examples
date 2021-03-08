@@ -42,6 +42,12 @@ class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
     return ds
 
 
+class YAMNetWithoutPreprcessing(audio_spec.YAMNetSpec):
+
+  def preprocess_ds(self, ds, is_training=False):
+    return ds
+
+
 def write_sample(root,
                  category,
                  file_name,
@@ -59,7 +65,13 @@ def write_sample(root,
 class AudioClassifierTest(tf.test.TestCase):
 
   def testBrowserFFT(self):
+    self._test_spec(audio_spec.BrowserFFTSpec(),
+                    BrowserFFTWithoutPreprocessing())
 
+  def testYAMNet(self):
+    self._test_spec(audio_spec.YAMNetSpec(), YAMNetWithoutPreprcessing())
+
+  def _test_spec(self, train_spec, tflite_eval_spec):
     temp_folder = self.get_temp_dir()
     cat1 = write_sample(temp_folder, 'cat', '1.wav', 44100, duration_sec=1)
     cat2 = write_sample(temp_folder, 'cat', '2.wav', 44100, duration_sec=2)
@@ -71,14 +83,14 @@ class AudioClassifierTest(tf.test.TestCase):
     tf.random.set_seed(123)
 
     # Prepare data.
-    spec = audio_spec.BrowserFFTSpec()
     ds = tf.data.Dataset.from_tensor_slices(([cat1, cat2, dog1,
                                               dog2], [0, 0, 1, 1]))
     data_loader = audio_dataloader.DataLoader(ds, len(ds), index_to_labels,
-                                              spec)
+                                              train_spec)
 
     # Train a floating point model.
-    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=15)
+    task = audio_classifier.create(
+        data_loader, train_spec, batch_size=1, epochs=15)
 
     # Evaluate trained model
     _, acc = task.evaluate(data_loader)
@@ -86,15 +98,15 @@ class AudioClassifierTest(tf.test.TestCase):
     self.assertGreater(acc, .5)
 
     # Export the model to saved model.
-    output_path = os.path.join(spec.model_dir, 'saved_model')
-    task.export(spec.model_dir, export_format=ExportFormat.SAVED_MODEL)
+    output_path = os.path.join(train_spec.model_dir, 'saved_model')
+    task.export(train_spec.model_dir, export_format=ExportFormat.SAVED_MODEL)
     self.assertTrue(os.path.isdir(output_path))
     self.assertNotEqual(len(os.listdir(output_path)), 0)
 
     # Export the model to TFLite.
-    output_path = os.path.join(spec.model_dir, 'float.tflite')
+    output_path = os.path.join(train_spec.model_dir, 'float.tflite')
     task.export(
-        spec.model_dir,
+        train_spec.model_dir,
         tflite_filename='float.tflite',
         export_format=ExportFormat.TFLITE)
     self.assertTrue(tf.io.gfile.exists(output_path))
@@ -104,9 +116,9 @@ class AudioClassifierTest(tf.test.TestCase):
 
     # Create a new dataset without preprocessing since preprocessing has been
     # packaged inside TFLite model.
-    spec = BrowserFFTWithoutPreprocessing()
     tflite_dataloader = audio_dataloader.DataLoader(ds, len(ds),
-                                                    index_to_labels, spec)
+                                                    index_to_labels,
+                                                    tflite_eval_spec)
 
     # Evaluate accurarcy on float model.
     result = task.evaluate_tflite(output_path, tflite_dataloader)
