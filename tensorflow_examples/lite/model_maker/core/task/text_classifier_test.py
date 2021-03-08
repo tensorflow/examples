@@ -170,7 +170,7 @@ class TextClassifierTest(tf.test.TestCase):
     self.assertEqual(labels, ['neg', 'pos'])
 
   def _test_export_vocab(self, model):
-    vocab_output_file = os.path.join(self.get_temp_dir(), 'vocab')
+    vocab_output_file = os.path.join(self.get_temp_dir(), 'vocab.txt')
     model.export(self.get_temp_dir(), export_format=ExportFormat.VOCAB)
 
     word_index = self._load_vocab(vocab_output_file)

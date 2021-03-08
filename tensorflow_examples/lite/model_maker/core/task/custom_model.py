@@ -126,7 +126,7 @@ class CustomModel(abc.ABC):
              export_dir,
              tflite_filename='model.tflite',
              label_filename='labels.txt',
-             vocab_filename='vocab',
+             vocab_filename='vocab.txt',
              saved_model_filename='saved_model',
              tfjs_folder_name='tfjs',
              export_format=None,

@@ -101,7 +101,7 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
     self.assertGreaterEqual(metric['final_f1'], threshold)
 
   def _test_export_vocab(self, model):
-    vocab_output_file = os.path.join(self.get_temp_dir(), 'vocab')
+    vocab_output_file = os.path.join(self.get_temp_dir(), 'vocab.txt')
     model.export(self.get_temp_dir(), export_format=ExportFormat.VOCAB)
 
     self.assertTrue(os.path.isfile(vocab_output_file))
