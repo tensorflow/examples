@@ -66,7 +66,7 @@ def create(train_data,
 
 
 def _get_model_info(model_spec, vocab_file):
-  """Gets the specific info for the image model."""
+  """Gets the specific info for the question answer model."""
   return metadata_writer.QuestionAnswererInfo(
       name=model_spec.name + ' Question and Answerer',
       version='v1',
@@ -181,14 +181,17 @@ class QuestionAnswer(custom_model.CustomModel):
   def _export_tflite(self,
                      tflite_filepath,
                      quantization_config=None,
-                     with_metadata=True):
+                     with_metadata=True,
+                     export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
-      with_metadata: Whether the output tflite model contains metadata. If True,
-        Exports metadata in json file as well.
+      with_metadata: Whether the output tflite model contains metadata.
+      export_metadata_json_file: Whether to export metadata in json file. If
+        True, export the metadata in the same directory as tflite model.Used
+        only if `with_metadata` is True.
     """
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
@@ -207,4 +210,4 @@ class QuestionAnswer(custom_model.CustomModel):
         export_dir = os.path.dirname(tflite_filepath)
         populator = metadata_writer.MetadataPopulatorForBertQuestionAndAnswer(
             tflite_filepath, export_dir, model_info)
-        populator.populate()
+        populator.populate(export_metadata_json_file)

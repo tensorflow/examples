@@ -45,10 +45,10 @@ class MetadataWriter(abc.ABC):
     self.associated_files = associated_files
     self.metadata_buf = None
 
-  def populate(self):
+  def populate(self, export_metadata_json_file=False):
     """Creates metadata and then populates it into a TFLite model."""
     self._create_metadata()
-    self._populate_metadata()
+    self._populate_metadata(export_metadata_json_file)
 
   @abc.abstractmethod
   def _create_metadata(self):
@@ -118,7 +118,7 @@ class MetadataWriter(abc.ABC):
       ordered_metadata.append(name_meta_dict[name.decode()])
     return ordered_metadata
 
-  def _populate_metadata(self):
+  def _populate_metadata(self, export_metadata_json_file=False):
     """Populates the metadata and label file to the model file."""
     # Copies model_file to export_path.
     model_basename = os.path.basename(self.model_file)
@@ -137,13 +137,18 @@ class MetadataWriter(abc.ABC):
     export_json_path = os.path.join(
         self.export_directory,
         os.path.splitext(model_basename)[0] + ".json")
-    with open(export_json_path, "w") as f:
-      f.write(displayer.get_metadata_json())
+    if export_metadata_json_file:
+      with open(export_json_path, "w") as f:
+        f.write(displayer.get_metadata_json())
 
-    print("Finished populating metadata and associated file to the model:")
-    print(export_model_path)
-    print("The metadata json file has been saved to:")
-    print(export_json_path)
+    logging = tf.compat.v1.logging
+    logging.info(
+        "Finished populating metadata and associated file to the model:")
+    logging.info(export_model_path)
+    if export_metadata_json_file:
+      logging.info("The metadata json file has been saved to:")
+      logging.info(export_json_path)
     if self.associated_files:
-      print("The associated file that has been been packed to the model is:")
-      print(displayer.get_packed_associated_file_list())
+      logging.info(
+          "The associated file that has been been packed to the model is:")
+      logging.info(displayer.get_packed_associated_file_list())

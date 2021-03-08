@@ -155,14 +155,17 @@ class TextClassifier(classification_model.ClassificationModel):
   def _export_tflite(self,
                      tflite_filepath,
                      quantization_config=None,
-                     with_metadata=True):
+                     with_metadata=True,
+                     export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
-      with_metadata: Whether the output tflite model contains metadata. If True,
-        Exports metadata in json file as well.
+      with_metadata: Whether the output tflite model contains metadata.
+      export_metadata_json_file: Whether to export metadata in json file. If
+        True, export the metadata in the same directory as tflite model.Used
+        only if `with_metadata` is True.
     """
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
@@ -196,4 +199,4 @@ class TextClassifier(classification_model.ClassificationModel):
                            'metadata into TFLite. Please set '
                            '`with_metadata=False` or write metadata by '
                            'yourself.')
-        populator.populate()
+        populator.populate(export_metadata_json_file)

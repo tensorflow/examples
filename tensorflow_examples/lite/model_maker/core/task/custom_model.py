@@ -160,6 +160,8 @@ class CustomModel(abc.ABC):
       tflite_filepath = os.path.join(export_dir, tflite_filename)
       export_tflite_kwargs, kwargs = _get_params(self._export_tflite, **kwargs)
       self._export_tflite(tflite_filepath, **export_tflite_kwargs)
+      tf.compat.v1.logging.info(
+          'TensorFlow Lite model exported successfully: %s' % tflite_filepath)
     else:
       with_metadata = False
 

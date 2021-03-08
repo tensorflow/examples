@@ -114,7 +114,10 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
                              atol=1e-04,
                              expected_json_file=None):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
-    model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
+    model.export(
+        self.get_temp_dir(),
+        export_format=ExportFormat.TFLITE,
+        export_metadata_json_file=expected_json_file is not None)
 
     self.assertTrue(os.path.isfile(tflite_output_file))
     self.assertGreater(os.path.getsize(tflite_output_file), 0)
@@ -142,11 +145,10 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
             model.model_spec,
             atol=atol))
 
-    json_output_file = os.path.join(self.get_temp_dir(), 'model.json')
-    self.assertTrue(os.path.isfile(json_output_file))
-    self.assertGreater(os.path.getsize(json_output_file), 0)
-
     if expected_json_file is not None:
+      json_output_file = os.path.join(self.get_temp_dir(), 'model.json')
+      self.assertTrue(os.path.isfile(json_output_file))
+      self.assertGreater(os.path.getsize(json_output_file), 0)
       expected_json_file = test_util.get_test_data_path(expected_json_file)
       self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
