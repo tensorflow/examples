@@ -37,8 +37,8 @@ class. So instead of installing the large `tensorflow` package, we're using the
 much smaller `tflite_runtime` package.
 
 To install this on your Raspberry Pi, follow the instructions in the
-[Python quickstart](https://www.tensorflow.org/lite/guide/python).
-Return here after you perform the `pip install` command.
+[Python quickstart](https://www.tensorflow.org/lite/guide/python#install_tensorflow_lite_for_python).
+Return here after you perform the `apt-get install` command.
 
 
 ## Download the example files
