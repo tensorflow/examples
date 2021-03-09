@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import filecmp
 import os
 
 from absl import logging
@@ -61,9 +62,18 @@ class ObjectDetectorTest(tf.test.TestCase):
     task.export(
         self.get_temp_dir(),
         tflite_filename='float.tflite',
-        export_format=ExportFormat.TFLITE)
+        export_format=ExportFormat.TFLITE,
+        with_metadata=True,
+        export_metadata_json_file=True)
     self.assertTrue(tf.io.gfile.exists(output_path))
     self.assertGreater(os.path.getsize(output_path), 0)
+
+    json_output_file = os.path.join(self.get_temp_dir(), 'float.json')
+    self.assertTrue(os.path.isfile(json_output_file))
+    self.assertGreater(os.path.getsize(json_output_file), 0)
+    expected_json_file = test_util.get_test_data_path(
+        'efficientdet_lite0_metadata.json')
+    self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
     # Export the model to quantized TFLite model.
     # TODO(b/175173304): Skips the test for stable tensorflow 2.4 for now since

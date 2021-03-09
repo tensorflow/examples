@@ -13,10 +13,17 @@
 # limitations under the License.
 """ObjectDetector class."""
 
+import os
+import tempfile
+
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
+from tensorflow_examples.lite.model_maker.core.task.metadata_writers.object_detector import metadata_writer_for_object_detector as metadata_writer
+
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 
 
 def create(train_data,
@@ -54,8 +61,42 @@ def create(train_data,
   return object_detector
 
 
+def _get_model_info(model_spec, quantization_config=None):
+  """Gets the specific info for the object detection model."""
+
+  # Gets image_min/image_max for float/quantized model.
+  image_min = -1
+  image_max = 1
+  if quantization_config:
+    if quantization_config.inference_input_type == tf.uint8:
+      image_min = 0
+      image_max = 255
+    elif quantization_config.inference_input_type == tf.int8:
+      image_min = -128
+      image_max = 127
+
+  def _get_list(v):
+    if isinstance(v, list) or isinstance(v, tuple):
+      return v
+    else:
+      return [v]
+
+  return metadata_writer.ModelSpecificInfo(
+      name=model_spec.model_name,
+      version='v1',
+      image_width=model_spec.config.image_size[1],
+      image_height=model_spec.config.image_size[0],
+      image_min=image_min,
+      image_max=image_max,
+      mean=_get_list(model_spec.config.mean_rgb),
+      std=_get_list(model_spec.config.stddev_rgb))
+
+
 class ObjectDetector(custom_model.CustomModel):
   """ObjectDetector class for inference and exporting to tflite."""
+
+  ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.SAVED_MODEL,
+                           ExportFormat.LABEL)
 
   def __init__(self, model_spec, label_map):
     super().__init__(model_spec, shuffle=None)
@@ -124,11 +165,44 @@ class ObjectDetector(custom_model.CustomModel):
     """Saves the model to Tensorflow SavedModel."""
     self.model_spec.export_saved_model(saved_model_dir)
 
-  def _export_tflite(self, tflite_filepath, quantization_config=None):
+  def _export_tflite(self,
+                     tflite_filepath,
+                     quantization_config=None,
+                     with_metadata=True,
+                     export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
+      with_metadata: Whether the output tflite model contains metadata.
+      export_metadata_json_file: Whether to export metadata in json file. If
+        True, export the metadata in the same directory as tflite model.Used
+        only if `with_metadata` is True.
     """
     self.model_spec.export_tflite(tflite_filepath, quantization_config)
+
+    if with_metadata:
+      with tempfile.TemporaryDirectory() as temp_dir:
+        tf.compat.v1.logging.info(
+            'Label file is inside the TFLite model with metadata.')
+        label_filepath = os.path.join(temp_dir, 'labelmap.txt')
+        self._export_labels(label_filepath)
+        model_info = _get_model_info(self.model_spec, quantization_config)
+        export_dir = os.path.dirname(tflite_filepath)
+        populator = metadata_writer.MetadataPopulatorForObjectDetector(
+            tflite_filepath, export_dir, model_info, label_filepath)
+        populator.populate(export_metadata_json_file)
+
+  def _export_labels(self, label_filepath):
+    """Export labels to label_filepath."""
+    tf.compat.v1.logging.info('Saving labels in %s.', label_filepath)
+    num_classes = self.model_spec.config.num_classes
+    label_map = label_util.get_label_map(self.model_spec.config.label_map)
+    with tf.io.gfile.GFile(label_filepath, 'w') as f:
+      # Ignores label_map[0] that's the background. The labels in the label file
+      # for TFLite metadata should start from the actual labels without the
+      # background.
+      for i in range(num_classes):
+        label = label_map[i + 1] if i + 1 in label_map else '???'
+        f.write(label + '\n')
