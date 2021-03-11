@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""ObjectDetector class."""
+"""APIs to train an object detection model."""
 
 import os
 import tempfile
