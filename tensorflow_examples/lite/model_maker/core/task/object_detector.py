@@ -15,9 +15,11 @@
 
 import os
 import tempfile
+from typing import Dict
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
@@ -160,6 +162,14 @@ class ObjectDetector(custom_model.CustomModel):
 
     return self.model_spec.evaluate(self.model, ds, steps,
                                     data.annotations_json_file)
+
+  def evaluate_tflite(
+      self, tflite_filepath: str,
+      data: object_detector_dataloader.DataLoader) -> Dict[str, float]:
+    """Evaluate the TFLite model."""
+    ds = data.gen_dataset(self.model_spec, batch_size=1, is_training=False)
+    return self.model_spec.evaluate_tflite(tflite_filepath, ds, len(data),
+                                           data.annotations_json_file)
 
   def _export_saved_model(self, saved_model_dir):
     """Saves the model to Tensorflow SavedModel."""

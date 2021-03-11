@@ -16,6 +16,7 @@
 import collections
 import os
 import tempfile
+from typing import Tuple, Dict
 
 from absl import logging
 import tensorflow as tf
@@ -26,6 +27,7 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet import coco_m
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import hparams_config
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import efficientdet_keras
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import eval_tflite
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import inference
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import postprocess
@@ -202,8 +204,10 @@ class EfficientDetModelSpec(object):
         validation_steps=validation_steps)
     return model
 
-  def evaluate(self, model, dataset, steps, json_file=None):
-    """Evaluate the EfficientDet keras model."""
+  def _get_evaluator_and_label_map(
+      self, json_file: str
+  ) -> Tuple[coco_metric.EvaluationMetric, collections.OrderedDict]:
+    """Gets evaluator and label_map for evaluation."""
     label_map = label_util.get_label_map(self.config.label_map)
     # Sorts label_map.keys since pycocotools.cocoeval uses sorted catIds
     # (category ids) in COCOeval class.
@@ -213,6 +217,43 @@ class EfficientDetModelSpec(object):
         filename=json_file, label_map=label_map)
 
     evaluator.reset_states()
+    return evaluator, label_map
+
+  def _get_metric_dict(self, evaluator: coco_metric.EvaluationMetric,
+                       label_map: collections.OrderedDict) -> Dict[str, float]:
+    """Gets the metric dict for evaluation."""
+    metrics = evaluator.result()
+    metric_dict = {}
+    for i, name in enumerate(evaluator.metric_names):
+      metric_dict[name] = metrics[i]
+
+    if label_map:
+      for i, cid in enumerate(label_map.keys()):
+        name = 'AP_/%s' % label_map[cid]
+        metric_dict[name] = metrics[i + len(evaluator.metric_names)]
+    return metric_dict
+
+  def evaluate(self,
+               model: tf.keras.Model,
+               dataset: tf.data.Dataset,
+               steps: int,
+               json_file: str = None) -> Dict[str, float]:
+    """Evaluate the EfficientDet keras model.
+
+    Args:
+      model: The keras model to be evaluated.
+      dataset: tf.data.Dataset used for evaluation.
+      steps: Number of steps to evaluate the model.
+      json_file: JSON with COCO data format containing golden bounding boxes.
+        Used for validation. If None, use the ground truth from the dataloader.
+        Refer to
+        https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5
+          for the description of COCO data format.
+
+    Returns:
+      A dict contains AP metrics.
+    """
+    evaluator, label_map = self._get_evaluator_and_label_map(json_file)
     dataset = dataset.take(steps)
 
     @tf.function
@@ -228,18 +269,66 @@ class EfficientDetModelSpec(object):
       ], [])
 
     dataset = self.ds_strategy.experimental_distribute_dataset(dataset)
-    for (images, labels) in dataset:
+    progbar = tf.keras.utils.Progbar(steps)
+    for i, (images, labels) in enumerate(dataset):
       self.ds_strategy.run(_get_detections, (images, labels))
+      progbar.update(i)
 
-    metrics = evaluator.result()
-    metric_dict = {}
-    for i, name in enumerate(evaluator.metric_names):
-      metric_dict[name] = metrics[i]
+    metric_dict = self._get_metric_dict(evaluator, label_map)
+    return metric_dict
 
-    if label_map:
-      for i, cid in enumerate(label_map.keys()):
-        name = 'AP_/%s' % label_map[cid]
-        metric_dict[name] = metrics[i + len(evaluator.metric_names)]
+  def evaluate_tflite(self,
+                      tflite_filepath: str,
+                      dataset: tf.data.Dataset,
+                      steps: int,
+                      json_file: str = None) -> Dict[str, float]:
+    """Evaluate the EfficientDet TFLite model.
+
+    Args:
+      tflite_filepath: File path to the TFLite model.
+      dataset: tf.data.Dataset used for evaluation.
+      steps: Number of steps to evaluate the model.
+      json_file: JSON with COCO data format containing golden bounding boxes.
+        Used for validation. If None, use the ground truth from the dataloader.
+        Refer to
+        https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5
+          for the description of COCO data format.
+
+    Returns:
+      A dict contains AP metrics.
+    """
+    # TODO(b/182441458): Use the task library for evaluation instead once it
+    # supports python interface.
+    evaluator, label_map = self._get_evaluator_and_label_map(json_file)
+    dataset = dataset.take(steps)
+
+    lite_runner = eval_tflite.LiteRunner(tflite_filepath, only_network=False)
+    progbar = tf.keras.utils.Progbar(steps)
+    for i, (images, labels) in enumerate(dataset):
+      # Get the output result after post-processing NMS op.
+      nms_boxes, nms_classes, nms_scores, _ = lite_runner.run(images)
+
+      # CLASS_OFFSET is used since label_id for `background` is 0 in label_map
+      # while it's not actually included the model. We don't need to add the
+      # offset in the Android application.
+      nms_classes += postprocess.CLASS_OFFSET
+
+      height, width = utils.parse_image_size(self.config.image_size)
+      normalize_factor = tf.constant([height, width, height, width],
+                                     dtype=tf.float32)
+      nms_boxes *= normalize_factor
+      if labels['image_scales'] is not None:
+        scales = tf.expand_dims(tf.expand_dims(labels['image_scales'], -1), -1)
+        nms_boxes = nms_boxes * tf.cast(scales, nms_boxes.dtype)
+      detections = postprocess.generate_detections_from_nms_output(
+          nms_boxes, nms_classes, nms_scores, labels['source_ids'])
+
+      detections = postprocess.transform_detections(detections)
+      evaluator.update_state(labels['groundtruth_data'].numpy(),
+                             detections.numpy())
+      progbar.update(i)
+
+    metric_dict = self._get_metric_dict(evaluator, label_map)
     return metric_dict
 
   def export_saved_model(self,

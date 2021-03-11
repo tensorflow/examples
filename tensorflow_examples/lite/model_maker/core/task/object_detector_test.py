@@ -75,6 +75,11 @@ class ObjectDetectorTest(tf.test.TestCase):
         'efficientdet_lite0_metadata.json')
     self.assertTrue(filecmp.cmp(json_output_file, expected_json_file))
 
+    # Evaluate the TFLite model.
+    task.evaluate_tflite(output_path, data)
+    self.assertIsInstance(metrics, dict)
+    self.assertGreaterEqual(metrics['AP'], 0)
+
     # Export the model to quantized TFLite model.
     # TODO(b/175173304): Skips the test for stable tensorflow 2.4 for now since
     # it fails. Will revert this change after TF upgrade.
