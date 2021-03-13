@@ -1,0 +1,21 @@
+name: "Validate Gradle"
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  validation:
+    name: "Validation"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lite/examples/${{ matrix.example }}
+    strategy:
+      matrix:
+        java_version: [ 11 ]
+        example: [ hand_tracking, bert_qa, digit_classifier, gesture_classification, image_classification, image_segmentation, model_personalization, object_detection, posenet, recommendation, smart_reply, sound_classification, speech_commands, style_transfer, super_resolution, text_classification ]
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: gradle/wrapper-validation-action@v1
