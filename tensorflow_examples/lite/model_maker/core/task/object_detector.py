@@ -33,6 +33,7 @@ def create(train_data,
            validation_data=None,
            epochs=None,
            batch_size=None,
+           train_whole_model=False,
            do_train=True):
   """Loads data and train the model for object detection.
 
@@ -42,12 +43,17 @@ def create(train_data,
     validation_data: Validation data. If None, skips validation process.
     epochs: Number of epochs for training.
     batch_size: Batch size for training.
+    train_whole_model: Boolean, False by default. If true, train the whole
+      model. Otherwise, only train the layers that are not match
+      `model_spec.config.var_freeze_expr`.
     do_train: Whether to run training.
 
   Returns:
     ObjectDetector
   """
   model_spec = ms.get(model_spec)
+  if train_whole_model:
+    model_spec.config.var_freeze_expr = None
   if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
     raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
         model_spec.compat_tf_versions, compat.get_tf_behavior()))
