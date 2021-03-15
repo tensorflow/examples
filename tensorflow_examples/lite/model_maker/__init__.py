@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Public APIs for TFLite Model Maker, a transfer learning library to train custom TFLite models."""
+"""A transfer learning library to train custom TFLite models."""
 
 from tensorflow_examples.lite.model_maker.core import compat
 
