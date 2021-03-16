@@ -136,6 +136,10 @@ class ObjectDetector(custom_model.CustomModel):
             epochs=None,
             batch_size=None):
     """Feeds the training data for training."""
+    if not self.model_spec.config.drop_remainder:
+      raise ValueError('Must set `drop_remainder=True` during training. '
+                       'Otherwise it will fail.')
+
     batch_size = batch_size if batch_size else self.model_spec.batch_size
     # TODO(b/171449557): Upstream this to the parent class.
     if len(train_data) < batch_size:
@@ -143,6 +147,12 @@ class ObjectDetector(custom_model.CustomModel):
                        'than batch_size (%d). To solve this problem, set '
                        'the batch_size smaller or increase the size of the '
                        'train_data.' % (len(train_data), batch_size))
+    if validation_data and len(validation_data) < batch_size:
+      tf.compat.v1.logging.warn(
+          'The size of the validation_data (%d) is smaller than batch_size '
+          '(%d). Ignore the validation_data.' %
+          (len(validation_data), batch_size))
+      validation_data = None
 
     with self.model_spec.ds_strategy.scope():
       self.create_model()
@@ -157,8 +167,10 @@ class ObjectDetector(custom_model.CustomModel):
   def evaluate(self, data, batch_size=None):
     """Evaluates the model."""
     batch_size = batch_size if batch_size else self.model_spec.batch_size
+    # Not to drop the smaller batch to evaluate the whole dataset.
+    self.model_spec.config.drop_remainder = False
     ds = data.gen_dataset(self.model_spec, batch_size, is_training=False)
-    steps = len(data) // batch_size
+    steps = (len(data) + batch_size - 1) // batch_size
     # TODO(b/171449557): Upstream this to the parent class.
     if steps <= 0:
       raise ValueError('The size of the validation_data (%d) couldn\'t be '
@@ -166,8 +178,12 @@ class ObjectDetector(custom_model.CustomModel):
                        'set the batch_size smaller or increase the size of the '
                        'validation_data.' % (len(data), batch_size))
 
-    return self.model_spec.evaluate(self.model, ds, steps,
-                                    data.annotations_json_file)
+    eval_metrics = self.model_spec.evaluate(self.model, ds, steps,
+                                            data.annotations_json_file)
+    # Set back drop_remainder=True since it must be True during training.
+    # Otherwise it will fail.
+    self.model_spec.config.drop_remainder = True
+    return eval_metrics
 
   def evaluate_tflite(
       self, tflite_filepath: str,

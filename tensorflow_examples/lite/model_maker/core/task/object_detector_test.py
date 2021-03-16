@@ -47,7 +47,7 @@ class ObjectDetectorTest(tf.test.TestCase):
     self.assertEqual(spec.config.num_classes, 2)
 
     # Evaluate trained model
-    metrics = task.evaluate(data, batch_size=1)
+    metrics = task.evaluate(data)
     self.assertIsInstance(metrics, dict)
     self.assertGreaterEqual(metrics['AP'], 0)
 
