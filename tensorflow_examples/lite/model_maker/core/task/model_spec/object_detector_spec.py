@@ -61,6 +61,7 @@ class EfficientDetModelSpec(object):
                steps_per_execution=1,
                moving_average_decay=0,
                var_freeze_expr='(efficientnet|fpn_cells|resample_p6)',
+               tflite_max_detections=25,
                strategy=None,
                tpu=None,
                gcp_project=None,
@@ -85,6 +86,8 @@ class EfficientDetModelSpec(object):
       moving_average_decay: Float. The decay to use for maintaining moving
         averages of the trained parameters.
       var_freeze_expr: Expression to freeze variables.
+      tflite_max_detections: The max number of output detections in the TFLite
+        model.
       strategy:  A string specifying which distribution strategy to use.
         Accepted values are 'tpu', 'gpus', None. tpu' means to use TPUStrategy.
         'gpus' mean to use MirroredStrategy for multi-gpus. If None, use TF
@@ -112,6 +115,7 @@ class EfficientDetModelSpec(object):
     config.image_size = utils.parse_image_size(config.image_size)
     config.var_freeze_expr = var_freeze_expr
     config.moving_average_decay = moving_average_decay
+    config.tflite_max_detections = tflite_max_detections
     if epochs:
       config.num_epochs = epochs
 
