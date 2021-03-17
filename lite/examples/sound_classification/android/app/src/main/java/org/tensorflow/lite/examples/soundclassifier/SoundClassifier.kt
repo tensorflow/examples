@@ -55,8 +55,6 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         val modelPath: String = "sound_classifier.tflite",
         /** The required audio sample rate in Hz.  */
         val sampleRate: Int = 44_100,
-        /** How many milliseconds to sleep between successive audio sample pulls.  */
-        val audioPullPeriod: Long = 50L,
         /** Number of warm up runs to do after loading the TFLite model.  */
         val warmupRuns: Int = 3,
         /** Number of points in average to reduce noise. */
@@ -321,13 +319,20 @@ class SoundClassifier(context: Context, private val options: Options = Options()
                 return
             }
             val outputBuffer = FloatBuffer.allocate(modelNumClasses)
+
+            var lastInvokeMs = SystemClock.elapsedRealtime()
+
             while (!isInterrupted) {
 
-                try {
-                    TimeUnit.MILLISECONDS.sleep(options.audioPullPeriod)
-                } catch (e: InterruptedException) {
-                    Log.w(TAG, "Sleep interrupted in recognition thread.")
-                    break
+                val currentMs = SystemClock.elapsedRealtime()
+
+                if(currentMs - lastInvokeMs < recognitionPeriod) {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(recognitionPeriod - (currentMs - lastInvokeMs))
+                    } catch (e: InterruptedException) {
+                        Log.w(TAG, "Sleep interrupted in recognition thread.")
+                        break
+                    }
                 }
 
                 // TODO: Check output against 0?
