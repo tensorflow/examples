@@ -147,15 +147,17 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     private lateinit var recordingBuffer: ShortArray
 
     /** Buffer that holds audio PCM sample that are fed to the TFLite model for inference.  */
-    private lateinit var inputBuffer: FloatBuffer
+
 
     private lateinit var newAudioBuffer: AudioBuffer
-    private lateinit var record: AudioRecord
+    private var record: AudioRecord? = null
 
     init {
         loadLabels(context)
         setupInterpreter(context)
         warmUpModel()
+        startRecording()
+        startRecognition()
     }
 
     override fun onResume(owner: LifecycleOwner) = start()
@@ -168,7 +170,8 @@ class SoundClassifier(context: Context, private val options: Options = Options()
      */
     fun start() {
         if (!isPaused) {
-            startAudioRecord()
+            startRecording()
+            startRecognition()
         }
     }
 
@@ -178,7 +181,7 @@ class SoundClassifier(context: Context, private val options: Options = Options()
      */
     fun stop() {
         if (isClosed || !isRecording) return
-        recordingThread?.interrupt()
+        record?.stop()
         recognitionThread?.interrupt()
 
         _probabilities.postValue(labelList.associateWith { 0f })
@@ -238,11 +241,13 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         // Fill the array with NaNs initially.
         predictionProbs = FloatArray(modelNumClasses) { Float.NaN }
 
-        inputBuffer = FloatBuffer.allocate(modelInputLength)
+//        inputBuffer = FloatBuffer.allocate(modelInputLength)
         newAudioBuffer = AudioBuffer(null, modelInputLength)
     }
 
     private fun warmUpModel() {
+        var inputBuffer = FloatBuffer.allocate(modelInputLength)
+
         generateDummyAudioInput(inputBuffer)
         for (n in 0 until options.warmupRuns) {
             val t0 = SystemClock.elapsedRealtimeNanos()
@@ -271,16 +276,6 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         }
     }
 
-    /** Start a thread to pull audio samples in continuously.  */
-    @Synchronized
-    private fun startAudioRecord() {
-        if (isRecording) return
-        recordingThread = AudioRecordingThread().apply {
-            start()
-        }
-        isClosed = false
-    }
-
     /** Start a thread that runs model inference (i.e., recognition) at a regular interval.  */
     private fun startRecognition() {
         recognitionThread = RecognitionThread().apply {
@@ -288,87 +283,35 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         }
     }
 
-    /** Runnable class to run a thread for audio recording */
-    private inner class AudioRecordingThread : Thread() {
-        override fun run() {
-            var bufferSize = AudioRecord.getMinBufferSize(
-                options.sampleRate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            )
-            if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
-                bufferSize = options.sampleRate * 2
-                Log.w(TAG, "bufferSize has error or bad value")
-            }
-            // Force a long recording
-            bufferSize = options.sampleRate * 2
-            Log.i(TAG, "bufferSize = $bufferSize")
-            record = AudioRecord(
-                // including MIC, UNPROCESSED, and CAMCORDER.
-                MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                options.sampleRate,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize
-            )
-            if (record.state != AudioRecord.STATE_INITIALIZED) {
-                Log.e(TAG, "AudioRecord failed to initialize")
-                return
-            }
-            Log.i(TAG, "Successfully initialized AudioRecord")
-            val bufferSamples = bufferSize / 2
-            val audioBuffer = ShortArray(bufferSamples)
-            val recordingBufferSamples =
-                ceil(modelInputLength.toFloat() / bufferSamples.toDouble())
-                    .toInt() * bufferSamples
-            Log.i(TAG, "recordingBufferSamples = $recordingBufferSamples")
-            recordingOffset = 0
-            recordingBuffer = ShortArray(recordingBufferSamples)
-            record.startRecording()
-            Log.i(TAG, "Successfully started AudioRecord recording")
-
-            // Start recognition (model inference) thread.
-            startRecognition()
-//
-//      while (!isInterrupted) {
-//        try {
-//          TimeUnit.MILLISECONDS.sleep(options.audioPullPeriod)
-//        } catch (e: InterruptedException) {
-//          Log.w(TAG, "Sleep interrupted in audio recording thread.")
-//          break
-//        }
-//        when (record.read(audioBuffer, 0, audioBuffer.size)) {
-//          AudioRecord.ERROR_INVALID_OPERATION -> {
-//            Log.w(TAG, "AudioRecord.ERROR_INVALID_OPERATION")
-//          }
-//          AudioRecord.ERROR_BAD_VALUE -> {
-//            Log.w(TAG, "AudioRecord.ERROR_BAD_VALUE")
-//          }
-//          AudioRecord.ERROR_DEAD_OBJECT -> {
-//            Log.w(TAG, "AudioRecord.ERROR_DEAD_OBJECT")
-//          }
-//          AudioRecord.ERROR -> {
-//            Log.w(TAG, "AudioRecord.ERROR")
-//          }
-//          bufferSamples -> {
-//            // We apply locks here to avoid two separate threads (the recording and
-//            // recognition threads) reading and writing from the recordingBuffer at the same
-//            // time, which can cause the recognition thread to read garbled audio snippets.
-//            recordingBufferLock.withLock {
-//              audioBuffer.copyInto(
-//                recordingBuffer,
-//                recordingOffset,
-//                0,
-//                bufferSamples
-//              )
-//              recordingOffset = (recordingOffset + bufferSamples) % recordingBufferSamples
-//              Log.i(TAG, "recordingOffset is now (${recordingOffset}")
-//              Log.i(TAG, "Got $bufferSamples samples")
-//            }
-//          }
-//        }
-//      }
+    private fun startRecording() {
+        var bufferSize = options.sampleRate * 2
+        var minBufferSize = AudioRecord.getMinBufferSize(
+            options.sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        )
+        // Minimal buffer size is greater than the default buffer size.
+        if (minBufferSize > options.sampleRate * 2) {
+            bufferSize = bufferSize
         }
+        Log.i(TAG, "bufferSize = $bufferSize")
+
+        record = AudioRecord(
+            // including MIC, UNPROCESSED, and CAMCORDER.
+            MediaRecorder.AudioSource.VOICE_RECOGNITION,
+            options.sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            bufferSize
+        )
+        if (record?.state != AudioRecord.STATE_INITIALIZED) {
+            Log.e(TAG, "AudioRecord failed to initialize")
+            return
+        }
+        Log.i(TAG, "Successfully initialized AudioRecord")
+        record?.startRecording()
+        Log.i(TAG, "Successfully started AudioRecord recording")
+
     }
 
     private inner class RecognitionThread : Thread() {
@@ -380,23 +323,17 @@ class SoundClassifier(context: Context, private val options: Options = Options()
             val outputBuffer = FloatBuffer.allocate(modelNumClasses)
             while (!isInterrupted) {
 
-                // TODO: increase the audio record buffer
                 try {
                     TimeUnit.MILLISECONDS.sleep(options.audioPullPeriod)
-//         TimeUnit.MILLISECONDS.sleep(recognitionPeriod)
                 } catch (e: InterruptedException) {
                     Log.w(TAG, "Sleep interrupted in recognition thread.")
                     break
                 }
-//        var samplesAreAllZero = true
 
                 // TODO: Check output against 0?
                 val cnt = newAudioBuffer.feed(record)
                 Log.i(TAG, "Loaded $cnt samples from recorder")
                 var newInputBuffer = newAudioBuffer.GetAudioBufferInFloat()
-
-//                var samplesAreAllZero = false
-//                newInputBuffer.rewind()
 
                 var averageBuffer = FloatBuffer.allocate(modelInputLength)
                 for (i in 0 until modelInputLength) {
@@ -407,50 +344,15 @@ class SoundClassifier(context: Context, private val options: Options = Options()
                     } else {
                         newInputBuffer[i]
                     }
-//                    if (samplesAreAllZero && s.toInt() != 0) {
-//                        samplesAreAllZero = false
-//                    }
+
                     averageBuffer.put(i, s.toFloat())
-//                    if (!samplesAreAllZero) {
-//                        Log.i(TAG, "Setting inputBuffer[$i] as ${s.toFloat()} from $s")
-//                    }
+
                 }
 
-//        recordingBufferLock.withLock {
-//          // reader
-//          var j = (recordingOffset - modelInputLength) % modelInputLength
-//          if (j < 0) {
-//            j += modelInputLength
-//          }
-//
-//          // writer
-//          for (i in 0 until modelInputLength) {
-//            val s = if (i >= options.pointsInAverage && j >= options.pointsInAverage) {
-//              ((j - options.pointsInAverage + 1)..j).map { recordingBuffer[it % modelInputLength] }
-//                .average()
-//            } else {
-//              recordingBuffer[j % modelInputLength]
-//            }
-//            j += 1
-//
-//            if (samplesAreAllZero && s.toInt() != 0) {
-//              samplesAreAllZero = false
-//            }
-//            inputBuffer.put(i, s.toFloat())
-//            if (! samplesAreAllZero) {
-//              Log.i(TAG,"Setting inputBuffer[$i] as ${s.toFloat()} from $s")
-//            }
-//          }
-//        }
-//                if (samplesAreAllZero) {
-//                    Log.w(TAG, "No audio input: All audio samples are zero!")
-//                    continue
-//                }
                 val t0 = SystemClock.elapsedRealtimeNanos()
-//        inputBuffer.rewind()
+                averageBuffer.rewind()
                 outputBuffer.rewind()
-                interpreter.run(newInputBuffer, outputBuffer)
-//        interpreter.run(inputBuffer, outputBuffer)
+                interpreter.run(averageBuffer, outputBuffer)
                 outputBuffer.rewind()
                 outputBuffer.get(predictionProbs) // Copy data to predictionProbs.
 
