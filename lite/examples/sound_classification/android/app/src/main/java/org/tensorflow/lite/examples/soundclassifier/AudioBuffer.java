@@ -88,7 +88,7 @@ public class AudioBuffer {
     }
 
     private int feed(AudioRecord record, float[] temporary) {
-        int readSamples = record.read(temporary, 0, temporary.length, AudioRecord.READ_BLOCKING);
+        int readSamples = record.read(temporary, 0, temporary.length, AudioRecord.READ_NON_BLOCKING);
         if (readSamples > 0) {
             feed(temporary, readSamples);
         }
@@ -96,7 +96,7 @@ public class AudioBuffer {
     }
 
     public int feed(AudioRecord record, short[] temporary) {
-        int readSamples = record.read(temporary, 0, temporary.length, AudioRecord.READ_BLOCKING);
+        int readSamples = record.read(temporary, 0, temporary.length, AudioRecord.READ_NON_BLOCKING);
         if (readSamples > 0) {
             feed(temporary, readSamples);
         }
