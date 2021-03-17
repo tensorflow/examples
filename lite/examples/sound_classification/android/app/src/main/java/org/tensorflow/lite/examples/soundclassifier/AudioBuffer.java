@@ -2,24 +2,18 @@ package org.tensorflow.lite.examples.soundclassifier;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import java.nio.FloatBuffer;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import kotlin.collections.ArrayDeque;
-
 public class AudioBuffer {
 
     // TODO: What if the ring buffer is not yet fully filled before invocation?
-    private class RingBuffer {
+    private class FloatRingBuffer {
         private float[] buffer;
         private int current;
 
-        RingBuffer(int size) {
+        FloatRingBuffer(int size) {
             buffer = new float[size];
         }
 
@@ -50,14 +44,15 @@ public class AudioBuffer {
         }
     }
 
-    // Do we actually need it in Java here?
     private AudioFormat audioFormat;
-    private RingBuffer ringBuffer;
-    private int ringBufferIndex = 0;
+    // Keeping all the data in float and convert them to desired types at the end.
+    // In the future, we might want to store data in the format specified by audioFormat.
+    private FloatRingBuffer floatRingBuffer;
 
+    // TODO: Do we need to keep track of the AudioFormat?
     public AudioBuffer(AudioFormat audioFormat, int sampleCount) {
         this.audioFormat = audioFormat;
-        this.ringBuffer = new RingBuffer(sampleCount);
+        this.floatRingBuffer = new FloatRingBuffer(sampleCount);
     }
 
     // PCM float
@@ -67,7 +62,7 @@ public class AudioBuffer {
 
     // TODO: what's the correct name?
     public int feed(float[] data, int size) {
-        ringBuffer.feed(data, size);
+        floatRingBuffer.feed(data, size);
         return size;
     }
 
@@ -82,14 +77,14 @@ public class AudioBuffer {
 
     public int feed(short[] data, int size) {
         for (int i = 0; i < size; i++) {
-            ringBuffer.feed(pcm16ToFloat(data[i]));
+            floatRingBuffer.feed(pcm16ToFloat(data[i]));
         }
         return size;
     }
 
     // Read from AudioRecord as a helper function
     public int feed(AudioRecord record) {
-        return feed(record, ringBuffer.getCapacity());
+        return feed(record, floatRingBuffer.getCapacity());
     }
 
     private int feed(AudioRecord record, float[] temporary) {
@@ -147,13 +142,9 @@ public class AudioBuffer {
         return audioFormat;
     }
 
-    // TODO: Convert this to byte buffer.
-
     // TODO: ownership
     public FloatBuffer GetAudioBufferInFloat() {
-        FloatBuffer output = FloatBuffer.wrap(this.ringBuffer.getArray());
-        // TODO: Is this needed?
-//        output.rewind();
+        FloatBuffer output = FloatBuffer.wrap(this.floatRingBuffer.getArray());
         return output;
     }
 
