@@ -81,11 +81,26 @@ def define_flags():
   flags.DEFINE_integer('num_images', None, 'Max number of imags to process.')
 
 
+class UniqueId(object):
+  """Class to get the unique {image/ann}_id each time calling the functions."""
+
+  def __init__(self):
+    self.image_id = 0
+    self.ann_id = 0
+
+  def get_image_id(self):
+    self.image_id += 1
+    return self.image_id
+
+  def get_ann_id(self):
+    self.ann_id += 1
+    return self.ann_id
+
+
 def dict_to_tf_example(data,
                        images_dir,
                        label_map_dict,
-                       image_id,
-                       ann_id,
+                       unique_id,
                        ignore_difficult_instances=False,
                        ann_json_dict=None):
   """Convert XML derived dict to tf.Example proto.
@@ -98,8 +113,8 @@ def dict_to_tf_example(data,
       tfrecord_util.recursive_parse_xml_to_dict)
     images_dir: Path to the directory holding raw images.
     label_map_dict: A map from string label names to integers ids.
-    image_id: Interger, image id for this image.
-    ann_id: Interger, annotation id for this image.
+    unique_id: UniqueId object to get the unique {image/ann}_id for the image
+      and the annotations.
     ignore_difficult_instances: Whether to skip difficult instances in the
       dataset  (default: False).
     ann_json_dict: annotation json dictionary.
@@ -118,6 +133,8 @@ def dict_to_tf_example(data,
   if image.format != 'JPEG':
     raise ValueError('Image format not JPEG')
   key = hashlib.sha256(encoded_jpg).hexdigest()
+
+  image_id = unique_id.get_image_id()
 
   width = int(data['size']['width'])
   height = int(data['size']['height'])
@@ -171,7 +188,7 @@ def dict_to_tf_example(data,
             'image_id': image_id,
             'bbox': [abs_xmin, abs_ymin, abs_width, abs_height],
             'category_id': label_map_dict[obj['name']],
-            'id': ann_id,
+            'id': unique_id.get_ann_id(),
             'ignore': 0,
             'segmentation': [],
         }
@@ -254,8 +271,8 @@ def main(_):
       'annotations': [],
       'categories': []
   }
-  image_id = 0
-  ann_id = 0
+
+  unique_id = UniqueId()
   for year in years:
     example_class = list(label_map_dict.keys())[1]
     examples_path = os.path.join(data_dir, year, 'ImageSets', 'Main',
@@ -281,14 +298,11 @@ def main(_):
 
       img_dir = os.path.join(FLAGS.data_dir, data['folder'], 'JPEGImages')
 
-      image_id += 1
-      ann_id += 1
       tf_example = dict_to_tf_example(
           data,
           img_dir,
           label_map_dict,
-          image_id,
-          ann_id,
+          unique_id,
           FLAGS.ignore_difficult_instances,
           ann_json_dict=ann_json_dict)
       writers[idx % FLAGS.num_shards].write(tf_example.SerializeToString())
