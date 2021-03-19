@@ -62,9 +62,6 @@ pascal_label_map_dict = {
     'tvmonitor': 20,
 }
 
-GLOBAL_IMG_ID = 0  # global image id.
-GLOBAL_ANN_ID = 0  # global annotation id.
-
 
 def define_flags():
   """Define the flags."""
@@ -84,30 +81,11 @@ def define_flags():
   flags.DEFINE_integer('num_images', None, 'Max number of imags to process.')
 
 
-def get_image_id(filename):
-  """Convert a string to a integer."""
-  # Warning: this function is highly specific to pascal filename!!
-  # Given filename like '2008_000002', we cannot use id 2008000002 because our
-  # code internally will convert the int value to float32 and back to int, which
-  # would cause value mismatch int(float32(2008000002)) != int(2008000002).
-  # COCO needs int values, here we just use a incremental global_id, but
-  # users should customize their own ways to generate filename.
-  del filename
-  global GLOBAL_IMG_ID
-  GLOBAL_IMG_ID += 1
-  return GLOBAL_IMG_ID
-
-
-def get_ann_id():
-  """Return unique annotation id across images."""
-  global GLOBAL_ANN_ID
-  GLOBAL_ANN_ID += 1
-  return GLOBAL_ANN_ID
-
-
 def dict_to_tf_example(data,
                        images_dir,
                        label_map_dict,
+                       image_id,
+                       ann_id,
                        ignore_difficult_instances=False,
                        ann_json_dict=None):
   """Convert XML derived dict to tf.Example proto.
@@ -120,6 +98,8 @@ def dict_to_tf_example(data,
       tfrecord_util.recursive_parse_xml_to_dict)
     images_dir: Path to the directory holding raw images.
     label_map_dict: A map from string label names to integers ids.
+    image_id: Interger, image id for this image.
+    ann_id: Interger, annotation id for this image.
     ignore_difficult_instances: Whether to skip difficult instances in the
       dataset  (default: False).
     ann_json_dict: annotation json dictionary.
@@ -141,7 +121,6 @@ def dict_to_tf_example(data,
 
   width = int(data['size']['width'])
   height = int(data['size']['height'])
-  image_id = get_image_id(data['filename'])
   if ann_json_dict:
     image = {
         'file_name': data['filename'],
@@ -192,7 +171,7 @@ def dict_to_tf_example(data,
             'image_id': image_id,
             'bbox': [abs_xmin, abs_ymin, abs_width, abs_height],
             'category_id': label_map_dict[obj['name']],
-            'id': get_ann_id(),
+            'id': ann_id,
             'ignore': 0,
             'segmentation': [],
         }
@@ -275,6 +254,8 @@ def main(_):
       'annotations': [],
       'categories': []
   }
+  image_id = 0
+  ann_id = 0
   for year in years:
     example_class = list(label_map_dict.keys())[1]
     examples_path = os.path.join(data_dir, year, 'ImageSets', 'Main',
@@ -299,10 +280,15 @@ def main(_):
       data = tfrecord_util.recursive_parse_xml_to_dict(xml)['annotation']
 
       img_dir = os.path.join(FLAGS.data_dir, data['folder'], 'JPEGImages')
+
+      image_id += 1
+      ann_id += 1
       tf_example = dict_to_tf_example(
           data,
           img_dir,
           label_map_dict,
+          image_id,
+          ann_id,
           FLAGS.ignore_difficult_instances,
           ann_json_dict=ann_json_dict)
       writers[idx % FLAGS.num_shards].write(tf_example.SerializeToString())
