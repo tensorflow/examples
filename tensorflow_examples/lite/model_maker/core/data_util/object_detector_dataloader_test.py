@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import filecmp
 import os
+import unittest
 
 import numpy as np
 
@@ -41,7 +42,9 @@ class MockDetectorModelSpec(object):
 
 class ObjectDectectorDataLoaderTest(tf.test.TestCase):
 
+  @unittest.skip('Temporaty skipping b/182437378.')
   def test_from_pascal_voc(self):
+
     images_dir, annotations_dir, label_map = test_util.create_pascal_voc(
         self.get_temp_dir())
     model_spec = MockDetectorModelSpec('efficientdet-lite0')
