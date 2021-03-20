@@ -16,11 +16,12 @@
 import collections
 import os
 import tempfile
-from typing import Tuple, Dict
+from typing import Optional, Tuple, Dict
 
 from absl import logging
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import coco_metric
@@ -36,7 +37,8 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import util_keras
 
 
-def _get_ordered_label_map(label_map):
+def _get_ordered_label_map(
+    label_map: Optional[Dict[int, str]]) -> Optional[Dict[int, str]]:
   """Gets label_map as an OrderedDict instance with ids sorted."""
   if not label_map:
     return label_map
@@ -52,24 +54,24 @@ class EfficientDetModelSpec(object):
   compat_tf_versions = compat.get_compat_tf_versions(2)
 
   def __init__(self,
-               model_name,
-               uri,
-               hparams='',
-               model_dir=None,
-               epochs=50,
-               batch_size=64,
-               steps_per_execution=1,
-               moving_average_decay=0,
-               var_freeze_expr='(efficientnet|fpn_cells|resample_p6)',
-               tflite_max_detections=25,
-               strategy=None,
-               tpu=None,
-               gcp_project=None,
-               tpu_zone=None,
-               use_xla=False,
-               profile=False,
-               debug=False,
-               tf_random_seed=111111):
+               model_name: str,
+               uri: str,
+               hparams: str = '',
+               model_dir: Optional[str] = None,
+               epochs: int = 50,
+               batch_size: int = 64,
+               steps_per_execution: int = 1,
+               moving_average_decay: int = 0,
+               var_freeze_expr: str = '(efficientnet|fpn_cells|resample_p6)',
+               tflite_max_detections: int = 25,
+               strategy: Optional[str] = None,
+               tpu: Optional[str] = None,
+               gcp_project: Optional[str] = None,
+               tpu_zone: Optional[str] = None,
+               use_xla: bool = False,
+               profile: bool = False,
+               debug: bool = False,
+               tf_random_seed: int = 111111) -> None:
     """Initialze an instance with model paramaters.
 
     Args:
@@ -169,20 +171,20 @@ class EfficientDetModelSpec(object):
     policy = tf.keras.mixed_precision.experimental.Policy(precision)
     tf.keras.mixed_precision.experimental.set_policy(policy)
 
-  def create_model(self):
+  def create_model(self) -> tf.keras.Model:
     """Creates the EfficientDet model."""
     return train_lib.EfficientDetNetTrainHub(
         config=self.config, hub_module_url=self.uri)
 
   def train(self,
-            model,
-            train_dataset,
-            steps_per_epoch,
-            val_dataset,
-            validation_steps,
-            epochs=None,
-            batch_size=None,
-            val_json_file=None):
+            model: tf.keras.Model,
+            train_dataset: tf.data.Dataset,
+            steps_per_epoch: int,
+            val_dataset: Optional[tf.data.Dataset],
+            validation_steps: int,
+            epochs: Optional[int] = None,
+            batch_size: Optional[int] = None,
+            val_json_file: Optional[str] = None) -> tf.keras.Model:
     """Run EfficientDet training."""
     config = self.config
     if not epochs:
@@ -210,7 +212,7 @@ class EfficientDetModelSpec(object):
 
   def _get_evaluator_and_label_map(
       self, json_file: str
-  ) -> Tuple[coco_metric.EvaluationMetric, collections.OrderedDict]:
+  ) -> Tuple[coco_metric.EvaluationMetric, Optional[Dict[int, str]]]:
     """Gets evaluator and label_map for evaluation."""
     label_map = label_util.get_label_map(self.config.label_map)
     # Sorts label_map.keys since pycocotools.cocoeval uses sorted catIds
@@ -336,10 +338,10 @@ class EfficientDetModelSpec(object):
     return metric_dict
 
   def export_saved_model(self,
-                         saved_model_dir,
-                         batch_size=None,
-                         pre_mode='infer',
-                         post_mode='global'):
+                         saved_model_dir: str,
+                         batch_size: Optional[int] = None,
+                         pre_mode: Optional[str] = 'infer',
+                         post_mode: Optional[str] = 'global') -> None:
     """Saves the model to Tensorflow SavedModel.
 
     Args:
@@ -386,7 +388,10 @@ class EfficientDetModelSpec(object):
         saved_model_dir,
         signatures=export_model.__call__.get_concrete_function(input_spec))
 
-  def export_tflite(self, tflite_filepath, quantization_config=None):
+  def export_tflite(
+      self,
+      tflite_filepath: str,
+      quantization_config: Optional[configs.QuantizationConfig] = None) -> None:
     """Converts the retrained model to tflite format and saves it.
 
     The exported TFLite model has the following inputs & outputs:
@@ -426,7 +431,7 @@ class EfficientDetModelSpec(object):
         f.write(tflite_model)
 
 
-def efficientdet_lite0_spec(**kwargs):
+def efficientdet_lite0_spec(**kwargs) -> EfficientDetModelSpec:
   args = util.dict_with_default(
       default_dict=dict(
           model_name='efficientdet-lite0',
@@ -436,7 +441,7 @@ def efficientdet_lite0_spec(**kwargs):
   return EfficientDetModelSpec(**args)
 
 
-def efficientdet_lite1_spec(**kwargs):
+def efficientdet_lite1_spec(**kwargs) -> EfficientDetModelSpec:
   args = util.dict_with_default(
       default_dict=dict(
           model_name='efficientdet-lite1',
@@ -446,7 +451,7 @@ def efficientdet_lite1_spec(**kwargs):
   return EfficientDetModelSpec(**args)
 
 
-def efficientdet_lite2_spec(**kwargs):
+def efficientdet_lite2_spec(**kwargs) -> EfficientDetModelSpec:
   args = util.dict_with_default(
       default_dict=dict(
           model_name='efficientdet-lite2',
@@ -456,7 +461,7 @@ def efficientdet_lite2_spec(**kwargs):
   return EfficientDetModelSpec(**args)
 
 
-def efficientdet_lite3_spec(**kwargs):
+def efficientdet_lite3_spec(**kwargs) -> EfficientDetModelSpec:
   args = util.dict_with_default(
       default_dict=dict(
           model_name='efficientdet-lite3',
@@ -466,7 +471,7 @@ def efficientdet_lite3_spec(**kwargs):
   return EfficientDetModelSpec(**args)
 
 
-def efficientdet_lite4_spec(**kwargs):
+def efficientdet_lite4_spec(**kwargs) -> EfficientDetModelSpec:
   args = util.dict_with_default(
       default_dict=dict(
           model_name='efficientdet-lite4',

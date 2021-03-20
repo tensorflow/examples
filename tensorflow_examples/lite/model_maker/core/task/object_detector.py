@@ -15,26 +15,31 @@
 
 import os
 import tempfile
-from typing import Dict
+from typing import Dict, Optional, Tuple, TypeVar
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers.object_detector import metadata_writer_for_object_detector as metadata_writer
+from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 
+T = TypeVar('T', bound='ObjectDetector')
 
-def create(train_data,
-           model_spec,
-           validation_data=None,
-           epochs=None,
-           batch_size=None,
-           train_whole_model=False,
-           do_train=True):
+
+def create(train_data: object_detector_dataloader.DataLoader,
+           model_spec: object_detector_spec.EfficientDetModelSpec,
+           validation_data: Optional[
+               object_detector_dataloader.DataLoader] = None,
+           epochs: Optional[object_detector_dataloader.DataLoader] = None,
+           batch_size: Optional[int] = None,
+           train_whole_model: bool = False,
+           do_train: bool = True) -> T:
   """Loads data and train the model for object detection.
 
   Args:
@@ -69,7 +74,10 @@ def create(train_data,
   return object_detector
 
 
-def _get_model_info(model_spec, quantization_config=None):
+def _get_model_info(
+    model_spec: object_detector_spec.EfficientDetModelSpec,
+    quantization_config: Optional[configs.QuantizationConfig] = None,
+) -> metadata_writer.ModelSpecificInfo:
   """Gets the specific info for the object detection model."""
 
   # Gets image_min/image_max for float/quantized model.
@@ -106,7 +114,8 @@ class ObjectDetector(custom_model.CustomModel):
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.SAVED_MODEL,
                            ExportFormat.LABEL)
 
-  def __init__(self, model_spec, label_map):
+  def __init__(self, model_spec: object_detector_spec.EfficientDetModelSpec,
+               label_map: Dict[int, str]) -> None:
     super().__init__(model_spec, shuffle=None)
     if model_spec.config.label_map and model_spec.config.label_map != label_map:
       tf.compat.v1.logging.warn(
@@ -116,11 +125,16 @@ class ObjectDetector(custom_model.CustomModel):
     # make minimum num_classes=2 for now.
     model_spec.config.num_classes = max(2, max(label_map.keys()))
 
-  def create_model(self):
+  def create_model(self) -> tf.keras.Model:
     self.model = self.model_spec.create_model()
     return self.model
 
-  def _get_dataset_and_steps(self, data, batch_size, is_training):
+  def _get_dataset_and_steps(
+      self,
+      data: object_detector_dataloader.DataLoader,
+      batch_size: int,
+      is_training: bool,
+  ) -> Tuple[Optional[tf.data.Dataset], int, Optional[str]]:
     """Gets dataset, steps and annotations json file."""
     if not data:
       return None, 0, None
@@ -131,10 +145,11 @@ class ObjectDetector(custom_model.CustomModel):
     return dataset, steps, data.annotations_json_file
 
   def train(self,
-            train_data,
-            validation_data=None,
-            epochs=None,
-            batch_size=None):
+            train_data: object_detector_dataloader.DataLoader,
+            validation_data: Optional[
+                object_detector_dataloader.DataLoader] = None,
+            epochs: Optional[int] = None,
+            batch_size: Optional[int] = None) -> tf.keras.Model:
     """Feeds the training data for training."""
     if not self.model_spec.config.drop_remainder:
       raise ValueError('Must set `drop_remainder=True` during training. '
@@ -164,7 +179,9 @@ class ObjectDetector(custom_model.CustomModel):
                                    validation_ds, validation_steps, epochs,
                                    batch_size, val_json_file)
 
-  def evaluate(self, data, batch_size=None):
+  def evaluate(self,
+               data: object_detector_dataloader.DataLoader,
+               batch_size: Optional[int] = None) -> Dict[str, float]:
     """Evaluates the model."""
     batch_size = batch_size if batch_size else self.model_spec.batch_size
     # Not to drop the smaller batch to evaluate the whole dataset.
@@ -193,15 +210,16 @@ class ObjectDetector(custom_model.CustomModel):
     return self.model_spec.evaluate_tflite(tflite_filepath, ds, len(data),
                                            data.annotations_json_file)
 
-  def _export_saved_model(self, saved_model_dir):
+  def _export_saved_model(self, saved_model_dir: str) -> None:
     """Saves the model to Tensorflow SavedModel."""
     self.model_spec.export_saved_model(saved_model_dir)
 
   def _export_tflite(self,
-                     tflite_filepath,
-                     quantization_config=None,
-                     with_metadata=True,
-                     export_metadata_json_file=False):
+                     tflite_filepath: str,
+                     quantization_config: Optional[
+                         configs.QuantizationConfig] = None,
+                     with_metadata: bool = True,
+                     export_metadata_json_file: bool = False) -> None:
     """Converts the retrained model to tflite format and saves it.
 
     Args:
@@ -226,7 +244,7 @@ class ObjectDetector(custom_model.CustomModel):
             tflite_filepath, export_dir, model_info, label_filepath)
         populator.populate(export_metadata_json_file)
 
-  def _export_labels(self, label_filepath):
+  def _export_labels(self, label_filepath: str) -> None:
     """Export labels to label_filepath."""
     tf.compat.v1.logging.info('Saving labels in %s.', label_filepath)
     num_classes = self.model_spec.config.num_classes
