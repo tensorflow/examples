@@ -26,7 +26,7 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.task import configs
+from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 from tensorflow_examples.lite.model_maker.core.task import object_detector
 
@@ -64,11 +64,13 @@ class ObjectDetectorTest(tf.test.TestCase):
     task.export(
         self.get_temp_dir(),
         tflite_filename='float.tflite',
+        quantization_type=QuantizationType.FP32,
         export_format=ExportFormat.TFLITE,
         with_metadata=True,
         export_metadata_json_file=True)
-    self.assertTrue(tf.io.gfile.exists(output_path))
-    self.assertGreater(os.path.getsize(output_path), 0)
+    # Checks the sizes of the float32 TFLite model files in bytes.
+    model_size = 13476379
+    self.assertNear(os.path.getsize(output_path), model_size, 100)
 
     json_output_file = os.path.join(self.get_temp_dir(), 'float.json')
     self.assertTrue(os.path.isfile(json_output_file))
@@ -87,16 +89,27 @@ class ObjectDetectorTest(tf.test.TestCase):
     # it fails. Will revert this change after TF upgrade.
     if tf.__version__.startswith('2.4'):
       return
-    output_path = os.path.join(self.get_temp_dir(), 'model_quantized.tflite')
-    config = configs.QuantizationConfig.create_full_integer_quantization(
-        data, is_integer_only=True)
-    task.export(
-        self.get_temp_dir(),
-        tflite_filename='model_quantized.tflite',
-        quantization_config=config,
-        export_format=ExportFormat.TFLITE)
-    self.assertTrue(os.path.isfile(output_path))
-    self.assertGreater(os.path.getsize(output_path), 0)
+
+    # Not include QuantizationType.FP32 here since we have already tested it
+    # above together with metadata file test.
+    types = (QuantizationType.INT8, QuantizationType.FP16,
+             QuantizationType.DYNAMIC)
+    # The sizes of the TFLite model files in bytes.
+    model_sizes = (4439987, 6840331, 4289875)
+    for quantization_type, model_size in zip(types, model_sizes):
+      filename = quantization_type.name.lower() + '.tflite'
+      output_path = os.path.join(self.get_temp_dir(), filename)
+      if quantization_type == QuantizationType.INT8:
+        representative_data = data
+      else:
+        representative_data = None
+      task.export(
+          self.get_temp_dir(),
+          quantization_type=quantization_type,
+          tflite_filename=filename,
+          representative_data=representative_data,
+          export_format=ExportFormat.TFLITE)
+      self.assertNear(os.path.getsize(output_path), model_size, 100)
 
 
 if __name__ == '__main__':

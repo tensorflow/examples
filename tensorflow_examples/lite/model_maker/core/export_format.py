@@ -27,3 +27,11 @@ class ExportFormat(enum.Enum):
   LABEL = "LABEL"
   VOCAB = "VOCAB"
   TFJS = "TFJS"
+
+
+@enum.unique
+class QuantizationType(enum.Enum):
+  INT8 = "INT8"
+  FP16 = "FP16"
+  FP32 = "FP32"
+  DYNAMIC = "DYNAMIC"
