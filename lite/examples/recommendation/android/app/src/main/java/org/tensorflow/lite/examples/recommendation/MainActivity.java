@@ -61,10 +61,9 @@ public class MainActivity extends AppCompatActivity
     // Load movies list.
     try {
       allMovies.clear();
-      allMovies.addAll(FileUtil.loadMovieList(getAssets(), config.movieListPath));
+      allMovies.addAll(FileUtil.loadMovieList(getAssets(), config.movieList));
     } catch (IOException ex) {
-      Log.e(
-          TAG, String.format("Error occurs when loading movies %s: %s.", config.movieListPath, ex));
+      Log.e(TAG, String.format("Error occurs when loading movies %s: %s.", config.movieList, ex));
     }
 
     client = new RecommendationClient(this, config);
@@ -119,10 +118,7 @@ public class MainActivity extends AppCompatActivity
   /** Shows result on the screen. */
   private void showResult(final List<Result> recommendations) {
     // Run on UI thread as we'll updating our app UI
-    runOnUiThread(
-        () -> {
-          recommendationFragment.setRecommendations(recommendations);
-        });
+    runOnUiThread(() -> recommendationFragment.setRecommendations(recommendations));
   }
 
   @Override
@@ -132,9 +128,7 @@ public class MainActivity extends AppCompatActivity
         selectedMovies.add(item);
       }
     } else {
-      if (selectedMovies.contains(item)) {
-        selectedMovies.remove(item);
-      }
+      selectedMovies.remove(item);
     }
 
     if (!selectedMovies.isEmpty()) {

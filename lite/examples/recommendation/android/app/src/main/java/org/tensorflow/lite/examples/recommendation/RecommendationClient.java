@@ -22,11 +22,14 @@ import androidx.annotation.WorkerThread;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.examples.recommendation.Config.Feature;
 import org.tensorflow.lite.examples.recommendation.data.FileUtil;
 import org.tensorflow.lite.examples.recommendation.data.MovieItem;
 
@@ -35,9 +38,11 @@ public class RecommendationClient {
   private static final String TAG = "RecommendationClient";
 
   private final Context context;
-  private final Map<Integer, MovieItem> candidates = new HashMap<>();
   private final Config config;
   private Interpreter tflite;
+
+  final Map<Integer, MovieItem> candidates = new HashMap<>();
+  final Map<String, Integer> genres = new HashMap<>();
 
   /** An immutable result returned by a RecommendationClient. */
   public static class Result {
@@ -66,6 +71,10 @@ public class RecommendationClient {
   public RecommendationClient(Context context, Config config) {
     this.context = context;
     this.config = config;
+
+    if (!config.validate()) {
+      Log.e(TAG, "Config is not valid.");
+    }
   }
 
   /** Load the TF Lite model and dictionary. */
@@ -73,13 +82,16 @@ public class RecommendationClient {
   public void load() {
     loadModel();
     loadCandidateList();
+    if (config.useGenres()) {
+      loadGenreList();
+    }
   }
 
   /** Load TF Lite model. */
   @WorkerThread
   private synchronized void loadModel() {
     try {
-      ByteBuffer buffer = FileUtil.loadModelFile(this.context.getAssets(), config.modelPath);
+      ByteBuffer buffer = FileUtil.loadModelFile(this.context.getAssets(), config.model);
       tflite = new Interpreter(buffer);
       Log.v(TAG, "TFLite model loaded.");
     } catch (IOException ex) {
@@ -92,10 +104,27 @@ public class RecommendationClient {
   private synchronized void loadCandidateList() {
     try {
       Collection<MovieItem> collection =
-          FileUtil.loadMovieList(this.context.getAssets(), config.movieListPath);
+          FileUtil.loadMovieList(this.context.getAssets(), config.movieList);
+      candidates.clear();
       for (MovieItem item : collection) {
         Log.d(TAG, String.format("Load candidate: %s", item));
         candidates.put(item.id, item);
+      }
+      Log.v(TAG, "Candidate list loaded.");
+    } catch (IOException ex) {
+      Log.e(TAG, ex.getMessage());
+    }
+  }
+
+  /** Load movie genre list. */
+  @WorkerThread
+  private synchronized void loadGenreList() {
+    try {
+      List<String> genreList = FileUtil.loadGenreList(this.context.getAssets(), config.genreList);
+      genres.clear();
+      for (String genre : genreList) {
+        Log.d(TAG, String.format("Load genre: \"%s\"", genre));
+        genres.put(genre, genres.size());
       }
       Log.v(TAG, "Candidate list loaded.");
     } catch (IOException ex) {
@@ -110,20 +139,59 @@ public class RecommendationClient {
     candidates.clear();
   }
 
-  /** Given a list of selected items, preprocess to get tflite input. */
-  @WorkerThread
-  synchronized int[] preprocess(List<MovieItem> selectedMovies) {
-    int[] inputContext = new int[config.inputLength];
-    for (int i = 0; i < config.inputLength; i++) {
-      if (i < selectedMovies.size()) {
-        MovieItem item = selectedMovies.get(i);
-        inputContext[i] = item.id;
-      } else {
-        // Padding input.
-        inputContext[i] = config.pad;
+  int[] preprocessIds(List<MovieItem> selectedMovies, int length) {
+    int[] inputIds = new int[length];
+    Arrays.fill(inputIds, config.pad); // Fill inputIds with the default.
+    int i = 0;
+    for (MovieItem item : selectedMovies) {
+      if (i >= inputIds.length) {
+        break;
+      }
+      inputIds[i] = item.id;
+      ++i;
+    }
+    return inputIds;
+  }
+
+  int[] preprocessGenres(List<MovieItem> selectedMovies, int length) {
+    // Fill inputGenres.
+    int[] inputGenres = new int[length];
+    Arrays.fill(inputGenres, config.unknownGenre); // Fill inputGenres with the default.
+    int i = 0;
+    for (MovieItem item : selectedMovies) {
+      if (i >= inputGenres.length) {
+        break;
+      }
+      for (String genre : item.genres) {
+        if (i >= inputGenres.length) {
+          break;
+        }
+        inputGenres[i] = genres.containsKey(genre) ? genres.get(genre) : config.unknownGenre;
+        ++i;
       }
     }
-    return inputContext;
+    return inputGenres;
+  }
+
+  /** Given a list of selected items, preprocess to get tflite input. */
+  @WorkerThread
+  synchronized Object[] preprocess(List<MovieItem> selectedMovies) {
+    List<Object> inputs = new ArrayList<>();
+
+    // Sort features.
+    List<Feature> sortedFeatures = new ArrayList<>(config.inputs);
+    Collections.sort(sortedFeatures, (Feature a, Feature b) -> Integer.compare(a.index, b.index));
+
+    for (Feature feature : sortedFeatures) {
+      if (Config.FEATURE_MOVIE.equals(feature.name)) {
+        inputs.add(preprocessIds(selectedMovies, feature.inputLength));
+      } else if (Config.FEATURE_GENRE.equals(feature.name)) {
+        inputs.add(preprocessGenres(selectedMovies, feature.inputLength));
+      } else {
+        Log.e(TAG, String.format("Invalid feature: %s", feature.name));
+      }
+    }
+    return inputs.toArray();
   }
 
   /** Postprocess to gets results from tflite inference. */
@@ -160,7 +228,7 @@ public class RecommendationClient {
   /** Given a list of selected items, and returns the recommendation results. */
   @WorkerThread
   public synchronized List<Result> recommend(List<MovieItem> selectedMovies) {
-    Object[] inputs = new Object[] {preprocess(selectedMovies)};
+    Object[] inputs = preprocess(selectedMovies);
 
     // Run inference.
     int[] outputIds = new int[config.outputLength];
@@ -171,10 +239,6 @@ public class RecommendationClient {
     tflite.runForMultipleInputsOutputs(inputs, outputs);
 
     return postprocess(outputIds, confidences, selectedMovies);
-  }
-
-  Map<Integer, MovieItem> getCandidates() {
-    return this.candidates;
   }
 
   Interpreter getTflite() {

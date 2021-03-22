@@ -1,7 +1,13 @@
 {
-  "model": "recommendation_cnn_i10o100.tflite",
-  "inputLength": 10,
-  "outputLength": 100,
+  "model": "recommendation_cnn_i10i32o100.tflite",
+  "inputs": [
+    {"name": "movieFeature", "index": 0, "inputLength": 10},
+    {"name": "genreFeature", "index": 1, "inputLength": 32}
+  ],
+  "movieList": "sorted_movie_vocab.json",
+  "genreList": "movie_genre_vocab.txt",
   "topK": 10,
-  "movieList": "sorted_movie_vocab.json"
+  "outputLength": 100,
+  "outputIdsIndex": 1,
+  "outputScoresIndex": 0
 }

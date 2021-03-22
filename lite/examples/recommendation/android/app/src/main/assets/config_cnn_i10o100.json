@@ -1,0 +1,11 @@
+{
+  "model": "recommendation_cnn_i10o100.tflite",
+  "inputs": [
+    {"name": "movieFeature", "index": 0, "inputLength": 10}
+  ],
+  "movieList": "sorted_movie_vocab.json",
+  "topK": 10,
+  "outputLength": 100,
+  "outputIdsIndex": 1,
+  "outputScoresIndex": 0
+}

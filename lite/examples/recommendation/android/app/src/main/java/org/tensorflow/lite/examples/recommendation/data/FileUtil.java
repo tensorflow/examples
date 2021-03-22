@@ -16,6 +16,7 @@
 
 package org.tensorflow.lite.examples.recommendation.data;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 
 import android.content.res.AssetFileDescriptor;
@@ -30,7 +31,9 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import org.tensorflow.lite.examples.recommendation.Config;
 
 /** FileUtil class to load data from asset files. */
@@ -59,6 +62,13 @@ public class FileUtil {
     return gson.fromJson(content, type);
   }
 
+  public static List<String> loadGenreList(AssetManager assetManager, String genreListPath)
+      throws IOException {
+    String content = loadFileContent(assetManager, genreListPath);
+    String[] lines = content.split(System.lineSeparator());
+    return Arrays.asList(lines);
+  }
+
   /** Load config from asset file. */
   public static Config loadConfig(AssetManager assetManager, String configPath) throws IOException {
     String content = loadFileContent(assetManager, configPath);
@@ -71,7 +81,7 @@ public class FileUtil {
   @SuppressWarnings("AndroidJdkLibsChecker")
   private static String loadFileContent(AssetManager assetManager, String path) throws IOException {
     try (InputStream ins = assetManager.open(path);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(ins))) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(ins, UTF_8))) {
       return reader.lines().collect(joining(System.lineSeparator()));
     }
   }
