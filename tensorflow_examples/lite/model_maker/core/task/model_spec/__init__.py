@@ -64,6 +64,8 @@ MODEL_SPECS = {
 
     # Audio classification
     'audio_browser_fft': audio_spec.BrowserFFTSpec,
+    'audio_teachable_machine': audio_spec.BrowserFFTSpec,
+    'audio_yament': audio_spec.YAMNetSpec,
 
     # Recommendation
     'recommendation_bow': recommendation_spec.recommendation_bow_spec,
@@ -87,7 +89,9 @@ TEXT_CLASSIFICATION_MODELS = [
     'bert_classifier', 'average_word_vec', 'mobilebert_classifier'
 ]
 QUESTION_ANSWERING_MODELS = ['bert_qa', 'mobilebert_qa', 'mobilebert_qa_squad']
-AUDIO_CLASSIFICATION_MODELS = ['audio_browser_fft']
+AUDIO_CLASSIFICATION_MODELS = [
+    'audio_browser_fft', 'audio_teachable_machine', 'audio_yament'
+]
 RECOMMENDATION_MODELS = [
     'recommendation_bow',
     'recommendation_rnn',
