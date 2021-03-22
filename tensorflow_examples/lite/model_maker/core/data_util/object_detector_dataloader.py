@@ -272,6 +272,7 @@ class DataLoader(dataloader.DataLoader):
     else:
       ann_path_list = list(tf.io.gfile.glob(annotations_dir + r'/*.xml'))
 
+    unique_id = create_pascal_tfrecord.UniqueId()
     for idx, ann_path in enumerate(ann_path_list):
       if max_num_images and idx >= max_num_images:
         break
@@ -285,6 +286,7 @@ class DataLoader(dataloader.DataLoader):
           data,
           images_dir,
           label_name2id_dict,
+          unique_id,
           ignore_difficult_instances,
           ann_json_dict=ann_json_dict)
       writers[idx % num_shards].write(tf_example.SerializeToString())
