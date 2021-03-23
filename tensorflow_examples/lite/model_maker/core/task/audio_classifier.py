@@ -28,7 +28,7 @@ def create(train_data,
            model_spec,
            validation_data=None,
            batch_size=32,
-           epochs=1,
+           epochs=5,
            model_dir=None,
            do_train=True,
            train_whole_model=False):
