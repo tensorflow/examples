@@ -96,6 +96,10 @@ class AudioClassifier(classification_model.ClassificationModel):
 
       self.model = self.model_spec.create_model(
           train_data.num_classes, train_whole_model=self.train_whole_model)
+
+      # Display model summary
+      self.model.summary()
+
       return self.model_spec.run_classifier(
           self.model,
           epochs,
