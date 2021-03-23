@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "cc//predictor.h"
+#include "cc/predictor.h"
 
 #include "absl/strings/str_split.h"
 #include "re2/re2.h"
