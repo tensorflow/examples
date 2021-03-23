@@ -17,7 +17,7 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
-#include "libs/cc/predictor.h"
+#include "cc//predictor.h"
 #include "tensorflow/lite/model.h"
 
 const char kIllegalStateException[] = "java/lang/IllegalStateException";

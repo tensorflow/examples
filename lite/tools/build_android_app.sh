@@ -69,7 +69,7 @@ function build_smartreply_aar {
   if [[ "${RELATIVE_DIR}" != "smart_reply/android" ]]; then
     return 0
   fi
-  WORKSPACE_DIR="${EXAMPLES_DIR}/smart_reply/android/app"
+  WORKSPACE_DIR="${EXAMPLES_DIR}/smart_reply/android/app/libs"
   echo "=== BUILD STARTED: ${RELATIVE_DIR} :: build_smartreply_aar ==="
 
   pushd "$1" > /dev/null
@@ -79,8 +79,8 @@ function build_smartreply_aar {
   /usr/bin/gcc -v
   bazel version  # Get bazel version info.
   # Add --sandbox_debug to provide more info for testing.
-  bazel build --sandbox_debug //libs/cc/... //libs/cc:smartreply_runtime_aar
-  bazel test //libs/cc/...
+  bazel build --sandbox_debug //cc/... //cc:smartreply_runtime_aar
+  bazel test //cc/...
 
   popd > /dev/null
 

@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include "libs/cc/predictor.h"
+#include "cc//predictor.h"
 
 #include <fstream>
 #include <unordered_set>
@@ -31,7 +31,7 @@ namespace custom {
 namespace smartreply {
 namespace {
 
-const char kSmartReply[] = "libs/cc/testdata/";  // NOLINT
+const char kSmartReply[] = "cc//testdata/";  // NOLINT
 const char kModel[] = "smartreply.tflite";
 const char kSamples[] = "smartreply_samples.tsv";
 

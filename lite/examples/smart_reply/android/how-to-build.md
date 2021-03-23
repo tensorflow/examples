@@ -118,9 +118,9 @@ Secondly, use Bazel to build AAR package from JNI source code and include .so
 lib inside:
 
 ```
-cd app
+cd app/libs
 
-bazel build libs/cc:smartreply_runtime_aar
+bazel build cc:smartreply_runtime_aar
 ```
 
 By default, it builds ops for multiple cpus (with options: `--fat_apk_cpu=x86,x86_64,arm64-v8a,armeabi-v7a`).
@@ -128,7 +128,7 @@ By default, it builds ops for multiple cpus (with options: `--fat_apk_cpu=x86,x8
 Thirdly, copy AAR package to `libs` folder from your bazel root folder.
 
 ```
-cp bazel-bin/libs/cc/smartreply_runtime_aar.aar libs/smartreply_runtime_aar.aar
+cp bazel-bin/cc/smartreply_runtime_aar.aar ./smartreply_runtime_aar.aar
 ```
 
 In addition, if you want to build optimized package you may add options `-c opt`
