@@ -208,7 +208,11 @@ class DataLoader(dataloader.ClassificationDataLoader):
           waveform, orig_sr=sample_rate, target_sr=spec.target_sample_rate)
       return waveform, label
 
+    @tf.function
     def _resample(waveform, sample_rate, label):
+      # Short circuit resampling if possible.
+      if sample_rate == spec.target_sample_rate:
+        return [waveform, label]
       return tf.numpy_function(
           _resample_numpy,
           inp=(waveform, sample_rate, label),
