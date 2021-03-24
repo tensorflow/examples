@@ -178,7 +178,7 @@ def main(_):
   export_model_path = os.path.join(FLAGS.export_directory, model_basename)
 
   # Copies model_file to export_path.
-  tf.io.gfile.copy(model_file, export_model_path, overwrite=True)
+  tf.io.gfile.copy(model_file, export_model_path, overwrite=False)
 
   # Generate the metadata objects and put them in the model file
   populator = MetadataPopulatorForImageClassifier(
