@@ -17,7 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import bisect
 import os
 import random
 
@@ -27,80 +26,88 @@ from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
-def _list_files(path):
-  return tf.io.gfile.glob(path + r'/*/*')
-
-
 class ExamplesHelper(object):
-  """Helper class for loading examples and parsing labels from example path.
+  """Helper class for matching examples and labels."""
 
-  This path contain a number of folders, each named by the category name. Each
-  folder contain a number of files. This helper class loads and parse the
-  tree structure.
+  @classmethod
+  def from_examples_folder(cls, path, examples_filter_fn):
+    """Helper function for loading examples and parsing labels from example path.
 
-  Example folder:
-    /category1
-      /file1.wav
-      /file2.wav
-    /category2
-      /file2.wav
-      /README
+    This path contain a number of folders, each named by the category name. Each
+    folder contain a number of files. This helper class loads and parse the
+    tree structure.
 
-  Usage:
-  >>> helper = ExamplesHelper(path, is_wav)
-  >>> # helper.shuffle() if shuffle is needed
-  >>> helper.examples_and_labels()
-  ('/category1/file1.wav', '/category1/file2.wav', '/category2/file2.wav'),
-  ('category1', 'category1', 'category2')
-  >>> helper.sorted_cateogries()
-  ('category1', 'category2')
-  >>> helper.examples_and_label_indices()
-  ('/category1/file1.wav', '/category1/file2.wav', '/category2/file2.wav'), (0,
-  0, 1)
-  """
+    Example folder:
+      /category1
+        /file1.wav
+        /file2.wav
+      /category2
+        /file2.wav
+        /README
 
-  def __init__(self, path, filter_fn=None):
+    Usage:
+    >>> helper = ExamplesHelper.from_example_folder(path, is_wav)
+    >>> # helper.shuffle() if shuffle is needed
+    >>> helper.examples_and_labels()
+    ('/category1/file1.wav', '/category1/file2.wav', '/category2/file2.wav'),
+    ('category1', 'category1', 'category2')
+    >>> helper.index_to_label()
+    ('category1', 'category2')
+    >>> helper.examples_and_label_indices()
+    ('/category1/file1.wav', '/category1/file2.wav', '/category2/file2.wav'),
+    (0, 0, 1)
 
-    def _is_dir(folder):
-      return tf.io.gfile.isdir(os.path.join(path, folder))
+    Args:
+      path: String, relative path to the data folder. This folder should contain
+        a list of sub-folders, named after its categories.
+      examples_filter_fn: A lambda function to filter out unrelated files. It
+        takes in a full path to the example file and returns a boolean,
+        representing if this example file can be preserved.
 
-    if not filter_fn:
-      filter_fn = lambda x: True
-    # Immutable after `__init__`
-    self._path = path
-    self._sorted_examples = sorted(filter(filter_fn, _list_files(path)))
-    self._sorted_categories = sorted(filter(_is_dir, tf.io.gfile.listdir(path)))
-    # Mutable only by `shuffle` method
-    self._examples = self._sorted_examples
+    Returns:
+      An instance of ExamplesHelper.
+    """
 
-  @property
-  def sorted_cateogries(self):
-    return self._sorted_categories
+    def _list_files(path):
+      return tf.io.gfile.glob(os.path.join(path, '*', '*'))
+
+    def _get_label(example):
+      """Parses the example path and return the label string."""
+      return example.rsplit(os.path.sep, 2)[1]
+
+    examples = list(filter(examples_filter_fn, _list_files(path)))
+    labels = list(map(_get_label, examples))
+    return cls(examples, labels)
+
+  def __init__(self, examples, labels):
+    self.index_to_label = sorted(list(set(labels)))  # [label]
+    self.label_to_index = {
+        label: i for i, label in enumerate(self.index_to_label)
+    }
+    self._data = sorted(list(zip(examples, labels)))  # [(example, label)]
 
   def shuffle(self):
-    random.shuffle(self._examples)
-
-  def _get_label(self, example):
-    """Parses the example path and return the label string."""
-    return example.rsplit(os.path.sep, 2)[1]
-
-  def _category_idx(self, label):
-    """Converts label string to index."""
-    idx = bisect.bisect_left(self._sorted_categories, label)
-    if idx != len(
-        self._sorted_categories) and self._sorted_categories[idx] == label:
-      return idx
-    raise ValueError('Unknown label: ', label)
+    random.shuffle(self._data)
 
   def examples_and_label_indices(self):
-    """Returns a list of example and a list of their corresponding label idx."""
-    labels = (self._get_label(example) for example in self._examples)
-    return self._examples, [self._category_idx(label) for label in labels]
+    """Returns a tuple of example and a tuple of their corresponding label idx."""
+    examples, labels = self.examples_and_labels()
+    label_indicies = tuple(map(self.label_to_index.get, labels))
+    return examples, label_indicies
 
   def examples_and_labels(self):
-    """Returns a list of example and a list of their corresponding labels."""
-    labels = [self._get_label(example) for example in self._examples]
-    return self._examples, labels
+    """Returns a tuple of example and a tuple of their corresponding labels."""
+    if not self._data:
+      return (), ()
+    examples, labels = zip(*self._data)
+    return examples, labels
+
+  def examples_and_label_indices_ds(self):
+    examples, labels = self.examples_and_label_indices()
+    wav_ds = tf.data.Dataset.from_tensor_slices(list(examples))
+    label_ds = tf.data.Dataset.from_tensor_slices(list(labels))
+    ds = tf.data.Dataset.zip((wav_ds, label_ds))
+    return ds
 
 
 class DataLoader(dataloader.ClassificationDataLoader):
@@ -141,19 +148,16 @@ class DataLoader(dataloader.ClassificationDataLoader):
     """
     assert isinstance(spec, audio_spec.BaseSpec)
     root_dir = os.path.abspath(data_path)
-    helper = ExamplesHelper(root_dir, lambda s: s.endswith('.wav'))
+    helper = ExamplesHelper.from_examples_folder(root_dir,
+                                                 lambda s: s.endswith('.wav'))
     if shuffle:
       helper.shuffle()
-    examples, labels = helper.examples_and_label_indices()
+    ds = helper.examples_and_label_indices_ds()
 
-    if not examples:
+    if len(ds) == 0:  # pylint: disable=g-explicit-length-test
       raise ValueError('No audio files found.')
 
-    wav_ds = tf.data.Dataset.from_tensor_slices(examples)
-    label_ds = tf.data.Dataset.from_tensor_slices(labels)
-    ds = tf.data.Dataset.zip((wav_ds, label_ds))
-
-    return DataLoader(ds, len(ds), helper.sorted_cateogries, spec)
+    return DataLoader(ds, len(ds), helper.index_to_label, spec)
 
   def gen_dataset(self,
                   batch_size=1,

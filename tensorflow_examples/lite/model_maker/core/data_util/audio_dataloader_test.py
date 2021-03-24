@@ -110,17 +110,7 @@ class LoadFromESC50Test(Base):
       audio_dataloader.DataLoader.from_esc50(spec, folder_path)
 
 
-class LoadFromFolderTest(Base):
-
-  def test_spec(self):
-    folder_path = self._get_folder_path('test_examples_helper')
-    write_sample(folder_path, 'unknown', '2s.wav', 44100, 2, value=1)
-
-    spec = audio_spec.YAMNetSpec()
-    audio_dataloader.DataLoader.from_folder(spec, folder_path)
-
-    spec = audio_spec.BrowserFFTSpec()
-    audio_dataloader.DataLoader.from_folder(spec, folder_path)
+class ExamplesHelperTest(Base):
 
   def test_examples_helper(self):
     root = self._get_folder_path('test_examples_helper')
@@ -138,18 +128,30 @@ class LoadFromFolderTest(Base):
     def fullpath(name):
       return os.path.join(root, name)
 
-    helper = audio_dataloader.ExamplesHelper(root, is_wav_files)
-    self.assertEqual(helper.sorted_cateogries, ['a', 'b'])
+    helper = audio_dataloader.ExamplesHelper.from_examples_folder(
+        root, is_wav_files)
+    self.assertEqual(helper.index_to_label, ['a', 'b'])
     self.assertEqual(
         helper.examples_and_labels(),
-        ([fullpath('a/1.wav'),
-          fullpath('a/2.wav'),
-          fullpath('b/1.wav')], ['a', 'a', 'b']))
+        ((fullpath('a/1.wav'), fullpath('a/2.wav'), fullpath('b/1.wav')),
+         ('a', 'a', 'b')))
     self.assertEqual(
         helper.examples_and_label_indices(),
-        ([fullpath('a/1.wav'),
-          fullpath('a/2.wav'),
-          fullpath('b/1.wav')], [0, 0, 1]))
+        ((fullpath('a/1.wav'), fullpath('a/2.wav'), fullpath('b/1.wav')),
+         (0, 0, 1)))
+
+
+class LoadFromFolderTest(Base):
+
+  def test_spec(self):
+    folder_path = self._get_folder_path('test_examples_helper')
+    write_sample(folder_path, 'unknown', '2s.wav', 44100, 2, value=1)
+
+    spec = audio_spec.YAMNetSpec()
+    audio_dataloader.DataLoader.from_folder(spec, folder_path)
+
+    spec = audio_spec.BrowserFFTSpec()
+    audio_dataloader.DataLoader.from_folder(spec, folder_path)
 
   def test_no_audio_files_found(self):
     folder_path = self._get_folder_path('test_no_audio_files_found')
