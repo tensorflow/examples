@@ -1,0 +1,59 @@
+{
+  "images": [
+    {
+      "file_name": "8515203476_b575d9b2fc_o.jpg",
+      "height": 612,
+      "width": 612,
+      "id": 1
+    }
+  ],
+  "annotations": [
+    {
+      "area": 13120,
+      "iscrowd": 0,
+      "image_id": 1,
+      "bbox": [
+        225,
+        233,
+        82,
+        160
+      ],
+      "category_id": 2,
+      "id": 1,
+      "ignore": 0,
+      "segmentation": []
+    },
+    {
+      "area": 342108,
+      "iscrowd": 0,
+      "image_id": 1,
+      "bbox": [
+        53,
+        0,
+        559,
+        612
+      ],
+      "category_id": 3,
+      "id": 2,
+      "ignore": 0,
+      "segmentation": []
+    }
+  ],
+  "categories": [
+    {
+      "supercategory": "none",
+      "id": 1,
+      "name": "Baked Goods"
+    },
+    {
+      "supercategory": "none",
+      "id": 2,
+      "name": "Cheese"
+    },
+    {
+      "supercategory": "none",
+      "id": 3,
+      "name": "Salad"
+    }
+  ]
+}
