@@ -71,6 +71,9 @@ class YAMNetSpecTest(tf.test.TestCase):
         output_count=1)
 
   def test_create_model(self):
+    # Make sure that there is no naming conflicts.
+    model = self._spec.create_model(10)
+    model = self._spec.create_model(10)
     model = self._spec.create_model(10)
     self.assertEqual(model.input_shape, (None, 1024))
     self.assertEqual(model.output_shape, (None, 10))
@@ -138,7 +141,11 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     self.assertEqual(model.output_shape, (None, 10))
 
   def test_create_model(self):
+    # Make sure that there is no naming conflicts.
     self._spec.create_model(100)
+    self._spec.create_model(100)
+    self._spec.create_model(100)
+
     tf.keras.backend.clear_session()
     # Binary classification is not supported yet.
     with self.assertRaises(ValueError):

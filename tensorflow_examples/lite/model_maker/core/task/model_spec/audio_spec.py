@@ -154,7 +154,10 @@ class BrowserFFTSpec(BaseSpec):
     model = tf.keras.Sequential()
     for layer in self._tfjs_sc_model.layers[:-1]:
       model.add(layer)
-    model.add(tf.keras.layers.Dense(units=num_classes, activation='softmax'))
+    model.add(
+        tf.keras.layers.Dense(
+            name='classification_head', units=num_classes,
+            activation='softmax'))
     if not train_whole_model:
       # Freeze all but the last layer of the model. The last layer will be
       # fine-tuned during transfer learning.
@@ -222,8 +225,9 @@ class YAMNetSpec(BaseSpec):
   def create_model(self, num_classes, train_whole_model=False):
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=(1024), dtype=tf.float32, name='embedding'),
-        tf.keras.layers.Dense(512, activation='relu'),
-        tf.keras.layers.Dense(num_classes, activation='softmax')
+        tf.keras.layers.Dense(512, name='dense', activation='relu'),
+        tf.keras.layers.Dense(
+            num_classes, name='classification_head', activation='softmax')
     ])
     return model
 
