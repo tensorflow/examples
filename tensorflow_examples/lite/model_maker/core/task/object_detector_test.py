@@ -107,7 +107,7 @@ class ObjectDetectorTest(tf.test.TestCase):
           tflite_filename=filename,
           representative_data=representative_data,
           export_format=ExportFormat.TFLITE)
-      self.assertNear(os.path.getsize(output_path), model_size, 100)
+      self.assertNear(os.path.getsize(output_path), model_size, 50000)
 
 
 if __name__ == '__main__':
