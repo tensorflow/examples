@@ -74,7 +74,7 @@ class CacheFilesWriter(abc.ABC):
       self.label_name2id_dict[name] = idx
 
   def write_files(self, tfrecord_files: List[str], annotations_json_file: str,
-                  meta_data_file: str, *args) -> None:
+                  meta_data_file: str, *args, **kwargs) -> None:
     """Writes TFRecord, meta_data and annotations json files.
 
     Args:
@@ -83,7 +83,8 @@ class CacheFilesWriter(abc.ABC):
         bounding boxes.
       meta_data_file: Yaml file to save the meta_data including data size and
         label_map.
-      *args: Parameters used in the `get_tf_example` method.
+      *args: Non-keyword of parameters used in the `_get_xml_dict` method.
+      **kwargs: Keyword parameters used in the `_get_xml_dict` method.
     """
     writers = [tf.io.TFRecordWriter(path) for path in tfrecord_files]
 
@@ -94,7 +95,7 @@ class CacheFilesWriter(abc.ABC):
 
     # Writes tf.Example into TFRecord files.
     size = 0
-    for idx, xml_dict in enumerate(self._get_xml_dict(*args)):
+    for idx, xml_dict in enumerate(self._get_xml_dict(*args, **kwargs)):
       if self.max_num_images and idx >= self.max_num_images:
         break
       if idx % 100 == 0:
@@ -122,7 +123,7 @@ class CacheFilesWriter(abc.ABC):
       json.dump(ann_json_dict, f, indent=2)
 
   @abc.abstractmethod
-  def _get_xml_dict(self, *args) -> tf.train.Example:
+  def _get_xml_dict(self, *args, **kwargs) -> tf.train.Example:
     """Gets the dict holding PASCAL XML fields one by one."""
     raise NotImplementedError
 
