@@ -123,7 +123,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
     return self._split(fraction, self.index_to_label, self._spec)
 
   @classmethod
-  def from_folder(cls, spec, data_path, is_training=True, shuffle=True):
+  def from_folder(cls, spec, data_path, shuffle=True):
     """Load audio files from a data_path.
 
     - The root `data_path` folder contains a number of folders. The name for
@@ -141,7 +141,6 @@ class DataLoader(dataloader.ClassificationDataLoader):
     Args:
       spec: instance of audio_spec.BaseSpec.
       data_path: string, location to the audio files.
-      is_training: boolean, if True, apply training augmentation to the dataset.
       shuffle: boolean, if True, random shuffle data.
 
     Returns:
@@ -255,7 +254,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
     return ds
 
   @classmethod
-  def from_esc50(cls, spec, data_path, is_training=True, shuffle=True):
+  def from_esc50(cls, spec, data_path, shuffle=True):
     """Load ESC50 style audio samples.
 
     ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
@@ -272,7 +271,6 @@ class DataLoader(dataloader.ClassificationDataLoader):
       spec: An instance of audio_spec.YAMNet
       data_path: A string, location of the ESC50 dataset. It should contain at
         least two sub-folders, `meta` and `audio`.
-      is_training: boolean, if True, apply training augmentation to the dataset.
       shuffle: boolean, if True, random shuffle data.
 
     Returns:
