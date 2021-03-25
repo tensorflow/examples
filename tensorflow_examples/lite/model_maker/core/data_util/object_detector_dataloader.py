@@ -18,19 +18,19 @@ from __future__ import division
 from __future__ import print_function
 
 import hashlib
-import json
 import os
 import tempfile
+from typing import Dict, List, Optional, TypeVar, Union
 
-from lxml import etree
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader_util as util
 import yaml
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import dataloader as det_dataloader
-from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset import create_pascal_tfrecord
-from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset import tfrecord_util
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
+
+DetectorDataLoader = TypeVar('DetectorDataLoader', bound='DataLoader')
 
 ANN_JSON_FILE_SUFFIX = '_annotations.json'
 META_DATA_FILE_SUFFIX = '_meta_data.yaml'
@@ -147,16 +147,17 @@ class DataLoader(dataloader.DataLoader):
     self.annotations_json_file = annotations_json_file
 
   @classmethod
-  def from_pascal_voc(cls,
-                      images_dir,
-                      annotations_dir,
-                      label_map,
-                      annotations_list=None,
-                      ignore_difficult_instances=False,
-                      num_shards=100,
-                      max_num_images=None,
-                      cache_dir=None,
-                      cache_prefix_filename=None):
+  def from_pascal_voc(
+      cls,
+      images_dir: str,
+      annotations_dir: str,
+      label_map: Union[List[str], Dict[int, str], str],
+      annotations_list: Optional[List[str]] = None,
+      ignore_difficult_instances: bool = False,
+      num_shards: int = 100,
+      max_num_images: Optional[int] = None,
+      cache_dir: Optional[str] = None,
+      cache_prefix_filename: Optional[str] = None) -> DetectorDataLoader:
     """Loads from dataset with PASCAL VOC format.
 
     Refer to
@@ -209,10 +210,18 @@ class DataLoader(dataloader.DataLoader):
     # annotations_json_file_path.
     # If `num_shards` differs, it's still not cached.
     if not is_cached:
-      cls._write_pascal_tfrecord(images_dir, annotations_dir, label_map,
-                                 annotations_list, ignore_difficult_instances,
-                                 num_shards, max_num_images, tfrecord_files,
-                                 ann_json_file, meta_data_file)
+      cache_writer = util.PascalVocCacheFilesWriter(
+          label_map=label_map,
+          images_dir=images_dir,
+          num_shards=num_shards,
+          max_num_images=max_num_images,
+          ignore_difficult_instances=ignore_difficult_instances)
+      cache_writer.write_files(
+          tfrecord_files=tfrecord_files,
+          annotations_json_file=ann_json_file,
+          meta_data_file=meta_data_file,
+          annotations_dir=annotations_dir,
+          annotations_list=annotations_list)
 
     return cls.from_cache(cache_prefix)
 
@@ -246,60 +255,6 @@ class DataLoader(dataloader.DataLoader):
 
     return DataLoader(tfrecord_file_patten, meta_data['size'],
                       meta_data['label_map'], ann_json_file)
-
-  @classmethod
-  def _write_pascal_tfrecord(cls, images_dir, annotations_dir, label_map_dict,
-                             annotations_list, ignore_difficult_instances,
-                             num_shards, max_num_images, tfrecord_files,
-                             annotations_json_file, meta_data_file):
-    """Write TFRecord and json file for PASCAL VOC data."""
-    label_name2id_dict = {'background': 0}
-    for idx, name in label_map_dict.items():
-      label_name2id_dict[name] = idx
-    writers = [tf.io.TFRecordWriter(path) for path in tfrecord_files]
-
-    ann_json_dict = {'images': [], 'annotations': [], 'categories': []}
-    for class_id, class_name in label_map_dict.items():
-      c = {'supercategory': 'none', 'id': class_id, 'name': class_name}
-      ann_json_dict['categories'].append(c)
-
-    # Gets the paths to annotations.
-    if annotations_list:
-      ann_path_list = [
-          os.path.join(annotations_dir, annotation + '.xml')
-          for annotation in annotations_list
-      ]
-    else:
-      ann_path_list = list(tf.io.gfile.glob(annotations_dir + r'/*.xml'))
-
-    unique_id = create_pascal_tfrecord.UniqueId()
-    for idx, ann_path in enumerate(ann_path_list):
-      if max_num_images and idx >= max_num_images:
-        break
-      if idx % 100 == 0:
-        tf.compat.v1.logging.info('On image %d of %d', idx, len(ann_path_list))
-      with tf.io.gfile.GFile(ann_path, 'r') as fid:
-        xml_str = fid.read()
-      xml = etree.fromstring(xml_str)
-      data = tfrecord_util.recursive_parse_xml_to_dict(xml)['annotation']
-      tf_example = create_pascal_tfrecord.dict_to_tf_example(
-          data,
-          images_dir,
-          label_name2id_dict,
-          unique_id,
-          ignore_difficult_instances,
-          ann_json_dict=ann_json_dict)
-      writers[idx % num_shards].write(tf_example.SerializeToString())
-
-    meta_data = {'size': idx + 1, 'label_map': label_map_dict}
-    with tf.io.gfile.GFile(meta_data_file, 'w') as f:
-      yaml.dump(meta_data, f)
-
-    for writer in writers:
-      writer.close()
-
-    with tf.io.gfile.GFile(annotations_json_file, 'w') as f:
-      json.dump(ann_json_dict, f, indent=2)
 
   def gen_dataset(self,
                   model_spec,
