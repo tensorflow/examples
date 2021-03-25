@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import csv
 import os
 
 import numpy as np
@@ -43,6 +44,16 @@ def write_sample(root,
   os.makedirs(os.path.join(root, category), exist_ok=True)
   xs = value * np.ones(shape=(int(sample_rate * duration_sec),), dtype=dtype)
   wavfile.write(os.path.join(root, category, file_name), sample_rate, xs)
+
+
+def write_csv(root, folder, filename, headers, rows):
+  os.makedirs(os.path.join(root, folder), exist_ok=True)
+
+  with open(os.path.join(root, folder, filename), 'w') as f:
+    writer = csv.DictWriter(f, fieldnames=headers)
+    writer.writeheader()
+    for row in rows:
+      writer.writerow(dict(zip(headers, row)))
 
 
 class MockSpec(audio_spec.BaseSpec):
@@ -99,15 +110,36 @@ class Base(tf.test.TestCase):
 
 class LoadFromESC50Test(Base):
 
-  def test_spec(self):
+  def test_from_esc50(self):
     folder_path = self._get_folder_path('test_examples_helper')
 
-    spec = audio_spec.YAMNetSpec()
-    audio_dataloader.DataLoader.from_esc50(spec, folder_path)
+    headers = [
+        'filename', 'fold', 'target', 'category', 'esc10', 'src_file', 'take'
+    ]
+    rows = []
+    rows.append(['1-100032-A-0.wav', '1', '0', 'dog', 'True', '100032', 'A'])
+    rows.append([
+        '1-100210-B-36.wav', '2', '36', 'vacuum_cleaner', 'False', '100210', 'B'
+    ])
+    rows.append([
+        '1-100210-A-36.wav', '1', '36', 'vacuum_cleaner', 'False', '100210', 'A'
+    ])
+    write_csv(folder_path, 'meta', 'esc50.csv', headers, rows)
 
-    spec = audio_spec.BrowserFFTSpec()
-    with self.assertRaises(AssertionError):
-      audio_dataloader.DataLoader.from_esc50(spec, folder_path)
+    spec = audio_spec.YAMNetSpec()
+    loader = audio_dataloader.DataLoader.from_esc50(spec, folder_path)
+
+    self.assertEqual(len(loader), 3)
+    self.assertEqual(loader.index_to_label, ['dog', 'vacuum_cleaner'])
+
+    expected_results = {
+        '1-100032-A-0.wav': 0,
+        '1-100210-B-36.wav': 1,
+        '1-100210-A-36.wav': 1,
+    }
+    for full_path, label in loader._dataset:
+      filename = full_path.numpy().decode('utf-8').split('/')[-1]
+      self.assertEqual(expected_results[filename], label)
 
 
 class ExamplesHelperTest(Base):

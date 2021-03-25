@@ -21,6 +21,7 @@ import os
 import random
 
 import librosa
+import pandas as pd
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
@@ -79,12 +80,13 @@ class ExamplesHelper(object):
     labels = list(map(_get_label, examples))
     return cls(examples, labels)
 
-  def __init__(self, examples, labels):
+  def __init__(self, examples_in_absolute_path, labels):
     self.index_to_label = sorted(list(set(labels)))  # [label]
     self.label_to_index = {
         label: i for i, label in enumerate(self.index_to_label)
     }
-    self._data = sorted(list(zip(examples, labels)))  # [(example, label)]
+    # [(example, label)] in stable order
+    self._data = sorted(list(zip(examples_in_absolute_path, labels)))
 
   def shuffle(self):
     random.shuffle(self._data)
@@ -152,8 +154,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
                                                  lambda s: s.endswith('.wav'))
     if shuffle:
       helper.shuffle()
-    ds = helper.examples_and_label_indices_ds()
 
+    ds = helper.examples_and_label_indices_ds()
     if len(ds) == 0:  # pylint: disable=g-explicit-length-test
       raise ValueError('No audio files found.')
 
@@ -253,22 +255,42 @@ class DataLoader(dataloader.ClassificationDataLoader):
     return ds
 
   @classmethod
-  def from_esc50(cls, spec, data_path):
+  def from_esc50(cls, spec, data_path, is_training=True, shuffle=True):
     """Load ESC50 style audio samples.
 
     ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
     Audio files should be put in ${data_path}/audio
     Metadata file should be put in ${data_path}/meta/esc50.csv
 
-    Note that only YAMNet model is supported.
+    # TODO(b/178083095): Add filters on fold and categories.
+
+    Note that instead of relying on the `target` field in the CSV, a new
+    `index_to_label` mapping is created based on the alphabet order of the
+    available categories.
 
     Args:
       spec: An instance of audio_spec.YAMNet
-      data_path: string, location to the audio files.
+      data_path: A string, location of the ESC50 dataset. It should contain at
+        least two sub-folders, `meta` and `audio`.
+      is_training: boolean, if True, apply training augmentation to the dataset.
+      shuffle: boolean, if True, random shuffle data.
 
     Returns:
       An instance of AudioDataLoader containing audio samples and labels.
     """
-    # TODO(b/178083096): remove this restriction.
-    assert isinstance(spec, audio_spec.YAMNetSpec)
-    return NotImplemented
+
+    def _fullpath(filename):
+      return os.path.join(data_path, 'audio', filename)
+
+    csv_path = os.path.join(data_path, 'meta/esc50.csv')
+    pd_data = pd.read_csv(csv_path)
+
+    helper = ExamplesHelper(map(_fullpath, pd_data.filename), pd_data.category)
+    if shuffle:
+      helper.shuffle()
+    ds = helper.examples_and_label_indices_ds()
+
+    if len(ds) == 0:  # pylint: disable=g-explicit-length-test
+      raise ValueError('No audio files found.')
+
+    return DataLoader(ds, len(ds), helper.index_to_label, spec)
