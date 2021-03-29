@@ -254,14 +254,17 @@ class DataLoader(dataloader.ClassificationDataLoader):
     return ds
 
   @classmethod
-  def from_esc50(cls, spec, data_path, shuffle=True):
+  def from_esc50(cls,
+                 spec,
+                 data_path,
+                 folds=None,
+                 categories=None,
+                 shuffle=True):
     """Load ESC50 style audio samples.
 
     ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
     Audio files should be put in ${data_path}/audio
     Metadata file should be put in ${data_path}/meta/esc50.csv
-
-    # TODO(b/178083095): Add filters on fold and categories.
 
     Note that instead of relying on the `target` field in the CSV, a new
     `index_to_label` mapping is created based on the alphabet order of the
@@ -270,6 +273,10 @@ class DataLoader(dataloader.ClassificationDataLoader):
     Args:
       spec: An instance of audio_spec.YAMNet
       data_path: A string, location of the ESC50 dataset. It should contain at
+      folds: A integer list of selected folds. If empty, all folds will be
+        selected.
+      categories: A string list of selected categories. If empty, all categories
+        will be selected.
         least two sub-folders, `meta` and `audio`.
       shuffle: boolean, if True, random shuffle data.
 
@@ -282,6 +289,10 @@ class DataLoader(dataloader.ClassificationDataLoader):
 
     csv_path = os.path.join(data_path, 'meta/esc50.csv')
     pd_data = pd.read_csv(csv_path)
+    if categories:
+      pd_data = pd_data[pd_data.category.isin(categories)]
+    if folds:
+      pd_data = pd_data[pd_data.fold.isin(folds)]
 
     helper = ExamplesHelper(map(_fullpath, pd_data.filename), pd_data.category)
     if shuffle:

@@ -141,6 +141,37 @@ class LoadFromESC50Test(Base):
       filename = full_path.numpy().decode('utf-8').split('/')[-1]
       self.assertEqual(expected_results[filename], label)
 
+    # fitlered dataset
+    with self.assertRaisesRegexp(ValueError, 'No audio files found'):
+      loader = audio_dataloader.DataLoader.from_esc50(
+          spec, folder_path, folds=[
+              3,
+          ])
+
+    with self.assertRaisesRegexp(ValueError, 'No audio files found'):
+      loader = audio_dataloader.DataLoader.from_esc50(
+          spec, folder_path, categories=['unknown'])
+
+    loader = audio_dataloader.DataLoader.from_esc50(
+        spec, folder_path, folds=[
+            1,
+        ])
+    self.assertEqual(len(loader), 2)
+
+    loader = audio_dataloader.DataLoader.from_esc50(
+        spec, folder_path, categories=['vacuum_cleaner'])
+    self.assertEqual(len(loader), 2)
+
+    loader = audio_dataloader.DataLoader.from_esc50(
+        spec, folder_path, folds=[
+            1,
+        ], categories=['vacuum_cleaner'])
+    self.assertEqual(len(loader), 1)
+
+    loader = audio_dataloader.DataLoader.from_esc50(
+        spec, folder_path, folds=[1, 2], categories=['vacuum_cleaner'])
+    self.assertEqual(len(loader), 2)
+
 
 class ExamplesHelperTest(Base):
 
