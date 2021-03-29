@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The TensorFlow Authors. All Rights Reserved.
+ * Copyright 2021 The TensorFlow Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,8 @@ class SoundClassifier(context: Context, private val options: Options = Options()
   /** Retrieve labels from "labels.txt" file */
   private fun loadLabels(context: Context) {
     try {
-      val reader = BufferedReader(InputStreamReader(context.assets.open(options.metadataPath)))
+      val reader =
+        BufferedReader(InputStreamReader(context.assets.open(options.metadataPath)))
       val wordList = mutableListOf<String>()
       reader.useLines { lines ->
         lines.forEach {
@@ -355,7 +356,8 @@ class SoundClassifier(context: Context, private val options: Options = Options()
                 0,
                 bufferSamples
               )
-              recordingOffset = (recordingOffset + bufferSamples) % recordingBufferSamples
+              recordingOffset =
+                (recordingOffset + bufferSamples) % recordingBufferSamples
             }
           }
         }
@@ -416,7 +418,8 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         }
         _probabilities.postValue(labelList.zip(probList).toMap())
 
-        latestPredictionLatencyMs = ((SystemClock.elapsedRealtimeNanos() - t0) / 1e6).toFloat()
+        latestPredictionLatencyMs =
+          ((SystemClock.elapsedRealtimeNanos() - t0) / 1e6).toFloat()
       }
     }
   }
