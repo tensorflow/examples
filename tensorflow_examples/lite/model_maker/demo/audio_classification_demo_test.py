@@ -54,7 +54,7 @@ class AudioClassificationDemoTest(tf.test.TestCase):
     with patch_data_loader():
       with tempfile.TemporaryDirectory() as temp_dir:
         # Use cached training data if exists.
-        data_dir = audio_classification_demo.download_dataset(
+        data_dir = audio_classification_demo.download_speech_commands_dataset(
             cache_dir=test_util.get_cache_dir(temp_dir,
                                               'mini_speech_commands.zip'),
             file_hash='4b8a67bae2973844e84fa7ac988d1a44')
@@ -62,9 +62,10 @@ class AudioClassificationDemoTest(tf.test.TestCase):
         tflite_filename = os.path.join(temp_dir, 'model.tflite')
         label_filename = os.path.join(temp_dir, 'labels.txt')
         audio_classification_demo.run(
+            'audio_browser_fft',
             data_dir,
+            'mini_speech_command',
             temp_dir,
-            spec='audio_browser_fft',
             epochs=1,
             batch_size=1)
 

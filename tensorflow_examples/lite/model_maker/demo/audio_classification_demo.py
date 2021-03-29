@@ -39,6 +39,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 from absl import app
 from absl import flags
 from absl import logging
@@ -56,10 +57,13 @@ def define_flags():
                       'The directory to save exported files.')
   flags.DEFINE_string('spec', 'audio_browser_fft',
                       'Name of the model spec to use.')
+  flags.DEFINE_string(
+      'dataset', 'mini_speech_command',
+      'Which dataset to use. Supports: `mini_speech_command` and `esc50`')
   flags.mark_flag_as_required('export_dir')
 
 
-def download_dataset(**kwargs):
+def download_speech_commands_dataset(**kwargs):
   """Downloads demo dataset, and returns directory path."""
   tf.compat.v1.logging.info('Downloading mini speech command dataset.')
   # ${HOME}/.keras/datasets/mini_speech_commands.zip
@@ -74,13 +78,46 @@ def download_dataset(**kwargs):
   return folder_path
 
 
-def run(data_dir, export_dir, spec='audio_browser_fft', **kwargs):
+def download_esc50_dataset(**kwargs):
+  """Downloads ESC50 dataset, and returns directory path."""
+  tf.compat.v1.logging.info('Downloading ESC50 dataset.')
+  # ${HOME}/.keras/datasets/mini_speech_commands.zip
+  filepath = tf.keras.utils.get_file(
+      'esc-50.zip',
+      'https://github.com/karoldvl/ESC-50/archive/master.zip',
+      cache_subdir='datasets',
+      extract=True,
+      **kwargs)
+  # ${HOME}/.keras/datasets/mini_speech_commands
+  folder_path = filepath.rsplit('/', 1)[0]
+  folder_path = os.path.join(folder_path, 'ESC-50-master')
+
+  print(f'Dataset has been downloaded to {folder_path}')
+  return folder_path
+
+
+def run(spec, data_dir, dataset_type, export_dir, **kwargs):
   """Runs demo."""
   spec = model_spec.get(spec)
-  data = audio_dataloader.DataLoader.from_folder(spec, data_dir)
 
-  train_data, rest_data = data.split(0.8)
-  validation_data, test_data = rest_data.split(0.5)
+  if dataset_type == 'esc50':
+    # Limit to 2 categories to speed up the demo
+    categories = ['dog', 'cat']
+    train_data = audio_dataloader.DataLoader.from_esc50(
+        spec, data_dir, folds=[0, 1, 2, 3], categories=categories)
+    validation_data = audio_dataloader.DataLoader.from_esc50(
+        spec, data_dir, folds=[
+            4,
+        ], categories=categories)
+    test_data = audio_dataloader.DataLoader.from_esc50(
+        spec, data_dir, folds=[
+            5,
+        ], categories=categories)
+
+  else:
+    data = audio_dataloader.DataLoader.from_folder(spec, data_dir)
+    train_data, rest_data = data.split(0.8)
+    validation_data, test_data = rest_data.split(0.5)
 
   print('Training the model')
   model = audio_classifier.create(train_data, spec, validation_data, **kwargs)
@@ -94,8 +131,13 @@ def run(data_dir, export_dir, spec='audio_browser_fft', **kwargs):
 
 def main(_):
   logging.set_verbosity(logging.INFO)
-  data_dir = download_dataset()
-  run(data_dir, export_dir=FLAGS.export_dir, spec=FLAGS.spec)
+
+  if FLAGS.dataset == 'esc50':
+    data_dir = download_esc50_dataset()
+  else:
+    data_dir = download_speech_commands_dataset()
+
+  run(FLAGS.spec, data_dir, FLAGS.dataset, export_dir=FLAGS.export_dir)
 
 
 if __name__ == '__main__':
