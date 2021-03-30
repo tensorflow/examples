@@ -6,7 +6,7 @@ android {
     compileSdkVersion 30
     defaultConfig {
         applicationId "org.tensorflow.lite.examples.soundclassifier"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
