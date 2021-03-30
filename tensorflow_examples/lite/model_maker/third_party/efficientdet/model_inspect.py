@@ -86,7 +86,7 @@ class ModelInspector(object):
                tflite_path: Text = None,
                batch_size: int = 1,
                hparams: Text = '',
-               **kwargs):
+               **kwargs):  # pytype: disable=annotation-type-mismatch
     self.model_name = model_name
     self.logdir = logdir
     self.tensorrt = tensorrt

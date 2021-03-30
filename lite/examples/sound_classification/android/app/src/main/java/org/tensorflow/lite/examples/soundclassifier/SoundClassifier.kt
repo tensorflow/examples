@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The TensorFlow Authors. All Rights Reserved.
+ * Copyright 2021 The TensorFlow Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,6 @@ import java.io.InputStreamReader
 import java.nio.FloatBuffer
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
-import kotlin.math.ceil
 import kotlin.math.sin
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
@@ -68,15 +65,13 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     var probabilityThreshold: Float = 0.3f,
   )
 
-  val isRecording: Boolean
-    get() = recordingThread?.isAlive == true
+  var isRecording: Boolean = false
+    private set
 
   /** As the result of sound classification, this value emits map of probabilities */
   val probabilities: LiveData<Map<String, Float>>
     get() = _probabilities
   private val _probabilities = MutableLiveData<Map<String, Float>>()
-
-  private val recordingBufferLock: ReentrantLock = ReentrantLock()
 
   var isClosed: Boolean = true
     private set
@@ -141,11 +136,10 @@ class SoundClassifier(context: Context, private val options: Options = Options()
   /** Latest prediction latency in milliseconds.  */
   private var latestPredictionLatencyMs = 0f
 
-  private var recordingThread: Thread? = null
   private var recognitionThread: Thread? = null
 
-  private var recordingOffset = 0
-  private lateinit var recordingBuffer: ShortArray
+  /** Used to record audio samples. */
+  private lateinit var audioRecord: AudioRecord
 
   /** Buffer that holds audio PCM sample that are fed to the TFLite model for inference.  */
   private lateinit var inputBuffer: FloatBuffer
@@ -172,12 +166,13 @@ class SoundClassifier(context: Context, private val options: Options = Options()
 
   /**
    * Stops sound classification, which triggers interruption of
-   * `recordingThread` and `recognitionThread`.
+   * `recognitionThread`.
    */
   fun stop() {
     if (isClosed || !isRecording) return
-    recordingThread?.interrupt()
     recognitionThread?.interrupt()
+    audioRecord.stop()
+    isRecording = false
 
     _probabilities.postValue(labelList.associateWith { 0f })
   }
@@ -194,7 +189,8 @@ class SoundClassifier(context: Context, private val options: Options = Options()
   /** Retrieve labels from "labels.txt" file */
   private fun loadLabels(context: Context) {
     try {
-      val reader = BufferedReader(InputStreamReader(context.assets.open(options.metadataPath)))
+      val reader =
+        BufferedReader(InputStreamReader(context.assets.open(options.metadataPath)))
       val wordList = mutableListOf<String>()
       reader.useLines { lines ->
         lines.forEach {
@@ -267,100 +263,85 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     }
   }
 
-  /** Start a thread to pull audio samples in continuously.  */
+  /** Start recording and triggers recognition.  */
   @Synchronized
   private fun startAudioRecord() {
     if (isRecording) return
-    recordingThread = AudioRecordingThread().apply {
-      start()
-    }
+    setupAudioRecord()
     isClosed = false
+    isRecording = true
   }
 
   /** Start a thread that runs model inference (i.e., recognition) at a regular interval.  */
   private fun startRecognition() {
+    Log.i(TAG, "Starting Recognition")
     recognitionThread = RecognitionThread().apply {
       start()
     }
   }
 
-  /** Runnable class to run a thread for audio recording */
-  private inner class AudioRecordingThread : Thread() {
-    override fun run() {
-      var bufferSize = AudioRecord.getMinBufferSize(
-        options.sampleRate,
-        AudioFormat.CHANNEL_IN_MONO,
-        AudioFormat.ENCODING_PCM_16BIT
-      )
-      if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
-        bufferSize = options.sampleRate * 2
-        Log.w(TAG, "bufferSize has error or bad value")
-      }
-      Log.i(TAG, "bufferSize = $bufferSize")
-      val record = AudioRecord(
-        // including MIC, UNPROCESSED, and CAMCORDER.
-        MediaRecorder.AudioSource.VOICE_RECOGNITION,
-        options.sampleRate,
-        AudioFormat.CHANNEL_IN_MONO,
-        AudioFormat.ENCODING_PCM_16BIT,
-        bufferSize
-      )
-      if (record.state != AudioRecord.STATE_INITIALIZED) {
-        Log.e(TAG, "AudioRecord failed to initialize")
-        return
-      }
-      Log.i(TAG, "Successfully initialized AudioRecord")
-      val bufferSamples = bufferSize / 2
-      val audioBuffer = ShortArray(bufferSamples)
-      val recordingBufferSamples =
-        ceil(modelInputLength.toFloat() / bufferSamples.toDouble())
-          .toInt() * bufferSamples
-      Log.i(TAG, "recordingBufferSamples = $recordingBufferSamples")
-      recordingOffset = 0
-      recordingBuffer = ShortArray(recordingBufferSamples)
-      record.startRecording()
-      Log.i(TAG, "Successfully started AudioRecord recording")
+  private fun setupAudioRecord() {
+    var bufferSize = AudioRecord.getMinBufferSize(
+      options.sampleRate,
+      AudioFormat.CHANNEL_IN_MONO,
+      AudioFormat.ENCODING_PCM_16BIT
+    )
+    Log.i(TAG, "min buffer size = $bufferSize")
+    if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
+      bufferSize = options.sampleRate * 2
+      Log.w(TAG, "bufferSize has error or bad value")
+    }
+    // The buffer of AudioRecord should be larger than what model requires.
+    val modelRequiredBufferSize = 2 * modelInputLength * Short.SIZE_BYTES
+    if (bufferSize < modelRequiredBufferSize) {
+      bufferSize = modelRequiredBufferSize
+    }
+    Log.i(TAG, "bufferSize = $bufferSize")
+    audioRecord = AudioRecord(
+      // including MIC, UNPROCESSED, and CAMCORDER.
+      MediaRecorder.AudioSource.VOICE_RECOGNITION,
+      options.sampleRate,
+      AudioFormat.CHANNEL_IN_MONO,
+      AudioFormat.ENCODING_PCM_16BIT,
+      bufferSize
+    )
+    if (audioRecord.state != AudioRecord.STATE_INITIALIZED) {
+      Log.e(TAG, "AudioRecord failed to initialize")
+      return
+    }
+    Log.i(TAG, "Successfully initialized AudioRecord")
 
-      // Start recognition (model inference) thread.
-      startRecognition()
+    audioRecord.startRecording()
+    Log.i(TAG, "Successfully started AudioRecord recording")
 
-      while (!isInterrupted) {
-        try {
-          TimeUnit.MILLISECONDS.sleep(options.audioPullPeriod)
-        } catch (e: InterruptedException) {
-          Log.w(TAG, "Sleep interrupted in audio recording thread.")
-          break
-        }
-        when (record.read(audioBuffer, 0, audioBuffer.size)) {
-          AudioRecord.ERROR_INVALID_OPERATION -> {
-            Log.w(TAG, "AudioRecord.ERROR_INVALID_OPERATION")
-          }
-          AudioRecord.ERROR_BAD_VALUE -> {
-            Log.w(TAG, "AudioRecord.ERROR_BAD_VALUE")
-          }
-          AudioRecord.ERROR_DEAD_OBJECT -> {
-            Log.w(TAG, "AudioRecord.ERROR_DEAD_OBJECT")
-          }
-          AudioRecord.ERROR -> {
-            Log.w(TAG, "AudioRecord.ERROR")
-          }
-          bufferSamples -> {
-            // We apply locks here to avoid two separate threads (the recording and
-            // recognition threads) reading and writing from the recordingBuffer at the same
-            // time, which can cause the recognition thread to read garbled audio snippets.
-            recordingBufferLock.withLock {
-              audioBuffer.copyInto(
-                recordingBuffer,
-                recordingOffset,
-                0,
-                bufferSamples
-              )
-              recordingOffset = (recordingOffset + bufferSamples) % recordingBufferSamples
-            }
-          }
-        }
+    // Start recognition (model inference) thread.
+    startRecognition()
+  }
+
+  private fun loadAudio(audioBuffer: ShortArray): Int {
+    when (
+      val loadedSamples = audioRecord.read(
+        audioBuffer, 0, audioBuffer.size, AudioRecord.READ_NON_BLOCKING
+      )
+    ) {
+      AudioRecord.ERROR_INVALID_OPERATION -> {
+        Log.w(TAG, "AudioRecord.ERROR_INVALID_OPERATION")
+      }
+      AudioRecord.ERROR_BAD_VALUE -> {
+        Log.w(TAG, "AudioRecord.ERROR_BAD_VALUE")
+      }
+      AudioRecord.ERROR_DEAD_OBJECT -> {
+        Log.w(TAG, "AudioRecord.ERROR_DEAD_OBJECT")
+      }
+      AudioRecord.ERROR -> {
+        Log.w(TAG, "AudioRecord.ERROR")
+      }
+      else -> {
+        return loadedSamples
       }
     }
+    // No new sample was loaded.
+    return 0
   }
 
   private inner class RecognitionThread : Thread() {
@@ -370,36 +351,48 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         return
       }
       val outputBuffer = FloatBuffer.allocate(modelNumClasses)
+      val recordingBuffer = ShortArray(modelInputLength)
+      val circularBuffer = ShortArray(modelInputLength)
+      var j = 0 // Indices for the circular buffer next write
+
       while (!isInterrupted) {
+
+        // Wait for the next invocation
         try {
           TimeUnit.MILLISECONDS.sleep(recognitionPeriod)
         } catch (e: InterruptedException) {
           Log.w(TAG, "Sleep interrupted in recognition thread.")
-          break
         }
+
+        // Load new audio samples
+        val sampleCounts = loadAudio(recordingBuffer)
+        if (sampleCounts == 0) {
+          continue
+        }
+
+        // Copy new data into the circular buffer
+        for (i in 0 until sampleCounts) {
+          circularBuffer[j] = recordingBuffer[i]
+          j = (j + 1) % circularBuffer.size
+        }
+
+        // Feed data to the input buffer.
         var samplesAreAllZero = true
-
-        recordingBufferLock.withLock {
-          var j = (recordingOffset - modelInputLength) % modelInputLength
-          if (j < 0) {
-            j += modelInputLength
-          }
-
-          for (i in 0 until modelInputLength) {
-            val s = if (i >= options.pointsInAverage && j >= options.pointsInAverage) {
-              ((j - options.pointsInAverage + 1)..j).map { recordingBuffer[it % modelInputLength] }
-                .average()
-            } else {
-              recordingBuffer[j % modelInputLength]
+        for (i in 0 until modelInputLength) {
+          val s = if (i > options.pointsInAverage) {
+            ((i - options.pointsInAverage + 1)..i).map {
+              circularBuffer[(j + it) % modelInputLength]
             }
-            j += 1
-
-            if (samplesAreAllZero && s.toInt() != 0) {
-              samplesAreAllZero = false
-            }
-            inputBuffer.put(i, s.toFloat())
+              .average()
+          } else {
+            circularBuffer[(i + j) % modelInputLength]
           }
+          if (samplesAreAllZero && s.toInt() != 0) {
+            samplesAreAllZero = false
+          }
+          inputBuffer.put(i, s.toFloat())
         }
+
         if (samplesAreAllZero) {
           Log.w(TAG, "No audio input: All audio samples are zero!")
           continue
@@ -414,9 +407,11 @@ class SoundClassifier(context: Context, private val options: Options = Options()
         val probList = predictionProbs.map {
           if (it > probabilityThreshold) it else 0f
         }
+        Log.i(TAG, "inference result: $probList")
         _probabilities.postValue(labelList.zip(probList).toMap())
 
-        latestPredictionLatencyMs = ((SystemClock.elapsedRealtimeNanos() - t0) / 1e6).toFloat()
+        latestPredictionLatencyMs =
+          ((SystemClock.elapsedRealtimeNanos() - t0) / 1e6).toFloat()
       }
     }
   }
