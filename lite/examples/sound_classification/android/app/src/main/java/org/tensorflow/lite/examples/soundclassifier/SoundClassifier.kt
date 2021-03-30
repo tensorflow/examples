@@ -27,8 +27,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.support.common.FileUtil
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -36,6 +34,8 @@ import java.nio.FloatBuffer
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.sin
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.support.common.FileUtil
 
 /**
  * Performs classification on sound.
@@ -143,7 +143,6 @@ class SoundClassifier(context: Context, private val options: Options = Options()
 
   /** Buffer that holds audio PCM sample that are fed to the TFLite model for inference.  */
   private lateinit var inputBuffer: FloatBuffer
-
 
   init {
     loadLabels(context)
@@ -278,7 +277,6 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     recognitionThread = RecognitionThread().apply {
       start()
     }
-
   }
 
   private fun setupAudioRecord() {
@@ -320,8 +318,10 @@ class SoundClassifier(context: Context, private val options: Options = Options()
   }
 
   private fun loadAudio(audioBuffer: ShortArray): Int {
-    when (val loadedSamples =
-      audioRecord.read(audioBuffer, 0, audioBuffer.size, AudioRecord.READ_NON_BLOCKING)) {
+    when (
+      val loadedSamples =
+        audioRecord.read(audioBuffer, 0, audioBuffer.size, AudioRecord.READ_NON_BLOCKING)
+    ) {
       AudioRecord.ERROR_INVALID_OPERATION -> {
         Log.w(TAG, "AudioRecord.ERROR_INVALID_OPERATION")
       }
@@ -351,10 +351,10 @@ class SoundClassifier(context: Context, private val options: Options = Options()
       val outputBuffer = FloatBuffer.allocate(modelNumClasses)
       val recordingBuffer = ShortArray(modelInputLength)
       val circularBuffer = ShortArray(modelInputLength)
-      var j = 0  // Indices for the circular buffer next write
+
+      var j = 0 // Indices for the circular buffer next write
 
       while (!isInterrupted) {
-
         // Wait for the next invocation
         try {
           TimeUnit.MILLISECONDS.sleep(recognitionPeriod)
@@ -374,12 +374,13 @@ class SoundClassifier(context: Context, private val options: Options = Options()
           j = (j + 1) % circularBuffer.size
         }
 
-
         // Feed data to the input buffer.
         var samplesAreAllZero = true
         for (i in 0 until modelInputLength) {
           val s = if (i > options.pointsInAverage) {
-            ((i - options.pointsInAverage + 1)..i).map { circularBuffer[(j + it) % modelInputLength] }
+            ((i - options.pointsInAverage + 1)..i).map {
+              circularBuffer[(j + it) % modelInputLength]
+            }
               .average()
           } else {
             circularBuffer[(i + j) % modelInputLength]
@@ -425,4 +426,3 @@ private fun String.toTitleCase() =
     .map { it.capitalize(Locale.ROOT) }
     .joinToString(" ")
     .trim()
-
