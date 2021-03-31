@@ -76,6 +76,55 @@ class ObjectDectectorDataLoaderTest(tf.test.TestCase):
       self.assertTrue((images_shape == expected_shape).all())
       self.assertLen(labels, 15)
 
+  def test_from_csv(self):
+    model_spec = MockDetectorModelSpec('efficientdet-lite0')
+
+    csv_file = test_util.get_test_data_path('salads_ml_use.csv')
+    image_dir = test_util.get_test_data_path('salad_images')
+    train_data, validation_data, test_data = \
+        object_detector_dataloader.DataLoader.from_csv(csv_file, image_dir)
+
+    label_map = {1: 'Baked Goods', 2: 'Cheese', 3: 'Salad'}
+    # Checks the training data.
+    self.assertIsInstance(train_data, object_detector_dataloader.DataLoader)
+    self.assertLen(train_data, 1)
+    self.assertEqual(train_data.label_map, label_map)
+
+    self.assertTrue(os.path.isfile(train_data.annotations_json_file))
+    self.assertGreater(os.path.getsize(train_data.annotations_json_file), 0)
+    expected_json_file = test_util.get_test_data_path('train_annotations.json')
+    self.assertTrue(
+        filecmp.cmp(train_data.annotations_json_file, expected_json_file))
+
+    dataset = train_data.gen_dataset(model_spec, batch_size=1, is_training=True)
+    for images, labels in dataset.take(10):
+      images_shape = tf.shape(images).numpy()
+      expected_shape = np.array([1, *model_spec.config.image_size, 3])
+      self.assertTrue((images_shape == expected_shape).all())
+      self.assertLen(labels, 15)
+
+    # Checks the validation data.
+    self.assertIsNone(validation_data)
+
+    # Checks the test data.
+    self.assertIsInstance(test_data, object_detector_dataloader.DataLoader)
+    self.assertLen(test_data, 2)
+    self.assertEqual(test_data.label_map, label_map)
+
+    self.assertTrue(os.path.isfile(test_data.annotations_json_file))
+    self.assertGreater(os.path.getsize(test_data.annotations_json_file), 0)
+    expected_json_file = test_util.get_test_data_path('test_annotations.json')
+    self.assertTrue(
+        filecmp.cmp(test_data.annotations_json_file, expected_json_file))
+
+    dataset = test_data.gen_dataset(model_spec, batch_size=1, is_training=False)
+    for i, (images, labels) in enumerate(dataset):
+      self.assertLess(i, 2)
+      images_shape = tf.shape(images).numpy()
+      expected_shape = np.array([1, *model_spec.config.image_size, 3])
+      self.assertTrue((images_shape == expected_shape).all())
+      self.assertLen(labels, 15)
+
 
 if __name__ == '__main__':
   tf.test.main()
