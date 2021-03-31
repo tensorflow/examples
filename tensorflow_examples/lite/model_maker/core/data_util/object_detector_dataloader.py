@@ -20,7 +20,7 @@ from __future__ import print_function
 import hashlib
 import os
 import tempfile
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import Collection, Dict, List, Optional, TypeVar, Union
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
@@ -36,7 +36,7 @@ ANN_JSON_FILE_SUFFIX = '_annotations.json'
 META_DATA_FILE_SUFFIX = '_meta_data.yaml'
 
 
-def _get_cache_prefix_filename(image_dir, annotations_dir, annotations_list,
+def _get_cache_prefix_filename(image_dir, annotations_dir, annotation_filenames,
                                num_shards):
   """Get the prefix for cached files."""
 
@@ -46,8 +46,8 @@ def _get_cache_prefix_filename(image_dir, annotations_dir, annotations_list,
   hasher = hashlib.md5()
   hasher.update(_get_dir_basename(image_dir).encode('utf-8'))
   hasher.update(_get_dir_basename(annotations_dir).encode('utf-8'))
-  if annotations_list:
-    hasher.update(' '.join(sorted(annotations_list)).encode('utf-8'))
+  if annotation_filenames:
+    hasher.update(' '.join(sorted(annotation_filenames)).encode('utf-8'))
   hasher.update(str(num_shards).encode('utf-8'))
   return hasher.hexdigest()
 
@@ -55,7 +55,7 @@ def _get_cache_prefix_filename(image_dir, annotations_dir, annotations_list,
 def _get_object_detector_cache_filenames(cache_dir,
                                          image_dir,
                                          annotations_dir,
-                                         annotations_list,
+                                         annotation_filenames,
                                          num_shards,
                                          cache_prefix_filename=None):
   """Gets cache filenames for obejct detector."""
@@ -67,7 +67,7 @@ def _get_object_detector_cache_filenames(cache_dir,
   if cache_prefix_filename is None:
     cache_prefix_filename = _get_cache_prefix_filename(image_dir,
                                                        annotations_dir,
-                                                       annotations_list,
+                                                       annotation_filenames,
                                                        num_shards)
   cache_prefix = os.path.join(cache_dir, cache_prefix_filename)
   print(
@@ -152,7 +152,7 @@ class DataLoader(dataloader.DataLoader):
       images_dir: str,
       annotations_dir: str,
       label_map: Union[List[str], Dict[int, str], str],
-      annotations_list: Optional[List[str]] = None,
+      annotation_filenames: Optional[Collection[str]] = None,
       ignore_difficult_instances: bool = False,
       num_shards: int = 100,
       max_num_images: Optional[int] = None,
@@ -182,10 +182,10 @@ class DataLoader(dataloader.DataLoader):
            the same as setting label_map={1: 'person', 2: 'notperson'}.
         3. String, name for certain dataset. Accepted values are: 'coco', 'voc'
           and 'waymo'. 4. String, yaml filename that stores label_map.
-      annotations_list: list of annotation filenames (strings) to be loaded. For
-        instance, if there're 3 annotation files [0.xml, 1.xml, 2.xml] in
-        `annotations_dir`, setting annotations_list=['0', '1'] makes this method
-        only load [0.xml, 1.xml].
+      annotation_filenames: Collection of annotation filenames (strings) to be
+        loaded. For instance, if there're 3 annotation files [0.xml, 1.xml,
+        2.xml] in `annotations_dir`, setting annotation_filenames=['0', '1']
+        makes this method only load [0.xml, 1.xml].
       ignore_difficult_instances: Whether to ignore difficult instances.
         `difficult` can be set inside `object` item in the annotation xml file.
       num_shards: Number of shards for output file.
@@ -196,7 +196,7 @@ class DataLoader(dataloader.DataLoader):
         later.
       cache_prefix_filename: The cache prefix filename. If not set, will
         automatically generate it based on `image_dir`, `annotations_dir` and
-        `annotations_list`.
+        `annotation_filenames`.
 
     Returns:
       ObjectDetectorDataLoader object.
@@ -204,7 +204,7 @@ class DataLoader(dataloader.DataLoader):
     label_map = _get_label_map(label_map)
     is_cached, cache_prefix, tfrecord_files, ann_json_file, meta_data_file = \
         _get_object_detector_cache_filenames(cache_dir, images_dir,
-                                             annotations_dir, annotations_list,
+                                             annotations_dir, annotation_filenames,
                                              num_shards, cache_prefix_filename)
     # If not cached, write data into tfrecord_file_paths and
     # annotations_json_file_path.
@@ -221,7 +221,7 @@ class DataLoader(dataloader.DataLoader):
           annotations_json_file=ann_json_file,
           meta_data_file=meta_data_file,
           annotations_dir=annotations_dir,
-          annotations_list=annotations_list)
+          annotation_filenames=annotation_filenames)
 
     return cls.from_cache(cache_prefix)
 

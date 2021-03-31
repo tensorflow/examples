@@ -13,16 +13,15 @@
 # limitations under the License.
 """Utilities for Object Detection Dataloader."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import abc
+import hashlib
 import io
 import json
 import os
-from typing import Any, Dict, List, Optional
+import tempfile
+from typing import Any, Collection, Dict, List, Sequence, Optional
 
+import dataclasses
 from lxml import etree
 from PIL import JpegImagePlugin
 import PIL.Image
@@ -35,6 +34,156 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.dataset impor
 
 # A workaround to avoid a JPEG image being identified as MPO.
 JpegImagePlugin._getmp = lambda: None  # pylint: disable=protected-access
+
+# Suffix of the annotations json file name and the meta data file name.
+ANN_JSON_FILE_SUFFIX = '_annotations.json'
+META_DATA_FILE_SUFFIX = '_meta_data.yaml'
+
+
+def _get_cache_dir_or_create(cache_dir: Optional[str]) -> str:
+  """Gets the cache directory or creates it if not exists."""
+  # TODO(b/183683348): Unifies with other tasks as well.
+  # If `cache_dir` is None, a temporary folder will be created and will not be
+  # removed automatically after training which makes it can be used later.
+  if cache_dir is None:
+    cache_dir = tempfile.mkdtemp()
+  if not tf.io.gfile.exists(cache_dir):
+    tf.io.gfile.makedirs(cache_dir)
+  return cache_dir
+
+
+def _get_dir_basename(dirname):
+  """Gets the base name of the directory."""
+  return os.path.basename(os.path.abspath(dirname))
+
+
+def get_cache_prefix_filename_from_pascal(images_dir: str,
+                                          annotations_dir: str,
+                                          annotation_filenames: Optional[
+                                              Collection[str]],
+                                          num_shards: int = 10) -> str:
+  """Gets the prefix of cached files from PASCAL VOC data.
+
+  Args:
+    images_dir: Path to directory that store raw images.
+    annotations_dir: Path to the annotations directory.
+    annotation_filenames: Collection of annotation filenames (strings) to be
+      loaded. For instance, if there're 3 annotation files [0.xml, 1.xml, 2.xml]
+      in `annotations_dir`, setting annotation_filenames=['0', '1'] makes this
+      method only load [0.xml, 1.xml].
+    num_shards: Number of shards for output file.
+
+  Returns:
+    The prefix of cached files.
+  """
+  hasher = hashlib.md5()
+  hasher.update(_get_dir_basename(images_dir).encode('utf-8'))
+  hasher.update(_get_dir_basename(annotations_dir).encode('utf-8'))
+  if annotation_filenames:
+    hasher.update(' '.join(sorted(annotation_filenames)).encode('utf-8'))
+  hasher.update(str(num_shards).encode('utf-8'))
+  return hasher.hexdigest()
+
+
+def get_cache_prefix_filename_from_csv(csv_file: str, num_shards: int) -> str:
+  """Gets the prefix of cached files from the csv file.
+
+  Args:
+    csv_file: Name of the csv file.
+    num_shards: Number of shards for output file.
+
+  Returns:
+    The prefix of cached files.
+  """
+  hasher = hashlib.md5()
+  hasher.update(os.path.basename(csv_file).encode('utf-8'))
+  hasher.update(str(num_shards).encode('utf-8'))
+  return hasher.hexdigest()
+
+
+@dataclasses.dataclass(frozen=True)
+class CacheFiles:
+  """Cache files for object detection."""
+  cache_prefix: str
+  tfrecord_files: Sequence[str]
+  meta_data_file: str
+  annotations_json_file: Optional[str]
+
+
+def get_cache_files(cache_dir: Optional[str],
+                    cache_prefix_filename: str,
+                    num_shards: int = 10) -> CacheFiles:
+  """Creates an object of CacheFiles class.
+
+  Args:
+    cache_dir: The cache directory to save TFRecord, metadata and json file.
+      When cache_dir is None, a temporary folder will be created and will not be
+      removed automatically after training which makes it can be used later.
+     cache_prefix_filename: The cache prefix filename.
+     num_shards: Number of shards for output file.
+
+  Returns:
+    An object of CacheFiles class.
+  """
+  cache_dir = _get_cache_dir_or_create(cache_dir)
+  # The cache prefix including the cache directory and the cache prefix
+  # filename, e.g: '/tmp/cache/train'.
+  cache_prefix = os.path.join(cache_dir, cache_prefix_filename)
+  print(
+      'Cache will be stored in %s with prefix filename %s. Cache_prefix is %s' %
+      (cache_dir, cache_prefix_filename, cache_prefix))
+
+  # Cached files including the TFRecord files, the annotations json file and
+  # the meda data file.
+  tfrecord_files = [
+      cache_prefix + '-%05d-of-%05d.tfrecord' % (i, num_shards)
+      for i in range(num_shards)
+  ]
+  annotations_json_file = cache_prefix + ANN_JSON_FILE_SUFFIX
+  meta_data_file = cache_prefix + META_DATA_FILE_SUFFIX
+  return CacheFiles(
+      cache_prefix=cache_prefix,
+      tfrecord_files=tuple(tfrecord_files),
+      meta_data_file=meta_data_file,
+      annotations_json_file=annotations_json_file)
+
+
+def is_cached(cache_files: CacheFiles) -> bool:
+  """Checks whether cache files are already cached."""
+  # annotations_json_file is optional, thus we don't check whether it is cached.
+  all_cached_files = list(
+      cache_files.tfrecord_files) + [cache_files.meta_data_file]
+  return all(tf.io.gfile.exists(path) for path in all_cached_files)
+
+
+def is_all_cached(cache_files_collection: Collection[CacheFiles]) -> bool:
+  """Checks whether a collection of cache files are all already cached."""
+  return all(map(is_cached, cache_files_collection))
+
+
+def get_cache_files_sequence(cache_dir: str, cache_prefix_filename: str,
+                             set_prefixes: Collection[str],
+                             num_shards: int) -> Sequence[CacheFiles]:
+  """Gets a sequence of cache files.
+
+  Args:
+    cache_dir: The cache directory to save TFRecord, metadata and json file.
+      When cache_dir is None, a temporary folder will be created and will not be
+      removed automatically after training which makes it can be used later.
+      cache_prefix_filename: The cache prefix filename.
+    set_prefixes: Set prefix names for training, validation and test data. e.g.
+      ['TRAIN', 'VAL', 'TEST'].
+    num_shards: Number of shards for output file.
+
+  Returns:
+    A sequence of CachFiles objects mapping the set_prefixes.
+  """
+  cache_files_list = []
+  for set_prefix in set_prefixes:
+    prefix_filename = set_prefix.lower() + '_' + cache_prefix_filename
+    cache_files = get_cache_files(cache_dir, prefix_filename, num_shards)
+    cache_files_list.append(cache_files)
+  return tuple(cache_files_list)
 
 
 class CacheFilesWriter(abc.ABC):
@@ -73,12 +222,13 @@ class CacheFilesWriter(abc.ABC):
     for idx, name in self.label_map.items():
       self.label_name2id_dict[name] = idx
 
-  def write_files(self, tfrecord_files: List[str], annotations_json_file: str,
-                  meta_data_file: str, *args, **kwargs) -> None:
+  def write_files(self, tfrecord_files: Sequence[str],
+                  annotations_json_file: str, meta_data_file: str, *args,
+                  **kwargs) -> None:
     """Writes TFRecord, meta_data and annotations json files.
 
     Args:
-      tfrecord_files: List of tfrecord files.
+      tfrecord_files: A sequence of tfrecord files.
       annotations_json_file: Json file with COCO data format containing golden
         bounding boxes.
       meta_data_file: Yaml file to save the meta_data including data size and
@@ -134,24 +284,24 @@ class PascalVocCacheFilesWriter(CacheFilesWriter):
   def _get_xml_dict(
       self,
       annotations_dir: str,
-      annotations_list: Optional[List[str]] = None) -> tf.train.Example:
+      annotation_filenames: Optional[List[str]] = None) -> tf.train.Example:
     """Gets the tf example one by one from data with Pascal Voc format.
 
     Args:
       annotations_dir: Path to the annotations directory.
-      annotations_list: List of annotation filenames (strings) to be loaded. For
-        instance, if there're 3 annotation files [0.xml, 1.xml, 2.xml] in
-        `annotations_dir`, setting annotations_list=['0', '1'] makes this method
-        only load [0.xml, 1.xml].
+      annotation_filenames: Collection of annotation filenames (strings) to be
+        loaded. For instance, if there're 3 annotation files [0.xml, 1.xml,
+        2.xml] in `annotations_dir`, setting annotation_filenames=['0', '1']
+        makes this method only load [0.xml, 1.xml].
 
     Yields:
       tf.train.Example
     """
     # Gets the paths to annotations.
-    if annotations_list:
+    if annotation_filenames:
       ann_path_list = [
           os.path.join(annotations_dir, annotation + '.xml')
-          for annotation in annotations_list
+          for annotation in annotation_filenames
       ]
     else:
       ann_path_list = list(tf.io.gfile.glob(annotations_dir + r'/*.xml'))

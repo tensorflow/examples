@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import csv
 import filecmp
 import os
@@ -24,6 +20,81 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader_util as dataloader_util
 import yaml
+
+
+class CacheFilesTest(tf.test.TestCase):
+
+  def test_get_cache_files(self):
+    cache_files = dataloader_util.get_cache_files(
+        cache_dir='/tmp/', cache_prefix_filename='train', num_shards=1)
+    self.assertEqual(cache_files.cache_prefix, '/tmp/train')
+    self.assertLen(cache_files.tfrecord_files, 1)
+    self.assertEqual(cache_files.tfrecord_files[0],
+                     '/tmp/train-00000-of-00001.tfrecord')
+    self.assertEqual(cache_files.meta_data_file, '/tmp/train_meta_data.yaml')
+    self.assertEqual(cache_files.annotations_json_file,
+                     '/tmp/train_annotations.json')
+
+  def test_filename_from_pascal(self):
+    # Checks the filenames are not equal if any of the parameters is changed.
+    images_dir = '/tmp/images/'
+    annotations_dir = '/tmp/annotations/'
+    annotation_filenames = None
+    num_shards = 1
+    filename = dataloader_util.get_cache_prefix_filename_from_pascal(
+        images_dir=images_dir,
+        annotations_dir=annotations_dir,
+        annotation_filenames=annotation_filenames,
+        num_shards=num_shards)
+
+    images_dir = '/tmp/images_1/'
+    filename1 = dataloader_util.get_cache_prefix_filename_from_pascal(
+        images_dir=images_dir,
+        annotations_dir=annotations_dir,
+        annotation_filenames=annotation_filenames,
+        num_shards=num_shards)
+    self.assertNotEqual(filename, filename1)
+
+    annotations_dir = '/tmp/annotations_2/'
+    filename2 = dataloader_util.get_cache_prefix_filename_from_pascal(
+        images_dir=images_dir,
+        annotations_dir=annotations_dir,
+        annotation_filenames=annotation_filenames,
+        num_shards=num_shards)
+    self.assertNotEqual(filename1, filename2)
+
+    annotation_filenames = ['1', '2']
+    filename3 = dataloader_util.get_cache_prefix_filename_from_pascal(
+        images_dir=images_dir,
+        annotations_dir=annotations_dir,
+        annotation_filenames=annotation_filenames,
+        num_shards=num_shards)
+    self.assertNotEqual(filename2, filename3)
+
+    num_shards = 10
+    filename4 = dataloader_util.get_cache_prefix_filename_from_pascal(
+        images_dir=images_dir,
+        annotations_dir=annotations_dir,
+        annotation_filenames=annotation_filenames,
+        num_shards=num_shards)
+    self.assertNotEqual(filename3, filename4)
+
+  def test_filename_from_csv(self):
+    # Checks the filenames are not equal if any of the parameters is changed.
+    csv_file = '/tmp/1.csv'
+    num_shards = 1
+    filename = dataloader_util.get_cache_prefix_filename_from_csv(
+        csv_file, num_shards)
+
+    csv_file = '/tmp/2.csv'
+    filename1 = dataloader_util.get_cache_prefix_filename_from_csv(
+        csv_file, num_shards)
+    self.assertNotEqual(filename, filename1)
+
+    num_shards = 10
+    filename2 = dataloader_util.get_cache_prefix_filename_from_csv(
+        csv_file, num_shards)
+    self.assertNotEqual(filename1, filename2)
 
 
 class CacheFilesWriterTest(tf.test.TestCase):
