@@ -106,23 +106,24 @@ class CacheFilesWriterTest(tf.test.TestCase):
     cache_writer = dataloader_util.PascalVocCacheFilesWriter(
         label_map, images_dir, num_shards=1)
 
-    tfrecord_files = [os.path.join(self.get_temp_dir(), 'pascal.tfrecord')]
-    ann_json_file = os.path.join(self.get_temp_dir(), 'pascal_annotations.json')
-    meta_data_file = os.path.join(self.get_temp_dir(), 'pascal_meta_data.yaml')
-    cache_writer.write_files(tfrecord_files, ann_json_file, meta_data_file,
-                             annotations_dir)
+    cache_files = dataloader_util.get_cache_files(
+        cache_dir=self.get_temp_dir(), cache_prefix_filename='pascal')
+    cache_writer.write_files(cache_files, annotations_dir)
 
     # Checks the TFRecord file.
+    tfrecord_files = cache_files.tfrecord_files
     self.assertTrue(os.path.isfile(tfrecord_files[0]))
     self.assertGreater(os.path.getsize(tfrecord_files[0]), 0)
 
     # Checks the annotation json file.
-    self.assertTrue(os.path.isfile(ann_json_file))
-    self.assertGreater(os.path.getsize(ann_json_file), 0)
+    annotations_json_file = cache_files.annotations_json_file
+    self.assertTrue(os.path.isfile(annotations_json_file))
+    self.assertGreater(os.path.getsize(annotations_json_file), 0)
     expected_json_file = test_util.get_test_data_path('annotations.json')
-    self.assertTrue(filecmp.cmp(ann_json_file, expected_json_file))
+    self.assertTrue(filecmp.cmp(annotations_json_file, expected_json_file))
 
     # Checks the meta_data file.
+    meta_data_file = cache_files.meta_data_file
     self.assertTrue(os.path.isfile(meta_data_file))
     self.assertGreater(os.path.getsize(meta_data_file), 0)
     with tf.io.gfile.GFile(meta_data_file, 'r') as f:
@@ -165,28 +166,25 @@ class CacheFilesWriterTest(tf.test.TestCase):
       with tf.io.gfile.GFile(csv_file, 'r') as f:
         lines = [line for line in csv.reader(f) if line[0].startswith(set_name)]
 
-      tfrecord_files = [
-          os.path.join(self.get_temp_dir(), set_name + '_csv.tfrecord')
-      ]
-      ann_json_file = os.path.join(self.get_temp_dir(),
-                                   set_name + '_csv_annotations.json')
-      meta_data_file = os.path.join(self.get_temp_dir(),
-                                    set_name + '_csv_meta_data.yaml')
-      cache_writer.write_files(tfrecord_files, ann_json_file, meta_data_file,
-                               lines)
+      cache_files = dataloader_util.get_cache_files(
+          cache_dir=self.get_temp_dir(), cache_prefix_filename='csv')
+      cache_writer.write_files(cache_files, lines)
 
       # Checks the TFRecord file.
+      tfrecord_files = cache_files.tfrecord_files
       self.assertTrue(os.path.isfile(tfrecord_files[0]))
       self.assertGreater(os.path.getsize(tfrecord_files[0]), 0)
 
       # Checks the annotation json file.
-      self.assertTrue(os.path.isfile(ann_json_file))
-      self.assertGreater(os.path.getsize(ann_json_file), 0)
+      annotations_json_file = cache_files.annotations_json_file
+      self.assertTrue(os.path.isfile(annotations_json_file))
+      self.assertGreater(os.path.getsize(annotations_json_file), 0)
       expected_json_file = test_util.get_test_data_path(set_name.lower() +
                                                         '_annotations.json')
-      self.assertTrue(filecmp.cmp(ann_json_file, expected_json_file))
+      self.assertTrue(filecmp.cmp(annotations_json_file, expected_json_file))
 
       # Checks the meta_data file.
+      meta_data_file = cache_files.meta_data_file
       self.assertTrue(os.path.isfile(meta_data_file))
       self.assertGreater(os.path.getsize(meta_data_file), 0)
       with tf.io.gfile.GFile(meta_data_file, 'r') as f:

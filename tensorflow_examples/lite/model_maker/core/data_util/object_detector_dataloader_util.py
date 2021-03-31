@@ -222,21 +222,20 @@ class CacheFilesWriter(abc.ABC):
     for idx, name in self.label_map.items():
       self.label_name2id_dict[name] = idx
 
-  def write_files(self, tfrecord_files: Sequence[str],
-                  annotations_json_file: str, meta_data_file: str, *args,
-                  **kwargs) -> None:
+  def write_files(self, cache_files: CacheFiles, *args, **kwargs) -> None:
     """Writes TFRecord, meta_data and annotations json files.
 
     Args:
-      tfrecord_files: A sequence of tfrecord files.
-      annotations_json_file: Json file with COCO data format containing golden
-        bounding boxes.
-      meta_data_file: Yaml file to save the meta_data including data size and
-        label_map.
+      cache_files: CacheFiles object including a list of TFRecord files, the
+        annotations json file with COCO data format containing golden bounding
+        boxes and the meda data yaml file to save the meta_data including data
+        size and label_map.
       *args: Non-keyword of parameters used in the `_get_xml_dict` method.
       **kwargs: Keyword parameters used in the `_get_xml_dict` method.
     """
-    writers = [tf.io.TFRecordWriter(path) for path in tfrecord_files]
+    writers = [
+        tf.io.TFRecordWriter(path) for path in cache_files.tfrecord_files
+    ]
 
     ann_json_dict = {'images': [], 'annotations': [], 'categories': []}
     for class_id, class_name in self.label_map.items():
@@ -265,11 +264,11 @@ class CacheFilesWriter(abc.ABC):
 
     # Writes meta_data into meta_data_file.
     meta_data = {'size': size, 'label_map': self.label_map}
-    with tf.io.gfile.GFile(meta_data_file, 'w') as f:
+    with tf.io.gfile.GFile(cache_files.meta_data_file, 'w') as f:
       yaml.dump(meta_data, f)
 
     # Writes ann_json_dict into annotations_json_file.
-    with tf.io.gfile.GFile(annotations_json_file, 'w') as f:
+    with tf.io.gfile.GFile(cache_files.annotations_json_file, 'w') as f:
       json.dump(ann_json_dict, f, indent=2)
 
   @abc.abstractmethod

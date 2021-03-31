@@ -17,9 +17,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import hashlib
-import os
-import tempfile
 from typing import Collection, Dict, List, Optional, TypeVar, Union
 
 import tensorflow as tf
@@ -31,59 +28,6 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet import datalo
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 
 DetectorDataLoader = TypeVar('DetectorDataLoader', bound='DataLoader')
-
-ANN_JSON_FILE_SUFFIX = '_annotations.json'
-META_DATA_FILE_SUFFIX = '_meta_data.yaml'
-
-
-def _get_cache_prefix_filename(image_dir, annotations_dir, annotation_filenames,
-                               num_shards):
-  """Get the prefix for cached files."""
-
-  def _get_dir_basename(dirname):
-    return os.path.basename(os.path.abspath(dirname))
-
-  hasher = hashlib.md5()
-  hasher.update(_get_dir_basename(image_dir).encode('utf-8'))
-  hasher.update(_get_dir_basename(annotations_dir).encode('utf-8'))
-  if annotation_filenames:
-    hasher.update(' '.join(sorted(annotation_filenames)).encode('utf-8'))
-  hasher.update(str(num_shards).encode('utf-8'))
-  return hasher.hexdigest()
-
-
-def _get_object_detector_cache_filenames(cache_dir,
-                                         image_dir,
-                                         annotations_dir,
-                                         annotation_filenames,
-                                         num_shards,
-                                         cache_prefix_filename=None):
-  """Gets cache filenames for obejct detector."""
-  if cache_dir is None:
-    cache_dir = tempfile.mkdtemp()
-  if not tf.io.gfile.exists(cache_dir):
-    tf.io.gfile.makedirs(cache_dir)
-
-  if cache_prefix_filename is None:
-    cache_prefix_filename = _get_cache_prefix_filename(image_dir,
-                                                       annotations_dir,
-                                                       annotation_filenames,
-                                                       num_shards)
-  cache_prefix = os.path.join(cache_dir, cache_prefix_filename)
-  print(
-      'Cache will be stored in %s with prefix filename %s. Cache_prefix is %s' %
-      (cache_dir, cache_prefix_filename, cache_prefix))
-
-  tfrecord_files = [
-      cache_prefix + '-%05d-of-%05d.tfrecord' % (i, num_shards)
-      for i in range(num_shards)
-  ]
-  annotations_json_file = cache_prefix + ANN_JSON_FILE_SUFFIX
-  meta_data_file = cache_prefix + META_DATA_FILE_SUFFIX
-
-  all_cached_files = tfrecord_files + [annotations_json_file, meta_data_file]
-  is_cached = all(os.path.exists(path) for path in all_cached_files)
-  return is_cached, cache_prefix, tfrecord_files, annotations_json_file, meta_data_file
 
 
 def _get_label_map(label_map):
@@ -202,14 +146,24 @@ class DataLoader(dataloader.DataLoader):
       ObjectDetectorDataLoader object.
     """
     label_map = _get_label_map(label_map)
-    is_cached, cache_prefix, tfrecord_files, ann_json_file, meta_data_file = \
-        _get_object_detector_cache_filenames(cache_dir, images_dir,
-                                             annotations_dir, annotation_filenames,
-                                             num_shards, cache_prefix_filename)
+
+    # If `cache_prefix_filename` is None, automatically generates a hash value.
+    if cache_prefix_filename is None:
+      cache_prefix_filename = util.get_cache_prefix_filename_from_pascal(
+          images_dir=images_dir,
+          annotations_dir=annotations_dir,
+          annotation_filenames=annotation_filenames,
+          num_shards=num_shards)
+
+    cache_files = util.get_cache_files(
+        cache_dir=cache_dir,
+        cache_prefix_filename=cache_prefix_filename,
+        num_shards=num_shards)
+
     # If not cached, write data into tfrecord_file_paths and
     # annotations_json_file_path.
     # If `num_shards` differs, it's still not cached.
-    if not is_cached:
+    if not util.is_cached(cache_files):
       cache_writer = util.PascalVocCacheFilesWriter(
           label_map=label_map,
           images_dir=images_dir,
@@ -217,13 +171,11 @@ class DataLoader(dataloader.DataLoader):
           max_num_images=max_num_images,
           ignore_difficult_instances=ignore_difficult_instances)
       cache_writer.write_files(
-          tfrecord_files=tfrecord_files,
-          annotations_json_file=ann_json_file,
-          meta_data_file=meta_data_file,
+          cache_files=cache_files,
           annotations_dir=annotations_dir,
           annotation_filenames=annotation_filenames)
 
-    return cls.from_cache(cache_prefix)
+    return cls.from_cache(cache_files.cache_prefix)
 
   @classmethod
   def from_cache(cls, cache_prefix):
@@ -242,14 +194,14 @@ class DataLoader(dataloader.DataLoader):
       raise ValueError('TFRecord files are empty.')
 
     # Loads meta_data.
-    meta_data_file = cache_prefix + META_DATA_FILE_SUFFIX
+    meta_data_file = cache_prefix + util.META_DATA_FILE_SUFFIX
     if not tf.io.gfile.exists(meta_data_file):
       raise ValueError('Metadata file %s doesn\'t exist.' % meta_data_file)
     with tf.io.gfile.GFile(meta_data_file, 'r') as f:
       meta_data = yaml.load(f, Loader=yaml.FullLoader)
 
     # Gets annotation json file.
-    ann_json_file = cache_prefix + ANN_JSON_FILE_SUFFIX
+    ann_json_file = cache_prefix + util.ANN_JSON_FILE_SUFFIX
     if not tf.io.gfile.exists(ann_json_file):
       ann_json_file = None
 
