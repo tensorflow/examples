@@ -58,6 +58,8 @@ def create(train_data: object_detector_dataloader.DataLoader,
     ObjectDetector
   """
   model_spec = ms.get(model_spec)
+  model_spec.config.num_epochs = epochs
+  model_spec.config.batch_size = batch_size
   if train_whole_model:
     model_spec.config.var_freeze_expr = None
   if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
