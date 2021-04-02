@@ -62,7 +62,7 @@ class MetadataPopulatorForObjectDetector(metadata_writer.MetadataWriter):
         "information about their positions within the given image or a video "
         "stream.")
     model_meta.version = self.model_info.version
-    model_meta.author = "TensorFlow"
+    model_meta.author = "TensorFlow Lite Model Maker"
     model_meta.license = ("Apache License. Version 2.0 "
                           "http://www.apache.org/licenses/LICENSE-2.0.")
 

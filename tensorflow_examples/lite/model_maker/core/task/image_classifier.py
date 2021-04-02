@@ -160,7 +160,8 @@ def _get_model_info(model_spec,
       std=model_spec.stddev_rgb,
       image_min=image_min,
       image_max=image_max,
-      num_classes=num_classes)
+      num_classes=num_classes,
+      author='TensorFlow Lite Model Maker')
 
 
 class ImageClassifier(classification_model.ClassificationModel):

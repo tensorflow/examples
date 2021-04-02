@@ -48,7 +48,7 @@ class ModelSpecificInfo(object):
   """Holds information that is specificly tied to an image classifier."""
 
   def __init__(self, name, version, image_width, image_height, image_min,
-               image_max, mean, std, num_classes):
+               image_max, mean, std, num_classes, author):
     self.name = name
     self.version = version
     self.image_width = image_width
@@ -58,6 +58,7 @@ class ModelSpecificInfo(object):
     self.mean = mean
     self.std = std
     self.num_classes = num_classes
+    self.author = author
 
 
 _MODEL_INFO = {
@@ -71,7 +72,8 @@ _MODEL_INFO = {
             image_max=255,
             mean=[127.5],
             std=[127.5],
-            num_classes=1001)
+            num_classes=1001,
+            author="TensorFlow")
 }
 
 
@@ -99,7 +101,7 @@ class MetadataPopulatorForImageClassifier(object):
                               "image from a set of %d categories." %
                               self.model_info.num_classes)
     model_meta.version = self.model_info.version
-    model_meta.author = "TensorFlow"
+    model_meta.author = self.model_info.author
     model_meta.license = ("Apache License. Version 2.0 "
                           "http://www.apache.org/licenses/LICENSE-2.0.")
 

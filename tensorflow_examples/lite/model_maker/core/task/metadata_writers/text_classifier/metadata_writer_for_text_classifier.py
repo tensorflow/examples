@@ -85,7 +85,7 @@ class MetadataPopulatorForTextClassifier(metadata_writer.MetadataWriter):
     model_meta.name = self.model_info.name
     model_meta.description = self.model_info.description
     model_meta.version = self.model_info.version
-    model_meta.author = "TensorFlow"
+    model_meta.author = "TensorFlow Lite Model Maker"
     model_meta.license = ("Apache License. Version 2.0 "
                           "http://www.apache.org/licenses/LICENSE-2.0.")
 
