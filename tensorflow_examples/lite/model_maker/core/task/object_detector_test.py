@@ -97,15 +97,10 @@ class ObjectDetectorTest(tf.test.TestCase):
     for quantization_type, model_size in zip(types, model_sizes):
       filename = quantization_type.name.lower() + '.tflite'
       output_path = os.path.join(self.get_temp_dir(), filename)
-      if quantization_type == QuantizationType.INT8:
-        representative_data = data
-      else:
-        representative_data = None
       task.export(
           self.get_temp_dir(),
           quantization_type=quantization_type,
           tflite_filename=filename,
-          representative_data=representative_data,
           export_format=ExportFormat.TFLITE)
       self.assertNear(os.path.getsize(output_path), model_size, 50000)
 

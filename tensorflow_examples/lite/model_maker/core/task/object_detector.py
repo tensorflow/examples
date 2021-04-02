@@ -66,7 +66,7 @@ def create(train_data: object_detector_dataloader.DataLoader,
     raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
         model_spec.compat_tf_versions, compat.get_tf_behavior()))
 
-  object_detector = ObjectDetector(model_spec, train_data.label_map)
+  object_detector = ObjectDetector(model_spec, train_data.label_map, train_data)
 
   if do_train:
     tf.compat.v1.logging.info('Retraining the models...')
@@ -121,8 +121,25 @@ class ObjectDetector(custom_model.CustomModel):
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.SAVED_MODEL,
                            ExportFormat.LABEL)
 
-  def __init__(self, model_spec: object_detector_spec.EfficientDetModelSpec,
-               label_map: Dict[int, str]) -> None:
+  def __init__(
+      self,
+      model_spec: object_detector_spec.EfficientDetModelSpec,
+      label_map: Dict[int, str],
+      representative_data: Optional[
+          object_detector_dataloader.DataLoader] = None
+  ) -> None:
+    """Initializes the ObjectDetector class.
+
+    Args:
+      model_spec: Specification for the model.
+      label_map:  Dict, map label integer ids to string label names such as {1:
+        'person', 2: 'notperson'}. 0 is the reserved key for `background` and
+          doesn't need to be included in `label_map`. Label names can't be
+          duplicated.
+      representative_data:  Representative dataset for full integer
+        quantization. Used when converting the keras model to the TFLite model
+        and `quantization_type=INT8`.
+    """
     super().__init__(model_spec, shuffle=None)
     if model_spec.config.label_map and model_spec.config.label_map != label_map:
       tf.compat.v1.logging.warn(
@@ -131,6 +148,7 @@ class ObjectDetector(custom_model.CustomModel):
     # TODO(yuqili): num_classes = 1 have some issues during training. Thus we
     # make minimum num_classes=2 for now.
     model_spec.config.num_classes = max(2, max(label_map.keys()))
+    self.representative_data = representative_data
 
   def create_model(self) -> tf.keras.Model:
     self.model = self.model_spec.create_model()
@@ -255,6 +273,8 @@ class ObjectDetector(custom_model.CustomModel):
     if quantization_type and quantization_config:
       raise ValueError('At most one of the paramaters `quantization_type` and '
                        '`quantization_config` can be set.')
+    if representative_data is None:
+      representative_data = self.representative_data
     if quantization_type == QuantizationType.INT8 and \
        representative_data is None:
       raise ValueError('`representative_data` must be set when '
