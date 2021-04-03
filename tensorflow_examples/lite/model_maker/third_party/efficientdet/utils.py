@@ -57,6 +57,9 @@ def activation_fn(features: tf.Tensor, act_type: Text):
 def cross_replica_mean(t, num_shards_per_group=None):
   """Calculates the average value of input tensor across TPU replicas."""
   num_shards = tpu_function.get_tpu_context().number_of_shards
+  if not num_shards:
+    return t
+
   if not num_shards_per_group:
     return tf.tpu.cross_replica_sum(t) / tf.cast(num_shards, t.dtype)
 
@@ -127,6 +130,8 @@ def get_ckpt_var_map(ckpt_path, ckpt_scope, var_scope, skip_mismatch=None):
       logging.info('skip {} -- does not match scope {}'.format(
           var_op_name, var_scope))
     ckpt_var = ckpt_scope + var_op_name[len(var_scope):]
+    if 'global_step' in ckpt_var:
+      continue
 
     if (ckpt_var not in ckpt_var_names and
         var_op_name.endswith('/ExponentialMovingAverage')):
