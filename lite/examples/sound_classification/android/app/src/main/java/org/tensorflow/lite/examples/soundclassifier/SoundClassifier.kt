@@ -32,7 +32,9 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.FloatBuffer
 import java.util.Locale
-import java.util.concurrent.TimeUnit
+import java.util.Timer
+import java.util.TimerTask
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.math.sin
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.FileUtil
@@ -136,7 +138,7 @@ class SoundClassifier(context: Context, private val options: Options = Options()
   /** Latest prediction latency in milliseconds.  */
   private var latestPredictionLatencyMs = 0f
 
-  private var recognitionThread: Thread? = null
+  private var recognitionTask: TimerTask? = null
 
   /** Used to record audio samples. */
   private lateinit var audioRecord: AudioRecord
@@ -170,7 +172,8 @@ class SoundClassifier(context: Context, private val options: Options = Options()
    */
   fun stop() {
     if (isClosed || !isRecording) return
-    recognitionThread?.interrupt()
+    recognitionTask?.cancel()
+
     audioRecord.stop()
     isRecording = false
 
@@ -272,14 +275,6 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     isRecording = true
   }
 
-  /** Start a thread that runs model inference (i.e., recognition) at a regular interval.  */
-  private fun startRecognition() {
-    Log.i(TAG, "Starting Recognition")
-    recognitionThread = RecognitionThread().apply {
-      start()
-    }
-  }
-
   private fun setupAudioRecord() {
     var bufferSize = AudioRecord.getMinBufferSize(
       options.sampleRate,
@@ -344,75 +339,68 @@ class SoundClassifier(context: Context, private val options: Options = Options()
     return 0
   }
 
-  private inner class RecognitionThread : Thread() {
-    override fun run() {
-      if (modelInputLength <= 0 || modelNumClasses <= 0) {
-        Log.e(TAG, "Switches: Cannot start recognition because model is unavailable.")
-        return
-      }
+  private fun startRecognition() {
+    if (modelInputLength <= 0 || modelNumClasses <= 0) {
+      Log.e(TAG, "Switches: Cannot start recognition because model is unavailable.")
+      return
+    }
+
+    val circularBuffer = ShortArray(modelInputLength)
+
+    var j = 0 // Indices for the circular buffer next write
+
+    recognitionTask = Timer().scheduleAtFixedRate(recognitionPeriod, recognitionPeriod) task@{
       val outputBuffer = FloatBuffer.allocate(modelNumClasses)
       val recordingBuffer = ShortArray(modelInputLength)
-      val circularBuffer = ShortArray(modelInputLength)
-      var j = 0 // Indices for the circular buffer next write
 
-      while (!isInterrupted) {
-
-        // Wait for the next invocation
-        try {
-          TimeUnit.MILLISECONDS.sleep(recognitionPeriod)
-        } catch (e: InterruptedException) {
-          Log.w(TAG, "Sleep interrupted in recognition thread.")
-        }
-
-        // Load new audio samples
-        val sampleCounts = loadAudio(recordingBuffer)
-        if (sampleCounts == 0) {
-          continue
-        }
-
-        // Copy new data into the circular buffer
-        for (i in 0 until sampleCounts) {
-          circularBuffer[j] = recordingBuffer[i]
-          j = (j + 1) % circularBuffer.size
-        }
-
-        // Feed data to the input buffer.
-        var samplesAreAllZero = true
-        for (i in 0 until modelInputLength) {
-          val s = if (i > options.pointsInAverage) {
-            ((i - options.pointsInAverage + 1)..i).map {
-              circularBuffer[(j + it) % modelInputLength]
-            }
-              .average()
-          } else {
-            circularBuffer[(i + j) % modelInputLength]
-          }
-          if (samplesAreAllZero && s.toInt() != 0) {
-            samplesAreAllZero = false
-          }
-          inputBuffer.put(i, s.toFloat())
-        }
-
-        if (samplesAreAllZero) {
-          Log.w(TAG, "No audio input: All audio samples are zero!")
-          continue
-        }
-        val t0 = SystemClock.elapsedRealtimeNanos()
-        inputBuffer.rewind()
-        outputBuffer.rewind()
-        interpreter.run(inputBuffer, outputBuffer)
-        outputBuffer.rewind()
-        outputBuffer.get(predictionProbs) // Copy data to predictionProbs.
-
-        val probList = predictionProbs.map {
-          if (it > probabilityThreshold) it else 0f
-        }
-        Log.i(TAG, "inference result: $probList")
-        _probabilities.postValue(labelList.zip(probList).toMap())
-
-        latestPredictionLatencyMs =
-          ((SystemClock.elapsedRealtimeNanos() - t0) / 1e6).toFloat()
+      // Load new audio samples
+      val sampleCounts = loadAudio(recordingBuffer)
+      if (sampleCounts == 0) {
+        return@task
       }
+
+      // Copy new data into the circular buffer
+      for (i in 0 until sampleCounts) {
+        circularBuffer[j] = recordingBuffer[i]
+        j = (j + 1) % circularBuffer.size
+      }
+
+      // Feed data to the input buffer.
+      var samplesAreAllZero = true
+      for (i in 0 until modelInputLength) {
+        val s = if (i > options.pointsInAverage) {
+          ((i - options.pointsInAverage + 1)..i).map {
+            circularBuffer[(j + it) % modelInputLength]
+          }
+            .average()
+        } else {
+          circularBuffer[(i + j) % modelInputLength]
+        }
+        if (samplesAreAllZero && s.toInt() != 0) {
+          samplesAreAllZero = false
+        }
+        inputBuffer.put(i, s.toFloat())
+      }
+
+      if (samplesAreAllZero) {
+        Log.w(TAG, "No audio input: All audio samples are zero!")
+        return@task
+      }
+      val t0 = SystemClock.elapsedRealtimeNanos()
+      inputBuffer.rewind()
+      outputBuffer.rewind()
+      interpreter.run(inputBuffer, outputBuffer)
+      outputBuffer.rewind()
+      outputBuffer.get(predictionProbs) // Copy data to predictionProbs.
+
+      val probList = predictionProbs.map {
+        if (it > probabilityThreshold) it else 0f
+      }
+      Log.i(TAG, "inference result: $probList")
+      _probabilities.postValue(labelList.zip(probList).toMap())
+
+      latestPredictionLatencyMs =
+        ((SystemClock.elapsedRealtimeNanos() - t0) / 1e6).toFloat()
     }
   }
 
