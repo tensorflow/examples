@@ -25,7 +25,7 @@ This is the TensorFlow example repo.  It has several classes of material:
 * Publish supporting material for the [TensorFlow Blog](https://blog.tensorflow.org) and [TensorFlow YouTube Channel](https://youtube.com/tensorflow)
 
 We welcome community contributions, see [CONTRIBUTING.md](CONTRIBUTING.md) and, for style help,
-[Writing TensorFlow documentation](https://www.tensorflow.org/community/documentation)
+[Writing TensorFlow documentation](https://www.tensorflow.org/community/contribute/docs_style)
 guide.
 
 To file an issue, use the tracker in the
