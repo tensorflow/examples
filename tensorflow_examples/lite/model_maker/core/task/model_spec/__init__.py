@@ -55,10 +55,10 @@ MODEL_SPECS = {
     'average_word_vec': average_word_vec_spec,
     'bert': bert_spec,
     'bert_classifier': bert_classifier_spec,
+    'mobilebert_classifier': mobilebert_classifier_spec,
 
     # Question answering
     'bert_qa': bert_qa_spec,
-    'mobilebert_classifier': mobilebert_classifier_spec,
     'mobilebert_qa': mobilebert_qa_spec,
     'mobilebert_qa_squad': mobilebert_qa_squad_spec,
 
