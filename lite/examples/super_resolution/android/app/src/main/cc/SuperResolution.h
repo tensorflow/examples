@@ -20,7 +20,6 @@
 #include <string>
 
 #include "tensorflow/lite/c/c_api.h"
-#include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/delegates/gpu/delegate.h"
 
 #define LOG_TAG "super_resolution::"
