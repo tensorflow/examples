@@ -129,7 +129,7 @@ def get_cache_files(cache_dir: Optional[str],
   # The cache prefix including the cache directory and the cache prefix
   # filename, e.g: '/tmp/cache/train'.
   cache_prefix = os.path.join(cache_dir, cache_prefix_filename)
-  print(
+  tf.compat.v1.logging.info(
       'Cache will be stored in %s with prefix filename %s. Cache_prefix is %s' %
       (cache_dir, cache_prefix_filename, cache_prefix))
 
