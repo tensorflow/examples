@@ -10,7 +10,7 @@ Questions about TensorFlow usage are best addressed on
 mailing list.
 
 To contribute to the TensorFlow code repositories, see the
-[Contributing to TensorFlow](https://www.tensorflow.org/community/contributing) guide
+[Contributing to TensorFlow](https://www.tensorflow.org/community/contribute) guide
 and the
 [TensorFlow contribution guidelines](https://github.com/tensorflow/tensorflow/blob/master/CONTRIBUTING.md).
 
