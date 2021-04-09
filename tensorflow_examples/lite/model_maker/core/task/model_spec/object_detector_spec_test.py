@@ -13,10 +13,6 @@
 # limitations under the License.
 """Tests for object detector specs."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import math
 import os
 
@@ -36,6 +32,18 @@ class EfficientDetModelSpecTest(tf.test.TestCase):
         model_name='efficientdet-lite0', uri=hub_path, hparams=dict(map_freq=1))
     with cls._spec.ds_strategy.scope():
       cls.model = cls._spec.create_model()
+
+  def test_export_saved_model(self):
+    saved_model_dir = os.path.join(self.get_temp_dir(), 'saved_model')
+    self._spec.export_saved_model(self.model, saved_model_dir)
+    self.assertTrue(os.path.isdir(saved_model_dir))
+    self.assertNotEqual(len(os.listdir(saved_model_dir)), 0)
+
+  def test_export_tflite(self):
+    tflite_filepath = os.path.join('/tmp/model.tflite')
+    self._spec.export_tflite(self.model, tflite_filepath)
+    self.assertTrue(os.path.isfile(tflite_filepath))
+    self.assertGreater(os.path.getsize(tflite_filepath), 0)
 
   def test_create_model(self):
     self.assertIsInstance(self.model, tf.keras.Model)

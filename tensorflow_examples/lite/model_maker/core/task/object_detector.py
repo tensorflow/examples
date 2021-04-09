@@ -239,7 +239,7 @@ class ObjectDetector(custom_model.CustomModel):
 
   def _export_saved_model(self, saved_model_dir: str) -> None:
     """Saves the model to Tensorflow SavedModel."""
-    self.model_spec.export_saved_model(saved_model_dir)
+    self.model_spec.export_saved_model(self.model, saved_model_dir)
 
   def _export_tflite(
       self,
@@ -285,8 +285,8 @@ class ObjectDetector(custom_model.CustomModel):
     ds, _, _ = self._get_dataset_and_steps(
         representative_data, batch_size=1, is_training=False)
 
-    self.model_spec.export_tflite(tflite_filepath, quantization_type, ds,
-                                  quantization_config)
+    self.model_spec.export_tflite(self.model, tflite_filepath,
+                                  quantization_type, ds, quantization_config)
 
     if with_metadata:
       with tempfile.TemporaryDirectory() as temp_dir:

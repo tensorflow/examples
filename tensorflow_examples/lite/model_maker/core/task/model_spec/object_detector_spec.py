@@ -31,12 +31,10 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet import hparam
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import efficientdet_keras
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import eval_tflite
-from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import inference
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import postprocess
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import train
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import train_lib
-from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import util_keras
 
 
 # Number of calibration steps for full integer quantization. 500 steps are
@@ -53,6 +51,59 @@ def _get_ordered_label_map(
   for idx in sorted(label_map.keys()):
     ordered_label_map[idx] = label_map[idx]
   return ordered_label_map
+
+
+class ExportModel(efficientdet_keras.EfficientDetModel):
+  """Model to be exported as SavedModel/TFLite format."""
+
+  def __init__(self,
+               model: tf.keras.Model,
+               config: hparams_config.Config,
+               pre_mode: Optional[str] = 'infer',
+               post_mode: Optional[str] = 'global',
+               name: Optional[str] = ''):
+    """Initilizes an instance with the keras model and pre/post_mode paramaters.
+
+    Args:
+      model: The EfficientDetNet model used for training which doesn't have pre
+        and post processing.
+      config: Model configuration.
+      pre_mode: Pre-processing Mode, must be {None, 'infer'}.
+      post_mode: Post-processing Mode, must be {None, 'global', 'per_class',
+        'tflite'}.
+      name: Model name.
+    """
+    super(efficientdet_keras.EfficientDetNet, self).__init__(name=name)
+    self.model = model
+    self.config = config
+    self.pre_mode = pre_mode
+    self.post_mode = post_mode
+
+  @tf.function
+  def __call__(self, inputs: tf.Tensor):
+    """Calls this model.
+
+    Args:
+      inputs: a tensor with common shape [batch, height, width, channels].
+
+    Returns:
+      the output tensor list.
+    """
+    config = self.config
+
+    # Preprocess.
+    inputs, scales = self._preprocessing(inputs, config.image_size,
+                                         config.mean_rgb, config.stddev_rgb,
+                                         self.pre_mode)
+    # Network.
+    outputs = self.model(inputs, training=False)
+
+    # Postprocess for detection.
+    det_outputs = self._postprocess(outputs[0], outputs[1], scales,
+                                    self.post_mode)
+    outputs = det_outputs + outputs[2:]
+
+    return outputs
 
 
 class EfficientDetModelSpec(object):
@@ -345,6 +396,7 @@ class EfficientDetModelSpec(object):
     return metric_dict
 
   def export_saved_model(self,
+                         model: tf.keras.Model,
                          saved_model_dir: str,
                          batch_size: Optional[int] = None,
                          pre_mode: Optional[str] = 'infer',
@@ -352,29 +404,23 @@ class EfficientDetModelSpec(object):
     """Saves the model to Tensorflow SavedModel.
 
     Args:
+      model: The EfficientDetNet model used for training which doesn't have pre
+        and post processing.
       saved_model_dir: Folder path for saved model.
       batch_size: Batch size to be saved in saved_model.
       pre_mode: Pre-processing Mode in ExportModel, must be {None, 'infer'}.
       post_mode: Post-processing Mode in ExportModel, must be {None, 'global',
-        'per_class'}.
+        'per_class', 'tflite'}.
     """
-    # Create EfficientDetModel with latest checkpoint.
     config = self.config
-    tf.keras.backend.clear_session()
-    model = efficientdet_keras.EfficientDetModel(config=config)
-    model.build((batch_size, *config.image_size, 3))
-    if config.model_dir:
-      util_keras.restore_ckpt(
-          model,
-          config.model_dir,
-          config['moving_average_decay'],
-          skip_mismatch=False)
-    else:
-      # EfficientDetModel is random initialized without restoring the
-      # checkpoint. This is mainly used in object_detector_test and shouldn't be
-      #  used if we want to export trained model.
-      tf.compat.v1.logging.warn('Need to restore the checkpoint for '
-                                'EfficientDet.')
+    # Sets the keras model optimizer to None when exporting to saved model.
+    # Otherwise, it fails with `NotImplementedError`: "Learning rate schedule
+    # must override get_config".
+    original_optimizer = model.optimizer
+    model.optimizer = None
+    # Creates ExportModel which has pre and post processing.
+    export_model = ExportModel(model, config, pre_mode, post_mode)
+
     # Gets tf.TensorSpec.
     if pre_mode is None:
       # Input is the preprocessed image that's already resized to a certain
@@ -388,15 +434,15 @@ class EfficientDetModelSpec(object):
       input_spec = tf.TensorSpec(
           shape=[batch_size, None, None, 3], dtype=tf.uint8, name='images')
 
-    export_model = inference.ExportModel(
-        model, pre_mode=pre_mode, post_mode=post_mode)
     tf.saved_model.save(
         export_model,
         saved_model_dir,
         signatures=export_model.__call__.get_concrete_function(input_spec))
+    model.optimizer = original_optimizer
 
   def export_tflite(
       self,
+      model: tf.keras.Model,
       tflite_filepath: str,
       quantization_type: Optional[QuantizationType] = None,
       representative_dataset: Optional[
@@ -420,6 +466,8 @@ class EfficientDetModelSpec(object):
         boxes.
 
     Args:
+      model: The EfficientDetNet model used for training which doesn't have pre
+        and post processing.
       tflite_filepath: File path to save tflite model.
       quantization_type: Enum, type of post-training quantization. Accepted
         values are `INT8`, `FP16`, `FP32`, `DYNAMIC`. `FP16` means float16
@@ -437,7 +485,7 @@ class EfficientDetModelSpec(object):
     """
     with tempfile.TemporaryDirectory() as temp_dir:
       self.export_saved_model(
-          temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
+          model, temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
       converter = tf.lite.TFLiteConverter.from_saved_model(temp_dir)
       if quantization_type == QuantizationType.INT8:
         # Enables MLIR-based post-training quantization.
@@ -465,7 +513,7 @@ class EfficientDetModelSpec(object):
         converter.target_spec.supported_types = [tf.float16]
       elif quantization_type == QuantizationType.DYNAMIC:
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
-      elif quantization_type != QuantizationType.FP32:
+      elif quantization_type and quantization_type != QuantizationType.FP32:
         raise ValueError('Unsupported `quantization_type`: %s' %
                          str(quantization_type))
       elif quantization_config:
