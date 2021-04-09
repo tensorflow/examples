@@ -61,12 +61,10 @@ class MetadataWriter(abc.ABC):
       model_buf = f.read()
 
     model = _schema_fb.Model.GetRootAsModel(model_buf, 0)
-    # There should be exactly one SubGraph in the model.
-    if model.SubgraphsLength() != 1:
-      raise ValueError(
-          "The model should have exactly one subgraph, but found {0}.".format(
-              model.SubgraphsLength()))
 
+    # Use the first subgraph as default. TFLite Interpreter doesn't support
+    # multiple subgraphs yet, but models with mini-benchmark may have multiple
+    # subgraphs for acceleration evaluation purpose.
     return model.Subgraphs(0)
 
   def _get_input_tensor_names(self):
