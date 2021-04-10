@@ -22,6 +22,7 @@ from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
 from tensorflow_examples.lite.model_maker.core.data_util.audio_dataloader import DataLoader as AudioDataLoader
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
 from tensorflow_examples.lite.model_maker.core.data_util.object_detector_dataloader import DataLoader as ObjectDetectorDataloader
+from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import QuestionAnswerDataLoader
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
 
@@ -33,4 +34,5 @@ from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 from tensorflow_examples.lite.model_maker.core.task import object_detector
 from tensorflow_examples.lite.model_maker.core.task import question_answer
+from tensorflow_examples.lite.model_maker.core.task import recommendation
 from tensorflow_examples.lite.model_maker.core.task import text_classifier
