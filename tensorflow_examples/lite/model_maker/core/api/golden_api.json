@@ -1,0 +1,9 @@
+{
+  "tflite_model_maker": [
+    "from tflite_model_maker import compat"
+  ],
+  "tflite_model_maker.compat": [
+    "from tensorflow_examples.lite.model_maker.core.compat import get_compat_tf_versions",
+    "from tensorflow_examples.lite.model_maker.core.compat import get_tf_behavior"
+  ]
+}

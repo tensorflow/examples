@@ -134,7 +134,7 @@ def prepare_package_src():
 
   # Copy .py files.
   files = BASE_DIR.rglob(r'*')
-  extentions = {'.py', '.txt', '.md'}
+  extentions = {'.py', '.txt', '.md', '.json'}
 
   relative_pys = []
   init_pys = []
@@ -186,21 +186,23 @@ def prepare_package_src():
     official_py = official_pkg.joinpath(p)
     shutil.copy2(str(build_py), str(official_py))
 
-  extra = {}
+  package_data = {
+      '': ['*.txt', '*.md', '*.json'],
+  }
   if nightly:
     # For nightly, proceeed with addtional preparation.
-    extra_nightly = _prepare_nightly()
-    extra.update(extra_nightly)
+    extra_package_data = _prepare_nightly()
+    package_data.update(extra_package_data)
 
   # Return package.
   namespace_packages = find_namespace_packages(where=BUILD_ROOT)
   package_dir_mapping = {'': SRC_NAME}
 
-  extra.update(
-      packages=namespace_packages,
-      package_dir=package_dir_mapping,
-  )
-  return extra
+  return {
+      'packages': namespace_packages,
+      'package_dir': package_dir_mapping,
+      'package_data': package_data,
+  }
 
 
 def _prepare_nightly():
@@ -213,7 +215,7 @@ def _prepare_nightly():
   code directly.
 
   Returns:
-    dict: extra kwargs for setup.
+    dict: extra package_data.
   """
   tfjs_git = 'https://github.com/tensorflow/tfjs'
   tfjs_path = PIP_PKG_PATH.joinpath('tfjs')
@@ -234,7 +236,7 @@ def _prepare_nightly():
       dst_folder,
       ignore=lambda _, names: set(s for s in names if s.endswith('_test.py')))
 
-  return {'package_data': {'tensorflowjs/op_list': ['*.json']}}
+  return {'tensorflowjs/op_list': ['*.json']}
 
 
 setup_extra = prepare_package_src()
