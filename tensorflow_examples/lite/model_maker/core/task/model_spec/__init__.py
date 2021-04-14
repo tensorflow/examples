@@ -15,7 +15,7 @@
 
 import inspect
 
-
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec import recommendation_spec
@@ -88,7 +88,7 @@ IMAGE_CLASSIFICATION_MODELS = [
 TEXT_CLASSIFICATION_MODELS = [
     'bert_classifier', 'average_word_vec', 'mobilebert_classifier'
 ]
-QUESTION_ANSWERING_MODELS = ['bert_qa', 'mobilebert_qa', 'mobilebert_qa_squad']
+QUESTION_ANSWER_MODELS = ['bert_qa', 'mobilebert_qa', 'mobilebert_qa_squad']
 AUDIO_CLASSIFICATION_MODELS = [
     'audio_browser_fft', 'audio_teachable_machine', 'audio_yamnet'
 ]
@@ -104,8 +104,11 @@ OBJECT_DETECTION_MODELS = [
     'efficientdet_lite3',
     'efficientdet_lite4',
 ]
+mm_export('model_spec.QUESTION_ANSWER_MODELS').export_constant(
+    __name__, 'QUESTION_ANSWER_MODELS')
 
 
+@mm_export('model_spec.get')
 def get(spec_or_str):
   """Gets model spec by name or instance, and initializes by default."""
   if isinstance(spec_or_str, str):

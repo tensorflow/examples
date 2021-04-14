@@ -25,7 +25,7 @@ from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
 MODELS = (
     ms.IMAGE_CLASSIFICATION_MODELS + ms.TEXT_CLASSIFICATION_MODELS +
-    ms.QUESTION_ANSWERING_MODELS + ms.AUDIO_CLASSIFICATION_MODELS +
+    ms.QUESTION_ANSWER_MODELS + ms.AUDIO_CLASSIFICATION_MODELS +
     ms.RECOMMENDATION_MODELS)
 
 

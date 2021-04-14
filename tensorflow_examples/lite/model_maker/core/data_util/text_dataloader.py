@@ -26,6 +26,7 @@ import tempfile
 from absl import logging
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import file_util
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
@@ -278,6 +279,7 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
       return lines
 
 
+@mm_export('question_answer.DataLoader')
 class QuestionAnswerDataLoader(dataloader.DataLoader):
   """DataLoader for question answering."""
 

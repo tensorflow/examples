@@ -26,7 +26,7 @@ from tensorflow_examples.lite.model_maker.demo import text_classification_demo
 
 _IMAGE_MODELS = model_spec.IMAGE_CLASSIFICATION_MODELS
 _TEXT_MODELS = model_spec.TEXT_CLASSIFICATION_MODELS
-_QA_MODELS = model_spec.QUESTION_ANSWERING_MODELS
+_QA_MODELS = model_spec.QUESTION_ANSWER_MODELS
 
 
 class FormatDoc(object):

@@ -23,6 +23,7 @@ import tempfile
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
@@ -30,6 +31,7 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers.bert.question_answerer import metadata_writer_for_bert_question_answerer as metadata_writer
 
 
+@mm_export('question_answer.create')
 def create(train_data,
            model_spec,
            batch_size=None,
@@ -82,6 +84,7 @@ def _get_model_info(model_spec, vocab_file):
       vocab_file=vocab_file)
 
 
+@mm_export('question_answer.QuestionAnswer')
 class QuestionAnswer(custom_model.CustomModel):
   """QuestionAnswer class for inference and exporting to tflite."""
 
