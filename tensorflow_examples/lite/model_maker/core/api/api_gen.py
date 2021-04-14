@@ -35,15 +35,21 @@ def parse_arguments():
       '--input_json',
       type=str,
       default='golden_api.json',
-      help='Json file for Golden APIs.')
+      help='JSON file for Golden APIs.')
   return parser.parse_args()
 
 
-def load_golden(input_json: str) -> Dict[str, Sequence[str]]:
-  """Loads Golden APIs."""
-  path = pathlib.Path(__file__).with_name(input_json)
+def _read_golden_text(json_file: str) -> str:
+  """Reads Golden file as text."""
+  path = pathlib.Path(__file__).with_name(json_file)
   with open(path) as f:
-    return json.load(fp=f)
+    return f.read()
+
+
+def load_golden(json_file: str) -> Dict[str, Sequence[str]]:
+  """Loads Golden APIs."""
+  content = _read_golden_text(json_file)
+  return json.loads(content)
 
 
 def run(output_dir: str, input_json: str) -> None:

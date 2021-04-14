@@ -34,8 +34,18 @@ class MMExportTest(tf.test.TestCase):
       pass
 
     self.assertLen(api_util.NAME_TO_SYMBOL, 1)
-    expected = api_util.Symbol('foo.a', ['foo', 'a'], a)
+    expected = api_util.Symbol('foo.a', ['foo', 'a'], a, '__main__', 'a')
     self.assertEqual(api_util.NAME_TO_SYMBOL['foo.a'], expected)
+
+  def test_call_class(self):
+
+    @api_util.mm_export('foo.A')
+    class A():
+      pass
+
+    self.assertLen(api_util.NAME_TO_SYMBOL, 1)
+    expected = api_util.Symbol('foo.A', ['foo', 'A'], A, '__main__', 'A')
+    self.assertEqual(api_util.NAME_TO_SYMBOL['foo.A'], expected)
 
   def test_call_duplicated(self):
     with self.assertRaisesRegex(ValueError, 'API already exists'):
@@ -67,6 +77,16 @@ class MMExportTest(tf.test.TestCase):
     self.assertEqual(func.gen_import(), 'from __main__ import test_func as fn')
     self.assertEqual(func.get_package_name(), '')
 
+  def test_export_constant(self):
+
+    FOO = 1  # pylint: disable=invalid-name,unused-variable
+    api_util.mm_export('foo.FOO').export_constant(__name__, 'FOO')
+
+    self.assertLen(api_util.NAME_TO_SYMBOL, 1)
+    expected = api_util.Symbol('foo.FOO', ['foo', 'FOO'], None, '__main__',
+                               'FOO')
+    self.assertEqual(api_util.NAME_TO_SYMBOL['foo.FOO'], expected)
+
 
 class ApiUtilTest(tf.test.TestCase):
 
@@ -74,21 +94,26 @@ class ApiUtilTest(tf.test.TestCase):
     super(ApiUtilTest, self).setUp()
     api_util._reset_apis()
 
-  def test_get_function_module_and_name(self):
+  def test_get_module_and_name(self):
 
     def a():
       pass
 
-    module_and_name = api_util._get_function_module_and_name(a)
+    module_and_name = api_util._get_module_and_name(a)
     self.assertTupleEqual(module_and_name, ('__main__', 'a'))
 
     expected = (
         'tensorflow_examples.lite.model_maker.core.api.api_util',
         'generate_imports',
     )
-    module_and_name = api_util._get_function_module_and_name(
-        api_util.generate_imports)
+    module_and_name = api_util._get_module_and_name(api_util.generate_imports)
     self.assertTupleEqual(module_and_name, expected)
+
+    class A:
+      pass
+
+    module_and_name = api_util._get_module_and_name(A)
+    self.assertTupleEqual(module_and_name, ('__main__', 'A'))
 
   def test_generate_imports(self):
 

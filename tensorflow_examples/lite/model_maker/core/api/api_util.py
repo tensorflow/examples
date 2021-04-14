@@ -29,12 +29,19 @@ def get_foo(...):
   ...
 mm_export('bar.foo')(get_foo)
 ```
+
+Exporting a constant.
+```python
+FOO = 1
+mm_export('bar.FOO').export_constant(__name__, 'FOO')
+```
+where __name__ gets the current module name, and 'FOO' is the constant.
 """
 import collections
 from collections.abc import Callable  # pylint: disable=g-importing-member
 import inspect
 import os
-from typing import Dict, List, Tuple, Sequence
+from typing import Dict, List, Tuple, Sequence, Optional
 
 import dataclasses
 
@@ -66,13 +73,36 @@ class Symbol:
 
   exported_name: str  # Exported name of the symbol
   exported_parts: List[str]  # Parts after splitting.
-  func: Callable  # Function.
+  func: Optional[Callable]  # Function or class.
+  imported_module: str  # Imported module name.
+  imported_name: str  # Imported symbol name.
 
   @classmethod
-  def from_function(cls, exported_name: str, func: Callable) -> 'Symbol':
+  def from_callable(cls, exported_name: str, func: Callable) -> 'Symbol':
+    """Creates a symbol from a callable (function or class)."""
+    if func is None:
+      raise ValueError('func should not be None: {}'.format(func))
+    imported_module, imported_name = _get_module_and_name(func)
+
     exported_parts = _split_name(exported_name)
     return cls(
-        exported_name=exported_name, exported_parts=exported_parts, func=func)
+        exported_name=exported_name,
+        exported_parts=exported_parts,
+        func=func,
+        imported_module=imported_module,
+        imported_name=imported_name)
+
+  @classmethod
+  def from_constant(cls, exported_name: str, module: str,
+                    name: str) -> 'Symbol':
+    """Creates a symbol from a constant."""
+    exported_parts = _split_name(exported_name)
+    return cls(
+        exported_name=exported_name,
+        exported_parts=exported_parts,
+        func=None,
+        imported_module=module,
+        imported_name=name)
 
   def get_package_name(self) -> str:
     """Generated path."""
@@ -80,15 +110,13 @@ class Symbol:
 
   def gen_import(self) -> str:
     """Generates import text line."""
-    if self.func is None:
-      raise ValueError('func should not be None')
-
-    import_module, import_name = _get_function_module_and_name(self.func)
     as_name = self.exported_parts[-1]
-    if as_name == import_name:
-      import_line = 'from {} import {}'.format(import_module, import_name)
+    if as_name == self.imported_name:
+      import_line = 'from {} import {}'.format(self.imported_module,
+                                               self.imported_name)
     else:
-      import_line = 'from {} import {} as {}'.format(import_module, import_name,
+      import_line = 'from {} import {} as {}'.format(self.imported_module,
+                                                     self.imported_name,
                                                      as_name)
     return import_line
 
@@ -133,10 +161,10 @@ def _as_path(names: List[str]) -> str:
     return ''
 
 
-def _get_function_module_and_name(func: Callable) -> Tuple[str, str]:
-  """Gets function's module and name, or raise error if not a function."""
-  if not inspect.isfunction(func):
-    raise ValueError('Expect a function, but got: {}'.format(func))
+def _get_module_and_name(func: Callable) -> Tuple[str, str]:
+  """Gets module and name, or raise error if not a function."""
+  if not inspect.isfunction(func) and not inspect.isclass(func):
+    raise ValueError('Expect a function or class, but got: {}'.format(func))
   return func.__module__, func.__name__
 
 
@@ -146,11 +174,18 @@ class mm_export:  # pylint: disable=invalid-name
   def __init__(self, name: str):
     if name in NAME_TO_SYMBOL:
       raise ValueError('API already exists: `{}`.'.format(name))
-    self._name = name
+    self._exported_name = name  # API name.
 
   def __call__(self, func: Callable) -> Callable:
-    NAME_TO_SYMBOL[self._name] = Symbol.from_function(self._name, func)
+    """Exports function or class."""
+    NAME_TO_SYMBOL[self._exported_name] = Symbol.from_callable(
+        self._exported_name, func)
     return func
+
+  def export_constant(self, module: str, name: str) -> None:
+    """Exports constants."""
+    NAME_TO_SYMBOL[self._exported_name] = Symbol.from_constant(
+        self._exported_name, module, name)
 
 
 def _reset_apis():

@@ -13,19 +13,27 @@
 # limitations under the License.
 """Test for API generation."""
 
+import json
+
 import tensorflow.compat.v2 as tf
 
 import tensorflow_examples.lite.model_maker  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.api import api_gen  # pylint: disable=unused-import
+from tensorflow_examples.lite.model_maker.core.api import api_gen
 from tensorflow_examples.lite.model_maker.core.api import api_util
 
 
 class ApiGenTest(tf.test.TestCase):
 
-  def test_load_golden(self):
+  def test_golden_api(self):
     golden = api_gen.load_golden('golden_api.json')
     imports = api_util.generate_imports(api_util.PACKAGE_PREFIX)
-    self.assertDictEqual(imports, golden)
+
+    imports_json = json.dumps(imports, indent=2, sort_keys=True)
+    golden_content = api_gen._read_golden_text('golden_api.json')
+    msg = ('Exported APIs do not match `golden_api.json`. Please check it.\n\n'
+           'Imports in json format: \n{}\n'
+           'Golden file content:\n{}\n\n').format(imports_json, golden_content)
+    self.assertDictEqual(imports, golden, msg)
 
 
 if __name__ == '__main__':
