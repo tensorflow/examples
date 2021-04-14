@@ -337,6 +337,7 @@ class EfficientDetModelSpec(object):
     for i, (images, labels) in enumerate(dataset):
       self.ds_strategy.run(_get_detections, (images, labels))
       progbar.update(i)
+    print()
 
     metric_dict = self._get_metric_dict(evaluator, label_map)
     return metric_dict
