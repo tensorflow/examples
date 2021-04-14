@@ -247,7 +247,7 @@ def build_model(images,
     When model_name specified an undefined model, raises NotImplementedError.
     When override_params has invalid fields, raises ValueError.
   """
-  assert isinstance(images, tf.Tensor)
+  assert tf.is_tensor(images)
   assert not (features_only and pooled_features_only)
 
   # For backward compatibility.
