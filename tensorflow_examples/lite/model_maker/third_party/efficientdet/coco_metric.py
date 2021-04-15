@@ -18,7 +18,9 @@ Implements the interface of COCO API and metric_fn in tf.TPUEstimator.
 COCO API: github.com/cocodataset/cocoapi/
 """
 import json
+import logging
 import os
+import sys
 from absl import logging
 import numpy as np
 import tensorflow as tf
@@ -33,6 +35,17 @@ try:
 except ImportError:
   COCO = None
   COCOeval = None
+
+
+def block_print(log_level):
+  """Disables print function when current logging level > log_level."""
+  if tf.get_logger().getEffectiveLevel() > log_level:
+    sys.stdout = open(os.devnull, 'w')
+
+
+def enable_print():
+  """Enables print function."""
+  sys.stdout = sys.__stdout__
 
 
 class EvaluationMetric():
@@ -77,9 +90,11 @@ class EvaluationMetric():
     self.category_ids = []
     self.metric_values = None
 
-  def evaluate(self):
+  def evaluate(self, log_level=logging.ERROR):
     """Evaluates with detections from all images with COCO API.
 
+    Args:
+      log_level: Logging lavel to print logs.
     Returns:
       coco_metric: float numpy array with shape [12] representing the
         coco-style evaluation metrics.
@@ -92,12 +107,14 @@ class EvaluationMetric():
                  'for efficientdet/coco_metric to work.')
       raise ImportError(message)
 
+    block_print(log_level)
     if self.filename:
       coco_gt = COCO(self.filename)
     else:
       coco_gt = COCO()
       coco_gt.dataset = self.dataset
       coco_gt.createIndex()
+    enable_print()
 
     if self.testdev_dir:
       # Run on test-dev dataset.
@@ -120,6 +137,7 @@ class EvaluationMetric():
       return np.array([-1.], dtype=np.float32)
     else:
       # Run on validation dataset.
+      block_print(log_level)
       detections = np.array(self.detections)
       image_ids = list(set(detections[:, 0]))
       coco_dt = coco_gt.loadRes(detections)
@@ -128,6 +146,7 @@ class EvaluationMetric():
       coco_eval.evaluate()
       coco_eval.accumulate()
       coco_eval.summarize()
+      enable_print()
       coco_metrics = coco_eval.stats
 
       if self.label_map:
