@@ -14,6 +14,7 @@
 """Model specification for object detection."""
 
 import collections
+import logging
 import os
 import tempfile
 from typing import Optional, Tuple, Dict
@@ -286,7 +287,7 @@ class EfficientDetModelSpec(object):
   def _get_metric_dict(self, evaluator: coco_metric.EvaluationMetric,
                        label_map: collections.OrderedDict) -> Dict[str, float]:
     """Gets the metric dict for evaluation."""
-    metrics = evaluator.result()
+    metrics = evaluator.result(log_level=logging.INFO)
     metric_dict = {}
     for i, name in enumerate(evaluator.metric_names):
       metric_dict[name] = metrics[i]
