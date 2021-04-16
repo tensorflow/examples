@@ -24,6 +24,8 @@ from typing import Dict, Sequence
 
 from tensorflow_examples.lite.model_maker.core.api import api_util
 
+DEFAULT_API_FILE = 'golden_api.json'
+
 
 def parse_arguments():
   """Parse arguments for API gen."""
@@ -34,7 +36,7 @@ def parse_arguments():
       '-i',
       '--input_json',
       type=str,
-      default='golden_api.json',
+      default=DEFAULT_API_FILE,
       help='JSON file for Golden APIs.')
   return parser.parse_args()
 

@@ -41,14 +41,15 @@ import collections
 from collections.abc import Callable  # pylint: disable=g-importing-member
 import inspect
 import os
-from typing import Dict, List, Tuple, Sequence, Optional
+import pathlib
+from typing import Dict, List, Tuple, Sequence, Optional, Union
 
 import dataclasses
 
 # Model Maker API.
 NAME_TO_SYMBOL = {}
 
-HEADER = """# Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+LICENSE = """# Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,7 +85,7 @@ class Symbol:
       raise ValueError('func should not be None: {}'.format(func))
     imported_module, imported_name = _get_module_and_name(func)
 
-    exported_parts = _split_name(exported_name)
+    exported_parts = split_name(exported_name)
     return cls(
         exported_name=exported_name,
         exported_parts=exported_parts,
@@ -96,7 +97,7 @@ class Symbol:
   def from_constant(cls, exported_name: str, module: str,
                     name: str) -> 'Symbol':
     """Creates a symbol from a constant."""
-    exported_parts = _split_name(exported_name)
+    exported_parts = split_name(exported_name)
     return cls(
         exported_name=exported_name,
         exported_parts=exported_parts,
@@ -106,7 +107,7 @@ class Symbol:
 
   def get_package_name(self) -> str:
     """Generated path."""
-    return _as_package(self.exported_parts[:-1])
+    return as_package(self.exported_parts[:-1])
 
   def gen_import(self) -> str:
     """Generates import text line."""
@@ -127,15 +128,15 @@ class Symbol:
     for i in range(length - 1):
       parts = self.exported_parts[:i]
       import_name = self.exported_parts[i]
-      parent = _as_package(parts)
-      abs_package = _split_name(package_prefix) + parts
-      abs_package = _as_package(abs_package)
+      parent = as_package(parts)
+      abs_package = split_name(package_prefix) + parts
+      abs_package = as_package(abs_package)
       import_line = 'from {} import {}'.format(abs_package, import_name)
       parents_import[parent] = [import_line]
     return parents_import
 
 
-def _split_name(name: str) -> List[str]:
+def split_name(name: str) -> List[str]:
   """Splits name and returns a list of segments.
 
   Args:
@@ -148,12 +149,12 @@ def _split_name(name: str) -> List[str]:
   return list(filter(lambda n: n, parts))
 
 
-def _as_package(names: List[str]) -> str:
+def as_package(names: List[str]) -> str:
   """Joins names as a package name."""
   return '.'.join(names)
 
 
-def _as_path(names: List[str]) -> str:
+def as_path(names: List[str]) -> str:
   """Joins names as a file path."""
   if names:
     return os.path.join(*names)
@@ -208,8 +209,8 @@ def generate_imports(package_prefix: str) -> Dict[str, Sequence[str]]:
   # Add prefix and sort import values.
   abs_import_dict = {}
   for package_name, value_set in import_dict.items():
-    parts = _split_name(package_prefix) + _split_name(package_name)
-    abs_package = _as_package(parts)
+    parts = split_name(package_prefix) + split_name(package_name)
+    abs_package = as_package(parts)
     abs_import_dict[abs_package] = list(sorted(value_set))
   return abs_import_dict
 
@@ -218,15 +219,30 @@ def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]]):
   """Writes packages as init files."""
   for package_name, import_lines in imports_dict.items():
     # Create parent dir.
-    parts = _as_path(_split_name(package_name))
+    parts = as_path(split_name(package_name))
     parent_dir = os.path.join(base_dir, parts)
-    if not os.path.exists(parent_dir):
-      os.makedirs(parent_dir)
+    make_dirs_or_not(parent_dir)
 
     # Write header and import lines.
     full_path = os.path.join(parent_dir, '__init__.py')
-    with open(full_path, 'w') as f:
-      f.write(HEADER)
-      f.write('"""Generated API for package: {}."""\n\n'.format(package_name))
-      for line in import_lines:
+    write_python_file(full_path, package_name, import_lines)
+
+
+PathOrStrType = Union[pathlib.Path, str]
+
+
+def make_dirs_or_not(dirpath: Union[PathOrStrType]):
+  """Make dirs if not exists."""
+  if not os.path.exists(dirpath):
+    os.makedirs(dirpath)
+
+
+def write_python_file(filepath: PathOrStrType, package_name: str,
+                      lines: Optional[Sequence[str]]):
+  """Writes python file."""
+  with open(filepath, 'w') as f:
+    f.write(LICENSE)
+    f.write('"""Generated API for package: {}."""\n\n'.format(package_name))
+    if lines:
+      for line in lines:
         f.write(line + '\n')

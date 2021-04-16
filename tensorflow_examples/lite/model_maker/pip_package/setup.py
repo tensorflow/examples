@@ -31,11 +31,9 @@ from __future__ import print_function
 import datetime
 import os
 import pathlib
-import shutil
-import subprocess
 import sys
+import setup_util
 
-from setuptools import find_namespace_packages
 from setuptools import setup
 
 nightly = False
@@ -56,6 +54,7 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
+# Set package version.
 if nightly:
   project_name = '{}-nightly'.format(project_name)
   version = '0.2.6'  # Version prefix, usually major.minor.micro.
@@ -66,14 +65,31 @@ if nightly:
 else:
   version = '0.2.5'
 
-# Path to folder model_maker.
+# Path to model_maker dir: <repo>/tensorflow_examples/lite/model_maker
 BASE_DIR = pathlib.Path(os.path.abspath(__file__)).parents[1]
-LIB_NAMESPACE = 'tensorflow_examples.lite.model_maker'  # Original namespace.
-OFFICIAL_NAMESPACE = 'tflite_model_maker'  # Official package namespace.
-MODEL_MAKER_CONSOLE = 'tflite_model_maker=tflite_model_maker.cli.cli:main'
-PIP_PKG_PATH = BASE_DIR.joinpath('pip_package')
-SRC_NAME = 'src'  # To create folder `pip_package/src`
-BUILD_ROOT = PIP_PKG_PATH.joinpath(SRC_NAME)
+# Path to root dir: <repo>
+ROOT_DIR = BASE_DIR.parents[2]
+# Original namespace of the lib.
+LIB_NAMESPACE = 'tensorflow_examples.lite.model_maker'
+# Official package namespace for API. Used as code name.
+API_NAMESPACE = 'tflite_model_maker'
+# Internal package tflite_model_maker.python mapping internal packages.
+INTERNAL_NAME = 'python'
+MODEL_MAKER_CONSOLE = 'tflite_model_maker=tflite_model_maker.python.cli.cli:main'
+
+# Build dir `pip_package/src`: copy all source code and create a package.
+SRC_NAME = 'src'
+BUILD_DIR = BASE_DIR.joinpath('pip_package').joinpath(SRC_NAME)
+
+# Setup options.
+setup_options = {
+    'package_dir': {
+        '': SRC_NAME
+    },
+    'entry_points': {
+        'console_scripts': [MODEL_MAKER_CONSOLE,],
+    },
+}
 
 DESCRIPTION = ('TFLite Model Maker: a model customization library for on-device'
                ' applications.')
@@ -99,147 +115,10 @@ def get_required_packages():
   return required_pkgs
 
 
-def _ensure_dir_created(dirpath):
-  """Ensures dir created."""
-  if not dirpath.exists():
-    os.makedirs(str(dirpath))
-
-
-def _create_py_with_content(filepath, content):
-  """Creates a py file with content and header of license."""
-  with PIP_PKG_PATH.joinpath('header.txt').open('r') as template:
-    header = template.read()
-  with filepath.open('w') as f:
-    f.write(header)
-    if content:
-      f.write(content)
-
-
-def prepare_package_src():
-  """Prepares src folder, and returns packages with dir mapping."""
-  lib_names = LIB_NAMESPACE.split('.')
-  lib_pkg = BUILD_ROOT.joinpath(*lib_names)
-
-  # Cleanup if `src` folder exists
-  if BUILD_ROOT.exists():
-    shutil.rmtree(str(BUILD_ROOT), ignore_errors=True)
-
-  # Prepare __init__.py.
-  _ensure_dir_created(lib_pkg)
-  for i in range(len(lib_names) + 1):
-    dirpath = BUILD_ROOT.joinpath(*lib_names[:i])
-    init_file = dirpath.joinpath('__init__.py')
-    if not init_file.exists():
-      _create_py_with_content(init_file, None)
-
-  # Copy .py files.
-  files = BASE_DIR.rglob(r'*')
-  extentions = {'.py', '.txt', '.md', '.json'}
-
-  relative_pys = []
-  init_pys = []
-  for path in files:
-    name = str(path)
-    if path.is_dir():
-      continue
-    if path.suffix not in extentions:
-      continue
-    if ('pip_package' in name) or ('_test.py' in name):
-      continue
-
-    build_path = lib_pkg.joinpath(path.relative_to(BASE_DIR))
-    _ensure_dir_created(build_path.parent)
-    shutil.copy2(str(path), str(build_path))
-
-    if path.suffix == '.py':
-      if path.stem != '__init__':
-        relative_pys.append(build_path.relative_to(lib_pkg))
-      else:
-        init_pys.append(build_path.relative_to(lib_pkg))
-
-  # Create namespace mapping.
-  offical_names = OFFICIAL_NAMESPACE.split('.')
-  official_pkg = BUILD_ROOT.joinpath(*offical_names)
-
-  # Prepare __init__.py.
-  _ensure_dir_created(official_pkg)
-  for i in range(len(offical_names) + 1):
-    dirpath = BUILD_ROOT.joinpath(*offical_names[:i])
-    init_file = dirpath.joinpath('__init__.py')
-    if not init_file.exists():
-      _create_py_with_content(init_file, None)
-
-  # Import lib paths by adding like:
-  # from tensorflow_examples.lite.model_maker.core.task.text_classifier import *
-  for r in relative_pys:
-    official_py = official_pkg.joinpath(r)
-
-    ns = str(r).replace('.py', '').replace(os.sep, '.')
-    ns = '{}.{}'.format(LIB_NAMESPACE, ns)
-    content = 'from {} import *'.format(ns)
-    _ensure_dir_created(official_py.parent)
-    _create_py_with_content(official_py, content)
-
-  # Copy the __init__.py.
-  for p in init_pys:
-    build_py = lib_pkg.joinpath(p)
-    official_py = official_pkg.joinpath(p)
-    shutil.copy2(str(build_py), str(official_py))
-
-  package_data = {
-      '': ['*.txt', '*.md', '*.json'],
-  }
-  if nightly:
-    # For nightly, proceeed with addtional preparation.
-    extra_package_data = _prepare_nightly()
-    package_data.update(extra_package_data)
-
-  # Return package.
-  namespace_packages = find_namespace_packages(where=BUILD_ROOT)
-  package_dir_mapping = {'': SRC_NAME}
-
-  return {
-      'packages': namespace_packages,
-      'package_dir': package_dir_mapping,
-      'package_data': package_data,
-  }
-
-
-def _prepare_nightly():
-  """Prepares nightly and gets extra setup config.
-
-  For nightly, tflite-model-maker will pack `tensorflowjs` python source code.
-
-  TODO(tianlin): tensorflowjs pip requires stable tensorflow instead of nightly,
-  which conflicts with tflite-model-maker-nightly. Thus, we include its python
-  code directly.
-
-  Returns:
-    dict: extra package_data.
-  """
-  tfjs_git = 'https://github.com/tensorflow/tfjs'
-  tfjs_path = PIP_PKG_PATH.joinpath('tfjs')
-
-  # Remove existing tfjs and git clone.
-  if tfjs_path.exists():
-    shutil.rmtree(str(tfjs_path), ignore_errors=True)
-  cmd = ['git', 'clone', tfjs_git, str(tfjs_path)]
-  print('Running git clone: {}'.format(cmd))
-  subprocess.check_call(cmd)
-
-  # Copy `tensorflowjs` python code to `src` and release with tflite-model-maker
-  src_folder = str(
-      tfjs_path.joinpath('tfjs-converter', 'python', 'tensorflowjs'))
-  dst_folder = str(BUILD_ROOT.joinpath('tensorflowjs'))
-  shutil.copytree(
-      src_folder,
-      dst_folder,
-      ignore=lambda _, names: set(s for s in names if s.endswith('_test.py')))
-
-  return {'tensorflowjs/op_list': ['*.json']}
-
-
-setup_extra = prepare_package_src()
+extra_options = setup_util.PackageGen(BASE_DIR, ROOT_DIR, BUILD_DIR, nightly,
+                                      LIB_NAMESPACE, API_NAMESPACE,
+                                      INTERNAL_NAME).run()
+setup_options.update(extra_options)
 
 setup(
     name=project_name,
@@ -254,9 +133,6 @@ setup(
     license='Apache 2.0',
     scripts=[],
     install_requires=get_required_packages(),
-    entry_points={
-        'console_scripts': [MODEL_MAKER_CONSOLE,],
-    },
     classifiers=classifiers,
     keywords=['tensorflow', 'lite', 'model customization', 'transfer learning'],
-    **setup_extra)
+    **setup_options)

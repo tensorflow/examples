@@ -17,19 +17,19 @@ import json
 
 import tensorflow.compat.v2 as tf
 
-import tensorflow_examples.lite.model_maker  # pylint: disable=unused-import
 from tensorflow_examples.lite.model_maker.core.api import api_gen
 from tensorflow_examples.lite.model_maker.core.api import api_util
+from tensorflow_examples.lite.model_maker.core.api import include  # pylint: disable=unused-import
 
 
 class ApiGenTest(tf.test.TestCase):
 
   def test_golden_api(self):
-    golden = api_gen.load_golden('golden_api.json')
+    golden = api_gen.load_golden(api_gen.DEFAULT_API_FILE)
     imports = api_util.generate_imports(api_util.PACKAGE_PREFIX)
 
     imports_json = json.dumps(imports, indent=2, sort_keys=True)
-    golden_content = api_gen._read_golden_text('golden_api.json')
+    golden_content = api_gen._read_golden_text(api_gen.DEFAULT_API_FILE)
     msg = ('Exported APIs do not match `golden_api.json`. Please check it.\n\n'
            'Imports in json format: \n{}\n'
            'Golden file content:\n{}\n\n').format(imports_json, golden_content)

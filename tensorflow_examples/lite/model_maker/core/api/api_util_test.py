@@ -178,14 +178,15 @@ class ApiUtilTest(tf.test.TestCase):
 
       # Checks existence of __init__ file and its content.
       for package_name, symbols in expected_imports.items():
-        parts = api_util._split_name(package_name)
-        path = api_util._as_path(parts)
+        parts = api_util.split_name(package_name)
+        path = api_util.as_path(parts)
         init_file = os.path.join(tmp_dir, path, '__init__.py')
         self.assertTrue(os.path.exists(init_file))
         self.assertGreater(os.path.getsize(init_file), 0)
         with tf.io.gfile.GFile(init_file) as f:
           content = f.read()
-          self.assertIn(api_util.HEADER, content)
+          self.assertIn(api_util.LICENSE, content)
+          self.assertIn('Generated API for package:', content)
           for symbol in symbols:
             self.assertIn(symbol, content)
 
