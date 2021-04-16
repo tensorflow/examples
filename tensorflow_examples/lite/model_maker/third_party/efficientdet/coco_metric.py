@@ -168,10 +168,10 @@ class EvaluationMetric():
       # Return the concat normal and per-class AP.
       return np.array(coco_metrics, dtype=np.float32)
 
-  def result(self):
+  def result(self, log_level=logging.ERROR):
     """Return the metric values (and compute it if needed)."""
     if self.metric_values is None:
-      self.metric_values = self.evaluate()
+      self.metric_values = self.evaluate(log_level)
     return self.metric_values
 
   def update_state(self, groundtruth_data, detections):
