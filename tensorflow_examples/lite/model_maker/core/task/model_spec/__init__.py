@@ -104,8 +104,18 @@ OBJECT_DETECTION_MODELS = [
     'efficientdet_lite3',
     'efficientdet_lite4',
 ]
+mm_export('model_spec.IMAGE_CLASSIFICATION_MODELS').export_constant(
+    __name__, 'IMAGE_CLASSIFICATION_MODELS')
+mm_export('model_spec.TEXT_CLASSIFICATION_MODELS').export_constant(
+    __name__, 'TEXT_CLASSIFICATION_MODELS')
 mm_export('model_spec.QUESTION_ANSWER_MODELS').export_constant(
     __name__, 'QUESTION_ANSWER_MODELS')
+mm_export('model_spec.AUDIO_CLASSIFICATION_MODELS').export_constant(
+    __name__, 'AUDIO_CLASSIFICATION_MODELS')
+mm_export('model_spec.RECOMMENDATION_MODELS').export_constant(
+    __name__, 'RECOMMENDATION_MODELS')
+mm_export('model_spec.OBJECT_DETECTION_MODELS').export_constant(
+    __name__, 'OBJECT_DETECTION_MODELS')
 
 
 @mm_export('model_spec.get')

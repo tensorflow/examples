@@ -20,11 +20,13 @@ import os
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import file_util
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.data import example_generation_movielens as _gen
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model_launcher_keras as _launcher
 
 
+@mm_export('recommendation.DataLoader')
 class RecommendationDataLoader(dataloader.DataLoader):
   """Recommendation data loader."""
 

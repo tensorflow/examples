@@ -17,9 +17,11 @@ import functools
 
 import tensorflow as tf  # pylint: disable=unused-import
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model as _rm
 
 
+@mm_export('recommendation.ModelSpec')
 class RecommendationSpec(object):
   """Recommendation model spec."""
 
@@ -108,3 +110,10 @@ recommendation_cnn_spec = functools.partial(
     RecommendationSpec, encoder_type='cnn')
 recommendation_rnn_spec = functools.partial(
     RecommendationSpec, encoder_type='rnn')
+
+mm_export('recommendation.BowSpec').export_constant(__name__,
+                                                    'recommendation_bow_spec')
+mm_export('recommendation.CnnSpec').export_constant(__name__,
+                                                    'recommendation_cnn_spec')
+mm_export('recommendation.RnnSpec').export_constant(__name__,
+                                                    'recommendation_rnn_spec')

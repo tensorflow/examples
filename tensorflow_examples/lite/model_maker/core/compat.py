@@ -18,7 +18,6 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow_examples.lite.model_maker.core.api import mm_export
 
 _DEFAULT_TF_BEHAVIOR = 2
 
@@ -43,7 +42,6 @@ def setup_tf_behavior(tf_version=_DEFAULT_TF_BEHAVIOR):
   _tf_behavior_version = tf_version
 
 
-@mm_export('compat.get_tf_behavior')
 def get_tf_behavior():
   """Gets version for tf behavior.
 
@@ -53,7 +51,6 @@ def get_tf_behavior():
   return _tf_behavior_version
 
 
-@mm_export('compat.get_compat_tf_versions')
 def get_compat_tf_versions(compat_tf_versions=None):
   """Gets compatible tf versions (default: [2]).
 

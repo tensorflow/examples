@@ -18,6 +18,7 @@ import tempfile
 import numpy as np
 import tensorflow as tf
 
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import data_util
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
@@ -28,6 +29,7 @@ from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model im
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model_launcher_keras as _launcher
 
 
+@mm_export('recommendation.create')
 def create(train_data,
            model_spec,
            model_spec_options=None,
@@ -91,6 +93,7 @@ def create(train_data,
   return recommendation
 
 
+@mm_export('recommendation.Recommendation')
 class Recommendation(custom_model.CustomModel):
   """Recommendation task class."""
 

@@ -645,7 +645,7 @@ def create_qa_model_from_squad(max_seq_length,
       outputs=[start_logits, end_logits])
 
 
-@mm_export('question_answer.model_spec.BertQAModelSpec')
+@mm_export('question_answer.BertQaSpec')
 class BertQAModelSpec(BertModelSpec):
   """A specification of BERT model for question answering."""
 
@@ -977,7 +977,6 @@ def bert_classifier_spec(**kwargs):
   return BertClassifierModelSpec(**kwargs)
 
 
-@mm_export('question_answer.model_spec.bert_qa_spec')
 def bert_qa_spec(**kwargs):
   return BertQAModelSpec(**kwargs)
 
@@ -995,7 +994,7 @@ def mobilebert_classifier_spec(**kwargs):
   return BertClassifierModelSpec(**args)
 
 
-@mm_export('question_answer.model_spec.mobilebert_qa_spec')
+@mm_export('question_answer.MobileBertQaSpec')
 def mobilebert_qa_spec(**kwargs):
   """Model specification for MobileBERT in the question answer task."""
   args = util.dict_with_default(
@@ -1010,7 +1009,7 @@ def mobilebert_qa_spec(**kwargs):
   return BertQAModelSpec(**args)
 
 
-@mm_export('question_answer.model_spec.mobilebert_qa_squad_spec')
+@mm_export('question_answer.MobileBertQaSquadSpec')
 def mobilebert_qa_squad_spec(**kwargs):
   """Model specification for MobileBERT that already retrained on SQuAD1.1."""
   args = util.dict_with_default(

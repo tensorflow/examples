@@ -1,27 +1,33 @@
 {
   "tflite_model_maker": [
-    "from tflite_model_maker import compat",
     "from tflite_model_maker import model_spec",
-    "from tflite_model_maker import question_answer"
-  ],
-  "tflite_model_maker.compat": [
-    "from tensorflow_examples.lite.model_maker.core.compat import get_compat_tf_versions",
-    "from tensorflow_examples.lite.model_maker.core.compat import get_tf_behavior"
+    "from tflite_model_maker import question_answer",
+    "from tflite_model_maker import recommendation"
   ],
   "tflite_model_maker.model_spec": [
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import AUDIO_CLASSIFICATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import IMAGE_CLASSIFICATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import OBJECT_DETECTION_MODELS",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec import QUESTION_ANSWER_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import RECOMMENDATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import TEXT_CLASSIFICATION_MODELS",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec import get"
   ],
   "tflite_model_maker.question_answer": [
     "from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import QuestionAnswerDataLoader as DataLoader",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import BertQAModelSpec as BertQaSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_qa_spec as MobileBertQaSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_qa_squad_spec as MobileBertQaSquadSpec",
     "from tensorflow_examples.lite.model_maker.core.task.question_answer import QuestionAnswer",
-    "from tensorflow_examples.lite.model_maker.core.task.question_answer import create",
-    "from tflite_model_maker.question_answer import model_spec"
+    "from tensorflow_examples.lite.model_maker.core.task.question_answer import create"
   ],
-  "tflite_model_maker.question_answer.model_spec": [
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import BertQAModelSpec",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import bert_qa_spec",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_qa_spec",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_qa_squad_spec"
+  "tflite_model_maker.recommendation": [
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader as DataLoader",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import RecommendationSpec as ModelSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_bow_spec as BowSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_cnn_spec as CnnSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_rnn_spec as RnnSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.recommendation import Recommendation",
+    "from tensorflow_examples.lite.model_maker.core.task.recommendation import create"
   ]
 }
