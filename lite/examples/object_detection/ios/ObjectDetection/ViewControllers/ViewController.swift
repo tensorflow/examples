@@ -442,3 +442,15 @@ extension ViewController {
   }
 
 }
+
+extension ViewController {
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: nil, completion: { [weak self] (context) in
+            DispatchQueue.main.async(execute: {
+                self?.cameraFeedManager.changeVideoOrientation()
+            })
+        })
+    }
+}
