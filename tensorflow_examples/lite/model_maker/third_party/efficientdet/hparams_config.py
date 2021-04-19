@@ -439,11 +439,22 @@ efficientdet_lite_param_dict = {
             box_class_repeats=4,
             **lite_common_param,
         ),
+    'efficientdet-lite3x':
+        dict(
+            name='efficientdet-lite3x',
+            backbone_name='efficientnet-lite3',
+            image_size=640,
+            fpn_num_filters=200,
+            fpn_cell_repeats=6,
+            box_class_repeats=4,
+            anchor_scale=3.0,
+            **lite_common_param,
+        ),
     'efficientdet-lite4':
         dict(
             name='efficientdet-lite4',
             backbone_name='efficientnet-lite4',
-            image_size=512,
+            image_size=640,
             fpn_num_filters=224,
             fpn_cell_repeats=7,
             box_class_repeats=4,
