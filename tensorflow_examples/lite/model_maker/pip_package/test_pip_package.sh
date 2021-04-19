@@ -61,7 +61,7 @@ function uninstall_pip {
 function test_import {
   # Test whether import is successful
   echo "------ Test import -----"
-  ${PYTHON_BIN} -c "import tflite_model_maker"
+  ${PYTHON_BIN} -c "import tflite_model_maker; print(tflite_model_maker.__version__)"
   echo
 }
 

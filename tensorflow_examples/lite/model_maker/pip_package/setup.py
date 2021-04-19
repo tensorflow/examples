@@ -116,7 +116,7 @@ def get_required_packages():
 
 
 extra_options = setup_util.PackageGen(BASE_DIR, ROOT_DIR, BUILD_DIR, nightly,
-                                      LIB_NAMESPACE, API_NAMESPACE,
+                                      version, LIB_NAMESPACE, API_NAMESPACE,
                                       INTERNAL_NAME).run()
 setup_options.update(extra_options)
 

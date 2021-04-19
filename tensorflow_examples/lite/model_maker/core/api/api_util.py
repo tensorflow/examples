@@ -215,8 +215,16 @@ def generate_imports(package_prefix: str) -> Dict[str, Sequence[str]]:
   return abs_import_dict
 
 
-def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]]):
-  """Writes packages as init files."""
+def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]],
+                   base_package: str, version: str) -> None:
+  """Writes packages as init files.
+
+  Args:
+    base_dir: str, base directory to write packages.
+    imports_dict: dict, pairs of (namespace, list of imports).
+    base_package: str, the base package name. (e.g. 'tflite_model_maker')
+    version: str, version string. (e.g., 0.x.x)
+  """
   for package_name, import_lines in imports_dict.items():
     # Create parent dir.
     parts = as_path(split_name(package_name))
@@ -225,7 +233,12 @@ def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]]):
 
     # Write header and import lines.
     full_path = os.path.join(parent_dir, '__init__.py')
-    write_python_file(full_path, package_name, import_lines)
+
+    lines = list(import_lines)
+    # For base package add __version__.
+    if package_name == base_package:
+      lines.append("""__version__ = '{}'""".format(version))
+    write_python_file(full_path, package_name, lines)
 
 
 PathOrStrType = Union[pathlib.Path, str]

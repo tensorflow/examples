@@ -31,6 +31,7 @@ class PackageGen:
       root_dir,
       build_dir,
       nightly,
+      version,
       lib_ns,
       api_ns,
       internal_name,
@@ -43,6 +44,7 @@ class PackageGen:
       build_dir: Path, path to the build dir, where we copy all source code and
         create a package. (e.g. Path('pip_package/src')).
       nightly: boolean, whether it is nightly.
+      version: str, package version.
       lib_ns: str, original namespace of the lib (e.g.
         'tensorflow_examples.lite.model_maker').
       api_ns: str, official package namespace for API. Used as code name. (e.g.,
@@ -54,6 +56,7 @@ class PackageGen:
     self.root_dir = root_dir
     self.build_dir = build_dir
     self.nightly = nightly
+    self.version = version
     self.lib_ns = lib_ns
     self.api_ns = api_ns
     self.internal_name = internal_name
@@ -167,7 +170,9 @@ class PackageGen:
   def add_api_files(self):
     """Adds API files."""
     from tensorflow_examples.lite.model_maker.core.api import api_gen  # pylint: disable=g-import-not-at-top
-    api_gen.run(str(self.build_dir), api_gen.DEFAULT_API_FILE)
+    api_gen.run(
+        str(self.build_dir), api_gen.DEFAULT_API_FILE, self.api_ns,
+        self.version)
 
   def _prepare_nightly(self):
     """Prepares nightly and gets extra setup config.
