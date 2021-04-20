@@ -1,6 +1,5 @@
 {
   "tflite_model_maker": [
-    "from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat",
     "from tflite_model_maker import config",
     "from tflite_model_maker import image_classifier",
     "from tflite_model_maker import model_spec",
@@ -10,6 +9,7 @@
     "from tflite_model_maker import text_classifier"
   ],
   "tflite_model_maker.config": [
+    "from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat",
     "from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType",
     "from tensorflow_examples.lite.model_maker.core.task.configs import QuantizationConfig"
   ],
