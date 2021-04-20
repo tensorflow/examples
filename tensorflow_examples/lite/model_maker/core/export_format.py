@@ -18,8 +18,10 @@ from __future__ import division
 from __future__ import print_function
 
 import enum
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 
 
+@mm_export("config.ExportFormat")
 @enum.unique
 class ExportFormat(enum.Enum):
   TFLITE = "TFLITE"
@@ -29,6 +31,7 @@ class ExportFormat(enum.Enum):
   TFJS = "TFJS"
 
 
+@mm_export("config.QuantizationType")
 @enum.unique
 class QuantizationType(enum.Enum):
   INT8 = "INT8"

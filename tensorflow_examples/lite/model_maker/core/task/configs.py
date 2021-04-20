@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 
 DEFAULT_QUANTIZATION_STEPS = 2000
 
@@ -47,6 +48,7 @@ def _get_representative_dataset_gen(dataset, num_steps):
   return representative_dataset_gen
 
 
+@mm_export('config.QuantizationConfig')
 class QuantizationConfig(object):
   """Configuration for post-training quantization.
 

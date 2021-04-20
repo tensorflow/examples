@@ -21,6 +21,7 @@ import csv
 from typing import Collection, Dict, List, Optional, Tuple, TypeVar, Union
 
 import tensorflow as tf
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader_util as util
 import yaml
@@ -98,6 +99,7 @@ def _group_csv_lines(csv_file: str,
   return lines_list, label_map
 
 
+@mm_export('object_detector.DataLoader')
 class DataLoader(dataloader.DataLoader):
   """DataLoader for object detector."""
 

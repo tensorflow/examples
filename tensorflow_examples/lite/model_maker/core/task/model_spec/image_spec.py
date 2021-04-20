@@ -18,9 +18,11 @@ from __future__ import division
 from __future__ import print_function
 
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 
 
+@mm_export('image_classifier.ImageSpec')
 class ImageModelSpec(object):
   """A specification of image model."""
 
@@ -41,6 +43,7 @@ class ImageModelSpec(object):
     self.input_image_shape = input_image_shape
 
 
+@mm_export('image_classifier.MobilenetV2Spec')
 def mobilenet_v2_spec(**kwargs):
   args = util.dict_with_default(
       default_dict=dict(
@@ -51,6 +54,7 @@ def mobilenet_v2_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
+@mm_export('image_classifier.Resnet50Spec')
 def resnet_50_spec(**kwargs):
   args = util.dict_with_default(
       default_dict=dict(
@@ -61,7 +65,9 @@ def resnet_50_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
+@mm_export('image_classifier.EfficientNetLite0Spec')
 def efficientnet_lite0_spec(**kwargs):
+  """Model specification for EfficientNet-Lite0."""
   args = util.dict_with_default(
       default_dict=dict(
           uri='https://tfhub.dev/tensorflow/efficientnet/lite0/feature-vector/2',
@@ -71,7 +77,9 @@ def efficientnet_lite0_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
+@mm_export('image_classifier.EfficientNetLite1Spec')
 def efficientnet_lite1_spec(**kwargs):
+  """Model specification for EfficientNet-Lite1."""
   args = util.dict_with_default(
       default_dict=dict(
           uri='https://tfhub.dev/tensorflow/efficientnet/lite1/feature-vector/2',
@@ -82,7 +90,9 @@ def efficientnet_lite1_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
+@mm_export('image_classifier.EfficientNetLite2Spec')
 def efficientnet_lite2_spec(**kwargs):
+  """Model specification for EfficientNet-Lite2."""
   args = util.dict_with_default(
       default_dict=dict(
           uri='https://tfhub.dev/tensorflow/efficientnet/lite2/feature-vector/2',
@@ -94,7 +104,9 @@ def efficientnet_lite2_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
+@mm_export('image_classifier.EfficientNetLit3Spec')
 def efficientnet_lite3_spec(**kwargs):
+  """Model specification for EfficientNet-Lite3."""
   args = util.dict_with_default(
       default_dict=dict(
           uri='https://tfhub.dev/tensorflow/efficientnet/lite3/feature-vector/2',
@@ -105,7 +117,9 @@ def efficientnet_lite3_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
+@mm_export('image_classifier.EfficientNetLite4Spec')
 def efficientnet_lite4_spec(**kwargs):
+  """Model specification for EfficientNet-Lite4."""
   args = util.dict_with_default(
       default_dict=dict(
           uri='https://tfhub.dev/tensorflow/efficientnet/lite4/feature-vector/2',
@@ -114,4 +128,3 @@ def efficientnet_lite4_spec(**kwargs):
           name='efficientnet_lite4'),
       **kwargs)
   return ImageModelSpec(**args)
-

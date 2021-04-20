@@ -1,8 +1,17 @@
 {
   "tflite_model_maker": [
+    "from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat",
+    "from tflite_model_maker import config",
+    "from tflite_model_maker import image_classifier",
     "from tflite_model_maker import model_spec",
+    "from tflite_model_maker import object_detector",
     "from tflite_model_maker import question_answer",
-    "from tflite_model_maker import recommendation"
+    "from tflite_model_maker import recommendation",
+    "from tflite_model_maker import text_classifier"
+  ],
+  "tflite_model_maker.config": [
+    "from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType",
+    "from tensorflow_examples.lite.model_maker.core.task.configs import QuantizationConfig"
   ],
   "tflite_model_maker.model_spec": [
     "from tensorflow_examples.lite.model_maker.core.task.model_spec import AUDIO_CLASSIFICATION_MODELS",
@@ -12,6 +21,30 @@
     "from tensorflow_examples.lite.model_maker.core.task.model_spec import RECOMMENDATION_MODELS",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec import TEXT_CLASSIFICATION_MODELS",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec import get"
+  ],
+  "tflite_model_maker.image_classifier": [
+    "from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader as DataLoader",
+    "from tensorflow_examples.lite.model_maker.core.task.image_classifier import ImageClassifier",
+    "from tensorflow_examples.lite.model_maker.core.task.image_classifier import create",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import ImageModelSpec as ImageSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite0_spec as EfficientNetLite0Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite1_spec as EfficientNetLite1Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite2_spec as EfficientNetLite2Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite3_spec as EfficientNetLit3Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite4_spec as EfficientNetLite4Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import mobilenet_v2_spec as MobilenetV2Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import resnet_50_spec as Resnet50Spec"
+  ],
+  "tflite_model_maker.object_detector": [
+    "from tensorflow_examples.lite.model_maker.core.data_util.object_detector_dataloader import DataLoader",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.object_detector_spec import EfficientDetModelSpec as EfficientDetSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.object_detector_spec import efficientdet_lite0_spec as EfficientDetLite0Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.object_detector_spec import efficientdet_lite1_spec as EfficientDetLite1Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.object_detector_spec import efficientdet_lite2_spec as EfficientDetLite2Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.object_detector_spec import efficientdet_lite3_spec as EfficientDetLite3Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.object_detector_spec import efficientdet_lite4_spec as EfficientDetLite4Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.object_detector import ObjectDetector",
+    "from tensorflow_examples.lite.model_maker.core.task.object_detector import create"
   ],
   "tflite_model_maker.question_answer": [
     "from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import QuestionAnswerDataLoader as DataLoader",
@@ -29,5 +62,13 @@
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_rnn_spec as RnnSpec",
     "from tensorflow_examples.lite.model_maker.core.task.recommendation import Recommendation",
     "from tensorflow_examples.lite.model_maker.core.task.recommendation import create"
+  ],
+  "tflite_model_maker.text_classifier": [
+    "from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader as DataLoader",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import AverageWordVecModelSpec as AverageWordVecSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import BertClassifierModelSpec as BertClassifierSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_classifier_spec as MobileBertClassifierSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.text_classifier import TextClassifier",
+    "from tensorflow_examples.lite.model_maker.core.task.text_classifier import create"
   ]
 }

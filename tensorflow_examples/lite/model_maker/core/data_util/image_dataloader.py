@@ -22,6 +22,7 @@ import random
 
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 
 
@@ -45,6 +46,7 @@ def create_data(name, data, info, label_names):
   return ImageClassifierDataLoader(data, size, label_names)
 
 
+@mm_export('image_classifier.DataLoader')
 class ImageClassifierDataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for image classifier."""
 

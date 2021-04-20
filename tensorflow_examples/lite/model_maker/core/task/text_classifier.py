@@ -23,6 +23,7 @@ import tempfile
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
@@ -31,6 +32,7 @@ from tensorflow_examples.lite.model_maker.core.task.metadata_writers.bert.text_c
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers.text_classifier import metadata_writer_for_text_classifier as metadata_writer
 
 
+@mm_export('text_classifier.create')
 def create(train_data,
            model_spec='average_word_vec',
            validation_data=None,
@@ -92,6 +94,7 @@ def _get_model_info(model_name):
       version='v1')
 
 
+@mm_export('text_classifier.TextClassifier')
 class TextClassifier(classification_model.ClassificationModel):
   """TextClassifier class for inference and exporting to tflite."""
 

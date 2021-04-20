@@ -25,6 +25,7 @@ import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.task import metadata_writer_for_image_classifier as metadata_writer
 
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
@@ -42,6 +43,7 @@ def get_hub_lib_hparams(**kwargs):
   return train_image_classifier_lib.add_params(hparams, **kwargs)
 
 
+@mm_export('image_classifier.create')
 def create(train_data,
            model_spec='efficientnet_lite0',
            validation_data=None,
@@ -164,6 +166,7 @@ def _get_model_info(model_spec,
       author='TensorFlow Lite Model Maker')
 
 
+@mm_export('image_classifier.ImageClassifier')
 class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
 

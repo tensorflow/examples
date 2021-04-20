@@ -19,6 +19,7 @@ from typing import Dict, Optional, Tuple, TypeVar
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType
@@ -33,6 +34,7 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import 
 T = TypeVar('T', bound='ObjectDetector')
 
 
+@mm_export('object_detector.create')
 def create(train_data: object_detector_dataloader.DataLoader,
            model_spec: object_detector_spec.EfficientDetModelSpec,
            validation_data: Optional[
@@ -117,6 +119,7 @@ def _get_model_info(
       std=_get_list(model_spec.config.stddev_rgb))
 
 
+@mm_export('object_detector.ObjectDetector')
 class ObjectDetector(custom_model.CustomModel):
   """ObjectDetector class for inference and exporting to tflite."""
 

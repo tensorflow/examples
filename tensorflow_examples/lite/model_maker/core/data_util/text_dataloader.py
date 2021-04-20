@@ -80,6 +80,7 @@ def _get_cache_info(cache_dir, data_name, model_spec, is_training):
   return is_cached, tfrecord_file, meta_data_file, file_prefix
 
 
+@mm_export('text_classifier.DataLoader')
 class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for text classifier."""
 

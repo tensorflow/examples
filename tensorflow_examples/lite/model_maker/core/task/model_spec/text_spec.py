@@ -49,6 +49,7 @@ except:
 # pylint: enable=g-import-not-at-top,bare-except
 
 
+@mm_export('text_classifier.AverageWordVecSpec')
 class AverageWordVecModelSpec(object):
   """A specification of averaging word vector model."""
   PAD = '<PAD>'  # Index: 0
@@ -432,6 +433,7 @@ class BertModelSpec(object):
     tf.compat.v1.logging.info('Saved vocabulary in %s.', vocab_filename)
 
 
+@mm_export('text_classifier.BertClassifierSpec')
 class BertClassifierModelSpec(BertModelSpec):
   """A specification of BERT model for text classification."""
 
@@ -981,6 +983,7 @@ def bert_qa_spec(**kwargs):
   return BertQAModelSpec(**kwargs)
 
 
+@mm_export('text_classifier.MobileBertClassifierSpec')
 def mobilebert_classifier_spec(**kwargs):
   """Model specification for MobileBERT in the text classification task."""
   args = util.dict_with_default(
