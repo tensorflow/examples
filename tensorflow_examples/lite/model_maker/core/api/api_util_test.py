@@ -133,18 +133,18 @@ class ApiUtilTest(tf.test.TestCase):
     def aa():  # pylint: disable=unused-variable
       pass
 
-    imports = api_util.generate_imports('pkg1.pkg2')
+    imports = api_util.generate_imports()
     expected = {
-        'pkg1.pkg2': [
-            'from pkg1.pkg2 import bar',
-            'from pkg1.pkg2 import foo',
+        '': [
+            'from $PKG import bar',
+            'from $PKG import foo',
         ],
-        'pkg1.pkg2.foo': [
+        'foo': [
             'from __main__ import a',
             'from __main__ import b',
         ],
-        'pkg1.pkg2.bar': ['from pkg1.pkg2.bar import sub',],
-        'pkg1.pkg2.bar.sub': [
+        'bar': ['from $PKG.bar import sub',],
+        'bar.sub': [
             'from __main__ import aa as aaa',
             'from __main__ import c',
         ],
@@ -161,27 +161,26 @@ class ApiUtilTest(tf.test.TestCase):
     def b():  # pylint: disable=unused-variable
       pass
 
-    imports = api_util.generate_imports(api_util.PACKAGE_PREFIX)
+    imports = api_util.generate_imports()
     expected_imports = {
-        'tflite_model_maker': [
-            'from tflite_model_maker import bar',
-            'from tflite_model_maker import foo',
+        '': [
+            'from $PKG import bar',
+            'from $PKG import foo',
         ],
-        'tflite_model_maker.foo': ['from __main__ import a',],
-        'tflite_model_maker.bar': ['from tflite_model_maker.bar import sub',],
-        'tflite_model_maker.bar.sub': ['from __main__ import b',],
+        'foo': ['from __main__ import a',],
+        'bar': ['from $PKG.bar import sub',],
+        'bar.sub': ['from __main__ import b',],
     }
     self.assertDictEqual(imports, expected_imports)
 
     version = '0.0.0-test'
     with tempfile.TemporaryDirectory() as tmp_dir:
-      api_util.write_packages(tmp_dir, imports, api_util.PACKAGE_PREFIX,
-                              version)
+      api_util.write_packages(tmp_dir, imports, {},
+                              api_util.PACKAGE_PLACEHOLDER, version)
 
       # Checks existence of __init__ file and its content.
       for package_name, symbols in expected_imports.items():
-        parts = api_util.split_name(package_name)
-        path = api_util.as_path(parts)
+        path = api_util.as_path(api_util.split_name(package_name))
         init_file = os.path.join(tmp_dir, path, '__init__.py')
         self.assertTrue(os.path.exists(init_file))
         self.assertGreater(os.path.getsize(init_file), 0)
@@ -192,7 +191,7 @@ class ApiUtilTest(tf.test.TestCase):
           for symbol in symbols:
             self.assertIn(symbol, content)
 
-          if package_name == api_util.PACKAGE_PREFIX:
+          if package_name == api_util.PACKAGE_PLACEHOLDER:
             self.assertIn("""__version__ = '0.0.0-test'""", content)
 
 

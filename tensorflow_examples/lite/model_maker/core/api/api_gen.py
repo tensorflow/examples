@@ -11,10 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""CLI utility to generate APIs.
+r"""CLI utility to generate APIs.
 
 Usage:
-python api_gen --output_dir=<path to output> --version=0.x.x
+python api_gen.py --output_dir=<path to output> --version=0.x.x \
+  --base_package=tflite_model_maker
 """
 
 import argparse
@@ -24,8 +25,6 @@ from typing import Dict, Sequence
 
 from tensorflow_examples.lite.model_maker.core.api import api_util
 
-DEFAULT_API_FILE = 'golden_api.json'
-
 
 def parse_arguments():
   """Parse arguments for API gen."""
@@ -33,16 +32,16 @@ def parse_arguments():
   parser.add_argument(
       '-o', '--output_dir', type=str, help='Base dir to output generated APIs.')
   parser.add_argument(
-      '-i',
-      '--input_json',
-      type=str,
-      default=DEFAULT_API_FILE,
-      help='JSON file for Golden APIs.')
-  parser.add_argument(
       '-v',
       '--version',
       type=str,
       default='0.0.0dev',
+      help='Version of the package.')
+  parser.add_argument(
+      '-b',
+      '--base_package',
+      type=str,
+      default='tflite_model_maker',
       help='Version of the package.')
   return parser.parse_args()
 
@@ -60,16 +59,17 @@ def load_golden(json_file: str) -> Dict[str, Sequence[str]]:
   return json.loads(content)
 
 
-def run(output_dir: str, input_json: str, base_package: str,
-        version: str) -> None:
+def run(output_dir: str, base_package: str, version: str) -> None:
   """Runs main."""
-  imports = load_golden(input_json)
-  api_util.write_packages(output_dir, imports, base_package, version)
+  imports = load_golden('golden_api.json')
+  imports_doc = load_golden('golden_api_doc.json')
+  api_util.write_packages(output_dir, imports, imports_doc, base_package,
+                          version)
 
 
 def main() -> None:
   args = parse_arguments()
-  run(args.output_dir, args.input_json, api_util.PACKAGE_PREFIX, args.version)
+  run(args.output_dir, args.base_package, args.version)
 
 
 if __name__ == '__main__':

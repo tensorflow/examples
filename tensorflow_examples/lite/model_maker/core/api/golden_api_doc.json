@@ -1,0 +1,11 @@
+{
+  "": "Public APIs for TFLite Model Maker, a transfer learning library to train custom TFLite models.",
+  "audio_classifier": "APIs to train an audio classification model.",
+  "config": "APIs for the config of TFLite Model Maker.",
+  "image_classifier": "APIs to train an image classification model.",
+  "model_spec": "APIs for the model spec of TFLite Model Maker.",
+  "object_detector": "APIs to train an object detection model.",
+  "question_answer": "APIs to train a model that can answer questions based on a predefined text.",
+  "recommendation": "APIs to train an on-device recommendation model.",
+  "text_classifier": "APIs to train a text classification model."
+}

@@ -28,7 +28,7 @@ from absl.testing import parameterized
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.api import api_gen
 
-GOLDEN = api_gen.load_golden(api_gen.DEFAULT_API_FILE)
+GOLDEN = api_gen.load_golden('golden_api.json')
 
 
 class GoldenApiTest(tf.test.TestCase, parameterized.TestCase):
@@ -39,8 +39,10 @@ class GoldenApiTest(tf.test.TestCase, parameterized.TestCase):
     import tflite_model_maker  # pylint: disable=g-import-not-at-top
 
     for line in import_lines:
-      # Get `question_answer`, for `tflite_model_maker.question_answer`.
-      parts = package.split('.')[1:]
+      if not package:
+        continue
+
+      parts = package.split('.')
       # Get `c`, for `from a import c` or `from a import b as c`.
       name = line.split()[-1]
       parts.append(name)

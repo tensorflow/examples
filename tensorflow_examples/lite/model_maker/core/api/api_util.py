@@ -65,7 +65,8 @@ LICENSE = """# Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 """
 
 # Package prefix name for model maker.
-PACKAGE_PREFIX = 'tflite_model_maker'
+PACKAGE_PLACEHOLDER = '$PKG'
+ROOT_PACKAGE_KEY = ''
 
 
 @dataclasses.dataclass
@@ -121,7 +122,7 @@ class Symbol:
                                                      as_name)
     return import_line
 
-  def gen_parents_import(self, package_prefix: str) -> Dict[str, Sequence[str]]:
+  def gen_parents_import(self) -> Dict[str, Sequence[str]]:
     """Generates parents import."""
     length = len(self.exported_parts)
     parents_import = {}
@@ -129,7 +130,7 @@ class Symbol:
       parts = self.exported_parts[:i]
       import_name = self.exported_parts[i]
       parent = as_package(parts)
-      abs_package = split_name(package_prefix) + parts
+      abs_package = split_name(PACKAGE_PLACEHOLDER) + parts
       abs_package = as_package(abs_package)
       import_line = 'from {} import {}'.format(abs_package, import_name)
       parents_import[parent] = [import_line]
@@ -195,7 +196,12 @@ def _reset_apis():
   NAME_TO_SYMBOL = {}
 
 
-def generate_imports(package_prefix: str) -> Dict[str, Sequence[str]]:
+def _case_insensitive(s: str):
+  """To sort with case insensitive."""
+  return s.lower()
+
+
+def generate_imports() -> Dict[str, Sequence[str]]:
   """Generates imports."""
   import_dict = collections.defaultdict(set)
   for _, symbol in NAME_TO_SYMBOL.items():
@@ -203,25 +209,33 @@ def generate_imports(package_prefix: str) -> Dict[str, Sequence[str]]:
     import_line = symbol.gen_import()
     import_dict[package_name].add(import_line)
 
-    for k, line in symbol.gen_parents_import(package_prefix).items():
+    for k, line in symbol.gen_parents_import().items():
       import_dict[k].update(line)
 
   # Add prefix and sort import values.
   abs_import_dict = {}
   for package_name, value_set in import_dict.items():
-    parts = split_name(package_prefix) + split_name(package_name)
+    parts = split_name(package_name)
     abs_package = as_package(parts)
-    abs_import_dict[abs_package] = list(sorted(value_set))
+    abs_import_dict[abs_package] = list(
+        sorted(value_set, key=_case_insensitive))
   return abs_import_dict
 
 
+def generate_package_doc(package_name):
+  """Generates package doc."""
+  return '"""Generated API for package: {}."""'.format(package_name)
+
+
 def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]],
-                   base_package: str, version: str) -> None:
+                   doc_dict: Dict[str, str], base_package: str,
+                   version: str) -> None:
   """Writes packages as init files.
 
   Args:
     base_dir: str, base directory to write packages.
     imports_dict: dict, pairs of (namespace, list of imports).
+    doc_dict: dict, pairs of (namespace, package_doc).
     base_package: str, the base package name. (e.g. 'tflite_model_maker')
     version: str, version string. (e.g., 0.x.x)
   """
@@ -234,11 +248,21 @@ def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]],
     # Write header and import lines.
     full_path = os.path.join(parent_dir, '__init__.py')
 
-    lines = list(import_lines)
+    lines = [
+        line.replace(PACKAGE_PLACEHOLDER, base_package) for line in import_lines
+    ]
     # For base package add __version__.
-    if package_name == base_package:
+    if package_name == ROOT_PACKAGE_KEY:
       lines.append("""__version__ = '{}'""".format(version))
-    write_python_file(full_path, package_name, lines)
+
+    full_package_name = as_package(
+        split_name(base_package) + split_name(package_name))
+
+    if package_name in doc_dict:
+      doc = '"""{}"""'.format(doc_dict[package_name])
+    else:
+      doc = generate_package_doc(full_package_name)
+    write_python_file(full_path, doc, lines)
 
 
 PathOrStrType = Union[pathlib.Path, str]
@@ -250,12 +274,13 @@ def make_dirs_or_not(dirpath: Union[PathOrStrType]):
     os.makedirs(dirpath)
 
 
-def write_python_file(filepath: PathOrStrType, package_name: str,
+def write_python_file(filepath: PathOrStrType, package_doc: Optional[str],
                       lines: Optional[Sequence[str]]):
   """Writes python file."""
   with open(filepath, 'w') as f:
     f.write(LICENSE)
-    f.write('"""Generated API for package: {}."""\n\n'.format(package_name))
+    if package_doc:
+      f.write(package_doc + '\n\n')
     if lines:
       for line in lines:
         f.write(line + '\n')

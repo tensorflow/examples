@@ -87,8 +87,8 @@ class PackageGen:
       dirpath = self.build_dir.joinpath(*lib_names[:i])
       init_file = dirpath.joinpath('__init__.py')
       if not init_file.exists():
-        api_util.write_python_file(init_file,
-                                   api_util.as_package(lib_names[:i]), None)
+        doc = api_util.generate_package_doc(lib_names[:i])
+        api_util.write_python_file(init_file, doc, None)
 
     # Copy static files.
     static_files = [
@@ -105,13 +105,15 @@ class PackageGen:
 
     script_pys = []
     init_pys = []
+    public_api = os.path.join('public')
     for path in files:
       name = str(path)
       if path.is_dir():
         continue
       if path.suffix not in include_extentions:
         continue
-      if ('pip_package' in name) or ('_test.py' in name):
+      if ('pip_package' in name) or ('_test.py' in name) or (public_api
+                                                             in name):
         continue
 
       target_path = lib_pkg.joinpath(path.relative_to(self.base_dir))
@@ -126,6 +128,11 @@ class PackageGen:
         else:
           # Get a path like: a/__init__.py
           init_pys.append(relative)
+
+    # Add APIs files.
+    shutil.copytree(
+        self.base_dir.joinpath(public_api),
+        self.build_dir.joinpath(self.api_ns))
 
     # Create API's namespace mapping.
     internal_names = api_util.split_name(self.api_ns) + api_util.split_name(
@@ -144,12 +151,10 @@ class PackageGen:
         ns = ''
       real_ns = api_util.as_package(
           api_util.split_name(self.lib_ns) + api_util.split_name(ns))
+      doc = api_util.generate_package_doc(real_ns)
       content = 'from {} import *'.format(real_ns)
       api_util.make_dirs_or_not(official_py.parent)
-      api_util.write_python_file(official_py, real_ns, [content])
-
-    # Add APIs files.
-    self.add_api_files()
+      api_util.write_python_file(official_py, doc, [content])
 
     package_data = {
         '': ['*.txt', '*.md', '*.json'],
@@ -166,13 +171,6 @@ class PackageGen:
         'packages': namespace_packages,
         'package_data': package_data,
     }
-
-  def add_api_files(self):
-    """Adds API files."""
-    from tensorflow_examples.lite.model_maker.core.api import api_gen  # pylint: disable=g-import-not-at-top
-    api_gen.run(
-        str(self.build_dir), api_gen.DEFAULT_API_FILE, self.api_ns,
-        self.version)
 
   def _prepare_nightly(self):
     """Prepares nightly and gets extra setup config.

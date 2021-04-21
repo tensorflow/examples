@@ -25,15 +25,26 @@ from tensorflow_examples.lite.model_maker.core.api import include  # pylint: dis
 class ApiGenTest(tf.test.TestCase):
 
   def test_golden_api(self):
-    golden = api_gen.load_golden(api_gen.DEFAULT_API_FILE)
-    imports = api_util.generate_imports(api_util.PACKAGE_PREFIX)
+    golden = api_gen.load_golden('golden_api.json')
+    imports = api_util.generate_imports()
 
     imports_json = json.dumps(imports, indent=2, sort_keys=True)
-    golden_content = api_gen._read_golden_text(api_gen.DEFAULT_API_FILE)
+    golden_content = api_gen._read_golden_text('golden_api.json')
     msg = ('Exported APIs do not match `golden_api.json`. Please check it.\n\n'
            'Imports in json format: \n{}\n\n\n'
            'Golden file content:\n{}\n\n').format(imports_json, golden_content)
     self.assertDictEqual(imports, golden, msg)
+
+  def test_golden_api_doc(self):
+    golden = api_gen.load_golden('golden_api.json')
+    golden_doc = api_gen.load_golden('golden_api_doc.json')
+
+    api_keys = list(golden.keys())
+    doc_keys = list(golden_doc.keys())
+    msg = ('Expect package keys are matched: \n'
+           'In `golden_api.json`: \n{}\n\n'
+           'In `golden_api_doc.json`: \n{}\n\n').format(api_keys, doc_keys)
+    self.assertListEqual(api_keys, doc_keys, msg)
 
 
 if __name__ == '__main__':

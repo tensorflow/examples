@@ -31,7 +31,7 @@ from tensorflow_docs.api_generator import generate_lib
 from tensorflow_docs.api_generator import public_api
 
 import tensorflow_examples
-import tflite_model_maker
+import tensorflow_examples.lite.examples.model_maker.public as tflite_model_maker
 
 import yaml
 
