@@ -31,7 +31,7 @@ class ApiGenTest(tf.test.TestCase):
     imports_json = json.dumps(imports, indent=2, sort_keys=True)
     golden_content = api_gen._read_golden_text(api_gen.DEFAULT_API_FILE)
     msg = ('Exported APIs do not match `golden_api.json`. Please check it.\n\n'
-           'Imports in json format: \n{}\n'
+           'Imports in json format: \n{}\n\n\n'
            'Golden file content:\n{}\n\n').format(imports_json, golden_content)
     self.assertDictEqual(imports, golden, msg)
 
