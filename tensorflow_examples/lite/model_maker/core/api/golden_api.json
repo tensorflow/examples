@@ -1,5 +1,6 @@
 {
   "tflite_model_maker": [
+    "from tflite_model_maker import audio_classifier",
     "from tflite_model_maker import config",
     "from tflite_model_maker import image_classifier",
     "from tflite_model_maker import model_spec",
@@ -8,19 +9,17 @@
     "from tflite_model_maker import recommendation",
     "from tflite_model_maker import text_classifier"
   ],
+  "tflite_model_maker.audio_classifier": [
+    "from tensorflow_examples.lite.model_maker.core.data_util.audio_dataloader import DataLoader",
+    "from tensorflow_examples.lite.model_maker.core.task.audio_classifier import AudioClassifier",
+    "from tensorflow_examples.lite.model_maker.core.task.audio_classifier import create",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.audio_spec import BrowserFFTSpec as BrowserFftSpec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.audio_spec import YAMNetSpec as YamNetSpec"
+  ],
   "tflite_model_maker.config": [
     "from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat",
     "from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType",
     "from tensorflow_examples.lite.model_maker.core.task.configs import QuantizationConfig"
-  ],
-  "tflite_model_maker.model_spec": [
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import AUDIO_CLASSIFICATION_MODELS",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import IMAGE_CLASSIFICATION_MODELS",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import OBJECT_DETECTION_MODELS",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import QUESTION_ANSWER_MODELS",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import RECOMMENDATION_MODELS",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import TEXT_CLASSIFICATION_MODELS",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec import get"
   ],
   "tflite_model_maker.image_classifier": [
     "from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader as DataLoader",
@@ -34,6 +33,15 @@
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite4_spec as EfficientNetLite4Spec",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import mobilenet_v2_spec as MobilenetV2Spec",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import resnet_50_spec as Resnet50Spec"
+  ],
+  "tflite_model_maker.model_spec": [
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import AUDIO_CLASSIFICATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import IMAGE_CLASSIFICATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import OBJECT_DETECTION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import QUESTION_ANSWER_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import RECOMMENDATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import TEXT_CLASSIFICATION_MODELS",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec import get"
   ],
   "tflite_model_maker.object_detector": [
     "from tensorflow_examples.lite.model_maker.core.data_util.object_detector_dataloader import DataLoader",

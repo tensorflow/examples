@@ -23,6 +23,7 @@ import random
 import librosa
 import pandas as pd
 import tensorflow as tf
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
@@ -112,6 +113,7 @@ class ExamplesHelper(object):
     return ds
 
 
+@mm_export('audio_classifier.DataLoader')
 class DataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for audio tasks."""
 

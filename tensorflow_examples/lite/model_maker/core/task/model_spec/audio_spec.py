@@ -22,6 +22,7 @@ import os
 import tempfile
 
 import tensorflow as tf
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.task import model_util
 import tensorflow_hub as hub
 
@@ -98,6 +99,7 @@ def _load_tfjs_speech_command_model():
   return model_util.load_tfjs_keras_model(model_path)
 
 
+@mm_export('audio_classifier.BrowserFftSpec')
 class BrowserFFTSpec(BaseSpec):
   """Audio classification model spec using Browser FFT as preprocessing."""
 
@@ -207,6 +209,7 @@ class BrowserFFTSpec(BaseSpec):
     model_util.set_batch_size(model, batch_size=None)
 
 
+@mm_export('audio_classifier.YamNetSpec')
 class YAMNetSpec(BaseSpec):
   """Audio classification model spec using YAMNet embedding."""
 

@@ -18,12 +18,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
+@mm_export('audio_classifier.create')
 def create(train_data,
            model_spec,
            validation_data=None,
@@ -62,6 +64,7 @@ def create(train_data,
   return task
 
 
+@mm_export('audio_classifier.AudioClassifier')
 class AudioClassifier(classification_model.ClassificationModel):
   """Audio classifier for training/inference and exporing."""
 
