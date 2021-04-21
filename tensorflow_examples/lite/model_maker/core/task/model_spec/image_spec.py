@@ -104,7 +104,7 @@ def efficientnet_lite2_spec(**kwargs):
   return ImageModelSpec(**args)
 
 
-@mm_export('image_classifier.EfficientNetLit3Spec')
+@mm_export('image_classifier.EfficientNetLite3Spec')
 def efficientnet_lite3_spec(**kwargs):
   """Model specification for EfficientNet-Lite3."""
   args = util.dict_with_default(
