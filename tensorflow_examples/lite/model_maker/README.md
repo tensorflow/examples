@@ -47,25 +47,32 @@ utilizes this library with just 4 lines of code, each of which representing one
 step of the overall process. For more detail, you could refer to
 [Colab for image classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_image_classification.ipynb).
 
-1.   Load input data specific to an on-device ML app.
+*   1. Import the required modules.
 
 ```python
-data = ImageClassifierDataLoader.from_folder('flower_photos/')
+from tflite_model_maker import image_classifier
+from tflite_model_maker.image_classifier import DataLoader
 ```
 
-2. Customize the TensorFlow model.
+*   2. Load input data specific to an on-device ML app.
+
+```python
+data = DataLoader.from_folder('flower_photos/')
+```
+
+*   3. Customize the TensorFlow model.
 
 ```python
 model = image_classifier.create(data)
 ```
 
-3. Evaluate the model.
+*   4. Evaluate the model.
 
 ```python
 loss, accuracy = model.evaluate()
 ```
 
-4.  Export to Tensorflow Lite model and label file in `export_dir`.
+*   5. Export to Tensorflow Lite model and label file in `export_dir`.
 
 ```python
 model.export(export_dir='/tmp/')
