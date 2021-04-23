@@ -224,7 +224,7 @@ class ImageClassifier(classification_model.ClassificationModel):
           loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
           metrics=['accuracy'])
 
-  def train(self, train_data, validation_data=None, hparams=None, class_weight=None):
+  def train(self, train_data, validation_data=None, hparams=None, class_weight):
     """Feeds the training data for training.
 
     Args:
