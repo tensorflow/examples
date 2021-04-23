@@ -57,13 +57,13 @@ classifiers = [
 # Set package version.
 if nightly:
   project_name = '{}-nightly'.format(project_name)
-  version = '0.2.6'  # Version prefix, usually major.minor.micro.
+  version = '0.3.0'  # Version prefix, usually major.minor.micro.
   version = '{:s}.dev{:s}'.format(version, datestring)
   classifiers += [
       'Development Status :: 4 - Beta',
   ]
 else:
-  version = '0.2.5'
+  version = '0.3.0'
 
 # Path to model_maker dir: <repo>/tensorflow_examples/lite/model_maker
 BASE_DIR = pathlib.Path(os.path.abspath(__file__)).parents[1]

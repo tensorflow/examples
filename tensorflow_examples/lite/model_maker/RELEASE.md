@@ -1,11 +1,17 @@
+# Release 0.3
+
+## 0.3.0
+
+*   Export TFLite Model Maker public APIs, and adapt colabs as demo code.
+*   Add three new tasks: Object Detection, Audio Classification and
+    Recommendation.
+
 # Release 0.2
-
-Refactor the code to be more flexible and extentable without changing API.
-
-Add executable test script for pip package.
 
 ## 0.2.5
 
+*   Refactor the code to be more flexible and extentable without changing API.
+*   Add executable test script for pip package.
 *   Update tensorflow-hub version in requirements.txt to fix incompatible error
     when installing pip package.
 

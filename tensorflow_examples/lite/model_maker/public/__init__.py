@@ -22,4 +22,4 @@ from tflite_model_maker import question_answer
 from tflite_model_maker import recommendation
 from tflite_model_maker import text_classifier
 
-__version__ = '0.2.6'
+__version__ = '0.3.0'
