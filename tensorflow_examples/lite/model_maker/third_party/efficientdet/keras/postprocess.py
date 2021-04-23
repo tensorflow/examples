@@ -199,7 +199,7 @@ def nms(params, boxes: T, scores: T, classes: T,
 
   nms_boxes = tf.gather(boxes, nms_top_idx)
   nms_classes = tf.cast(
-      tf.gather(classes, nms_top_idx) + CLASS_OFFSET, tf.float32)
+      tf.gather(classes, nms_top_idx) + CLASS_OFFSET, boxes.dtype)
   return nms_boxes, nms_scores, nms_classes, nms_valid_lens
 
 

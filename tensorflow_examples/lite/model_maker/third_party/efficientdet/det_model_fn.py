@@ -41,8 +41,7 @@ def update_learning_rate_schedule_parameters(params):
       params['learning_rate'] * batch_size / _DEFAULT_BATCH_SIZE)
 
   if 'lr_warmup_init' in params:
-    params['adjusted_lr_warmup_init'] = (
-        params['lr_warmup_init'] * batch_size / _DEFAULT_BATCH_SIZE)
+    params['adjusted_lr_warmup_init'] = params['lr_warmup_init']
 
   steps_per_epoch = params['num_examples_per_epoch'] / batch_size
   params['lr_warmup_step'] = int(params['lr_warmup_epoch'] * steps_per_epoch)

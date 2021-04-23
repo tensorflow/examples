@@ -307,7 +307,8 @@ def main(_):
 
       logging.info('Starting to evaluate.')
       try:
-        eval_results = eval_est.evaluate(eval_input_fn, steps=eval_steps)
+        eval_results = eval_est.evaluate(
+            eval_input_fn, steps=eval_steps, name=FLAGS.eval_name)
         # Terminate eval job when final checkpoint is reached.
         try:
           current_step = int(os.path.basename(ckpt).split('-')[1])
