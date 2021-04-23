@@ -91,7 +91,7 @@ def create_optimizer(init_lr, num_decay_steps, num_warmup_steps):
   return optimizer
 
 
-def train_model(model, hparams, train_data_and_size, validation_data_and_size):
+def train_model(model, hparams, train_data_and_size, validation_data_and_size, class_weight):
   """Trains model with the given data and hyperparameters.
 
   Args:
@@ -112,6 +112,11 @@ def train_model(model, hparams, train_data_and_size, validation_data_and_size):
     validation_data_and_size: A (data, size) tuple in which data is validation
       data to be fed in tf.keras.Model.fit(), size is a Python integer with the
       numbers of validation.
+    class_weight: : Optional dictionary mapping class indices (integers) to a
+      weight (float) value, used for weighting the loss function
+      (during training only). This can be useful to tell the model to
+      "pay more attention" to samples from an under-represented class.
+
 
   Returns:
     The tf.keras.callbacks.History object returned by tf.keras.Model.fit().
@@ -152,4 +157,5 @@ def train_model(model, hparams, train_data_and_size, validation_data_and_size):
       steps_per_epoch=steps_per_epoch,
       validation_data=validation_data,
       validation_steps=validation_steps,
-      callbacks=[summary_callback, checkpoint_callback])
+      callbacks=[summary_callback, checkpoint_callback],
+      class_weight=class_weight)

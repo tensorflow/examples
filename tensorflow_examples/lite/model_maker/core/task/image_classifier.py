@@ -57,7 +57,8 @@ def create(train_data,
            use_hub_library=True,
            warmup_steps=None,
            model_dir=None,
-           do_train=True):
+           do_train=True,
+           class_weight=None):
   """Loads data and retrains the model based on data for image classification.
 
   Args:
@@ -86,6 +87,10 @@ def create(train_data,
     model_dir: The location of the model checkpoint files. Only used when
       `use_hub_library` is False.
     do_train: Whether to run training.
+    class_weight: : Optional dictionary mapping class indices (integers) to a
+      weight (float) value, used for weighting the loss function
+      (during training only). This can be useful to tell the model to
+      "pay more attention" to samples from an under-represented class.
 
   Returns:
     An instance of ImageClassifier class.
@@ -122,7 +127,7 @@ def create(train_data,
 
   if do_train:
     tf.compat.v1.logging.info('Retraining the models...')
-    image_classifier.train(train_data, validation_data)
+    image_classifier.train(train_data, validation_data, class_weight)
   else:
     # Used in evaluation.
     image_classifier.create_model(with_loss_and_metrics=True)
@@ -219,7 +224,7 @@ class ImageClassifier(classification_model.ClassificationModel):
           loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
           metrics=['accuracy'])
 
-  def train(self, train_data, validation_data=None, hparams=None):
+  def train(self, train_data, validation_data=None, hparams=None, class_weight=None):
     """Feeds the training data for training.
 
     Args:
@@ -227,6 +232,10 @@ class ImageClassifier(classification_model.ClassificationModel):
       validation_data: Validation data. If None, skips validation process.
       hparams: An instance of hub_lib.HParams or
         train_image_classifier_lib.HParams. Anamedtuple of hyperparameters.
+      class_weight: : Optional dictionary mapping class indices (integers) to a
+        weight (float) value, used for weighting the loss function
+        (during training only). This can be useful to tell the model to
+        "pay more attention" to samples from an under-represented class.
 
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
@@ -260,7 +269,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     if isinstance(hparams, train_image_classifier_lib.HParams):
       lib = train_image_classifier_lib
     self.history = lib.train_model(self.model, hparams, train_data_and_size,
-                                   validation_data_and_size)
+                                   validation_data_and_size, class_weight)
     return self.history
 
   def _export_tflite(self,
