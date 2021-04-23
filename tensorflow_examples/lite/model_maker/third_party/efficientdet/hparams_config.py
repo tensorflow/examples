@@ -291,6 +291,10 @@ def default_detection_configs():
   h.positives_momentum = None
   h.grad_checkpoint = False
 
+  # Parameters for the Checkpoint Callback.
+  h.verbose = 1
+  h.save_freq = 'epoch'
+
   return h
 
 

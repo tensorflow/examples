@@ -18,7 +18,6 @@ Implements the interface of COCO API and metric_fn in tf.TPUEstimator.
 COCO API: github.com/cocodataset/cocoapi/
 """
 import json
-import logging
 import os
 import sys
 from absl import logging
@@ -43,9 +42,9 @@ def block_print(log_level):
     sys.stdout = open(os.devnull, 'w')
 
 
-def enable_print():
+def enable_print(original_stdout):
   """Enables print function."""
-  sys.stdout = sys.__stdout__
+  sys.stdout = original_stdout
 
 
 class EvaluationMetric():
@@ -90,7 +89,7 @@ class EvaluationMetric():
     self.category_ids = []
     self.metric_values = None
 
-  def evaluate(self, log_level=logging.ERROR):
+  def evaluate(self, log_level=tf.compat.v1.logging.INFO):
     """Evaluates with detections from all images with COCO API.
 
     Args:
@@ -107,6 +106,7 @@ class EvaluationMetric():
                  'for efficientdet/coco_metric to work.')
       raise ImportError(message)
 
+    original_stdout = sys.stdout
     block_print(log_level)
     if self.filename:
       coco_gt = COCO(self.filename)
@@ -114,7 +114,7 @@ class EvaluationMetric():
       coco_gt = COCO()
       coco_gt.dataset = self.dataset
       coco_gt.createIndex()
-    enable_print()
+    enable_print(original_stdout)
 
     if self.testdev_dir:
       # Run on test-dev dataset.
@@ -146,7 +146,7 @@ class EvaluationMetric():
       coco_eval.evaluate()
       coco_eval.accumulate()
       coco_eval.summarize()
-      enable_print()
+      enable_print(original_stdout)
       coco_metrics = coco_eval.stats
 
       if self.label_map:
@@ -168,7 +168,7 @@ class EvaluationMetric():
       # Return the concat normal and per-class AP.
       return np.array(coco_metrics, dtype=np.float32)
 
-  def result(self, log_level=logging.ERROR):
+  def result(self, log_level=tf.compat.v1.logging.INFO):
     """Return the metric values (and compute it if needed)."""
     if self.metric_values is None:
       self.metric_values = self.evaluate(log_level)
