@@ -31,7 +31,7 @@
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite3_spec as EfficientNetLite3Spec",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite4_spec as EfficientNetLite4Spec",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import ImageModelSpec as ImageSpec",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import mobilenet_v2_spec as MobilenetV2Spec",
+    "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import mobilenet_v2_spec as MobileNetV2Spec",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import resnet_50_spec as Resnet50Spec"
   ],
   "model_spec": [

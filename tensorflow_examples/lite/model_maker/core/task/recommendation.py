@@ -66,7 +66,13 @@ def create(train_data,
   # Create model spec.
   if model_spec_options is None:
     model_spec_options = {}
-  model_spec = ms.get(model_spec)(**model_spec_options)
+
+  if isinstance(model_spec, str):
+    spec = ms.MODEL_SPECS[model_spec]
+  else:
+    spec = model_spec
+
+  model_spec = spec(**model_spec_options)
 
   # Use model_dir or a temp folder to store intermediate checkpoints, etc.
   if model_dir is None:

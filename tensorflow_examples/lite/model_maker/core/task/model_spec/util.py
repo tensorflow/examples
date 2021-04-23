@@ -13,6 +13,9 @@
 # limitations under the License.
 """Utilities for model specification."""
 
+import inspect
+import re
+
 import tensorflow as tf
 
 
@@ -34,3 +37,20 @@ def get_num_gpus(num_gpus):
   if num_gpus > tot_num_gpus or num_gpus == -1:
     num_gpus = tot_num_gpus
   return num_gpus
+
+
+def wrap_doc(func_or_class, short_desciption):
+  """Wrap doc string of function or class, and replace short description."""
+  if inspect.isfunction(func_or_class):
+    doc = func_or_class.__doc__
+  elif inspect.isclass(func_or_class):
+    doc = func_or_class.__init__.__doc__
+  else:
+    raise ValueError('Only support function or classtion, but got: {}.'.format(
+        func_or_class))
+
+  if not doc:
+    doc = ''
+  # Replace the first line to the new short description.
+  doc = re.sub(r'^.*', short_desciption, doc, count=1)
+  return doc

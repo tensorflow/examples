@@ -13,6 +13,7 @@
 # limitations under the License.
 """Model specification."""
 
+import functools
 import inspect
 
 from tensorflow_examples.lite.model_maker.core.api import mm_export
@@ -126,7 +127,8 @@ def get(spec_or_str):
   else:
     model_spec = spec_or_str
 
-  if inspect.isclass(model_spec) or inspect.isfunction(model_spec):
+  if inspect.isclass(model_spec) or inspect.isfunction(
+      model_spec) or isinstance(model_spec, functools.partial):
     return model_spec()
   else:
     return model_spec
