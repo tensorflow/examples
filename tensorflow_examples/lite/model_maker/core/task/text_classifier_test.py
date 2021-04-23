@@ -240,7 +240,9 @@ class TextClassifierTest(tf.test.TestCase):
 
   def _test_export_to_tfjs(self, model):
     output_path = os.path.join(self.get_temp_dir(), 'tfjs')
-    model.export(self.get_temp_dir(), export_format=ExportFormat.TFJS)
+    model.export(
+        self.get_temp_dir(),
+        export_format=[ExportFormat.TFLITE, ExportFormat.TFJS])
 
     self.assertTrue(os.path.isdir(output_path))
     self.assertNotEmpty(os.listdir(output_path))

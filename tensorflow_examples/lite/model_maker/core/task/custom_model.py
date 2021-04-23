@@ -163,6 +163,7 @@ class CustomModel(abc.ABC):
       tf.compat.v1.logging.info(
           'TensorFlow Lite model exported successfully: %s' % tflite_filepath)
     else:
+      tflite_filepath = None
       with_metadata = False
 
     if ExportFormat.SAVED_MODEL in export_format:
@@ -174,7 +175,7 @@ class CustomModel(abc.ABC):
 
     if ExportFormat.TFJS in export_format:
       tfjs_output_path = os.path.join(export_dir, tfjs_folder_name)
-      self._export_tfjs(tfjs_output_path)
+      self._export_tfjs(tfjs_output_path, tflite_filepath=tflite_filepath)
 
     if ExportFormat.VOCAB in export_format:
       if with_metadata:
@@ -234,13 +235,16 @@ class CustomModel(abc.ABC):
     """
     model_util.export_tflite(self.model, tflite_filepath, quantization_config)
 
-  def _export_tfjs(self, tfjs_filepath):
+  def _export_tfjs(self, tfjs_filepath, tflite_filepath=None, **kwargs):
     """Converts the retrained model to tflite format.
 
     Args:
       tfjs_filepath: File path to save tflite model.
+      tflite_filepath: File path to existing tflite model.
+      **kwargs: Additional kwargs.
     """
-    model_util.export_tfjs(self.model, tfjs_filepath)
+    model_util.export_tfjs(
+        self.model, tfjs_filepath, tflite_filepath=tflite_filepath, **kwargs)
 
   def _keras_callbacks(self, model_dir):
     """Returns a list of default keras callbacks for `model.fit`."""

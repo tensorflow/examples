@@ -34,7 +34,6 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task import train_image_classifier_lib
 
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
-from tflite_support import metadata as _metadata  # pylint: disable=g-direct-tensorflow-import
 
 
 def get_hub_lib_hparams(**kwargs):
@@ -303,12 +302,10 @@ class ImageClassifier(classification_model.ClassificationModel):
       # Validate the output model file by reading the metadata and produce
       # a json file with the metadata under the export path
       if export_metadata_json_file:
-        displayer = _metadata.MetadataDisplayer.with_model_file(tflite_filepath)
+        metadata_json = model_util.extract_tflite_metadata_json(tflite_filepath)
         export_json_file = os.path.splitext(tflite_filepath)[0] + '.json'
-
-        content = displayer.get_metadata_json()
         with open(export_json_file, 'w') as f:
-          f.write(content)
+          f.write(metadata_json)
 
   def _get_hparams_or_default(self, hparams):
     """Returns hparams if not none, otherwise uses default one."""
