@@ -14,7 +14,6 @@
 """Model specification for object detection."""
 
 import collections
-import logging
 import os
 import tempfile
 from typing import Optional, Tuple, Dict
@@ -132,7 +131,8 @@ class EfficientDetModelSpec(object):
                use_xla: bool = False,
                profile: bool = False,
                debug: bool = False,
-               tf_random_seed: int = 111111) -> None:
+               tf_random_seed: int = 111111,
+               verbose: int = 0) -> None:
     """Initialze an instance with model paramaters.
 
     Args:
@@ -169,6 +169,7 @@ class EfficientDetModelSpec(object):
       debug: Enable debug mode.
       tf_random_seed: Fixed random seed for deterministic execution across runs
         for debugging.
+      verbose: verbosity mode for `tf.keras.callbacks.ModelCheckpoint`, 0 or 1.
     """
     self.model_name = model_name
     self.uri = uri
@@ -223,7 +224,8 @@ class EfficientDetModelSpec(object):
         strategy=strategy,
         batch_size=batch_size,
         tf_random_seed=tf_random_seed,
-        debug=debug)
+        debug=debug,
+        verbose=verbose)
     config.override(params, True)
     self.config = config
 
@@ -289,7 +291,7 @@ class EfficientDetModelSpec(object):
   def _get_metric_dict(self, evaluator: coco_metric.EvaluationMetric,
                        label_map: collections.OrderedDict) -> Dict[str, float]:
     """Gets the metric dict for evaluation."""
-    metrics = evaluator.result(log_level=logging.INFO)
+    metrics = evaluator.result(log_level=tf.compat.v1.logging.INFO)
     metric_dict = {}
     for i, name in enumerate(evaluator.metric_names):
       metric_dict[name] = metrics[i]
