@@ -142,7 +142,7 @@ DSP (Digital Signal Processor) or NPU (Neural Processing Unit) is available, a
 [`Delegate`](https://www.tensorflow.org/lite/performance/delegates) can be used
 to take full advantage of these hardware.
 
-Please note that there are performance edge cases and developers are adviced to
+Please note that there are performance edge cases and developers are advised to
 test with a representative set of devices prior to production.
 
 ```java
