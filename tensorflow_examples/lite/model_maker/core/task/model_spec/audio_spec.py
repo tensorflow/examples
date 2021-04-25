@@ -169,9 +169,7 @@ class BrowserFFTSpec(BaseSpec):
 
   def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
     model.compile(
-        optimizer='adam',
-        loss='sparse_categorical_crossentropy',
-        metrics=['acc'])
+        optimizer='adam', loss='categorical_crossentropy', metrics=['acc'])
 
     hist = model.fit(
         train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)
@@ -231,9 +229,7 @@ class YAMNetSpec(BaseSpec):
 
   def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
     model.compile(
-        optimizer='sgd',
-        loss='sparse_categorical_crossentropy',
-        metrics=['acc'])
+        optimizer='sgd', loss='categorical_crossentropy', metrics=['acc'])
 
     hist = model.fit(
         train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)

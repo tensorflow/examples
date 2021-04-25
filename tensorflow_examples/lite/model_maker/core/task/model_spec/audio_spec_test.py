@@ -24,6 +24,37 @@ import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
+def _gen_dataset(spec, total_samples, num_classes, batch_size, seed):
+
+  def fill_shape(new_shape):
+
+    @tf.function
+    def fn(value):
+      return tf.cast(tf.fill(dims=new_shape, value=value), tf.float32)
+
+    return fn
+
+  wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
+  wav_ds = wav_ds.map(fill_shape([
+      spec.target_sample_rate,
+  ]))
+
+  labels = tf.data.Dataset.from_tensor_slices(
+      np.random.randint(low=0, high=num_classes, size=total_samples))
+  dataset = tf.data.Dataset.zip((wav_ds, labels))
+  dataset = spec.preprocess_ds(dataset)
+
+  @tf.function
+  def _one_hot_encoding_label(wav, label):
+    return wav, tf.one_hot(label, num_classes)
+
+  dataset = dataset.map(_one_hot_encoding_label)
+
+  dataset = dataset.batch(batch_size)
+
+  return dataset
+
+
 class YAMNetSpecTest(tf.test.TestCase):
 
   @classmethod
@@ -81,28 +112,11 @@ class YAMNetSpecTest(tf.test.TestCase):
   def _train(self, total_samples, num_classes, batch_size, seed):
     tf.keras.backend.clear_session()
 
-    def fill_shape(new_shape):
-
-      @tf.function
-      def fn(value):
-        return tf.cast(tf.fill(dims=new_shape, value=value), tf.float32)
-
-      return fn
-
     tf.random.set_seed(seed)
     np.random.seed(seed)
 
-    wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
-    wav_ds = wav_ds.map(fill_shape([
-        16000,
-    ]))
-
-    labels = tf.data.Dataset.from_tensor_slices(
-        np.random.randint(low=0, high=num_classes, size=total_samples))
-    dataset = tf.data.Dataset.zip((wav_ds, labels))
-    dataset = self._spec.preprocess_ds(dataset)
-    dataset = dataset.batch(batch_size)
-
+    dataset = _gen_dataset(self._spec, total_samples, num_classes, batch_size,
+                           seed)
     model = self._spec.create_model(num_classes)
     self._spec.run_classifier(
         model, epochs=1, train_ds=dataset, validation_ds=dataset)
@@ -162,27 +176,11 @@ class BrowserFFTSpecTest(tf.test.TestCase):
   def _train(self, total_samples, num_classes, batch_size, seed):
     tf.keras.backend.clear_session()
 
-    def fill_shape(new_shape):
-
-      def fn(value):
-        return tf.fill(dims=new_shape, value=value)
-
-      return fn
-
     tf.random.set_seed(seed)
     np.random.seed(seed)
 
-    wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
-    wav_ds = wav_ds.map(fill_shape([
-        self._spec.expected_waveform_len,
-    ]))
-
-    labels = tf.data.Dataset.from_tensor_slices(
-        np.random.randint(low=0, high=num_classes, size=total_samples))
-    dataset = tf.data.Dataset.zip((wav_ds, labels))
-    dataset = self._spec.preprocess_ds(dataset)
-    dataset = dataset.batch(batch_size)
-
+    dataset = _gen_dataset(self._spec, total_samples, num_classes, batch_size,
+                           seed)
     model = self._spec.create_model(num_classes)
     self._spec.run_classifier(
         model, epochs=1, train_ds=dataset, validation_ds=dataset)

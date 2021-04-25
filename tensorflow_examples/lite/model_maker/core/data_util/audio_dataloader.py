@@ -303,6 +303,12 @@ class DataLoader(dataloader.ClassificationDataLoader):
     ds = spec.preprocess_ds(ds, is_training=is_training)
     ds = ds.filter(_elements_finite)
 
+    @tf.function
+    def _one_hot_encoding_label(wav, label):
+      return wav, tf.one_hot(label, len(self.index_to_label))
+
+    ds = ds.map(_one_hot_encoding_label, num_parallel_calls=autotune)
+
     if is_training:
       if shuffle:
         # Shuffle size should be bigger than the batch_size. Otherwise it's only
