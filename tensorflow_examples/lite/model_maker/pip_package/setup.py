@@ -63,7 +63,9 @@ if nightly:
       'Development Status :: 4 - Beta',
   ]
 else:
+  # LINT.IfChange(model_maker_pip_version)
   version = '0.3.0'
+  # LINT.ThenChange(../public/__init__.py, ../RELEASE.md)
 
 # Path to model_maker dir: <repo>/tensorflow_examples/lite/model_maker
 BASE_DIR = pathlib.Path(os.path.abspath(__file__)).parents[1]
