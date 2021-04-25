@@ -14,6 +14,7 @@
 """Model specification for object detection."""
 
 import collections
+import functools
 import os
 import tempfile
 from typing import Optional, Tuple, Dict
@@ -539,56 +540,52 @@ class EfficientDetModelSpec(object):
         f.write(tflite_model)
 
 
-@mm_export('object_detector.EfficientDetLite0Spec')
-def efficientdet_lite0_spec(**kwargs) -> EfficientDetModelSpec:
-  args = util.dict_with_default(
-      default_dict=dict(
-          model_name='efficientdet-lite0',
-          uri='https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1'
-      ),
-      **kwargs)
-  return EfficientDetModelSpec(**args)
+efficientdet_lite0_spec = functools.partial(
+    EfficientDetModelSpec,
+    model_name='efficientdet-lite0',
+    uri='https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1',
+)
+efficientdet_lite0_spec.__doc__ = util.wrap_doc(
+    EfficientDetModelSpec, 'Creates EfficientDet-Lite0 model spec.')
+mm_export('object_detector.EfficientDetLite0Spec').export_constant(
+    __name__, 'efficientdet_lite0_spec')
 
+efficientdet_lite1_spec = functools.partial(
+    EfficientDetModelSpec,
+    model_name='efficientdet-lite1',
+    uri='https://tfhub.dev/tensorflow/efficientdet/lite1/feature-vector/1',
+)
+efficientdet_lite1_spec.__doc__ = util.wrap_doc(
+    EfficientDetModelSpec, 'Creates EfficientDet-Lite1 model spec.')
+mm_export('object_detector.EfficientDetLite1Spec').export_constant(
+    __name__, 'efficientdet_lite1_spec')
 
-@mm_export('object_detector.EfficientDetLite1Spec')
-def efficientdet_lite1_spec(**kwargs) -> EfficientDetModelSpec:
-  args = util.dict_with_default(
-      default_dict=dict(
-          model_name='efficientdet-lite1',
-          uri='https://tfhub.dev/tensorflow/efficientdet/lite1/feature-vector/1'
-      ),
-      **kwargs)
-  return EfficientDetModelSpec(**args)
+efficientdet_lite2_spec = functools.partial(
+    EfficientDetModelSpec,
+    model_name='efficientdet-lite2',
+    uri='https://tfhub.dev/tensorflow/efficientdet/lite2/feature-vector/1',
+)
+efficientdet_lite2_spec.__doc__ = util.wrap_doc(
+    EfficientDetModelSpec, 'Creates EfficientDet-Lite2 model spec.')
+mm_export('object_detector.EfficientDetLite2Spec').export_constant(
+    __name__, 'efficientdet_lite2_spec')
 
+efficientdet_lite3_spec = functools.partial(
+    EfficientDetModelSpec,
+    model_name='efficientdet-lite3',
+    uri='https://tfhub.dev/tensorflow/efficientdet/lite3/feature-vector/1',
+)
+efficientdet_lite3_spec.__doc__ = util.wrap_doc(
+    EfficientDetModelSpec, 'Creates EfficientDet-Lite3 model spec.')
+mm_export('object_detector.EfficientDetLite3Spec').export_constant(
+    __name__, 'efficientdet_lite3_spec')
 
-@mm_export('object_detector.EfficientDetLite2Spec')
-def efficientdet_lite2_spec(**kwargs) -> EfficientDetModelSpec:
-  args = util.dict_with_default(
-      default_dict=dict(
-          model_name='efficientdet-lite2',
-          uri='https://tfhub.dev/tensorflow/efficientdet/lite2/feature-vector/1'
-      ),
-      **kwargs)
-  return EfficientDetModelSpec(**args)
-
-
-@mm_export('object_detector.EfficientDetLite3Spec')
-def efficientdet_lite3_spec(**kwargs) -> EfficientDetModelSpec:
-  args = util.dict_with_default(
-      default_dict=dict(
-          model_name='efficientdet-lite3',
-          uri='https://tfhub.dev/tensorflow/efficientdet/lite3/feature-vector/1'
-      ),
-      **kwargs)
-  return EfficientDetModelSpec(**args)
-
-
-@mm_export('object_detector.EfficientDetLite4Spec')
-def efficientdet_lite4_spec(**kwargs) -> EfficientDetModelSpec:
-  args = util.dict_with_default(
-      default_dict=dict(
-          model_name='efficientdet-lite4',
-          uri='https://tfhub.dev/tensorflow/efficientdet/lite4/feature-vector/1'
-      ),
-      **kwargs)
-  return EfficientDetModelSpec(**args)
+efficientdet_lite4_spec = functools.partial(
+    EfficientDetModelSpec,
+    model_name='efficientdet-lite4',
+    uri='https://tfhub.dev/tensorflow/efficientdet/lite4/feature-vector/2',
+)
+efficientdet_lite4_spec.__doc__ = util.wrap_doc(
+    EfficientDetModelSpec, 'Creates EfficientDet-Lite4 model spec.')
+mm_export('object_detector.EfficientDetLite4Spec').export_constant(
+    __name__, 'efficientdet_lite4_spec')

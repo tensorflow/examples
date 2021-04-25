@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import functools
 import os
 import re
 import tempfile
@@ -983,46 +984,48 @@ def bert_qa_spec(**kwargs):
   return BertQAModelSpec(**kwargs)
 
 
-@mm_export('text_classifier.MobileBertClassifierSpec')
-def mobilebert_classifier_spec(**kwargs):
-  """Model specification for MobileBERT in the text classification task."""
-  args = util.dict_with_default(
-      default_dict=dict(
-          uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
-          is_tf2=False,
-          distribution_strategy='off',
-          name='MobileBert',
-          default_batch_size=48),
-      **kwargs)
-  return BertClassifierModelSpec(**args)
+mobilebert_classifier_spec = functools.partial(
+    BertClassifierModelSpec,
+    uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
+    is_tf2=False,
+    distribution_strategy='off',
+    name='MobileBert',
+    default_batch_size=48,
+)
+mobilebert_classifier_spec.__doc__ = util.wrap_doc(
+    BertClassifierModelSpec,
+    'Creates MobileBert model spec for the text classification task.')
+mm_export('text_classifier.MobileBertClassifierSpec').export_constant(
+    __name__, 'mobilebert_classifier_spec')
 
+mobilebert_qa_spec = functools.partial(
+    BertQAModelSpec,
+    uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
+    is_tf2=False,
+    distribution_strategy='off',
+    learning_rate=4e-05,
+    name='MobileBert',
+    default_batch_size=32,
+)
+mobilebert_qa_spec.__doc__ = util.wrap_doc(
+    BertQAModelSpec,
+    'Creates MobileBert model spec for the question answer task.')
+mm_export('question_answer.MobileBertQaSpec').export_constant(
+    __name__, 'mobilebert_qa_spec')
 
-@mm_export('question_answer.MobileBertQaSpec')
-def mobilebert_qa_spec(**kwargs):
-  """Model specification for MobileBERT in the question answer task."""
-  args = util.dict_with_default(
-      default_dict=dict(
-          uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
-          is_tf2=False,
-          distribution_strategy='off',
-          learning_rate=4e-05,
-          name='MobileBert',
-          default_batch_size=32),
-      **kwargs)
-  return BertQAModelSpec(**args)
-
-
-@mm_export('question_answer.MobileBertQaSquadSpec')
-def mobilebert_qa_squad_spec(**kwargs):
-  """Model specification for MobileBERT that already retrained on SQuAD1.1."""
-  args = util.dict_with_default(
-      default_dict=dict(
-          uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/squadv1/1',
-          is_tf2=False,
-          distribution_strategy='off',
-          learning_rate=4e-05,
-          name='MobileBert',
-          init_from_squad_model=True,
-          default_batch_size=32),
-      **kwargs)
-  return BertQAModelSpec(**args)
+mobilebert_qa_squad_spec = functools.partial(
+    BertQAModelSpec,
+    uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/squadv1/1',
+    is_tf2=False,
+    distribution_strategy='off',
+    learning_rate=4e-05,
+    name='MobileBert',
+    init_from_squad_model=True,
+    default_batch_size=32,
+)
+mobilebert_qa_squad_spec.__doc__ = util.wrap_doc(
+    BertQAModelSpec,
+    'Creates MobileBert model spec that\'s already retrained on SQuAD1.1 for '
+    'the question answer task.')
+mm_export('question_answer.MobileBertQaSquadSpec').export_constant(
+    __name__, 'mobilebert_qa_squad_spec')
