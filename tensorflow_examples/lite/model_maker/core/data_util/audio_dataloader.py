@@ -239,13 +239,14 @@ class DataLoader(dataloader.ClassificationDataLoader):
     Args:
       batch_size: A integer, the returned dataset will be batched by this size.
       is_training: A boolean, when True, the returned dataset will be optionally
-        shuffled and repeated as an endless dataset.
+        shuffled. Data augmentation, if exists, will also be applied to the
+        returned dataset.
       shuffle: A boolean, when True, the returned dataset will be shuffled to
-        create randomness during model training.
+        create randomness during model training. Only applies when `is_training`
+        is set to True.
       input_pipeline_context: A InputContext instance, used to shared dataset
         among multiple workers when distribution strategy is used.
-      preprocess: A function taking three arguments in order, feature, label and
-        boolean is_training.
+      preprocess: Not in use.
       drop_remainder: boolean, whether the finaly batch drops remainder.
 
     Returns:
@@ -258,9 +259,10 @@ class DataLoader(dataloader.ClassificationDataLoader):
     spec = self._spec
     autotune = tf.data.AUTOTUNE
 
-    options = tf.data.Options()
-    options.experimental_deterministic = False
-    ds = ds.with_options(options)
+    if is_training and shuffle:
+      options = tf.data.Options()
+      options.experimental_deterministic = False
+      ds = ds.with_options(options)
 
     ds = dataloader.shard(ds, input_pipeline_context)
 
