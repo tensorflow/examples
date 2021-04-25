@@ -23,8 +23,7 @@ from absl import app
 from absl import flags
 from absl import logging
 
-from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader
-from tensorflow_examples.lite.model_maker.core.task import recommendation
+from tflite_model_maker import recommendation
 
 FLAGS = flags.FLAGS
 
@@ -40,7 +39,7 @@ def define_flags():
 
 def download_data(download_dir):
   """Downloads demo data, and returns directory path."""
-  return RecommendationDataLoader.download_and_extract_movielens(download_dir)
+  return recommendation.DataLoader.download_and_extract_movielens(download_dir)
 
 
 def run(data_dir,
@@ -49,8 +48,8 @@ def run(data_dir,
         batch_size=16,
         epochs=5):
   """Runs demo."""
-  train_data = RecommendationDataLoader.from_movielens(data_dir, 'train')
-  test_data = RecommendationDataLoader.from_movielens(data_dir, 'test')
+  train_data = recommendation.DataLoader.from_movielens(data_dir, 'train')
+  test_data = recommendation.DataLoader.from_movielens(data_dir, 'test')
 
   # options for spec to specify recommendation model architecture.
   model_spec_options = dict(

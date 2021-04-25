@@ -23,11 +23,10 @@ from unittest.mock import patch
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
-from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
 from tensorflow_examples.lite.model_maker.demo import image_classification_demo
+from tflite_model_maker import image_classifier
 
-
-from_folder_fn = ImageClassifierDataLoader.from_folder
+from_folder_fn = image_classifier.DataLoader.from_folder
 
 
 def patch_data_loader():
@@ -43,7 +42,7 @@ def patch_data_loader():
     return data_loader
 
   return patch.object(
-      ImageClassifierDataLoader, 'from_folder', side_effect=side_effect)
+      image_classifier.DataLoader, 'from_folder', side_effect=side_effect)
 
 
 class ImageClassificationDemoTest(tf.test.TestCase):

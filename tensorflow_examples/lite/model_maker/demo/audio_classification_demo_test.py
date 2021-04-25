@@ -23,11 +23,10 @@ import unittest
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
-from tensorflow_examples.lite.model_maker.core.data_util.audio_dataloader import DataLoader
 from tensorflow_examples.lite.model_maker.demo import audio_classification_demo
+from tflite_model_maker import audio_classifier
 
-
-from_folder_fn = DataLoader.from_folder
+from_folder_fn = audio_classifier.DataLoader.from_folder
 
 
 def patch_data_loader():
@@ -45,7 +44,7 @@ def patch_data_loader():
     return data_loader
 
   return unittest.mock.patch.object(
-      DataLoader, 'from_folder', side_effect=side_effect)
+      audio_classifier.DataLoader, 'from_folder', side_effect=side_effect)
 
 
 class AudioClassificationDemoTest(tf.test.TestCase):

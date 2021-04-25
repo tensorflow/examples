@@ -27,10 +27,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import data_util
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
-from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_util
+from tflite_model_maker import config
 
 from official.nlp import optimization
 
@@ -222,7 +221,7 @@ def train_xor_model(export_dir):
   print('Test accuracy: %f' % eval_acc)
 
   # Convert and quantize the model to tflite format.
-  quantization = configs.QuantizationConfig.create_full_integer_quantization(
+  quantization = config.QuantizationConfig.create_full_integer_quantization(
       is_integer_only=True,
       representative_data=test_data,
       quantization_steps=len(test_data))
@@ -230,7 +229,8 @@ def train_xor_model(export_dir):
       export_dir,
       quantization_config=quantization,
   )
-  classifier.export(export_dir, export_format=(ExportFormat.SAVED_MODEL,))
+  classifier.export(
+      export_dir, export_format=(config.ExportFormat.SAVED_MODEL,))
 
   # Evaluate quantized tflite model.
   result = classifier.evaluate_tflite(

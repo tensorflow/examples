@@ -45,9 +45,8 @@ from absl import flags
 from absl import logging
 
 import tensorflow as tf
-from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader
-from tensorflow_examples.lite.model_maker.core.task import audio_classifier
-from tensorflow_examples.lite.model_maker.core.task import model_spec
+from tflite_model_maker import audio_classifier
+from tflite_model_maker import model_spec
 
 FLAGS = flags.FLAGS
 
@@ -103,19 +102,19 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
   if dataset_type == 'esc50':
     # Limit to 2 categories to speed up the demo
     categories = ['dog', 'cat']
-    train_data = audio_dataloader.DataLoader.from_esc50(
+    train_data = audio_classifier.DataLoader.from_esc50(
         spec, data_dir, folds=[0, 1, 2, 3], categories=categories)
-    validation_data = audio_dataloader.DataLoader.from_esc50(
+    validation_data = audio_classifier.DataLoader.from_esc50(
         spec, data_dir, folds=[
             4,
         ], categories=categories)
-    test_data = audio_dataloader.DataLoader.from_esc50(
+    test_data = audio_classifier.DataLoader.from_esc50(
         spec, data_dir, folds=[
             5,
         ], categories=categories)
 
   else:
-    data = audio_dataloader.DataLoader.from_folder(spec, data_dir)
+    data = audio_classifier.DataLoader.from_folder(spec, data_dir)
     train_data, rest_data = data.split(0.8)
     validation_data, test_data = rest_data.split(0.5)
 

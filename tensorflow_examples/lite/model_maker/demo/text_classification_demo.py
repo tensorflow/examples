@@ -24,10 +24,10 @@ from absl import flags
 from absl import logging
 
 import tensorflow as tf
-from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
-from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.task import model_spec
-from tensorflow_examples.lite.model_maker.core.task import text_classifier
+
+from tflite_model_maker import model_spec
+from tflite_model_maker import text_classifier
+from tflite_model_maker.config import ExportFormat
 
 FLAGS = flags.FLAGS
 
@@ -55,14 +55,14 @@ def run(data_dir, export_dir, spec='bert_classifier', **kwargs):
   spec = model_spec.get(spec)
 
   # Gets training data and validation data.
-  train_data = TextClassifierDataLoader.from_csv(
+  train_data = text_classifier.DataLoader.from_csv(
       filename=os.path.join(os.path.join(data_dir, 'train.tsv')),
       text_column='sentence',
       label_column='label',
       model_spec=spec,
       delimiter='\t',
       is_training=True)
-  validation_data = TextClassifierDataLoader.from_csv(
+  validation_data = text_classifier.DataLoader.from_csv(
       filename=os.path.join(os.path.join(data_dir, 'dev.tsv')),
       text_column='sentence',
       label_column='label',

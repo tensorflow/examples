@@ -23,11 +23,10 @@ from unittest.mock import patch
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
-from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
 from tensorflow_examples.lite.model_maker.demo import text_classification_demo
+from tflite_model_maker import text_classifier
 
-
-from_csv_fn = TextClassifierDataLoader.from_csv
+from_csv_fn = text_classifier.DataLoader.from_csv
 
 
 def patch_data_loader():
@@ -43,7 +42,7 @@ def patch_data_loader():
     return data_loader
 
   return patch.object(
-      TextClassifierDataLoader, 'from_csv', side_effect=side_effect)
+      text_classifier.DataLoader, 'from_csv', side_effect=side_effect)
 
 
 class TextClassificationDemoTest(tf.test.TestCase):

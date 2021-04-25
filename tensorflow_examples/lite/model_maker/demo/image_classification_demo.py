@@ -25,10 +25,9 @@ from absl import logging
 
 import tensorflow as tf
 
-from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
-from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.task import image_classifier
-from tensorflow_examples.lite.model_maker.core.task import model_spec
+from tflite_model_maker import image_classifier
+from tflite_model_maker import model_spec
+from tflite_model_maker.config import ExportFormat
 
 FLAGS = flags.FLAGS
 
@@ -54,15 +53,12 @@ def download_demo_data(**kwargs):
 def run(data_dir, export_dir, spec='efficientnet_lite0', **kwargs):
   """Runs demo."""
   spec = model_spec.get(spec)
-  data = ImageClassifierDataLoader.from_folder(data_dir)
+  data = image_classifier.DataLoader.from_folder(data_dir)
   train_data, rest_data = data.split(0.8)
   validation_data, test_data = rest_data.split(0.5)
 
   model = image_classifier.create(
-      train_data,
-      model_spec=spec,
-      validation_data=validation_data,
-      **kwargs)
+      train_data, model_spec=spec, validation_data=validation_data, **kwargs)
 
   _, acc = model.evaluate(test_data)
   print('Test accuracy: %f' % acc)
