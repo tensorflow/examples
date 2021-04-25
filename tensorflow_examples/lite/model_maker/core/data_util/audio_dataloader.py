@@ -82,15 +82,24 @@ class ExamplesHelper(object):
     return cls(examples, labels)
 
   def __init__(self, examples_in_absolute_path, labels):
-    self.index_to_label = sorted(list(set(labels)))  # [label]
-    self.label_to_index = {
-        label: i for i, label in enumerate(self.index_to_label)
-    }
+    self.index_to_label = self._get_index_to_label(labels)  # [label]
+    self.label_to_index = self._get_label_to_index(self.index_to_label)
     # [(example, label)] in stable order
     self._data = sorted(list(zip(examples_in_absolute_path, labels)))
 
+  def _get_index_to_label(self, used_labels):
+    return sorted(list(set(used_labels)))
+
+  def _get_label_to_index(self, index_to_label):
+    return {label: i for i, label in enumerate(index_to_label)}
+
   def shuffle(self):
     random.shuffle(self._data)
+
+  def filter(self, labels):
+    self._data = filter(lambda v: v[1] in labels, self._data)
+    examples, labels = zip(*self._data)
+    return ExamplesHelper(examples, labels)
 
   def examples_and_label_indices(self):
     """Returns a tuple of example and a tuple of their corresponding label idx."""
@@ -121,11 +130,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
     super(DataLoader, self).__init__(dataset, size, index_to_label)
     self._spec = spec
 
-  def split(self, fraction):
-    return self._split(fraction, self.index_to_label, self._spec)
-
   @classmethod
-  def from_folder(cls, spec, data_path, shuffle=True):
+  def from_folder(cls, spec, data_path, categories=None, shuffle=True):
     """Load audio files from a data_path.
 
     - The root `data_path` folder contains a number of folders. The name for
@@ -143,6 +149,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
     Args:
       spec: instance of audio_spec.BaseSpec.
       data_path: string, location to the audio files.
+      categories: A string list of selected categories. If empty, all categories
+        will be selected.
       shuffle: boolean, if True, random shuffle data.
 
     Returns:
@@ -153,6 +161,10 @@ class DataLoader(dataloader.ClassificationDataLoader):
     root_dir = os.path.abspath(data_path)
     helper = ExamplesHelper.from_examples_folder(root_dir,
                                                  lambda s: s.endswith('.wav'))
+
+    if categories:
+      helper = helper.filter(categories)
+
     if shuffle:
       helper.shuffle()
 
@@ -161,6 +173,59 @@ class DataLoader(dataloader.ClassificationDataLoader):
       raise ValueError('No audio files found.')
 
     return DataLoader(ds, len(ds), helper.index_to_label, spec)
+
+  @classmethod
+  def from_esc50(cls,
+                 spec,
+                 data_path,
+                 folds=None,
+                 categories=None,
+                 shuffle=True):
+    """Load ESC50 style audio samples.
+
+    ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
+    Audio files should be put in ${data_path}/audio
+    Metadata file should be put in ${data_path}/meta/esc50.csv
+
+    Note that instead of relying on the `target` field in the CSV, a new
+    `index_to_label` mapping is created based on the alphabet order of the
+    available categories.
+
+    Args:
+      spec: An instance of audio_spec.YAMNet
+      data_path: A string, location of the ESC50 dataset. It should contain at
+      folds: A integer list of selected folds. If empty, all folds will be
+        selected.
+      categories: A string list of selected categories. If empty, all categories
+        will be selected.
+      shuffle: boolean, if True, random shuffle data.
+
+    Returns:
+      An instance of AudioDataLoader containing audio samples and labels.
+    """
+
+    def _fullpath(filename):
+      return os.path.join(data_path, 'audio', filename)
+
+    csv_path = os.path.join(data_path, 'meta/esc50.csv')
+    pd_data = pd.read_csv(csv_path)
+    if categories:
+      pd_data = pd_data[pd_data.category.isin(categories)]
+    if folds:
+      pd_data = pd_data[pd_data.fold.isin(folds)]
+
+    helper = ExamplesHelper(map(_fullpath, pd_data.filename), pd_data.category)
+    if shuffle:
+      helper.shuffle()
+    ds = helper.examples_and_label_indices_ds()
+
+    if len(ds) == 0:  # pylint: disable=g-explicit-length-test
+      raise ValueError('No audio files found.')
+
+    return DataLoader(ds, len(ds), helper.index_to_label, spec)
+
+  def split(self, fraction):
+    return self._split(fraction, self.index_to_label, self._spec)
 
   def gen_dataset(self,
                   batch_size=1,
@@ -254,54 +319,3 @@ class DataLoader(dataloader.ClassificationDataLoader):
     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
     # TODO(b/171449557): Consider converting ds to distributed ds here.
     return ds
-
-  @classmethod
-  def from_esc50(cls,
-                 spec,
-                 data_path,
-                 folds=None,
-                 categories=None,
-                 shuffle=True):
-    """Load ESC50 style audio samples.
-
-    ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
-    Audio files should be put in ${data_path}/audio
-    Metadata file should be put in ${data_path}/meta/esc50.csv
-
-    Note that instead of relying on the `target` field in the CSV, a new
-    `index_to_label` mapping is created based on the alphabet order of the
-    available categories.
-
-    Args:
-      spec: An instance of audio_spec.YAMNet
-      data_path: A string, location of the ESC50 dataset. It should contain at
-      folds: A integer list of selected folds. If empty, all folds will be
-        selected.
-      categories: A string list of selected categories. If empty, all categories
-        will be selected.
-        least two sub-folders, `meta` and `audio`.
-      shuffle: boolean, if True, random shuffle data.
-
-    Returns:
-      An instance of AudioDataLoader containing audio samples and labels.
-    """
-
-    def _fullpath(filename):
-      return os.path.join(data_path, 'audio', filename)
-
-    csv_path = os.path.join(data_path, 'meta/esc50.csv')
-    pd_data = pd.read_csv(csv_path)
-    if categories:
-      pd_data = pd_data[pd_data.category.isin(categories)]
-    if folds:
-      pd_data = pd_data[pd_data.fold.isin(folds)]
-
-    helper = ExamplesHelper(map(_fullpath, pd_data.filename), pd_data.category)
-    if shuffle:
-      helper.shuffle()
-    ds = helper.examples_and_label_indices_ds()
-
-    if len(ds) == 0:  # pylint: disable=g-explicit-length-test
-      raise ValueError('No audio files found.')
-
-    return DataLoader(ds, len(ds), helper.index_to_label, spec)

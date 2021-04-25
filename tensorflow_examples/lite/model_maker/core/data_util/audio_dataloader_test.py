@@ -237,9 +237,14 @@ class LoadFromFolderTest(Base):
     write_sample(folder_path, 'command0', '1.8s.wav', 4410, 1.8, value=5)
     # Ignored due to wrong file extension
     write_sample(folder_path, 'command0', '1.8s.bak', 4410, 1.8, value=6)
+    # Category not in use.
+    write_sample(folder_path, 'unused_command', '2s.wav', 44410, 1, value=7)
 
     spec = MockSpec(model_dir=folder_path)
-    loader = audio_dataloader.DataLoader.from_folder(spec, folder_path)
+    loader = audio_dataloader.DataLoader.from_folder(
+        spec,
+        folder_path,
+        categories=['background', 'command0', 'command1', 'command2'])
 
     # 6 files with .wav extennsion
     self.assertEqual(len(loader), 6)
