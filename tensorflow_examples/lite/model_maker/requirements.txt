@@ -10,7 +10,7 @@ absl-py<0.11>=0.10.0
 urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1
 tflite-support==0.1.0rc4
 tensorflowjs>=2.4.0
-tensorflow>=2.4.0
+tensorflow>=2.5.0rc0
 librosa>=0.5
 lxml>=4.6.1
 PyYAML>=5.1
