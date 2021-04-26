@@ -126,12 +126,18 @@ class ExamplesHelper(object):
 class DataLoader(dataloader.ClassificationDataLoader):
   """DataLoader for audio tasks."""
 
-  def __init__(self, dataset, size, index_to_label, spec):
+  def __init__(self, dataset, size, index_to_label, spec, cache=False):
     super(DataLoader, self).__init__(dataset, size, index_to_label)
     self._spec = spec
+    self._cache = cache
 
   @classmethod
-  def from_folder(cls, spec, data_path, categories=None, shuffle=True):
+  def from_folder(cls,
+                  spec,
+                  data_path,
+                  categories=None,
+                  shuffle=True,
+                  cache=False):
     """Load audio files from a data_path.
 
     - The root `data_path` folder contains a number of folders. The name for
@@ -152,6 +158,12 @@ class DataLoader(dataloader.ClassificationDataLoader):
       categories: A string list of selected categories. If empty, all categories
         will be selected.
       shuffle: boolean, if True, random shuffle data.
+      cache: str or boolean. When set to True, intermediate results will be
+        cached in ram. When set to a file path in string, intermediate results
+        will be cached in this file. Please note that, once file based cache is
+        created, changes to the input data will have no effects until the cache
+        file is removed or the filename is changed. More details can be found at
+        https://www.tensorflow.org/api_docs/python/tf/data/Dataset#cache
 
     Returns:
       AudioDataLoader containing audio spectrogram (or any data type generated
@@ -172,7 +184,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
     if len(ds) == 0:  # pylint: disable=g-explicit-length-test
       raise ValueError('No audio files found.')
 
-    return DataLoader(ds, len(ds), helper.index_to_label, spec)
+    return DataLoader(ds, len(ds), helper.index_to_label, spec, cache)
 
   @classmethod
   def from_esc50(cls,
@@ -180,7 +192,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
                  data_path,
                  folds=None,
                  categories=None,
-                 shuffle=True):
+                 shuffle=True,
+                 cache=False):
     """Load ESC50 style audio samples.
 
     ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
@@ -199,6 +212,12 @@ class DataLoader(dataloader.ClassificationDataLoader):
       categories: A string list of selected categories. If empty, all categories
         will be selected.
       shuffle: boolean, if True, random shuffle data.
+      cache: str or boolean. When set to True, intermediate results will be
+        cached in ram. When set to a file path in string, intermediate results
+        will be cached in this file. Please note that, once file based cache is
+        created, changes to the input data will have no effects until the cache
+        file is removed or the filename is changed. More details can be found at
+        https://www.tensorflow.org/api_docs/python/tf/data/Dataset#cache
 
     Returns:
       An instance of AudioDataLoader containing audio samples and labels.
@@ -222,7 +241,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
     if len(ds) == 0:  # pylint: disable=g-explicit-length-test
       raise ValueError('No audio files found.')
 
-    return DataLoader(ds, len(ds), helper.index_to_label, spec)
+    return DataLoader(ds, len(ds), helper.index_to_label, spec, cache)
 
   def split(self, fraction):
     return self._split(fraction, self.index_to_label, self._spec)
@@ -302,15 +321,28 @@ class DataLoader(dataloader.ClassificationDataLoader):
 
     ds = ds.map(_load_wav, num_parallel_calls=autotune)
     ds = ds.map(_resample, num_parallel_calls=autotune)
+
+    if self._cache:
+      if isinstance(self._cache, str):
+        # Cache to a file
+        ds = ds.cache(self._cache)
+      else:
+        # In ram cache.
+        ds = ds.cache()
+
+    # `preprocess_ds` contains data augmentation, so it needs to be done after
+    # caching.
     ds = spec.preprocess_ds(ds, is_training=is_training)
     ds = ds.filter(_elements_finite)
 
+    # Apply one-hot encoding after caching to reduce the cache size.
     @tf.function
     def _one_hot_encoding_label(wav, label):
       return wav, tf.one_hot(label, len(self.index_to_label))
 
     ds = ds.map(_one_hot_encoding_label, num_parallel_calls=autotune)
 
+    # Shuffle needs to be done after caching to create randomness across epochs.
     if is_training:
       if shuffle:
         # Shuffle size should be bigger than the batch_size. Otherwise it's only

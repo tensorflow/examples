@@ -254,6 +254,11 @@ class LoadFromFolderTest(Base):
     # 5 valid audio snippets
     self.assertEqual(len(list(loader.gen_dataset())), 5)
 
+    spec = MockSpec(model_dir=folder_path)
+    loader = audio_dataloader.DataLoader.from_folder(
+        spec, folder_path, cache=True)
+    self.assertEqual(len(list(loader.gen_dataset())), 6)
+
 
 if __name__ == '__main__':
   tf.test.main()
