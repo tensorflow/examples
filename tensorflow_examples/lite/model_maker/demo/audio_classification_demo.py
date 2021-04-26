@@ -51,14 +51,17 @@ from tflite_model_maker import model_spec
 FLAGS = flags.FLAGS
 
 
-def define_flags():
+def _define_flags():
+  """Define CLI flags and their default values."""
   flags.DEFINE_string('export_dir', None,
                       'The directory to save exported files.')
+  flags.DEFINE_string('data_dir', None, 'The directory to load dataset from.')
   flags.DEFINE_string('spec', 'audio_browser_fft',
                       'Name of the model spec to use.')
   flags.DEFINE_string(
       'dataset', 'mini_speech_command',
-      'Which dataset to use. Supports: `mini_speech_command` and `esc50`')
+      'Which dataset to use. Supports: `mini_speech_command`, '
+      '`bird` and `esc50`')
   flags.mark_flag_as_required('export_dir')
 
 
@@ -112,21 +115,27 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
         spec, data_dir, folds=[
             5,
         ], categories=categories)
+  elif dataset_type == 'bird':
+    train_data = audio_classifier.DataLoader.from_folder(
+        spec, os.path.join(data_dir, 'train'), cache=True)
+    train_data, validation_data = train_data.split(0.8)
+    test_data = audio_classifier.DataLoader.from_folder(
+        spec, os.path.join(data_dir, 'test'), cache=True)
 
   else:
     data = audio_classifier.DataLoader.from_folder(spec, data_dir)
     train_data, rest_data = data.split(0.8)
     validation_data, test_data = rest_data.split(0.5)
 
-  print('Training the model')
+  print('\nTraining the model')
   model = audio_classifier.create(train_data, spec, validation_data, **kwargs)
 
-  print('Evaluating the model')
-  _, acc = model.evaluate(test_data)
-  print('Test accuracy: %f' % acc)
+  print('\nEvaluating the model')
+  model.evaluate(test_data)
 
-  print('Confusion matrix: ')
+  print('\nConfusion matrix: ')
   print(model.confusion_matrix(test_data))
+  print('labels: ', test_data.index_to_label)
 
   model.export(export_dir)
 
@@ -134,14 +143,22 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
 def main(_):
   logging.set_verbosity(logging.INFO)
 
-  if FLAGS.dataset == 'esc50':
-    data_dir = download_esc50_dataset()
+  if not FLAGS.data_dir:
+    if FLAGS.dataset == 'esc50':
+      data_dir = download_esc50_dataset()
+    elif FLAGS.dataset == 'bird':
+      # TODO(b/186365051): Add download function once the dataset is finalized.
+      raise ValueError('`data_dir` is missing')
+    elif FLAGS.dataset == 'mini_speech_command':
+      data_dir = download_speech_commands_dataset()
+    else:
+      raise ValueError('Unsupported dataset type: ', FLAGS.dataset)
   else:
-    data_dir = download_speech_commands_dataset()
+    data_dir = FLAGS.data_dir
 
   run(FLAGS.spec, data_dir, FLAGS.dataset, export_dir=FLAGS.export_dir)
 
 
 if __name__ == '__main__':
-  define_flags()
+  _define_flags()
   app.run(main)
