@@ -71,6 +71,36 @@ class AudioClassifierTest(tf.test.TestCase):
   def testYAMNet(self):
     self._test_spec(audio_spec.YAMNetSpec(), YAMNetWithoutPreprcessing())
 
+  def testConfusionMatrix(self):
+    spec = audio_spec.BrowserFFTSpec()
+
+    temp_folder = self.get_temp_dir()
+    cat1 = write_sample(temp_folder, 'cat', '1.wav', 44100, duration_sec=1)
+    cat2 = write_sample(temp_folder, 'cat', '2.wav', 44100, duration_sec=2)
+    dog1 = write_sample(temp_folder, 'dog', '1.wav', 44100, duration_sec=3)
+    dog2 = write_sample(temp_folder, 'dog', '2.wav', 44100, duration_sec=4)
+    index_to_labels = ['cat', 'dog']
+
+    # Prepare data.
+    ds = tf.data.Dataset.from_tensor_slices(([cat1, cat2, dog1,
+                                              dog2], [0, 0, 1, 1]))
+    data_loader = audio_dataloader.DataLoader(ds, len(ds), index_to_labels,
+                                              spec)
+
+    # Train a floating point model.
+    task = audio_classifier.create(data_loader, spec, batch_size=1, epochs=15)
+
+    confusion_matrx = task.confusion_matrix(data_loader)
+
+    # BrowserFFTSpec generates 1 sample for 1 second audio so there are
+    # 10 samples in total.
+    self.assertEqual(tf.math.reduce_sum(confusion_matrx), 10)
+    # confusion_matrix is of shape (truth, predication)
+    # We have 2 classes, 3 cat samples and 7 dog samples.
+    self.assertEqual(confusion_matrx.shape, (2, 2))
+    self.assertAllEqual(
+        tf.math.reduce_sum(confusion_matrx, axis=-1).numpy(), np.array([3, 7]))
+
   def _test_spec(self, train_spec, tflite_eval_spec):
     temp_folder = self.get_temp_dir()
     cat1 = write_sample(temp_folder, 'cat', '1.wav', 44100, duration_sec=1)

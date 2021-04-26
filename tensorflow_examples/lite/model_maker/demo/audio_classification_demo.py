@@ -125,6 +125,9 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
   _, acc = model.evaluate(test_data)
   print('Test accuracy: %f' % acc)
 
+  print('Confusion matrix: ')
+  print(model.confusion_matrix(test_data))
+
   model.export(export_dir)
 
 

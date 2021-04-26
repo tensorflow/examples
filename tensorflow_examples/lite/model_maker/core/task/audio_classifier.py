@@ -122,3 +122,20 @@ class AudioClassifier(classification_model.ClassificationModel):
     if not callable(fn):
       fn = model_util.export_tflite
     fn(self.model, tflite_filepath, quantization_config)
+
+  def confusion_matrix(self, data, batch_size=32):
+    # TODO(b/171449557): Consider moving this to ClassificationModel
+    ds = data.gen_dataset(
+        batch_size, is_training=False, preprocess=self.preprocess)
+    predicated = []
+    truth = []
+    for item, label in ds:
+      if tf.rank(label) == 2:  # One-hot encoded labels (batch, num_classes)
+        truth.extend(tf.math.argmax(label, axis=-1))
+        predicated.extend(tf.math.argmax(self.model.predict(item), axis=-1))
+      else:
+        truth.extend(label)
+        predicated.extend(self.model.predict(item))
+
+    return tf.math.confusion_matrix(
+        labels=truth, predictions=predicated, num_classes=data.num_classes)
