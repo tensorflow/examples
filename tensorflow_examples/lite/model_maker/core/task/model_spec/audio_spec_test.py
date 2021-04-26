@@ -124,7 +124,7 @@ class YAMNetSpecTest(tf.test.TestCase):
     # Test tflite export
     tflite_filepath = os.path.join(self.get_temp_dir(), 'model.tflite')
     self._spec.export_tflite(model, tflite_filepath)
-    expected_model_size = 16 * 1000 * 1000
+    expected_model_size = 13 * 1000 * 1000
     self.assertNear(
         os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
 

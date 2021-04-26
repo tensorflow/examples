@@ -226,7 +226,6 @@ class YAMNetSpec(BaseSpec):
   def create_model(self, num_classes, train_whole_model=False):
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=(1024), dtype=tf.float32, name='embedding'),
-        tf.keras.layers.Dense(512, name='dense', activation='relu'),
         tf.keras.layers.Dense(
             num_classes, name='classification_head', activation='softmax')
     ])
