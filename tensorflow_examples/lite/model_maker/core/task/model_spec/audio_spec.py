@@ -101,7 +101,7 @@ def _load_tfjs_speech_command_model():
 
 @mm_export('audio_classifier.BrowserFftSpec')
 class BrowserFFTSpec(BaseSpec):
-  """Audio classification model spec using Browser FFT as preprocessing."""
+  """Model good at detecting speech commands, using Browser FFT spectrum."""
 
   def __init__(self, model_dir=None, strategy=None):
     super(BrowserFFTSpec, self).__init__(model_dir, strategy)
@@ -209,7 +209,7 @@ class BrowserFFTSpec(BaseSpec):
 
 @mm_export('audio_classifier.YamNetSpec')
 class YAMNetSpec(BaseSpec):
-  """Audio classification model spec using YAMNet embedding."""
+  """Model good at detecting environmental sounds, using YAMNet embedding."""
 
   def __init__(self,
                model_dir: None = None,
