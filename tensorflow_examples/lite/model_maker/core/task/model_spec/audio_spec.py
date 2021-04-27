@@ -211,13 +211,22 @@ class BrowserFFTSpec(BaseSpec):
 class YAMNetSpec(BaseSpec):
   """Model good at detecting environmental sounds, using YAMNet embedding."""
 
-  def __init__(self,
-               model_dir: None = None,
-               strategy: None = None,
-               yamnet_model_handle='https://tfhub.dev/google/yamnet/1'):
+  EXPECTED_WAVEFORM_LENGTH = 15600  # effectively 0.975s
+  EMBEDDING_SIZE = 1024
+
+  def __init__(
+      self,
+      model_dir: None = None,
+      strategy: None = None,
+      yamnet_model_handle='https://tfhub.dev/google/yamnet/1',
+      frame_length=EXPECTED_WAVEFORM_LENGTH,  # Window size 0.975 s
+      frame_step=EXPECTED_WAVEFORM_LENGTH // 2  # Hop of 0.975 /2 s
+  ):
     super(YAMNetSpec, self).__init__(model_dir, strategy)
     self._yamnet_model_handle = yamnet_model_handle
     self._yamnet_model = hub.load(yamnet_model_handle)
+    self._frame_length = frame_length
+    self._frame_step = frame_step
 
   @property
   def target_sample_rate(self):
@@ -225,7 +234,10 @@ class YAMNetSpec(BaseSpec):
 
   def create_model(self, num_classes, train_whole_model=False):
     model = tf.keras.Sequential([
-        tf.keras.layers.Input(shape=(1024), dtype=tf.float32, name='embedding'),
+        tf.keras.layers.Input(
+            shape=(YAMNetSpec.EMBEDDING_SIZE),
+            dtype=tf.float32,
+            name='embedding'),
         tf.keras.layers.Dense(
             num_classes, name='classification_head', activation='softmax')
     ])
@@ -239,14 +251,34 @@ class YAMNetSpec(BaseSpec):
         train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)
     return hist
 
-  @tf.function
-  def _extract_embedding(self, wav, label):
-    _, embeddings, _ = self._yamnet_model(wav)  # (chunks, 1024)
-    chunks = tf.shape(embeddings)[0]
-    labels = tf.repeat(tf.expand_dims(label, 0), chunks)  # (chunks,)
-    return embeddings, labels
+  # Annotate the TF function with input_signature to avoid re-tracing. Otherwise
+  # the TF function gets retraced everytime the input shape is changed.
+  # Check https://www.tensorflow.org/api_docs/python/tf/function#args_1 for more
+  # information.
+  @tf.function(input_signature=[
+      tf.TensorSpec(shape=[None], dtype=tf.float32),
+      tf.TensorSpec([], dtype=tf.int32)
+  ])
+  def _frame(self, wav, label):
+    clips = tf.signal.frame(
+        wav, frame_length=self._frame_length, frame_step=self._frame_step)
+    batch_labels = tf.repeat(tf.expand_dims(label, 0), len(clips))
 
-  @tf.function
+    return clips, batch_labels
+
+  @tf.function(input_signature=[
+      tf.TensorSpec(shape=[None], dtype=tf.float32),
+      tf.TensorSpec([], dtype=tf.int32)
+  ])
+  def _extract_embedding(self, wav, label):
+    _, embeddings, _ = self._yamnet_model(wav)  # (chunks, EMBEDDING_SIZE)
+    embedding = tf.reduce_mean(embeddings, axis=0)
+    return embedding, label
+
+  @tf.function(input_signature=[
+      tf.TensorSpec(shape=[EMBEDDING_SIZE], dtype=tf.float32),
+      tf.TensorSpec([], dtype=tf.int32)
+  ])
   def _add_noise(self, embedding, label):
     noise = tf.random.normal(
         embedding.shape, mean=0.0, stddev=.2, dtype=tf.dtypes.float32)
@@ -256,7 +288,8 @@ class YAMNetSpec(BaseSpec):
     _ = is_training
 
     autotune = tf.data.AUTOTUNE
-    ds = ds.map(self._extract_embedding, num_parallel_calls=autotune).unbatch()
+    ds = ds.map(self._frame, num_parallel_calls=autotune).unbatch()
+    ds = ds.map(self._extract_embedding, num_parallel_calls=autotune)
 
     if is_training:
       ds = ds.map(self._add_noise, num_parallel_calls=autotune)

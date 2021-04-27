@@ -40,7 +40,8 @@ def _gen_dataset(spec, total_samples, num_classes, batch_size, seed):
   ]))
 
   labels = tf.data.Dataset.from_tensor_slices(
-      np.random.randint(low=0, high=num_classes, size=total_samples))
+      np.random.randint(low=0, high=num_classes,
+                        size=total_samples).astype('int32'))
   dataset = tf.data.Dataset.zip((wav_ds, labels))
   dataset = spec.preprocess_ds(dataset)
 
@@ -66,7 +67,8 @@ class YAMNetSpecTest(tf.test.TestCase):
                        output_count):
     wav_ds = tf.data.Dataset.from_tensor_slices([tf.ones(input_shape)] *
                                                 input_count)
-    label_ds = tf.data.Dataset.range(input_count)
+    label_ds = tf.data.Dataset.range(input_count).map(
+        lambda x: tf.cast(x, tf.int32))
 
     ds = tf.data.Dataset.zip((wav_ds, label_ds))
     ds = self._spec.preprocess_ds(ds)
@@ -86,17 +88,17 @@ class YAMNetSpecTest(tf.test.TestCase):
       cnt += 1
 
   def test_preprocess(self):
-    # YAMNet does padding on the input.
+    # No padding on the input.
     self._test_preprocess(
-        input_shape=(10,), input_count=2, output_shape=(1024,), output_count=2)
+        input_shape=(10,), input_count=2, output_shape=(1024,), output_count=0)
     # Split the input data into trunks
     self._test_preprocess(
         input_shape=(16000 * 2,),
         input_count=2,
         output_shape=(1024,),
-        output_count=8)
+        output_count=6)
     self._test_preprocess(
-        input_shape=(8000,),
+        input_shape=(15600,),
         input_count=1,
         output_shape=(1024,),
         output_count=1)

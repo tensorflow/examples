@@ -116,6 +116,14 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
             5,
         ], categories=categories)
   elif dataset_type == 'bird':
+    if isinstance(spec, audio_classifier.YamNetSpec):
+      # In some files, two consecutive bird sounds might be too far apart, so
+      # increase the window size to have a higher probability of capturing the
+      # bird sound.
+      spec = audio_classifier.YamNetSpec(
+          frame_length=6 * audio_classifier.YamNetSpec.EXPECTED_WAVEFORM_LENGTH)
+    else:
+      raise ValueError('Bird dataset can only be used with YAMNet model.')
     train_data = audio_classifier.DataLoader.from_folder(
         spec, os.path.join(data_dir, 'train'), cache=True)
     train_data, validation_data = train_data.split(0.8)
