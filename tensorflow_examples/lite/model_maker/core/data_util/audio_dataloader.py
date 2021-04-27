@@ -244,7 +244,7 @@ class DataLoader(dataloader.ClassificationDataLoader):
     return DataLoader(ds, len(ds), helper.index_to_label, spec, cache)
 
   def split(self, fraction):
-    return self._split(fraction, self.index_to_label, self._spec)
+    return self._split(fraction, self.index_to_label, self._spec, self._cache)
 
   def gen_dataset(self,
                   batch_size=1,
