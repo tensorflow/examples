@@ -115,7 +115,7 @@ class ClassificationModel(custom_model.CustomModel):
     lite_runner = model_util.get_lite_runner(tflite_filepath, self.model_spec)
     for i, (feature, label) in enumerate(data_util.generate_elements(ds)):
       log_steps = 1000
-      tf.compat.v1.logging.log_every_n(tf.compat.v1.logging.INFO,
+      tf.compat.v1.logging.log_every_n(tf.compat.v1.logging.DEBUG,
                                        'Processing example: #%d\n%s', log_steps,
                                        i, feature)
 
