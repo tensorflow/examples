@@ -1,5 +1,5 @@
 # Lint as: python3
-#   Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+#   Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from model import keras_losses
+from tensorflow_examples.lite.examples.recommendation.ml.model import keras_losses
 
 
 class KerasLossesTest(tf.test.TestCase):

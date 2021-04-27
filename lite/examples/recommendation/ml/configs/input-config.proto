@@ -1,0 +1,75 @@
+// For re-generating `input_config_generated_pb2.py`, please refer to
+// https://developers.google.com/protocol-buffers/docs/overview#generating.
+syntax = "proto3";
+
+package tensorflow_examples.lite.examples.recommendation.ml_v2.configs;
+
+
+// Different input feature types.
+enum FeatureType {
+  STRING = 0;
+  INT = 1;
+  FLOAT = 2;
+}
+
+// Supported context encoder types.
+enum EncoderType {
+  BOW = 0;
+  CNN = 1;
+  LSTM = 2;
+}
+
+// Input feature.
+message Feature {
+  // Name of the feature.
+  optional string feature_name = 1;
+
+  // Type of the feature.
+  optional FeatureType feature_type = 2;
+
+  // Name of the vocabulary (vocab file name).
+  // For INT type features, if the vocab_name is unset, the vocab of the feature
+  // will be considered to be [0, vocab_size). If this is not desired, the
+  // vocab_name should be set for INT type features.
+  // For STRING type features, the vocab_name field should be set.
+  // For FLOAT type feature, vocab_name is not needed.
+  optional string vocab_name = 3;
+
+  // Size of the vocabulary, if feature_type is STRING or INT.
+  optional int64 vocab_size = 4;
+
+  // Embedding dimension for STRING or INT feature.
+  optional int64 embedding_dim = 5;
+
+  // Sequence length of the feature.
+  optional int64 feature_length = 6;
+}
+
+// A Group of features that should be concatenated and encoded together.
+message FeatureGroup {
+  // Features in this feature group. STRING or INT features will be represented
+  // with embeddings. And FLOAT features will be directly used and concatenated
+  // with embeddings.
+  repeated Feature features = 1;
+
+  // Type of the encoder to generate encoding for this group. The supported
+  // encoder types are: 'bow', 'cnn', 'rnn'. Parameters for the selected encoder
+  // will be set in training config.
+  optional EncoderType encoder_type = 2;
+}
+
+// Config for input data.
+message InputConfig {
+  // Global feature groups, such as groups of user-level features
+  // (e.g. gender, age etc).
+  repeated FeatureGroup global_feature_groups = 1;
+
+  // Group of activity-level sequence features, that are mostly associated with
+  // each activity.
+  repeated FeatureGroup activity_feature_groups = 2;
+
+  // Label feature.
+  // Currently only support id-based label encoding, hence label feature expects
+  // to have FeatureType.INT.
+  optional Feature label_feature = 3;
+}
