@@ -246,11 +246,20 @@ class YAMNetSpec(BaseSpec):
     labels = tf.repeat(tf.expand_dims(label, 0), chunks)  # (chunks,)
     return embeddings, labels
 
+  @tf.function
+  def _add_noise(self, embedding, label):
+    noise = tf.random.normal(
+        embedding.shape, mean=0.0, stddev=.2, dtype=tf.dtypes.float32)
+    return noise + embedding, label
+
   def preprocess_ds(self, ds, is_training=False):
     _ = is_training
 
     autotune = tf.data.AUTOTUNE
     ds = ds.map(self._extract_embedding, num_parallel_calls=autotune).unbatch()
+
+    if is_training:
+      ds = ds.map(self._add_noise, num_parallel_calls=autotune)
     return ds
 
   def export_tflite(self, model, tflite_filepath, quantization_config=None):
