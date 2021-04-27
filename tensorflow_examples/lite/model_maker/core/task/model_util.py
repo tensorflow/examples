@@ -20,15 +20,19 @@ from __future__ import print_function
 import json
 import os
 import tempfile
+from typing import Optional
 
 import numpy as np
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflowjs.converters import converter as tfjs_converter
 from tflite_support import metadata as _metadata
 
 DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
+_NUM_CALIBRATION_STEPS = 500
 
 
 def set_batch_size(model, batch_size):
@@ -60,7 +64,9 @@ def export_tflite(model,
                   quantization_config=None,
                   convert_from_saved_model_tf2=False,
                   preprocess=None,
-                  supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,)):
+                  supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,),
+                  quantization_type: Optional[QuantizationType] = None,
+                  representative_dataset: Optional[tf.data.Dataset] = None):
   """Converts the retrained model to tflite format and saves it.
 
   Args:
@@ -71,7 +77,22 @@ def export_tflite(model,
     preprocess: A preprocess function to apply on the dataset.
         # TODO(wangtz): Remove when preprocess is split off from CustomModel.
     supported_ops: A list of supported ops in the converted TFLite file.
+    quantization_type: Enum, type of post-training quantization. Accepted values
+      are `INT8`, `FP16`, `FP32`, `DYNAMIC`. `FP16` means float16 quantization
+      with 2x smaller, optimized for GPU. `INT8` means full integer quantization
+      with 4x smaller, 3x+ speedup, optimized for EdgeTPU. 'DYNAMIC' means
+      dynamic range quantization with	4x smaller, 2x-3x speedup. `FP32` mean
+      exporting float model without quantization. Please refer to
+      https://www.tensorflow.org/lite/performance/post_training_quantization
+      for more detailed about different techniques for post-training
+      quantization.
+    representative_dataset: Representative dataset for full integer
+      quantization. Used when `quantization_type=INT8`.
   """
+  if quantization_type and quantization_config:
+    raise ValueError('At most one of the paramaters `quantization_type` and '
+                     '`quantization_config` can be set.')
+
   if tflite_filepath is None:
     raise ValueError(
         "TFLite filepath couldn't be None when exporting to tflite.")
@@ -91,7 +112,29 @@ def export_tflite(model,
     else:
       converter = lite.TFLiteConverter.from_keras_model(model)
 
-    if quantization_config:
+    # Uses `quantization_type` for post-training quantization.
+    if quantization_type == QuantizationType.INT8:
+      if representative_dataset is None:
+        raise ValueError('`representative_data` must be set when '
+                         '`quantization_type=QuantizationType.INT8.')
+
+      converter.representative_dataset = configs.get_representative_dataset_gen(
+          representative_dataset, _NUM_CALIBRATION_STEPS)
+      converter.optimizations = [tf.lite.Optimize.DEFAULT]
+      converter.inference_input_type = tf.uint8
+      converter.inference_output_type = tf.uint8
+      supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+      converter.target_spec.supported_ops = supported_ops
+    elif quantization_type == QuantizationType.FP16:
+      converter.optimizations = [tf.lite.Optimize.DEFAULT]
+      converter.target_spec.supported_types = [tf.float16]
+    elif quantization_type == QuantizationType.DYNAMIC:
+      converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    elif quantization_type and quantization_type != QuantizationType.FP32:
+      raise ValueError('Unsupported `quantization_type`: %s' %
+                       str(quantization_type))
+    # Uses `quantization_config` for post-training quantization.
+    elif quantization_config:
       converter = quantization_config.get_converter_with_quantization(
           converter, preprocess=preprocess)
 
