@@ -251,7 +251,7 @@ class TextClassifierTest(tf.test.TestCase):
     tflite_filename = 'model_quant.tflite'
     tflite_output_file = os.path.join(self.get_temp_dir(), tflite_filename)
     config = configs.QuantizationConfig.create_dynamic_range_quantization(
-        optimizations=[tf.lite.Optimize.OPTIMIZE_FOR_LATENCY])
+        optimizations=[tf.lite.Optimize.DEFAULT])
     model.export(
         self.get_temp_dir(),
         tflite_filename=tflite_filename,
