@@ -318,8 +318,11 @@ class YAMNetSpec(BaseSpec):
         self._yamnet_model_handle, trainable=False)
 
     keras_input = tf.keras.Input(
-        shape=(None,), dtype=tf.float32, name='audio')  # (1, wav)
-    reshaped_input = tf.reshape(keras_input, (-1,))  # (wav)
+        shape=(YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,),
+        dtype=tf.float32,
+        name='audio')  # (1, wav)
+    reshaped_input = tf.reshape(keras_input,
+                                (YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,))  # (wav)
 
     _, embeddings, _ = embedding_extraction_layer(reshaped_input)
     serving_outputs = model(embeddings)

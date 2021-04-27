@@ -48,6 +48,13 @@ class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
 class YAMNetWithoutPreprcessing(audio_spec.YAMNetSpec):
 
   def preprocess_ds(self, ds, is_training=False, cache_fn=None):
+
+    @tf.function
+    def _crop(wav, label):
+      wav = wav[:audio_spec.YAMNetSpec.EXPECTED_WAVEFORM_LENGTH]
+      return wav, label
+
+    ds = ds.map(_crop)
     return ds
 
 
