@@ -72,7 +72,7 @@ class MockSpec(audio_spec.BaseSpec):
   def target_sample_rate(self):
     return 44100
 
-  def preprocess_ds(self, ds, is_training=False):
+  def preprocess_ds(self, ds, is_training=False, cache_fn=None):
     _ = is_training
 
     @tf.function
@@ -94,6 +94,9 @@ class MockSpec(audio_spec.BaseSpec):
     autotune = tf.data.AUTOTUNE
     ds = ds.filter(_ensure_length)
     ds = ds.map(_split, num_parallel_calls=autotune).unbatch()
+
+    if cache_fn:
+      ds = cache_fn(ds)
     return ds
 
 

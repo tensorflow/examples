@@ -30,7 +30,7 @@ from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
 
-  def preprocess_ds(self, ds, is_training=False):
+  def preprocess_ds(self, ds, is_training=False, cache_fn=None):
     _ = is_training
 
     @tf.function
@@ -39,12 +39,15 @@ class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
       return wav, label
 
     ds = ds.map(_crop)
+
+    if cache_fn:
+      ds = cache_fn(ds)
     return ds
 
 
 class YAMNetWithoutPreprcessing(audio_spec.YAMNetSpec):
 
-  def preprocess_ds(self, ds, is_training=False):
+  def preprocess_ds(self, ds, is_training=False, cache_fn=None):
     return ds
 
 

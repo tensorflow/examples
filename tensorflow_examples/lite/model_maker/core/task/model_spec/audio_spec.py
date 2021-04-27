@@ -51,9 +51,10 @@ class BaseSpec(abc.ABC):
   def run_classifier(self, model, epochs, train_ds, validation_ds, **kwargs):
     pass
 
-  def preprocess_ds(self, ds, is_training=False):
+  def preprocess_ds(self, ds, is_training=False, cache_fn=None):
     """Returns a preprocessed dataset."""
     _ = is_training
+    _ = cache_fn
     return ds
 
 
@@ -140,13 +141,15 @@ class BrowserFFTSpec(BaseSpec):
     # y has shape (embedding_len,)
     return spectrum, label
 
-  def preprocess_ds(self, ds, is_training=False):
+  def preprocess_ds(self, ds, is_training=False, cache_fn=None):
     del is_training
 
     autotune = tf.data.AUTOTUNE
     ds = ds.filter(self._ensure_length)
     ds = ds.map(self._split, num_parallel_calls=autotune).unbatch()
     ds = ds.map(self._preprocess, num_parallel_calls=autotune)
+    if cache_fn:
+      ds = cache_fn(ds)
     return ds
 
   def create_model(self, num_classes, train_whole_model=False):
@@ -284,12 +287,14 @@ class YAMNetSpec(BaseSpec):
         embedding.shape, mean=0.0, stddev=.2, dtype=tf.dtypes.float32)
     return noise + embedding, label
 
-  def preprocess_ds(self, ds, is_training=False):
-    _ = is_training
-
+  def preprocess_ds(self, ds, is_training=False, cache_fn=None):
     autotune = tf.data.AUTOTUNE
     ds = ds.map(self._frame, num_parallel_calls=autotune).unbatch()
     ds = ds.map(self._extract_embedding, num_parallel_calls=autotune)
+
+    # Cache intermediate results right before data augmentation.
+    if cache_fn:
+      ds = cache_fn(ds)
 
     if is_training:
       ds = ds.map(self._add_noise, num_parallel_calls=autotune)

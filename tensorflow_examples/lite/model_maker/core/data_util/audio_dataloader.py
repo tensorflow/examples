@@ -322,17 +322,20 @@ class DataLoader(dataloader.ClassificationDataLoader):
     ds = ds.map(_load_wav, num_parallel_calls=autotune)
     ds = ds.map(_resample, num_parallel_calls=autotune)
 
-    if self._cache:
-      if isinstance(self._cache, str):
-        # Cache to a file
-        ds = ds.cache(self._cache)
-      else:
-        # In ram cache.
-        ds = ds.cache()
+    @tf.function
+    def _cache_fn(dataset):
+      if self._cache:
+        if isinstance(self._cache, str):
+          # Cache to a file
+          dataset = dataset.cache(self._cache)
+        else:
+          # In ram cache.
+          dataset = dataset.cache()
+      return dataset
 
-    # `preprocess_ds` contains data augmentation, so it needs to be done after
-    # caching.
-    ds = spec.preprocess_ds(ds, is_training=is_training)
+    # `preprocess_ds` contains data augmentation, so it knows when it's the best
+    # time to do caching.
+    ds = spec.preprocess_ds(ds, is_training=is_training, cache_fn=_cache_fn)
     ds = ds.filter(_elements_finite)
 
     # Apply one-hot encoding after caching to reduce the cache size.
