@@ -61,6 +61,6 @@ class QuantizableBase(object):
       converter.optimizations = [tf.lite.Optimize.DEFAULT]
       converter.representative_dataset = self._representative_dataset
     elif self._quantize:
-      converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_SIZE]
+      converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
     return converter.convert()
