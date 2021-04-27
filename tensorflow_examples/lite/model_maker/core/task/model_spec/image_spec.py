@@ -24,7 +24,7 @@ from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 
 
-@mm_export('image_classifier.ImageSpec')
+@mm_export('image_classifier.ModelSpec')
 class ImageModelSpec(object):
   """A specification of image model."""
 
@@ -58,8 +58,10 @@ mobilenet_v2_spec = functools.partial(
     uri='https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4',
     compat_tf_versions=2,
     name='mobilenet_v2')
-mobilenet_v2_spec.__doc__ = util.wrap_doc(ImageModelSpec,
-                                          'Creates MobileNet v2 model spec.')
+mobilenet_v2_spec.__doc__ = util.wrap_doc(
+    ImageModelSpec,
+    'Creates MobileNet v2 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.MobileNetV2Spec').export_constant(
     __name__, 'mobilenet_v2_spec')
 
@@ -68,8 +70,10 @@ resnet_50_spec = functools.partial(
     uri='https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/4',
     compat_tf_versions=2,
     name='resnet_50')
-resnet_50_spec.__doc__ = util.wrap_doc(ImageModelSpec,
-                                       'Creates ResNet 50 model spec.')
+resnet_50_spec.__doc__ = util.wrap_doc(
+    ImageModelSpec,
+    'Creates ResNet 50 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.Resnet50Spec').export_constant(
     __name__, 'resnet_50_spec')
 
@@ -79,7 +83,9 @@ efficientnet_lite0_spec = functools.partial(
     compat_tf_versions=[1, 2],
     name='efficientnet_lite0')
 efficientnet_lite0_spec.__doc__ = util.wrap_doc(
-    ImageModelSpec, 'Creates EfficientNet-Lite0 model spec.')
+    ImageModelSpec,
+    'Creates EfficientNet-Lite0 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.EfficientNetLite0Spec').export_constant(
     __name__, 'efficientnet_lite0_spec')
 
@@ -90,7 +96,9 @@ efficientnet_lite1_spec = functools.partial(
     input_image_shape=[240, 240],
     name='efficientnet_lite1')
 efficientnet_lite1_spec.__doc__ = util.wrap_doc(
-    ImageModelSpec, 'Creates EfficientNet-Lite1 model spec.')
+    ImageModelSpec,
+    'Creates EfficientNet-Lite1 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.EfficientNetLite1Spec').export_constant(
     __name__, 'efficientnet_lite1_spec')
 
@@ -101,7 +109,9 @@ efficientnet_lite2_spec = functools.partial(
     input_image_shape=[260, 260],
     name='efficientnet_lite2')
 efficientnet_lite2_spec.__doc__ = util.wrap_doc(
-    ImageModelSpec, 'Creates EfficientNet-Lite2 model spec.')
+    ImageModelSpec,
+    'Creates EfficientNet-Lite2 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.EfficientNetLite2Spec').export_constant(
     __name__, 'efficientnet_lite2_spec')
 
@@ -112,7 +122,9 @@ efficientnet_lite3_spec = functools.partial(
     input_image_shape=[280, 280],
     name='efficientnet_lite3')
 efficientnet_lite3_spec.__doc__ = util.wrap_doc(
-    ImageModelSpec, 'Creates EfficientNet-Lite3 model spec.')
+    ImageModelSpec,
+    'Creates EfficientNet-Lite3 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.EfficientNetLite3Spec').export_constant(
     __name__, 'efficientnet_lite3_spec')
 
@@ -123,6 +135,8 @@ efficientnet_lite4_spec = functools.partial(
     input_image_shape=[300, 300],
     name='efficientnet_lite4')
 efficientnet_lite4_spec.__doc__ = util.wrap_doc(
-    ImageModelSpec, 'Creates EfficientNet-Lite4 model spec.')
+    ImageModelSpec,
+    'Creates EfficientNet-Lite4 model spec. See also: `tflite_model_maker.image_classifier.ModelSpec`.'
+)
 mm_export('image_classifier.EfficientNetLite4Spec').export_constant(
     __name__, 'efficientnet_lite4_spec')

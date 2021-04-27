@@ -108,20 +108,26 @@ class RecommendationSpec(object):
 recommendation_bow_spec = functools.partial(
     RecommendationSpec, encoder_type='bow')
 recommendation_bow_spec.__doc__ = util.wrap_doc(
-    RecommendationSpec, 'Creates Recommendation Bag-of-Word (BoW) model spec.')
+    RecommendationSpec,
+    'Creates Recommendation Bag-of-Word (BoW) model spec. See also: `tflite_model_maker.recommendation.ModelSpec`.'
+)
 mm_export('recommendation.BowSpec').export_constant(__name__,
                                                     'recommendation_bow_spec')
 
 recommendation_cnn_spec = functools.partial(
     RecommendationSpec, encoder_type='cnn')
 recommendation_cnn_spec.__doc__ = util.wrap_doc(
-    RecommendationSpec, 'Creates Recommendation CNN model spec.')
+    RecommendationSpec,
+    'Creates Recommendation CNN model spec. See also: `tflite_model_maker.recommendation.ModelSpec`.'
+)
 mm_export('recommendation.CnnSpec').export_constant(__name__,
                                                     'recommendation_cnn_spec')
 
 recommendation_rnn_spec = functools.partial(
     RecommendationSpec, encoder_type='rnn')
 recommendation_rnn_spec.__doc__ = util.wrap_doc(
-    RecommendationSpec, 'Creates Recommendation RNN model spec.')
+    RecommendationSpec,
+    'Creates Recommendation RNN model spec. See also: `tflite_model_maker.recommendation.ModelSpec`.'
+)
 mm_export('recommendation.RnnSpec').export_constant(__name__,
                                                     'recommendation_rnn_spec')
