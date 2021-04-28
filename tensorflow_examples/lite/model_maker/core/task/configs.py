@@ -21,7 +21,7 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.api import mm_export
 
-DEFAULT_QUANTIZATION_STEPS = 2000
+DEFAULT_QUANTIZATION_STEPS = 500
 
 
 def get_representative_dataset_gen(dataset, num_steps):
@@ -117,20 +117,17 @@ class QuantizationConfig(object):
     self.experimental_new_quantizer = experimental_new_quantizer
 
   @classmethod
-  def create_dynamic_range_quantization(cls,
-                                        optimizations=tf.lite.Optimize.DEFAULT):
+  def for_dynamic(cls):
     """Creates configuration for dynamic range quantization."""
-    return QuantizationConfig(optimizations)
+    return QuantizationConfig()
 
   @classmethod
-  def create_full_integer_quantization(
-      cls,
-      representative_data,
-      quantization_steps=DEFAULT_QUANTIZATION_STEPS,
-      optimizations=tf.lite.Optimize.DEFAULT,
-      inference_input_type=tf.uint8,
-      inference_output_type=tf.uint8,
-      is_integer_only=False):
+  def for_int8(cls,
+               representative_data,
+               quantization_steps=DEFAULT_QUANTIZATION_STEPS,
+               inference_input_type=tf.uint8,
+               inference_output_type=tf.uint8,
+               supported_ops=tf.lite.OpsSet.TFLITE_BUILTINS_INT8):
     """Creates configuration for full integer quantization.
 
     Args:
@@ -138,48 +135,27 @@ class QuantizationConfig(object):
         quantization.
       quantization_steps: Number of post-training quantization calibration steps
         to run.
-      optimizations: A list of optimizations to apply when converting the model.
-        If not set, use `[Optimize.DEFAULT]` by default.
       inference_input_type: Target data type of real-number input arrays. Used
         only when `is_integer_only` is True. Must be in `{tf.uint8, tf.int8}`.
       inference_output_type: Target data type of real-number output arrays. Used
         only when `is_integer_only` is True. Must be in `{tf.uint8, tf.int8}`.
-      is_integer_only: If True, enforces full integer quantization for all ops
-        including the input and output. If False, uses integer with float
-        fallback (using default float input/output) that mean to fully integer
-        quantize a model, but use float operators when they don't have an
-        integer implementation.
+      supported_ops:  Set of `tf.lite.OpsSet` options, where each option
+        represents a set of operators supported by the target device.
 
     Returns:
       QuantizationConfig.
     """
-    if not is_integer_only:
-      return QuantizationConfig(
-          optimizations,
-          representative_data=representative_data,
-          quantization_steps=quantization_steps)
-    else:
-      if inference_input_type not in [tf.uint8, tf.int8]:
-        raise ValueError('For integer only quantization, '
-                         '`inference_input_type` '
-                         'should be tf.uint8 or tf.int8.')
-      if inference_output_type not in [tf.uint8, tf.int8]:
-        raise ValueError('For integer only quantization, '
-                         '`inference_output_type` '
-                         'should be tf.uint8 or tf.int8.')
-
-      return QuantizationConfig(
-          optimizations,
-          representative_data=representative_data,
-          quantization_steps=quantization_steps,
-          inference_input_type=inference_input_type,
-          inference_output_type=inference_output_type,
-          supported_ops=[tf.lite.OpsSet.TFLITE_BUILTINS_INT8])
+    return QuantizationConfig(
+        representative_data=representative_data,
+        quantization_steps=quantization_steps,
+        inference_input_type=inference_input_type,
+        inference_output_type=inference_output_type,
+        supported_ops=supported_ops)
 
   @classmethod
-  def create_float16_quantization(cls, optimizations=tf.lite.Optimize.DEFAULT):
+  def for_float16(cls):
     """Creates configuration for float16 quantization."""
-    return QuantizationConfig(optimizations, supported_types=[tf.float16])
+    return QuantizationConfig(supported_types=[tf.float16])
 
   def get_converter_with_quantization(self, converter, **kwargs):
     """Gets TFLite converter with settings for quantization."""

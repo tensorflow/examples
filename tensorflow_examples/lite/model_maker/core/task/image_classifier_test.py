@@ -172,8 +172,7 @@ class ImageClassifierTest(tf.test.TestCase):
     # Just test whether quantization will crash, can't guarantee the result.
     tflile_filename = 'model_quantized.tflite'
     tflite_output_file = os.path.join(self.get_temp_dir(), tflile_filename)
-    config = configs.QuantizationConfig.create_full_integer_quantization(
-        representative_data, is_integer_only=True)
+    config = configs.QuantizationConfig.for_int8(representative_data)
     model.export(
         self.get_temp_dir(),
         tflile_filename,

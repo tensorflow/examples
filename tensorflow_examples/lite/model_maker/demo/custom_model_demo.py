@@ -221,10 +221,8 @@ def train_xor_model(export_dir):
   print('Test accuracy: %f' % eval_acc)
 
   # Convert and quantize the model to tflite format.
-  quantization = config.QuantizationConfig.create_full_integer_quantization(
-      is_integer_only=True,
-      representative_data=test_data,
-      quantization_steps=len(test_data))
+  quantization = config.QuantizationConfig.for_int8(
+      representative_data=test_data, quantization_steps=len(test_data))
   classifier.export(
       export_dir,
       quantization_config=quantization,

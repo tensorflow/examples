@@ -28,25 +28,20 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 
 def _get_quantization_config_list(input_dim, num_classes, max_input_value):
   # Configuration for dynamic range quantization.
-  config1 = configs.QuantizationConfig.create_dynamic_range_quantization()
+  config1 = configs.QuantizationConfig.for_dynamic()
 
   representative_data = test_util.get_dataloader(
       data_size=1,
       input_shape=[input_dim],
       num_classes=num_classes,
       max_input_value=max_input_value)
-  # Configuration for full integer quantization with float fallback.
-  config2 = configs.QuantizationConfig.create_full_integer_quantization(
-      representative_data=representative_data, quantization_steps=1)
   # Configuration for full integer quantization with integer only.
-  config3 = configs.QuantizationConfig.create_full_integer_quantization(
-      representative_data=representative_data,
-      quantization_steps=1,
-      is_integer_only=True)
+  config2 = configs.QuantizationConfig.for_int8(
+      representative_data=representative_data, quantization_steps=1)
 
   # Configuration for full integer quantization with float fallback.
-  config4 = configs.QuantizationConfig.create_float16_quantization()
-  return [config1, config2, config3, config4]
+  config3 = configs.QuantizationConfig.for_float16()
+  return [config1, config2, config3]
 
 
 class ModelUtilTest(tf.test.TestCase):
@@ -89,7 +84,7 @@ class ModelUtilTest(tf.test.TestCase):
 
     quant_configs = _get_quantization_config_list(input_dim, num_classes,
                                                   max_input_value)
-    model_sizes = [9088, 9536, 9600, 17280]
+    model_sizes = (9088, 9600, 17280)
     for config, model_size in zip(quant_configs, model_sizes):
       model_util.export_tflite(model, tflite_file, quantization_config=config)
       self._test_tflite(
