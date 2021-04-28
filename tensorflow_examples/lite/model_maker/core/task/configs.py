@@ -24,7 +24,7 @@ from tensorflow_examples.lite.model_maker.core.api import mm_export
 DEFAULT_QUANTIZATION_STEPS = 500
 
 
-def get_representative_dataset_gen(dataset, num_steps):
+def _get_representative_dataset_gen(dataset, num_steps):
   """Gets the function that generates representative dataset for quantized."""
 
   def representative_dataset_gen():
@@ -165,7 +165,7 @@ class QuantizationConfig(object):
       ds = self.representative_data.gen_dataset(
           batch_size=1, is_training=False, **kwargs)
       converter.representative_dataset = tf.lite.RepresentativeDataset(
-          get_representative_dataset_gen(ds, self.quantization_steps))
+          _get_representative_dataset_gen(ds, self.quantization_steps))
 
     if self.inference_input_type:
       converter.inference_input_type = self.inference_input_type

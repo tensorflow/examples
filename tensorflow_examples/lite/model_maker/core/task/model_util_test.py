@@ -21,7 +21,6 @@ import os
 import numpy as np
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import test_util
-from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType
 from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import model_util
 
@@ -44,6 +43,12 @@ def _get_quantization_config_list(input_dim, num_classes, max_input_value):
   return [config1, config2, config3]
 
 
+def _mock_gen_dataset(data, batch_size=1, is_training=False):  # pylint: disable=unused-argument
+  ds = data.dataset
+  ds = ds.batch(batch_size)
+  return ds
+
+
 class ModelUtilTest(tf.test.TestCase):
 
   @test_util.test_in_tf_1and2
@@ -62,31 +67,11 @@ class ModelUtilTest(tf.test.TestCase):
     model = test_util.build_model([input_dim], num_classes)
     tflite_file = os.path.join(self.get_temp_dir(), 'model_quantized.tflite')
 
-    dataloader = test_util.get_dataloader(
-        data_size=1,
-        input_shape=[input_dim],
-        num_classes=num_classes,
-        max_input_value=max_input_value)
-    representative_dataset = dataloader.gen_dataset(
-        batch_size=1, is_training=False)
-    quantization_types = (QuantizationType.DYNAMIC, QuantizationType.INT8,
-                          QuantizationType.FP16, QuantizationType.FP32)
-    model_sizes = (9088, 9600, 17280, 32840)
-    for quantization_type, model_size in zip(quantization_types, model_sizes):
-      model_util.export_tflite(
-          model,
-          tflite_file,
-          quantization_type=quantization_type,
-          representative_dataset=representative_dataset)
-      self._test_tflite(
-          model, tflite_file, input_dim, max_input_value, atol=1e-01)
-      self.assertNear(os.path.getsize(tflite_file), model_size, 300)
-
     quant_configs = _get_quantization_config_list(input_dim, num_classes,
                                                   max_input_value)
     model_sizes = (9088, 9600, 17280)
     for config, model_size in zip(quant_configs, model_sizes):
-      model_util.export_tflite(model, tflite_file, quantization_config=config)
+      model_util.export_tflite(model, tflite_file, config, _mock_gen_dataset)
       self._test_tflite(
           model, tflite_file, input_dim, max_input_value, atol=1e-01)
       self.assertNear(os.path.getsize(tflite_file), model_size, 300)
