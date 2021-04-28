@@ -98,7 +98,13 @@ def download_esc50_dataset(**kwargs):
   return folder_path
 
 
-def run(spec, data_dir, dataset_type, export_dir, **kwargs):
+def run(spec,
+        data_dir,
+        dataset_type,
+        export_dir,
+        epochs=5,
+        batch_size=32,
+        **kwargs):
   """Runs demo."""
   spec = model_spec.get(spec)
 
@@ -122,9 +128,12 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
       # bird sound.
       spec = audio_classifier.YamNetSpec(
           keep_yamnet_and_custom_heads=True,
+          frame_step=3 * audio_classifier.YamNetSpec.EXPECTED_WAVEFORM_LENGTH,
           frame_length=6 * audio_classifier.YamNetSpec.EXPECTED_WAVEFORM_LENGTH)
     else:
       raise ValueError('Bird dataset can only be used with YAMNet model.')
+    batch_size = 128
+    epochs = 100
     train_data = audio_classifier.DataLoader.from_folder(
         spec, os.path.join(data_dir, 'train'), cache=True)
     train_data, validation_data = train_data.split(0.8)
@@ -137,7 +146,13 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
     validation_data, test_data = rest_data.split(0.5)
 
   print('\nTraining the model')
-  model = audio_classifier.create(train_data, spec, validation_data, **kwargs)
+  model = audio_classifier.create(
+      train_data,
+      spec,
+      validation_data,
+      batch_size=batch_size,
+      epochs=epochs,
+      **kwargs)
 
   print('\nEvaluating the model')
   model.evaluate(test_data)
@@ -146,6 +161,7 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
   print(model.confusion_matrix(test_data))
   print('labels: ', test_data.index_to_label)
 
+  print('\nExporing the TFLite model to {}'.format(export_dir))
   model.export(export_dir)
 
 
