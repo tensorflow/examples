@@ -24,7 +24,6 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
-from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType
 from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 
@@ -447,13 +446,28 @@ class EfficientDetModelSpec(object):
         signatures=export_model.__call__.get_concrete_function(input_spec))
     model.optimizer = original_optimizer
 
+  def get_default_quantization_config(
+      self, representative_data: object_detector_dataloader.DataLoader
+  ) -> configs.QuantizationConfig:
+    """Gets the default quantization configuration."""
+    # Sets `inference_output_type=None` since the output op is the custom NMS op
+    # which can't be quantized so that the tflite model output should be float.
+    # `supported_ops` contains both `TFLITE_BUILTINS_INT8` and `TFLITE_BUILTINS`
+    # due to the same reason: custom NMS op should be included as the
+    # `TFLITE_BUILTINS` op.
+    config = configs.QuantizationConfig.for_int8(
+        representative_data,
+        inference_output_type=None,
+        supported_ops=[
+            tf.lite.OpsSet.TFLITE_BUILTINS_INT8, tf.lite.OpsSet.TFLITE_BUILTINS
+        ])
+    config.experimental_new_quantizer = True
+    return config
+
   def export_tflite(
       self,
       model: tf.keras.Model,
       tflite_filepath: str,
-      quantization_type: Optional[QuantizationType] = None,
-      representative_dataset: Optional[
-          object_detector_dataloader.DataLoader] = None,
       quantization_config: Optional[configs.QuantizationConfig] = None) -> None:
     """Converts the retrained model to tflite format and saves it.
 
@@ -476,54 +490,14 @@ class EfficientDetModelSpec(object):
       model: The EfficientDetNet model used for training which doesn't have pre
         and post processing.
       tflite_filepath: File path to save tflite model.
-      quantization_type: Enum, type of post-training quantization. Accepted
-        values are `INT8`, `FP16`, `FP32`, `DYNAMIC`. `FP16` means float16
-        quantization with 2x smaller, optimized for GPU. `INT8` means full
-        integer quantization with 4x smaller, 3x+ speedup, optimized for Edge
-        TPU. 'DYNAMIC' means dynamic range quantization with	4x smaller, 2x-3x
-        speedup. `FP32` mean exporting float model without quantization. Please
-        refer to
-        https://www.tensorflow.org/lite/performance/post_training_quantization
-        for more detailed about different techniques for post-training
-        quantization.
-      representative_dataset: Representative dataset for full integer
-        quantization. Used when `quantization_type=INT8`.
       quantization_config: Configuration for post-training quantization.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
       self.export_saved_model(
           model, temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
       converter = tf.lite.TFLiteConverter.from_saved_model(temp_dir)
-      if quantization_type == QuantizationType.INT8:
-        # Enables MLIR-based post-training quantization.
-        converter.experimental_new_quantizer = True
 
-        if representative_dataset is None:
-          raise ValueError('`representative_data` must be set when '
-                           '`quantization_type=QuantizationType.INT8.')
-
-        def representative_dataset_gen():
-          for image, _ in representative_dataset.take(_NUM_CALIBRATION_STEPS):
-            yield [image]
-
-        converter.representative_dataset = representative_dataset_gen
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.inference_input_type = tf.uint8
-        # TFLite's custom NMS op isn't supported by post-training quant,
-        # so we add TFLITE_BUILTINS as well.
-        supported_ops = [
-            tf.lite.OpsSet.TFLITE_BUILTINS_INT8, tf.lite.OpsSet.TFLITE_BUILTINS
-        ]
-        converter.target_spec.supported_ops = supported_ops
-      elif quantization_type == QuantizationType.FP16:
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.target_spec.supported_types = [tf.float16]
-      elif quantization_type == QuantizationType.DYNAMIC:
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-      elif quantization_type and quantization_type != QuantizationType.FP32:
-        raise ValueError('Unsupported `quantization_type`: %s' %
-                         str(quantization_type))
-      elif quantization_config:
+      if quantization_config:
         converter = quantization_config.get_converter_with_quantization(
             converter, model_spec=self)
 

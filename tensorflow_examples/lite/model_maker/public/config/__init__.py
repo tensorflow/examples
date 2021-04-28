@@ -14,5 +14,4 @@
 """APIs for the config of TFLite Model Maker."""
 
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.export_format import QuantizationType
 from tensorflow_examples.lite.model_maker.core.task.configs import QuantizationConfig
