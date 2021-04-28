@@ -25,7 +25,6 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec
 
@@ -74,7 +73,7 @@ class ImageClassifierTest(tf.test.TestCase):
     self._test_accuracy(model)
     self._test_predict_top_k(model)
     self._test_export_to_tflite(model)
-    self._test_export_to_tflite_quantized(model, self.train_data)
+    self._test_export_to_tflite_quantized(model, model_size=2779577)
     self._test_export_to_tflite_with_metadata(model)
     self._test_export_to_saved_model(model)
     self._test_export_labels(model)
@@ -108,7 +107,7 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
-    self._test_export_to_tflite_quantized(model, self.train_data)
+    self._test_export_to_tflite_quantized(model, model_size=4007249)
     self._test_export_to_tflite_with_metadata(
         model, expected_json_file='efficientnet_lite0_metadata.json')
     self._test_export_to_tfjs(model)
@@ -130,7 +129,7 @@ class ImageClassifierTest(tf.test.TestCase):
         shuffle=True)
     self._test_accuracy(model)
     self._test_export_to_tflite(model)
-    self._test_export_to_tflite_quantized(model, self.train_data)
+    self._test_export_to_tflite_quantized(model, model_size=24377953)
     self._test_export_to_tflite_with_metadata(model)
     self._test_export_to_tfjs(model)
 
@@ -157,7 +156,10 @@ class ImageClassifierTest(tf.test.TestCase):
   def _test_export_to_tflite(self, model, threshold=0.0):
     tflite_output_file = os.path.join(self.get_temp_dir(), 'model.tflite')
 
-    model.export(self.get_temp_dir(), export_format=ExportFormat.TFLITE)
+    model.export(
+        self.get_temp_dir(),
+        export_format=ExportFormat.TFLITE,
+        quantization_config=None)
 
     result = model.evaluate_tflite(tflite_output_file, self.test_data)
     self.assertGreaterEqual(result['accuracy'], threshold)
@@ -168,18 +170,17 @@ class ImageClassifierTest(tf.test.TestCase):
         test_util.is_same_output(tflite_output_file, model.model, random_input,
                                  model.model_spec))
 
-  def _test_export_to_tflite_quantized(self, model, representative_data):
+  def _test_export_to_tflite_quantized(self, model, model_size, err_ratio=0.08):
     # Just test whether quantization will crash, can't guarantee the result.
     tflile_filename = 'model_quantized.tflite'
     tflite_output_file = os.path.join(self.get_temp_dir(), tflile_filename)
-    config = configs.QuantizationConfig.for_int8(representative_data)
     model.export(
         self.get_temp_dir(),
         tflile_filename,
-        quantization_config=config,
         export_format=ExportFormat.TFLITE)
     self.assertTrue(os.path.isfile(tflite_output_file))
-    self.assertGreater(os.path.getsize(tflite_output_file), 0)
+    err = model_size * err_ratio
+    self.assertNear(os.path.getsize(tflite_output_file), model_size, err)
 
   def _check_label_file(self, labels_output_file):
     labels = self._load_labels(labels_output_file)
@@ -197,6 +198,7 @@ class ImageClassifierTest(tf.test.TestCase):
     model.export(
         self.get_temp_dir(),
         '%s.tflite' % model_name,
+        quantization_config=None,
         with_metadata=True,
         export_metadata_json_file=True)
 

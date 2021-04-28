@@ -183,19 +183,25 @@ class QuestionAnswer(custom_model.CustomModel):
 
   def _export_tflite(self,
                      tflite_filepath,
-                     quantization_config=None,
+                     quantization_config='default',
                      with_metadata=True,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
-      quantization_config: Configuration for post-training quantization.
+      quantization_config: Configuration for post-training quantization. If
+        'default', sets the `quantization_config` by default according to
+        `self.model_spec`. If None, exports the float tflite model without
+        quantization.
       with_metadata: Whether the output tflite model contains metadata.
       export_metadata_json_file: Whether to export metadata in json file. If
         True, export the metadata in the same directory as tflite model.Used
         only if `with_metadata` is True.
     """
+    if quantization_config == 'default':
+      quantization_config = self.model_spec.get_default_quantization_config()
+
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(self.model, batch_size=1)
     model_util.export_tflite(self.model, tflite_filepath, quantization_config,

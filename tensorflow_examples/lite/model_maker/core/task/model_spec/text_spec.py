@@ -27,6 +27,7 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core import file_util
 from tensorflow_examples.lite.model_maker.core.api import mm_export
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import util
@@ -245,6 +246,10 @@ class AverageWordVecModelSpec(object):
         'lowercase': self.lowercase
     }
 
+  def get_default_quantization_config(self):
+    """Gets the default quantization configuration."""
+    return None
+
 
 def create_classifier_model(bert_config,
                             num_labels,
@@ -404,6 +409,12 @@ class BertModelSpec(object):
       }
     self.tflite_input_name = tflite_input_name
     self.default_batch_size = default_batch_size
+
+  def get_default_quantization_config(self):
+    """Gets the default quantization configuration."""
+    config = configs.QuantizationConfig.for_dynamic()
+    config.experimental_new_quantizer = True
+    return config
 
   def reorder_input_details(self, tflite_input_details):
     """Reorders the tflite input details to map the order of keras model."""

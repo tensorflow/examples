@@ -110,13 +110,16 @@ class AudioClassifier(classification_model.ClassificationModel):
           validation_ds,
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
 
-  def _export_tflite(self, tflite_filepath, quantization_config=None):
+  def _export_tflite(self, tflite_filepath, quantization_config='default'):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
     """
+    if quantization_config == 'default':
+      quantization_config = self.model_spec.get_default_quantization_config()
+
     # Allow model_spec to override this method.
     fn = getattr(self.model_spec, 'export_tflite', None)
     if not callable(fn):

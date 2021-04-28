@@ -118,7 +118,8 @@ def create(train_data,
       train_data.index_to_label,
       shuffle=shuffle,
       hparams=hparams,
-      use_augmentation=use_augmentation)
+      use_augmentation=use_augmentation,
+      representative_data=train_data)
 
   if do_train:
     tf.compat.v1.logging.info('Retraining the models...')
@@ -174,7 +175,8 @@ class ImageClassifier(classification_model.ClassificationModel):
                index_to_label,
                shuffle=True,
                hparams=hub_lib.get_default_hparams(),
-               use_augmentation=False):
+               use_augmentation=False,
+               representative_data=None):
     """Init function for ImageClassifier class.
 
     Args:
@@ -187,6 +189,9 @@ class ImageClassifier(classification_model.ClassificationModel):
         .do_fine_tuning: If true, the Hub module is trained together with the
           classification layer on top.
       use_augmentation: Use data augmentation for preprocessing.
+      representative_data:  Representative dataset for full integer
+        quantization. Used when converting the keras model to the TFLite model
+        with full interger quantization.
     """
     super(ImageClassifier, self).__init__(model_spec, index_to_label, shuffle,
                                           hparams.do_fine_tuning)
@@ -199,6 +204,7 @@ class ImageClassifier(classification_model.ClassificationModel):
         self.model_spec.stddev_rgb,
         use_augmentation=use_augmentation)
     self.history = None  # Training history that returns from `keras_model.fit`.
+    self.representative_data = representative_data
 
   def _get_tflite_input_tensors(self, input_tensors):
     """Gets the input tensors for the TFLite model."""
@@ -265,19 +271,25 @@ class ImageClassifier(classification_model.ClassificationModel):
 
   def _export_tflite(self,
                      tflite_filepath,
-                     quantization_config=None,
+                     quantization_config='default',
                      with_metadata=True,
                      export_metadata_json_file=False):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
-      quantization_config: Configuration for post-training quantization.
+      quantization_config: Configuration for post-training quantization. If
+        'default', sets the `quantization_config` by default according to
+        `self.model_spec`. If None, exports the float tflite model without
+        quantization.
       with_metadata: Whether the output tflite model contains metadata.
       export_metadata_json_file: Whether to export metadata in json file. If
         True, export the metadata in the same directory as tflite model.Used
         only if `with_metadata` is True.
     """
+    if quantization_config == 'default':
+      quantization_config = self.model_spec.get_default_quantization_config(
+          self.representative_data)
     model_util.export_tflite(
         self.model,
         tflite_filepath,

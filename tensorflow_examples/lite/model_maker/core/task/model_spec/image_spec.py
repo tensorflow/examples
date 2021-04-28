@@ -21,6 +21,7 @@ import functools
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.api import mm_export
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 
 
@@ -51,6 +52,11 @@ class ImageModelSpec(object):
     if input_image_shape is None:
       input_image_shape = [224, 224]
     self.input_image_shape = input_image_shape
+
+  def get_default_quantization_config(self, representative_data):
+    """Gets the default quantization configuration."""
+    config = configs.QuantizationConfig.for_int8(representative_data)
+    return config
 
 
 mobilenet_v2_spec = functools.partial(

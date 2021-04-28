@@ -57,6 +57,10 @@ class BaseSpec(abc.ABC):
     _ = cache_fn
     return ds
 
+  def get_default_quantization_config(self):
+    """Gets the default quantization configuration."""
+    return None
+
 
 def _remove_suffix_if_possible(text, suffix):
   return text.rsplit(suffix, 1)[0]

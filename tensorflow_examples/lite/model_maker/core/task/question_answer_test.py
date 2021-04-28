@@ -117,6 +117,7 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
     model.export(
         self.get_temp_dir(),
         export_format=ExportFormat.TFLITE,
+        quantization_config=None,
         export_metadata_json_file=expected_json_file is not None)
 
     self.assertTrue(os.path.isfile(tflite_output_file))

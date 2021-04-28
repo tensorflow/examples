@@ -104,6 +104,10 @@ class RecommendationSpec(object):
     """
     return _rm.RecommendationModel(self.params)
 
+  def get_default_quantization_config(self):
+    """Gets the default quantization configuration."""
+    return None
+
 
 recommendation_bow_spec = functools.partial(
     RecommendationSpec, encoder_type='bow')
