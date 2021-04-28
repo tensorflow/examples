@@ -66,7 +66,7 @@ dependencies {
     def camerax_version = "1.0.0-alpha02"
     def lifecycle_version = "2.1.0-alpha02"
     def coroutines_version = "1.1.1"
-    def tfl_version = "0.0.0-nightly"
+    def tfl_version = "0.0.0-nightly-SNAPSHOT"
     def glide_version = "4.9.0"
 
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
