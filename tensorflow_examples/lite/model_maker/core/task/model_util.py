@@ -145,7 +145,7 @@ def export_tflite(model,
     f.write(tflite_model)
 
 
-def get_lite_runner(tflite_filepath, model_spec):
+def get_lite_runner(tflite_filepath, model_spec=None):
   """Gets `LiteRunner` from file path to TFLite model and `model_spec`."""
   # Gets the functions to handle the input & output indexes if exists.
   reorder_input_details_fn = None

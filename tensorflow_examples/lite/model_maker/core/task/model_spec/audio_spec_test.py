@@ -21,6 +21,7 @@ import os
 
 import numpy as np
 import tensorflow.compat.v2 as tf
+from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
@@ -58,20 +59,16 @@ def _gen_dataset(spec, total_samples, num_classes, batch_size, seed):
 
 class YAMNetSpecTest(tf.test.TestCase):
 
-  @classmethod
-  def setUpClass(cls):
-    super(YAMNetSpecTest, cls).setUpClass()
-    cls._spec = audio_spec.YAMNetSpec()
-
   def _test_preprocess(self, input_shape, input_count, output_shape,
                        output_count):
+    spec = audio_spec.YAMNetSpec()
     wav_ds = tf.data.Dataset.from_tensor_slices([tf.ones(input_shape)] *
                                                 input_count)
     label_ds = tf.data.Dataset.range(input_count).map(
         lambda x: tf.cast(x, tf.int32))
 
     ds = tf.data.Dataset.zip((wav_ds, label_ds))
-    ds = self._spec.preprocess_ds(ds)
+    ds = spec.preprocess_ds(ds)
 
     chunks = output_count // input_count
 
@@ -104,37 +101,60 @@ class YAMNetSpecTest(tf.test.TestCase):
         output_count=1)
 
   def test_create_model(self):
-    # Make sure that there is no naming conflicts.
-    model = self._spec.create_model(10)
-    model = self._spec.create_model(10)
-    model = self._spec.create_model(10)
+    # Make sure that there is no naming conflicts in the graph.
+    spec = audio_spec.YAMNetSpec()
+    model = spec.create_model(10)
+    model = spec.create_model(10)
+    model = spec.create_model(10)
     self.assertEqual(model.input_shape, (None, 1024))
     self.assertEqual(model.output_shape, (None, 10))
 
-  def _train(self, total_samples, num_classes, batch_size, seed):
-    tf.keras.backend.clear_session()
+  def _train_and_export(self, spec, num_classes, filename, expected_model_size):
+    dataset = _gen_dataset(
+        spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
+    model = spec.create_model(num_classes)
+    spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
 
-    tf.random.set_seed(seed)
-    np.random.seed(seed)
+    tflite_filepath = os.path.join(self.get_temp_dir(), filename)
+    spec.export_tflite(model, tflite_filepath)
 
-    dataset = _gen_dataset(self._spec, total_samples, num_classes, batch_size,
-                           seed)
-    model = self._spec.create_model(num_classes)
-    self._spec.run_classifier(
-        model, epochs=1, train_ds=dataset, validation_ds=dataset)
-
-    # Test tflite export
-    tflite_filepath = os.path.join(self.get_temp_dir(), 'model.tflite')
-    self._spec.export_tflite(model, tflite_filepath)
-    expected_model_size = 13 * 1000 * 1000
     self.assertNear(
         os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
 
+    return tflite_filepath
+
+  def test_yamnet_two_heads(self):
+
+    tflite_path = self._train_and_export(
+        audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=True),
+        num_classes=2,
+        filename='two_heads.tflite',
+        expected_model_size=15 * 1000 * 1000)
+    self.assertEqual(
+        2, len(model_util.get_lite_runner(tflite_path).output_details))
+
+  def test_yamnet_single_head(self):
+    tflite_path = self._train_and_export(
+        audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=False),
+        num_classes=2,
+        filename='single_head.tflite',
+        expected_model_size=13 * 1000 * 1000)
+    self.assertEqual(
+        1, len(model_util.get_lite_runner(tflite_path).output_details))
+
   def test_binary_classification(self):
-    self._train(total_samples=10, num_classes=2, batch_size=2, seed=100)
+    self._train_and_export(
+        audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=True),
+        num_classes=2,
+        filename='binary_classification.tflite',
+        expected_model_size=15 * 1000 * 1000)
 
   def test_basic_training(self):
-    self._train(total_samples=20, num_classes=3, batch_size=2, seed=100)
+    self._train_and_export(
+        audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=True),
+        num_classes=5,
+        filename='basic_5_classes_training.tflite',
+        expected_model_size=15 * 1000 * 1000)
 
 
 class BrowserFFTSpecTest(tf.test.TestCase):

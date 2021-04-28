@@ -121,6 +121,7 @@ def run(spec, data_dir, dataset_type, export_dir, **kwargs):
       # increase the window size to have a higher probability of capturing the
       # bird sound.
       spec = audio_classifier.YamNetSpec(
+          keep_yamnet_and_custom_heads=True,
           frame_length=6 * audio_classifier.YamNetSpec.EXPECTED_WAVEFORM_LENGTH)
     else:
       raise ValueError('Bird dataset can only be used with YAMNet model.')

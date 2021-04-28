@@ -161,7 +161,11 @@ class AudioClassifierTest(tf.test.TestCase):
                                                     tflite_eval_spec)
 
     # Evaluate accurarcy on float model.
-    result = task.evaluate_tflite(output_path, tflite_dataloader)
+    result = task.evaluate_tflite(
+        output_path,
+        tflite_dataloader,
+        # Skip yamnet output during TFLite evaluation.
+        postprocess_fn=lambda x: x[-1])
     self.assertGreaterEqual(result['accuracy'], .5)
 
 

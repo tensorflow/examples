@@ -223,13 +223,14 @@ class YAMNetSpec(BaseSpec):
       strategy: None = None,
       yamnet_model_handle='https://tfhub.dev/google/yamnet/1',
       frame_length=EXPECTED_WAVEFORM_LENGTH,  # Window size 0.975 s
-      frame_step=EXPECTED_WAVEFORM_LENGTH // 2  # Hop of 0.975 /2 s
-  ):
+      frame_step=EXPECTED_WAVEFORM_LENGTH // 2,  # Hop of 0.975 /2 s
+      keep_yamnet_and_custom_heads=True):
     super(YAMNetSpec, self).__init__(model_dir, strategy)
     self._yamnet_model_handle = yamnet_model_handle
     self._yamnet_model = hub.load(yamnet_model_handle)
     self._frame_length = frame_length
     self._frame_step = frame_step
+    self._keep_yamnet_and_custom_heads = keep_yamnet_and_custom_heads
 
   @property
   def target_sample_rate(self):
@@ -324,10 +325,14 @@ class YAMNetSpec(BaseSpec):
     reshaped_input = tf.reshape(keras_input,
                                 (YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,))  # (wav)
 
-    _, embeddings, _ = embedding_extraction_layer(reshaped_input)
+    scores, embeddings, _ = embedding_extraction_layer(reshaped_input)
     serving_outputs = model(embeddings)
     serving_outputs = tf.math.reduce_mean(serving_outputs, axis=0)
-    serving_model = tf.keras.Model(keras_input, serving_outputs)
+
+    if self._keep_yamnet_and_custom_heads:
+      serving_model = tf.keras.Model(keras_input, [scores, serving_outputs])
+    else:
+      serving_model = tf.keras.Model(keras_input, serving_outputs)
 
     # TODO(b/164229433): Remove SELECT_TF_OPS once changes in the bug are
     # released.
