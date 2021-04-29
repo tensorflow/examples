@@ -18,50 +18,33 @@ import inspect
 
 from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
+from tensorflow_examples.lite.model_maker.core.task.model_spec import image_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 from tensorflow_examples.lite.model_maker.core.task.model_spec import recommendation_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite0_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite1_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite2_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite3_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import efficientnet_lite4_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import ImageModelSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import mobilenet_v2_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.image_spec import resnet_50_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import average_word_vec_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import AverageWordVecModelSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import bert_classifier_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import bert_qa_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import bert_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import BertClassifierModelSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import BertModelSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import BertQAModelSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_classifier_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_qa_spec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import mobilebert_qa_squad_spec
+from tensorflow_examples.lite.model_maker.core.task.model_spec import text_spec
 
 
 # A dict for model specs to make it accessible by string key.
 MODEL_SPECS = {
     # Image classification
-    'efficientnet_lite0': efficientnet_lite0_spec,
-    'efficientnet_lite1': efficientnet_lite1_spec,
-    'efficientnet_lite2': efficientnet_lite2_spec,
-    'efficientnet_lite3': efficientnet_lite3_spec,
-    'efficientnet_lite4': efficientnet_lite4_spec,
-    'mobilenet_v2': mobilenet_v2_spec,
-    'resnet_50': resnet_50_spec,
+    'efficientnet_lite0': image_spec.efficientnet_lite0_spec,
+    'efficientnet_lite1': image_spec.efficientnet_lite1_spec,
+    'efficientnet_lite2': image_spec.efficientnet_lite2_spec,
+    'efficientnet_lite3': image_spec.efficientnet_lite3_spec,
+    'efficientnet_lite4': image_spec.efficientnet_lite4_spec,
+    'mobilenet_v2': image_spec.mobilenet_v2_spec,
+    'resnet_50': image_spec.resnet_50_spec,
 
     # Text classification
-    'average_word_vec': average_word_vec_spec,
-    'bert': bert_spec,
-    'bert_classifier': bert_classifier_spec,
-    'mobilebert_classifier': mobilebert_classifier_spec,
+    'average_word_vec': text_spec.AverageWordVecModelSpec,
+    'bert': text_spec.BertModelSpec,
+    'bert_classifier': text_spec.BertClassifierModelSpec,
+    'mobilebert_classifier': text_spec.mobilebert_classifier_spec,
 
     # Question answering
-    'bert_qa': bert_qa_spec,
-    'mobilebert_qa': mobilebert_qa_spec,
-    'mobilebert_qa_squad': mobilebert_qa_squad_spec,
+    'bert_qa': text_spec.BertQAModelSpec,
+    'mobilebert_qa': text_spec.mobilebert_qa_spec,
+    'mobilebert_qa_squad': text_spec.mobilebert_qa_squad_spec,
 
     # Audio classification
     'audio_browser_fft': audio_spec.BrowserFFTSpec,

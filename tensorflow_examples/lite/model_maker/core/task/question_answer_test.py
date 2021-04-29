@@ -29,6 +29,7 @@ from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import question_answer
+from tensorflow_examples.lite.model_maker.core.task.model_spec import text_spec
 
 
 def _get_data(model_spec, version):
@@ -54,13 +55,14 @@ class QuestionAnswerTest(tf.test.TestCase, parameterized.TestCase):
   @test_util.test_in_tf_1
   def test_bert_model_v1_incompatible(self):
     with self.assertRaisesRegex(ValueError, 'Incompatible versions'):
-      _ = ms.BertQAModelSpec(trainable=False)
+      text_spec.BertQAModelSpec(trainable=False)
 
   @test_util.test_in_tf_2
   def test_bert_model(self):
     # Only test squad1.1 since it takes too long time for this.
     version = '1.1'
-    model_spec = ms.BertQAModelSpec(trainable=False, predict_batch_size=1)
+    model_spec = text_spec.BertQAModelSpec(
+        trainable=False, predict_batch_size=1)
     train_data, validation_data = _get_data(model_spec, version)
     model = question_answer.create(
         train_data, model_spec=model_spec, epochs=1, batch_size=1)

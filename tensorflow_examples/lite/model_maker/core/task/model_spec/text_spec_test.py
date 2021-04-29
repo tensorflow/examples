@@ -22,7 +22,7 @@ import os
 from absl.testing import parameterized
 import tensorflow.compat.v2 as tf
 
-from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
+from tensorflow_examples.lite.model_maker.core.task.model_spec import text_spec
 from official.nlp.data import classifier_data_lib
 
 
@@ -51,18 +51,18 @@ class AverageWordVecModelSpecTest(tf.test.TestCase):
 
   def setUp(self):
     super(AverageWordVecModelSpecTest, self).setUp()
-    self.model_spec = ms.AverageWordVecModelSpec(seq_len=5)
+    self.model_spec = text_spec.AverageWordVecModelSpec(seq_len=5)
     self.vocab = collections.OrderedDict(
         (('<PAD>', 0), ('<START>', 1), ('<UNKNOWN>', 2), ('good', 3), ('bad',
                                                                        4)))
     self.model_spec.vocab = self.vocab
 
   def test_tokenize(self):
-    model_spec = ms.AverageWordVecModelSpec()
+    model_spec = text_spec.AverageWordVecModelSpec()
     text = model_spec._tokenize('It\'s really good.')
     self.assertEqual(text, ['it\'s', 'really', 'good'])
 
-    model_spec = ms.AverageWordVecModelSpec(lowercase=False)
+    model_spec = text_spec.AverageWordVecModelSpec(lowercase=False)
     text = model_spec._tokenize('That is so cool!!!')
     self.assertEqual(text, ['That', 'is', 'so', 'cool'])
 
@@ -138,7 +138,7 @@ class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
       ('https://tfhub.dev/google/bert_uncased_L-12_H-768_A-12/1', False),
   )
   def test_bert(self, uri, is_tf2):
-    model_spec = ms.BertClassifierModelSpec(
+    model_spec = text_spec.BertClassifierModelSpec(
         uri, is_tf2=is_tf2, distribution_strategy='off', seq_len=3)
     self._test_convert_examples_to_features(model_spec)
     self._test_run_classifier(model_spec)

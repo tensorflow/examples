@@ -32,6 +32,7 @@ from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task import train_image_classifier_lib
+from tensorflow_examples.lite.model_maker.core.task.model_spec import image_spec
 
 from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
 
@@ -137,7 +138,7 @@ def _get_model_info(model_spec,
                     version='v1'):
   """Gets the specific info for the image model."""
 
-  if not isinstance(model_spec, ms.ImageModelSpec):
+  if not isinstance(model_spec, image_spec.ImageModelSpec):
     raise ValueError('Currently only support models for image classification.')
 
   image_min = 0

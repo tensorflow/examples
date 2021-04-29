@@ -979,22 +979,6 @@ class BertQAModelSpec(BertModelSpec):
     return eval_metrics
 
 
-def average_word_vec_spec(**kwargs):
-  return AverageWordVecModelSpec(**kwargs)
-
-
-def bert_spec(**kwargs):
-  return BertModelSpec(**kwargs)
-
-
-def bert_classifier_spec(**kwargs):
-  return BertClassifierModelSpec(**kwargs)
-
-
-def bert_qa_spec(**kwargs):
-  return BertQAModelSpec(**kwargs)
-
-
 mobilebert_classifier_spec = functools.partial(
     BertClassifierModelSpec,
     uri='https://tfhub.dev/google/mobilebert/uncased_L-24_H-128_B-512_A-4_F-4_OPT/1',
@@ -1005,7 +989,8 @@ mobilebert_classifier_spec = functools.partial(
 )
 mobilebert_classifier_spec.__doc__ = util.wrap_doc(
     BertClassifierModelSpec,
-    'Creates MobileBert model spec for the text classification task.')
+    'Creates MobileBert model spec for the text classification task. See also: `tflite_model_maker.question_answer.BertClassifierSpec`.'
+)
 mm_export('text_classifier.MobileBertClassifierSpec').export_constant(
     __name__, 'mobilebert_classifier_spec')
 
@@ -1020,7 +1005,8 @@ mobilebert_qa_spec = functools.partial(
 )
 mobilebert_qa_spec.__doc__ = util.wrap_doc(
     BertQAModelSpec,
-    'Creates MobileBert model spec for the question answer task.')
+    'Creates MobileBert model spec for the question answer task. See also: `tflite_model_maker.question_answer.BertClassifierSpec`.'
+)
 mm_export('question_answer.MobileBertQaSpec').export_constant(
     __name__, 'mobilebert_qa_spec')
 
@@ -1037,6 +1023,7 @@ mobilebert_qa_squad_spec = functools.partial(
 mobilebert_qa_squad_spec.__doc__ = util.wrap_doc(
     BertQAModelSpec,
     'Creates MobileBert model spec that\'s already retrained on SQuAD1.1 for '
-    'the question answer task.')
+    'the question answer task. See also: `tflite_model_maker.question_answer.BertQaSpec`.'
+)
 mm_export('question_answer.MobileBertQaSquadSpec').export_constant(
     __name__, 'mobilebert_qa_squad_spec')

@@ -37,7 +37,6 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import train
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import train_lib
 
-
 # Number of calibration steps for full integer quantization. 500 steps are
 # enough to get a reasonable post-quantization result.
 _NUM_CALIBRATION_STEPS = 500
@@ -520,7 +519,9 @@ efficientdet_lite0_spec = functools.partial(
     uri='https://tfhub.dev/tensorflow/efficientdet/lite0/feature-vector/1',
 )
 efficientdet_lite0_spec.__doc__ = util.wrap_doc(
-    EfficientDetModelSpec, 'Creates EfficientDet-Lite0 model spec.')
+    EfficientDetModelSpec,
+    'Creates EfficientDet-Lite0 model spec. See also: `tflite_model_maker.object_detector.EfficientDetSpec`.'
+)
 mm_export('object_detector.EfficientDetLite0Spec').export_constant(
     __name__, 'efficientdet_lite0_spec')
 
@@ -530,7 +531,9 @@ efficientdet_lite1_spec = functools.partial(
     uri='https://tfhub.dev/tensorflow/efficientdet/lite1/feature-vector/1',
 )
 efficientdet_lite1_spec.__doc__ = util.wrap_doc(
-    EfficientDetModelSpec, 'Creates EfficientDet-Lite1 model spec.')
+    EfficientDetModelSpec,
+    'Creates EfficientDet-Lite1 model spec. See also: `tflite_model_maker.object_detector.EfficientDetSpec`.'
+)
 mm_export('object_detector.EfficientDetLite1Spec').export_constant(
     __name__, 'efficientdet_lite1_spec')
 
@@ -540,7 +543,9 @@ efficientdet_lite2_spec = functools.partial(
     uri='https://tfhub.dev/tensorflow/efficientdet/lite2/feature-vector/1',
 )
 efficientdet_lite2_spec.__doc__ = util.wrap_doc(
-    EfficientDetModelSpec, 'Creates EfficientDet-Lite2 model spec.')
+    EfficientDetModelSpec,
+    'Creates EfficientDet-Lite2 model spec. See also: `tflite_model_maker.object_detector.EfficientDetSpec`.'
+)
 mm_export('object_detector.EfficientDetLite2Spec').export_constant(
     __name__, 'efficientdet_lite2_spec')
 
@@ -550,7 +555,9 @@ efficientdet_lite3_spec = functools.partial(
     uri='https://tfhub.dev/tensorflow/efficientdet/lite3/feature-vector/1',
 )
 efficientdet_lite3_spec.__doc__ = util.wrap_doc(
-    EfficientDetModelSpec, 'Creates EfficientDet-Lite3 model spec.')
+    EfficientDetModelSpec,
+    'Creates EfficientDet-Lite3 model spec. See also: `tflite_model_maker.object_detector.EfficientDetSpec`.'
+)
 mm_export('object_detector.EfficientDetLite3Spec').export_constant(
     __name__, 'efficientdet_lite3_spec')
 
@@ -560,6 +567,8 @@ efficientdet_lite4_spec = functools.partial(
     uri='https://tfhub.dev/tensorflow/efficientdet/lite4/feature-vector/2',
 )
 efficientdet_lite4_spec.__doc__ = util.wrap_doc(
-    EfficientDetModelSpec, 'Creates EfficientDet-Lite4 model spec.')
+    EfficientDetModelSpec,
+    'Creates EfficientDet-Lite4 model spec. See also: `tflite_model_maker.object_detector.EfficientDetSpec`.'
+)
 mm_export('object_detector.EfficientDetLite4Spec').export_constant(
     __name__, 'efficientdet_lite4_spec')

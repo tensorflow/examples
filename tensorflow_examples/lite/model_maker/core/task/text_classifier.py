@@ -30,6 +30,7 @@ from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers.bert.text_classifier import metadata_writer_for_bert_text_classifier as bert_metadata_writer
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers.text_classifier import metadata_writer_for_text_classifier as metadata_writer
+from tensorflow_examples.lite.model_maker.core.task.model_spec import text_spec
 
 
 @mm_export('text_classifier.create')
@@ -193,12 +194,12 @@ class TextClassifier(classification_model.ClassificationModel):
         self._export_labels(label_filepath)
 
         export_dir = os.path.dirname(tflite_filepath)
-        if isinstance(self.model_spec, ms.BertClassifierModelSpec):
+        if isinstance(self.model_spec, text_spec.BertClassifierModelSpec):
           model_info = _get_bert_model_info(self.model_spec, vocab_filepath,
                                             label_filepath)
           populator = bert_metadata_writer.MetadataPopulatorForBertTextClassifier(
               tflite_filepath, export_dir, model_info)
-        elif isinstance(self.model_spec, ms.AverageWordVecModelSpec):
+        elif isinstance(self.model_spec, text_spec.AverageWordVecModelSpec):
           model_info = _get_model_info(self.model_spec.name)
           populator = metadata_writer.MetadataPopulatorForTextClassifier(
               tflite_filepath, export_dir, model_info, label_filepath,
