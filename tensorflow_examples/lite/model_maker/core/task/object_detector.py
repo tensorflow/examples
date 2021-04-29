@@ -33,53 +33,6 @@ from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import 
 T = TypeVar('T', bound='ObjectDetector')
 
 
-@mm_export('object_detector.create')
-def create(train_data: object_detector_dataloader.DataLoader,
-           model_spec: object_detector_spec.EfficientDetModelSpec,
-           validation_data: Optional[
-               object_detector_dataloader.DataLoader] = None,
-           epochs: Optional[object_detector_dataloader.DataLoader] = None,
-           batch_size: Optional[int] = None,
-           train_whole_model: bool = False,
-           do_train: bool = True) -> T:
-  """Loads data and train the model for object detection.
-
-  Args:
-    train_data: Training data.
-    model_spec: Specification for the model.
-    validation_data: Validation data. If None, skips validation process.
-    epochs: Number of epochs for training.
-    batch_size: Batch size for training.
-    train_whole_model: Boolean, False by default. If true, train the whole
-      model. Otherwise, only train the layers that are not match
-      `model_spec.config.var_freeze_expr`.
-    do_train: Whether to run training.
-
-  Returns:
-    ObjectDetector
-  """
-  model_spec = ms.get(model_spec)
-  if epochs is not None:
-    model_spec.config.num_epochs = epochs
-  if batch_size is not None:
-    model_spec.config.batch_size = batch_size
-  if train_whole_model:
-    model_spec.config.var_freeze_expr = None
-  if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
-    raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
-        model_spec.compat_tf_versions, compat.get_tf_behavior()))
-
-  object_detector = ObjectDetector(model_spec, train_data.label_map, train_data)
-
-  if do_train:
-    tf.compat.v1.logging.info('Retraining the models...')
-    object_detector.train(train_data, validation_data, epochs, batch_size)
-  else:
-    object_detector.create_model()
-
-  return object_detector
-
-
 def _get_model_info(
     model_spec: object_detector_spec.EfficientDetModelSpec,
     quantization_config: Optional[configs.QuantizationConfig] = None,
@@ -289,3 +242,55 @@ class ObjectDetector(custom_model.CustomModel):
       for i in range(num_classes):
         label = label_map[i + 1] if i + 1 in label_map else '???'
         f.write(label + '\n')
+
+  @classmethod
+  def create(cls,
+             train_data: object_detector_dataloader.DataLoader,
+             model_spec: object_detector_spec.EfficientDetModelSpec,
+             validation_data: Optional[
+                 object_detector_dataloader.DataLoader] = None,
+             epochs: Optional[object_detector_dataloader.DataLoader] = None,
+             batch_size: Optional[int] = None,
+             train_whole_model: bool = False,
+             do_train: bool = True) -> T:
+    """Loads data and train the model for object detection.
+
+    Args:
+      train_data: Training data.
+      model_spec: Specification for the model.
+      validation_data: Validation data. If None, skips validation process.
+      epochs: Number of epochs for training.
+      batch_size: Batch size for training.
+      train_whole_model: Boolean, False by default. If true, train the whole
+        model. Otherwise, only train the layers that are not match
+        `model_spec.config.var_freeze_expr`.
+      do_train: Whether to run training.
+
+    Returns:
+      An instance based on ObjectDetector.
+    """
+    model_spec = ms.get(model_spec)
+    if epochs is not None:
+      model_spec.config.num_epochs = epochs
+    if batch_size is not None:
+      model_spec.config.batch_size = batch_size
+    if train_whole_model:
+      model_spec.config.var_freeze_expr = None
+    if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
+      raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
+          model_spec.compat_tf_versions, compat.get_tf_behavior()))
+
+    object_detector = cls(model_spec, train_data.label_map, train_data)
+
+    if do_train:
+      tf.compat.v1.logging.info('Retraining the models...')
+      object_detector.train(train_data, validation_data, epochs, batch_size)
+    else:
+      object_detector.create_model()
+
+    return object_detector
+
+
+# Shortcut function.
+create = ObjectDetector.create
+mm_export('object_detector.create').export_constant(__name__, 'create')

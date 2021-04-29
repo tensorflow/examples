@@ -33,47 +33,6 @@ from tensorflow_examples.lite.model_maker.core.task.metadata_writers.text_classi
 from tensorflow_examples.lite.model_maker.core.task.model_spec import text_spec
 
 
-@mm_export('text_classifier.create')
-def create(train_data,
-           model_spec='average_word_vec',
-           validation_data=None,
-           batch_size=None,
-           epochs=3,
-           shuffle=False,
-           do_train=True):
-  """Loads data and train the model for test classification.
-
-  Args:
-    train_data: Training data.
-    model_spec: Specification for the model.
-    validation_data: Validation data. If None, skips validation process.
-    batch_size: Batch size for training.
-    epochs: Number of epochs for training.
-    shuffle: Whether the data should be shuffled.
-    do_train: Whether to run training.
-
-  Returns:
-    TextClassifier
-  """
-  model_spec = ms.get(model_spec)
-  if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
-    raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
-        model_spec.compat_tf_versions, compat.get_tf_behavior()))
-
-  text_classifier = TextClassifier(
-      model_spec,
-      train_data.index_to_label,
-      shuffle=shuffle)
-
-  if do_train:
-    tf.compat.v1.logging.info('Retraining the models...')
-    text_classifier.train(train_data, validation_data, epochs, batch_size)
-  else:
-    text_classifier.create_model()
-
-  return text_classifier
-
-
 def _get_bert_model_info(model_spec, vocab_file, label_file):
   return bert_metadata_writer.ClassifierSpecificInfo(
       name=model_spec.name + ' text classifier',
@@ -210,3 +169,47 @@ class TextClassifier(classification_model.ClassificationModel):
                            '`with_metadata=False` or write metadata by '
                            'yourself.')
         populator.populate(export_metadata_json_file)
+
+  @classmethod
+  def create(cls,
+             train_data,
+             model_spec='average_word_vec',
+             validation_data=None,
+             batch_size=None,
+             epochs=3,
+             shuffle=False,
+             do_train=True):
+    """Loads data and train the model for test classification.
+
+    Args:
+      train_data: Training data.
+      model_spec: Specification for the model.
+      validation_data: Validation data. If None, skips validation process.
+      batch_size: Batch size for training.
+      epochs: Number of epochs for training.
+      shuffle: Whether the data should be shuffled.
+      do_train: Whether to run training.
+
+    Returns:
+      An instance based on TextClassifier.
+    """
+    model_spec = ms.get(model_spec)
+    if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
+      raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
+          model_spec.compat_tf_versions, compat.get_tf_behavior()))
+
+    text_classifier = cls(
+        model_spec, train_data.index_to_label, shuffle=shuffle)
+
+    if do_train:
+      tf.compat.v1.logging.info('Retraining the models...')
+      text_classifier.train(train_data, validation_data, epochs, batch_size)
+    else:
+      text_classifier.create_model()
+
+    return text_classifier
+
+
+# Shortcut function.
+create = TextClassifier.create
+mm_export('text_classifier.create').export_constant(__name__, 'create')

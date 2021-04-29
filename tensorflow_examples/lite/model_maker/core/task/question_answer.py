@@ -31,42 +31,6 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers.bert.question_answerer import metadata_writer_for_bert_question_answerer as metadata_writer
 
 
-@mm_export('question_answer.create')
-def create(train_data,
-           model_spec,
-           batch_size=None,
-           epochs=2,
-           shuffle=False,
-           do_train=True):
-  """Loads data and train the model for question answer.
-
-  Args:
-    train_data: Training data.
-    model_spec: Specification for the model.
-    batch_size: Batch size for training.
-    epochs: Number of epochs for training.
-    shuffle: Whether the data should be shuffled.
-    do_train: Whether to run training.
-
-  Returns:
-    object of QuestionAnswer class.
-  """
-  model_spec = ms.get(model_spec)
-  if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
-    raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
-        model_spec.compat_tf_versions, compat.get_tf_behavior()))
-
-  model = QuestionAnswer(model_spec, shuffle=shuffle)
-
-  if do_train:
-    tf.compat.v1.logging.info('Retraining the models...')
-    model.train(train_data, epochs, batch_size)
-  else:
-    model.create_model()
-
-  return model
-
-
 def _get_model_info(model_spec, vocab_file):
   """Gets the specific info for the question answer model."""
   return metadata_writer.QuestionAnswererInfo(
@@ -220,3 +184,44 @@ class QuestionAnswer(custom_model.CustomModel):
         populator = metadata_writer.MetadataPopulatorForBertQuestionAndAnswer(
             tflite_filepath, export_dir, model_info)
         populator.populate(export_metadata_json_file)
+
+  @classmethod
+  def create(cls,
+             train_data,
+             model_spec,
+             batch_size=None,
+             epochs=2,
+             shuffle=False,
+             do_train=True):
+    """Loads data and train the model for question answer.
+
+    Args:
+      train_data: Training data.
+      model_spec: Specification for the model.
+      batch_size: Batch size for training.
+      epochs: Number of epochs for training.
+      shuffle: Whether the data should be shuffled.
+      do_train: Whether to run training.
+
+    Returns:
+      An instance based on QuestionAnswer.
+    """
+    model_spec = ms.get(model_spec)
+    if compat.get_tf_behavior() not in model_spec.compat_tf_versions:
+      raise ValueError('Incompatible versions. Expect {}, but got {}.'.format(
+          model_spec.compat_tf_versions, compat.get_tf_behavior()))
+
+    model = cls(model_spec, shuffle=shuffle)
+
+    if do_train:
+      tf.compat.v1.logging.info('Retraining the models...')
+      model.train(train_data, epochs, batch_size)
+    else:
+      model.create_model()
+
+    return model
+
+
+# Shortcut function.
+create = QuestionAnswer.create
+mm_export('question_answer.create').export_constant(__name__, 'create')

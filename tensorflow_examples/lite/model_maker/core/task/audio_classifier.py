@@ -25,45 +25,6 @@ from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
-@mm_export('audio_classifier.create')
-def create(train_data,
-           model_spec,
-           validation_data=None,
-           batch_size=32,
-           epochs=5,
-           model_dir=None,
-           do_train=True,
-           train_whole_model=False):
-  """Loads data and retrains the model.
-
-  Args:
-    train_data: A instance of audio_dataloader.DataLoader class.
-    model_spec: Specification for the model.
-    validation_data: Validation DataLoader. If None, skips validation process.
-    batch_size: Number of samples per training step. If `use_hub_library` is
-      False, it represents the base learning rate when train batch size is 256
-      and it's linear to the batch size.
-    epochs: Number of epochs for training.
-    model_dir: The location of the model checkpoint files.
-    do_train: Whether to run training.
-    train_whole_model: Boolean. By default, only the classification head is
-      trained. When True, the base model is also trained.
-
-  Returns:
-    An instance of AudioClassifier class.
-  """
-  if not isinstance(model_spec, audio_spec.BaseSpec):
-    model_spec = model_spec.get(model_spec, model_dir=model_dir)
-  task = AudioClassifier(
-      model_spec,
-      train_data.index_to_label,
-      shuffle=True,
-      train_whole_model=train_whole_model)
-  if do_train:
-    task.train(train_data, validation_data, epochs, batch_size)
-  return task
-
-
 @mm_export('audio_classifier.AudioClassifier')
 class AudioClassifier(classification_model.ClassificationModel):
   """Audio classifier for training/inference and exporing."""
@@ -142,3 +103,47 @@ class AudioClassifier(classification_model.ClassificationModel):
 
     return tf.math.confusion_matrix(
         labels=truth, predictions=predicated, num_classes=data.num_classes)
+
+  @classmethod
+  def create(cls,
+             train_data,
+             model_spec,
+             validation_data=None,
+             batch_size=32,
+             epochs=5,
+             model_dir=None,
+             do_train=True,
+             train_whole_model=False):
+    """Loads data and retrains the model.
+
+    Args:
+      train_data: A instance of audio_dataloader.DataLoader class.
+      model_spec: Specification for the model.
+      validation_data: Validation DataLoader. If None, skips validation process.
+      batch_size: Number of samples per training step. If `use_hub_library` is
+        False, it represents the base learning rate when train batch size is 256
+        and it's linear to the batch size.
+      epochs: Number of epochs for training.
+      model_dir: The location of the model checkpoint files.
+      do_train: Whether to run training.
+      train_whole_model: Boolean. By default, only the classification head is
+        trained. When True, the base model is also trained.
+
+    Returns:
+      An instance based on AudioClassifier.
+    """
+    if not isinstance(model_spec, audio_spec.BaseSpec):
+      model_spec = model_spec.get(model_spec, model_dir=model_dir)
+    task = cls(
+        model_spec,
+        train_data.index_to_label,
+        shuffle=True,
+        train_whole_model=train_whole_model)
+    if do_train:
+      task.train(train_data, validation_data, epochs, batch_size)
+    return task
+
+
+# Shortcut function.
+create = AudioClassifier.create
+mm_export('audio_classifier.create').export_constant(__name__, 'create')
