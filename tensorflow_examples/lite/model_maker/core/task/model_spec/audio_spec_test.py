@@ -116,7 +116,10 @@ class YAMNetSpecTest(tf.test.TestCase):
     spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
 
     tflite_filepath = os.path.join(self.get_temp_dir(), filename)
-    spec.export_tflite(model, tflite_filepath)
+    spec.export_tflite(
+        model,
+        tflite_filepath,
+        index_to_label=['label_{}'.format(i) for i in range(num_classes)])
 
     self.assertNear(
         os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
@@ -124,7 +127,6 @@ class YAMNetSpecTest(tf.test.TestCase):
     return tflite_filepath
 
   def test_yamnet_two_heads(self):
-
     tflite_path = self._train_and_export(
         audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=True),
         num_classes=2,
@@ -132,6 +134,85 @@ class YAMNetSpecTest(tf.test.TestCase):
         expected_model_size=15 * 1000 * 1000)
     self.assertEqual(
         2, len(model_util.get_lite_runner(tflite_path).output_details))
+    self.assertEqual(
+        model_util.extract_tflite_metadata_json(tflite_path), """{
+  "name": "yamnet/classification",
+  "description": "Recognizes sound events",
+  "version": "v1",
+  "subgraph_metadata": [
+    {
+      "input_tensor_metadata": [
+        {
+          "name": "audio_clip",
+          "description": "Input audio clip to be classified.",
+          "content": {
+            "content_properties_type": "AudioProperties",
+            "content_properties": {
+              "sample_rate": 16000,
+              "channels": 1
+            }
+          },
+          "stats": {
+          }
+        }
+      ],
+      "output_tensor_metadata": [
+        {
+          "name": "scores",
+          "description": "Scores in range 0..1.0 for each of the 521 output classes.",
+          "content": {
+            "content_properties_type": "FeatureProperties",
+            "content_properties": {
+            }
+          },
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              0.0
+            ]
+          },
+          "associated_files": [
+            {
+              "name": "yamnet_label_list.txt",
+              "description": "Labels for categories that the model can recognize.",
+              "type": "TENSOR_AXIS_LABELS"
+            }
+          ]
+        },
+        {
+          "name": "classification",
+          "description": "Scores in range 0..1.0 for each output classes.",
+          "content": {
+            "content_properties_type": "FeatureProperties",
+            "content_properties": {
+            }
+          },
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              0.0
+            ]
+          },
+          "associated_files": [
+            {
+              "name": "custom_label_list.txt",
+              "description": "Labels for categories that the model can recognize.",
+              "type": "TENSOR_AXIS_LABELS"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "author": "TensorFlow Lite Model Maker",
+  "license": "Apache License. Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.",
+  "min_parser_version": "1.3.0"
+}
+""")
 
   def test_yamnet_single_head(self):
     tflite_path = self._train_and_export(
@@ -141,6 +222,74 @@ class YAMNetSpecTest(tf.test.TestCase):
         expected_model_size=13 * 1000 * 1000)
     self.assertEqual(
         1, len(model_util.get_lite_runner(tflite_path).output_details))
+    self.assertEqual(
+        model_util.extract_tflite_metadata_json(tflite_path), """{
+  "name": "yamnet/classification",
+  "description": "Recognizes sound events",
+  "version": "v1",
+  "subgraph_metadata": [
+    {
+      "input_tensor_metadata": [
+        {
+          "name": "audio_clip",
+          "description": "Input audio clip to be classified.",
+          "content": {
+            "content_properties_type": "AudioProperties",
+            "content_properties": {
+              "sample_rate": 16000,
+              "channels": 1
+            }
+          },
+          "stats": {
+          }
+        }
+      ],
+      "output_tensor_metadata": [
+        {
+          "name": "classification",
+          "description": "Scores in range 0..1.0 for each output classes.",
+          "content": {
+            "content_properties_type": "FeatureProperties",
+            "content_properties": {
+            }
+          },
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              0.0
+            ]
+          },
+          "associated_files": [
+            {
+              "name": "custom_label_list.txt",
+              "description": "Labels for categories that the model can recognize.",
+              "type": "TENSOR_AXIS_LABELS"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "author": "TensorFlow Lite Model Maker",
+  "license": "Apache License. Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.",
+  "min_parser_version": "1.3.0"
+}
+""")
+
+  def test_no_metadata(self):
+    audio_spec.ENABLE_METADATA = False
+    tflite_path = self._train_and_export(
+        audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=True),
+        num_classes=2,
+        filename='two_heads.tflite',
+        expected_model_size=15 * 1000 * 1000)
+    self.assertEqual(
+        2, len(model_util.get_lite_runner(tflite_path).output_details))
+    with self.assertRaisesRegex(ValueError, 'The model does not have metadata'):
+      model_util.extract_tflite_metadata_json(tflite_path)
+    audio_spec.ENABLE_METADATA = True
 
   def test_binary_classification(self):
     self._train_and_export(

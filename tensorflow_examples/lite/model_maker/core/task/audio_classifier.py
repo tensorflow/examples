@@ -21,7 +21,6 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import classification_model
-from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
@@ -71,21 +70,27 @@ class AudioClassifier(classification_model.ClassificationModel):
           validation_ds,
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
 
-  def _export_tflite(self, tflite_filepath, quantization_config='default'):
+  def _export_tflite(self,
+                     tflite_filepath,
+                     with_metadata=True,
+                     export_metadata_json_file=True,
+                     quantization_config='default'):
     """Converts the retrained model to tflite format and saves it.
 
     Args:
       tflite_filepath: File path to save tflite model.
+      with_metadata: Whether the output tflite model contains metadata.
+      export_metadata_json_file: Whether to export metadata in json file. If
+        True, export the metadata in the same directory as tflite model. Used
+        only if `with_metadata` is True.
       quantization_config: Configuration for post-training quantization.
     """
     if quantization_config == 'default':
       quantization_config = self.model_spec.get_default_quantization_config()
 
-    # Allow model_spec to override this method.
-    fn = getattr(self.model_spec, 'export_tflite', None)
-    if not callable(fn):
-      fn = model_util.export_tflite
-    fn(self.model, tflite_filepath, quantization_config)
+    self.model_spec.export_tflite(self.model, tflite_filepath, with_metadata,
+                                  export_metadata_json_file,
+                                  self.index_to_label)
 
   def confusion_matrix(self, data, batch_size=32):
     # TODO(b/171449557): Consider moving this to ClassificationModel
