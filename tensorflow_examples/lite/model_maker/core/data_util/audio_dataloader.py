@@ -322,7 +322,6 @@ class DataLoader(dataloader.ClassificationDataLoader):
     ds = ds.map(_load_wav, num_parallel_calls=autotune)
     ds = ds.map(_resample, num_parallel_calls=autotune)
 
-    @tf.function
     def _cache_fn(dataset):
       if self._cache:
         if isinstance(self._cache, str):
