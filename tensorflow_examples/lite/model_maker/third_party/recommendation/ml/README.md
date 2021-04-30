@@ -80,3 +80,9 @@ python -m model.recommendation_model_launcher_keras \
   --num_predictions 100 \
   --max_history_length 10
 ```
+
+## Further reading
+
+If you want to read more about the technology related to on-device
+recommendation, please check out our
+[blogpost](https://blog.tensorflow.org/2020/09/introduction-to-tflite-on-device-recommendation.html).
