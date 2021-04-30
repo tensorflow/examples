@@ -17,6 +17,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import unittest
 
 import numpy as np
 from scipy.io import wavfile
@@ -72,6 +73,8 @@ def write_sample(root,
   return full_path
 
 
+@unittest.skipIf(tf.__version__ < '2.5',
+                 'Audio Classification requires TF 2.5 or later')
 class AudioClassifierTest(tf.test.TestCase):
 
   def testBrowserFFT(self):

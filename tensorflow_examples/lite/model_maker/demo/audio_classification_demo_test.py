@@ -47,6 +47,8 @@ def patch_data_loader():
       audio_classifier.DataLoader, 'from_folder', side_effect=side_effect)
 
 
+@unittest.skipIf(tf.__version__ < '2.5',
+                 'Audio Classification requires TF 2.5 or later')
 class AudioClassificationDemoTest(tf.test.TestCase):
 
   def test_audio_classification_demo(self):

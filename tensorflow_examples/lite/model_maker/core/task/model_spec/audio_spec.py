@@ -37,12 +37,25 @@ except ImportError:
   ENABLE_METADATA = False
 
 
+def _ensure_tf25(version):
+  if version < '2.5':
+    raise RuntimeError(
+        'Audio Tasks requires TF2.5 or later. For example, you can run the '
+        'following command to install TF2.5.0rc2:\n\n'
+        'pip3 install tensorflow==2.5.0rc2\n\n')
+
+
+def _get_tf_version():
+  return tf.__version__
+
+
 class BaseSpec(abc.ABC):
   """Base model spec for audio classification."""
 
   compat_tf_versions = (2,)
 
   def __init__(self, model_dir=None, strategy=None):
+    _ensure_tf25(_get_tf_version())
     self.model_dir = model_dir
     if not model_dir:
       self.model_dir = tempfile.mkdtemp()

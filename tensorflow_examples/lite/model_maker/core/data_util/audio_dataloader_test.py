@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import csv
 import os
+import unittest
 
 import numpy as np
 from scipy.io import wavfile
@@ -111,6 +112,8 @@ class Base(tf.test.TestCase):
     return folder_path
 
 
+@unittest.skipIf(tf.__version__ < '2.5',
+                 'Audio Classification requires TF 2.5 or later')
 class LoadFromESC50Test(Base):
 
   def test_from_esc50(self):
@@ -207,6 +210,8 @@ class ExamplesHelperTest(Base):
          (0, 0, 1)))
 
 
+@unittest.skipIf(tf.__version__ < '2.5',
+                 'Audio Classification requires TF 2.5 or later')
 class LoadFromFolderTest(Base):
 
   def test_spec(self):

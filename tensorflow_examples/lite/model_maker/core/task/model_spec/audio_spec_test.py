@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import unittest
 
 import numpy as np
 import tensorflow.compat.v2 as tf
@@ -57,6 +58,31 @@ def _gen_dataset(spec, total_samples, num_classes, batch_size, seed):
   return dataset
 
 
+class BaseSpecTest(tf.test.TestCase):
+
+  def testEnsureVersion(self):
+    valid_versions = ['2.5.0', '2.5.0rc1', '2.6']
+    invalid_versions = [
+        '2.4.1',
+    ]
+    specs = [audio_spec.YAMNetSpec, audio_spec.BrowserFFTSpec]
+
+    tmp_version_fn = audio_spec._get_tf_version
+    for spec in specs:
+      for version in valid_versions:
+        audio_spec._get_tf_version = lambda: version  # pylint: disable=cell-var-from-loop
+        spec()
+
+      for version in invalid_versions:
+        audio_spec._get_tf_version = lambda: version  # pylint: disable=cell-var-from-loop
+        with self.assertRaisesRegexp(RuntimeError, '2.5.0'):
+          spec()
+
+    audio_spec._get_tf_version = tmp_version_fn
+
+
+@unittest.skipIf(tf.__version__ < '2.5',
+                 'Audio Classification requires TF 2.5 or later')
 class YAMNetSpecTest(tf.test.TestCase):
 
   def _test_preprocess(self, input_shape, input_count, output_shape,
@@ -315,6 +341,8 @@ class YAMNetSpecTest(tf.test.TestCase):
         expected_model_size=15 * 1000 * 1000)
 
 
+@unittest.skipIf(tf.__version__ < '2.5',
+                 'Audio Classification requires TF 2.5 or later')
 class BrowserFFTSpecTest(tf.test.TestCase):
 
   @classmethod
