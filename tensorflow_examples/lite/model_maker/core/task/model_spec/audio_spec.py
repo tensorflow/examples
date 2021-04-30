@@ -465,7 +465,6 @@ class YAMNetSpec(BaseSpec):
 
     scores, embeddings, _ = embedding_extraction_layer(reshaped_input)
     serving_outputs = model(embeddings)
-    serving_outputs = tf.math.reduce_mean(serving_outputs, axis=0)
 
     if self._keep_yamnet_and_custom_heads:
       serving_model = tf.keras.Model(keras_input, [scores, serving_outputs])

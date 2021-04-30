@@ -134,6 +134,12 @@ class YAMNetSpecTest(tf.test.TestCase):
         expected_model_size=15 * 1000 * 1000)
     self.assertEqual(
         2, len(model_util.get_lite_runner(tflite_path).output_details))
+    self.assertAllEqual(
+        [1, 521],
+        model_util.get_lite_runner(tflite_path).output_details[0]['shape'])
+    self.assertAllEqual(
+        [1, 2],
+        model_util.get_lite_runner(tflite_path).output_details[1]['shape'])
     self.assertEqual(
         model_util.extract_tflite_metadata_json(tflite_path), """{
   "name": "yamnet/classification",
@@ -222,6 +228,9 @@ class YAMNetSpecTest(tf.test.TestCase):
         expected_model_size=13 * 1000 * 1000)
     self.assertEqual(
         1, len(model_util.get_lite_runner(tflite_path).output_details))
+    self.assertAllEqual(
+        [1, 2],
+        model_util.get_lite_runner(tflite_path).output_details[0]['shape'])
     self.assertEqual(
         model_util.extract_tflite_metadata_json(tflite_path), """{
   "name": "yamnet/classification",
