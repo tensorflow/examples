@@ -989,7 +989,7 @@ mobilebert_classifier_spec = functools.partial(
 )
 mobilebert_classifier_spec.__doc__ = util.wrap_doc(
     BertClassifierModelSpec,
-    'Creates MobileBert model spec for the text classification task. See also: `tflite_model_maker.question_answer.BertClassifierSpec`.'
+    'Creates MobileBert model spec for the text classification task. See also: `tflite_model_maker.text_classifier.BertClassifierSpec`.'
 )
 mm_export('text_classifier.MobileBertClassifierSpec').export_constant(
     __name__, 'mobilebert_classifier_spec')
@@ -1005,7 +1005,7 @@ mobilebert_qa_spec = functools.partial(
 )
 mobilebert_qa_spec.__doc__ = util.wrap_doc(
     BertQAModelSpec,
-    'Creates MobileBert model spec for the question answer task. See also: `tflite_model_maker.question_answer.BertClassifierSpec`.'
+    'Creates MobileBert model spec for the question answer task. See also: `tflite_model_maker.question_answer.BertQaSpec`.'
 )
 mm_export('question_answer.MobileBertQaSpec').export_constant(
     __name__, 'mobilebert_qa_spec')
