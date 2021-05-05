@@ -395,7 +395,6 @@ class InputReader:
   def dataset_options(self):
     options = tf.data.Options()
     options.experimental_deterministic = self._debug or not self._is_training
-    options.experimental_optimization.map_vectorization.enabled = True
     options.experimental_optimization.map_parallelization = True
     options.experimental_optimization.parallel_batch = True
     return options
