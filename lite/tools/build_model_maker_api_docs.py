@@ -50,9 +50,10 @@ OrderedDumper.add_representer(dict, _dict_representer)
 flags.DEFINE_string('output_dir', '/tmp/mm_api/',
                     'The path to output the files to')
 
-flags.DEFINE_string('code_url_prefix',
-                    'https://github.com/tensorflow/examples/blob/master/',
-                    'The url prefix for links to code.')
+flags.DEFINE_string(
+    'code_url_prefix',
+    'https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/public',
+    'The url prefix for links to code.')
 
 flags.DEFINE_bool('search_hints', True,
                   'Include metadata search hints in the generated files')
