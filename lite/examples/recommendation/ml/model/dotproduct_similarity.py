@@ -23,10 +23,8 @@ class DotProductSimilarity(tf.keras.layers.Layer):
     if top_k is None, top_k computation will be ignored.
   """
 
-  def call(self,
-           context_embeddings: tf.Tensor,
-           label_embeddings: tf.Tensor,
-           top_k: int = None):
+  def call(self, context_embeddings: tf.Tensor, label_embeddings: tf.Tensor,
+           top_k: int):
     """Generate dotproduct similarity matrix and top values/indices.
 
     Args:

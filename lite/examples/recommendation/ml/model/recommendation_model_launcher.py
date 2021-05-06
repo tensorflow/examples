@@ -37,6 +37,7 @@ flags.DEFINE_string('training_data_filepattern', None,
 flags.DEFINE_string('testing_data_filepattern', None,
                     'File pattern of the training data.')
 flags.DEFINE_string('model_dir', None, 'Directory to store checkpoints.')
+flags.DEFINE_string('export_dir', None, 'Directory for the exported model.')
 flags.DEFINE_integer('batch_size', 1, 'Training batch size.')
 flags.DEFINE_float('learning_rate', 0.1, 'Learning rate.')
 flags.DEFINE_integer('steps_per_epoch', 10,
@@ -81,8 +82,7 @@ class SimpleCheckpoint(tf.keras.callbacks.Callback):
     self.checkpoint_manager.save(checkpoint_number=step_counter)
 
 
-def _get_optimizer(learning_rate: float = None,
-                   gradient_clip_norm: float = None):
+def _get_optimizer(learning_rate: float, gradient_clip_norm: float):
   """Gets model optimizer."""
   kwargs = {'clipnorm': gradient_clip_norm} if gradient_clip_norm > 0 else {}
   return tf.keras.optimizers.Adagrad(learning_rate, **kwargs)
@@ -206,7 +206,7 @@ def export_tflite(export_dir):
 
 
 def export(checkpoint_path: str, input_config: input_config_pb2.InputConfig,
-           model_config: model_config_class.ModelConfig):
+           model_config: model_config_class.ModelConfig, export_dir: str):
   """Export to tensorflow saved model and TFLite model.
 
   Args:
@@ -214,9 +214,12 @@ def export(checkpoint_path: str, input_config: input_config_pb2.InputConfig,
       based on.
     input_config: The input config of the model.
     model_config: The configuration to set up the model.
+    export_dir: The directory to store the exported model, If not set, model is
+      exported to the model_dir with timestamp.
   """
   logger = tf.get_logger()
-  export_dir = os.path.join(FLAGS.model_dir, 'export', str(int(time.time())))
+  if not export_dir:
+    export_dir = os.path.join(FLAGS.model_dir, 'export', str(int(time.time())))
   logger.info('Exporting model to dir: {}'.format(export_dir))
   save_model(
       checkpoint_path=checkpoint_path,
@@ -249,6 +252,9 @@ def main(_):
   logger = tf.get_logger()
   if not tf.io.gfile.exists(FLAGS.model_dir):
     tf.io.gfile.mkdir(FLAGS.model_dir)
+
+  if not tf.io.gfile.exists(FLAGS.export_dir):
+    tf.io.gfile.mkdir(FLAGS.export_dir)
 
   input_config = load_input_config()
   model_config = prepare_model_config()
@@ -283,7 +289,8 @@ def main(_):
       export(
           checkpoint_path=latest_checkpoint_path,
           input_config=input_config,
-          model_config=model_config)
+          model_config=model_config,
+          export_dir=FLAGS.export_dir)
   elif FLAGS.run_mode == 'export':
     checkpoint_path = (
         FLAGS.checkpoint_path if FLAGS.checkpoint_path else
@@ -291,7 +298,8 @@ def main(_):
     export(
         checkpoint_path=checkpoint_path,
         input_config=input_config,
-        model_config=model_config)
+        model_config=model_config,
+        export_dir=FLAGS.export_dir)
   else:
     logger.error('Unsupported launcher run model {}.'.format(FLAGS.run_mode))
 
