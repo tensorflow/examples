@@ -197,8 +197,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
     """Load ESC50 style audio samples.
 
     ESC50 file structure is expalined in https://github.com/karolpiczak/ESC-50
-    Audio files should be put in ${data_path}/audio
-    Metadata file should be put in ${data_path}/meta/esc50.csv
+    Audio files should be put in `${data_path}/audio`
+    Metadata file should be put in `${data_path}/meta/esc50.csv`
 
     Note that instead of relying on the `target` field in the CSV, a new
     `index_to_label` mapping is created based on the alphabet order of the
