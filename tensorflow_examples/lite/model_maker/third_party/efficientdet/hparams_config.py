@@ -223,6 +223,7 @@ def default_detection_configs():
   # The default image normalization is identical to Cloud TPU ResNet.
   h.mean_rgb = [0.485 * 255, 0.456 * 255, 0.406 * 255]
   h.stddev_rgb = [0.229 * 255, 0.224 * 255, 0.225 * 255]
+  h.scale_range = False
 
   # classification loss
   h.label_smoothing = 0.0  # 0.1 is a good default

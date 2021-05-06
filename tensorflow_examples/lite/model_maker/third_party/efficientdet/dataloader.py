@@ -351,6 +351,8 @@ class InputReader:
       areas = pad_to_fixed_size(areas, -1, [self._max_instances_per_image, 1])
       classes = pad_to_fixed_size(classes, -1,
                                   [self._max_instances_per_image, 1])
+      if params['scale_range']:
+        image = image * 2.0 / 255 - 1.0
       if params['mixed_precision']:
         dtype = tf.keras.mixed_precision.global_policy().compute_dtype
         image = tf.cast(image, dtype=dtype)
