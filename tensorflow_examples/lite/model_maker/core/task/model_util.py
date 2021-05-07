@@ -55,6 +55,37 @@ class DummyContextManager(object):
     pass
 
 
+def export_saved_model(model,
+                       filepath,
+                       overwrite=True,
+                       include_optimizer=True,
+                       save_format=None,
+                       signatures=None,
+                       options=None):
+  """Saves the model to Tensorflow SavedModel or a single HDF5 file.
+
+  Args:
+    model: Instance of a Keras model.
+    filepath: String, path to SavedModel or H5 file to save the model.
+    overwrite: Whether to silently overwrite any existing file at the target
+      location, or provide the user with a manual prompt.
+    include_optimizer: If True, save optimizer's state together.
+    save_format: Either 'tf' or 'h5', indicating whether to save the model to
+      Tensorflow SavedModel or HDF5. Defaults to 'tf' in TF 2.X, and 'h5' in TF
+      1.X.
+    signatures: Signatures to save with the SavedModel. Applicable to the 'tf'
+      format only. Please see the `signatures` argument in `tf.saved_model.save`
+      for details.
+    options: Optional `tf.saved_model.SaveOptions` object that specifies options
+      for saving to SavedModel.
+  """
+  if filepath is None:
+    raise ValueError(
+        "SavedModel filepath couldn't be None when exporting to SavedModel.")
+  model.save(filepath, overwrite, include_optimizer, save_format, signatures,
+             options)
+
+
 def export_tflite(model,
                   tflite_filepath,
                   quantization_config=None,

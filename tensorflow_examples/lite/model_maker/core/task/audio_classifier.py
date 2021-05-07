@@ -29,7 +29,8 @@ class AudioClassifier(classification_model.ClassificationModel):
   """Audio classifier for training/inference and exporing."""
 
   # TODO(b/171848856): Add TFJS export.
-  DEFAULT_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.TFLITE)
+  DEFAULT_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.TFLITE,
+                           ExportFormat.SAVED_MODEL)
   ALLOWED_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.TFLITE,
                            ExportFormat.SAVED_MODEL)
 

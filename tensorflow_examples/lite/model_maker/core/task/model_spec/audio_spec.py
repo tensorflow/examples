@@ -213,6 +213,15 @@ class BrowserFFTSpec(BaseSpec):
         train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)
     return hist
 
+  def create_serving_model(self, training_model):
+    """Create a model for serving."""
+    combined = tf.keras.Sequential()
+    combined.add(self._preprocess_model)
+    combined.add(training_model)
+    # Build the model.
+    combined.build([None, self.expected_waveform_len])
+    return combined
+
   def export_tflite(self,
                     model,
                     tflite_filepath,
@@ -235,11 +244,7 @@ class BrowserFFTSpec(BaseSpec):
       index_to_label: A list that map from index to label class name.
     """
     del with_metadata, export_metadata_json_file, index_to_label
-    combined = tf.keras.Sequential()
-    combined.add(self._preprocess_model)
-    combined.add(model)
-    # Build the model.
-    combined.build([None, self.expected_waveform_len])
+    combined = self.create_serving_model(model)
 
     # Sets batch size from None to 1 when converting to tflite.
     model_util.set_batch_size(model, batch_size=1)
@@ -468,6 +473,27 @@ class YAMNetSpec(BaseSpec):
         with open(export_json_file, 'w') as f:
           f.write(metadata_json)
 
+  def create_serving_model(self, training_model):
+    """Create a model for serving."""
+    embedding_extraction_layer = hub.KerasLayer(
+        self._yamnet_model_handle, trainable=False)
+    keras_input = tf.keras.Input(
+        shape=(YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,),
+        dtype=tf.float32,
+        name='audio')  # (1, wav)
+    reshaped_input = tf.reshape(keras_input,
+                                (YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,))  # (wav)
+
+    scores, embeddings, _ = embedding_extraction_layer(reshaped_input)
+    serving_outputs = training_model(embeddings)
+
+    if self._keep_yamnet_and_custom_heads:
+      serving_model = tf.keras.Model(keras_input, [scores, serving_outputs])
+    else:
+      serving_model = tf.keras.Model(keras_input, serving_outputs)
+
+    return serving_model
+
   def export_tflite(self,
                     model,
                     tflite_filepath,
@@ -490,23 +516,7 @@ class YAMNetSpec(BaseSpec):
         only if `with_metadata` is True.
       index_to_label: A list that map from index to label class name.
     """
-    embedding_extraction_layer = hub.KerasLayer(
-        self._yamnet_model_handle, trainable=False)
-
-    keras_input = tf.keras.Input(
-        shape=(YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,),
-        dtype=tf.float32,
-        name='audio')  # (1, wav)
-    reshaped_input = tf.reshape(keras_input,
-                                (YAMNetSpec.EXPECTED_WAVEFORM_LENGTH,))  # (wav)
-
-    scores, embeddings, _ = embedding_extraction_layer(reshaped_input)
-    serving_outputs = model(embeddings)
-
-    if self._keep_yamnet_and_custom_heads:
-      serving_model = tf.keras.Model(keras_input, [scores, serving_outputs])
-    else:
-      serving_model = tf.keras.Model(keras_input, serving_outputs)
+    serving_model = self.create_serving_model(model)
 
     # TODO(b/164229433): Remove SELECT_TF_OPS once changes in the bug are
     # released.

@@ -220,11 +220,12 @@ class CustomModel(abc.ABC):
       options: Optional `tf.saved_model.SaveOptions` object that specifies
         options for saving to SavedModel.
     """
-    if filepath is None:
-      raise ValueError(
-          "SavedModel filepath couldn't be None when exporting to SavedModel.")
-    self.model.save(filepath, overwrite, include_optimizer, save_format,
-                    signatures, options)
+    if hasattr(self.model_spec, 'create_serving_model'):
+      model = self.model_spec.create_serving_model(self.model)
+    else:
+      model = self.model
+    model_util.export_saved_model(model, filepath, overwrite, include_optimizer,
+                                  save_format, signatures, options)
 
   def _export_tflite(self, tflite_filepath, quantization_config=None):
     """Converts the retrained model to tflite format and saves it.
