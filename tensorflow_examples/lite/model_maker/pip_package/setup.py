@@ -57,7 +57,7 @@ classifiers = [
 # Set package version.
 if nightly:
   project_name = '{}-nightly'.format(project_name)
-  version = '0.3.0'  # Version prefix, usually major.minor.micro.
+  version = '0.3.1'  # Version prefix, usually major.minor.micro.
   version = '{:s}.dev{:s}'.format(version, datestring)
   classifiers += [
       'Development Status :: 4 - Beta',

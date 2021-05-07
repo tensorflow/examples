@@ -1,5 +1,10 @@
 # Release 0.3
 
+## 0.3.1
+
+*   Polish document with minor changes.
+*   Add some 0.2.x APIs for backward compatibility.
+
 ## 0.3.0
 
 *   Export TFLite Model Maker public APIs, and adapt colabs as demo code.

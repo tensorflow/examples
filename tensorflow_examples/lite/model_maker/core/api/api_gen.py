@@ -63,8 +63,14 @@ def run(output_dir: str, base_package: str, version: str) -> None:
   """Runs main."""
   imports = load_golden('golden_api.json')
   imports_doc = load_golden('golden_api_doc.json')
-  api_util.write_packages(output_dir, imports, imports_doc, base_package,
-                          version)
+  deprecated_imports = load_golden('deprecated_api.json')
+  api_util.write_packages(
+      output_dir,
+      imports,
+      imports_doc,
+      base_package,
+      version,
+      deprecated_imports=deprecated_imports)
 
 
 def main() -> None:

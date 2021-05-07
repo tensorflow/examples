@@ -21,4 +21,11 @@ from tflite_model_maker import object_detector
 from tflite_model_maker import question_answer
 from tflite_model_maker import recommendation
 from tflite_model_maker import text_classifier
-__version__ = '0.3.0'
+# Deprecated imports are kept for backward compatiblity.
+# pylint: disable=g-bad-import-order
+from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task import configs
+# pylint: enable=g-bad-import-order
+
+__version__ = '0.3.1'

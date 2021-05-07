@@ -227,19 +227,27 @@ def generate_package_doc(package_name):
   return '"""Generated API for package: {}."""'.format(package_name)
 
 
-def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]],
-                   doc_dict: Dict[str, str], base_package: str,
-                   version: str) -> None:
+def write_packages(
+    base_dir: str,
+    imports: Dict[str, Sequence[str]],
+    doc_dict: Dict[str, str],
+    base_package: str,
+    version: str,
+    deprecated_imports: Optional[Dict[str, Sequence[str]]] = None) -> None:
   """Writes packages as init files.
 
   Args:
     base_dir: str, base directory to write packages.
-    imports_dict: dict, pairs of (namespace, list of imports).
+    imports: dict, pairs of (namespace, list of imports).
     doc_dict: dict, pairs of (namespace, package_doc).
     base_package: str, the base package name. (e.g. 'tflite_model_maker')
-    version: str, version string. (e.g., 0.x.x)
+    version: str, version string. (e.g., 0.x.x).
+    deprecated_imports: optinal dict, pairs of (namespace, list of imports).
   """
-  for package_name, import_lines in imports_dict.items():
+  if not deprecated_imports:
+    deprecated_imports = {}
+
+  for package_name, import_lines in imports.items():
     # Create parent dir.
     parts = as_path(split_name(package_name))
     parent_dir = os.path.join(base_dir, parts)
@@ -251,17 +259,25 @@ def write_packages(base_dir: str, imports_dict: Dict[str, Sequence[str]],
     lines = [
         line.replace(PACKAGE_PLACEHOLDER, base_package) for line in import_lines
     ]
+
+    # Add deprecated imports for backward compatiblity..
+    if package_name in deprecated_imports:
+      lines.extend(deprecated_imports[package_name])
+
     # For base package add __version__.
     if package_name == ROOT_PACKAGE_KEY:
+      lines.append('')  # Empty line.
       lines.append("""__version__ = '{}'""".format(version))
 
     full_package_name = as_package(
         split_name(base_package) + split_name(package_name))
 
+    # Add package doc.
     if package_name in doc_dict:
       doc = '"""{}"""'.format(doc_dict[package_name])
     else:
       doc = generate_package_doc(full_package_name)
+
     write_python_file(full_path, doc, lines)
 
 
