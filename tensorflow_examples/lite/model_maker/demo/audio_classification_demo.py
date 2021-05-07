@@ -168,6 +168,8 @@ def run(spec,
 def main(_):
   logging.set_verbosity(logging.INFO)
 
+  export_dir = os.path.expanduser(FLAGS.export_dir)
+
   if not FLAGS.data_dir:
     if FLAGS.dataset == 'esc50':
       data_dir = download_esc50_dataset()
@@ -179,9 +181,9 @@ def main(_):
     else:
       raise ValueError('Unsupported dataset type: ', FLAGS.dataset)
   else:
-    data_dir = FLAGS.data_dir
+    data_dir = os.path.expanduser(FLAGS.data_dir)
 
-  run(FLAGS.spec, data_dir, FLAGS.dataset, export_dir=FLAGS.export_dir)
+  run(FLAGS.spec, data_dir, FLAGS.dataset, export_dir=export_dir)
 
 
 if __name__ == '__main__':
