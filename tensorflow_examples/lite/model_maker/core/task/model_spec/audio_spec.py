@@ -299,8 +299,8 @@ class YAMNetSpec(BaseSpec):
 
   def create_model(self, num_classes, train_whole_model=False):
     model = tf.keras.Sequential([
-        tf.keras.layers.Input(
-            shape=(YAMNetSpec.EMBEDDING_SIZE),
+        tf.keras.layers.InputLayer(
+            input_shape=(YAMNetSpec.EMBEDDING_SIZE),
             dtype=tf.float32,
             name='embedding'),
         tf.keras.layers.Dense(
