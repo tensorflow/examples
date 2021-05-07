@@ -2,6 +2,10 @@
 
 ### Overview
 
+**Warning**: This is deprecated, and please refers to
+[Sound Classification](../../sound_classification/android/README.md) android
+sample with latest technologies.
+
 This app performs recognition of speech Commands on mobile, highlighting the spoken word.
 
 <!-- TODO(b/124116863): Add app screenshot. -->
