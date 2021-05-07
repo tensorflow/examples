@@ -288,8 +288,10 @@ def generate_examples_from_timelines(timelines,
   """
   examples = []
   movies_dict = generate_movies_dict(movies_df)
+  progress_bar = tf.keras.utils.Progbar(len(timelines))
   for timeline in timelines.values():
     if len(timeline) < min_timeline_len:
+      progress_bar.add(1)
       continue
     single_timeline_examples = generate_examples_from_single_timeline(
         timeline=timeline,
@@ -297,6 +299,7 @@ def generate_examples_from_timelines(timelines,
         max_context_len=max_context_len,
         max_context_movie_genre_len=max_context_movie_genre_len)
     examples.extend(single_timeline_examples)
+    progress_bar.add(1)
   # Split the examples into train, test sets.
   if shuffle:
     random.seed(random_seed)
@@ -346,8 +349,10 @@ def generate_movie_feature_vocabs(movies_df, movie_counts):
 def write_tfrecords(tf_examples, filename):
   """Write tf examples to tfrecord file."""
   with tf.io.TFRecordWriter(filename) as file_writer:
+    progress_bar = tf.keras.utils.Progbar(len(tf_examples))
     for example in tf_examples:
       file_writer.write(example.SerializeToString())
+      progress_bar.add(1)
 
 
 def write_vocab_json(movie_id_vocab, filename):
@@ -371,8 +376,9 @@ def main(_):
   extracted_file_dir = download_and_extract_data(data_directory=data_dir)
   logging.info("Reading data to dataframes.")
   ratings_df, movies_df = read_data(data_directory=extracted_file_dir)
-  logging.info("Generating train and test examples.")
+  logging.info("Generating movie rating user timelines.")
   timelines, movie_counts = convert_to_timelines(ratings_df)
+  logging.info("Generating train and test examples.")
   train_examples, test_examples = generate_examples_from_timelines(
       timelines=timelines,
       movies_df=movies_df,
@@ -383,9 +389,11 @@ def main(_):
 
   if not tf.io.gfile.exists(FLAGS.output_dir):
     tf.io.gfile.makedirs(FLAGS.output_dir)
+  logging.info("Writing generated training examples.")
   write_tfrecords(
       tf_examples=train_examples,
       filename=os.path.join(FLAGS.output_dir, OUTPUT_TRAINING_DATA_FILENAME))
+  logging.info("Writing generated testing examples.")
   write_tfrecords(
       tf_examples=test_examples,
       filename=os.path.join(FLAGS.output_dir, OUTPUT_TESTING_DATA_FILENAME))
