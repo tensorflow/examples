@@ -83,8 +83,12 @@ def run(data_dir,
 
 def main(_):
   logging.set_verbosity(logging.INFO)
-  extracted_dir = download_data(FLAGS.data_dir)
-  run(extracted_dir, FLAGS.export_dir, spec=FLAGS.spec)
+
+  export_dir = os.path.expanduser(FLAGS.export_dir)
+  data_dir = os.path.expanduser(FLAGS.data_dir)
+
+  extracted_dir = download_data(data_dir)
+  run(extracted_dir, export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':

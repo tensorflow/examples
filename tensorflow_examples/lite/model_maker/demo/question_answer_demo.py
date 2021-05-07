@@ -17,6 +17,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+
 from absl import app
 from absl import flags
 from absl import logging
@@ -78,7 +80,9 @@ def main(_):
   logging.set_verbosity(logging.INFO)
 
   train_data_path, validation_data_path = download_demo_data()
-  run(train_data_path, validation_data_path, FLAGS.export_dir, spec=FLAGS.spec)
+  export_dir = os.path.expanduser(FLAGS.export_dir)
+
+  run(train_data_path, validation_data_path, export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':

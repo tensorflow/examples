@@ -89,7 +89,9 @@ def run(data_dir, export_dir, spec='bert_classifier', **kwargs):
 def main(_):
   logging.set_verbosity(logging.INFO)
   data_dir = download_demo_data()
-  run(data_dir, FLAGS.export_dir, spec=FLAGS.spec)
+  export_dir = os.path.expanduser(FLAGS.export_dir)
+
+  run(data_dir, export_dir, spec=FLAGS.spec)
 
 
 if __name__ == '__main__':
