@@ -131,6 +131,15 @@ class DataLoader(dataloader.ClassificationDataLoader):
     self._spec = spec
     self._cache = cache
 
+  def __len__(self):
+    """Returns the number of audio files in the DataLoader.
+
+    Note that one audio file could be framed (mostly via a sliding window of
+    fixed size) into None or multiple audio clips during training and
+    evaluation.
+    """
+    return self._size
+
   @classmethod
   def from_folder(cls,
                   spec,
@@ -147,13 +156,13 @@ class DataLoader(dataloader.ClassificationDataLoader):
     corresponds to an example. Each .wav file is mono (single-channel) and has
     the typical 16 bit pulse-code modulation (PCM) encoding.
 
-    - .wav files will be resampled to spec.target_sample_rate then fed into
-    spec.preprocess_ds for split and other operations. Normally long wav files
-    will be split into multiple snippets. And wav files shorter than a certain
+    - .wav files will be resampled to `spec.target_sample_rate` then fed into
+    `spec.preprocess_ds` for split and other operations. Normally long wav files
+    will be framed into multiple clips. And wav files shorter than a certain
     threshold will be ignored.
 
     Args:
-      spec: instance of audio_spec.BaseSpec.
+      spec: instance of `audio_spec.BaseSpec`.
       data_path: string, location to the audio files.
       categories: A string list of selected categories. If empty, all categories
         will be selected.
@@ -166,8 +175,8 @@ class DataLoader(dataloader.ClassificationDataLoader):
         https://www.tensorflow.org/api_docs/python/tf/data/Dataset#cache
 
     Returns:
-      AudioDataLoader containing audio spectrogram (or any data type generated
-      by spec.preprocess_ds) and labels.
+      `AudioDataLoader` containing audio spectrogram (or any data type generated
+      by `spec.preprocess_ds`) and labels.
     """
     assert isinstance(spec, audio_spec.BaseSpec)
     root_dir = os.path.abspath(data_path)

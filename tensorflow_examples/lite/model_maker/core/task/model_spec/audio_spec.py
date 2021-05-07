@@ -132,6 +132,14 @@ class BrowserFFTSpec(BaseSpec):
   """Model good at detecting speech commands, using Browser FFT spectrum."""
 
   def __init__(self, model_dir=None, strategy=None):
+    """Initialize a new instance for BrowserFFT spec.
+
+    Args:
+      model_dir: The location to save the model checkpoint files.
+      strategy: An instance of TF distribute strategy. If none, it will use the
+        default strategy (either SingleDeviceStrategy or the current scoped
+        strategy.
+    """
     super(BrowserFFTSpec, self).__init__(model_dir, strategy)
     self._preprocess_model = _load_browser_fft_preprocess_model()
     self._tfjs_sc_model = _load_tfjs_speech_command_model()
@@ -286,6 +294,22 @@ class YAMNetSpec(BaseSpec):
       frame_length=EXPECTED_WAVEFORM_LENGTH,  # Window size 0.975 s
       frame_step=EXPECTED_WAVEFORM_LENGTH // 2,  # Hop of 0.975 /2 s
       keep_yamnet_and_custom_heads=True):
+    """Initialize a new instance for YAMNet spec.
+
+    Args:
+      model_dir: The location to save the model checkpoint files.
+      strategy: An instance of TF distribute strategy. If none, it will use the
+        default strategy (either SingleDeviceStrategy or the current scoped
+        strategy.
+      yamnet_model_handle: Path of the TFHub model for retrining.
+      frame_length: The number of samples in each audio frame. If the audio file
+        is shorter than `frame_length`, then the audio file will be ignored.
+      frame_step: The number of samples between two audio frames. This value
+        should be bigger than `frame_length`.
+      keep_yamnet_and_custom_heads: Boolean, decides if the final TFLite model
+        contains both YAMNet and custom trained classification heads. When set
+        to False, only the trained custom head will be preserved.
+    """
     super(YAMNetSpec, self).__init__(model_dir, strategy)
     self._yamnet_model_handle = yamnet_model_handle
     self._yamnet_model = hub.load(yamnet_model_handle)
