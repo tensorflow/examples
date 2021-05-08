@@ -52,8 +52,6 @@ def _get_tf_version():
 class BaseSpec(abc.ABC):
   """Base model spec for audio classification."""
 
-  compat_tf_versions = (2,)
-
   def __init__(self, model_dir=None, strategy=None):
     _ensure_tf25(_get_tf_version())
     self.model_dir = model_dir
