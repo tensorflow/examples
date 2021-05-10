@@ -216,6 +216,25 @@ def _load_tfjs_speech_command_model():
 class BrowserFFTSpec(BaseSpec):
   """Model good at detecting speech commands, using Browser FFT spectrum."""
 
+  # Information used to populate TFLite metadata.
+  _MODEL_NAME = 'AudioClassifier'
+  _MODEL_DESCRIPTION = ('Identify the most prominent type in the audio clip '
+                        'from a known set of categories.')
+
+  _MODEL_VERSION = 'v1'
+  _MODEL_AUTHOR = 'TensorFlow Lite Model Maker'
+  _MODEL_LICENSES = ('Apache License. Version 2.0 '
+                     'http://www.apache.org/licenses/LICENSE-2.0.')
+
+  _SAMPLE_RATE = 44100
+  _CHANNELS = 1
+
+  _INPUT_NAME = 'audio_clip'
+  _INPUT_DESCRIPTION = 'Input audio clip to be classified.'
+
+  _OUTPUT_NAME = 'probability'
+  _OUTPUT_DESCRIPTION = 'Scores of the labels respectively.'
+
   def __init__(self, model_dir=None, strategy=None):
     """Initialize a new instance for BrowserFFT spec.
 
@@ -307,6 +326,31 @@ class BrowserFFTSpec(BaseSpec):
     combined.build([None, self.expected_waveform_len])
     return combined
 
+  def _export_metadata(self, tflite_filepath, index_to_label,
+                       export_metadata_json_file):
+    """Export TFLite metadata."""
+    with MetadataWriter(
+        tflite_filepath,
+        name=self._MODEL_NAME,
+        description=self._MODEL_DESCRIPTION,
+        version=self._MODEL_VERSION,
+        author=self._MODEL_AUTHOR,
+        licenses=self._MODEL_LICENSES) as writer:
+      writer.add_input(
+          name=self._INPUT_NAME,
+          description=self._INPUT_DESCRIPTION,
+          sample_rate=self._SAMPLE_RATE,
+          channels=self._CHANNELS)
+
+      writer.add_output(
+          labels=index_to_label,
+          name=self._OUTPUT_NAME,
+          description=self._OUTPUT_DESCRIPTION)
+
+      json_filepath = (os.path.splitext(tflite_filepath)[0] +
+                       '.json') if export_metadata_json_file else None
+      writer.save(tflite_filepath, json_filepath)
+
   def export_tflite(self,
                     model,
                     tflite_filepath,
@@ -328,7 +372,6 @@ class BrowserFFTSpec(BaseSpec):
         only if `with_metadata` is True.
       index_to_label: A list that map from index to label class name.
     """
-    del with_metadata, export_metadata_json_file, index_to_label
     combined = self.create_serving_model(model)
 
     # Sets batch size from None to 1 when converting to tflite.
@@ -343,6 +386,14 @@ class BrowserFFTSpec(BaseSpec):
 
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(model, batch_size=None)
+
+    if with_metadata:
+      if not ENABLE_METADATA:
+        print('Writing Metadata is not support in the installed tflite-support '
+              'version. Please use tflite-support >= 0.2.*')
+      else:
+        self._export_metadata(tflite_filepath, index_to_label,
+                              export_metadata_json_file)
 
 
 @mm_export('audio_classifier.YamNetSpec')

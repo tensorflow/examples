@@ -381,30 +381,91 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     self._spec.create_model(20)
     tf.keras.backend.clear_session()
 
-  def _train(self, total_samples, num_classes, batch_size, seed):
-    tf.keras.backend.clear_session()
+  def _train_and_export(self, spec, num_classes, filename, expected_model_size):
+    dataset = _gen_dataset(
+        spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
+    model = spec.create_model(num_classes)
+    spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
 
-    tf.random.set_seed(seed)
-    np.random.seed(seed)
+    tflite_filepath = os.path.join(self.get_temp_dir(), filename)
+    spec.export_tflite(
+        model,
+        tflite_filepath,
+        index_to_label=['label_{}'.format(i) for i in range(num_classes)])
 
-    dataset = _gen_dataset(self._spec, total_samples, num_classes, batch_size,
-                           seed)
-    model = self._spec.create_model(num_classes)
-    self._spec.run_classifier(
-        model, epochs=1, train_ds=dataset, validation_ds=dataset)
-
-    # Test tflite export
-    tflite_filepath = os.path.join(self.get_temp_dir(), 'model.tflite')
-    self._spec.export_tflite(model, tflite_filepath)
-    expected_model_size = 6 * 1000 * 1000
     self.assertNear(
         os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
 
+    return tflite_filepath
+
   def test_binary_classification(self):
-    self._train(total_samples=10, num_classes=2, batch_size=2, seed=100)
+    self._train_and_export(
+        audio_spec.BrowserFFTSpec(),
+        num_classes=2,
+        filename='binary_classification.tflite',
+        expected_model_size=6 * 1000 * 1000)
 
   def test_basic_training(self):
-    self._train(total_samples=20, num_classes=3, batch_size=2, seed=100)
+    tflite_path = self._train_and_export(
+        audio_spec.BrowserFFTSpec(),
+        num_classes=5,
+        filename='basic_5_classes_training.tflite',
+        expected_model_size=6 * 1000 * 1000)
+    self.assertEqual(
+        model_util.extract_tflite_metadata_json(tflite_path), """{
+  "name": "AudioClassifier",
+  "description": "Identify the most prominent type in the audio clip from a known set of categories.",
+  "version": "v1",
+  "subgraph_metadata": [
+    {
+      "input_tensor_metadata": [
+        {
+          "name": "audio_clip",
+          "description": "Input audio clip to be classified.",
+          "content": {
+            "content_properties_type": "AudioProperties",
+            "content_properties": {
+              "sample_rate": 44100,
+              "channels": 1
+            }
+          },
+          "stats": {
+          }
+        }
+      ],
+      "output_tensor_metadata": [
+        {
+          "name": "probability",
+          "description": "Scores of the labels respectively.",
+          "content": {
+            "content_properties_type": "FeatureProperties",
+            "content_properties": {
+            }
+          },
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              0.0
+            ]
+          },
+          "associated_files": [
+            {
+              "name": "probability_labels_default.txt",
+              "description": "Labels for categories that the model can recognize.",
+              "type": "TENSOR_AXIS_LABELS"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "author": "TensorFlow Lite Model Maker",
+  "license": "Apache License. Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.",
+  "min_parser_version": "1.3.0"
+}
+""")
 
 
 if __name__ == '__main__':
