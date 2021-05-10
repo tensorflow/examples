@@ -11,7 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""APIs to train an image classification model."""
+"""APIs to train an image classification model.
+
+Task guide:
+https://www.tensorflow.org/lite/tutorials/model_maker_image_classification.
+"""
 
 from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader as DataLoader
 from tensorflow_examples.lite.model_maker.core.task.image_classifier import create

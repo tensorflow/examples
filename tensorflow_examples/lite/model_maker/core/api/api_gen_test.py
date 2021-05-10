@@ -19,6 +19,7 @@ import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core.api import api_gen
 from tensorflow_examples.lite.model_maker.core.api import api_util
+from tensorflow_examples.lite.model_maker.core.api import golden_api_doc
 from tensorflow_examples.lite.model_maker.core.api import include  # pylint: disable=unused-import
 
 
@@ -37,13 +38,13 @@ class ApiGenTest(tf.test.TestCase):
 
   def test_golden_api_doc(self):
     golden = api_gen.load_golden('golden_api.json')
-    golden_doc = api_gen.load_golden('golden_api_doc.json')
+    golden_doc = golden_api_doc.DOCS
 
     api_keys = list(golden.keys())
     doc_keys = list(golden_doc.keys())
     msg = ('Expect package keys are matched: \n'
            'In `golden_api.json`: \n{}\n\n'
-           'In `golden_api_doc.json`: \n{}\n\n').format(api_keys, doc_keys)
+           'In `golden_api_doc.py`: \n{}\n\n').format(api_keys, doc_keys)
     self.assertListEqual(api_keys, doc_keys, msg)
 
 

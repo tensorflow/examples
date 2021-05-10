@@ -24,6 +24,8 @@ import pathlib
 from typing import Dict, Sequence
 
 from tensorflow_examples.lite.model_maker.core.api import api_util
+from tensorflow_examples.lite.model_maker.core.api import deprecated_api
+from tensorflow_examples.lite.model_maker.core.api import golden_api_doc
 
 
 def parse_arguments():
@@ -62,8 +64,8 @@ def load_golden(json_file: str) -> Dict[str, Sequence[str]]:
 def run(output_dir: str, base_package: str, version: str) -> None:
   """Runs main."""
   imports = load_golden('golden_api.json')
-  imports_doc = load_golden('golden_api_doc.json')
-  deprecated_imports = load_golden('deprecated_api.json')
+  imports_doc = golden_api_doc.DOCS
+  deprecated_imports = deprecated_api.IMPORTS
   api_util.write_packages(
       output_dir,
       imports,

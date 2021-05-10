@@ -11,7 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Public APIs for TFLite Model Maker, a transfer learning library to train custom TFLite models.
+"""Golden APIs doc."""
+
+DOCS = {}
+
+# pylint: disable=line-too-long
+DOCS[''] = """
+Public APIs for TFLite Model Maker, a transfer learning library to train custom TFLite models.
 
 You can install the package with
 
@@ -38,24 +44,34 @@ model.export(export_dir='/tmp/')
 
 For more details, please refer to our guide:
 https://www.tensorflow.org/lite/guide/model_maker.
+""".lstrip()
+
+DOCS['audio_classifier'] = 'APIs to train an audio classification model.'
+
+DOCS['config'] = 'APIs for the config of TFLite Model Maker.'
+
+DOCS['image_classifier'] = """APIs to train an image classification model.
+
+Task guide: https://www.tensorflow.org/lite/tutorials/model_maker_image_classification.
 """
 
-from tflite_model_maker import audio_classifier
-from tflite_model_maker import config
-from tflite_model_maker import image_classifier
-from tflite_model_maker import model_spec
-from tflite_model_maker import object_detector
-from tflite_model_maker import question_answer
-from tflite_model_maker import recommendation
-from tflite_model_maker import text_classifier
+DOCS['model_spec'] = 'APIs for the model spec of TFLite Model Maker.'
 
-# Deprecated imports are kept for backward compatiblity and to be removed in
-# future versions. Please refer to public APIs for replacement:
-# https://www.tensorflow.org/lite/api_docs/python/tflite_model_maker
-# pylint: disable=g-bad-import-order
-from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
-from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
-from tensorflow_examples.lite.model_maker.core.task import configs
-# pylint: enable=g-bad-import-order
+DOCS['object_detector'] = 'APIs to train an object detection model.'
 
-__version__ = '0.3.1'
+DOCS['question_answer'] = """
+APIs to train a model that can answer questions based on a predefined text.
+
+Task guide: https://www.tensorflow.org/lite/tutorials/model_maker_question_answer.
+""".lstrip()
+
+DOCS['recommendation'] = """APIs to train an on-device recommendation model.
+
+Demo code: https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/recommendation_demo.py
+"""
+
+DOCS['text_classifier'] = """APIs to train a text classification model.
+
+Task guide: https://www.tensorflow.org/lite/tutorials/model_maker_text_classification.
+"""
+# pylint: enable=line-too-long

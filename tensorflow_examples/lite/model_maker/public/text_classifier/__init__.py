@@ -11,7 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""APIs to train a text classification model."""
+"""APIs to train a text classification model.
+
+Task guide:
+https://www.tensorflow.org/lite/tutorials/model_maker_text_classification.
+"""
 
 from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader as DataLoader
 from tensorflow_examples.lite.model_maker.core.task.model_spec.text_spec import AverageWordVecModelSpec as AverageWordVecSpec
