@@ -354,7 +354,7 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     model = self._spec.create_model(10)
 
     self.assertEqual(self._spec._preprocess_model.input_shape,
-                     (None, self._spec.expected_waveform_len))
+                     (None, self._spec.EXPECTED_WAVEFORM_LENGTH))
     self.assertEqual(self._spec._preprocess_model.output_shape,
                      (None, None, 232, 1))
     self.assertEqual(self._spec._tfjs_sc_model.input_shape, (None, 43, 232, 1))

@@ -216,6 +216,8 @@ def _load_tfjs_speech_command_model():
 class BrowserFFTSpec(BaseSpec):
   """Model good at detecting speech commands, using Browser FFT spectrum."""
 
+  EXPECTED_WAVEFORM_LENGTH = 44032
+
   # Information used to populate TFLite metadata.
   _MODEL_NAME = 'AudioClassifier'
   _MODEL_DESCRIPTION = ('Identify the most prominent type in the audio clip '
@@ -248,32 +250,40 @@ class BrowserFFTSpec(BaseSpec):
     self._preprocess_model = _load_browser_fft_preprocess_model()
     self._tfjs_sc_model = _load_tfjs_speech_command_model()
 
-    self.expected_waveform_len = self._preprocess_model.input_shape[-1]
-
   @property
   def target_sample_rate(self):
     return 44100
 
-  @tf.function
+  @tf.function(input_signature=[
+      tf.TensorSpec(shape=[None], dtype=tf.float32),
+      tf.TensorSpec([], dtype=tf.int32)
+  ])
   def _ensure_length(self, wav, unused_label):
-    return len(wav) >= self.expected_waveform_len
+    return len(wav) >= self.EXPECTED_WAVEFORM_LENGTH
 
-  @tf.function
+  @tf.function(input_signature=[
+      tf.TensorSpec(shape=[None], dtype=tf.float32),
+      tf.TensorSpec([], dtype=tf.int32)
+  ])
   def _split(self, wav, label):
     """Split the long audio samples into multiple trunks."""
     # wav shape: (audio_samples, )
-    chunks = tf.math.floordiv(len(wav), self.expected_waveform_len)
-    unused = tf.math.floormod(len(wav), self.expected_waveform_len)
+    chunks = tf.math.floordiv(len(wav), self.EXPECTED_WAVEFORM_LENGTH)
+    unused = tf.math.floormod(len(wav), self.EXPECTED_WAVEFORM_LENGTH)
     # Drop unused data
     wav = wav[:len(wav) - unused]
     # Split the audio sample into multiple chunks
-    wav = tf.reshape(wav, (chunks, 1, self.expected_waveform_len))
+    wav = tf.reshape(wav, (chunks, 1, self.EXPECTED_WAVEFORM_LENGTH))
 
     return wav, tf.repeat(tf.expand_dims(label, 0), len(wav))
 
-  @tf.function
+  @tf.function(input_signature=[
+      tf.TensorSpec(shape=[1, EXPECTED_WAVEFORM_LENGTH], dtype=tf.float32),
+      tf.TensorSpec([], dtype=tf.int32)
+  ])
   def _preprocess(self, x, label):
-    # x has shape (1, expected_waveform_len)
+    """Preprocess the dataset to extract the spectrum."""
+    # x has shape (1, EXPECTED_WAVEFORM_LENGTH)
     spectrum = self._preprocess_model(x)
     # y has shape (1, embedding_len)
     spectrum = tf.squeeze(spectrum, axis=0)
@@ -323,7 +333,7 @@ class BrowserFFTSpec(BaseSpec):
     combined.add(self._preprocess_model)
     combined.add(training_model)
     # Build the model.
-    combined.build([None, self.expected_waveform_len])
+    combined.build([None, self.EXPECTED_WAVEFORM_LENGTH])
     return combined
 
   def _export_metadata(self, tflite_filepath, index_to_label,

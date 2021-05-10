@@ -197,6 +197,14 @@ class CustomModel(abc.ABC):
       tf.compat.v1.logging.warn('Encountered unknown parameters: ' +
                                 str(kwargs))
 
+  def create_serving_model(self):
+    """Returns the underlining Keras model for serving."""
+    if hasattr(self.model_spec, 'create_serving_model'):
+      model = self.model_spec.create_serving_model(self.model)
+    else:
+      model = self.model
+    return model
+
   def _export_saved_model(self,
                           filepath,
                           overwrite=True,
@@ -220,10 +228,7 @@ class CustomModel(abc.ABC):
       options: Optional `tf.saved_model.SaveOptions` object that specifies
         options for saving to SavedModel.
     """
-    if hasattr(self.model_spec, 'create_serving_model'):
-      model = self.model_spec.create_serving_model(self.model)
-    else:
-      model = self.model
+    model = self.create_serving_model()
     model_util.export_saved_model(model, filepath, overwrite, include_optimizer,
                                   save_format, signatures, options)
 

@@ -36,7 +36,7 @@ class BrowserFFTWithoutPreprocessing(audio_spec.BrowserFFTSpec):
 
     @tf.function
     def _crop(wav, label):
-      wav = wav[:self.expected_waveform_len]
+      wav = wav[:self.EXPECTED_WAVEFORM_LENGTH]
       return wav, label
 
     ds = ds.map(_crop)
@@ -170,6 +170,10 @@ class AudioClassifierTest(tf.test.TestCase):
         # Skip yamnet output during TFLite evaluation.
         postprocess_fn=lambda x: x[-1])
     self.assertGreaterEqual(result['accuracy'], .5)
+
+    keras_model = task.create_serving_model()
+    self.assertAllEqual(keras_model.input_shape,
+                        [None, train_spec.EXPECTED_WAVEFORM_LENGTH])
 
 
 if __name__ == '__main__':
