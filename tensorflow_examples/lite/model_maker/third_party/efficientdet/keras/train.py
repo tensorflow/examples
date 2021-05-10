@@ -14,6 +14,7 @@
 # ==============================================================================
 """The main training script."""
 import os
+import platform
 from absl import app
 from absl import flags
 from absl import logging
@@ -164,7 +165,6 @@ def main(_):
       tf.config.experimental.set_memory_growth(gpu, True)
 
   if FLAGS.debug:
-    tf.config.run_functions_eagerly(True)
     tf.debugging.set_log_device_placement(True)
     os.environ['TF_DETERMINISTIC_OPS'] = '1'
     tf.random.set_seed(FLAGS.tf_random_seed)
@@ -178,8 +178,20 @@ def main(_):
     ds_strategy = tf.distribute.TPUStrategy(tpu_cluster_resolver)
     logging.info('All devices: %s', tf.config.list_logical_devices('TPU'))
   elif FLAGS.strategy == 'gpus':
-    ds_strategy = tf.distribute.MirroredStrategy()
-    logging.info('All devices: %s', tf.config.list_physical_devices('GPU'))
+    gpus = tf.config.list_physical_devices('GPU')
+    if FLAGS.batch_size % len(gpus):
+      raise ValueError(
+          'Batch size divide gpus number must be interger, but got %f' %
+          (FLAGS.batch_size / len(gpus)))
+    if platform.system() == 'Windows':
+      # Windows doesn't support nccl use HierarchicalCopyAllReduce instead
+      # TODO(fsx950223): investigate HierarchicalCopyAllReduce performance issue
+      cross_device_ops = tf.distribute.HierarchicalCopyAllReduce()
+    else:
+      cross_device_ops = None
+    ds_strategy = tf.distribute.MirroredStrategy(
+        cross_device_ops=cross_device_ops)
+    logging.info('All devices: %s', gpus)
   else:
     if tf.config.list_physical_devices('GPU'):
       ds_strategy = tf.distribute.OneDeviceStrategy('device:GPU:0')
@@ -230,9 +242,15 @@ def main(_):
     else:
       model = train_lib.EfficientDetNetTrain(config=config)
     model = setup_model(model, config)
+    if FLAGS.debug:
+      tf.config.run_functions_eagerly(True)
     if FLAGS.pretrained_ckpt and not FLAGS.hub_module_url:
       ckpt_path = tf.train.latest_checkpoint(FLAGS.pretrained_ckpt)
-      util_keras.restore_ckpt(model, ckpt_path, config.moving_average_decay)
+      util_keras.restore_ckpt(
+          model,
+          ckpt_path,
+          config.moving_average_decay,
+          exclude_layers=['class_net'])
     init_experimental(config)
     if 'train' in FLAGS.mode:
       val_dataset = get_dataset(False, config) if 'eval' in FLAGS.mode else None

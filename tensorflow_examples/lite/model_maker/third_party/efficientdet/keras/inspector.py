@@ -25,7 +25,7 @@ import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import hparams_config
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
-from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import inference
+from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import infer_lib
 
 flags.DEFINE_string('model_name', 'efficientdet-d0', 'Model.')
 flags.DEFINE_enum('mode', 'infer',
@@ -83,7 +83,7 @@ def main(_):
   ckpt_path_or_file = FLAGS.model_dir
   if tf.io.gfile.isdir(ckpt_path_or_file):
     ckpt_path_or_file = tf.train.latest_checkpoint(ckpt_path_or_file)
-  driver = inference.ServingDriver(FLAGS.model_name, ckpt_path_or_file,
+  driver = infer_lib.ServingDriver(FLAGS.model_name, ckpt_path_or_file,
                                    FLAGS.batch_size or None,
                                    FLAGS.only_network, model_params)
   if FLAGS.mode == 'export':
@@ -135,6 +135,9 @@ def main(_):
       # use synthetic data if no image is provided.
       image_arrays = tf.ones((batch_size, *model_config.image_size, 3),
                              dtype=tf.uint8)
+    if FLAGS.only_network:
+      image_arrays = tf.image.convert_image_dtype(image_arrays, tf.float32)
+      image_arrays = tf.image.resize(image_arrays, model_config.image_size)
     driver.benchmark(image_arrays, FLAGS.bm_runs, FLAGS.trace_filename)
   elif FLAGS.mode == 'dry':
     # transfer to tf2 format ckpt
@@ -153,8 +156,8 @@ def main(_):
     if FLAGS.output_video:
       frame_width, frame_height = int(cap.get(3)), int(cap.get(4))
       out_ptr = cv2.VideoWriter(FLAGS.output_video,
-                                cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), 25,
-                                (frame_width, frame_height))
+                                cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
+                                cap.get(5), (frame_width, frame_height))
 
     while cap.isOpened():
       # Capture frame-by-frame

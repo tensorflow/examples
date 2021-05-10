@@ -81,16 +81,14 @@ class RecordInspect:
     for i, zip_data in enumerate(zip(gt_data, images, scales)):
       gt, image, scale = zip_data
       boxes = gt[:, :4]
-      boxes = boxes[boxes[..., 0] > 0].numpy()
+      boxes = boxes[np.any(boxes > 0, axis=1)].numpy()
       if boxes.shape[0] > 0:
         classes = gt[:boxes.shape[0], -1].numpy()
         try:
-          display_str_list_list = map(lambda idx: self.cls_to_label[idx],
-                                      np.asarray(classes, dtype=np.int))
-          display_str_list_list = np.reshape(
-              np.asarray(list(display_str_list_list)), (-1, 1)).tolist()
+          category_index = {idx: {'id': idx, 'name': self.cls_to_label[idx]}
+                            for idx in np.asarray(classes, dtype=np.int)}
         except Exception:  # pylint: disable=broad-except
-          display_str_list_list = ()
+          category_index = {}
 
         # unnormalize image.
         image *= scale_image
@@ -102,13 +100,15 @@ class RecordInspect:
         # scale to image_size
         boxes *= scale.numpy()
 
-        # normalize boxes
-        boxes[:, (0, 2)] = boxes[:, (0, 2)] / image.shape[0]
-        boxes[:, (1, 3)] = boxes[:, (1, 3)] / image.shape[1]
-
+        image = vis_utils.visualize_boxes_and_labels_on_image_array(
+            image,
+            boxes=boxes,
+            classes=classes.astype(int),
+            scores=np.ones(boxes.shape[0]),
+            category_index=category_index,
+            line_thickness=2,
+            skip_scores=True)
         image = Image.fromarray(image)
-        vis_utils.draw_bounding_boxes_on_image(
-            image, boxes, display_str_list_list=display_str_list_list)
         image.save(os.path.join(FLAGS.save_samples_dir, f'sample{i}.jpg'))
 
 

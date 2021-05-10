@@ -43,9 +43,9 @@ def main(_):
   # !wget https://user-images.githubusercontent.com/11736571/77320690-099af300-6d37-11ea-9d86-24f14dc2d540.png -O tmp/img.png
   # !wget https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-d0.tar.gz -O tmp/efficientdet-d0.tar.gz
   # !tar zxf tmp/efficientdet-d0.tar.gz -C tmp
-  imgs = [np.array(Image.open(FLAGS.image_path))] * 2
+  imgs = [np.array(Image.open(FLAGS.image_path))]
   # Create model config.
-  config = hparams_config.get_efficientdet_config('efficientdet-d0')
+  config = hparams_config.get_efficientdet_config(FLAGS.model_name)
   config.is_training_bn = False
   config.image_size = '1920x1280'
   config.nms_configs.score_thresh = 0.4
