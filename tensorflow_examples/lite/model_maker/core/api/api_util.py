@@ -266,7 +266,6 @@ def write_packages(
 
     # For base package add __version__.
     if package_name == ROOT_PACKAGE_KEY:
-      lines.append('')  # Empty line.
       lines.append("""__version__ = '{}'""".format(version))
 
     full_package_name = as_package(

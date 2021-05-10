@@ -46,13 +46,18 @@ For more details, please refer to our guide:
 https://www.tensorflow.org/lite/guide/model_maker.
 """.lstrip()
 
-DOCS['audio_classifier'] = 'APIs to train an audio classification model.'
+DOCS['audio_classifier'] = """APIs to train an audio classification model.
+
+Demo code:
+https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/audio_classification_demo.py
+"""
 
 DOCS['config'] = 'APIs for the config of TFLite Model Maker.'
 
 DOCS['image_classifier'] = """APIs to train an image classification model.
 
-Task guide: https://www.tensorflow.org/lite/tutorials/model_maker_image_classification.
+Task guide:
+https://www.tensorflow.org/lite/tutorials/model_maker_image_classification.
 """
 
 DOCS['model_spec'] = 'APIs for the model spec of TFLite Model Maker.'
@@ -62,16 +67,19 @@ DOCS['object_detector'] = 'APIs to train an object detection model.'
 DOCS['question_answer'] = """
 APIs to train a model that can answer questions based on a predefined text.
 
-Task guide: https://www.tensorflow.org/lite/tutorials/model_maker_question_answer.
+Task guide:
+https://www.tensorflow.org/lite/tutorials/model_maker_question_answer.
 """.lstrip()
 
 DOCS['recommendation'] = """APIs to train an on-device recommendation model.
 
-Demo code: https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/recommendation_demo.py
+Demo code:
+https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/recommendation_demo.py
 """
 
 DOCS['text_classifier'] = """APIs to train a text classification model.
 
-Task guide: https://www.tensorflow.org/lite/tutorials/model_maker_text_classification.
+Task guide:
+https://www.tensorflow.org/lite/tutorials/model_maker_text_classification.
 """
 # pylint: enable=line-too-long

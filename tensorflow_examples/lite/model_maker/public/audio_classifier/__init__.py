@@ -11,7 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""APIs to train an audio classification model."""
+"""APIs to train an audio classification model.
+
+Demo code:
+https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/audio_classification_demo.py
+"""
 
 from tensorflow_examples.lite.model_maker.core.data_util.audio_dataloader import DataLoader
 from tensorflow_examples.lite.model_maker.core.task.audio_classifier import AudioClassifier
