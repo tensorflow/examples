@@ -55,6 +55,11 @@ class DummyContextManager(object):
     pass
 
 
+def export_labels(filepath, index_to_label):
+  with tf.io.gfile.GFile(filepath, 'w') as f:
+    f.write('\n'.join(index_to_label))
+
+
 def export_saved_model(model,
                        filepath,
                        overwrite=True,

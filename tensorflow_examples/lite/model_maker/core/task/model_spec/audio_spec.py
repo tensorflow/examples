@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import collections
 import csv
 import io
 import os
@@ -35,6 +36,92 @@ try:
   ENABLE_METADATA = True
 except ImportError:
   ENABLE_METADATA = False
+
+
+class MetadataWriter:
+  """Helper class to populate Audio Metadata, to be used in `with` statement.
+
+  Simple usage for model with two classification heads.
+
+  with MetadataWriter(tflite_path) as writer:
+    writer.add_input(sample_rate=16000, channels=1)
+    writer.add_output(name='animal_sound', labels=['dog', 'cat'])
+    writer.add_output(name='speech_command', labels=['yes', 'no'])
+    writer.save(tflite_path, json_filepath)
+
+  `add_output` can also take an ordered dict for multiple locales, example:
+
+  writer.add_output(name='animal_sound', labels=collections.OrderedDict([
+    ('en', ['bird', 'cat']),
+    ('fr', ['oiseau', 'chat'])
+  ]))
+  """
+
+  def __init__(self, tflite_filepath, **kwargs):
+    self._model = writer_utils.load_file(tflite_filepath)
+    self._general_md = md_info.GeneralMd(**kwargs)
+    self._inputs = []
+    self._outputs = []
+
+  def __enter__(self):
+    self._temp_folder = tempfile.TemporaryDirectory()
+    return self
+
+  def __exit__(self, exc_type, exc_val, exc_tb):
+    self._temp_folder.cleanup()
+    # Delete the attribute so that it errors out if not in `with` statement.
+    delattr(self, '_temp_folder')
+
+  def add_input(self, **kwargs):
+    """Add metadta for the input tensor."""
+    self._inputs.append(md_info.InputAudioTensorMd(**kwargs))
+
+  def add_output(self, name, labels, **kwargs):
+    """Add metadata for output tensor in order."""
+    if isinstance(labels, list):
+      default_locale = None
+      labels = collections.OrderedDict([(default_locale, labels)])
+      return self.add_output(name, labels, **kwargs)
+
+    label_files = []
+    if isinstance(labels, collections.OrderedDict):
+      for locale, label_list in labels.items():
+        full_path = os.path.join(
+            self._temp_folder.name,
+            '{}_labels_{}.txt'.format(name, locale or 'default'))
+        model_util.export_labels(full_path, label_list)
+        label_files.append(
+            md_info.LabelFileMd(file_path=full_path, locale=locale))
+    else:
+      raise ValueError(
+          '`labels` should be either a list of labels or an ordered dict mapping `locale` -> list of labels. got: {}'
+          .format(labels))
+
+    idx = len(self._outputs)
+    self._outputs.append(
+        md_info.ClassificationTensorMd(
+            name=name,
+            label_files=label_files,
+            tensor_type=writer_utils.get_output_tensor_types(self._model)[idx],
+            **kwargs))
+
+  def save(self, tflite_filepath=None, json_filepath=None):
+    """Persist model with metadata."""
+    if len(self._inputs) > 1:
+      raise ValueError('Only supports single input, got {}'.format(
+          len(self._inputs)))
+    input_md = self._inputs[0]
+
+    writer = md_writer.MetadataWriter.create_from_metadata_info_for_multihead(
+        model_buffer=self._model,
+        general_md=self._general_md,
+        input_md=input_md,
+        output_md_list=self._outputs)
+    if tflite_filepath:
+      writer_utils.save_file(writer.populate(), tflite_filepath, mode='wb')
+    if json_filepath:
+      writer_utils.save_file(
+          writer.get_metadata_json(), json_filepath, mode='wt')
 
 
 def _ensure_tf25(version):
@@ -279,15 +366,13 @@ class YAMNetSpec(BaseSpec):
   _INPUT_NAME = 'audio_clip'
   _INPUT_DESCRIPTION = 'Input audio clip to be classified.'
 
-  _YAMNET_OUTPUT_NAME = 'scores'
+  _YAMNET_OUTPUT_NAME = 'yamnet'
   _YAMNET_OUTPUT_DESCRIPTION = ('Scores in range 0..1.0 for each of the 521 '
                                 'output classes.')
-  _YAMNET_LABEL_FILE = 'yamnet_label_list.txt'
 
-  _CUSTOM_OUTPUT_NAME = 'classification'
+  _CUSTOM_OUTPUT_NAME = 'custom'
   _CUSTOM_OUTPUT_DESCRIPTION = (
       'Scores in range 0..1.0 for each output classes.')
-  _CUSTOM_LABEL_FILE = 'custom_label_list.txt'
 
   def __init__(
       self,
@@ -400,76 +485,36 @@ class YAMNetSpec(BaseSpec):
     class_names = class_names[1:]  # Skip CSV header
     return class_names
 
-  def _export_labels(self, filepath, index_to_label):
-    with tf.io.gfile.GFile(filepath, 'w') as f:
-      f.write('\n'.join(index_to_label))
-
   def _export_metadata(self, tflite_filepath, index_to_label,
                        export_metadata_json_file):
     """Export TFLite metadata."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-      # Prepare metadata
-      with open(tflite_filepath, 'rb') as f:
-        model_buffer = f.read()
-
-      general_md = md_info.GeneralMd(
-          name=self._MODEL_NAME,
-          description=self._MODEL_DESCRIPTION,
-          version=self._MODEL_VERSION,
-          author=self._MODEL_AUTHOR,
-          licenses=self._MODEL_LICENSES)
-      input_md = md_info.InputAudioTensorMd(self._INPUT_NAME,
-                                            self._INPUT_DESCRIPTION,
-                                            self._SAMPLE_RATE, self._CHANNELS)
-
-      # Save label files.
-      custom_label_filepath = os.path.join(temp_dir, self._CUSTOM_LABEL_FILE)
-      self._export_labels(custom_label_filepath, index_to_label)
-
-      custom_output_md = md_info.ClassificationTensorMd(
-          name=self._CUSTOM_OUTPUT_NAME,
-          description=self._CUSTOM_OUTPUT_DESCRIPTION,
-          label_files=[
-              md_info.LabelFileMd(
-                  file_path=os.path.join(temp_dir, self._CUSTOM_LABEL_FILE))
-          ],
-          tensor_type=writer_utils.get_output_tensor_types(model_buffer)[-1],
-          score_calibration_md=None)
+    with MetadataWriter(
+        tflite_filepath,
+        name=self._MODEL_NAME,
+        description=self._MODEL_DESCRIPTION,
+        version=self._MODEL_VERSION,
+        author=self._MODEL_AUTHOR,
+        licenses=self._MODEL_LICENSES) as writer:
+      writer.add_input(
+          name=self._INPUT_NAME,
+          description=self._INPUT_DESCRIPTION,
+          sample_rate=self._SAMPLE_RATE,
+          channels=self._CHANNELS)
 
       if self._keep_yamnet_and_custom_heads:
-        yamnet_label_filepath = os.path.join(temp_dir, self._YAMNET_LABEL_FILE)
-        self._export_labels(yamnet_label_filepath, self._yamnet_labels())
-
-        yamnet_output_md = md_info.ClassificationTensorMd(
+        writer.add_output(
+            labels=self._yamnet_labels(),
             name=self._YAMNET_OUTPUT_NAME,
-            description=self._YAMNET_OUTPUT_DESCRIPTION,
-            label_files=[
-                md_info.LabelFileMd(
-                    file_path=os.path.join(temp_dir, self._YAMNET_LABEL_FILE))
-            ],
-            tensor_type=writer_utils.get_output_tensor_types(model_buffer)[0],
-            score_calibration_md=None)
-        output_md = [yamnet_output_md, custom_output_md]
-      else:
-        output_md = [custom_output_md]
+            description=self._YAMNET_OUTPUT_DESCRIPTION)
 
-      # Populate metadata
-      writer = md_writer.MetadataWriter.create_from_metadata_info_for_multihead(
-          model_buffer=model_buffer,
-          general_md=general_md,
-          input_md=input_md,
-          output_md_list=output_md)
+      writer.add_output(
+          labels=index_to_label,
+          name=self._CUSTOM_OUTPUT_NAME,
+          description=self._CUSTOM_OUTPUT_DESCRIPTION)
 
-      output_model = writer.populate()
-
-      with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
-        f.write(output_model)
-
-      if export_metadata_json_file:
-        metadata_json = writer.get_metadata_json()
-        export_json_file = os.path.splitext(tflite_filepath)[0] + '.json'
-        with open(export_json_file, 'w') as f:
-          f.write(metadata_json)
+      json_filepath = (os.path.splitext(tflite_filepath)[0] +
+                       '.json') if export_metadata_json_file else None
+      writer.save(tflite_filepath, json_filepath)
 
   def create_serving_model(self, training_model):
     """Create a model for serving."""

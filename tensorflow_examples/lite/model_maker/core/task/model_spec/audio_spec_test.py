@@ -190,7 +190,7 @@ class YAMNetSpecTest(tf.test.TestCase):
       ],
       "output_tensor_metadata": [
         {
-          "name": "scores",
+          "name": "yamnet",
           "description": "Scores in range 0..1.0 for each of the 521 output classes.",
           "content": {
             "content_properties_type": "FeatureProperties",
@@ -207,14 +207,14 @@ class YAMNetSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "yamnet_label_list.txt",
+              "name": "yamnet_labels_default.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
           ]
         },
         {
-          "name": "classification",
+          "name": "custom",
           "description": "Scores in range 0..1.0 for each output classes.",
           "content": {
             "content_properties_type": "FeatureProperties",
@@ -231,7 +231,7 @@ class YAMNetSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "custom_label_list.txt",
+              "name": "custom_labels_default.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
@@ -281,7 +281,7 @@ class YAMNetSpecTest(tf.test.TestCase):
       ],
       "output_tensor_metadata": [
         {
-          "name": "classification",
+          "name": "custom",
           "description": "Scores in range 0..1.0 for each output classes.",
           "content": {
             "content_properties_type": "FeatureProperties",
@@ -298,7 +298,7 @@ class YAMNetSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "custom_label_list.txt",
+              "name": "custom_labels_default.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
