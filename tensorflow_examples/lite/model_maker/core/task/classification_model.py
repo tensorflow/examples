@@ -21,6 +21,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.data_util import data_util
+from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_util
@@ -67,7 +68,8 @@ class ClassificationModel(custom_model.CustomModel):
     """Predicts the top-k predictions.
 
     Args:
-      data: Data to be evaluated.
+      data: Data to be evaluated. Either an instance of DataLoader or just raw
+        data entries such TF tensor or numpy array.
       k: Number of top results to be predicted.
       batch_size: Number of samples per evaluation step.
 
@@ -76,8 +78,11 @@ class ClassificationModel(custom_model.CustomModel):
     """
     if k < 0:
       raise ValueError('K should be equal or larger than 0.')
-    ds = data.gen_dataset(
-        batch_size, is_training=False, preprocess=self.preprocess)
+    if isinstance(data, dataloader.DataLoader):
+      ds = data.gen_dataset(
+          batch_size, is_training=False, preprocess=self.preprocess)
+    else:
+      ds = data
 
     predicted_prob = self.model.predict(ds)
     topk_prob, topk_id = tf.math.top_k(predicted_prob, k=k)

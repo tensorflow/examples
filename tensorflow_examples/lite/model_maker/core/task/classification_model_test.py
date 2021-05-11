@@ -49,23 +49,26 @@ class ClassificationModelTest(tf.test.TestCase):
   def test_predict_top_k(self):
     input_shape = [24, 24, 3]
     self.model.model = test_util.build_model(input_shape, self.num_classes)
-    data = test_util.get_dataloader(2, input_shape, self.num_classes)
+    ds = test_util.get_dataloader(2, input_shape, self.num_classes)
+    raw_data = tf.random.uniform(
+        shape=[2] + input_shape, minval=0, maxval=1, dtype=tf.float32)
 
-    topk_results = self.model.predict_top_k(data, k=2, batch_size=1)
-    for topk_result in topk_results:
-      top1_result, top2_result = topk_result[0], topk_result[1]
-      top1_label, top1_prob = top1_result[0], top1_result[1]
-      top2_label, top2_prob = top2_result[0], top2_result[1]
+    for data in [ds, raw_data]:
+      topk_results = self.model.predict_top_k(data, k=2, batch_size=1)
+      for topk_result in topk_results:
+        top1_result, top2_result = topk_result[0], topk_result[1]
+        top1_label, top1_prob = top1_result[0], top1_result[1]
+        top2_label, top2_prob = top2_result[0], top2_result[1]
 
-      self.assertIn(top1_label, self.model.index_to_label)
-      self.assertIn(top2_label, self.model.index_to_label)
-      self.assertNotEqual(top1_label, top2_label)
+        self.assertIn(top1_label, self.model.index_to_label)
+        self.assertIn(top2_label, self.model.index_to_label)
+        self.assertNotEqual(top1_label, top2_label)
 
-      self.assertLessEqual(top1_prob, 1)
-      self.assertGreaterEqual(top1_prob, top2_prob)
-      self.assertGreaterEqual(top2_prob, 0)
+        self.assertLessEqual(top1_prob, 1)
+        self.assertGreaterEqual(top1_prob, top2_prob)
+        self.assertGreaterEqual(top2_prob, 0)
 
-      self.assertEqual(top1_prob + top2_prob, 1.0)
+        self.assertEqual(top1_prob + top2_prob, 1.0)
 
   def test_export_labels(self):
     labels_output_file = os.path.join(self.get_temp_dir(), 'label')
