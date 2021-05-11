@@ -117,11 +117,11 @@ def run(spec,
     validation_data = audio_classifier.DataLoader.from_esc50(
         spec, data_dir, folds=[
             4,
-        ], categories=categories)
+        ], categories=categories, cache=True)
     test_data = audio_classifier.DataLoader.from_esc50(
         spec, data_dir, folds=[
             5,
-        ], categories=categories)
+        ], categories=categories, cache=True)
   elif dataset_type == 'bird':
     if isinstance(spec, audio_classifier.YamNetSpec):
       # In some files, two consecutive bird sounds might be too far apart, so
@@ -142,7 +142,7 @@ def run(spec,
         spec, os.path.join(data_dir, 'test'), cache=True)
 
   else:
-    data = audio_classifier.DataLoader.from_folder(spec, data_dir)
+    data = audio_classifier.DataLoader.from_folder(spec, data_dir, cache=True)
     train_data, rest_data = data.split(0.8)
     validation_data, test_data = rest_data.split(0.5)
 
