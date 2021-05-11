@@ -388,11 +388,7 @@ class BrowserFFTSpec(BaseSpec):
     model_util.set_batch_size(model, batch_size=1)
 
     model_util.export_tflite(
-        combined,
-        tflite_filepath,
-        quantization_config=None,
-        supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,
-                       tf.lite.OpsSet.SELECT_TF_OPS))
+        combined, tflite_filepath, quantization_config=None)
 
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(model, batch_size=None)
@@ -625,11 +621,7 @@ class YAMNetSpec(BaseSpec):
     # TODO(b/164229433): Remove SELECT_TF_OPS once changes in the bug are
     # released.
     model_util.export_tflite(
-        serving_model,
-        tflite_filepath,
-        quantization_config=None,
-        supported_ops=(tf.lite.OpsSet.TFLITE_BUILTINS,
-                       tf.lite.OpsSet.SELECT_TF_OPS))
+        serving_model, tflite_filepath, quantization_config=None)
 
     if with_metadata:
       if not ENABLE_METADATA:
