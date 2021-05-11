@@ -20,6 +20,7 @@ import os
 import tempfile
 import unittest
 
+from absl.testing import parameterized
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
@@ -49,9 +50,13 @@ def patch_data_loader():
 
 @unittest.skipIf(tf.__version__ < '2.5',
                  'Audio Classification requires TF 2.5 or later')
-class AudioClassificationDemoTest(tf.test.TestCase):
+class AudioClassificationDemoTest(tf.test.TestCase, parameterized.TestCase):
 
-  def test_audio_classification_demo(self):
+  @parameterized.parameters(
+      ('audio_browser_fft', 'mini_speech_command'),
+      ('audio_yamnet', 'mini_speech_command'),
+  )
+  def test_audio_classification_demo(self, spec, dataset):
     with patch_data_loader():
       with tempfile.TemporaryDirectory() as temp_dir:
         # Use cached training data if exists.
@@ -60,20 +65,12 @@ class AudioClassificationDemoTest(tf.test.TestCase):
                                               'mini_speech_commands.zip'),
             file_hash='4b8a67bae2973844e84fa7ac988d1a44')
 
-        tflite_filename = os.path.join(temp_dir, 'model.tflite')
-        label_filename = os.path.join(temp_dir, 'labels.txt')
         audio_classification_demo.run(
-            'audio_browser_fft',
-            data_dir,
-            'mini_speech_command',
-            temp_dir,
-            epochs=1,
-            batch_size=1)
+            spec, data_dir, dataset, temp_dir, epochs=1, batch_size=1)
 
+        tflite_filename = os.path.join(temp_dir, 'model.tflite')
         self.assertTrue(tf.io.gfile.exists(tflite_filename))
         self.assertGreater(os.path.getsize(tflite_filename), 0)
-
-        self.assertFalse(tf.io.gfile.exists(label_filename))
 
 
 if __name__ == '__main__':
