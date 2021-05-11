@@ -40,12 +40,13 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+
 from absl import app
 from absl import flags
 from absl import logging
-
 import tensorflow as tf
 from tflite_model_maker import audio_classifier
+from tflite_model_maker import ExportFormat
 from tflite_model_maker import model_spec
 
 FLAGS = flags.FLAGS
@@ -161,8 +162,9 @@ def run(spec,
   print(model.confusion_matrix(test_data))
   print('labels: ', test_data.index_to_label)
 
-  print('\nExporing the TFLite model to {}'.format(export_dir))
-  model.export(export_dir)
+  print('\nExporing the Saved model and TFLite model to {}'.format(export_dir))
+  model.export(
+      export_dir, export_format=(ExportFormat.TFLITE, ExportFormat.SAVED_MODEL))
 
 
 def main(_):

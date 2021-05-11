@@ -175,6 +175,12 @@ class AudioClassifierTest(tf.test.TestCase):
     self.assertAllEqual(keras_model.input_shape,
                         [None, train_spec.EXPECTED_WAVEFORM_LENGTH])
 
+    task.export(train_spec.model_dir, export_format=ExportFormat.SAVED_MODEL)
+    new_model = tf.keras.models.load_model(
+        os.path.join(train_spec.model_dir, 'saved_model'))
+    self.assertAllEqual(new_model.input_shape,
+                        [None, train_spec.EXPECTED_WAVEFORM_LENGTH])
+
 
 if __name__ == '__main__':
   # Load compressed models from tensorflow_hub
