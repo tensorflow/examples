@@ -130,9 +130,10 @@ class PackageGen:
           init_pys.append(relative)
 
     # Add APIs files.
-    shutil.copytree(
-        self.base_dir.joinpath(public_api),
-        self.build_dir.joinpath(self.api_ns))
+    target_api_dir = self.build_dir.joinpath(self.api_ns)
+    shutil.copytree(self.base_dir.joinpath(public_api), target_api_dir)
+    # Set version in package.
+    api_util.overwrite_version_in_package(target_api_dir, self.version)
 
     # Create API's namespace mapping.
     internal_names = api_util.split_name(self.api_ns) + api_util.split_name(

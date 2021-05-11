@@ -42,6 +42,7 @@ from collections.abc import Callable  # pylint: disable=g-importing-member
 import inspect
 import os
 import pathlib
+import re
 from typing import Dict, List, Tuple, Sequence, Optional, Union
 
 import dataclasses
@@ -266,7 +267,7 @@ def write_packages(
 
     # For base package add __version__.
     if package_name == ROOT_PACKAGE_KEY:
-      lines.append("""__version__ = '{}'""".format(version))
+      lines.append(_version_line(version))
 
     full_package_name = as_package(
         split_name(base_package) + split_name(package_name))
@@ -299,3 +300,20 @@ def write_python_file(filepath: PathOrStrType, package_doc: Optional[str],
     if lines:
       for line in lines:
         f.write(line + '\n')
+
+
+def _version_line(version: str):
+  """Gets a version statement."""
+  return "__version__ = '{}'".format(version)
+
+
+def overwrite_version_in_package(base_dir: PathOrStrType, version: str):
+  """Overwrites __version__ in package."""
+  base_init = os.path.join(str(base_dir), '__init__.py')
+  with open(base_init, 'r+') as f:
+    content = f.read()
+    version_regex = re.compile(r'^__version__ = .+$', flags=re.MULTILINE)
+    new_content = version_regex.sub(_version_line(version), content)
+    f.seek(0)
+    f.write(new_content)
+    f.truncate()

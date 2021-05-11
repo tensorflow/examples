@@ -194,6 +194,14 @@ class ApiUtilTest(tf.test.TestCase):
           if package_name == api_util.PACKAGE_PLACEHOLDER:
             self.assertIn("""__version__ = '0.0.0-test'""", content)
 
+      # Overwrite version.
+      new_version = '0.0.0-new'
+      api_util.overwrite_version_in_package(tmp_dir, new_version)
+      init_file = os.path.join(tmp_dir, '__init__.py')
+      with tf.io.gfile.GFile(init_file) as f:
+        new_content = f.read()
+        self.assertIn("""__version__ = '0.0.0-new'""", new_content)
+
 
 if __name__ == '__main__':
   tf.test.main()
