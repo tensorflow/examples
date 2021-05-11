@@ -340,7 +340,7 @@ class EfficientDetModelSpec(object):
     progbar = tf.keras.utils.Progbar(steps)
     for i, (images, labels) in enumerate(dataset):
       self.ds_strategy.run(_get_detections, (images, labels))
-      progbar.update(i)
+      progbar.update(i + 1)
     print()
 
     metric_dict = self._get_metric_dict(evaluator, label_map)
@@ -395,7 +395,8 @@ class EfficientDetModelSpec(object):
       detections = postprocess.transform_detections(detections)
       evaluator.update_state(labels['groundtruth_data'].numpy(),
                              detections.numpy())
-      progbar.update(i)
+      progbar.update(i + 1)
+    print()
 
     metric_dict = self._get_metric_dict(evaluator, label_map)
     return metric_dict
