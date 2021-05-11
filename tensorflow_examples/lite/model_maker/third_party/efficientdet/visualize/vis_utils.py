@@ -20,7 +20,6 @@ The functions do not return a value, instead they modify the image itself.
 import abc
 import collections
 import matplotlib
-matplotlib.use('Agg')  # Set headless-friendly backend.
 import matplotlib.pyplot as plt  # pylint: disable=g-import-not-at-top
 import numpy as np
 import PIL.Image as Image
@@ -62,6 +61,12 @@ STANDARD_COLORS = [
     'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White',
     'WhiteSmoke', 'Yellow', 'YellowGreen'
 ]
+
+
+def _force_matplotlib_backend():
+  """force the backend of matplotlib to Agg."""
+  if matplotlib.get_backend().lower() != 'agg':  # case-insensitive
+    matplotlib.use('Agg')  # Set headless-friendly backend.
 
 
 def _get_multiplier_for_color_randomness():
@@ -923,6 +928,7 @@ def add_cdf_image_summary(values, name):
     values: a 1-D float32 tensor containing the values.
     name: name for the image summary.
   """
+  _force_matplotlib_backend()
 
   def cdf_plot(values):
     """Numpy function to plot CDF."""
@@ -958,6 +964,7 @@ def add_hist_image_summary(values, bins, name):
     bins: bin edges which will be directly passed to np.histogram.
     name: name for the image summary.
   """
+  _force_matplotlib_backend()
 
   def hist_plot(values, bins):
     """Numpy function to plot hist."""
