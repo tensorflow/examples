@@ -2,7 +2,8 @@
 
 ## 0.3.1
 
-*   Polish document with minor changes.
+*   Polish document showing in
+    https://www.tensorflow.org/lite/api_docs/python/tflite_model_maker.
 *   Add some 0.2.x APIs for backward compatibility.
 
 ## 0.3.0
