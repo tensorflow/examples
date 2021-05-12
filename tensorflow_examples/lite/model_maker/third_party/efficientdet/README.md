@@ -1,10 +1,16 @@
 # EfficientDet
+[![Paper](http://img.shields.io/badge/Paper-arXiv.1911.09070-B3181B?logo=arXiv)](https://arxiv.org/abs/1911.09070)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.sandbox.google.com/github/google/automl/blob/master/efficientdet/tutorial.ipynb)
+[![TensorFlow Hub](https://img.shields.io/badge/TF%20Hub-Models-FF6F00?logo=tensorflow)](https://tfhub.dev/s?network-architecture=efficientdet)
+
+
 
 [1] Mingxing Tan, Ruoming Pang, Quoc V. Le. EfficientDet: Scalable and Efficient Object Detection. CVPR 2020.
 Arxiv link: https://arxiv.org/abs/1911.09070
 
 Updates:
 
+  - May10/2021: Added EfficientDet-lite checkpoints (by Yuqi and TFLite team)
   - Mar25/2021: Added [Det-AdvProp](https://arxiv.org/abs/2103.13886) model checkpoints ([see this page](./Det-AdvProp.md)).
   - Jul20/2020: Added keras/TF2 and new SOTA D7x: 55.1mAP with 153ms.
   - Apr22/2020: Sped up end-to-end latency: D0 has up to >200 FPS throughput on Tesla V100.
@@ -82,9 +88,20 @@ In addition, the following table includes a list of models trained with fixed 64
 | D5(640) [h5](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco640/efficientdet-d5-640.h5), [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco640/efficientdet-d5-640.tar.gz) |  46.6 | 26.6ms |
 | D6(640) [h5](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco640/efficientdet-d6-640.h5), [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco640/efficientdet-d6-640.tar.gz) |  47.9 | 33.8ms |
 
+We have also provided a list of mobile-size lite models:
+
+|       Model    |   mAP (float) | Quantized mAP (int8) | Prameters | Mobile latency |
+| ------ | :------: | :------:  | :------: | :------:  |:------:  |
+| lite0,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite0.tgz)  |  26.41 | 26.10 | 4.3M  |  36ms |
+| lite1,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite1.tgz)  |  31.50 | 31.12 |  5.8M |  49ms |
+| lite2,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite2.tgz)  |  35.06 | 34.69 |  7.2M | 69ms |
+| lite3,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3.tgz)  |  38.77 | 38.42 |  11M  | 116ms |
+| lite3x, [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3x..gz) |  42.64 | 41.87 |  12M  | 208ms  |
+| lite4,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite4.tgz)  |  43.18 | 42.83 |   20M | 260ms  |
 
 
 ## 3. Export SavedModel, frozen graph, tensort models, or tflite.
+
 
 Run the following command line to export models:
 
