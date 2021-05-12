@@ -12,6 +12,8 @@ model for on-device ML applications.
     [requirements.txt](https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/requirements.txt)
     for dependent libraries that're needed to use the library and run the demo
     code.
+*   Note that you might also need to install `sndfile` for Audio tasks.
+On Debian/Ubuntu, you can do so by `sudo apt-get install libsndfile1`
 
 ## Installation
 
