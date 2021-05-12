@@ -91,13 +91,13 @@ In addition, the following table includes a list of models trained with fixed 64
 We have also provided a list of mobile-size lite models:
 
 |       Model    |   mAP (float) | Quantized mAP (int8) | Prameters | Mobile latency |
-| ------ | :------: | :------:  | :------: | :------:  |:------:  |
-| lite0,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite0.tgz)  |  26.41 | 26.10 | 4.3M  |  36ms |
-| lite1,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite1.tgz)  |  31.50 | 31.12 |  5.8M |  49ms |
-| lite2,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite2.tgz)  |  35.06 | 34.69 |  7.2M | 69ms |
-| lite3,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3.tgz)  |  38.77 | 38.42 |  11M  | 116ms |
-| lite3x, [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3x..gz) |  42.64 | 41.87 |  12M  | 208ms  |
-| lite4,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite4.tgz)  |  43.18 | 42.83 |   20M | 260ms  |
+| ------ | :------: | :------:  | :------: | :------:  |
+| EfficientDet-lite0,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite0.tgz)  |  26.41 | 26.10 | 4.3M  |  36ms |
+| EfficientDet-lite1,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite1.tgz)  |  31.50 | 31.12 |  5.8M |  49ms |
+| EfficientDet-lite2,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite2.tgz)  |  35.06 | 34.69 |  7.2M | 69ms |
+| EfficientDet-lite3,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3.tgz)  |  38.77 | 38.42 |  11M  | 116ms |
+| EfficientDet-lite3x, [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3x..gz) |  42.64 | 41.87 |  12M  | 208ms  |
+| EfficientDet-lite4,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite4.tgz)  |  43.18 | 42.83 |   20M | 260ms  |
 
 
 ## 3. Export SavedModel, frozen graph, tensort models, or tflite.
