@@ -1,0 +1,11 @@
+task downloadSoundClassificationModelFile(type: Download) {
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/sound_classification/snap_clap.tflite'
+    dest project.ext.ASSET_DIR + '/sound_classifier.tflite'
+    overwrite false
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'assembleDebug') || (task.name == 'assembleRelease')) {
+        task.dependsOn 'downloadSoundClassificationModelFile'
+    }
+}

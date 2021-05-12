@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name" translatable="false">TFL Sound Classifier</string>
+    <string name="label_input" translatable="false">Input:</string>
+    <string name="overlap_factor_label" translatable="false">Overlap Factor</string>
+    <string name="tensorflow_lite_logo" translatable="false">TensorFlow Lite Logo</string>
+</resources>
