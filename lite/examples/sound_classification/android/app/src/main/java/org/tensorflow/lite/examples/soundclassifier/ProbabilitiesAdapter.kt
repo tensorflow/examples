@@ -23,10 +23,10 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import org.tensorflow.lite.examples.soundclassifier.databinding.ItemProbabilityBinding
+import org.tensorflow.lite.support.label.Category
 
 internal class ProbabilitiesAdapter : RecyclerView.Adapter<ProbabilitiesAdapter.ViewHolder>() {
-  var labelList = emptyList<String>()
-  var probabilityMap = mapOf<String, Float>()
+  var categoryList: List<Category> = emptyList()
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val binding =
@@ -35,22 +35,21 @@ internal class ProbabilitiesAdapter : RecyclerView.Adapter<ProbabilitiesAdapter.
   }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    val label = labelList[position]
-    val probability = probabilityMap[label] ?: 0f
-    holder.bind(position, label, probability)
+    val category = categoryList[position]
+    holder.bind(position, category.label, category.score)
   }
 
-  override fun getItemCount() = labelList.size
+  override fun getItemCount() = categoryList.size
 
   class ViewHolder(private val binding: ItemProbabilityBinding) :
     RecyclerView.ViewHolder(binding.root) {
-    fun bind(position: Int, label: String, probability: Float) {
+    fun bind(position: Int, label: String, score: Float) {
       with(binding) {
         labelTextView.text = label
         progressBar.progressBackgroundTintList = progressColorPairList[position % 3].first
         progressBar.progressTintList = progressColorPairList[position % 3].second
 
-        val newValue = (probability * 100).toInt()
+        val newValue = (score * 100).toInt()
         // If you don't want to animate, you can write like `progressBar.progress = newValue`.
         val animation =
           ObjectAnimator.ofInt(progressBar, "progress", progressBar.progress, newValue)
