@@ -36,4 +36,4 @@ Re-installing the app may require you to uninstall the previous installations.
 ## Resources used:
 
 *   [TensorFlow Lite](https://www.tensorflow.org/lite)
-*   [Teachable Machine Audio Project](https://teachablemachine.withgoogle.com/train/audio)
+*   [YAMNet audio classification model](https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1)
