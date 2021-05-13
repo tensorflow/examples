@@ -31,7 +31,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.HandlerCompat
 import org.tensorflow.lite.examples.soundclassifier.databinding.ActivityMainBinding
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
   private var audioClassifier: AudioClassifier? = null
   private var audioRecord: AudioRecord? = null
-  private var classificationInterval = 500L // how often should classification run
+  private var classificationInterval = 500L // how often should classification run in milli-secs
   private lateinit var handler: Handler // background thread handler to run classification
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,16 +95,16 @@ class MainActivity : AppCompatActivity() {
     val audioTensor = classifier.createInputTensorAudio()
 
     // Initialize the audio recorder
-    val recorder = classifier.createAudioRecord()
-    recorder.startRecording()
+    val record = classifier.createAudioRecord()
+    record.startRecording()
 
-    // Define the classification process
+    // Define the classification runnable
     val run = object : Runnable {
       override fun run() {
         val startTime = System.currentTimeMillis()
 
         // Load the latest audio sample
-        audioTensor.load(recorder)
+        audioTensor.load(record)
         val output = classifier.classify(audioTensor)
 
         // Filter out results above a certain threshold, and sort them descendingly
@@ -135,7 +134,7 @@ class MainActivity : AppCompatActivity() {
 
     // Save the instances we just created for use later
     audioClassifier = classifier
-    audioRecord = recorder
+    audioRecord = record
   }
 
   private fun stopAudioClassification() {
