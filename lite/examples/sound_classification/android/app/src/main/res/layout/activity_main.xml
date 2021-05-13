@@ -69,18 +69,18 @@
             app:layout_constraintTop_toBottomOf="@id/input_switch" />
 
         <com.google.android.material.slider.Slider
-            android:id="@+id/overlap_factor_slider"
+            android:id="@+id/classification_interval_slider"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
-            android:valueFrom="0.0"
-            android:valueTo="1.0"
+            android:valueFrom="100"
+            android:valueTo="975"
             app:layout_constraintBottom_toBottomOf="@+id/overlap_factor_text_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/overlap_factor_text_view"
             app:layout_constraintTop_toTopOf="@id/overlap_factor_text_view"
-            tools:value="0.8" />
+            tools:value="500" />
 
         <View
             android:id="@+id/divider_view"
