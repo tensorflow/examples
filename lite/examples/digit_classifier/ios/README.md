@@ -16,7 +16,7 @@ demo
 application.<br/>
 ```git clone https://github.com/tensorflow/examples```
 1. Install the pod to generate the workspace file:<br/>
-```cd examples/lite/examples/image_classification/ios && pod install```<br/>
+```cd examples/lite/examples/digit_classifier/ios && pod install```<br/>
 Note: If you have installed this pod before and that command doesn't work, try ```pod update```.<br/>
 At the end of this step you should have a directory called ```DigitClassifier.xcworkspace```.
 1. Open the project in Xcode with the following command:<br/>
