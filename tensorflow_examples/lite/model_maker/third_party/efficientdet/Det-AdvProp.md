@@ -1,4 +1,6 @@
 # Det-AdvProp
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.sandbox.google.com/github/google/automl/blob/master/efficientdet
+/det_advprop_tutorial.ipynb)
 
 [1] Xiangning Chen, Cihang Xie, Mingxing Tan, Li Zhang, Cho-Jui Hsieh, Boqing
 Gong. CVPR 2021. Arxiv link: https://arxiv.org/abs/2103.13886
