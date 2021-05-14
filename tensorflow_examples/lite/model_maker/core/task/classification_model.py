@@ -98,7 +98,7 @@ class ClassificationModel(custom_model.CustomModel):
     if label_filepath is None:
       raise ValueError("Label filepath couldn't be None when exporting labels.")
 
-    tf.compat.v1.logging.info('Saving labels in %s.', label_filepath)
+    tf.compat.v1.logging.info('Saving labels in %s', label_filepath)
     with tf.io.gfile.GFile(label_filepath, 'w') as f:
       f.write('\n'.join(self.index_to_label))
 
