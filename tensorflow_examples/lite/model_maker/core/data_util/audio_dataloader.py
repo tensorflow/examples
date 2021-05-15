@@ -20,12 +20,19 @@ from __future__ import print_function
 import os
 import random
 
-import librosa
 import pandas as pd
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
+
+error_import_librosa = None
+try:
+  import librosa  # pylint: disable=g-import-not-at-top
+  ENABLE_RESAMPLE = True
+except (OSError, ImportError) as _error_import_librosa:  # pylint: disable=invalid-name
+  ENABLE_RESAMPLE = False
+  error_import_librosa = _error_import_librosa
 
 
 class ExamplesHelper(object):
@@ -306,8 +313,15 @@ class DataLoader(dataloader.ClassificationDataLoader):
     # This is a eager mode numpy_function. It can be converted to a tf.function
     # using https://www.tensorflow.org/io/api_docs/python/tfio/audio/resample
     def _resample_numpy(waveform, sample_rate, label):
-      waveform = librosa.resample(
-          waveform, orig_sr=sample_rate, target_sr=spec.target_sample_rate)
+      if ENABLE_RESAMPLE:
+        waveform = librosa.resample(
+            waveform, orig_sr=sample_rate, target_sr=spec.target_sample_rate)
+      else:
+        error_message = (
+            'Failed to import librosa. You might be missing sndfile, which '
+            'can be installed via `sudo apt-get install libsndfile1` on '
+            'Ubuntu/Debian.')
+        raise RuntimeError(error_message) from error_import_librosa
       return waveform, label
 
     @tf.function

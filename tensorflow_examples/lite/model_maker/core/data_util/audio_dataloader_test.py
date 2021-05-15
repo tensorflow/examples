@@ -18,11 +18,11 @@ from __future__ import print_function
 
 import csv
 import os
+import shutil
 import unittest
 
 import numpy as np
 from scipy.io import wavfile
-
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
@@ -106,7 +106,7 @@ class Base(tf.test.TestCase):
   def _get_folder_path(self, sub_folder_name):
     folder_path = os.path.join(self.get_temp_dir(), sub_folder_name)
     if os.path.exists(folder_path):
-      return
+      shutil.rmtree(folder_path)
     tf.compat.v1.logging.info('Test path: %s', folder_path)
     os.mkdir(folder_path)
     return folder_path
@@ -117,7 +117,7 @@ class Base(tf.test.TestCase):
 class LoadFromESC50Test(Base):
 
   def test_from_esc50(self):
-    folder_path = self._get_folder_path('test_examples_helper')
+    folder_path = self._get_folder_path('test_from_esc50')
 
     headers = [
         'filename', 'fold', 'target', 'category', 'esc10', 'src_file', 'take'
@@ -215,7 +215,7 @@ class ExamplesHelperTest(Base):
 class LoadFromFolderTest(Base):
 
   def test_spec(self):
-    folder_path = self._get_folder_path('test_examples_helper')
+    folder_path = self._get_folder_path('test_spec')
     write_sample(folder_path, 'unknown', '2s.wav', 44100, 2, value=1)
 
     spec = audio_spec.YAMNetSpec()
@@ -230,6 +230,40 @@ class LoadFromFolderTest(Base):
     with self.assertRaisesRegexp(ValueError, 'No audio files found'):
       spec = MockSpec(model_dir=folder_path)
       audio_dataloader.DataLoader.from_folder(spec, folder_path)
+
+  def test_failed_librosa_imoprt(self):
+    # Temporarily disable resampling.
+    audio_dataloader.ENABLE_RESAMPLE = False
+
+    # Pretend a real import failure.
+    try:
+      import inexistent_package  # pylint: disable=g-import-not-at-top,unused-import
+    except (OSError, ImportError) as e:
+      audio_dataloader.error_import_librosa = e
+
+    try:
+      folder_path = self._get_folder_path('test_failed_librosa_imoprt')
+
+      # No error occured if resampling is not needed.
+      write_sample(folder_path, 'background', '1s.wav', 44100, 1, value=0)
+      spec = MockSpec(model_dir=folder_path)
+      loader = audio_dataloader.DataLoader.from_folder(spec, folder_path)
+      self.assertEqual(len(loader), 1)
+      self.assertEqual(len(list(loader.gen_dataset())), 1)
+
+      # Error occured when resampling is needed.
+      write_sample(folder_path, 'command0', '1.8s.wav', 4410, 1.8, value=5)
+      spec = MockSpec(model_dir=folder_path)
+      loader = audio_dataloader.DataLoader.from_folder(spec, folder_path)
+      self.assertEqual(len(loader), 2)
+      with self.assertRaisesRegexp(tf.errors.UnknownError,
+                                   'sudo apt-get install libsndfile1'):
+        _ = list(loader.gen_dataset())
+
+    finally:
+      # Set it back
+      audio_dataloader.ENABLE_RESAMPLE = True
+      audio_dataloader.error_import_librosa = None
 
   def test_from_folder(self):
     folder_path = self._get_folder_path('test_from_folder')
