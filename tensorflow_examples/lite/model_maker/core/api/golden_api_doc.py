@@ -48,6 +48,9 @@ https://www.tensorflow.org/lite/guide/model_maker.
 
 DOCS['audio_classifier'] = """APIs to train an audio classification model.
 
+Tutorial:
+https://colab.research.google.com/github/googlecodelabs/odml-pathways/blob/main/audio_classification/colab/model_maker_audio_colab.ipynb
+
 Demo code:
 https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/audio_classification_demo.py
 """
