@@ -58,4 +58,4 @@ from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import configs
 # pylint: enable=g-bad-import-order
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'

@@ -1,5 +1,9 @@
 # Release 0.3
 
+## 0.3.2
+
+*   Minor fix: Move librosa to an optional library for audio task.
+
 ## 0.3.1
 
 *   Polish document showing in
