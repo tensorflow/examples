@@ -66,37 +66,40 @@ def _define_flags():
   flags.mark_flag_as_required('export_dir')
 
 
-def download_speech_commands_dataset(**kwargs):
-  """Downloads demo dataset, and returns directory path."""
-  tf.compat.v1.logging.info('Downloading mini speech command dataset.')
-  # ${HOME}/.keras/datasets/mini_speech_commands.zip
+def _download_dataset(filename, url, extracted_folder_name, **kwargs):
+  """Downloads the dataset, and returns path to the extracted directory."""
+  tf.compat.v1.logging.info('Downloading the dataset.')
+  # ${HOME}/.keras/datasets/FILENAME
   filepath = tf.keras.utils.get_file(
-      fname='mini_speech_commands.zip',
-      origin='https://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip',
-      extract=True,
-      **kwargs)
-  # ${HOME}/.keras/datasets/mini_speech_commands
-  folder_path = filepath.rsplit('.', 1)[0]
+      filename, url, cache_subdir='datasets', extract=True, **kwargs)
+  # ${HOME}/.keras/datasets/EXTRACTED_FOLDER_NAME
+  folder_path = os.path.dirname(filepath)
+  folder_path = os.path.join(folder_path, extracted_folder_name)
   print(f'Dataset has been downloaded to {folder_path}')
   return folder_path
+
+
+def download_bird_dataset(**kwargs):
+  """Downloads the bird dataset, and returns path to the directory."""
+  return _download_dataset(
+      'birds_dataset.zip',
+      'https://storage.googleapis.com/laurencemoroney-blog.appspot.com/birds_dataset.zip',
+      'small_birds_dataset', **kwargs)
+
+
+def download_speech_commands_dataset(**kwargs):
+  """Downloads demo dataset, and returns directory path."""
+  return _download_dataset(
+      'mini_speech_commands.zip',
+      'https://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip',
+      'mini_speech_commands', **kwargs)
 
 
 def download_esc50_dataset(**kwargs):
   """Downloads ESC50 dataset, and returns directory path."""
-  tf.compat.v1.logging.info('Downloading ESC50 dataset.')
-  # ${HOME}/.keras/datasets/mini_speech_commands.zip
-  filepath = tf.keras.utils.get_file(
-      'esc-50.zip',
-      'https://github.com/karoldvl/ESC-50/archive/master.zip',
-      cache_subdir='datasets',
-      extract=True,
-      **kwargs)
-  # ${HOME}/.keras/datasets/mini_speech_commands
-  folder_path = filepath.rsplit('/', 1)[0]
-  folder_path = os.path.join(folder_path, 'ESC-50-master')
-
-  print(f'Dataset has been downloaded to {folder_path}')
-  return folder_path
+  return _download_dataset(
+      'esc-50.zip', 'https://github.com/karoldvl/ESC-50/archive/master.zip',
+      'ESC-50-master', **kwargs)
 
 
 def run(spec,
@@ -176,8 +179,7 @@ def main(_):
     if FLAGS.dataset == 'esc50':
       data_dir = download_esc50_dataset()
     elif FLAGS.dataset == 'bird':
-      # TODO(b/186365051): Add download function once the dataset is finalized.
-      raise ValueError('`data_dir` is missing')
+      data_dir = download_bird_dataset()
     elif FLAGS.dataset == 'mini_speech_command':
       data_dir = download_speech_commands_dataset()
     else:
