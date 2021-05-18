@@ -207,7 +207,7 @@ class YAMNetSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "yamnet_labels_default.txt",
+              "name": "yamnet_labels.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
@@ -231,7 +231,7 @@ class YAMNetSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "custom_labels_default.txt",
+              "name": "custom_labels.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
@@ -298,7 +298,7 @@ class YAMNetSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "custom_labels_default.txt",
+              "name": "custom_labels.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }
@@ -452,7 +452,7 @@ class BrowserFFTSpecTest(tf.test.TestCase):
           },
           "associated_files": [
             {
-              "name": "probability_labels_default.txt",
+              "name": "probability_labels.txt",
               "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_AXIS_LABELS"
             }

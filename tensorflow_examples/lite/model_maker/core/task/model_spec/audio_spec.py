@@ -88,7 +88,7 @@ class MetadataWriter:
       for locale, label_list in labels.items():
         full_path = os.path.join(
             self._temp_folder.name,
-            '{}_labels_{}.txt'.format(name, locale or 'default'))
+            '{}_labels{}.txt'.format(name, '_' + locale if locale else ''))
         model_util.export_labels(full_path, label_list)
         label_files.append(
             md_info.LabelFileMd(file_path=full_path, locale=locale))
