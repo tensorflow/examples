@@ -22,6 +22,7 @@ import unittest
 
 import numpy as np
 import tensorflow.compat.v2 as tf
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
@@ -81,9 +82,35 @@ class BaseSpecTest(tf.test.TestCase):
     audio_spec._get_tf_version = tmp_version_fn
 
 
+class BaseTest(tf.test.TestCase):
+
+  def _train_and_export(self,
+                        spec,
+                        num_classes,
+                        filename,
+                        expected_model_size,
+                        quantization_config=None):
+    dataset = _gen_dataset(
+        spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
+    model = spec.create_model(num_classes)
+    spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
+
+    tflite_filepath = os.path.join(self.get_temp_dir(), filename)
+    spec.export_tflite(
+        model,
+        tflite_filepath,
+        index_to_label=['label_{}'.format(i) for i in range(num_classes)],
+        quantization_config=quantization_config)
+
+    self.assertNear(
+        os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
+
+    return tflite_filepath
+
+
 @unittest.skipIf(tf.__version__ < '2.5',
                  'Audio Classification requires TF 2.5 or later')
-class YAMNetSpecTest(tf.test.TestCase):
+class YAMNetSpecTest(BaseTest):
 
   def _test_preprocess(self, input_shape, input_count, output_shape,
                        output_count):
@@ -134,23 +161,6 @@ class YAMNetSpecTest(tf.test.TestCase):
     model = spec.create_model(10)
     self.assertEqual(model.input_shape, (None, 1024))
     self.assertEqual(model.output_shape, (None, 10))
-
-  def _train_and_export(self, spec, num_classes, filename, expected_model_size):
-    dataset = _gen_dataset(
-        spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
-    model = spec.create_model(num_classes)
-    spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
-
-    tflite_filepath = os.path.join(self.get_temp_dir(), filename)
-    spec.export_tflite(
-        model,
-        tflite_filepath,
-        index_to_label=['label_{}'.format(i) for i in range(num_classes)])
-
-    self.assertNear(
-        os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
-
-    return tflite_filepath
 
   def test_yamnet_two_heads(self):
     tflite_path = self._train_and_export(
@@ -333,17 +343,18 @@ class YAMNetSpecTest(tf.test.TestCase):
         filename='binary_classification.tflite',
         expected_model_size=15 * 1000 * 1000)
 
-  def test_basic_training(self):
+  def test_dynamic_range_quantization(self):
     self._train_and_export(
         audio_spec.YAMNetSpec(keep_yamnet_and_custom_heads=True),
         num_classes=5,
         filename='basic_5_classes_training.tflite',
-        expected_model_size=15 * 1000 * 1000)
+        expected_model_size=5 * 1000 * 1000,
+        quantization_config=configs.QuantizationConfig.for_dynamic())
 
 
 @unittest.skipIf(tf.__version__ < '2.5',
                  'Audio Classification requires TF 2.5 or later')
-class BrowserFFTSpecTest(tf.test.TestCase):
+class BrowserFFTSpecTest(BaseTest):
 
   @classmethod
   def setUpClass(cls):
@@ -381,22 +392,13 @@ class BrowserFFTSpecTest(tf.test.TestCase):
     self._spec.create_model(20)
     tf.keras.backend.clear_session()
 
-  def _train_and_export(self, spec, num_classes, filename, expected_model_size):
-    dataset = _gen_dataset(
-        spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
-    model = spec.create_model(num_classes)
-    spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
-
-    tflite_filepath = os.path.join(self.get_temp_dir(), filename)
-    spec.export_tflite(
-        model,
-        tflite_filepath,
-        index_to_label=['label_{}'.format(i) for i in range(num_classes)])
-
-    self.assertNear(
-        os.path.getsize(tflite_filepath), expected_model_size, 1000 * 1000)
-
-    return tflite_filepath
+  def test_dynamic_range_quantization(self):
+    self._train_and_export(
+        audio_spec.BrowserFFTSpec(),
+        num_classes=2,
+        filename='binary_classification.tflite',
+        expected_model_size=1 * 1000 * 1000,
+        quantization_config=configs.QuantizationConfig.for_dynamic())
 
   def test_binary_classification(self):
     self._train_and_export(

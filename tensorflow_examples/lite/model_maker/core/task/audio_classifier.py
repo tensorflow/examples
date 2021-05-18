@@ -90,7 +90,7 @@ class AudioClassifier(classification_model.ClassificationModel):
 
     self.model_spec.export_tflite(self.model, tflite_filepath, with_metadata,
                                   export_metadata_json_file,
-                                  self.index_to_label)
+                                  self.index_to_label, quantization_config)
 
   def confusion_matrix(self, data, batch_size=32):
     # TODO(b/171449557): Consider moving this to ClassificationModel

@@ -366,7 +366,8 @@ class BrowserFFTSpec(BaseSpec):
                     tflite_filepath,
                     with_metadata=True,
                     export_metadata_json_file=True,
-                    index_to_label=None):
+                    index_to_label=None,
+                    quantization_config=None):
     """Converts the retrained model to tflite format and saves it.
 
     This method overrides the default `CustomModel._export_tflite` method, and
@@ -381,6 +382,7 @@ class BrowserFFTSpec(BaseSpec):
         True, export the metadata in the same directory as tflite model.Used
         only if `with_metadata` is True.
       index_to_label: A list that map from index to label class name.
+      quantization_config: Configuration for post-training quantization.
     """
     combined = self.create_serving_model(model)
 
@@ -388,7 +390,7 @@ class BrowserFFTSpec(BaseSpec):
     model_util.set_batch_size(model, batch_size=1)
 
     model_util.export_tflite(
-        combined, tflite_filepath, quantization_config=None)
+        combined, tflite_filepath, quantization_config=quantization_config)
 
     # Sets batch size back to None to support retraining later.
     model_util.set_batch_size(model, batch_size=None)
@@ -599,7 +601,8 @@ class YAMNetSpec(BaseSpec):
                     tflite_filepath,
                     with_metadata=True,
                     export_metadata_json_file=True,
-                    index_to_label=None):
+                    index_to_label=None,
+                    quantization_config=None):
     """Converts the retrained model to tflite format and saves it.
 
     This method overrides the default `CustomModel._export_tflite` method, and
@@ -615,13 +618,14 @@ class YAMNetSpec(BaseSpec):
         True, export the metadata in the same directory as tflite model. Used
         only if `with_metadata` is True.
       index_to_label: A list that map from index to label class name.
+      quantization_config: Configuration for post-training quantization.
     """
     serving_model = self.create_serving_model(model)
 
     # TODO(b/164229433): Remove SELECT_TF_OPS once changes in the bug are
     # released.
     model_util.export_tflite(
-        serving_model, tflite_filepath, quantization_config=None)
+        serving_model, tflite_filepath, quantization_config=quantization_config)
 
     if with_metadata:
       if not ENABLE_METADATA:

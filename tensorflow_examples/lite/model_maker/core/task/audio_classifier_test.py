@@ -26,6 +26,7 @@ from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import audio_classifier
+from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task.model_spec import audio_spec
 
 
@@ -140,30 +141,21 @@ class AudioClassifierTest(tf.test.TestCase):
     # Better than random guessing.
     self.assertGreater(acc, .5)
 
-    # Export the model to saved model.
-    output_path = os.path.join(train_spec.model_dir, 'saved_model')
-    task.export(train_spec.model_dir, export_format=ExportFormat.SAVED_MODEL)
-    self.assertTrue(os.path.isdir(output_path))
-    self.assertNotEqual(len(os.listdir(output_path)), 0)
-
-    # Export the model to TFLite.
-    output_path = os.path.join(train_spec.model_dir, 'float.tflite')
-    task.export(
-        train_spec.model_dir,
-        tflite_filename='float.tflite',
-        export_format=ExportFormat.TFLITE)
-    self.assertTrue(tf.io.gfile.exists(output_path))
-    self.assertGreater(os.path.getsize(output_path), 0)
-
-    # Evaluate accurarcy on TFLite model.
-
     # Create a new dataset without preprocessing since preprocessing has been
     # packaged inside TFLite model.
     tflite_dataloader = audio_dataloader.DataLoader(ds, len(ds),
                                                     index_to_labels,
                                                     tflite_eval_spec)
 
-    # Evaluate accurarcy on float model.
+    # Export the floating point model to TFLite.
+    output_path = os.path.join(train_spec.model_dir, 'float.tflite')
+    task.export(
+        train_spec.model_dir,
+        tflite_filename='float.tflite',
+        export_format=ExportFormat.TFLITE,
+        quantization_config=None)
+    self.assertTrue(tf.io.gfile.exists(output_path))
+    self.assertGreater(os.path.getsize(output_path), 0)
     result = task.evaluate_tflite(
         output_path,
         tflite_dataloader,
@@ -171,15 +163,42 @@ class AudioClassifierTest(tf.test.TestCase):
         postprocess_fn=lambda x: x[-1])
     self.assertGreaterEqual(result['accuracy'], .5)
 
+    # Export the model to TFLite with dynamic range quantization.
+    dynamic_range_output_path = os.path.join(train_spec.model_dir,
+                                             'dynamic_range.tflite')
+    task.export(
+        train_spec.model_dir,
+        tflite_filename='dynamic_range.tflite',
+        export_format=ExportFormat.TFLITE,
+        quantization_config=configs.QuantizationConfig.for_dynamic())
+    self.assertTrue(tf.io.gfile.exists(dynamic_range_output_path))
+    self.assertGreater(os.path.getsize(dynamic_range_output_path), 0)
+    result = task.evaluate_tflite(
+        dynamic_range_output_path,
+        tflite_dataloader,
+        # Skip yamnet output during TFLite evaluation.
+        postprocess_fn=lambda x: x[-1])
+    self.assertGreaterEqual(result['accuracy'], .5)
+    # Float model should be bigger than the dynamic range quantized model by
+    # a margin.
+    self.assertGreater(
+        os.path.getsize(output_path),
+        os.path.getsize(dynamic_range_output_path) + 1 * 1000 * 1000)
+
+    # Test serving model.
     keras_model = task.create_serving_model()
     self.assertAllEqual(keras_model.input_shape,
                         [None, train_spec.EXPECTED_WAVEFORM_LENGTH])
 
+    # Test exporting to the saved model.
     task.export(train_spec.model_dir, export_format=ExportFormat.SAVED_MODEL)
     new_model = tf.keras.models.load_model(
         os.path.join(train_spec.model_dir, 'saved_model'))
     self.assertAllEqual(new_model.input_shape,
                         [None, train_spec.EXPECTED_WAVEFORM_LENGTH])
+    output_path = os.path.join(train_spec.model_dir, 'saved_model')
+    self.assertTrue(os.path.isdir(output_path))
+    self.assertNotEqual(len(os.listdir(output_path)), 0)
 
 
 if __name__ == '__main__':
