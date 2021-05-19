@@ -28,9 +28,6 @@ def create_mask(pred_mask):
   return pred_mask[0]
 
 
-dataset, info = tfds.load('oxford_iiit_pet:3.*.*', with_info=True)
-
-
 def normalize(input_image, input_mask):
   input_image = tf.cast(input_image, tf.float32) / 255.0
   input_mask -= 1
@@ -61,6 +58,7 @@ def load_image_test(datapoint):
 
 
 def main(_):
+  dataset, info = tfds.load('oxford_iiit_pet:3.*.*', with_info=True)
   train_examples = info.splits['train'].num_examples
   batch_size = 8
   steps_per_epoch = train_examples // batch_size
@@ -92,7 +90,7 @@ def main(_):
       validation_data=test_dataset,
       callbacks=[])
 
-  model.save_weights('./test/segmentation')
+  model.save_weights('./testdata/segmentation')
 
   print(create_mask(model(tf.ones((1, 512, 512, 3)), False)))
 

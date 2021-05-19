@@ -655,6 +655,7 @@ class SegmentationHead(tf.keras.layers.Layer):
                is_training_bn,
                act_type,
                strategy,
+               name='segmentation_head',
                **kwargs):
     """Initialize SegmentationHead.
 
@@ -667,13 +668,14 @@ class SegmentationHead(tf.keras.layers.Layer):
       is_training_bn: True if we train the BatchNorm.
       act_type: String of the activation used.
       strategy: string to specify training strategy for TPU/GPU/CPU.
+      name: string of name.
       **kwargs: other parameters.
     """
-    super().__init__(**kwargs)
+    super().__init__(name=name, **kwargs)
     self.act_type = act_type
     self.con2d_ts = []
     self.con2d_t_bns = []
-    for _ in range(max_level - min_level):
+    for level in range(max_level - min_level):
       self.con2d_ts.append(
           tf.keras.layers.Conv2DTranspose(
               num_filters,
@@ -687,7 +689,7 @@ class SegmentationHead(tf.keras.layers.Layer):
               is_training_bn=is_training_bn,
               data_format=data_format,
               strategy=strategy,
-              name='bn'))
+              name='bn_' + str(level)))
     self.head_transpose = tf.keras.layers.Conv2DTranspose(
         num_classes, 3, strides=2, padding='same')
 
