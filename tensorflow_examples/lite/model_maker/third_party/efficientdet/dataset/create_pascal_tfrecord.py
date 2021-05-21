@@ -176,10 +176,10 @@ def dict_to_tf_example(data,
       poses.append(obj['pose'].encode('utf8'))
 
       if ann_json_dict:
-        abs_xmin = int(obj['bndbox']['xmin'])
-        abs_ymin = int(obj['bndbox']['ymin'])
-        abs_xmax = int(obj['bndbox']['xmax'])
-        abs_ymax = int(obj['bndbox']['ymax'])
+        abs_xmin = int(float(obj['bndbox']['xmin']))
+        abs_ymin = int(float(obj['bndbox']['ymin']))
+        abs_xmax = int(float(obj['bndbox']['xmax']))
+        abs_ymax = int(float(obj['bndbox']['ymax']))
         abs_width = abs_xmax - abs_xmin
         abs_height = abs_ymax - abs_ymin
         ann = {
