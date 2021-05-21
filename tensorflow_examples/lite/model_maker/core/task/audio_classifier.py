@@ -33,16 +33,6 @@ class AudioClassifier(classification_model.ClassificationModel):
   ALLOWED_EXPORT_FORMAT = (ExportFormat.LABEL, ExportFormat.TFLITE,
                            ExportFormat.SAVED_MODEL)
 
-  def _get_dataset_and_steps(self, data, batch_size, is_training):
-    if not data:
-      return None, 0
-    # TODO(b/171449557): Put this into DataLoader.
-    input_fn, steps = self._get_input_fn_and_steps(
-        data, batch_size, is_training=is_training)
-    dataset = tf.distribute.get_strategy().distribute_datasets_from_function(
-        input_fn)
-    return dataset, steps
-
   def train(self, train_data, validation_data, epochs, batch_size):
     # TODO(b/171449557): Upstream this to the parent class.
     if len(train_data) < batch_size:
@@ -52,10 +42,10 @@ class AudioClassifier(classification_model.ClassificationModel):
                        'train_data.' % (len(train_data), batch_size))
 
     with self.model_spec.strategy.scope():
-      train_ds, _ = self._get_dataset_and_steps(
-          train_data, batch_size, is_training=True)
-      validation_ds, _ = self._get_dataset_and_steps(
-          validation_data, batch_size, is_training=False)
+      train_ds = train_data.gen_dataset(
+          batch_size, is_training=True, shuffle=self.shuffle)
+      validation_ds = validation_data.gen_dataset(
+          batch_size, is_training=False) if validation_data else None
 
       self.model = self.model_spec.create_model(
           train_data.num_classes, train_whole_model=self.train_whole_model)
