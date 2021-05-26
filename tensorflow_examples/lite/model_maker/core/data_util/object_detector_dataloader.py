@@ -338,7 +338,7 @@ class DataLoader(dataloader.DataLoader):
   def gen_dataset(self,
                   model_spec,
                   batch_size=None,
-                  is_training=True,
+                  is_training=False,
                   use_fake_data=False):
     """Generate a batched tf.data.Dataset for training/evaluation.
 
