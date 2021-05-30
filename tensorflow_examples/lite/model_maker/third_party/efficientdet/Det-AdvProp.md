@@ -1,6 +1,5 @@
 # Det-AdvProp
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.sandbox.google.com/github/google/automl/blob/master/efficientdet
-/det_advprop_tutorial.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.sandbox.google.com/github/google/automl/blob/master/efficientdet/det_advprop_tutorial.ipynb)
 
 [1] Xiangning Chen, Cihang Xie, Mingxing Tan, Li Zhang, Cho-Jui Hsieh, Boqing
 Gong. CVPR 2021. Arxiv link: https://arxiv.org/abs/2103.13886
@@ -31,7 +30,7 @@ EfficientDet-D5 + Det-AdvProp + AA ([ckpt](https://storage.googleapis.com/cloud-
 
 <sup>Unlike the vanilla EfficientDet that scales the image with mean and std,
 here we scale the input to the range of [-1, 1] to make it easier for performing
-adversarial attack. Please see [this Colab](??) for reproducing the
+adversarial attack. Please see [this Colab](https://github.com/google/automl/blob/master/efficientdet/det_advprop_tutorial.ipynb) for reproducing the
 results.</sup>
 
 ## 2. Robust Against Common Corruptions
