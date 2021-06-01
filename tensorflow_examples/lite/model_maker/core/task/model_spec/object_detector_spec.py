@@ -305,7 +305,7 @@ class EfficientDetModelSpec(object):
                model: tf.keras.Model,
                dataset: tf.data.Dataset,
                steps: int,
-               json_file: str = None) -> Dict[str, float]:
+               json_file: Optional[str] = None) -> Dict[str, float]:
     """Evaluate the EfficientDet keras model.
 
     Args:
@@ -350,7 +350,7 @@ class EfficientDetModelSpec(object):
                       tflite_filepath: str,
                       dataset: tf.data.Dataset,
                       steps: int,
-                      json_file: str = None) -> Dict[str, float]:
+                      json_file: Optional[str] = None) -> Dict[str, float]:
     """Evaluate the EfficientDet TFLite model.
 
     Args:
