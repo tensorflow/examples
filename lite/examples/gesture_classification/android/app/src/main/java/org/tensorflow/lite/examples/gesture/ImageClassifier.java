@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.support.common.FileUtil;
 
 /** Classifies images with Tensorflow Lite. */
 public abstract class ImageClassifier {
@@ -71,6 +72,12 @@ public abstract class ImageClassifier {
   /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
   protected ByteBuffer imgData = null;
 
+  /** Options for configuring the Interpreter.*/
+  private final Interpreter.Options tfliteOptions = new Interpreter.Options();
+
+  /** An instance of host activity.*/
+  private Activity activity = null;
+
   /** multi-stage low pass filter * */
   private float[][] filterLabelProbArray = null;
 
@@ -90,8 +97,9 @@ public abstract class ImageClassifier {
   /** Initializes an {@code ImageClassifier}. */
   ImageClassifier(Activity activity) throws IOException {
     // TODO(b/169965231): Add support for delegates.
-    tflite = new Interpreter(loadModelFile(activity));
-    labelList = loadLabelList(activity);
+    this.activity = activity;
+    initializeModel();
+    labelList = loadLabelList();
     imgData =
         ByteBuffer.allocateDirect(
             DIM_BATCH_SIZE
@@ -151,8 +159,13 @@ public abstract class ImageClassifier {
     }
   }
 
-  public void setNumThreads(int num_threads) {
-    if (tflite != null) tflite.setNumThreads(num_threads);
+  /* Sets number of threads and re-initialize model. */
+  public void setNumThreads(int numThreads) throws IOException {
+    if (tflite != null) {
+      tfliteOptions.setNumThreads(numThreads);
+      close();
+    }
+    initializeModel();
   }
 
   /** Closes tflite to release resources. */
@@ -161,8 +174,15 @@ public abstract class ImageClassifier {
     tflite = null;
   }
 
+  private void initializeModel() throws IOException {
+    if (tflite == null) {
+      MappedByteBuffer tfliteModel = FileUtil.loadMappedFile(activity, getModelPath());
+      tflite = new Interpreter(tfliteModel, tfliteOptions);
+    }
+  }
+
   /** Reads label list from Assets. */
-  private List<String> loadLabelList(Activity activity) throws IOException {
+  private List<String> loadLabelList() throws IOException {
     List<String> labelList = new ArrayList<String>();
     BufferedReader reader =
         new BufferedReader(new InputStreamReader(activity.getAssets().open(getLabelPath())));
@@ -176,16 +196,6 @@ public abstract class ImageClassifier {
       labelList.add(token);
     }
     return labelList;
-  }
-
-  /** Memory-map the model file in Assets. */
-  private MappedByteBuffer loadModelFile(Activity activity) throws IOException {
-    AssetFileDescriptor fileDescriptor = activity.getAssets().openFd(getModelPath());
-    FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-    FileChannel fileChannel = inputStream.getChannel();
-    long startOffset = fileDescriptor.getStartOffset();
-    long declaredLength = fileDescriptor.getDeclaredLength();
-    return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
   }
 
   /** Writes Image data into a {@code ByteBuffer}. */

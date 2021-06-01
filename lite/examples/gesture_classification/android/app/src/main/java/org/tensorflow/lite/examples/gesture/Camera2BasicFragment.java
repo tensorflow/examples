@@ -329,7 +329,13 @@ public class Camera2BasicFragment extends Fragment
         new NumberPicker.OnValueChangeListener() {
           @Override
           public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-            classifier.setNumThreads(newVal);
+            synchronized (lock) {
+              try {
+                classifier.setNumThreads(newVal);
+              } catch (IOException e) {
+                Log.e(TAG, "Failed to setNumThreads.", e);
+              }
+            }
           }
         });
 
