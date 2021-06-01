@@ -15,7 +15,7 @@
 """Common keras utils."""
 import collections
 
-from typing import Text
+from typing import Optional, Text
 from absl import logging
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import utils
@@ -32,7 +32,7 @@ def build_batch_norm(is_training_bn: bool,
                      data_format: Text = 'channels_last',
                      momentum: float = 0.99,
                      epsilon: float = 1e-3,
-                     strategy: Text = None,
+                     strategy: Optional[Text] = None,
                      name: Text = 'tpu_batch_normalization'):
   """Build a batch normalization layer.
 
