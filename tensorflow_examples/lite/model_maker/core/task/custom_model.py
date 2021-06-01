@@ -69,36 +69,6 @@ class CustomModel(abc.ABC):
   def evaluate(self, data, **kwargs):
     return
 
-  # TODO(b/155949323): Refactor the code for gen_dataset in CustomModel to a
-  # seperated  dataloader.
-  def _get_dataset_fn(self, input_data, global_batch_size, is_training):
-    """Gets a closure to create a dataset."""
-
-    def _dataset_fn(ctx=None):
-      """Returns tf.data.Dataset for question answer retraining."""
-      batch_size = ctx.get_per_replica_batch_size(
-          global_batch_size) if ctx else global_batch_size
-      dataset = input_data.gen_dataset(
-          batch_size,
-          is_training=is_training,
-          # TODO(wangtz): Consider moving `shuffle` to DataLoader.
-          shuffle=self.shuffle,
-          input_pipeline_context=ctx,
-          preprocess=self.preprocess)
-      return dataset
-
-    return _dataset_fn
-
-  def _get_input_fn_and_steps(self, data, batch_size, is_training):
-    """Gets input_fn and steps for training/evaluation."""
-    if data is None:
-      input_fn = None
-      steps = 0
-    else:
-      input_fn = self._get_dataset_fn(data, batch_size, is_training)
-      steps = len(data) // batch_size
-    return input_fn, steps
-
   def _get_default_export_format(self, **kwargs):
     """Gets the default export format."""
     if kwargs.get('with_metadata', True):

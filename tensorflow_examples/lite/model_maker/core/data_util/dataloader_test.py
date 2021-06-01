@@ -63,7 +63,7 @@ class DataLoaderTest(tf.test.TestCase):
       self.assertTrue((tf.shape(label).numpy() == np.array([2])).all())
 
     ds3 = data.gen_dataset(batch_size=2, is_training=True, shuffle=True)
-    self.assertEqual(ds3.cardinality(), tf.data.INFINITE_CARDINALITY)
+    self.assertEqual(ds3.cardinality(), 1)
     for (feature, label) in ds3.take(10):
       self.assertTrue((tf.shape(feature).numpy() == np.array([2, 8])).all())
       self.assertTrue((tf.shape(label).numpy() == np.array([2])).all())

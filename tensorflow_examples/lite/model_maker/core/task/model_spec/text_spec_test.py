@@ -103,32 +103,26 @@ class AverageWordVecModelSpecTest(tf.test.TestCase):
   def test_run_classifier(self):
     num_classes = 2
     model = self.model_spec.run_classifier(
-        train_input_fn=self._gen_random_input_fn(num_classes),
-        validation_input_fn=self._gen_random_input_fn(num_classes),
+        train_ds=self._gen_random_ds(num_classes),
+        validation_ds=self._gen_random_ds(num_classes),
         epochs=1,
         steps_per_epoch=1,
-        validation_steps=1,
         num_classes=num_classes)
     self.assertIsInstance(model, tf.keras.Model)
 
-  def _gen_random_input_fn(self, num_classes, data_size=1, batch_size=4):
+  def _gen_random_ds(self, num_classes, data_size=1, batch_size=4):
+    batched_features = tf.random.uniform(
+        (data_size, batch_size, self.model_spec.seq_len),
+        minval=0,
+        maxval=len(self.model_spec.vocab),
+        dtype=tf.dtypes.int32)
 
-    def _input_fn():
-      batched_features = tf.random.uniform(
-          (data_size, batch_size, self.model_spec.seq_len),
-          minval=0,
-          maxval=len(self.model_spec.vocab),
-          dtype=tf.dtypes.int32)
-
-      batched_labels = tf.random.uniform((data_size, batch_size),
-                                         minval=0,
-                                         maxval=num_classes,
-                                         dtype=tf.dtypes.int32)
-      ds = tf.data.Dataset.from_tensor_slices(
-          (batched_features, batched_labels))
-      return ds
-
-    return _input_fn
+    batched_labels = tf.random.uniform((data_size, batch_size),
+                                       minval=0,
+                                       maxval=num_classes,
+                                       dtype=tf.dtypes.int32)
+    ds = tf.data.Dataset.from_tensor_slices((batched_features, batched_labels))
+    return ds
 
 
 class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
@@ -171,51 +165,41 @@ class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
   def _test_run_classifier(self, model_spec):
     num_classes = 2
     model = model_spec.run_classifier(
-        train_input_fn=self._gen_random_input_fn(model_spec.seq_len,
-                                                 num_classes),
-        validation_input_fn=self._gen_random_input_fn(model_spec.seq_len,
-                                                      num_classes),
+        train_ds=self._gen_random_ds(model_spec.seq_len, num_classes),
+        validation_ds=self._gen_random_ds(model_spec.seq_len, num_classes),
         epochs=1,
         steps_per_epoch=1,
-        validation_steps=1,
         num_classes=num_classes)
     self.assertIsInstance(model, tf.keras.Model)
 
-  def _gen_random_input_fn(self,
-                           seq_len,
-                           num_classes,
-                           data_size=1,
-                           batch_size=1):
+  def _gen_random_ds(self, seq_len, num_classes, data_size=1, batch_size=1):
 
-    def _input_fn():
-      batched_input_ids = tf.random.uniform((data_size, batch_size, seq_len),
+    batched_input_ids = tf.random.uniform((data_size, batch_size, seq_len),
+                                          minval=0,
+                                          maxval=2,
+                                          dtype=tf.dtypes.int32)
+    batched_input_mask = tf.random.uniform((data_size, batch_size, seq_len),
+                                           minval=0,
+                                           maxval=2,
+                                           dtype=tf.dtypes.int32)
+    batched_segment_ids = tf.random.uniform((data_size, batch_size, seq_len),
                                             minval=0,
                                             maxval=2,
                                             dtype=tf.dtypes.int32)
-      batched_input_mask = tf.random.uniform((data_size, batch_size, seq_len),
-                                             minval=0,
-                                             maxval=2,
-                                             dtype=tf.dtypes.int32)
-      batched_segment_ids = tf.random.uniform((data_size, batch_size, seq_len),
-                                              minval=0,
-                                              maxval=2,
-                                              dtype=tf.dtypes.int32)
 
-      batched_labels = tf.random.uniform((data_size, batch_size),
-                                         minval=0,
-                                         maxval=num_classes,
-                                         dtype=tf.dtypes.int32)
-      x = {
-          'input_word_ids': batched_input_ids,
-          'input_mask': batched_input_mask,
-          'input_type_ids': batched_segment_ids
-      }
-      y = batched_labels
+    batched_labels = tf.random.uniform((data_size, batch_size),
+                                       minval=0,
+                                       maxval=num_classes,
+                                       dtype=tf.dtypes.int32)
+    x = {
+        'input_word_ids': batched_input_ids,
+        'input_mask': batched_input_mask,
+        'input_type_ids': batched_segment_ids
+    }
+    y = batched_labels
 
-      ds = tf.data.Dataset.from_tensor_slices((x, y))
-      return ds
-
-    return _input_fn
+    ds = tf.data.Dataset.from_tensor_slices((x, y))
+    return ds
 
 
 if __name__ == '__main__':

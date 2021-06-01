@@ -117,7 +117,7 @@ class Spec(BinaryClassificationBaseSpec):
     return model
 
   def run_classifier(self, model, epochs, train_ds, train_steps, validation_ds,
-                     validation_steps, **kwargs):
+                     **kwargs):
     initial_lr = 0.1
     total_steps = train_steps * epochs
     warmup_steps = int(epochs * train_steps * 0.1)
@@ -130,16 +130,9 @@ class Spec(BinaryClassificationBaseSpec):
         train_ds,
         steps_per_epoch=train_steps,
         validation_data=validation_ds,
-        validation_steps=validation_steps,
         epochs=epochs,
         **kwargs)
     return hist
-
-
-def _get_dataset(dataset_fn):
-  """Helper function to get dataset with current distribute strategy."""
-  return tf.distribute.get_strategy().distribute_datasets_from_function(
-      dataset_fn)
 
 
 class BinaryClassifier(custom_model.CustomModel):
@@ -157,14 +150,10 @@ class BinaryClassifier(custom_model.CustomModel):
                        'train_data.' % (len(train_data), batch_size))
 
     with distribute_utils.get_strategy_scope(self.model_spec.strategy):
-      train_input_fn, train_steps = self._get_input_fn_and_steps(
-          train_data, batch_size, is_training=True)
-      validation_input_fn, validation_steps = self._get_input_fn_and_steps(
-          validation_data, batch_size, is_training=False)
-
-      # TODO(wangtz): This should probably be fused into _get_input_fn_and_steps
-      train_ds = _get_dataset(train_input_fn)
-      validation_ds = _get_dataset(validation_input_fn)
+      train_ds = train_data.gen_dataset(batch_size, is_training=True)
+      train_steps = len(train_data) // batch_size
+      validation_ds = validation_data.gen_dataset(
+          batch_size, is_training=False) if validation_data else None
 
       self.model = self.model_spec.create_model()
       return self.model_spec.run_classifier(
@@ -173,7 +162,6 @@ class BinaryClassifier(custom_model.CustomModel):
           train_ds,
           train_steps,
           validation_ds,
-          validation_steps,
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
 
   def evaluate(self, data, batch_size=4):

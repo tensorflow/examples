@@ -40,7 +40,7 @@ class DataLoader(object):
   loading requirements.
   """
 
-  def __init__(self, dataset, size):
+  def __init__(self, dataset, size=None):
     """Init function for class `DataLoader`.
 
     In most cases, one should use helper functions like `from_folder` to create
@@ -100,7 +100,6 @@ class DataLoader(object):
         # Shuffle after repeat will give a more randomized dataset and mix the
         # epoch boundary: https://www.tensorflow.org/guide/data
         ds = ds.shuffle(buffer_size=min(self._size, buffer_size))
-      ds = ds.repeat()
 
     ds = ds.batch(batch_size, drop_remainder=drop_remainder)
     ds = ds.prefetch(tf.data.AUTOTUNE)
@@ -108,7 +107,10 @@ class DataLoader(object):
     return ds
 
   def __len__(self):
-    return self._size
+    if self._size is not None:
+      return self._size
+    else:
+      return len(self._dataset)
 
   def split(self, fraction):
     """Splits dataset into two sub-datasets with the given fraction.

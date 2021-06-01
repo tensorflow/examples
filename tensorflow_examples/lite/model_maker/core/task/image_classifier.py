@@ -137,7 +137,11 @@ class ImageClassifier(classification_model.ClassificationModel):
           loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
           metrics=['accuracy'])
 
-  def train(self, train_data, validation_data=None, hparams=None):
+  def train(self,
+            train_data,
+            validation_data=None,
+            hparams=None,
+            steps_per_epoch=None):
     """Feeds the training data for training.
 
     Args:
@@ -145,6 +149,10 @@ class ImageClassifier(classification_model.ClassificationModel):
       validation_data: Validation data. If None, skips validation process.
       hparams: An instance of hub_lib.HParams or
         train_image_classifier_lib.HParams. Anamedtuple of hyperparameters.
+      steps_per_epoch: Integer or None. Total number of steps (batches of
+        samples) before declaring one epoch finished and starting the next
+        epoch. If 'steps_per_epoch' is None, the epoch will run until the input
+        dataset is exhausted.
 
     Returns:
       The tf.keras.callbacks.History object returned by tf.keras.Model.fit*().
@@ -163,23 +171,29 @@ class ImageClassifier(classification_model.ClassificationModel):
         is_training=True,
         shuffle=self.shuffle,
         preprocess=self.preprocess)
-    train_data_and_size = (train_ds, len(train_data))
+    steps_per_epoch = model_util.get_steps_per_epoch(steps_per_epoch,
+                                                     hparams.batch_size,
+                                                     train_data)
+    if steps_per_epoch is not None:
+      train_ds = train_ds.take(steps_per_epoch)
 
     validation_ds = None
-    validation_size = 0
     if validation_data is not None:
       validation_ds = validation_data.gen_dataset(
           hparams.batch_size, is_training=False, preprocess=self.preprocess)
-      validation_size = len(validation_data)
-    validation_data_and_size = (validation_ds, validation_size)
 
     # Trains the models.
-    lib = hub_lib
     if isinstance(hparams, train_image_classifier_lib.HParams):
-      lib = train_image_classifier_lib
-    self.history = lib.train_model(self.model, hparams, train_data_and_size,
-                                   validation_data_and_size)
-    return self.history
+      train_model = train_image_classifier_lib.train_model
+    else:
+      train_model = train_image_classifier_lib.hub_train_model
+
+    self.history = train_model(
+        model=self.model,
+        hparams=hparams,
+        train_ds=train_ds,
+        validation_ds=validation_ds,
+        steps_per_epoch=steps_per_epoch)
 
   def _export_tflite(self,
                      tflite_filepath,
@@ -242,6 +256,7 @@ class ImageClassifier(classification_model.ClassificationModel):
              validation_data=None,
              batch_size=None,
              epochs=None,
+             steps_per_epoch=None,
              train_whole_model=None,
              dropout_rate=None,
              learning_rate=None,
@@ -262,6 +277,10 @@ class ImageClassifier(classification_model.ClassificationModel):
         False, it represents the base learning rate when train batch size is 256
         and it's linear to the batch size.
       epochs: Number of epochs for training.
+      steps_per_epoch: Integer or None. Total number of steps (batches of
+        samples) before declaring one epoch finished and starting the next
+        epoch. If `steps_per_epoch` is None, the epoch will run until the input
+        dataset is exhausted.
       train_whole_model: If true, the Hub module is trained together with the
         classification layer on top. Otherwise, only train the top
         classification layer.
@@ -317,7 +336,7 @@ class ImageClassifier(classification_model.ClassificationModel):
 
     if do_train:
       tf.compat.v1.logging.info('Retraining the models...')
-      image_classifier.train(train_data, validation_data)
+      image_classifier.train(train_data, validation_data, steps_per_epoch)
     else:
       # Used in evaluation.
       image_classifier.create_model(with_loss_and_metrics=True)

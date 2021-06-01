@@ -88,7 +88,8 @@ class TextClassifier(classification_model.ClassificationModel):
             train_data,
             validation_data=None,
             epochs=None,
-            batch_size=None):
+            batch_size=None,
+            steps_per_epoch=None):
     """Feeds the training data for training."""
     if batch_size is None:
       batch_size = self.model_spec.default_batch_size
@@ -99,18 +100,20 @@ class TextClassifier(classification_model.ClassificationModel):
                        'the batch_size smaller or increase the size of the '
                        'train_data.' % (len(train_data), batch_size))
 
-    train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
-        train_data, batch_size, is_training=True)
-    validation_input_fn, validation_steps = self._get_input_fn_and_steps(
-        validation_data, batch_size, is_training=False)
+    train_ds = train_data.gen_dataset(batch_size, is_training=True)
+    validation_ds = validation_data.gen_dataset(
+        batch_size, is_training=False) if validation_data else None
 
+    steps_per_epoch = model_util.get_steps_per_epoch(steps_per_epoch,
+                                                     batch_size, train_data)
+    if steps_per_epoch is not None:
+      train_ds = train_ds.take(steps_per_epoch)
     self.model = self.model_spec.run_classifier(
-        train_input_fn,
-        validation_input_fn,
-        epochs,
-        steps_per_epoch,
-        validation_steps,
-        self.num_classes,
+        train_ds=train_ds,
+        validation_ds=validation_ds,
+        epochs=epochs,
+        steps_per_epoch=steps_per_epoch,
+        num_classes=self.num_classes,
         callbacks=self._keras_callbacks(model_dir=self.model_spec.model_dir))
 
     return self.model
@@ -177,6 +180,7 @@ class TextClassifier(classification_model.ClassificationModel):
              validation_data=None,
              batch_size=None,
              epochs=3,
+             steps_per_epoch=None,
              shuffle=False,
              do_train=True):
     """Loads data and train the model for test classification.
@@ -187,6 +191,10 @@ class TextClassifier(classification_model.ClassificationModel):
       validation_data: Validation data. If None, skips validation process.
       batch_size: Batch size for training.
       epochs: Number of epochs for training.
+      steps_per_epoch: Integer or None. Total number of steps (batches of
+        samples) before declaring one epoch finished and starting the next
+        epoch. If `steps_per_epoch` is None, the epoch will run until the input
+        dataset is exhausted.
       shuffle: Whether the data should be shuffled.
       do_train: Whether to run training.
 
@@ -203,7 +211,8 @@ class TextClassifier(classification_model.ClassificationModel):
 
     if do_train:
       tf.compat.v1.logging.info('Retraining the models...')
-      text_classifier.train(train_data, validation_data, epochs, batch_size)
+      text_classifier.train(train_data, validation_data, epochs, batch_size,
+                            steps_per_epoch)
     else:
       text_classifier.create_model()
 

@@ -56,7 +56,11 @@ class QuestionAnswer(custom_model.CustomModel):
   ALLOWED_EXPORT_FORMAT = (ExportFormat.TFLITE, ExportFormat.VOCAB,
                            ExportFormat.SAVED_MODEL)
 
-  def train(self, train_data, epochs=None, batch_size=None):
+  def train(self,
+            train_data,
+            epochs=None,
+            batch_size=None,
+            steps_per_epoch=None):
     """Feeds the training data for training."""
     if batch_size is None:
       batch_size = self.model_spec.default_batch_size
@@ -67,10 +71,13 @@ class QuestionAnswer(custom_model.CustomModel):
                        'the batch_size smaller or increase the size of the '
                        'train_data.' % (len(train_data), batch_size))
 
-    train_input_fn, steps_per_epoch = self._get_input_fn_and_steps(
-        train_data, batch_size, is_training=True)
-
-    self.model = self.model_spec.train(train_input_fn, epochs, steps_per_epoch)
+    train_ds = train_data.gen_dataset(batch_size, is_training=True)
+    steps_per_epoch = model_util.get_steps_per_epoch(steps_per_epoch,
+                                                     batch_size, train_data)
+    if steps_per_epoch is not None:
+      train_ds = train_ds.take(steps_per_epoch)
+    self.model = self.model_spec.train(
+        train_ds=train_ds, epochs=epochs, steps_per_epoch=steps_per_epoch)
 
     return self.model
 
@@ -103,10 +110,10 @@ class QuestionAnswer(custom_model.CustomModel):
       A dict contains two metrics: Exact match rate and F1 score.
     """
     predict_batch_size = self.model_spec.predict_batch_size
-    input_fn = self._get_dataset_fn(data, predict_batch_size, is_training=False)
+    ds = data.gen_dataset(predict_batch_size, is_training=False)
     num_steps = int(len(data) / predict_batch_size)
     return self.model_spec.evaluate(
-        self.model, None, input_fn, num_steps, data.examples, data.features,
+        self.model, None, ds, num_steps, data.examples, data.features,
         data.squad_file, data.version_2_with_negative, max_answer_length,
         null_score_diff_threshold, verbose_logging, output_dir)
 
@@ -137,13 +144,11 @@ class QuestionAnswer(custom_model.CustomModel):
     Returns:
       A dict contains two metrics: Exact match rate and F1 score.
     """
-    input_fn = self._get_dataset_fn(
-        data, global_batch_size=1, is_training=False)
+    ds = data.gen_dataset(batch_size=1, is_training=False)
     return self.model_spec.evaluate(
-        None, tflite_filepath, input_fn, len(data), data.examples,
-        data.features, data.squad_file, data.version_2_with_negative,
-        max_answer_length, null_score_diff_threshold, verbose_logging,
-        output_dir)
+        None, tflite_filepath, ds, len(data), data.examples, data.features,
+        data.squad_file, data.version_2_with_negative, max_answer_length,
+        null_score_diff_threshold, verbose_logging, output_dir)
 
   def _export_tflite(self,
                      tflite_filepath,
@@ -191,6 +196,7 @@ class QuestionAnswer(custom_model.CustomModel):
              model_spec,
              batch_size=None,
              epochs=2,
+             steps_per_epoch=None,
              shuffle=False,
              do_train=True):
     """Loads data and train the model for question answer.
@@ -200,6 +206,10 @@ class QuestionAnswer(custom_model.CustomModel):
       model_spec: Specification for the model.
       batch_size: Batch size for training.
       epochs: Number of epochs for training.
+      steps_per_epoch: Integer or None. Total number of steps (batches of
+        samples) before declaring one epoch finished and starting the next
+        epoch. If `steps_per_epoch` is None, the epoch will run until the input
+        dataset is exhausted.
       shuffle: Whether the data should be shuffled.
       do_train: Whether to run training.
 
@@ -215,7 +225,7 @@ class QuestionAnswer(custom_model.CustomModel):
 
     if do_train:
       tf.compat.v1.logging.info('Retraining the models...')
-      model.train(train_data, epochs, batch_size)
+      model.train(train_data, epochs, batch_size, steps_per_epoch)
     else:
       model.create_model()
 

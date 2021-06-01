@@ -29,6 +29,7 @@ from tensorflowjs.converters import converter as tfjs_converter
 from tflite_support import metadata as _metadata
 
 DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
+ESTIMITED_STEPS_PER_EPOCH = 1000
 
 
 def set_batch_size(model, batch_size):
@@ -36,6 +37,33 @@ def set_batch_size(model, batch_size):
   for model_input in model.inputs:
     new_shape = [batch_size] + model_input.shape[1:]
     model_input.set_shape(new_shape)
+
+
+def get_steps_per_epoch(steps_per_epoch=None, batch_size=None, train_data=None):
+  """Gets the estimated training steps per epoch.
+
+  1. If `steps_per_epoch` is set, returns `steps_per_epoch` directly.
+  2. Else if we can get the length of training data successfully, returns
+     `train_data_length // batch_size`.
+  3. Else if it fails to get the length of training data, return None.
+
+  Args:
+    steps_per_epoch: int, training steps per epoch.
+    batch_size: int, batch size.
+    train_data: training data.
+
+  Returns:
+    Estimated training steps per epoch.
+  """
+  if steps_per_epoch is not None:
+    # steps_per_epoch is set by users manually.
+    return steps_per_epoch
+  else:
+    # Gets the steps by the length of the training data.
+    try:
+      return len(train_data) // batch_size
+    except TypeError:
+      return None
 
 
 def _create_temp_dir(convert_from_saved_model):
