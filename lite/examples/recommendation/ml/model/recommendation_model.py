@@ -70,7 +70,8 @@ class RecommendationModel(tf.keras.Model):
         full_vocab_input_label)
     full_vocab_dotproduct = self._dotproduct_layer(
         context_embeddings=context_embeddings,
-        label_embeddings=full_vocab_label_embeddings)[0]
+        label_embeddings=full_vocab_label_embeddings,
+        top_k=None)[0]
     return full_vocab_dotproduct
 
   @tf.function

@@ -13,6 +13,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """Dotproduct similarity layer."""
+from typing import Optional
+
 import tensorflow as tf
 
 
@@ -23,8 +25,10 @@ class DotProductSimilarity(tf.keras.layers.Layer):
     if top_k is None, top_k computation will be ignored.
   """
 
-  def call(self, context_embeddings: tf.Tensor, label_embeddings: tf.Tensor,
-           top_k: int):
+  def call(self,
+           context_embeddings: tf.Tensor,
+           label_embeddings: tf.Tensor,
+           top_k: Optional[int] = None):
     """Generate dotproduct similarity matrix and top values/indices.
 
     Args:
@@ -41,8 +45,7 @@ class DotProductSimilarity(tf.keras.layers.Layer):
       values/indices if top_k is set.
     """
     if tf.keras.backend.ndim(label_embeddings) == 3:
-      label_embeddings = tf.squeeze(label_embeddings,
-                                    1)
+      label_embeddings = tf.squeeze(label_embeddings, 1)
     dotproduct = tf.matmul(
         context_embeddings, label_embeddings, transpose_b=True)
     if top_k:
