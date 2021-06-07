@@ -375,7 +375,7 @@ class EfficientDetModelSpec(object):
     progbar = tf.keras.utils.Progbar(steps)
     for i, (images, labels) in enumerate(dataset):
       # Get the output result after post-processing NMS op.
-      nms_boxes, nms_classes, nms_scores, _ = lite_runner.run(images)
+      _, nms_scores, nms_classes, nms_boxes = lite_runner.run(images)
 
       # CLASS_OFFSET is used since label_id for `background` is 0 in label_map
       # while it's not actually included the model. We don't need to add the

@@ -80,6 +80,7 @@ class LiteRunner(object):
   def run(self, image):
     """Runs inference with Lite model."""
     interpreter = self.interpreter
+    signature_fn = interpreter.get_signature_runner()
     input_details = self.input_details
     output_details = self.output_details
 
@@ -88,12 +89,12 @@ class LiteRunner(object):
       scale, zero_point = input_detail['quantization']
       image = image / scale + zero_point
       image = np.array(image, dtype=input_detail['dtype'])
-    interpreter.set_tensor(input_detail['index'], image)
-    interpreter.invoke()
+
+    output = signature_fn(images=image)
 
     def get_output(idx):
       output_detail = output_details[idx]
-      output_tensor = interpreter.get_tensor(output_detail['index'])
+      output_tensor = output[f'output_{idx}']
       if output_detail['quantization'] != (DEFAULT_SCALE, DEFAULT_ZERO_POINT):
         # Dequantize the output
         scale, zero_point = output_detail['quantization']
@@ -105,14 +106,14 @@ class LiteRunner(object):
     if not self.only_network:
       # TFLite model with post-processing.
       # Four Outputs:
-      #   detection_boxes: a float32 tensor of shape [1, num_boxes, 4] with box
-      #     locations
-      #   detection_classes: a float32 tensor of shape [1, num_boxes]
-      #     with class indices
-      #   detection_scores: a float32 tensor of shape [1, num_boxes]
-      #     with class scores
       #   num_boxes: a float32 tensor of size 1 containing the number of
       #     detected boxes
+      #   detection_scores: a float32 tensor of shape [1, num_boxes]
+      #     with class scores
+      #   detection_classes: a float32 tensor of shape [1, num_boxes]
+      #     with class indices
+      #   detection_boxes: a float32 tensor of shape [1, num_boxes, 4] with box
+      #     locations
       return [get_output(i) for i in range(output_size)]
     else:
       # TFLite model only contains network without post-processing.
