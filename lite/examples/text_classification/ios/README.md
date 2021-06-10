@@ -5,7 +5,7 @@
 ## Requirements
 
 *  Xcode 10.3 (installed on a Mac machine)
-*  An iOS Simuiator running iOS 12 or above
+*  An iOS Simulator running iOS 12 or above
 *  Xcode command-line tools (run ```xcode-select --install```)
 *  CocoaPods (run ```sudo gem install cocoapods```)
 
