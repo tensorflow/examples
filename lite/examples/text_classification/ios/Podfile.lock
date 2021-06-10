@@ -1,75 +1,75 @@
 PODS:
-  - GoogleToolboxForMac (2.2.1):
-    - GoogleToolboxForMac/Core (= 2.2.1)
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-    - GoogleToolboxForMac/GeometryUtils (= 2.2.1)
-    - GoogleToolboxForMac/KVO (= 2.2.1)
-    - GoogleToolboxForMac/Logger (= 2.2.1)
-    - "GoogleToolboxForMac/NSData+zlib (= 2.2.1)"
-    - "GoogleToolboxForMac/NSDictionary+URLArguments (= 2.2.1)"
-    - "GoogleToolboxForMac/NSFileHandle+UniqueName (= 2.2.1)"
-    - "GoogleToolboxForMac/NSScanner+JSON (= 2.2.1)"
-    - "GoogleToolboxForMac/NSString+HTML (= 2.2.1)"
-    - "GoogleToolboxForMac/NSString+URLArguments (= 2.2.1)"
-    - "GoogleToolboxForMac/NSString+XML (= 2.2.1)"
-    - "GoogleToolboxForMac/NSThread+Blocks (= 2.2.1)"
-    - GoogleToolboxForMac/Regex (= 2.2.1)
-    - GoogleToolboxForMac/StringEncoding (= 2.2.1)
-    - GoogleToolboxForMac/SystemVersion (= 2.2.1)
-    - GoogleToolboxForMac/URLBuilder (= 2.2.1)
-  - GoogleToolboxForMac/Core (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/DebugUtils (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/Defines (2.2.1)
-  - GoogleToolboxForMac/GeometryUtils (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/KVO (2.2.1):
-    - GoogleToolboxForMac/Core (= 2.2.1)
-    - GoogleToolboxForMac/DebugUtils (= 2.2.1)
-  - GoogleToolboxForMac/Logger (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - "GoogleToolboxForMac/NSData+zlib (2.2.1)":
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - "GoogleToolboxForMac/NSDictionary+URLArguments (2.2.1)":
-    - GoogleToolboxForMac/DebugUtils (= 2.2.1)
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-    - "GoogleToolboxForMac/NSString+URLArguments (= 2.2.1)"
-  - "GoogleToolboxForMac/NSFileHandle+UniqueName (2.2.1)":
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - "GoogleToolboxForMac/NSScanner+JSON (2.2.1)":
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - "GoogleToolboxForMac/NSString+HTML (2.2.1)":
-    - GoogleToolboxForMac/Core (= 2.2.1)
-  - "GoogleToolboxForMac/NSString+URLArguments (2.2.1)"
-  - "GoogleToolboxForMac/NSString+XML (2.2.1)":
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - "GoogleToolboxForMac/NSThread+Blocks (2.2.1)":
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/Regex (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/StringEncoding (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/SystemVersion (2.2.1):
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-  - GoogleToolboxForMac/URLBuilder (2.2.1):
-    - GoogleToolboxForMac/Core (= 2.2.1)
-    - GoogleToolboxForMac/Defines (= 2.2.1)
-    - "GoogleToolboxForMac/NSDictionary+URLArguments (= 2.2.1)"
-    - "GoogleToolboxForMac/NSString+URLArguments (= 2.2.1)"
-  - TensorFlowLiteC (2.3.0):
-    - TensorFlowLiteC/Core (= 2.3.0)
-  - TensorFlowLiteC/Core (2.3.0)
-  - TensorFlowLiteSwift (2.3.0):
-    - TensorFlowLiteSwift/Core (= 2.3.0)
-  - TensorFlowLiteSwift/Core (2.3.0):
-    - TensorFlowLiteC (= 2.3.0)
-  - TensorFlowLiteTaskText (0.0.1-nightly.20201005):
-    - GoogleToolboxForMac (= 2.2.1)
+  - GoogleToolboxForMac (2.3.1):
+    - GoogleToolboxForMac/Core (= 2.3.1)
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+    - GoogleToolboxForMac/GeometryUtils (= 2.3.1)
+    - GoogleToolboxForMac/KVO (= 2.3.1)
+    - GoogleToolboxForMac/Logger (= 2.3.1)
+    - "GoogleToolboxForMac/NSData+zlib (= 2.3.1)"
+    - "GoogleToolboxForMac/NSDictionary+URLArguments (= 2.3.1)"
+    - "GoogleToolboxForMac/NSFileHandle+UniqueName (= 2.3.1)"
+    - "GoogleToolboxForMac/NSScanner+JSON (= 2.3.1)"
+    - "GoogleToolboxForMac/NSString+HTML (= 2.3.1)"
+    - "GoogleToolboxForMac/NSString+URLArguments (= 2.3.1)"
+    - "GoogleToolboxForMac/NSString+XML (= 2.3.1)"
+    - "GoogleToolboxForMac/NSThread+Blocks (= 2.3.1)"
+    - GoogleToolboxForMac/Regex (= 2.3.1)
+    - GoogleToolboxForMac/StringEncoding (= 2.3.1)
+    - GoogleToolboxForMac/SystemVersion (= 2.3.1)
+    - GoogleToolboxForMac/URLBuilder (= 2.3.1)
+  - GoogleToolboxForMac/Core (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/DebugUtils (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/Defines (2.3.1)
+  - GoogleToolboxForMac/GeometryUtils (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/KVO (2.3.1):
+    - GoogleToolboxForMac/Core (= 2.3.1)
+    - GoogleToolboxForMac/DebugUtils (= 2.3.1)
+  - GoogleToolboxForMac/Logger (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - "GoogleToolboxForMac/NSData+zlib (2.3.1)":
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - "GoogleToolboxForMac/NSDictionary+URLArguments (2.3.1)":
+    - GoogleToolboxForMac/DebugUtils (= 2.3.1)
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+    - "GoogleToolboxForMac/NSString+URLArguments (= 2.3.1)"
+  - "GoogleToolboxForMac/NSFileHandle+UniqueName (2.3.1)":
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - "GoogleToolboxForMac/NSScanner+JSON (2.3.1)":
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - "GoogleToolboxForMac/NSString+HTML (2.3.1)":
+    - GoogleToolboxForMac/Core (= 2.3.1)
+  - "GoogleToolboxForMac/NSString+URLArguments (2.3.1)"
+  - "GoogleToolboxForMac/NSString+XML (2.3.1)":
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - "GoogleToolboxForMac/NSThread+Blocks (2.3.1)":
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/Regex (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/StringEncoding (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/SystemVersion (2.3.1):
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+  - GoogleToolboxForMac/URLBuilder (2.3.1):
+    - GoogleToolboxForMac/Core (= 2.3.1)
+    - GoogleToolboxForMac/Defines (= 2.3.1)
+    - "GoogleToolboxForMac/NSDictionary+URLArguments (= 2.3.1)"
+    - "GoogleToolboxForMac/NSString+URLArguments (= 2.3.1)"
+  - TensorFlowLiteC (2.5.0):
+    - TensorFlowLiteC/Core (= 2.5.0)
+  - TensorFlowLiteC/Core (2.5.0)
+  - TensorFlowLiteSwift (2.5.0):
+    - TensorFlowLiteSwift/Core (= 2.5.0)
+  - TensorFlowLiteSwift/Core (2.5.0):
+    - TensorFlowLiteC (= 2.5.0)
+  - TensorFlowLiteTaskText (0.2.0):
+    - GoogleToolboxForMac (~> 2.2)
 
 DEPENDENCIES:
   - TensorFlowLiteSwift
-  - TensorFlowLiteTaskText (~> 0.0.1-nightly)
+  - TensorFlowLiteTaskText
 
 SPEC REPOS:
   trunk:
@@ -79,11 +79,11 @@ SPEC REPOS:
     - TensorFlowLiteTaskText
 
 SPEC CHECKSUMS:
-  GoogleToolboxForMac: b3553629623a3b1bff17f555e736cd5a6d95ad55
-  TensorFlowLiteC: 51f50caf5777f740a70e2c1a5dbdc149e7aeb50b
-  TensorFlowLiteSwift: fb152cc1eec36b25b03a23c07f5d58113170af58
-  TensorFlowLiteTaskText: d3c15b9a98b6d7ec998b08a1c1415798420740ed
+  GoogleToolboxForMac: 471e0c05d39506e50e6398f46fa9a12ae0efeff9
+  TensorFlowLiteC: 9115580176f050caa70fea478dba3d5a75c612a4
+  TensorFlowLiteSwift: 50063271b9ba99202c4d96a969a518eee2b5807e
+  TensorFlowLiteTaskText: c8250e1fbc279f3fb45b84f82a4ad968bb751688
 
-PODFILE CHECKSUM: 5e57e01c9facb01b67d92954159a0e1ae3294685
+PODFILE CHECKSUM: 591d837d54345b9c88afd17907697c5d6a17b84f
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1

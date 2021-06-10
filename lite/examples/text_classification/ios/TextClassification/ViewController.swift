@@ -67,14 +67,30 @@ class ViewController: UIViewController {
     super.viewDidDisappear(animated)
     NotificationCenter.default.removeObserver(self)
   }
-
+  
+  /// Action when user tap the "Classify" button.
+  @IBAction func tapClassify(_ sender: Any) {
+    guard let text = textField.text else { return }
+    if text.count == 0 { return }
+    classify(text: text)
+  }
+    
   /// Classify the text and display the result.
   private func classify(text: String) {
     guard let classifier = self.classifier else { return }
-    let classifierResults = classifier.classify(text: text)
-    let result = ClassificationResult(text: text, results: classifierResults)
-    results.append(result)
-    tableView.reloadData()
+    
+    // Run TF Lite inference in a background thread to avoid blocking app UI
+    DispatchQueue.global(qos: .userInitiated).async {
+        let classifierResults = classifier.classify(text: text)
+        let result = ClassificationResult(text: text, results: classifierResults)
+        self.results.append(result)
+
+        DispatchQueue.main.async {
+            // Return to main thread to update the UI.
+            self.textField.text = nil
+            self.tableView.reloadData()
+        }
+    }
   }
 
 }
