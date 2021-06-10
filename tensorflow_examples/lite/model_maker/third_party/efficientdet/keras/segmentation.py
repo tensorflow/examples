@@ -90,7 +90,8 @@ def main(_):
       validation_data=test_dataset,
       callbacks=[])
 
-  model.save_weights('./testdata/segmentation')
+  model.save_weights(
+      './third_party/brain_automl/efficientdet/testdata/segmentation')
 
   print(create_mask(model(tf.ones((1, 512, 512, 3)), False)))
 

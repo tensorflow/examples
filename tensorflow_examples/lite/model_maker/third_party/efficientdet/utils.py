@@ -634,6 +634,7 @@ def build_model_with_precision(pp, mm, ii, *args, **kwargs):
     with float16_scope():
       outputs = mm(inputs, *args, **kwargs)
   elif not pp or pp == 'float32':
+    set_precision_policy(pp)
     outputs = mm(ii, *args, **kwargs)
   else:
     raise ValueError('Unknow precision name {}'.format(pp))

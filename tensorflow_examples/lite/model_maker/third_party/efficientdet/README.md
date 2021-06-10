@@ -96,7 +96,7 @@ We have also provided a list of mobile-size lite models:
 | EfficientDet-lite1,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite1.tgz)  |  31.50 | 31.12 |  5.8M |  49ms |
 | EfficientDet-lite2,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite2.tgz)  |  35.06 | 34.69 |  7.2M | 69ms |
 | EfficientDet-lite3,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3.tgz)  |  38.77 | 38.42 |  11M  | 116ms |
-| EfficientDet-lite3x, [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3x..gz) |  42.64 | 41.87 |  12M  | 208ms  |
+| EfficientDet-lite3x, [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite3x.tgz) |  42.64 | 41.87 |  12M  | 208ms  |
 | EfficientDet-lite4,  [ckpt](https://storage.googleapis.com/cloud-tpu-checkpoints/efficientdet/coco/efficientdet-lite4.tgz)  |  43.18 | 42.83 |   20M | 260ms  |
 
 

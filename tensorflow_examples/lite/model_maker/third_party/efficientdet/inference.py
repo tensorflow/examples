@@ -87,13 +87,15 @@ def batch_image_preprocess(raw_images,
   """
   if not batch_size:
     # map_fn is a little bit slower due to some extra overhead.
+    # map_fn -> vectorized_map (fully parallelizes the batch).
     map_fn = functools.partial(
         image_preprocess,
         image_size=image_size,
         mean_rgb=mean_rgb,
         stddev_rgb=stddev_rgb)
-    images, scales = tf.map_fn(
-        map_fn, raw_images, dtype=(tf.float32, tf.float32), back_prop=False)
+    images, scales = tf.vectorized_map(map_fn, raw_images)
+    images = tf.stop_gradient(tf.cast(images, tf.float32))
+    scales = tf.stop_gradient(tf.cast(scales, tf.float32))
     return (images, scales)
 
   # If batch size is known, use a simple loop.
