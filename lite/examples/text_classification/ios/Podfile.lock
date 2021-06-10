@@ -57,33 +57,21 @@ PODS:
     - GoogleToolboxForMac/Defines (= 2.3.1)
     - "GoogleToolboxForMac/NSDictionary+URLArguments (= 2.3.1)"
     - "GoogleToolboxForMac/NSString+URLArguments (= 2.3.1)"
-  - TensorFlowLiteC (2.5.0):
-    - TensorFlowLiteC/Core (= 2.5.0)
-  - TensorFlowLiteC/Core (2.5.0)
-  - TensorFlowLiteSwift (2.5.0):
-    - TensorFlowLiteSwift/Core (= 2.5.0)
-  - TensorFlowLiteSwift/Core (2.5.0):
-    - TensorFlowLiteC (= 2.5.0)
   - TensorFlowLiteTaskText (0.2.0):
     - GoogleToolboxForMac (~> 2.2)
 
 DEPENDENCIES:
-  - TensorFlowLiteSwift
   - TensorFlowLiteTaskText
 
 SPEC REPOS:
   trunk:
     - GoogleToolboxForMac
-    - TensorFlowLiteC
-    - TensorFlowLiteSwift
     - TensorFlowLiteTaskText
 
 SPEC CHECKSUMS:
   GoogleToolboxForMac: 471e0c05d39506e50e6398f46fa9a12ae0efeff9
-  TensorFlowLiteC: 9115580176f050caa70fea478dba3d5a75c612a4
-  TensorFlowLiteSwift: 50063271b9ba99202c4d96a969a518eee2b5807e
   TensorFlowLiteTaskText: c8250e1fbc279f3fb45b84f82a4ad968bb751688
 
-PODFILE CHECKSUM: 591d837d54345b9c88afd17907697c5d6a17b84f
+PODFILE CHECKSUM: 0824f3f469110c22d79fb0278a39919e5d4e1024
 
 COCOAPODS: 1.10.1

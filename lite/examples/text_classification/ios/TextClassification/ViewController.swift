@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import UIKit
-import TensorFlowLite
 import TensorFlowLiteTaskText
 
 class ViewController: UIViewController {
