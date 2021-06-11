@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="FY1-QU-hgX">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="FY1-QU-hgX">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -16,27 +17,37 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Classify text" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="nZM-FA-Zjl">
-                                <rect key="frame" x="20" y="828" width="374" height="34"/>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Classify text" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="nZM-FA-Zjl">
+                                <rect key="frame" x="8" y="836" width="336" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" returnKeyType="done"/>
                             </textField>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="pUW-WU-S9u">
-                                <rect key="frame" x="0.0" y="88" width="414" height="732"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <rect key="frame" x="0.0" y="88" width="414" height="740"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8rU-8g-wT5">
+                                <rect key="frame" x="352" y="836" width="54" height="34"/>
+                                <state key="normal" title="Classify"/>
+                                <connections>
+                                    <action selector="tapClassify:" destination="BYZ-38-t0r" eventType="touchUpInside" id="0Yf-qU-uwF"/>
+                                </connections>
+                            </button>
                         </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="8rU-8g-wT5" firstAttribute="top" secondItem="nZM-FA-Zjl" secondAttribute="top" id="9oH-Aa-2l0"/>
                             <constraint firstItem="nZM-FA-Zjl" firstAttribute="top" secondItem="pUW-WU-S9u" secondAttribute="bottom" constant="8" id="Ex0-jj-Wkf"/>
-                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="I6r-au-B4U"/>
-                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="Lu6-pn-6nH"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="nZM-FA-Zjl" secondAttribute="trailing" constant="20" id="RqI-Yy-5U8"/>
+                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="8" id="I6r-au-B4U"/>
+                            <constraint firstItem="nZM-FA-Zjl" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" constant="8" id="Lu6-pn-6nH"/>
                             <constraint firstItem="pUW-WU-S9u" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="aHW-JJ-UOs"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="8rU-8g-wT5" secondAttribute="trailing" constant="8" id="apR-ET-XFX"/>
+                            <constraint firstItem="8rU-8g-wT5" firstAttribute="leading" secondItem="nZM-FA-Zjl" secondAttribute="trailing" constant="8" symbolic="YES" id="gVV-u1-1dP"/>
                             <constraint firstItem="pUW-WU-S9u" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="rcQ-pQ-RMI"/>
                             <constraint firstItem="pUW-WU-S9u" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="sJY-qg-kMR"/>
+                            <constraint firstItem="8rU-8g-wT5" firstAttribute="bottom" secondItem="nZM-FA-Zjl" secondAttribute="bottom" id="xZS-UQ-3Bm"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" title="TFL Text Classification" id="oaa-bg-hKo"/>
                     <connections>
@@ -69,4 +80,9 @@
         </scene>
     </scenes>
     <color key="tintColor" red="0.93044394249999995" green="0.47058212760000001" blue="0.18419533969999999" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
 </document>
