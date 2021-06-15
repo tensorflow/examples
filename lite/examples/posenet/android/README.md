@@ -1,6 +1,8 @@
-# TensorFlow Lite PoseNet Android Demo
+# See the new pose estimation TFLite Android sample [here](../../pose_estimation/android), which demonstrates both Posenet and Movenet models. This old Posenet sample will no longer be maintained.
 
-## See the new pose estimation TFLite Android sample [here](../../pose_estimation/android), which demonstrates both Posenet and Movenet models. This old Posenet sample will no longer be maintained.
+<br/> <br/> <br/> <br/>
+
+## TensorFlow Lite PoseNet Android Demo
 
 ### Overview
 This is an app that continuously detects the body parts in the frames seen by
