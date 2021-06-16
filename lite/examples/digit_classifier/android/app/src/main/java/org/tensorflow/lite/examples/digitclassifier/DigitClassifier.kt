@@ -134,7 +134,7 @@ class DigitClassifier(private val context: Context) {
   }
 
   private fun getOutputString(output: FloatArray): String {
-    val maxIndex = output.indices.maxBy { output[it] } ?: -1
+    val maxIndex = output.indices.maxByOrNull { output[it] } ?: -1
     return "Prediction Result: %d\nConfidence: %2f".format(maxIndex, output[maxIndex])
   }
 
