@@ -42,11 +42,12 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
 
     companion object {
         private const val MIN_CROP_KEYPOINT_SCORE = .2f
+        private const val CPU_NUM_THREADS = 4
 
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
             val options = Interpreter.Options()
-            options.setNumThreads(4)
+            options.setNumThreads(CPU_NUM_THREADS)
             when (device) {
                 Device.CPU -> {
                 }

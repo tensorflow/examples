@@ -32,9 +32,11 @@ import kotlin.math.exp
 class PoseNet(private val interpreter: Interpreter) : PoseDetector {
 
     companion object {
+        private const val CPU_NUM_THREADS = 4
+
         fun create(context: Context, device: Device): PoseNet {
             val options = Interpreter.Options()
-            options.setNumThreads(4)
+            options.setNumThreads(CPU_NUM_THREADS)
             when (device) {
                 Device.CPU -> {
                 }
