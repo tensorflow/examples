@@ -111,7 +111,7 @@ class DigitClassifier(private val context: Context) {
     // Post-processing: find the digit that has the highest probability
     // and return it a human-readable string.
     val result = output[0]
-    val maxIndex = result.indices.maxBy { result[it] } ?: -1
+    val maxIndex = result.indices.maxByOrNull { result[it] } ?: -1
     val resultString =
       "Prediction Result: %d\nConfidence: %2f"
         .format(maxIndex, result[maxIndex])
