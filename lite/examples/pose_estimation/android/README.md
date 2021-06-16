@@ -30,8 +30,8 @@ This is an app that continuously detects the body parts in the frames seen by
 `Open an existing Android Studio project`.
 
 * From the `Open File or Project` window that appears, navigate to and select
- the `tensorflow-lite/examples/pose_estimation/android` directory from wherever you
- cloned the TensorFlow Lite sample GitHub repo. Click `OK`.
+ the `lite/examples/pose_estimation/android` directory from wherever you
+ cloned the `tensorflow/examples` GitHub repo. Click `OK`.
 
 * If it asks you to do a `Gradle Sync`, click `OK`.
 
@@ -62,4 +62,3 @@ If you explicitly want to download the model, you can download it from here:
 _Please do not delete the assets folder content_. If you explicitly deleted the
  files, then please choose `Build` > `Rebuild` from menu to re-download the
  deleted model files into assets folder.
-
