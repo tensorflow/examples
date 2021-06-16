@@ -118,7 +118,7 @@ class CustomModel(abc.ABC):
         {export_dir}/{tfjs_folder_name}.
       export_format: List of export format that could be saved_model, tflite,
         label, vocab.
-      **kwargs: Other parameters like `quantized` for TFLITE model.
+      **kwargs: Other parameters like `quantized_config` for TFLITE model.
     """
     export_format = self._get_export_format(export_format, **kwargs)
 
