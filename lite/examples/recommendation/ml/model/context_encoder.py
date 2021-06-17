@@ -189,7 +189,7 @@ class FeatureGroupEncoder(tf.keras.layers.Layer):
     Returns:
       Feature group encoding.
     """
-    embedding_feature_shape = None
+    embedding_feature_shape = []
     embeddings = []
     masks = []
     for feature_name, embedding_layer in sorted(
@@ -197,9 +197,10 @@ class FeatureGroupEncoder(tf.keras.layers.Layer):
       input_feature = input_context[feature_name]
       if isinstance(input_feature, tf.SparseTensor):
         input_feature = tf.sparse.to_dense(input_feature)
-      if embedding_feature_shape is None:
-        embedding_feature_shape = input_feature.shape
-      assert input_feature.shape == embedding_feature_shape
+      if not embedding_feature_shape:
+        embedding_feature_shape = input_feature.shape.as_list()
+      assert input_feature.shape.as_list() == embedding_feature_shape
+
       embeddings.append(embedding_layer(input_feature))
       masks.append(embedding_layer.compute_mask(input_feature))
     # Collect nonembedding feature values.
@@ -209,7 +210,10 @@ class FeatureGroupEncoder(tf.keras.layers.Layer):
         input_feature = tf.sparse.to_dense(input_feature)
       embeddings.append(tf.expand_dims(input_feature, -1))
     embedding = tf.concat(embeddings, -1)
-    mask = tf.ones(shape=embedding_feature_shape)
+
+    # Set mask_shape with batch dim = 1. Compatible to unknown batch size.
+    mask_shape = [1] + embedding_feature_shape[1:]
+    mask = tf.ones(shape=mask_shape)
     for m in masks:
       mask = mask * tf.cast(m, 'float32')
     mask = tf.expand_dims(mask, -1)

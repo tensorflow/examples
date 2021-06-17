@@ -66,8 +66,8 @@ class RecommendationModel(tf.keras.Model):
     # all items in the vocabulary.
     full_vocab_input_label = tf.range(
         self._input_config.label_feature.vocab_size)
-    full_vocab_label_embeddings = self._label_encoder.encode(
-        full_vocab_input_label)
+    label = {self._label_encoder.label_name: full_vocab_input_label}
+    full_vocab_label_embeddings = self._label_encoder(label)
     full_vocab_dotproduct = self._dotproduct_layer(
         context_embeddings=context_embeddings,
         label_embeddings=full_vocab_label_embeddings,
