@@ -18,14 +18,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow_examples.lite.examples.recommendation.ml.model import keras_metrics
+from model import metrics
 
 
 class KerasMetricsTest(tf.test.TestCase):
 
   def test_batch_recall_and_mean_rank(self):
-    batch_recall = keras_metrics.BatchRecall(top_k=2)
-    batch_mean_rank = keras_metrics.BatchMeanRank()
+    batch_recall = metrics.BatchRecall(top_k=2)
+    batch_mean_rank = metrics.BatchMeanRank()
     true_label = tf.constant([[2], [0], [1]], dtype=tf.int32)
     logits = tf.constant([
         [0.8, 0.1, 1.1, 0.3],
@@ -38,8 +38,8 @@ class KerasMetricsTest(tf.test.TestCase):
     self.assertEqual(batch_mean_rank.result().numpy(), 1.0)
 
   def test_global_recall_and_mean_rank(self):
-    global_recall = keras_metrics.GlobalRecall(top_k=2)
-    global_mean_rank = keras_metrics.GlobalMeanRank()
+    global_recall = metrics.GlobalRecall(top_k=2)
+    global_mean_rank = metrics.GlobalMeanRank()
     true_label = tf.constant([[2], [0], [1]], dtype=tf.int32)
     logits = tf.constant([
         [0.8, 0.1, 1.1, 0.3],
