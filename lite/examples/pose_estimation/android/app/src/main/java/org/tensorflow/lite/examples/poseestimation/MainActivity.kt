@@ -36,6 +36,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import org.tensorflow.lite.examples.poseestimation.VisualizationUtils.drawBodyKeypoints
 import org.tensorflow.lite.examples.poseestimation.ml.ModelType
 import org.tensorflow.lite.examples.poseestimation.ml.MoveNet
 import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
@@ -50,27 +51,6 @@ class MainActivity : AppCompatActivity() {
         private const val PREVIEW_HEIGHT = 480
         private const val FRAGMENT_DIALOG = "dialog"
         private const val TAG = "Move Net"
-
-        private val bodyJoints = listOf(
-            Pair(BodyPart.NOSE, BodyPart.LEFT_EYE),
-            Pair(BodyPart.NOSE, BodyPart.RIGHT_EYE),
-            Pair(BodyPart.LEFT_EYE, BodyPart.LEFT_EAR),
-            Pair(BodyPart.RIGHT_EYE, BodyPart.RIGHT_EAR),
-            Pair(BodyPart.NOSE, BodyPart.LEFT_SHOULDER),
-            Pair(BodyPart.NOSE, BodyPart.RIGHT_SHOULDER),
-            Pair(BodyPart.LEFT_SHOULDER, BodyPart.LEFT_ELBOW),
-            Pair(BodyPart.LEFT_ELBOW, BodyPart.LEFT_WRIST),
-            Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW),
-            Pair(BodyPart.RIGHT_ELBOW, BodyPart.RIGHT_WRIST),
-            Pair(BodyPart.LEFT_SHOULDER, BodyPart.RIGHT_SHOULDER),
-            Pair(BodyPart.LEFT_SHOULDER, BodyPart.LEFT_HIP),
-            Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_HIP),
-            Pair(BodyPart.LEFT_HIP, BodyPart.RIGHT_HIP),
-            Pair(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE),
-            Pair(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE),
-            Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE),
-            Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
-        )
     }
 
     /** A [SurfaceView] for camera preview.   */
@@ -117,12 +97,6 @@ class MainActivity : AppCompatActivity() {
 
     /** Threshold for confidence score. */
     private val minConfidence = .2f
-
-    /** Radius of circle used to draw keypoints.  */
-    private val circleRadius = 6f
-
-    /** Width of line used to connected two keypoints.  */
-    private val lineWidth = 4f
 
     /** [CaptureRequest.Builder] for the camera preview   */
     private var previewRequestBuilder: CaptureRequest.Builder? = null
@@ -521,37 +495,6 @@ class MainActivity : AppCompatActivity() {
             tvTime.text =
                 getString(R.string.tv_time).format(it * 1.0f / 1_000_000)
         }
-    }
-
-    // Draw line and point indicate body pose
-    private fun drawBodyKeypoints(input: Bitmap, person: Person): Bitmap {
-        val paintCircle = Paint().apply {
-            strokeWidth = circleRadius
-            color = Color.RED
-            style = Paint.Style.FILL
-        }
-        val paintLine = Paint().apply {
-            strokeWidth = lineWidth
-            color = Color.RED
-            style = Paint.Style.FILL
-        }
-
-        val originalSizeCanvas = Canvas(input)
-        bodyJoints.forEach {
-            val pointA = person.keyPoints[it.first.position].coordinate
-            val pointB = person.keyPoints[it.second.position].coordinate
-            originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
-        }
-
-        person.keyPoints.forEach { point ->
-            originalSizeCanvas.drawCircle(
-                point.coordinate.x,
-                point.coordinate.y,
-                circleRadius,
-                paintCircle
-            )
-        }
-        return input
     }
 
     /**
