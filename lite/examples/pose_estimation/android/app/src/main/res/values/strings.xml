@@ -1,20 +1,20 @@
 <resources>
-    <string name="app_name">Movenet</string>
-    <string name="tfe_pn_request_permission">This app needs camera permission.</string>
-    <string name="tv_score">Score: %.2f</string>
-    <string name="tv_model">Model: </string>
-    <string name="tv_time">Time: %.2f ms</string>
-    <string name="tv_device">Device: </string>
+    <string name="tfe_pe_app_name">TFL Pose Estimation</string>
+    <string name="tfe_pe_request_permission">This app needs camera permission.</string>
+    <string name="tfe_pe_tv_score">Score: %.2f</string>
+    <string name="tfe_pe_tv_model">Model: </string>
+    <string name="tfe_pe_tv_time">Time: %.2f ms</string>
+    <string name="tfe_pe_tv_device">Device: </string>
 
-    <string-array name="models_array">
+    <string-array name="tfe_pe_models_array">
         <item>Movenet Lightning</item>
         <item>Movenet Thunder</item>
         <item>Posenet</item>
     </string-array>
 
-    <string-array name="device_name">
-        <item>GPU</item>
+    <string-array name="tfe_pe_device_name">
         <item>CPU</item>
+        <item>GPU</item>
         <item>NNAPI</item>
     </string-array>
 </resources>

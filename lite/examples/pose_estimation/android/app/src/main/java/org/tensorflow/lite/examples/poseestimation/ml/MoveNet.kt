@@ -52,7 +52,8 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 Device.CPU -> {
                 }
                 Device.GPU -> {
-                    options.addDelegate(GpuDelegate())
+                    // Movenet TFLite models don't work with GPUDelegate yet
+//                    options.addDelegate(GpuDelegate())
                 }
                 Device.NNAPI -> options.setUseNNAPI(true)
             }

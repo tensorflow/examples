@@ -41,16 +41,14 @@ import org.tensorflow.lite.examples.poseestimation.ml.ModelType
 import org.tensorflow.lite.examples.poseestimation.ml.MoveNet
 import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
 import org.tensorflow.lite.examples.poseestimation.ml.PoseNet
-import org.tensorflow.lite.examples.poseestimation.data.BodyPart
 import org.tensorflow.lite.examples.poseestimation.data.Device
-import org.tensorflow.lite.examples.poseestimation.data.Person
 
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val PREVIEW_WIDTH = 640
         private const val PREVIEW_HEIGHT = 480
         private const val FRAGMENT_DIALOG = "dialog"
-        private const val TAG = "Move Net"
+        private const val TAG = "PoseEstimation"
     }
 
     /** A [SurfaceView] for camera preview.   */
@@ -87,10 +85,10 @@ class MainActivity : AppCompatActivity() {
     private var poseDetector: PoseDetector? = null
 
     /** Default device is GPU */
-    private var device = Device.GPU
+    private var device = Device.CPU
 
-    /** Default 0 == Movenet model */
-    private var modelPos = 0
+    /** Default 0 == Movenet Lightning model */
+    private var modelPos = 2
 
     /** A shape for extracting frame data.   */
     private var imageReader: ImageReader? = null
@@ -139,7 +137,7 @@ class MainActivity : AppCompatActivity() {
                 // same time, respect the user's decision. Don't link to system
                 // settings in an effort to convince the user to change their
                 // decision.
-                ErrorDialog.newInstance(getString(R.string.tfe_pn_request_permission))
+                ErrorDialog.newInstance(getString(R.string.tfe_pe_request_permission))
                     .show(supportFragmentManager, FRAGMENT_DIALOG)
             }
         }
@@ -200,8 +198,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         // keep screen on while app is running
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        // default model is movenet
-        poseDetector = MoveNet.create(this, device)
+
+        createPoseEstimator()
 
         tvScore = findViewById(R.id.tvScore)
         tvTime = findViewById(R.id.tvTime)
@@ -237,20 +235,20 @@ class MainActivity : AppCompatActivity() {
     // change model when app is running
     private fun changeModel(position: Int) {
         modelPos = position
-        createPose()
+        createPoseEstimator()
     }
 
     // change device type when app is running
     private fun changeDevice(position: Int) {
         device = when (position) {
-            0 -> Device.GPU
-            1 -> Device.CPU
+            0 -> Device.CPU
+            1 -> Device.GPU
             else -> Device.NNAPI
         }
-        createPose()
+        createPoseEstimator()
     }
 
-    private fun createPose() {
+    private fun createPoseEstimator() {
         closeCamera()
         stopBackgroundThread()
         poseDetector?.close()
@@ -268,7 +266,7 @@ class MainActivity : AppCompatActivity() {
     private fun initSpinner() {
         ArrayAdapter.createFromResource(
             this,
-            R.array.models_array,
+            R.array.tfe_pe_models_array,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             // Specify the layout to use when the list of choices appears
@@ -280,7 +278,7 @@ class MainActivity : AppCompatActivity() {
 
         ArrayAdapter.createFromResource(
             this,
-            R.array.device_name, android.R.layout.simple_spinner_item
+            R.array.tfe_pe_device_name, android.R.layout.simple_spinner_item
         ).also { adaper ->
             adaper.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
@@ -490,10 +488,10 @@ class MainActivity : AppCompatActivity() {
             Rect(left, top, right, bottom), Paint()
         )
         surfaceHolder.unlockCanvasAndPost(canvas)
-        tvScore.text = getString(R.string.tv_score).format(score)
+        tvScore.text = getString(R.string.tfe_pe_tv_score).format(score)
         poseDetector?.lastInferenceTimeNanos()?.let {
             tvTime.text =
-                getString(R.string.tv_time).format(it * 1.0f / 1_000_000)
+                getString(R.string.tfe_pe_tv_time).format(it * 1.0f / 1_000_000)
         }
     }
 

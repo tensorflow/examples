@@ -43,7 +43,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/tv_device" />
+            android:text="@string/tfe_pe_tv_device" />
 
         <Spinner
             android:id="@+id/spnDevice"
@@ -59,7 +59,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/tv_model" />
+            android:text="@string/tfe_pe_tv_model" />
 
         <Spinner
             android:id="@+id/spnModel"
