@@ -53,12 +53,15 @@ apply from:'download_model.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     interpreterImplementation project(":lib_interpreter")
     taskApiImplementation project(":lib_task_api")
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
-
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'com.google.truth:truth:1.0.1'
     androidTestImplementation 'androidx.test:runner:1.2.0'

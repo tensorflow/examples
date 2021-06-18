@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.hardware.Camera;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
 import android.util.Size;
@@ -81,6 +82,11 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private MultiBoxTracker tracker;
 
   private BorderedText borderedText;
+
+  @Override
+  public void onPreviewFrame(byte[] bytes, Camera camera) {
+    super.onPreviewFrame(bytes, camera);
+  }
 
   @Override
   public void onPreviewSizeChosen(final Size size, final int rotation) {

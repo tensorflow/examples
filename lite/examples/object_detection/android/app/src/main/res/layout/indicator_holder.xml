@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:id="@+id/indicatorCard"
+        android:layout_marginLeft=".5dp"
+        android:layout_marginTop=".5dp"
+        android:layout_marginRight=".5dp"
+        android:layout_marginBottom=".5dp"
+        app:cardCornerRadius="2dp"
+        app:cardElevation="0dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imageIndicator"
+                android:background="@color/cardview_shadow_start_color"
+                android:padding="5dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/chair"
+                tools:ignore="ContentDescription"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/activeImage"
+                android:background="#8c000000"/>
+        </FrameLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

@@ -3,6 +3,12 @@
     <color name="tfe_color_primary">#ffa800</color>
     <color name="tfe_color_primary_dark">#ff6f00</color>
     <color name="tfe_color_accent">#425066</color>
-
+    <color name="gray">#848282</color>
+    <color name="lightgrey">#a6FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="orange">#FFA500</color>
+    <color name="lightorange">#A6FFA500</color>
+    <color name="black">#000000</color>
     <color name="tfe_semi_transparent">#66000000</color>
+    <color name = "skyblue">#4BB4E9</color>
 </resources>
