@@ -24,8 +24,6 @@ import org.tensorflow.lite.examples.poseestimation.ml.PoseNet
 class PosenetTest {
 
     companion object {
-        private const val TAG = "PosenetTest"
-
         private const val TEST_INPUT_IMAGE1 = "image1"
         private val EXPECTED_DETECTION_RESULT1 = mapOf(
             BodyPart.NOSE to Coordinate(483f,304f),
@@ -90,30 +88,5 @@ class PosenetTest {
         val input = EvaluationUtils.loadBitmapResourceByName(TEST_INPUT_IMAGE2)
         val person = poseDetector.estimateSinglePose(input)
         EvaluationUtils.assertPoseDetectionResult(person, EXPECTED_DETECTION_RESULT2)
-    }
-
-    @Test
-    fun testPoseEstimationResult1() {
-        val bitmap1 = EvaluationUtils.loadBitmapResourceByName("image2")
-
-        poseDetector = PoseNet.create(appContext, Device.CPU)
-        val person1 = poseDetector.estimateSinglePose(bitmap1)
-        val outputBitmap1 = VisualizationUtils.drawBodyKeypoints(bitmap1, person1)
-        Log.d(TAG, "confidence = " + person1.score)
-
-        poseDetector = MoveNet.create(appContext, Device.CPU, ModelType.Lightning)
-        poseDetector.estimateSinglePose(bitmap1)
-        poseDetector.estimateSinglePose(bitmap1)
-        val person2 = poseDetector.estimateSinglePose(bitmap1)
-        val outputBitmap2 = VisualizationUtils.drawBodyKeypoints(bitmap1, person2)
-        Log.d(TAG, "confidence = " + person2.score)
-
-        poseDetector = MoveNet.create(appContext, Device.CPU, ModelType.Thunder)
-        poseDetector.estimateSinglePose(bitmap1)
-        poseDetector.estimateSinglePose(bitmap1)
-        val person3 = poseDetector.estimateSinglePose(bitmap1)
-        val outputBitmap3 = VisualizationUtils.drawBodyKeypoints(bitmap1, person3)
-        Log.d(TAG, "confidence = " + person3.score)
-
     }
 }
