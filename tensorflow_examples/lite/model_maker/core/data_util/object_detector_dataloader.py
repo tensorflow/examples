@@ -149,14 +149,14 @@ class DataLoader(dataloader.DataLoader):
     """Loads from dataset with PASCAL VOC format.
 
     Refer to
-    https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5#:~:text=Pascal%20VOC%20is%20an%20XML,for%20training%2C%20testing%20and%20validation
+    https://towardsdatascience.com/coco-data-format-for-object-detection-a4c5eaf518c5
     for the description of PASCAL VOC data format.
 
     LabelImg Tool (https://github.com/tzutalin/labelImg) can annotate the image
     and save annotations as XML files in PASCAL VOC data format.
 
-    Annotations are in the folder: ${annotations_dir}.
-    Raw images are in the foloder: ${images_dir}.
+    Annotations are in the folder: `annotations_dir`.
+    Raw images are in the foloder: `images_dir`.
 
     Args:
       images_dir: Path to directory that store raw images.
