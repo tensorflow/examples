@@ -39,10 +39,11 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import java.util.List;
 import java.util.Locale;
+
+import org.tensorflow.lite.examples.bertqa.tflite.QaClient;
 import org.tensorflow.lite.examples.bertqa.R;
-import org.tensorflow.lite.examples.bertqa.ml.LoadDatasetClient;
-import org.tensorflow.lite.examples.bertqa.ml.QaAnswer;
-import org.tensorflow.lite.examples.bertqa.ml.QaClient;
+import org.tensorflow.lite.examples.bertqa.data.LoadDatasetClient;
+import org.tensorflow.lite.task.text.qa.QaAnswer;
 
 /** Activity for doing Q&A on a specific dataset */
 public class QaActivity extends AppCompatActivity {

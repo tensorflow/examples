@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import org.tensorflow.lite.examples.bertqa.R;
-import org.tensorflow.lite.examples.bertqa.ml.LoadDatasetClient;
+import org.tensorflow.lite.examples.bertqa.data.LoadDatasetClient;
 
 /**
  * An activity representing a list of Datasets. This activity has different presentations for
