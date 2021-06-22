@@ -118,7 +118,7 @@ public class Photo_folder_activity extends AppCompatActivity implements itemClic
         Intent move = new Intent(Photo_folder_activity.this, ImageDisplay.class);
         move.putExtra("folderPath", pictureFolderPath);
         move.putExtra("folderName", folderName);
-
+        Log.d("clicked folder:" , "\nfolder path : " + pictureFolderPath + "\nfolder name : " + folderName);
         startActivity(move);
     }
 

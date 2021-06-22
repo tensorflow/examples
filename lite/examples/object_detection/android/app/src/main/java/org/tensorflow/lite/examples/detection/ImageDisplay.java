@@ -3,6 +3,7 @@ package org.tensorflow.lite.examples.detection;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.tensorflow.lite.examples.detection.fragments.pictureBrowserFragment;
 import org.tensorflow.lite.examples.detection.utils.MarginDecoration;
 import org.tensorflow.lite.examples.detection.utils.PicHolder;
 import org.tensorflow.lite.examples.detection.utils.pictureFacer;
@@ -11,8 +12,11 @@ import org.tensorflow.lite.examples.detection.utils.itemClickListener;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.transition.Fade;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -53,12 +57,24 @@ public class ImageDisplay extends AppCompatActivity implements itemClickListener
 
     @Override
     public void onPicClicked(PicHolder holder, int position, ArrayList<pictureFacer> pics) {
+        pictureBrowserFragment browser = pictureBrowserFragment.newInstance(pics, position, ImageDisplay.this);
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            browser.setEnterTransition(new Fade());
+            browser.setExitTransition(new Fade());
+        }
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addSharedElement(holder.picture, position+"picture")
+                .add(R.id.displayContainer, browser)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
     public void onPicClicked(String pictureFolderPath, String folderName) {
-
+        Log.d("On clicked : ", pictureFolderPath + " / " + folderName);
     }
 
     public ArrayList<pictureFacer> getAllImagesByFolder(String path){
@@ -67,6 +83,7 @@ public class ImageDisplay extends AppCompatActivity implements itemClickListener
         String[] projection = {MediaStore.Images.ImageColumns.DATA, MediaStore.Images.Media.DISPLAY_NAME,
                 MediaStore.Images.Media.SIZE};
         Cursor cursor = ImageDisplay.this.getContentResolver().query(allVideosUri, projection, MediaStore.Images.Media.DATA + " like ? ", new String[] {"%"+path+"%"}, null);
+//        Log.d("Uri" , "allvideosUri: " + allVideosUri.toString() + "\nprojection : " + projection.toString() + "\nCursor : " + cursor.toString());
         try {
             cursor.moveToFirst();
             do{
@@ -87,6 +104,7 @@ public class ImageDisplay extends AppCompatActivity implements itemClickListener
         }catch (Exception e){
             e.printStackTrace();
         }
+        Log.d("Images:", images.get(0).getPicturePath().toString());
         return images;
     }
 }
