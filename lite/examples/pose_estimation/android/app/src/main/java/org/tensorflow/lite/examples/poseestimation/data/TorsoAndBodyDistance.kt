@@ -16,9 +16,9 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.poseestimation.data
 
-data class TorsoAndBodyRange(
-    val maxTorsoYRange: Float,
-    val maxTorsoXRange: Float,
-    val maxBodyYRange: Float,
-    val maxBodyXRange: Float
+data class TorsoAndBodyDistance(
+    val maxTorsoYDistance: Float,
+    val maxTorsoXDistance: Float,
+    val maxBodyYDistance: Float,
+    val maxBodyXDistance: Float
 )

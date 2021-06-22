@@ -22,7 +22,6 @@ import android.os.SystemClock
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.poseestimation.data.*
-import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -43,6 +42,11 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
     companion object {
         private const val MIN_CROP_KEYPOINT_SCORE = .2f
         private const val CPU_NUM_THREADS = 4
+
+        // Parameters that control how large crop region should be expanded from previous frames'
+        // body keypoints.
+        private const val TORSO_EXPANSION_RATIO = 1.9f
+        private const val BODY_EXPANSION_RATIO = 1.2f
 
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
@@ -73,7 +77,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             create(context, device, ModelType.Lightning)
     }
 
-    private var cropRegion: CropRegion? = null
+    private var cropRegion: RectF? = null
     private var lastInferenceTimeNanos: Long = -1
     private val inputWidth = interpreter.getInputTensor(0).shape()[1]
     private val inputHeight = interpreter.getInputTensor(0).shape()[2]
@@ -82,7 +86,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
     override fun estimateSinglePose(bitmap: Bitmap): Person {
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         if (cropRegion == null) {
-            cropRegion = initCropRegion(bitmap.width, bitmap.height)
+            cropRegion = initRectF(bitmap.width, bitmap.height)
         }
         var totalScore = 0f
 
@@ -91,10 +95,10 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
 
         cropRegion?.run {
             val rect = RectF(
-                (xMin * bitmap.width),
-                (yMin * bitmap.height),
-                (xMax * bitmap.width),
-                (yMax * bitmap.height)
+                (left * bitmap.width),
+                (top * bitmap.height),
+                (right * bitmap.width),
+                (bottom * bitmap.height)
             )
             val detectBitmap = Bitmap.createBitmap(
                 rect.width().toInt(),
@@ -127,7 +131,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                     keyPoints.add(
                         KeyPoint(
                             BodyPart.fromInt(idx),
-                            Coordinate(
+                            PointF(
                                 x,
                                 y
                             ),
@@ -144,13 +148,13 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             matrix.mapPoints(points)
             keyPoints.forEachIndexed { index, keyPoint ->
                 keyPoint.coordinate =
-                    Coordinate(
+                    PointF(
                         points[index * 2],
                         points[index * 2 + 1]
                     )
             }
             // new crop region
-            cropRegion = determineCropRegion(keyPoints, bitmap.width, bitmap.height)
+            cropRegion = determineRectF(keyPoints, bitmap.width, bitmap.height)
         }
         lastInferenceTimeNanos =
             SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
@@ -190,7 +194,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
      * sides to make it a square image) when the algorithm cannot reliably determine
      * the crop region from the previous frame.
      */
-    private fun initCropRegion(imageWidth: Int, imageHeight: Int): CropRegion {
+    private fun initRectF(imageWidth: Int, imageHeight: Int): RectF {
         val xMin: Float
         val yMin: Float
         val width: Float
@@ -206,7 +210,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             yMin = 0f
             xMin = (imageWidth / 2f - imageHeight / 2) / imageWidth
         }
-        return CropRegion(
+        return RectF(
             xMin,
             yMin,
             xMin + width,
@@ -238,17 +242,17 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
      * When the model is not confident with the four torso joint predictions, the
      * function returns a default crop which is the full image padded to square.
      */
-    private fun determineCropRegion(
+    private fun determineRectF(
         keyPoints: List<KeyPoint>,
         imageWidth: Int,
         imageHeight: Int
-    ): CropRegion {
+    ): RectF {
         val targetKeyPoints = mutableListOf<KeyPoint>()
         keyPoints.forEach {
             targetKeyPoints.add(
                 KeyPoint(
                     it.bodyPart,
-                    Coordinate(
+                    PointF(
                         it.coordinate.x * imageWidth,
                         it.coordinate.y * imageHeight
                     ),
@@ -264,12 +268,14 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 (targetKeyPoints[BodyPart.LEFT_HIP.position].coordinate.y +
                         targetKeyPoints[BodyPart.RIGHT_HIP.position].coordinate.y) / 2f
 
-            val torsoAndBodyRange =
-                determineTorsoAndBodyRange(keyPoints, targetKeyPoints, centerX, centerY)
+            val torsoAndBodyDistances =
+                determineTorsoAndBodyDistances(keyPoints, targetKeyPoints, centerX, centerY)
 
             val list = listOf(
-                torsoAndBodyRange.maxTorsoXRange * 1.9f, torsoAndBodyRange.maxTorsoYRange * 1.9f,
-                torsoAndBodyRange.maxBodyXRange * 1.2f, torsoAndBodyRange.maxBodyYRange * 1.2f
+                torsoAndBodyDistances.maxTorsoXDistance * TORSO_EXPANSION_RATIO,
+                torsoAndBodyDistances.maxTorsoYDistance * TORSO_EXPANSION_RATIO,
+                torsoAndBodyDistances.maxBodyXDistance * BODY_EXPANSION_RATIO,
+                torsoAndBodyDistances.maxBodyYDistance * BODY_EXPANSION_RATIO
             )
 
             var cropLengthHalf = list.maxOrNull() ?: 0f
@@ -278,18 +284,18 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             val cropCorner = Pair(centerY - cropLengthHalf, centerX - cropLengthHalf)
 
             return if (cropLengthHalf > max(imageWidth, imageHeight) / 2f) {
-                initCropRegion(imageWidth, imageHeight)
+                initRectF(imageWidth, imageHeight)
             } else {
                 val cropLength = cropLengthHalf * 2
-                CropRegion(
-                    yMin = cropCorner.first / imageHeight,
-                    xMin = cropCorner.second / imageWidth,
-                    yMax = (cropCorner.first + cropLength) / imageHeight,
-                    xMax = (cropCorner.second + cropLength) / imageWidth
+                RectF(
+                    cropCorner.second / imageWidth,
+                    cropCorner.first / imageHeight,
+                    (cropCorner.second + cropLength) / imageWidth,
+                    (cropCorner.first + cropLength) / imageHeight,
                 )
             }
         } else {
-            return initCropRegion(imageWidth, imageHeight)
+            return initRectF(imageWidth, imageHeight)
         }
     }
 
@@ -297,14 +303,14 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
      * Calculates the maximum distance from each keypoints to the center location.
      * The function returns the maximum distances from the two sets of keypoints:
      * full 17 keypoints and 4 torso keypoints. The returned information will be
-     * used to determine the crop size. See determineCropRegion for more detail.
+     * used to determine the crop size. See determineRectF for more detail.
      */
-    private fun determineTorsoAndBodyRange(
+    private fun determineTorsoAndBodyDistances(
         keyPoints: List<KeyPoint>,
         targetKeyPoints: List<KeyPoint>,
         centerX: Float,
         centerY: Float
-    ): TorsoAndBodyRange {
+    ): TorsoAndBodyDistance {
         val torsoJoints = listOf(
             BodyPart.LEFT_SHOULDER.position,
             BodyPart.RIGHT_SHOULDER.position,
@@ -331,7 +337,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             if (distY > maxBodyYRange) maxBodyYRange = distY
             if (distX > maxBodyXRange) maxBodyXRange = distX
         }
-        return TorsoAndBodyRange(
+        return TorsoAndBodyDistance(
             maxTorsoYRange,
             maxTorsoXRange,
             maxBodyYRange,

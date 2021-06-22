@@ -18,6 +18,7 @@ package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.PointF
 import android.os.SystemClock
 import android.util.Log
 import org.tensorflow.lite.Interpreter
@@ -142,7 +143,7 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
             keypointList.add(
                 KeyPoint(
                     it,
-                    Coordinate(xCoords[idx].toFloat(), yCoords[idx].toFloat()),
+                    PointF(xCoords[idx].toFloat(), yCoords[idx].toFloat()),
                     confidenceScores[idx]
                 )
             )
