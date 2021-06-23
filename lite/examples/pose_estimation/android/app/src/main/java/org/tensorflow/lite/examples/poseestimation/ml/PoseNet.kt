@@ -21,12 +21,17 @@ import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.SystemClock
 import android.util.Log
+import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.examples.poseestimation.data.*
+import org.tensorflow.lite.examples.poseestimation.data.BodyPart
+import org.tensorflow.lite.examples.poseestimation.data.Device
+import org.tensorflow.lite.examples.poseestimation.data.KeyPoint
+import org.tensorflow.lite.examples.poseestimation.data.Person
 import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
+import org.tensorflow.lite.support.image.TensorImage
 import kotlin.math.abs
 import kotlin.math.exp
 
@@ -34,6 +39,8 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
 
     companion object {
         private const val CPU_NUM_THREADS = 4
+        private const val MEAN = 127.5f
+        private const val STD = 127.5f
 
         fun create(context: Context, device: Device): PoseNet {
             val options = Interpreter.Options()
@@ -74,7 +81,7 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
             Bitmap.createScaledBitmap(cropImage, inputWidth, inputHeight, true)
 
         val estimationStartTimeNanos = SystemClock.elapsedRealtimeNanos()
-        val inputArray = arrayOf(initInputArray(inputBitmap))
+        val inputArray = arrayOf(initInputArray(inputBitmap).tensorBuffer.buffer)
         Log.i(
             "posenet",
             String.format(
@@ -199,28 +206,15 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
     }
 
     /**
-     * Scale the image to a byteBuffer of [-1,1] values.
+     * Scale the image to a TensorImage.
      */
-    private fun initInputArray(bitmap: Bitmap): ByteBuffer {
-        val bytesPerChannel = 4
-        val inputChannels = 3
-        val batchSize = 1
-        val inputBuffer = ByteBuffer.allocateDirect(
-            batchSize * bytesPerChannel * bitmap.height * bitmap.width * inputChannels
-        )
-        inputBuffer.order(ByteOrder.nativeOrder())
-        inputBuffer.rewind()
-
-        val mean = 128.0f
-        val std = 128.0f
-        val intValues = IntArray(bitmap.width * bitmap.height)
-        bitmap.getPixels(intValues, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-        for (pixelValue in intValues) {
-            inputBuffer.putFloat(((pixelValue shr 16 and 0xFF) - mean) / std)
-            inputBuffer.putFloat(((pixelValue shr 8 and 0xFF) - mean) / std)
-            inputBuffer.putFloat(((pixelValue and 0xFF) - mean) / std)
-        }
-        return inputBuffer
+    private fun initInputArray(bitmap: Bitmap): TensorImage {
+        val imageProcessor = ImageProcessor.Builder().apply {
+            add(NormalizeOp(MEAN, STD))
+        }.build()
+        val tensorImage = TensorImage(DataType.FLOAT32)
+        tensorImage.load(bitmap)
+        return imageProcessor.process(tensorImage)
     }
 
     /**

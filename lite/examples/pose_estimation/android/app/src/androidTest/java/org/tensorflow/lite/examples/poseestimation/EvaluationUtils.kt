@@ -12,12 +12,14 @@ import kotlin.math.pow
 
 object EvaluationUtils {
 
-    private const val ACCEPTABLE_ERROR = 3f // max 3 pixels
+    private const val ACCEPTABLE_ERROR = 10f // max 10 pixels
+    private const val BITMAP_FIXED_WIDTH_SIZE = 400
 
-    private fun distance(point1: PointF, point2: PointF) : Float {
-        return ((point1.x - point2.x).pow(2) + (point1.y - point2.y).pow(2)).pow(0.5f)
-    }
-
+    /**
+     * Assert whether the detected person from the image match with the expected result.
+     * Detection result is accepted as correct if it is within the ACCEPTABLE_ERROR range from the
+     * expected result.
+     */
     fun assertPoseDetectionResult(
         person: Person,
         expectedResult: Map<BodyPart, PointF>
@@ -36,6 +38,12 @@ object EvaluationUtils {
         }
     }
 
+    /**
+     * Load an image from assets folder using its resource name.
+     * Note: The image is implicitly resized to a fixed 400px width, while keeping its ratio.
+     * This is necessary to keep the test image consistent because different bitmap resolution will
+     * be loaded based on the device screen size.
+     */
     fun loadBitmapResourceByName(name: String): Bitmap {
         val resources = InstrumentationRegistry.getInstrumentation().context.resources
         val resourceId = resources.getIdentifier(
@@ -44,7 +52,20 @@ object EvaluationUtils {
         )
         val options = BitmapFactory.Options()
         options.inMutable = true
-        return BitmapFactory.decodeResource(resources, resourceId, options)
+        return scaleBitmapToFixedSize(BitmapFactory.decodeResource(resources, resourceId, options))
     }
 
+    private fun scaleBitmapToFixedSize(bitmap: Bitmap): Bitmap {
+        val ratio = bitmap.width.toFloat() / bitmap.height
+        return Bitmap.createScaledBitmap(
+            bitmap,
+            BITMAP_FIXED_WIDTH_SIZE,
+            (BITMAP_FIXED_WIDTH_SIZE / ratio).toInt(),
+            false
+        )
+    }
+
+    private fun distance(point1: PointF, point2: PointF): Float {
+        return ((point1.x - point2.x).pow(2) + (point1.y - point2.y).pow(2)).pow(0.5f)
+    }
 }
