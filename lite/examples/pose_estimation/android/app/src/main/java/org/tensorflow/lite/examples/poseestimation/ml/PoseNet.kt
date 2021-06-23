@@ -32,7 +32,8 @@ import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
-import kotlin.math.abs
+import org.tensorflow.lite.support.image.ops.ResizeOp
+import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import kotlin.math.exp
 
 class PoseNet(private val interpreter: Interpreter) : PoseDetector {
@@ -41,6 +42,7 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
         private const val CPU_NUM_THREADS = 4
         private const val MEAN = 127.5f
         private const val STD = 127.5f
+        private const val TAG = "Posenet"
 
         fun create(context: Context, device: Device): PoseNet {
             val options = Interpreter.Options()
@@ -69,24 +71,17 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
     private val inputHeight = interpreter.getInputTensor(0).shape()[2]
     private var cropHeight = 0f
     private var cropWidth = 0f
+    private var cropSize = 0
 
     @Suppress("UNCHECKED_CAST")
     override fun estimateSinglePose(bitmap: Bitmap): Person {
-        val cropImage = cropBitmap(bitmap)
-
-        val widthRatio = cropImage.width.toFloat() / inputWidth
-        val heightRatio = cropImage.height.toFloat() / inputHeight
-
-        val inputBitmap =
-            Bitmap.createScaledBitmap(cropImage, inputWidth, inputHeight, true)
-
         val estimationStartTimeNanos = SystemClock.elapsedRealtimeNanos()
-        val inputArray = arrayOf(initInputArray(inputBitmap).tensorBuffer.buffer)
+        val inputArray = arrayOf(processInputImage(bitmap).tensorBuffer.buffer)
         Log.i(
-            "posenet",
+            TAG,
             String.format(
                 "Scaling to [-1,1] took %.2f ms",
-                1.0f * (SystemClock.elapsedRealtimeNanos() - estimationStartTimeNanos) / 1_000_000
+                (SystemClock.elapsedRealtimeNanos() - estimationStartTimeNanos) / 1_000_000f
             )
         )
 
@@ -96,13 +91,33 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
         interpreter.runForMultipleInputsOutputs(inputArray, outputMap)
         lastInferenceTimeNanos = SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
         Log.i(
-            "posenet",
+            TAG,
             String.format("Interpreter took %.2f ms", 1.0f * lastInferenceTimeNanos / 1_000_000)
         )
 
         val heatmaps = outputMap[0] as Array<Array<Array<FloatArray>>>
         val offsets = outputMap[1] as Array<Array<Array<FloatArray>>>
 
+        val postProcessingStartTimeNanos = SystemClock.elapsedRealtimeNanos()
+        val person = postProcessModelOuputs(heatmaps, offsets)
+        Log.i(
+            TAG,
+            String.format(
+                "Postprocessing took %.2f ms",
+                (SystemClock.elapsedRealtimeNanos() - postProcessingStartTimeNanos) / 1_000_000f
+            )
+        )
+
+        return person
+    }
+
+    /**
+     * Convert heatmaps and offsets output of Posenet into a list of keypoints
+     */
+    private fun postProcessModelOuputs(
+        heatmaps: Array<Array<Array<FloatArray>>>,
+        offsets: Array<Array<Array<FloatArray>>>
+    ): Person {
         val height = heatmaps[0].size
         val width = heatmaps[0][0].size
         val numKeypoints = heatmaps[0][0][0].size
@@ -133,14 +148,14 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
             val positionY = keypointPositions[idx].first
             val positionX = keypointPositions[idx].second
             yCoords[idx] = ((
-                    position.first / (height - 1).toFloat() * inputBitmap.height +
+                    position.first / (height - 1).toFloat() * inputHeight +
                             offsets[0][positionY][positionX][idx]
-                    ) * heightRatio).toInt() + (cropHeight / 2).toInt()
+                    ) * (cropSize.toFloat() / inputHeight)).toInt() + (cropHeight / 2).toInt()
             xCoords[idx] = ((
-                    position.second / (width - 1).toFloat() * inputBitmap.width +
+                    position.second / (width - 1).toFloat() * inputWidth +
                             offsets[0][positionY]
                                     [positionX][idx + numKeypoints]
-                    ) * widthRatio).toInt() + (cropWidth / 2).toInt()
+                    ) * (cropSize.toFloat() / inputWidth)).toInt() + (cropWidth / 2).toInt()
             confidenceScores[idx] = sigmoid(heatmaps[0][positionY][positionX][idx])
         }
 
@@ -165,51 +180,24 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
         interpreter.close()
     }
 
-    /** Crop Bitmap to maintain aspect ratio of model input.   */
-    private fun cropBitmap(bitmap: Bitmap): Bitmap {
-        // Reset crop padding
-        cropHeight = 0f
-        cropWidth = 0f
-        val bitmapRatio = bitmap.height.toFloat() / bitmap.width
-        val modelInputRatio = inputHeight.toFloat() / inputWidth
-        var croppedBitmap = bitmap
-
-        // Acceptable difference between the modelInputRatio and bitmapRatio to skip cropping.
-        val maxDifference = 1e-5
-
-        // Checks if the bitmap has similar aspect ratio as the required model input.
-        when {
-            abs(modelInputRatio - bitmapRatio) < maxDifference -> return croppedBitmap
-            modelInputRatio < bitmapRatio -> {
-                // New image is taller so we are height constrained.
-                cropHeight = bitmap.height - (bitmap.width.toFloat() / modelInputRatio)
-                croppedBitmap = Bitmap.createBitmap(
-                    bitmap,
-                    0,
-                    (cropHeight / 2).toInt(),
-                    bitmap.width,
-                    (bitmap.height - cropHeight).toInt()
-                )
-            }
-            else -> {
-                cropWidth = bitmap.width - (bitmap.height.toFloat() * modelInputRatio)
-                croppedBitmap = Bitmap.createBitmap(
-                    bitmap,
-                    (cropWidth / 2).toInt(),
-                    0,
-                    (bitmap.width - cropWidth).toInt(),
-                    bitmap.height
-                )
-            }
-        }
-        return croppedBitmap
-    }
-
     /**
-     * Scale the image to a TensorImage.
+     * Scale and crop the input image to a TensorImage.
      */
-    private fun initInputArray(bitmap: Bitmap): TensorImage {
+    private fun processInputImage(bitmap: Bitmap): TensorImage {
+        // reset crop width and height
+        cropWidth = 0f
+        cropHeight = 0f
+        cropSize = if (bitmap.width > bitmap.height) {
+            cropWidth = (bitmap.width - bitmap.height).toFloat()
+            bitmap.height
+        } else {
+            cropHeight = (bitmap.height - bitmap.width).toFloat()
+            bitmap.width
+        }
+
         val imageProcessor = ImageProcessor.Builder().apply {
+            add(ResizeWithCropOrPadOp(cropSize, cropSize))
+            add(ResizeOp(inputWidth, inputHeight, ResizeOp.ResizeMethod.BILINEAR))
             add(NormalizeOp(MEAN, STD))
         }.build()
         val tensorImage = TensorImage(DataType.FLOAT32)
