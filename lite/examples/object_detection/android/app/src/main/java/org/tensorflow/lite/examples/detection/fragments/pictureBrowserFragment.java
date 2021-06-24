@@ -33,6 +33,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.Util;
 
 import org.tensorflow.lite.examples.detection.ImageDisplay;
+import org.tensorflow.lite.examples.detection.MainActivity;
 import org.tensorflow.lite.examples.detection.R;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
@@ -180,8 +181,8 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
     private class ImagesPagerAdapter extends PagerAdapter {
         private static final int TF_OD_API_INPUT_SIZE = 416;
         private static final boolean TF_OD_API_IS_QUANTIZED = false;
-        private static final String TF_OD_API_MODEL_FILE = "./detect.tflite";
-        private static final String TF_OD_API_LABELS_FILE = "labelmap.txt";
+        private static final String TF_OD_API_MODEL_FILE = "detect.tflite";
+        private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt";
         private static final boolean MAINTAIN_ASPECT = false;
         public static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
         private Integer sensorOrientation = 90;
@@ -213,17 +214,6 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
             view = layoutinflater.inflate(R.layout.picture_browser_pager,null);
             image = view.findViewById(R.id.image);
 
-            Handler handler = new Handler();
-            new Thread(() -> {
-                final List<Detector.Recognition> results = detector.recognizeImage(cropBitmap);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        handleResult(cropBitmap, results);
-                    }
-                });
-            });
-
             setTransitionName(image, String.valueOf(position)+"picture");
 
             pictureFacer pic = allImages.get(position);
@@ -241,6 +231,11 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
                 image.setImageBitmap(cropBitmap);
                 initBox();
             }
+
+            final List<Detector.Recognition> results = detector.recognizeImage(cropBitmap);
+            handleResult(cropBitmap, results);
+
+
 
             image.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -282,7 +277,7 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
             cropToFrameTransform = new Matrix();
             frameToCropTransform.invert(cropToFrameTransform);
 
-            tracker = new MultiBoxTracker(imagePager.getContext());
+            tracker = new MultiBoxTracker(getContext());
             trackingOverlay = view.findViewById(R.id.tracking_overlay);
             trackingOverlay.addCallback(
                     canvas -> tracker.draw(canvas)
@@ -291,7 +286,7 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
             tracker.setFrameConfiguration(TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, sensorOrientation);
             try{
                 detector = TFLiteObjectDetectionAPIModel.create(
-                        imagePager.getContext(),
+                        getContext(),
                         TF_OD_API_MODEL_FILE,
                         TF_OD_API_LABELS_FILE,
                         TF_OD_API_INPUT_SIZE,
@@ -299,11 +294,12 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
                 );
             }catch (final IOException e){
                 e.printStackTrace();
-//                Logger.e(e, "Exception initalizing detector");
+                LOGGER.e(e, "Exception initalizing detector");
 
-                Toast toast = Toast.makeText(getContext(), "classifier could be initialized", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getContext(), "Detector could be initialized", Toast.LENGTH_SHORT);
                 toast.show();
             }
+            Log.d("initbox", "done with init box");
         }
 
         private void handleResult(Bitmap bitmap, List<Detector.Recognition> results){
@@ -322,6 +318,7 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
                 }
             }
             image.setImageBitmap(bitmap);
+            Log.d("handleResult", image.toString());
         }
     }
 

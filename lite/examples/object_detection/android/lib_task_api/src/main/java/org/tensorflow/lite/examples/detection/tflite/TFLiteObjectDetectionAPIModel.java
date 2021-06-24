@@ -18,6 +18,8 @@ package org.tensorflow.lite.examples.detection.tflite;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Trace;
+import android.util.Log;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
@@ -108,6 +110,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
               detection.getBoundingBox()));
     }
     Trace.endSection(); // "recognizeImage"
+    Log.d("recognitions", recognitions.toString());
     return recognitions;
   }
 

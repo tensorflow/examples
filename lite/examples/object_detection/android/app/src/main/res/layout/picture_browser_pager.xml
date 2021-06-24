@@ -6,15 +6,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
-        android:layout_width="416dp"
-        android:layout_height="416dp"
-        android:scaleType="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:srcCompat="@drawable/chair"
         android:id="@+id/image"/>
 
     <org.tensorflow.lite.examples.detection.customview.OverlayView
-        android:layout_width="416dp"
-        android:layout_height="416dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/tracking_overlay"/>
 
 </RelativeLayout>

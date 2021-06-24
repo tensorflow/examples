@@ -15,6 +15,7 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.detection.env;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 import java.util.HashSet;
 import java.util.Set;
@@ -178,7 +179,8 @@ public final class Logger {
     }
   }
 
-  public static void e(final Throwable t, final String format, final Object... args) {
+  @SuppressLint("LogTagMismatch")
+  public void e(final Throwable t, final String format, final Object... args) {
     if (isLoggable(Log.ERROR)) {
       Log.e(tag, toMessage(format, args), t);
     }
