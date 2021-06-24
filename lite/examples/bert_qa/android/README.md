@@ -18,14 +18,14 @@ These instructions walk you through running the demo on an Android device.
 of pre-training language representations which obtains state-of-the-art results
 on a wide array of Natural Language Processing tasks.
 
-This app uses [MobileBERT](https://tfhub.dev/tensorflow/tfjs-model/mobilebert/1 "MobileBERT"), a compressed version of [BERT] that runs 4x faster and
+This app uses [MobileBERT], a compressed version of [BERT] that runs 4x faster and
 has 4x smaller model size.
 
 For more information, refer to the [BERT github page][BERT].
 
 
 ## Build the demo using Android Studio
-
+                                                                                                                                          
 ### Prerequisites
 
 *   If you don't have already, install
@@ -82,5 +82,12 @@ cd lite/examples/bert_qa/android   # Folder for Android app.
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
+## Assets folder
+
+_Do not delete the assets folder content_. If you explicitly deleted the files,
+choose `Build -> Rebuild` to re-download the deleted model files into the assets
+folder.
+
 [BERT]: https://github.com/google-research/bert "Bert"
 [SQuAD]: https://rajpurkar.github.io/SQuAD-explorer/ "SQuAD"
+[MobileBERT]:https://tfhub.dev/tensorflow/tfjs-model/mobilebert/1 "MobileBERT"

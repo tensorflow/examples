@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-package org.tensorflow.lite.examples.bertqa.data;
+package org.tensorflow.lite.examples.bertqa.ml;
 
 import android.content.Context;
 import android.util.Log;
@@ -35,7 +35,6 @@ import java.util.Map;
 public class LoadDatasetClient {
     private static final String TAG = "BertAppDemo";
     private static final String JSON_DIR = "qa.json";
-    private static final String DIC_DIR = "vocab.txt";
     private final Context context;
 
     private String[] contents;

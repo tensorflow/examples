@@ -8,7 +8,7 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.tensorflow.lite.examples.bertqa.tflite.QaClient;
+import org.tensorflow.lite.examples.bertqa.ml.QaClient;
 import org.tensorflow.lite.task.text.qa.QaAnswer;
 
 import static org.junit.Assert.*;

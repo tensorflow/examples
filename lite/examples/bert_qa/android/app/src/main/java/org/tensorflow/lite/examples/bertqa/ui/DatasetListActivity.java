@@ -15,11 +15,14 @@ limitations under the License.
 package org.tensorflow.lite.examples.bertqa.ui;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
 import org.tensorflow.lite.examples.bertqa.R;
-import org.tensorflow.lite.examples.bertqa.data.LoadDatasetClient;
+import org.tensorflow.lite.examples.bertqa.ml.LoadDatasetClient;
 
 /**
  * An activity representing a list of Datasets. This activity has different presentations for
@@ -29,23 +32,23 @@ import org.tensorflow.lite.examples.bertqa.data.LoadDatasetClient;
  */
 public class DatasetListActivity extends AppCompatActivity {
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.tfe_qa_activity_dataset_list);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.tfe_qa_activity_dataset_list);
 
-    ListView listView = findViewById(R.id.dataset_list);
-    assert listView != null;
+        ListView listView = findViewById(R.id.dataset_list);
+        assert listView != null;
 
-    LoadDatasetClient datasetClient = new LoadDatasetClient(this);
-    ArrayAdapter<String> datasetAdapter =
-        new ArrayAdapter<>(
-            this, android.R.layout.simple_selectable_list_item, datasetClient.getTitles());
-    listView.setAdapter(datasetAdapter);
+        LoadDatasetClient datasetClient = new LoadDatasetClient(this);
+        ArrayAdapter<String> datasetAdapter =
+                new ArrayAdapter<>(
+                        this, android.R.layout.simple_selectable_list_item, datasetClient.getTitles());
+        listView.setAdapter(datasetAdapter);
 
-    listView.setOnItemClickListener(
-        (parent, view, position, id) -> {
-          startActivity(QaActivity.newInstance(this, position));
-        });
-  }
+        listView.setOnItemClickListener(
+                (parent, view, position, id) -> {
+                    startActivity(QaActivity.newInstance(this, position));
+                });
+    }
 }

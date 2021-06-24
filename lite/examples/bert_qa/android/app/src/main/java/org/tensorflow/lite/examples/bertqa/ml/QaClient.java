@@ -1,4 +1,4 @@
-package org.tensorflow.lite.examples.bertqa.tflite;
+package org.tensorflow.lite.examples.bertqa.ml;
 
 import android.content.Context;
 import android.util.Log;
@@ -10,7 +10,9 @@ import org.tensorflow.lite.task.text.qa.QaAnswer;
 import java.io.IOException;
 import java.util.List;
 
-/** Load TfLite model and provide predictions with task api. */
+/**
+ * Load TfLite model and provide predictions with task api.
+ */
 public class QaClient {
 
     private static final String TAG = "TaskApi";
@@ -24,7 +26,9 @@ public class QaClient {
         this.context = context;
     }
 
-    /** Load TF Lite model. */
+    /**
+     * Load TF Lite model.
+     */
     public void loadModel() {
         try {
             answerer = BertQuestionAnswerer.createFromFile(context, MODEL_PATH);
@@ -33,14 +37,18 @@ public class QaClient {
         }
     }
 
-    /** Free up resources as the client is no longer needed. */
+    /**
+     * Free up resources as the client is no longer needed.
+     */
     public void unload() {
         answerer.close();
         answerer = null;
     }
 
 
-    /** Run inference and predict the possible answers. */
+    /**
+     * Run inference and predict the possible answers.
+     */
     public List<QaAnswer> predict(String questionToAsk, String contextOfTheQuestion) {
 
         List<QaAnswer> apiResult = answerer.answer(contextOfTheQuestion, questionToAsk);
