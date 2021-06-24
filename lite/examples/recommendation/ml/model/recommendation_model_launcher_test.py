@@ -223,4 +223,5 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
     self.assertAllEqual([5], tflite_top_prediction_scores.shape)
 
 if __name__ == '__main__':
+  launcher.define_flags()
   tf.test.main()

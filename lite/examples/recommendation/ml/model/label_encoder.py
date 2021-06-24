@@ -42,6 +42,8 @@ class LabelEncoder(tf.keras.layers.Layer):
     self._label_feature = self._input_config.label_feature
     if self._label_feature.feature_type != input_config_pb2.FeatureType.INT:
       raise ValueError('Currently only INT type is supported for label.')
+    if not self.label_name:
+      raise ValueError('label_feature name is expected.')
     self._label_embedding_layer = tf.keras.layers.Embedding(
         self._label_feature.vocab_size,
         self._label_feature.embedding_dim,
@@ -49,7 +51,11 @@ class LabelEncoder(tf.keras.layers.Layer):
             mean=0.0,
             stddev=1.0 / math.sqrt(self._label_feature.embedding_dim)),
         mask_zero=True,
-        name=self._label_feature.feature_name+'embedding_layer')
+        name=self.label_name + 'embedding_layer')
+
+  @property
+  def label_name(self):
+    return self._label_feature.feature_name
 
   def encode(self, input_label: tf.Tensor) -> tf.Tensor:
     """Generates label encoding with input label tensor.
@@ -77,5 +83,5 @@ class LabelEncoder(tf.keras.layers.Layer):
     Returns:
       Label encoding.
     """
-    input_label = inputs[self._label_feature.feature_name]
+    input_label = inputs[self.label_name]
     return self.encode(input_label)

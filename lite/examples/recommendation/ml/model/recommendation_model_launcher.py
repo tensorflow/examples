@@ -32,42 +32,47 @@ from google.protobuf import text_format
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string('training_data_filepattern', None,
-                    'File pattern of the training data.')
-flags.DEFINE_string('testing_data_filepattern', None,
-                    'File pattern of the training data.')
-flags.DEFINE_string('model_dir', None, 'Directory to store checkpoints.')
-flags.DEFINE_string('export_dir', None, 'Directory for the exported model.')
-flags.DEFINE_integer('batch_size', 1, 'Training batch size.')
-flags.DEFINE_float('learning_rate', 0.1, 'Learning rate.')
-flags.DEFINE_integer('steps_per_epoch', 10,
-                     'Number of steps to run in each epoch.')
-flags.DEFINE_integer('num_epochs', 10000, 'Number of training epochs.')
-flags.DEFINE_integer('num_eval_steps', 1000, 'Number of eval steps.')
-flags.DEFINE_enum('run_mode', 'train_and_eval',
-                  ['train_and_eval', 'export', 'export_tflite'],
-                  'Mode of the launcher, default value is: train_and_eval')
-flags.DEFINE_float('gradient_clip_norm', 1.0,
-                   'gradient_clip_norm <= 0 meaning no clip.')
-flags.DEFINE_string('vocab_dir', None,
-                    'Path of the directory storing vocabulary files.')
-flags.DEFINE_string('input_config_file', None, 'Path to the input config pbtxt'
-                    'file.')
-flags.DEFINE_list('hidden_layer_dims', None, 'Hidden layer dimensions.')
-flags.DEFINE_list('eval_top_k', None, 'Top k to evaluate.')
-flags.DEFINE_list(
-    'conv_num_filter_ratios', None,
-    'Number of filter ratios for the Conv1D layer, this'
-    'flag is only required if CNN encoder type is used.')
-flags.DEFINE_integer(
-    'conv_kernel_size', 4,
-    'Size of the Conv1D layer kernel size, this flag is only'
-    'required if CNN encoder type is used.')
-flags.DEFINE_integer(
-    'lstm_num_units', 4, 'Number of units for the LSTM layer,'
-    'this flag is only required if LSTM encoder type is used.')
-flags.DEFINE_integer('num_predictions', 5, 'Num of top predictions to output.')
-flags.DEFINE_string('checkpoint_path', '', 'Path to the checkpoint.')
+
+def define_flags():
+  """Define flags."""
+  flags.DEFINE_string('training_data_filepattern', None,
+                      'File pattern of the training data.')
+  flags.DEFINE_string('testing_data_filepattern', None,
+                      'File pattern of the training data.')
+  flags.DEFINE_string('model_dir', None, 'Directory to store checkpoints.')
+  flags.DEFINE_string('export_dir', None, 'Directory for the exported model.')
+  flags.DEFINE_integer('batch_size', 1, 'Training batch size.')
+  flags.DEFINE_float('learning_rate', 0.1, 'Learning rate.')
+  flags.DEFINE_integer('steps_per_epoch', 10,
+                       'Number of steps to run in each epoch.')
+  flags.DEFINE_integer('num_epochs', 10000, 'Number of training epochs.')
+  flags.DEFINE_integer('num_eval_steps', 1000, 'Number of eval steps.')
+  flags.DEFINE_enum('run_mode', 'train_and_eval',
+                    ['train_and_eval', 'export', 'export_tflite'],
+                    'Mode of the launcher, default value is: train_and_eval')
+  flags.DEFINE_float('gradient_clip_norm', 1.0,
+                     'gradient_clip_norm <= 0 meaning no clip.')
+  flags.DEFINE_string('vocab_dir', None,
+                      'Path of the directory storing vocabulary files.')
+  flags.DEFINE_string('input_config_file', None,
+                      'Path to the input config pbtxt'
+                      'file.')
+  flags.DEFINE_list('hidden_layer_dims', None, 'Hidden layer dimensions.')
+  flags.DEFINE_list('eval_top_k', None, 'Top k to evaluate.')
+  flags.DEFINE_list(
+      'conv_num_filter_ratios', None,
+      'Number of filter ratios for the Conv1D layer, this'
+      'flag is only required if CNN encoder type is used.')
+  flags.DEFINE_integer(
+      'conv_kernel_size', 4,
+      'Size of the Conv1D layer kernel size, this flag is only'
+      'required if CNN encoder type is used.')
+  flags.DEFINE_integer(
+      'lstm_num_units', 4, 'Number of units for the LSTM layer,'
+      'this flag is only required if LSTM encoder type is used.')
+  flags.DEFINE_integer('num_predictions', 5,
+                       'Num of top predictions to output.')
+  flags.DEFINE_string('checkpoint_path', '', 'Path to the checkpoint.')
 
 
 class SimpleCheckpoint(tf.keras.callbacks.Callback):
@@ -102,6 +107,15 @@ def _get_metrics(eval_top_k: List[int]):
   return metrics_list
 
 
+def compile_model(model, eval_top_k, learning_rate, gradient_clip_norm):
+  """Compile keras model."""
+  model.compile(
+      optimizer=_get_optimizer(
+          learning_rate=learning_rate, gradient_clip_norm=gradient_clip_norm),
+      loss=losses.GlobalSoftmax(),
+      metrics=_get_metrics(eval_top_k))
+
+
 def build_keras_model(input_config: input_config_pb2.InputConfig,
                       model_config: model_config_class.ModelConfig):
   """Construct and compile recommendation keras model.
@@ -119,14 +133,9 @@ def build_keras_model(input_config: input_config_pb2.InputConfig,
     The compiled keras model.
   """
   model = recommendation_model.RecommendationModel(
-      input_config=input_config,
-      model_config=model_config)
-  model.compile(
-      optimizer=_get_optimizer(
-          learning_rate=FLAGS.learning_rate,
-          gradient_clip_norm=FLAGS.gradient_clip_norm),
-      loss=losses.GlobalSoftmax(),
-      metrics=_get_metrics(model_config.eval_top_k))
+      input_config=input_config, model_config=model_config)
+  compile_model(model, model_config.eval_top_k, FLAGS.learning_rate,
+                FLAGS.gradient_clip_norm)
   return model
 
 
@@ -305,4 +314,5 @@ def main(_):
 
 
 if __name__ == '__main__':
+  define_flags()
   app.run(main)
