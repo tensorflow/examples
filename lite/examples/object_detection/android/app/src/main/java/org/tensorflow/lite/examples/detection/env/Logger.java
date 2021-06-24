@@ -178,7 +178,7 @@ public final class Logger {
     }
   }
 
-  public void e(final Throwable t, final String format, final Object... args) {
+  public static void e(final Throwable t, final String format, final Object... args) {
     if (isLoggable(Log.ERROR)) {
       Log.e(tag, toMessage(format, args), t);
     }
