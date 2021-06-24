@@ -894,6 +894,20 @@ class EfficientDetNet(tf.keras.Model):
       self._name = super().__init__(name, zero_based)
 
   def call(self, inputs, training):
+    """Returns the network features.
+
+    Args:
+      inputs: Input image tensor, commonly with shape [batch, height, width, 3].
+      training: bool, whether in training model.
+
+    Returns:
+      A list of tensors based on the heads:
+        - If heads is empty, then just return fpn_features;
+        - If heads includes 'object_detection', then return bounding box and
+            class predictions.
+        - If heads includes 'segmentation', then return per-pixel class
+            predictions.
+    """
     config = self.config
     # call backbone network.
     all_feats = self.backbone(inputs, training=training, features_only=True)
@@ -915,7 +929,7 @@ class EfficientDetNet(tf.keras.Model):
     if 'segmentation' in config.heads:
       seg_outputs = self.seg_head(fpn_feats, training)
       outputs.append(seg_outputs)
-    return tuple(outputs)
+    return tuple(outputs) or fpn_feats
 
 
 class EfficientDetModel(EfficientDetNet):
