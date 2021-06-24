@@ -9,10 +9,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +38,7 @@ import com.bumptech.glide.util.Util;
 import org.tensorflow.lite.examples.detection.ImageDisplay;
 import org.tensorflow.lite.examples.detection.MainActivity;
 import org.tensorflow.lite.examples.detection.R;
+import org.tensorflow.lite.examples.detection.env.BorderedText;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
 import org.tensorflow.lite.examples.detection.utils.imageIndicatorListener;
@@ -195,6 +199,8 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
 
         protected int previewWidth = 0;
         protected int previewHeight = 0;
+        private static final float TEXT_SIZE_DIP = 10;
+        private BorderedText borderedText;
         View view;
 
 
@@ -267,11 +273,15 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
         }
 
         private void initBox(){
+            final float textSizepx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
+            borderedText = new BorderedText(textSizepx);
+            borderedText.setTypeface(Typeface.MONOSPACE);
+
             previewHeight = TF_OD_API_INPUT_SIZE;
             previewWidth = TF_OD_API_INPUT_SIZE;
 
             frameToCropTransform = ImageUtils.getTransformationMatrix(
-                    previewWidth,previewHeight, TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, sensorOrientation, MAINTAIN_ASPECT
+                    previewWidth, previewHeight, TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, sensorOrientation, MAINTAIN_ASPECT
                     );
 
             cropToFrameTransform = new Matrix();
@@ -305,16 +315,36 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
         private void handleResult(Bitmap bitmap, List<Detector.Recognition> results){
             final Canvas canvas = new Canvas(bitmap);
             final Paint paint = new Paint();
+            String str;
+            int strWidth, strHeight;
             paint.setColor(Color.RED);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(2.0f);
+            final Paint txtPaint = new Paint();
+            txtPaint.setColor(Color.BLACK);
+            txtPaint.setStyle(Paint.Style.FILL);
+            txtPaint.setTextSize(25);
+            Rect textBounds = new Rect();
+            Paint textRect = new Paint();
+            textRect.setColor(Color.CYAN);
 
             final List<Detector.Recognition> mappedRecognitions = new LinkedList<Detector.Recognition>();
 
             for (final Detector.Recognition result : results){
                 final RectF location = result.getLocation();
                 if(location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API){
+                    str = result.getTitle();
                     canvas.drawRect(location, paint);
+//                    canvas.drawPaint(txtPaint);
+                    txtPaint.getTextBounds(str, 0, str.length(), textBounds);
+                    strWidth = textBounds.width();
+                    strHeight = textBounds.height();
+                    canvas.drawRect(result.getLocation().left - 5, result.getLocation().top + 5, result.getLocation().left + strWidth + 5, result.getLocation().top - strHeight - 5, textRect);
+                    canvas.drawText(str, result.getLocation().left, result.getLocation().top, txtPaint);
+//                    cropToFrameTransform.mapRect(location);
+//                    result.setLocation(location);
+//                    mappedRecognitions.add(result);
+                    Log.d("location", result.getLocation().toString());
                 }
             }
             image.setImageBitmap(bitmap);
