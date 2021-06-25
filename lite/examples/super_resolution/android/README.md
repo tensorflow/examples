@@ -12,6 +12,8 @@ Demo images are from [DIV2K dataset](https://data.vision.ee.ethz.ch/cvl/DIV2K/).
 This sample automatically downloads TFLite JAR files and uses TFLite C API
 through Android NDK.
 
+![SCREENSHOT](screenshot.jpg)
+
 ## Requirements
 
 *   Android Studio 3.2 (installed on a Linux, Mac or Windows machine)
