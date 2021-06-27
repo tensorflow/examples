@@ -23,6 +23,7 @@ import android.graphics.RectF;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.PriorityQueue;
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
+import org.tensorflow.lite.gpu.CompatibilityList;
 import org.tensorflow.lite.gpu.GpuDelegate;
 import org.tensorflow.lite.nnapi.NnApiDelegate;
 import org.tensorflow.lite.support.common.FileUtil;
@@ -204,11 +206,19 @@ public abstract class Classifier {
         tfliteOptions.addDelegate(nnApiDelegate);
         break;
       case GPU:
-        gpuDelegate = new GpuDelegate();
-        tfliteOptions.addDelegate(gpuDelegate);
-        break;
+        CompatibilityList compatList = new CompatibilityList();
+        if(compatList.isDelegateSupportedOnThisDevice()){
+          // if the device has a supported GPU, add the GPU delegate
+          GpuDelegate.Options delegateOptions = compatList.getBestOptionsForThisDevice();
+          GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
+          tfliteOptions.addDelegate(gpuDelegate);
+          Log.d(TAG, "GPU supported. GPU delegate created and added to options");
+          break;
+        }
+        Log.d(TAG, "GPU not supported. Default to CPU.");
       case CPU:
         tfliteOptions.setUseXNNPACK(true);
+        Log.d(TAG, "CPU execution");
         break;
     }
     tfliteOptions.setNumThreads(numThreads);
