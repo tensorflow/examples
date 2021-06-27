@@ -17,7 +17,8 @@ These instructions walk you through building and running the demo on an Android
 device. For an explanation of the source, see
 [TensorFlow Lite Android image classification example](EXPLORE_THE_CODE.md).
 
-<!-- TODO(b/124116863): Add app screenshot. -->
+<img src= https://github.com/SunitRoy2703/examples/raw/image-classification-android-screenshot/lite/examples/image_classification/android/screenshot.png width="350" />
+
 
 ### Model
 
