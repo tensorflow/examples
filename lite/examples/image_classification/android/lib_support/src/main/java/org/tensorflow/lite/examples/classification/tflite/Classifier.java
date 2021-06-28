@@ -213,9 +213,11 @@ public abstract class Classifier {
           GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
           tfliteOptions.addDelegate(gpuDelegate);
           Log.d(TAG, "GPU supported. GPU delegate created and added to options");
-          break;
+        } else {
+          tfliteOptions.setUseXNNPACK(true);
+          Log.d(TAG, "GPU not supported. Default to CPU.");
         }
-        Log.d(TAG, "GPU not supported. Default to CPU.");
+        break;
       case CPU:
         tfliteOptions.setUseXNNPACK(true);
         Log.d(TAG, "CPU execution");
