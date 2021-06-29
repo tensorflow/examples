@@ -12,7 +12,7 @@ Demo images are from [DIV2K dataset](https://data.vision.ee.ethz.ch/cvl/DIV2K/).
 This sample automatically downloads TFLite JAR files and uses TFLite C API
 through Android NDK.
 
-<img src= https://raw.githubusercontent.com/tensorflow/examples/master/lite/examples/super_resolution/android/screenshot.jpg width="350" />
+<img src= "https://raw.githubusercontent.com/tensorflow/examples/master/lite/examples/super_resolution/android/screenshot.jpg" width="350" />
 
 ## Requirements
 
