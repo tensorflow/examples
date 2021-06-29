@@ -10,7 +10,8 @@ TensorFlow 2.0, and tested on [SQuAD] dataset version 1.1. The demo app provides
 48 passages from the dataset for users to choose from, and gives 5 most possible
 answers corresponding to the input passage and query.
 
-These instructions walk you through running the demo on an Android device.
+These instructions walk you through running the demo on an Android device. For an explanation of the source, see
+[TensorFlow Lite BERT QA Android example](EXPLORE_THE_CODE.md).
 
 ### Model used
 
