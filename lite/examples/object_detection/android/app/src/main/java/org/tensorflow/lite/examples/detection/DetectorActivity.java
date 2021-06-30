@@ -27,11 +27,21 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.hardware.Camera;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.os.Environment;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
+
+import com.googlecode.tesseract.android.TessBaseAPI;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.tensorflow.lite.examples.detection.customview.OverlayView;
@@ -82,6 +92,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
   private MultiBoxTracker tracker;
 
   private BorderedText borderedText;
+
+  private TessBaseAPI tessBaseAPI;
+
 
   @Override
   public void onPreviewFrame(byte[] bytes, Camera camera) {
@@ -153,6 +166,31 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
   }
 
+
+
+  private String getOcrText(Bitmap bitmap){
+    try{
+      tessBaseAPI = new TessBaseAPI();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    String dataPath = getExternalFilesDir("/").getPath() + "/";
+    tessBaseAPI.setDebug(true);
+
+    tessBaseAPI.init(dataPath, "eng");
+    tessBaseAPI.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, "1234567890abcdefg"+"hijklmnopqrstuvwxyz"+"ABCDEFGHIJKLMNO"+"PQRSTUVWXYZ");
+    tessBaseAPI.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "!@#$%^&*()_+=-=[]}{" +
+            ";:'\"\\|~`,./<>?");
+    tessBaseAPI.setImage(bitmap);
+    String returnString = "no result";
+    try {
+      returnString = tessBaseAPI.getUTF8Text();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return returnString;
+  }
+
   @Override
   protected void processImage() {
     ++timestamp;
@@ -185,9 +223,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
             LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
             final List<Detector.Recognition> results = detector.recognizeImage(croppedBitmap);
+
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
+            String text = getOcrText(cropCopyBitmap);
+            Log.d("ocr text", text);
             final Canvas canvas = new Canvas(cropCopyBitmap);
             final Paint paint = new Paint();
             paint.setColor(Color.RED);
@@ -233,6 +274,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
           }
         });
   }
+
 
   @Override
   protected int getLayoutId() {

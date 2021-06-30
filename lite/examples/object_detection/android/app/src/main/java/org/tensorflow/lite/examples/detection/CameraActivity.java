@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -31,12 +32,15 @@ import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -50,6 +54,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.googlecode.tesseract.android.TessBaseAPI;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
@@ -86,6 +97,9 @@ public abstract class CameraActivity extends AppCompatActivity
   private ImageView plusImageView, minusImageView;
   private SwitchCompat apiSwitchCompat;
   private TextView threadsTextView;
+  public static final String TESS_DATA = "/tessdata/";
+  private static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/Tess";
+  private String FileName = "eng.traineddata";
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -97,7 +111,7 @@ public abstract class CameraActivity extends AppCompatActivity
     Toolbar toolbar = findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
     getSupportActionBar().setDisplayShowTitleEnabled(false);
-
+    prepareTesData();
     if (hasPermission()) {
       setFragment();
     } else {
@@ -173,6 +187,31 @@ public abstract class CameraActivity extends AppCompatActivity
   protected int[] getRgbBytes() {
     imageConverter.run();
     return rgbBytes;
+  }
+
+  private void prepareTesData(){
+        try {
+          File dir = getExternalFilesDir(TESS_DATA);
+          if(!dir.exists()){
+            if(!dir.mkdir())
+              Toast.makeText(getApplicationContext(), "the folder " + dir.getPath() + "was not created", Toast.LENGTH_SHORT).show();
+          }
+          String pathToDataFile = dir + "/" + FileName;
+          if(!(new File(pathToDataFile)).exists()){
+            InputStream in = getAssets().open(FileName);
+            OutputStream out = new FileOutputStream(pathToDataFile);
+            byte [] buffer = new byte[1024];
+            int len;
+            while((len = in.read(buffer)) > 0){
+              out.write(buffer, 0, len);
+            }
+            in.close();
+            out.close();
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
   }
 
   protected int getLuminanceStride() {
