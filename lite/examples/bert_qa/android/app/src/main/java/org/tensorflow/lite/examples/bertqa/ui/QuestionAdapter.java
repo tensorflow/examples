@@ -15,63 +15,72 @@ limitations under the License.
 package org.tensorflow.lite.examples.bertqa.ui;
 
 import android.content.Context;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.chip.Chip;
+
 import org.tensorflow.lite.examples.bertqa.R;
 
-/** Adapter class to show question suggestion chips. */
+/**
+ * Adapter class to show question suggestion chips.
+ */
 public class QuestionAdapter extends RecyclerView.Adapter<QuestionAdapter.MyViewHolder> {
 
-  private LayoutInflater inflater;
-  private String[] questions;
-  private OnQuestionSelectListener onQuestionSelectListener;
+    private LayoutInflater inflater;
+    private String[] questions;
+    private OnQuestionSelectListener onQuestionSelectListener;
 
-  public QuestionAdapter(Context context, String[] questions) {
-    inflater = LayoutInflater.from(context);
-    this.questions = questions;
-  }
-
-  @Override
-  public QuestionAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-    View view = inflater.inflate(R.layout.tfe_qa_question_chip, parent, false);
-    MyViewHolder holder = new MyViewHolder(view);
-
-    return holder;
-  }
-
-  @Override
-  public void onBindViewHolder(QuestionAdapter.MyViewHolder holder, int position) {
-    holder.chip.setText(questions[position]);
-    holder.chip.setOnClickListener(
-        view -> onQuestionSelectListener.onQuestionSelect(questions[position]));
-  }
-
-  @Override
-  public int getItemCount() {
-    return questions.length;
-  }
-
-  public void setOnQuestionSelectListener(OnQuestionSelectListener onQuestionSelectListener) {
-    this.onQuestionSelectListener = onQuestionSelectListener;
-  }
-
-  class MyViewHolder extends RecyclerView.ViewHolder {
-
-    Chip chip;
-
-    public MyViewHolder(View itemView) {
-      super(itemView);
-      chip = itemView.findViewById(R.id.chip);
+    public QuestionAdapter(Context context, String[] questions) {
+        inflater = LayoutInflater.from(context);
+        this.questions = questions;
     }
-  }
 
-  /** Interface for callback when a question is selected. */
-  public interface OnQuestionSelectListener {
-    void onQuestionSelect(String question);
-  }
+    @Override
+    public QuestionAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        View view = inflater.inflate(R.layout.tfe_qa_question_chip, parent, false);
+        MyViewHolder holder = new MyViewHolder(view);
+
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(QuestionAdapter.MyViewHolder holder, int position) {
+        holder.chip.setText(questions[position]);
+        holder.chip.setOnClickListener(
+                view -> onQuestionSelectListener.onQuestionSelect(questions[position]));
+    }
+
+    @Override
+    public int getItemCount() {
+        return questions.length;
+    }
+
+    public void setOnQuestionSelectListener(OnQuestionSelectListener onQuestionSelectListener) {
+        this.onQuestionSelectListener = onQuestionSelectListener;
+    }
+
+    class MyViewHolder extends RecyclerView.ViewHolder {
+
+        Chip chip;
+
+        public MyViewHolder(View itemView) {
+            super(itemView);
+            chip = itemView.findViewById(R.id.chip);
+        }
+    }
+
+    /**
+     * Interface for callback when a question is selected.
+     */
+    public interface OnQuestionSelectListener {
+        void onQuestionSelect(String question);
+    }
 }
