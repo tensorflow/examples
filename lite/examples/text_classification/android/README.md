@@ -26,7 +26,7 @@ Follow the steps below to build and run the sample Android app.
 *   Android Studio 3.2 or later. Install instructions can be found on
     [Android Studio](https://developer.android.com/studio/index.html) website.
 
-*   An Android device or an Android emulator and with API level higher than 15.
+*   An Android device or an Android emulator and with API level higher than 21.
 
 ### Building
 
