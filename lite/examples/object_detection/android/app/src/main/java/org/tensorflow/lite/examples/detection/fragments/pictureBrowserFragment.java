@@ -233,7 +233,7 @@ public class pictureBrowserFragment extends Fragment implements imageIndicatorLi
             if(imgFile.exists()){
                 this.sourceBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
 //                this.cropBitmap = ProcessImage.processBitmap(sourceBitmap, TF_OD_API_INPUT_SIZE);
-                this.cropBitmap = Bitmap.createScaledBitmap(sourceBitmap, 412, 412, true);
+                this.cropBitmap = Bitmap.createScaledBitmap(sourceBitmap, 300, 300, true);
                 image.setImageBitmap(cropBitmap);
                 initBox();
             }

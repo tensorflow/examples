@@ -7,13 +7,31 @@
     tools:context=".MainActivity"
     android:gravity="center">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageDisplay"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/TxtOCr"
+        android:textSize="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/imageDisplay"
+        android:layout_marginBottom="10dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/Btn_camera"
         android:text="camera"
+        android:layout_below="@+id/TxtOCr"
         android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         />
 
@@ -23,6 +41,7 @@
         android:id="@+id/Btn_folder"
         android:layout_below="@+id/Btn_camera"
         android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
         android:text="Folder"
         android:layout_gravity="center"
         />
