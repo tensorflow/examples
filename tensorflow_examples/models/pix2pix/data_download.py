@@ -29,7 +29,7 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_string('download_path', 'datasets', 'Download folder')
 
-_URL = 'http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/facades.tar.gz'
+_URL = 'https://tinghuiz.github.io/projects/pix2pix/datasets/facades.tar.gz'
 
 
 def _main(argv):
