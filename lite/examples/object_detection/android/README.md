@@ -14,7 +14,7 @@ explicitly.
 
 Application can run either on device or emulator.
 
-<!-- TODO(b/124116863): Add app screenshot. -->
+<img src="https://www.tensorflow.org/lite/examples/image_classification/images/android_banana.png" width="350" />
 
 ## Build the demo using Android Studio
 
