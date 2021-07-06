@@ -8,7 +8,7 @@ task downloadESRGANModelFile() {
 
 task downloadTFLiteJARFile() {
     download {
-        src "https://bintray.com/google/tensorflow/download_file?file_path=org%2Ftensorflow%2Ftensorflow-lite%2F2.3.0%2Ftensorflow-lite-2.3.0.aar"
+        src "https://repo1.maven.org/maven2/org/tensorflow/tensorflow-lite/2.3.0/tensorflow-lite-2.3.0.aar"
         dest "${project.rootDir}/libraries/tensorflow-lite-2.3.0.aar"
         overwrite false
         retries 5
@@ -17,7 +17,7 @@ task downloadTFLiteJARFile() {
 
 task downloadTFLiteGPUDelegateJARFile() {
     download {
-        src "https://bintray.com/google/tensorflow/download_file?file_path=org%2Ftensorflow%2Ftensorflow-lite-gpu%2F2.3.0%2Ftensorflow-lite-gpu-2.3.0.aar"
+        src "https://repo1.maven.org/maven2/org/tensorflow/tensorflow-lite-gpu/2.3.0/tensorflow-lite-gpu-2.3.0.aar"
         dest "${project.rootDir}/libraries/tensorflow-lite-gpu-2.3.0.aar"
         overwrite false
         retries 5
