@@ -130,14 +130,16 @@ def read_data(data_directory, min_rating=None):
   ratings_df = pd.read_csv(
       os.path.join(data_directory, RATINGS_FILE_NAME),
       sep="::",
-      names=RATINGS_DATA_COLUMNS)
+      names=RATINGS_DATA_COLUMNS,
+      encoding="unicode_escape")  # May contain unicode. Need to escape.
   ratings_df["Timestamp"] = ratings_df["Timestamp"].apply(int)
   if min_rating is not None:
     ratings_df = ratings_df[ratings_df["Rating"] >= min_rating]
   movies_df = pd.read_csv(
       os.path.join(data_directory, MOVIES_FILE_NAME),
       sep="::",
-      names=MOVIES_DATA_COLUMNS)
+      names=MOVIES_DATA_COLUMNS,
+      encoding="unicode_escape")  # May contain unicode. Need to escape.
   return ratings_df, movies_df
 
 
