@@ -79,11 +79,7 @@ class RecommendationDemoTest(tf.test.TestCase):
     export_dir = os.path.join(self.test_tempdir, 'export')
     tflite_filename = os.path.join(export_dir, 'model.tflite')
     with patch_data_loader():
-      recommendation_demo.run(
-          data_dir,
-          export_dir,
-          spec='recommendation_bow',
-          epochs=1)
+      recommendation_demo.run(data_dir, export_dir, epochs=1)
 
     self.assertTrue(tf.io.gfile.exists(tflite_filename))
     self.assertGreater(os.path.getsize(tflite_filename), 0)

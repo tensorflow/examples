@@ -55,6 +55,8 @@ PAD_MOVIE_ID = 0
 PAD_RATING = 0.0
 PAD_MOVIE_YEAR = 0
 UNKNOWN_STR = "UNK"
+VOCAB_MOVIE_ID_INDEX = 0
+VOCAB_COUNT_INDEX = 3
 
 
 def define_flags():
@@ -356,7 +358,7 @@ def generate_movie_feature_vocabs(movies_df, movie_counts):
     for genre in genres.split("|"):
       movie_genre_counter[genre] += 1
 
-  movie_vocab.sort(key=lambda x: x[3], reverse=True)  # by count.
+  movie_vocab.sort(key=lambda x: x[VOCAB_COUNT_INDEX], reverse=True)  # by count
   movie_year_vocab = [0] + [x for x, _ in movie_year_counter.most_common()]
   movie_genre_vocab = [UNKNOWN_STR
                       ] + [x for x, _ in movie_genre_counter.most_common()]
@@ -438,6 +440,7 @@ def generate_datasets(extracted_data_dir,
     stats.update({
         "vocab_size": len(movie_vocab),
         "vocab_file": vocab_file,
+        "vocab_max_id": max([arr[VOCAB_MOVIE_ID_INDEX] for arr in movie_vocab])
     })
 
     for vocab, filename, key in zip([movie_year_vocab, movie_genre_vocab],

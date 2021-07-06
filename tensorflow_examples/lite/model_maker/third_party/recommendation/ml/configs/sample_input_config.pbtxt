@@ -1,0 +1,33 @@
+activity_feature_groups {
+  features {
+    feature_name: "context_movie_id"
+    feature_type: INT
+    vocab_size: 3953
+    embedding_dim: 8
+    feature_length: 10
+  }
+  features {
+    feature_name: "context_movie_rating"
+    feature_type: FLOAT
+    feature_length: 10
+  }
+  encoder_type: CNN
+}
+activity_feature_groups {
+  features {
+    feature_name: "context_movie_genre"
+    feature_type: STRING
+    vocab_name: "movie_genre_vocab.txt"
+    vocab_size: 19
+    embedding_dim: 4
+    feature_length: 32
+  }
+  encoder_type: CNN
+}
+label_feature {
+  feature_name: "label_movie_id"
+  feature_type: INT
+  vocab_size: 3953
+  embedding_dim: 8
+  feature_length: 1
+}

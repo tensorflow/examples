@@ -62,13 +62,19 @@
     "from tensorflow_examples.lite.model_maker.core.task.question_answer import QuestionAnswer"
   ],
   "recommendation": [
+    "from $PKG.recommendation import spec",
     "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader as DataLoader",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_bow_spec as BowSpec",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_cnn_spec as CnnSpec",
-    "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_rnn_spec as RnnSpec",
     "from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import RecommendationSpec as ModelSpec",
     "from tensorflow_examples.lite.model_maker.core.task.recommendation import create",
     "from tensorflow_examples.lite.model_maker.core.task.recommendation import Recommendation"
+  ],
+  "recommendation.spec": [
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_config import EncoderType",
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_config import Feature",
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_config import FeatureGroup",
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_config import FeatureType",
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_config import InputSpec",
+    "from tensorflow_examples.lite.model_maker.core.data_util.recommendation_config import ModelHParams"
   ],
   "text_classifier": [
     "from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader as DataLoader",
