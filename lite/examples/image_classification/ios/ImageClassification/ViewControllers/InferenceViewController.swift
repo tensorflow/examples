@@ -76,6 +76,15 @@ class InferenceViewController: UIViewController {
   var resolution: CGSize = CGSize.zero
   var maxResults: Int = 0
   var threadCountLimit: Int = 0
+  var threadCount: Int {
+    get {
+      return currentThreadCount
+    }
+    set(value) {
+      currentThreadCount = value
+      threadStepper?.value = Double(value)
+    }
+  }
   private var currentThreadCount: Int = 0
   private var infoTextColor = UIColor.black
 
@@ -96,6 +105,7 @@ class InferenceViewController: UIViewController {
     threadStepper.maximumValue = Double(threadCountLimit)
     threadStepper.minimumValue = Double(minThreadCount)
     threadStepper.value = Double(currentThreadCount)
+    stepperValueLabel.text = "\(currentThreadCount)"
 
     // Set the info text color on iOS 11 and higher.
     if #available(iOS 11, *) {
