@@ -36,19 +36,14 @@ class InferenceViewController: UIViewController {
     case InferenceTime
 
     func displayString() -> String {
-
-      var toReturn = ""
-
       switch self {
       case .Resolution:
-        toReturn = "Resolution"
+        return "Resolution"
       case .Crop:
-        toReturn = "Crop"
+        return "Crop"
       case .InferenceTime:
-        toReturn = "Inference Time"
-
+        return "Inference Time"
       }
-      return toReturn
     }
   }
 
@@ -72,7 +67,7 @@ class InferenceViewController: UIViewController {
   var inferenceTime: Double = 0
   var wantedInputWidth: Int = 0
   var wantedInputHeight: Int = 0
-  var resolution: CGSize = CGSize.zero
+  var resolution: CGSize = .zero
   var threadCountLimit: Int = 0
   var currentThreadCount: Int = 0
 
@@ -89,11 +84,9 @@ class InferenceViewController: UIViewController {
     super.viewDidLoad()
 
     // Set up stepper
-    threadStepper.isUserInteractionEnabled = true
     threadStepper.maximumValue = Double(threadCountLimit)
     threadStepper.minimumValue = Double(minThreadCount)
     threadStepper.value = Double(currentThreadCount)
-
   }
 
   // MARK: Button Actions
@@ -166,7 +159,6 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
       let tuple = displayStringsForInferenceInfo(atRow: indexPath.row)
       fieldName = tuple.0
       info = tuple.1
-
     }
     cell.fieldNameLabel.font = infoFont
     cell.fieldNameLabel.textColor = infoTextColor
@@ -177,29 +169,26 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
 
   // MARK: Format Display of information in the bottom sheet
   /**
-   This method formats the display of additional information relating to the inferences.
+   This method formats the display of additional information related to the inferences.
    */
   func displayStringsForInferenceInfo(atRow row: Int) -> (String, String) {
 
-    var fieldName: String = ""
-    var info: String = ""
-
     guard let inferenceInfo = InferenceInfo(rawValue: row) else {
-      return (fieldName, info)
+      return ("", "")
     }
 
-    fieldName = inferenceInfo.displayString()
+    let fieldName = inferenceInfo.displayString()
 
+    let info: String
     switch inferenceInfo {
     case .Resolution:
       info = "\(Int(resolution.width))x\(Int(resolution.height))"
     case .Crop:
       info = "\(wantedInputWidth)x\(wantedInputHeight)"
     case .InferenceTime:
-
       info = String(format: "%.2fms", inferenceTime)
     }
 
-    return(fieldName, info)
+    return (fieldName, info)
   }
 }
