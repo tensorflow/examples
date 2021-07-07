@@ -1,0 +1,18 @@
+task downloadPalmDetectionModelFile(type: Download) {
+    src 'https://github.com/google/mediapipe/raw/master/mediapipe/modules/palm_detection/palm_detection.tflite'
+    dest project.ext.ASSET_DIR + '/palm_detection.tflite'
+    overwrite false
+}
+
+task downloadHandDetectionModelFile(type: Download) {
+    src 'https://github.com/google/mediapipe/raw/master/mediapipe/modules/hand_landmark/hand_landmark.tflite'
+    dest project.ext.ASSET_DIR + '/hand_landmark.tflite'
+    overwrite false
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'assembleDebug') || (task.name == 'assembleRelease')) {
+        task.dependsOn 'downloadPalmDetectionModelFile'
+        task.dependsOn 'downloadHandDetectionModelFile'
+    }
+}
