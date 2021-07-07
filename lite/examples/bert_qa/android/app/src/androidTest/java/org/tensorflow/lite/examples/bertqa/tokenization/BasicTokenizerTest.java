@@ -16,13 +16,13 @@ package org.tensorflow.lite.examples.bertqa.tokenization;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
-/** Tests of {@link org.tensorflow.lite.examples.bertqa.toeknization.BasicTokenizer} */
-@RunWith(RobolectricTestRunner.class)
+/** Tests of {@link org.tensorflow.lite.examples.bertqa.tokenization.BasicTokenizer} */
+@RunWith(AndroidJUnit4.class)
 public final class BasicTokenizerTest {
   @Test
   public void cleanTextTest() throws Exception {

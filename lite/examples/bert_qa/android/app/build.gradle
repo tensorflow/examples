@@ -53,13 +53,13 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.guava:guava:28.1-android'
-    implementation ('org.tensorflow:tensorflow-lite:2.4.0')
+    implementation 'org.tensorflow:tensorflow-lite:2.4.0'
     implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'androidx.test:core:1.2.0'
-    testImplementation 'com.google.truth:truth:1.0'
-    testImplementation 'org.robolectric:robolectric:4.3.1'
+    androidTestImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:core:1.2.0'
+    androidTestImplementation 'com.google.truth:truth:1.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }

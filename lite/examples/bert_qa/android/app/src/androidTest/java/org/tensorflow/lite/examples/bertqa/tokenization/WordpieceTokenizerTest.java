@@ -17,23 +17,29 @@ package org.tensorflow.lite.examples.bertqa.tokenization;
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.tensorflow.lite.examples.bertqa.ml.LoadDatasetClient;
+import org.tensorflow.lite.examples.bertqa.ml.ModelHelper;
+import org.tensorflow.lite.support.metadata.MetadataExtractor;
 
 /** Tests of {@link org.tensorflow.lite.examples.bertqa.tokenization.WordpieceTokenizer} */
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public final class WordpieceTokenizerTest {
   private Map<String, Integer> dic;
 
   @Before
-  public void setUp() {
-    LoadDatasetClient client = new LoadDatasetClient(ApplicationProvider.getApplicationContext());
-    dic = client.loadDictionary();
+  public void setUp() throws IOException {
+    ByteBuffer buffer = ModelHelper.loadModelFile(ApplicationProvider.getApplicationContext());
+    MetadataExtractor metadataExtractor = new MetadataExtractor(buffer);
+    dic = ModelHelper.extractDictionary(metadataExtractor);
+    assertThat(dic).isNotNull();
+    assertThat(dic).isNotEmpty();
   }
 
   @Test

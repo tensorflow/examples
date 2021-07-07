@@ -17,15 +17,15 @@ package org.tensorflow.lite.examples.bertqa.ml;
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
-/** Tests of {@link org.tensorflow.lite.examples.bertqa.QaClient} */
-@RunWith(RobolectricTestRunner.class)
+/** Tests of {@link org.tensorflow.lite.examples.bertqa.ml.QaClient} */
+@RunWith(AndroidJUnit4.class)
 public final class QaClientTest {
   private QaClient client;
 

@@ -18,13 +18,11 @@ import android.content.Context;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Interface to load squad dataset. Provide passages for users to choose from & provide questions
@@ -33,7 +31,6 @@ import java.util.Map;
 public class LoadDatasetClient {
   private static final String TAG = "BertAppDemo";
   private static final String JSON_DIR = "qa.json";
-  private static final String DIC_DIR = "vocab.txt";
   private final Context context;
 
   private String[] contents;
@@ -86,20 +83,5 @@ public class LoadDatasetClient {
 
   public String[] getQuestions(int index) {
     return questions[index];
-  }
-
-  public Map<String, Integer> loadDictionary() {
-    Map<String, Integer> dic = new HashMap<>();
-    try (InputStream ins = context.getAssets().open(DIC_DIR);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(ins))) {
-      int index = 0;
-      while (reader.ready()) {
-        String key = reader.readLine();
-        dic.put(key, index++);
-      }
-    } catch (IOException ex) {
-      Log.e(TAG, ex.getMessage());
-    }
-    return dic;
   }
 }
