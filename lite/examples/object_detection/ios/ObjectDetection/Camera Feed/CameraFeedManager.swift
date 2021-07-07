@@ -320,8 +320,21 @@ class CameraFeedManager: NSObject {
 
     }
   }
+    
+  // MARK: Video orientation
+  /**
+   This method rotates the video flowing through the connection based on a new interface orientation
+   */
+  func changeVideoOrientation() {
+      guard previewView.previewLayer.connection!.isVideoOrientationSupported,
+            let newOrientation = UIApplication.shared.statusBarOrientation.videoOrientation else {
+          return
+      }
+        
+      previewView.previewLayer.connection?.videoOrientation = newOrientation
+      videoDataOutput.connection(with: .video)?.videoOrientation = newOrientation
+  }
 }
-
 
 /**
  AVCaptureVideoDataOutputSampleBufferDelegate
@@ -343,4 +356,18 @@ extension CameraFeedManager: AVCaptureVideoDataOutputSampleBufferDelegate {
     delegate?.didOutput(pixelBuffer: imagePixelBuffer)
   }
 
+}
+
+extension UIInterfaceOrientation {
+    
+    /// Returns `AVCaptureVideoOrientation` based on `UIInterfaceOrientation`
+    var videoOrientation: AVCaptureVideoOrientation? {
+        switch self {
+        case .portraitUpsideDown: return .portraitUpsideDown
+        case .landscapeRight: return .landscapeRight
+        case .landscapeLeft: return .landscapeLeft
+        case .portrait: return .portrait
+        default: return nil
+        }
+    }
 }
