@@ -4,7 +4,7 @@
 Note : Model download does not work in Firefox.
 
 ## Overview
-This is a web app used to predict gesture from a webcam using transfer learning. We will use a pretrained truncated MobileNet model and train another model using the internal MobileNet activation to predict upto 8 different classes from the webcam defined by the user.
+This is a web app used to predict gesture from a webcam using transfer learning. We will use a pretrained truncated MobileNet model and train another model using the internal MobileNet activation to predict up to 8 different classes from the webcam defined by the user.
 
 `index.html` can be opened directly inside a browser. No need to have a web server to run the web app.
 

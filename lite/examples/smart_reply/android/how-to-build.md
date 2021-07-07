@@ -100,7 +100,7 @@ source code.
     ([release](https://github.com/bazelbuild/bazelisk/releases)) to automaticlly
     upgrades to the specific version via `.bazelversion` file.
 
--   The WORKSPACE file will pull TensorFlow source code, and it futher requires
+-   The WORKSPACE file will pull TensorFlow source code, and it further requires
     TensorFlow's python dependencies installed before building. (Tips: If you
     notice some missing Python packages during `bazel` command, please use `pip
     install <package>` to install it.)
