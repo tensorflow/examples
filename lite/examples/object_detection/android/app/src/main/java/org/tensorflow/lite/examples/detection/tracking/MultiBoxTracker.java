@@ -158,6 +158,7 @@ public class MultiBoxTracker {
     final List<Pair<Float, Recognition>> rectsToTrack = new LinkedList<Pair<Float, Recognition>>();
 
     screenRects.clear();
+    trackedObjects.clear();
     final Matrix rgbFrameToScreen = new Matrix(getFrameToCanvasMatrix());
 
     for (final Recognition result : results) {
