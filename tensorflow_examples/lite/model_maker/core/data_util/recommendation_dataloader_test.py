@@ -25,6 +25,7 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
   def setUp(self):
     super().setUp()
     _testutil.setup_fake_testdata(self)
+    self.input_spec = _testutil.get_input_spec()
 
   def test_download_and_extract_data(self):
     with _testutil.patch_download_and_extract_data(self.dataset_dir) as fn:
@@ -33,13 +34,12 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
       fn.called_once_with(self.download_dir)
       self.assertEqual(out_dir, self.dataset_dir)
 
-  def test_generate_movielens_examples(self):
+  def test_generate_movielens_dataset(self):
     loader = _dl.RecommendationDataLoader
     gen_dir = os.path.join(self.dataset_dir, 'generated_examples')
-    stats = loader._generate_movielens_examples(self.dataset_dir, gen_dir,
-                                                'train.tfrecord',
-                                                'test.tfrecord',
-                                                'movie_vocab.json', 'meta.json')
+    stats = loader.generate_movielens_dataset(self.dataset_dir, gen_dir,
+                                              'train.tfrecord', 'test.tfrecord',
+                                              'movie_vocab.json', 'meta.json')
     self.assertDictContainsSubset(
         {
             'train_file': os.path.join(gen_dir, 'train.tfrecord'),
@@ -48,6 +48,7 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
             'train_size': _testutil.TRAIN_SIZE,
             'test_size': _testutil.TEST_SIZE,
             'vocab_size': _testutil.VOCAB_SIZE,
+            'vocab_max_id': _testutil.MAX_ITEM_ID,
         }, stats)
 
     self.assertTrue(os.path.exists(gen_dir))
@@ -56,11 +57,13 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
     meta_file = os.path.join(gen_dir, 'meta.json')
     self.assertTrue(os.path.exists(meta_file))
 
+    self.assertEqual(loader.get_num_classes(stats), _testutil.MAX_ITEM_ID + 1)
+
   def test_from_movielens(self):
     train_loader = _dl.RecommendationDataLoader.from_movielens(
-        self.dataset_dir, 'train')
+        self.dataset_dir, 'train', self.input_spec)
     test_loader = _dl.RecommendationDataLoader.from_movielens(
-        self.dataset_dir, 'test')
+        self.dataset_dir, 'test', self.input_spec)
 
     self.assertEqual(len(train_loader), _testutil.TRAIN_SIZE)
     self.assertIsNotNone(train_loader._dataset)
@@ -76,7 +79,7 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
 
   def test_split(self):
     test_loader = _dl.RecommendationDataLoader.from_movielens(
-        self.dataset_dir, 'test')
+        self.dataset_dir, 'test', self.input_spec)
     test0, test1 = test_loader.split(0.1)
     expected_size0 = int(0.1 * _testutil.TEST_SIZE)
     expected_size1 = _testutil.TEST_SIZE - expected_size0
@@ -88,9 +91,26 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
 
   def test_gen_dataset(self):
     test_loader = _dl.RecommendationDataLoader.from_movielens(
-        self.dataset_dir, 'test')
-    ds = test_loader.gen_dataset(10, is_training=False)
+        self.dataset_dir, 'test', self.input_spec)
+    batch_size = 5
+    ds = test_loader.gen_dataset(batch_size, is_training=False)
     self.assertIsInstance(ds, tf.data.Dataset)
+
+    example = iter(ds).next()
+    tf.compat.v1.logging.info('example: %s', example)
+    features, label = example
+    expected_keys_shapes = [
+        ('context_movie_id', [batch_size, 10], tf.int32),
+        ('label_movie_id', [batch_size, 1], tf.int32),
+    ]
+    for key, shape, dtype in expected_keys_shapes:
+      self.assertIn(key, features,
+                    'Expect key: {} in features {}'.format(key, features))
+      v = features[key]
+      self.assertListEqual(v.shape.as_list(), shape)
+      self.assertEqual(v.dtype, dtype)
+    self.assertListEqual(label.shape.as_list(), [batch_size, 1])
+    self.assertEqual(label.dtype, tf.int32)
 
 
 if __name__ == '__main__':

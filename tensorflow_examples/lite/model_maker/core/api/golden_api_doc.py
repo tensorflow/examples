@@ -80,6 +80,56 @@ Demo code:
 https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/recommendation_demo.py
 """
 
+DOCS['recommendation.spec'] = """
+APIs for recommendation specifications.
+
+Example:
+```python
+input_spec = recommendation.spec.InputSpec(
+    activity_feature_groups=[
+        # Group #1: defines how features are grouped in the first Group.
+        dict(
+            features=[
+                # First feature.
+                dict(
+                    feature_name='context_movie_id',  # Feature name
+                    feature_type='INT',  # Feature type
+                    vocab_size=3953,     # ID size (number of IDs)
+                    embedding_dim=8,     # Projected feature embedding dim
+                    feature_length=10,   # History length of 10.
+                ),
+                # Maybe more features...
+            ],
+            encoder_type='CNN',  # CNN encoder (e.g. CNN, LSTM, BOW)
+        ),
+        # Maybe more groups...
+    ],
+    label_feature=dict(
+        feature_name='label_movie_id',  # Label feature name
+        feature_type='INT',  # Label type
+        vocab_size=3953,   # Label size (number of classes)
+        embedding_dim=8,   # label embedding demension
+        feature_length=1,  # Exactly 1 label
+    ),
+)
+
+model_hparams = recommendation.spec.ModelHParams(
+    hidden_layer_dims=[32, 32],  # Hidden layers dimension.
+    eval_top_k=[1, 5],           # Eval top 1 and top 5.
+    conv_num_filter_ratios=[2, 4],  # For CNN encoder, conv filter mutipler.
+    conv_kernel_size=16,            # For CNN encoder, base kernel size.
+    lstm_num_units=16,              # For LSTM/RNN, num units.
+    num_predictions=10,          # Number of output predictions. Select top 10.
+)
+
+spec = recommendation.ModelSpec(
+    input_spec=input_spec, model_hparams=model_hparams)
+# Or:
+spec = model_spec.get(
+    'recommendation', input_spec=input_spec, model_hparams=model_hparams)
+```
+""".lstrip()
+
 DOCS['text_classifier'] = """APIs to train a text classification model.
 
 Task guide:

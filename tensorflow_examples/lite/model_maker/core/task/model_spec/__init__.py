@@ -52,9 +52,7 @@ MODEL_SPECS = {
     'audio_yamnet': audio_spec.YAMNetSpec,
 
     # Recommendation
-    'recommendation_bow': recommendation_spec.recommendation_bow_spec,
-    'recommendation_cnn': recommendation_spec.recommendation_cnn_spec,
-    'recommendation_rnn': recommendation_spec.recommendation_rnn_spec,
+    'recommendation': recommendation_spec.RecommendationSpec,
 
     # Object detection
     'efficientdet_lite0': object_detector_spec.efficientdet_lite0_spec,
@@ -77,9 +75,7 @@ AUDIO_CLASSIFICATION_MODELS = [
     'audio_browser_fft', 'audio_teachable_machine', 'audio_yamnet'
 ]
 RECOMMENDATION_MODELS = [
-    'recommendation_bow',
-    'recommendation_rnn',
-    'recommendation_cnn',
+    'recommendation',
 ]
 OBJECT_DETECTION_MODELS = [
     'efficientdet_lite0',
@@ -103,8 +99,8 @@ mm_export('model_spec.OBJECT_DETECTION_MODELS').export_constant(
 
 
 @mm_export('model_spec.get')
-def get(spec_or_str):
-  """Gets model spec by name or instance, and initializes by default."""
+def get(spec_or_str, *args, **kwargs):
+  """Gets model spec by name or instance, and init with args and kwarges."""
   if isinstance(spec_or_str, str):
     model_spec = MODEL_SPECS[spec_or_str]
   else:
@@ -112,6 +108,6 @@ def get(spec_or_str):
 
   if inspect.isclass(model_spec) or inspect.isfunction(
       model_spec) or isinstance(model_spec, functools.partial):
-    return model_spec()
+    return model_spec(*args, **kwargs)
   else:
     return model_spec

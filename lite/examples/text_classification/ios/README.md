@@ -1,4 +1,4 @@
-# Digit Classifier iOS sample
+# TensorFlow Lite text classification iOS sample
 
 <img src="screenshot.png" />
 

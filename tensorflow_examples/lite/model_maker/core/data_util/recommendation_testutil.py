@@ -19,14 +19,15 @@ from unittest import mock
 
 import tensorflow as tf
 
+from tensorflow_examples.lite.model_maker.core.data_util import recommendation_config
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.data import example_generation_movielens as gen
 
 MOVIE_SIZE = 101
 RATING_SIZE = 5000
 USER_SIZE = 50
 
-TRAIN_SIZE = 4900
-TEST_SIZE = 50
+TRAIN_SIZE = 4455
+TEST_SIZE = 495
 VOCAB_SIZE = 101
 MAX_ITEM_ID = 999
 
@@ -67,7 +68,8 @@ def _generate_fake_data(data_dir):
   ratings = []
   for user in range(1, 51):
     ratings += [
-        '{user}::{movie}::5::978000000'.format(user=user, movie=movie)
+        '{user}::{movie}::5::{timestamp}'.format(
+            user=user, movie=movie, timestamp=978000000 + 1)
         for movie in range(1, 101)
     ]
   rating_file = os.path.join(data_dir, 'ratings.dat')
@@ -123,3 +125,65 @@ def patch_download_and_extract_data(data_dir):
 
   return mock.patch.object(
       gen, 'download_and_extract_data', side_effect=side_effect)
+
+
+def get_input_spec(encoder_type='cnn') -> recommendation_config.InputSpec:
+  """Gets input spec (for test).
+
+  Input spec defines how the input features are extracted.
+
+  Args:
+    encoder_type: str. Case-insensitive {'CNN', 'LSTM', 'BOW'}.
+
+  Returns:
+    InputSpec.
+  """
+  etype = encoder_type.upper()
+  if etype not in {'CNN', 'LSTM', 'BOW'}:
+    raise ValueError('Not support encoder_type: {}'.format(etype))
+
+  return recommendation_config.InputSpec(
+      activity_feature_groups=[
+          # Group #1: defines how features are grouped in the first Group.
+          dict(
+              features=[
+                  # First feature.
+                  dict(
+                      feature_name='context_movie_id',  # Feature name
+                      feature_type='INT',  # Feature type
+                      vocab_size=3953,  # ID size (number of IDs)
+                      embedding_dim=8,  # Projected feature embedding dim
+                      feature_length=10,  # History length of 10.
+                  ),
+                  # Maybe more features...
+              ],
+              encoder_type='CNN',  # CNN encoder (e.g. CNN, LSTM, BOW)
+          ),
+          # Maybe more groups...
+      ],
+      label_feature=dict(
+          feature_name='label_movie_id',  # Label feature name
+          feature_type='INT',  # Label type
+          vocab_size=3953,  # Label size (number of classes)
+          embedding_dim=8,  # Label embedding demension
+          feature_length=1,  # Exactly 1 label
+      ),
+  )
+
+
+def get_model_hparams() -> recommendation_config.ModelHParams:
+  """Gets model hparams (for test).
+
+  ModelHParams defines the model architecture.
+
+  Returns:
+    ModelHParams.
+  """
+  return recommendation_config.ModelHParams(
+      hidden_layer_dims=[32, 32],  # Hidden layers dimension.
+      eval_top_k=[1, 5],  # Eval top 1 and top 5.
+      conv_num_filter_ratios=[2, 4],  # For CNN encoder, conv filter mutipler.
+      conv_kernel_size=16,  # For CNN encoder, base kernel size.
+      lstm_num_units=16,  # For LSTM/RNN, num units.
+      num_predictions=10,  # Number of output predictions. Select top 10.
+  )

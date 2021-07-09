@@ -11,16 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=g-bad-import-order,redefined-builtin
 """APIs to train an on-device recommendation model.
 
 Demo code:
 https://github.com/tensorflow/examples/blob/master/tensorflow_examples/lite/model_maker/demo/recommendation_demo.py
 """
 
+from tflite_model_maker.recommendation import spec
 from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader as DataLoader
-from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_bow_spec as BowSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_cnn_spec as CnnSpec
-from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import recommendation_rnn_spec as RnnSpec
 from tensorflow_examples.lite.model_maker.core.task.model_spec.recommendation_spec import RecommendationSpec as ModelSpec
 from tensorflow_examples.lite.model_maker.core.task.recommendation import create
 from tensorflow_examples.lite.model_maker.core.task.recommendation import Recommendation

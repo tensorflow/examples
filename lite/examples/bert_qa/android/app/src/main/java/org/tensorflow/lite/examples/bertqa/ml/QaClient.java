@@ -17,19 +17,11 @@ package org.tensorflow.lite.examples.bertqa.ml;
 import static com.google.common.base.Verify.verify;
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.util.Log;
 import androidx.annotation.WorkerThread;
 import com.google.common.base.Joiner;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,8 +34,6 @@ import org.tensorflow.lite.support.metadata.schema.TensorMetadata;
 /** Interface to load TfLite model and provide predictions. */
 public class QaClient implements AutoCloseable {
   private static final String TAG = "BertDemo";
-  private static final String MODEL_PATH = "model.tflite";
-  private static final String DIC_PATH = "vocab.txt";
 
   private static final int MAX_ANS_LEN = 32;
   private static final int MAX_QUERY_LEN = 64;
@@ -77,24 +67,16 @@ public class QaClient implements AutoCloseable {
   @WorkerThread
   public synchronized void loadModel() {
     try {
-      ByteBuffer buffer = loadModelFile(this.context.getAssets());
+      ByteBuffer buffer = ModelHelper.loadModelFile(context);
+      metadataExtractor = new MetadataExtractor(buffer);
+      Map<String, Integer> loadedDic = ModelHelper.extractDictionary(metadataExtractor);
+      verify(loadedDic != null, "dic can't be null.");
+      dic.putAll(loadedDic);
+
       Interpreter.Options opt = new Interpreter.Options();
       opt.setNumThreads(NUM_LITE_THREADS);
-      metadataExtractor = new MetadataExtractor(buffer);
-      loadDictionary();
       tflite = new Interpreter(buffer, opt);
       Log.v(TAG, "TFLite model loaded.");
-    } catch (IOException ex) {
-      Log.e(TAG, ex.getMessage());
-    }
-  }
-
-  @WorkerThread
-  public synchronized void loadDictionary() {
-    try {
-      verify(metadataExtractor != null, "metadataExtractor can't be null.");
-      loadDictionaryFile(metadataExtractor.getAssociatedFile(DIC_PATH));
-      Log.v(TAG, "Dictionary loaded.");
     } catch (IOException ex) {
       Log.e(TAG, ex.getMessage());
     }
@@ -114,27 +96,6 @@ public class QaClient implements AutoCloseable {
     dic.clear();
   }
 
-  /** Load tflite model from assets. */
-  public MappedByteBuffer loadModelFile(AssetManager assetManager) throws IOException {
-    try (AssetFileDescriptor fileDescriptor = assetManager.openFd(MODEL_PATH);
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor())) {
-      FileChannel fileChannel = inputStream.getChannel();
-      long startOffset = fileDescriptor.getStartOffset();
-      long declaredLength = fileDescriptor.getDeclaredLength();
-      return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-    }
-  }
-
-  /** Load dictionary from assets. */
-  public void loadDictionaryFile(InputStream inputStream) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-      int index = 0;
-      while (reader.ready()) {
-        String key = reader.readLine();
-        dic.put(key, index++);
-      }
-    }
-  }
 
   /**
    * Input: Original content and query for the QA task. Later converted to Feature by
@@ -143,7 +104,7 @@ public class QaClient implements AutoCloseable {
    */
   @WorkerThread
   public synchronized List<QaAnswer> predict(String query, String content) {
-    Log.v(TAG, "TFLite model: " + MODEL_PATH + " running...");
+    Log.v(TAG, "TFLite model: " + ModelHelper.MODEL_PATH + " running...");
     Log.v(TAG, "Convert Feature...");
     Feature feature = featureConverter.convert(query, content);
 

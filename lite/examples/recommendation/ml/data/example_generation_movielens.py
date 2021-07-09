@@ -55,6 +55,8 @@ PAD_MOVIE_ID = 0
 PAD_RATING = 0.0
 PAD_MOVIE_YEAR = 0
 UNKNOWN_STR = "UNK"
+VOCAB_MOVIE_ID_INDEX = 0
+VOCAB_COUNT_INDEX = 3
 
 
 def define_flags():
@@ -130,14 +132,16 @@ def read_data(data_directory, min_rating=None):
   ratings_df = pd.read_csv(
       os.path.join(data_directory, RATINGS_FILE_NAME),
       sep="::",
-      names=RATINGS_DATA_COLUMNS)
+      names=RATINGS_DATA_COLUMNS,
+      encoding="unicode_escape")  # May contain unicode. Need to escape.
   ratings_df["Timestamp"] = ratings_df["Timestamp"].apply(int)
   if min_rating is not None:
     ratings_df = ratings_df[ratings_df["Rating"] >= min_rating]
   movies_df = pd.read_csv(
       os.path.join(data_directory, MOVIES_FILE_NAME),
       sep="::",
-      names=MOVIES_DATA_COLUMNS)
+      names=MOVIES_DATA_COLUMNS,
+      encoding="unicode_escape")  # May contain unicode. Need to escape.
   return ratings_df, movies_df
 
 
@@ -354,7 +358,7 @@ def generate_movie_feature_vocabs(movies_df, movie_counts):
     for genre in genres.split("|"):
       movie_genre_counter[genre] += 1
 
-  movie_vocab.sort(key=lambda x: x[3], reverse=True)  # by count.
+  movie_vocab.sort(key=lambda x: x[VOCAB_COUNT_INDEX], reverse=True)  # by count
   movie_year_vocab = [0] + [x for x, _ in movie_year_counter.most_common()]
   movie_genre_vocab = [UNKNOWN_STR
                       ] + [x for x, _ in movie_genre_counter.most_common()]
@@ -436,6 +440,7 @@ def generate_datasets(extracted_data_dir,
     stats.update({
         "vocab_size": len(movie_vocab),
         "vocab_file": vocab_file,
+        "vocab_max_id": max([arr[VOCAB_MOVIE_ID_INDEX] for arr in movie_vocab])
     })
 
     for vocab, filename, key in zip([movie_year_vocab, movie_genre_vocab],

@@ -20,6 +20,7 @@ import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.data_util import recommendation_dataloader as _dl
 from tensorflow_examples.lite.model_maker.core.data_util import recommendation_testutil as _testutil
 from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import recommendation
 
 
@@ -28,54 +29,63 @@ class RecommendationTest(parameterized.TestCase, tf.test.TestCase):
   def setUp(self):
     super().setUp()
     _testutil.setup_fake_testdata(self)
+    self.input_spec = _testutil.get_input_spec()
+    self.model_hparams = _testutil.get_model_hparams()
     self.train_loader = _dl.RecommendationDataLoader.from_movielens(
-        self.dataset_dir, 'train')
+        self.dataset_dir, 'train', self.input_spec)
     self.test_loader = _dl.RecommendationDataLoader.from_movielens(
-        self.dataset_dir, 'test')
-
-    self.model_spec_options = dict(
-        context_embedding_dim=16,
-        label_embedding_dim=16,
-        item_vocab_size=self.test_loader.max_vocab_id,
-        hidden_layer_dim_ratios=[1, 1],
-    )
+        self.dataset_dir, 'test', self.input_spec)
 
   @parameterized.parameters(
-      ('recommendation_bow'),
-      ('recommendation_cnn'),
-      ('recommendation_rnn'),
+      ('bow'),
+      ('cnn'),
+      ('lstm'),
   )
-  def test_create(self, model_spec):
+  def test_create(self, encoder_type):
     model_dir = os.path.join(self.test_tempdir, 'recommendation_create')
+    input_spec = _testutil.get_input_spec(encoder_type)
+
+    model_spec = ms.get(
+        'recommendation',
+        input_spec=input_spec,
+        model_hparams=self.model_hparams)
     model = recommendation.create(
         self.train_loader,
-        model_spec,
-        self.model_spec_options,
-        model_dir,
+        model_spec=model_spec,
+        model_dir=model_dir,
         steps_per_epoch=1)
     self.assertIsNotNone(model.model)
 
   def test_evaluate(self):
     model_dir = os.path.join(self.test_tempdir, 'recommendation_evaluate')
+    model_spec = ms.get(
+        'recommendation',
+        input_spec=self.input_spec,
+        model_hparams=self.model_hparams)
     model = recommendation.create(
         self.train_loader,
-        'recommendation_bow',
-        self.model_spec_options,
-        model_dir,
+        model_spec=model_spec,
+        model_dir=model_dir,
         steps_per_epoch=1)
     history = model.evaluate(self.test_loader)
     self.assertIsInstance(history, list)
     self.assertTrue(history)  # Non-empty list.
 
-  def test_export(self):
+  def test_export_and_evaluation(self):
     model_dir = os.path.join(self.test_tempdir, 'recommendation_export')
+    model_spec = ms.get(
+        'recommendation',
+        input_spec=self.input_spec,
+        model_hparams=self.model_hparams)
     model = recommendation.create(
         self.train_loader,
-        'recommendation_bow',
-        self.model_spec_options,
-        model_dir,
+        model_spec=model_spec,
+        model_dir=model_dir,
         steps_per_epoch=1)
-    export_format = [ExportFormat.TFLITE, ExportFormat.SAVED_MODEL]
+    export_format = [
+        ExportFormat.TFLITE,
+        ExportFormat.SAVED_MODEL,
+    ]
     model.export(model_dir, export_format=export_format)
     # Expect tflite file.
     expected_tflite = os.path.join(model_dir, 'model.tflite')
