@@ -1,5 +1,11 @@
 <resources>
-  <string name="tfe_tc_app_name" translatable="false">TFL Text Classification</string>
-  <string name="tfe_tc_edit_text_hint" translatable="false">Please enter your movie review.</string>
-  <string name="tfe_tc_button_ok" translatable="false">Predict</string>
+    <string name="tfe_tc_app_name" translatable="false">TFL Text Classification</string>
+    <string name="tfe_tc_edit_text_hint" translatable="false">Please enter your movie review.</string>
+    <string name="tfe_tc_button_ok" translatable="false">Predict</string>
+
+    <string name="tfe_ic_api" translatable="false">Api:</string>
+    <string-array name="tfe_ic_apis" translatable="false">
+        <item>NLClassifier</item>
+        <item>BertNLClassifier</item>
+    </string-array>
 </resources>
