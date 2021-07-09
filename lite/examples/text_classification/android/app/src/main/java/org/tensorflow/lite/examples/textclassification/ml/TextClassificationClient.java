@@ -14,64 +14,73 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.textclassification;
+package org.tensorflow.lite.examples.textclassification.ml;
 
 import android.content.Context;
-import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import org.tensorflow.lite.support.label.Category;
-import org.tensorflow.lite.task.text.nlclassifier.NLClassifier;
 
 /**
  * Load TfLite model and provide predictions with task api.
  */
 public class TextClassificationClient {
-    private static final String TAG = "TaskApi";
-    private static final String MODEL_PATH = "text_classification.tflite";
+    private static final String NLCLASSIFIER = "NLCLASSIFIER";
+    private static final String BertNLCLASSIFIER = "BERTNLCLASSIFIER";
 
     private final Context context;
+    private String api;
 
-    NLClassifier classifier;
+    NLClassifierClient nlClassifierClient;
+    BertNLClassifierClient bertNLClassifierClient;
 
-    public TextClassificationClient(Context context) {
+    public TextClassificationClient(Context context, String api) {
         this.context = context;
+        this.api = api;
+
+        nlClassifierClient = new NLClassifierClient(context);
+        bertNLClassifierClient = new BertNLClassifierClient(context);
     }
 
     /**
      * Load TF Lite model.
      */
     public void load() {
-        try {
-            classifier = NLClassifier.createFromFile(context, MODEL_PATH);
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+        if (api.equals(NLCLASSIFIER)) {
+
+            nlClassifierClient.load();
+        } else if (api.equals(BertNLCLASSIFIER)) {
+
+            bertNLClassifierClient.load();
         }
+
     }
 
     /**
      * Free up resources as the client is no longer needed.
      */
     public void unload() {
-        classifier.close();
-        classifier = null;
+        if (api.equals(NLCLASSIFIER)) {
+
+            nlClassifierClient.unload();
+        } else if (api.equals(BertNLCLASSIFIER)) {
+
+            bertNLClassifierClient.unload();
+        }
     }
 
     /**
      * Classify an input string and returns the classification results.
      */
     public List<Result> classify(String text) {
-        List<Category> apiResults = classifier.classify(text);
-        List<Result> results = new ArrayList<>(apiResults.size());
-        for (int i = 0; i < apiResults.size(); i++) {
-            Category category = apiResults.get(i);
-            results.add(new Result("" + i, category.getLabel(), category.getScore()));
+        List<Result> results = new ArrayList<>();
+        if (api.equals(NLCLASSIFIER)) {
+
+            results = nlClassifierClient.classify(text);
+        } else if (api.equals(BertNLCLASSIFIER)) {
+
+            results = bertNLClassifierClient.classify(text);
         }
-        Collections.sort(results);
         return results;
     }
 }

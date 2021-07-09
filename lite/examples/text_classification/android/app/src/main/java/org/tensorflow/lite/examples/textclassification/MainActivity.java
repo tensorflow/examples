@@ -16,24 +16,37 @@
 
 package org.tensorflow.lite.examples.textclassification;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
+import org.tensorflow.lite.examples.textclassification.ml.Result;
+import org.tensorflow.lite.examples.textclassification.ml.TextClassificationClient;
 
 import java.util.List;
 
 /**
  * The main activity to provide interactions with users.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "TextClassificationDemo";
 
     private TextClassificationClient client;
@@ -42,6 +55,11 @@ public class MainActivity extends AppCompatActivity {
     private EditText inputEditText;
     private Handler handler;
     private ScrollView scrollView;
+    private LinearLayout bottomSheetLayout;
+    private BottomSheetBehavior<LinearLayout> sheetBehavior;
+    private ImageView bottomSheetArrowImageView;
+    private Spinner apiSpinner;
+    private String api = "NLCLASSIFIER";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.tfe_tc_activity_main);
         Log.v(TAG, "onCreate");
 
-        client = new TextClassificationClient(getApplicationContext());
+        client = new TextClassificationClient(getApplicationContext(), api);
         handler = new Handler();
         Button classifyButton = findViewById(R.id.button);
         classifyButton.setOnClickListener(
@@ -59,6 +77,72 @@ public class MainActivity extends AppCompatActivity {
         resultTextView = findViewById(R.id.result_text_view);
         inputEditText = findViewById(R.id.input_text);
         scrollView = findViewById(R.id.scroll_view);
+        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
+        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+        apiSpinner = findViewById(R.id.api_spinner);
+
+        apiSpinner.setOnItemSelectedListener(this);
+
+        api = apiSpinner.getSelectedItem().toString().toUpperCase();
+
+        setupBottomSheet();
+
+    }
+
+    /**
+     * Setup the Bottom Sheet
+     */
+    private void setupBottomSheet() {
+        ViewTreeObserver vto = bottomSheetArrowImageView.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                            bottomSheetArrowImageView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        } else {
+                            bottomSheetArrowImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                        //                int width = bottomSheetLayout.getMeasuredWidth();
+                        int height = bottomSheetArrowImageView.getMeasuredHeight();
+
+                        sheetBehavior.setPeekHeight(height);
+                    }
+                });
+
+        sheetBehavior.setHideable(false);
+
+        sheetBehavior.setBottomSheetCallback(
+                new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        switch (newState) {
+                            case BottomSheetBehavior.STATE_HIDDEN:
+                                break;
+                            case BottomSheetBehavior.STATE_EXPANDED: {
+                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
+                                inputEditText.setEnabled(false);
+                            }
+                            break;
+                            case BottomSheetBehavior.STATE_COLLAPSED: {
+                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                                inputEditText.setEnabled(true);
+                            }
+                            break;
+                            case BottomSheetBehavior.STATE_DRAGGING:
+                                break;
+                            case BottomSheetBehavior.STATE_SETTLING:
+                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                                inputEditText.setEnabled(true);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                    }
+                });
     }
 
     @Override
@@ -118,5 +202,34 @@ public class MainActivity extends AppCompatActivity {
                     // Scroll to the bottom to show latest entry's classification result.
                     scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
                 });
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (parent == apiSpinner) {
+            setApi(parent.getItemAtPosition(position).toString().toUpperCase());
+            Toast.makeText(this, api, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setApi(String api) {
+        if (this.api != api) {
+            this.api = api;
+
+            recreateClassifier();
+        }
+
+    }
+
+    private void recreateClassifier() {
+        client.unload();
+        client = new TextClassificationClient(this, api);
+        client.load();
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

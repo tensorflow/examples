@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.tensorflow.lite.examples.textclassification;
+package org.tensorflow.lite.examples.textclassification.ml;
 
 /**
  * An immutable result returned by a TextClassifier describing what was classified.
