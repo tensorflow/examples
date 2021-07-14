@@ -154,6 +154,9 @@ def export_tflite(model,
       converter = lite.TFLiteConverter.from_saved_model(save_path)
     else:
       converter = lite.TFLiteConverter.from_keras_model(model)
+      # TODO(b/191205988): Explicitly disable saved model lowering in
+      #                    the conversion.
+      converter.experimental_lower_to_saved_model = False
 
     if quantization_config:
       converter = quantization_config.get_converter_with_quantization(
