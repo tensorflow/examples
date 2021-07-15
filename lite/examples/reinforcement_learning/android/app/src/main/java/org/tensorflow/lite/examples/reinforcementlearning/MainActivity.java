@@ -154,9 +154,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void initGame() {
-    initiBoard(playerBoard);
+    initBoard(playerBoard);
     placePlaneOnHiddenBoard(playerHiddenBoard);
-    initiBoard(agentBoard);
+    initBoard(agentBoard);
     placePlaneOnHiddenBoard(agentHiddenBoard);
     agentBoardGridView.invalidateViews();
     playerBoardGridView.invalidateViews();
@@ -166,20 +166,20 @@ public class MainActivity extends AppCompatActivity {
     playerHitsTextView.setText("Agent board:\n0 hits");
   }
 
-  private void initiBoard(BoardCellStatus[][] board) {
+  private void initBoard(BoardCellStatus[][] board) {
     for (int i = 0; i < Constants.BOARD_SIZE; i++) {
       Arrays.fill(board[i], 0, Constants.BOARD_SIZE, BoardCellStatus.UNTRIED);
     }
   }
 
-  private void initiHiddenBoard(HiddenBoardCellStatus[][] board) {
+  private void initHiddenBoard(HiddenBoardCellStatus[][] board) {
     for (int i = 0; i < Constants.BOARD_SIZE; i++) {
       Arrays.fill(board[i], 0, Constants.BOARD_SIZE, HiddenBoardCellStatus.UNOCCUPIED);
     }
   }
 
   private void placePlaneOnHiddenBoard(HiddenBoardCellStatus[][] hiddenBoard) {
-    initiHiddenBoard(hiddenBoard);
+    initHiddenBoard(hiddenBoard);
 
     // Place the plane on the board
     // First, decide the plane's orientation

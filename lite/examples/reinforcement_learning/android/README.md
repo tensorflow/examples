@@ -1,6 +1,5 @@
 # Reinforcement Learning Android sample
 
-TODO: b/189382433: add gif link here
 
 This reference app is a simple board game (called 'Plane Strike') in which you
 play against an agent trained by reinforcement learning. The agent runs the
@@ -8,9 +7,9 @@ reinforcement learning model on-device using TFLite.
 
 The game rule for Plane Strike is very simple. It is a turn-based board game and
 is very similar to the
-[Battleship game](https://en.wikipedia.org/wiki/Battleship_\(game\)) game. The
-only difference is that Battleship allows you to place battleships (2–5 cells in
-a row or a column as 'battleships'); you can place multple ships. Plane Strike
+[Battleship game](https://en.wikipedia.org/wiki/Battleship_\(game\)). The only
+difference is that Battleship allows you to place battleships (2–5 cells in a
+row or a column as 'battleships'); you can place multple ships. Plane Strike
 instead allows you to place a ‘plane’ on the board at the beginning of the game.
 In the animation we can see 2 boards (the top one is the agent's board and the
 bottom one is yours), each of which has a plane on the board. Of course you have
