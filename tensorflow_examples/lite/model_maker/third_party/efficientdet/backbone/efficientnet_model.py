@@ -727,7 +727,8 @@ class Model(tf.keras.Model):
       output tensors.
     """
     outputs = None
-    self.endpoints = {}
+    # Keep the original inputs in endpoints for U-Net style FPN.
+    self.endpoints = {'inputs': inputs}
     reduction_idx = 0
 
     # Calls Stem layers
