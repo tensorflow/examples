@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+apply plugin: 'de.undercouch.download'
+
+android {
+    compileSdkVersion 29
+    defaultConfig {
+        applicationId "org.tensorflow.lite.examples.reinforcementlearning"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    aaptOptions {
+        noCompress "tflite"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+// import DownloadModels task
+project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
+
+// Download default models; if you wish to use your own models then
+// place them in the "assets" directory and comment out this line.
+//apply from: "download_model.gradle"
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'org.tensorflow:tensorflow-lite:2.4.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+}

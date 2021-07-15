@@ -1,0 +1,4 @@
+<resources>
+  <string name="tfe_rl_app_name" translatable="false">TFL Reinforcement Learning</string>
+  <string name="text_prompt" translatable="false">Tap any cell in the agent board as your strike.\nRed - hit \t Yellow - miss</string>
+</resources>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00000000"
+    >
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/tfl2_logo_dark" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="?attr/actionBarSize"
+            android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/text_prompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:paddingBottom="3dp"
+                    android:textStyle="bold|italic"
+                    android:text="@string/text_prompt" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:orientation="horizontal">
+
+                <GridView
+                    android:id="@+id/agent_board_gridview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:numColumns="8"
+                    android:gravity="center"
+                    android:columnWidth="10dp"
+                    android:stretchMode="columnWidth"
+                    android:padding="2dp"
+                    android:horizontalSpacing="1dp"
+                    android:verticalSpacing="1dp"
+                    android:background="#9ACD32" />
+
+                <TextView
+                        android:id="@+id/player_hits_textview"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="15dp"/>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/line"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#c0c0c0"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="5dp"
+                android:orientation="horizontal">
+                <GridView
+                        android:id="@+id/player_board_gridview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:numColumns="8"
+                        android:gravity="center"
+                        android:columnWidth="10dp"
+                        android:stretchMode="columnWidth"
+                        android:padding="2dp"
+                        android:horizontalSpacing="1dp"
+                        android:verticalSpacing="1dp"
+                        android:background="#9ACD32" />
+
+                <TextView
+                    android:id="@+id/agent_hits_textview"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="15dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="20dp"
+                android:orientation="horizontal"
+                />
+
+                <Button
+                    android:id="@+id/reset_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Reset game" />
+            </LinearLayout>
+
+  </RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
