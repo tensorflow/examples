@@ -1,5 +1,7 @@
 tf-models-official==2.3.0
-tensorflow-hub<0.10>=0.8.0
+# tensorflow-hub is to load Hub model. Specific version is required by TFJS.
+tensorflow-hub>=0.7.0,<0.10; python_version < "3"
+tensorflow-hub>=0.7.0,<0.13; python_version >= "3"
 numpy>=1.17.3
 pillow>=7.0.0
 sentencepiece>=0.1.91
