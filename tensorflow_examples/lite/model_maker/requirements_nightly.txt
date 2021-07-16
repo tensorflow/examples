@@ -13,7 +13,7 @@ flatbuffers==1.12
 absl-py>=0.10.0
 urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1
 tflite-support-nightly
-tensorflow==2.6.0rc1
+tensorflow==2.5.0
 librosa>=0.5
 lxml>=4.6.1
 PyYAML>=5.1
