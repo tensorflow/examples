@@ -3,27 +3,22 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		3A4D441F43E606AFFBEDC0F4 /* Pods_BertQA_UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */; };
 		8073F32F9E31519DA1C60690 /* Pods_BertQA_SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */; };
-		8402440423D9BFDE00704ABD /* FullTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440323D9BFDE00704ABD /* FullTokenizer.swift */; };
-		8402440623D9C18600704ABD /* WordpieceTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440523D9C18600704ABD /* WordpieceTokenizer.swift */; };
-		8402440823D9C1FB00704ABD /* BasicTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440723D9C1FB00704ABD /* BasicTokenizer.swift */; };
 		840245262424CB63002D1DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245252424CB63002D1DAD /* AppDelegate.swift */; };
 		840245282424CB63002D1DAD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245272424CB63002D1DAD /* SceneDelegate.swift */; };
 		840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 840245302424CB64002D1DAD /* LaunchScreen.storyboard */; };
 		840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3B2403A39E00E6905E /* DataExtension.swift */; };
-		840C6F402403A39E00E6905E /* InputFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3C2403A39E00E6905E /* InputFeatures.swift */; };
 		840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
 		840C6F422403A39E00E6905E /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
 		840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
 		842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D023CEDD6F00AE9416 /* Constants.swift */; };
 		842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */; };
 		8433178E23E933AC001B0AE8 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8433178D23E933AC001B0AE8 /* StringExtension.swift */; };
-		84433D4D240EA8EF00C983EA /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84433D4C240EA8EF00C983EA /* ContentData.swift */; };
 		844C87012424CE29006DA707 /* DatasetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FC2424CD7F006DA707 /* DatasetListView.swift */; };
 		844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FE2424CD97006DA707 /* DatasetDetailView.swift */; };
 		844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
@@ -36,9 +31,6 @@
 		846918EC2425212F00A90808 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */; };
 		846918ED2425213100A90808 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8433178D23E933AC001B0AE8 /* StringExtension.swift */; };
 		846918EF2425213800A90808 /* FileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E81C6023FFC2B400D50692 /* FileLoader.swift */; };
-		846918F12425213B00A90808 /* FullTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440323D9BFDE00704ABD /* FullTokenizer.swift */; };
-		846918F32425213E00A90808 /* BasicTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440723D9C1FB00704ABD /* BasicTokenizer.swift */; };
-		846918F52425214200A90808 /* WordpieceTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8402440523D9C18600704ABD /* WordpieceTokenizer.swift */; };
 		846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
 		846918FA2425214D00A90808 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
 		8475814E23CDC1660003472A /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8475814D23CDC1660003472A /* README.md */; };
@@ -59,8 +51,6 @@
 		84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */; };
 		84CBD8F92424DCBF00DC20AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285523B49E2F00A7980D /* Assets.xcassets */; };
 		84D84026243C4DFB00E0B769 /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
-		84D84027243C4E0100E0B769 /* InputFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3C2403A39E00E6905E /* InputFeatures.swift */; };
-		84D84028243C4E0300E0B769 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84433D4C240EA8EF00C983EA /* ContentData.swift */; };
 		84D84029243C4E0600E0B769 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
 		84D8402E243C4E3E00E0B769 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402B243C4E3E00E0B769 /* StatusView.swift */; };
 		84D8402F243C4E3E00E0B769 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402C243C4E3E00E0B769 /* ContentView.swift */; };
@@ -89,16 +79,12 @@
 		6D06722FADA8CA7F3CCC3492 /* Pods-BertQA-SwiftUI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-SwiftUI.release.xcconfig"; path = "Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI.release.xcconfig"; sourceTree = "<group>"; };
 		7595E796644E0735F1BD68A4 /* Pods-BertQA-SwiftUI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-SwiftUI.debug.xcconfig"; path = "Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI.debug.xcconfig"; sourceTree = "<group>"; };
 		7E5B19F92467606B003BC3C2 /* download_resources.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = download_resources.sh; sourceTree = "<group>"; };
-		8402440323D9BFDE00704ABD /* FullTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullTokenizer.swift; sourceTree = "<group>"; };
-		8402440523D9C18600704ABD /* WordpieceTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordpieceTokenizer.swift; sourceTree = "<group>"; };
-		8402440723D9C1FB00704ABD /* BasicTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicTokenizer.swift; sourceTree = "<group>"; };
 		840245232424CB63002D1DAD /* BertQA-SwiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BertQA-SwiftUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		840245252424CB63002D1DAD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		840245272424CB63002D1DAD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		840245312424CB64002D1DAD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		840245332424CB64002D1DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		840C6F3B2403A39E00E6905E /* DataExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
-		840C6F3C2403A39E00E6905E /* InputFeatures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputFeatures.swift; sourceTree = "<group>"; };
 		840C6F3D2403A39E00E6905E /* BertQAHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandler.swift; sourceTree = "<group>"; };
 		840C6F3E2403A39E00E6905E /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = mobilebert_float_20191023.tflite; sourceTree = "<group>"; };
@@ -106,7 +92,6 @@
 		842E65D023CEDD6F00AE9416 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetTitleCell.swift; sourceTree = "<group>"; };
 		8433178D23E933AC001B0AE8 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
-		84433D4C240EA8EF00C983EA /* ContentData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
 		844C86FC2424CD7F006DA707 /* DatasetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetListView.swift; sourceTree = "<group>"; };
 		844C86FE2424CD97006DA707 /* DatasetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetDetailView.swift; sourceTree = "<group>"; };
 		844C87062424D019006DA707 /* KeyboardHeightObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightObserver.swift; sourceTree = "<group>"; };
@@ -191,16 +176,6 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		8402440223D9BC0600704ABD /* Tokenizers */ = {
-			isa = PBXGroup;
-			children = (
-				8402440323D9BFDE00704ABD /* FullTokenizer.swift */,
-				8402440723D9C1FB00704ABD /* BasicTokenizer.swift */,
-				8402440523D9C18600704ABD /* WordpieceTokenizer.swift */,
-			);
-			path = Tokenizers;
-			sourceTree = "<group>";
-		};
 		840245242424CB63002D1DAD /* ViewInSwiftUI */ = {
 			isa = PBXGroup;
 			children = (
@@ -217,8 +192,6 @@
 		840C6F322403A36000E6905E /* ML */ = {
 			isa = PBXGroup;
 			children = (
-				840C6F3C2403A39E00E6905E /* InputFeatures.swift */,
-				84433D4C240EA8EF00C983EA /* ContentData.swift */,
 				840C6F3E2403A39E00E6905E /* Result.swift */,
 				840C6F3D2403A39E00E6905E /* BertQAHandler.swift */,
 			);
@@ -286,7 +259,6 @@
 			children = (
 				845B4FD32434856500943980 /* Dataset.swift */,
 				84E81C6023FFC2B400D50692 /* FileLoader.swift */,
-				8402440223D9BC0600704ABD /* Tokenizers */,
 				840C6F322403A36000E6905E /* ML */,
 			);
 			path = Models;
@@ -398,6 +370,7 @@
 				8402451F2424CB63002D1DAD /* Sources */,
 				840245202424CB63002D1DAD /* Frameworks */,
 				840245212424CB63002D1DAD /* Resources */,
+				DBD0206C77DA733D29D77C3B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -435,6 +408,7 @@
 				84C3284723B49E2E00A7980D /* Sources */,
 				84C3284823B49E2E00A7980D /* Frameworks */,
 				84C3284923B49E2E00A7980D /* Resources */,
+				17B60A0619210768B3DA53F2 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -452,7 +426,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1120;
-				LastUpgradeCheck = 1030;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = tensorflow;
 				TargetAttributes = {
 					840245222424CB63002D1DAD = {
@@ -524,6 +498,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		17B60A0619210768B3DA53F2 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		846918AB2425200800A90808 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -557,6 +548,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "$SRCROOT/RunScripts/download_resources.sh\n";
+		};
+		DBD0206C77DA733D29D77C3B /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BertQA-SwiftUI/Pods-BertQA-SwiftUI-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		F18482CEB971E4CB207BA1C9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -610,9 +618,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84D84029243C4E0600E0B769 /* Result.swift in Sources */,
-				846918F32425213E00A90808 /* BasicTokenizer.swift in Sources */,
 				84D8402F243C4E3E00E0B769 /* ContentView.swift in Sources */,
-				846918F12425213B00A90808 /* FullTokenizer.swift in Sources */,
 				84D84030243C4E3E00E0B769 /* SuggestedQuestionsView.swift in Sources */,
 				840245262424CB63002D1DAD /* AppDelegate.swift in Sources */,
 				846918EC2425212F00A90808 /* UnicodeScalarExtension.swift in Sources */,
@@ -626,10 +632,7 @@
 				846918ED2425213100A90808 /* StringExtension.swift in Sources */,
 				84D8402E243C4E3E00E0B769 /* StatusView.swift in Sources */,
 				844C87082424D03E006DA707 /* Constants.swift in Sources */,
-				84D84027243C4E0100E0B769 /* InputFeatures.swift in Sources */,
-				84D84028243C4E0300E0B769 /* ContentData.swift in Sources */,
 				845B4FD52434856A00943980 /* Dataset.swift in Sources */,
-				846918F52425214200A90808 /* WordpieceTokenizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -651,20 +654,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				845B4FD42434856500943980 /* Dataset.swift in Sources */,
-				840C6F402403A39E00E6905E /* InputFeatures.swift in Sources */,
 				84F0354E2418B7380039B5D5 /* OptionViewController.swift in Sources */,
 				842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */,
 				842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */,
-				84433D4D240EA8EF00C983EA /* ContentData.swift in Sources */,
 				8475815223CDC28C0003472A /* DataSetsTableViewController.swift in Sources */,
-				8402440623D9C18600704ABD /* WordpieceTokenizer.swift in Sources */,
 				8433178E23E933AC001B0AE8 /* StringExtension.swift in Sources */,
-				8402440823D9C1FB00704ABD /* BasicTokenizer.swift in Sources */,
 				840C6F422403A39E00E6905E /* Result.swift in Sources */,
 				84C3284F23B49E2E00A7980D /* AppDelegate.swift in Sources */,
 				840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */,
 				84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */,
-				8402440423D9BFDE00704ABD /* FullTokenizer.swift in Sources */,
 				840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */,
 				84E81C6123FFC2B400D50692 /* FileLoader.swift in Sources */,
 				84F035502418B7800039B5D5 /* OptionTableViewController.swift in Sources */,
@@ -717,6 +715,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8TP3S93LB;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ViewInSwiftUI/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -724,7 +723,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-SwiftUI";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.sunit.BertQA-SwiftUI";
 				PRODUCT_NAME = "BertQA-SwiftUI";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -738,6 +737,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8TP3S93LB;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = ViewInSwiftUI/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -745,7 +745,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-SwiftUI";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.sunit.BertQA-SwiftUI";
 				PRODUCT_NAME = "BertQA-SwiftUI";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -819,6 +819,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -880,6 +881,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -916,12 +918,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8TP3S93LB;
 				INFOPLIST_FILE = ViewInUIKit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-UIKit";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.sunit.BertQA-UIKit";
 				PRODUCT_NAME = "BertQA-UIKit";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -936,12 +939,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8TP3S93LB;
 				INFOPLIST_FILE = ViewInUIKit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.tensorflow.BertQA-UIKit";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.sunit.BertQA-UIKit";
 				PRODUCT_NAME = "BertQA-UIKit";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;

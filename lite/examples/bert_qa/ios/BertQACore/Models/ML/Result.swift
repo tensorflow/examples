@@ -13,14 +13,15 @@
 // limitations under the License.
 
 import Foundation
+import TensorFlowLiteTaskText
 
 struct Result {
-  let answer: Answer
+  let answer: TFLQAAnswer
   let inferenceTime: Double
   var description: String {
     """
     Inference time: \(String(format: "%.2lf ms", inferenceTime))
-    Score: \(String(format: "%.2lf", answer.score.value))
+    Score: \(String(format: "%.2lf", answer.pos.logit))
     """
   }
 }
@@ -44,6 +45,9 @@ struct Score {
   /// Logit value of this score.
   let logit: Float
 }
+
+
+//token related model below
 
 /// Stores logit value and its range in token and word list.
 struct Prediction {

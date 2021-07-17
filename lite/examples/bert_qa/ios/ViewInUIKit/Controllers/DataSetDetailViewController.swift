@@ -77,6 +77,10 @@ class DatasetDetailViewController: UIViewController {
         action: #selector(tapSuggestedQuestionButton(of:)),
         for: .touchUpInside)
     }
+    guard let modelPath = Bundle.main.path(
+            forResource: "text_classification", ofType: "tflite") else { return }
+    
+    bertAnswerer = TFLBertQuestionAnswerer.questionAnswerer(modelPath: modelPath)
 
     // Disable run button at the begining as it is empty.
     runButton.isEnabled = false
@@ -169,15 +173,15 @@ class DatasetDetailViewController: UIViewController {
       return
     }
 
-    statusTextView.text = result.description
+    statusTextView.text = result.answer.text
 
     // Render the answer in the `contentView`.
-    contentView.textStorage
-      .addAttribute(
-        .backgroundColor,
-        value: CustomUI.textHighlightColor,
-        range: NSRange(result.answer.text.range, in: contentView.text)
-      )
+//    contentView.textStorage
+//      .addAttribute(
+//        .backgroundColor,
+//        value: CustomUI.textHighlightColor,
+//        range: NSRange(result.answer.text.range, in: contentView.text)
+//      )
 
     // Enable button as the process is finished.
     runButton.isEnabled = true

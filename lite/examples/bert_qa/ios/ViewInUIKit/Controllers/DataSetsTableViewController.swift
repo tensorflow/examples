@@ -84,10 +84,10 @@ class DatasetsTableViewController: UITableViewController {
   }
 
   private func updateBertQA() {
-    let threadCount = UserDefaults.standard.integer(forKey: InterpreterOptions.threadCount.id)
+//    let threadCount = UserDefaults.standard.integer(forKey: InterpreterOptions.threadCount.id)
 
     do {
-      bertQA = try BertQAHandler(threadCount: threadCount)
+      bertQA = try BertQAHandler()
     } catch let error {
       fatalError(error.localizedDescription)
     }

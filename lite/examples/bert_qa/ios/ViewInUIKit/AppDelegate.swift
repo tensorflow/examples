@@ -13,21 +13,22 @@
 // limitations under the License.
 
 import UIKit
+import TensorFlowLiteTaskText
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
 
-  func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-  ) -> Bool {
-    // Set default value of the application options.
-    UserDefaults.standard.register(defaults: [
-      InterpreterOptions.threadCount.id: InterpreterOptions.threadCount.defaultValue,
-    ])
-
-    return true
-  }
+//  func application(
+//    _ application: UIApplication,
+//    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+//  ) -> Bool {
+//    // Set default value of the application options.
+//    UserDefaults.standard.register(defaults: [
+//      InterpreterOptions.threadCount.id: InterpreterOptions.threadCount.defaultValue,
+//    ])
+//
+//    return true
+//  }
 }
