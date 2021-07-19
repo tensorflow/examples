@@ -72,7 +72,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Button classifyButton = findViewById(R.id.button);
         classifyButton.setOnClickListener(
                 (View v) -> {
-                    classify(inputEditText.getText().toString());
+                    if (inputEditText.getText().toString().isEmpty()) {
+                        Toast.makeText(this, "review is null", Toast.LENGTH_SHORT).show();
+                    }else {
+                        classify(inputEditText.getText().toString());
+                    }
                 });
         resultTextView = findViewById(R.id.result_text_view);
         inputEditText = findViewById(R.id.input_text);
