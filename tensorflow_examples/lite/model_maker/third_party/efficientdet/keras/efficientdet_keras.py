@@ -910,15 +910,8 @@ class EfficientDetNet(tf.keras.Model):
     """
     config = self.config
     # call backbone network.
-    self.backbone(inputs, training=training, features_only=True)
-    all_feats = [
-        inputs,
-        self.backbone.endpoints.get('reduction_1'),
-        self.backbone.endpoints.get('reduction_2'),
-        self.backbone.endpoints.get('reduction_3'),
-        self.backbone.endpoints.get('reduction_4'),
-        self.backbone.endpoints.get('reduction_5'),
-    ]
+    all_feats = self.backbone(inputs, training=training, features_only=True)
+    all_feats[0] = inputs  # replace the [0] logits with inputs.
     feats = all_feats[config.min_level:config.max_level + 1]
 
     # Build additional input features that are not from backbone.
