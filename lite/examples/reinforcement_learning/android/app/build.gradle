@@ -29,16 +29,10 @@ android {
     }
 }
 
-// import DownloadModels task
-project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
-
-// Download default models; if you wish to use your own models then
-// place them in the "assets" directory and comment out this line.
-//apply from: "download_model.gradle"
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'org.tensorflow:tensorflow-lite:2.4.0'
+    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'

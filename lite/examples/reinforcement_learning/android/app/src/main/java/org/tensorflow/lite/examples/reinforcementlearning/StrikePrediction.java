@@ -20,6 +20,4 @@ package org.tensorflow.lite.examples.reinforcementlearning;
 public class StrikePrediction {
   public int x;
   public int y;
-  public boolean isPredictedByAgent;
 }
-;

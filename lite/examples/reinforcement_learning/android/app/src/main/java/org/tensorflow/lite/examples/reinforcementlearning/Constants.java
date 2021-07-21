@@ -21,8 +21,15 @@ public final class Constants {
   // We always use square board, so only one size is needed
   public static final int BOARD_SIZE = 8;
   public static final int PLANE_CELL_COUNT = 8;
-  public static final String TFLITE_MODEL = "planestrike.tflite";
+  public static final boolean USE_MODEL_FROM_TF = true;
+  public static final String TF_TFLITE_MODEL = "planestrike_tf.tflite";
+  public static final String TF_AGENTS_TFLITE_MODEL = "planestrike_tf_agents.tflite";
   public static final String TAG = "TfLiteRLDemo";
+
+  // Cell status values to feed into the model
+  public static final float CELL_STATUS_VALUE_HIT = 1;
+  public static final float CELL_STATUS_VALUE_UNTRIED = 0;
+  public static final float CELL_STATUS_VALUE_MISS = -1;
 
   private Constants() {}
 }

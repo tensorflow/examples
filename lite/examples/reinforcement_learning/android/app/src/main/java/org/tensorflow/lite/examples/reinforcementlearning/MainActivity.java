@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
   private TextView playerHitsTextView;
   private Button resetButton;
 
-  private PolicyGradientAgent policyGradientAgent;
+  private PlaneStrikeAgent agent;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +63,11 @@ public class MainActivity extends AppCompatActivity {
     playerHitsTextView = (TextView) findViewById(R.id.player_hits_textview);
     initGame();
     try {
-      policyGradientAgent = new PolicyGradientAgent(this);
+      if (Constants.USE_MODEL_FROM_TF) {
+        agent = new RLAgent(this);
+      } else {
+        agent = new RLAgentFromTFAgents(this);
+      }
     } catch (IOException e) {
       Log.e(Constants.TAG, e.getMessage());
       return;
@@ -91,13 +95,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // Agent action
-            StrikePrediction agentStrikePosition = policyGradientAgent.predictNextMove(playerBoard);
-            if (!agentStrikePosition.isPredictedByAgent) {
+            StrikePrediction agentStrikePosition = agent.predictNextMove(playerBoard);
+            if (agentStrikePosition == null) {
               Toast.makeText(
                       MainActivity.this,
-                      "Something went wrong with the RL agent! Continuing with a random strike",
+                      "Something went wrong with the RL agent! Please restart the app.",
                       Toast.LENGTH_LONG)
                   .show();
+              return;
             }
             int agentStrikePositionX = agentStrikePosition.x;
             int agentStrikePositionY = agentStrikePosition.y;
