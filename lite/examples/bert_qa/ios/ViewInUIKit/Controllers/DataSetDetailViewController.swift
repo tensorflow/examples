@@ -14,6 +14,7 @@
 
 import UIKit
 import os
+import TensorFlowLiteTaskText
 
 /// Controller for detailed view of each `Dataset`.
 class DatasetDetailViewController: UIViewController {
@@ -77,11 +78,6 @@ class DatasetDetailViewController: UIViewController {
         action: #selector(tapSuggestedQuestionButton(of:)),
         for: .touchUpInside)
     }
-    guard let modelPath = Bundle.main.path(
-            forResource: "text_classification", ofType: "tflite") else { return }
-    
-    bertAnswerer = TFLBertQuestionAnswerer.questionAnswerer(modelPath: modelPath)
-
     // Disable run button at the begining as it is empty.
     runButton.isEnabled = false
   }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import Foundation
-import TensorFlowLite
 import TensorFlowLiteTaskText
 import os
 
@@ -36,15 +35,18 @@ final class BertQAHandler {
 //    tokenizer = FullTokenizer(with: dic, isCaseInsensitive: MobileBERT.doLowerCase)
 
     // Construct the path to the model file.
-    guard
-      let modelPath = Bundle(for: type(of: self)).path(
-        forResource: modelFile.name,
-        ofType: modelFile.ext)
+//    guard
+//      let modelPath = Bundle(for: type(of: self)).path(
+//        forResource: modelFile.name,
+//        ofType: modelFile.ext)
+    guard let modelPath = Bundle.main.path(
+            forResource: modelFile.name, ofType: modelFile.ext)
     else {
       fatalError("Failed to load the model file: \(modelFile.description)")
     }
+    print(modelPath)
     
-    bertAnswerer = TFLBertQuestionAnswerer.questionAnswerer(modelPath: modelPath)
+    self.bertAnswerer = TFLBertQuestionAnswerer.questionAnswerer(modelPath: modelPath)
 
 //    // Specify the options for the `Interpreter`.
 //    var options = Interpreter.Options()
