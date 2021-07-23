@@ -26,7 +26,7 @@ For more information, refer to the [BERT github page][BERT].
 
 
 ## Build the demo using Android Studio
-                                                                                                                                          
+
 ### Prerequisites
 
 *   If you don't have already, install
@@ -38,7 +38,7 @@ For more information, refer to the [BERT github page][BERT].
     - SDK Build Tools 29.0.2 or higher.
 
 *   You need an Android device or Android emulator and Android development
-    environment with minimum API 15.
+    environment with minimum API 21.
 
 ### Building
 
@@ -64,6 +64,38 @@ For more information, refer to the [BERT github page][BERT].
     virtual device with minimum API 15.
 
 *   Click `Run` to run the demo app on your Android device.
+
+#### Switch between inference solutions (Task library vs TFLite Interpreter)
+
+This BERT QA Android reference app demonstrates two implementation
+solutions:
+
+(1)
+[`lib_task_api`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_task_api)
+that leverages the out-of-box API from the
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/bert_question_answerer);
+
+(2)
+[`lib_interpreter`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_interpreter)
+that creates the custom inference pipleline using the
+[TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
+
+The [`build.gradle`](app/build.gradle) inside `app` folder shows how to change
+`flavorDimensions "tfliteInference"` to switch between the two solutions.
+
+Inside **Android Studio**, you can change the build variant to whichever one you
+want to build and run—just go to `Build > Select Build Variant` and select one
+from the drop-down menu. See
+[configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
+for more details.
+
+For gradle CLI, running `./gradlew build` can create APKs for both solutions
+under `app/build/outputs/apk`.
+
+*Note: If you simply want the out-of-box API to run the app, we recommend
+`lib_task_api`for inference. If you want to customize your own models and
+control the detail of inputs and outputs, it might be easier to adapt your model
+inputs and outputs by using `lib_interpreter`.*
 
 ## Build the demo using gradle (command line)
 
