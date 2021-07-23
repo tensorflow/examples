@@ -56,7 +56,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:context="org.tensorflow.lite.examples.bertqa.ui.DatasetListActivity">
+            tools:context="org.tensorflow.lite.examples.bertqa.DatasetListActivity">
 
             <TextView
                 android:id="@+id/hint_text_view"

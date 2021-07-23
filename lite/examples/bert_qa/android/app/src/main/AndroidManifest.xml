@@ -28,16 +28,16 @@
       tools:ignore="GoogleAppIndexingWarning">
 
     <activity
-        android:name=".ui.QaActivity"
+        android:name=".QaActivity"
         android:exported="false"
-        android:parentActivityName=".ui.DatasetListActivity">
+        android:parentActivityName=".DatasetListActivity">
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
-          android:value=".ui.DatasetListActivity" />
+          android:value=".DatasetListActivity" />
     </activity>
 
     <activity
-        android:name=".ui.DatasetListActivity"
+        android:name=".DatasetListActivity"
         android:exported="true"
         android:theme="@style/AppTheme.QA.NoTitleActivity" >
       <intent-filter>
