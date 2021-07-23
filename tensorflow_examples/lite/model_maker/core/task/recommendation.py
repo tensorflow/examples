@@ -151,7 +151,8 @@ class Recommendation(custom_model.CustomModel):
   def _export_tflite(self, tflite_filepath):
     """Exports tflite model."""
     serve_fn = self._get_serve_fn(self.model)
-    converter = tf.lite.TFLiteConverter.from_concrete_functions([serve_fn])
+    converter = tf.lite.TFLiteConverter.from_concrete_functions([serve_fn],
+                                                                self.model)
     tflite_model = converter.convert()
     with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
       f.write(tflite_model)

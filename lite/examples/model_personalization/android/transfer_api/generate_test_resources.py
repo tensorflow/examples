@@ -30,7 +30,7 @@ def initial_params(zero):
 
 
 converter = tf.lite.TFLiteConverter.from_concrete_functions(
-    [initial_params.get_concrete_function()])
+    [initial_params.get_concrete_function()], initial_params)
 model_lite = converter.convert()
 with open(SOFTMAX_INITIALIZE_ONES_PATH, 'wb') as f:
   f.write(model_lite)

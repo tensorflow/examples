@@ -136,7 +136,7 @@ def train_agent(iterations, modeldir, logdir):
       autograph=False)
 
   converter = tf.lite.TFLiteConverter.from_concrete_functions(
-      [tf_predict.get_concrete_function()])
+      [tf_predict.get_concrete_function()], tf_predict)
 
   tflite_model = converter.convert()
 

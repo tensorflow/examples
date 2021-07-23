@@ -98,8 +98,9 @@ class TFLiteTransferConverter(object):
 
   def _generate_initialize_model(self):
     """Generates a model that outputs initial parameter values."""
+    model = self.head_model.generate_initial_params()
     converter = tf.lite.TFLiteConverter.from_concrete_functions(
-        [self.head_model.generate_initial_params().get_concrete_function()])
+        [model.get_concrete_function()], model)
     return converter.convert()
 
   def _generate_bottleneck_model(self):
