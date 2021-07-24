@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Load TfLite model and provide predictions with task api.
+ * Load TFLite model and create BertQuestionAnswerer instance.
  */
 public class QaClient {
 
