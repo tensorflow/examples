@@ -41,14 +41,14 @@ Return here after you perform the `apt-get install` command.
 
 First, clone this Git repo onto your Raspberry Pi like this:
 
-```
+```shell
 git clone https://github.com/tensorflow/examples --depth 1
 ```
 
 Then use our script to install a couple Python packages, and
 download the MobileNet model and labels file:
 
-```
+```shell
 cd examples/lite/examples/image_classification/raspberry_pi
 
 # The script takes an argument specifying where you want to save the model files
@@ -58,7 +58,7 @@ bash download.sh /tmp
 
 ## Run the example
 
-```
+```shell
 python3 classify_picamera.py \
   --model /tmp/mobilenet_v1_1.0_224_quant.tflite \
   --labels /tmp/labels_mobilenet_quant_v1_224.txt
@@ -90,20 +90,20 @@ delegate model execution to the Edge TPU processor:
 2.  Now open the `classify_picamera.py` file and add the following import at
     the top:
 
-    ```
+    ```python
     from tflite_runtime.interpreter import load_delegate
     ```
 
     And then find the line that initializes the `Interpreter`, which looks like
     this:
 
-    ```
+    ```python
     interpreter = Interpreter(args.model)
     ```
 
     And change it to specify the Edge TPU delegate:
 
-    ```
+    ```python
     interpreter = Interpreter(args.model,
         experimental_delegates=[load_delegate('libedgetpu.so.1.0')])
     ```
@@ -126,7 +126,7 @@ Now you're ready to execute the TensorFlow Lite model on the Edge TPU. Just run
 `classify_picamera.py` again, but be sure you specify the model that's compiled
 for the Edge TPU (it uses the same labels file as before):
 
-```
+```shell
 python3 classify_picamera.py \
   --model /tmp/mobilenet_v1_1.0_224_quant_edgetpu.tflite \
   --labels /tmp/labels_mobilenet_quant_v1_224.txt
