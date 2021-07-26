@@ -14,7 +14,7 @@ explicitly.
 
 Application can run either on device or emulator.
 
-<img src="https://www.tensorflow.org/lite/examples/image_classification/images/android_banana.png" width="350" />
+<img src="https://www.tensorflow.org/lite/examples/object_detection/images/android_apple_banana.png" width="350" />
 
 ## Build the demo using Android Studio
 
