@@ -36,21 +36,18 @@ public class RLAgentFromTFAgents extends PlaneStrikeAgent {
 
   /** Predict the next move based on current board state. */
   @Override
-  protected StrikePrediction predictNextMove(BoardCellStatus[][] board) {
+  protected int predictNextMove(BoardCellStatus[][] board) {
 
     if (tflite == null) {
       Log.e(
           Constants.TAG, "Game agent failed to initialize. Please restart the app.");
-      return null;
+      return -1;
     } else {
       prepareModelInput(board);
       runInference();
     }
 
-    StrikePrediction strikePrediction = new StrikePrediction();
-    strikePrediction.x = agentStrikePosition / Constants.BOARD_SIZE;
-    strikePrediction.y = agentStrikePosition % Constants.BOARD_SIZE;
-    return strikePrediction;
+    return agentStrikePosition;
   }
 
   /** Run model inference on current board state. */
@@ -62,7 +59,6 @@ public class RLAgentFromTFAgents extends PlaneStrikeAgent {
     output.put(0, prediction);
     tflite.runForMultipleInputsOutputs(inputs, output);
     agentStrikePosition = prediction[0][0];
-    isPredictedByAgent = true;
   }
 
   @Override

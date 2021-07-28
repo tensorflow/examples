@@ -41,21 +41,29 @@ public class RLAgent extends PlaneStrikeAgent {
 
   /** Predict the next move based on current board state. */
   @Override
-  protected StrikePrediction predictNextMove(BoardCellStatus[][] board) {
+  protected int predictNextMove(BoardCellStatus[][] board) {
 
     if (tflite == null) {
-      Log.e(
-          Constants.TAG, "Game agent failed to initialize. Please restart the app.");
-      return null;
+      Log.e(Constants.TAG, "Game agent failed to initialize. Please restart the app.");
+      return -1;
     } else {
       prepareModelInput(board);
       runInference();
     }
 
-    StrikePrediction strikePrediction = new StrikePrediction();
-    strikePrediction.x = agentStrikePosition / Constants.BOARD_SIZE;
-    strikePrediction.y = agentStrikePosition % Constants.BOARD_SIZE;
-    return strikePrediction;
+    // Post-processing (non-repeat argmax)
+    float[] probArray = outputProbArrays[0]; // batch size is 1 so we use [0] here
+    int agentStrikePosition = -1;
+    float maxProb = 0;
+    for (int i = 0; i < probArray.length; i++) {
+      int x = i / Constants.BOARD_SIZE;
+      int y = i % Constants.BOARD_SIZE;
+      if (board[x][y] == BoardCellStatus.UNTRIED && probArray[i] > maxProb) {
+        agentStrikePosition = i;
+        maxProb = probArray[i];
+      }
+    }
+    return agentStrikePosition;
   }
 
   /** Run model inference on current board state. */
@@ -63,15 +71,6 @@ public class RLAgent extends PlaneStrikeAgent {
   protected void runInference() {
     tflite.run(boardData, outputProbArrays);
     boardData.rewind();
-
-    float[] probArray = outputProbArrays[0]; // batch size is 1 so we use [0] here
-    // Argmax
-    int maxIndex = 0;
-    for (int i = 0; i < probArray.length; i++) {
-      maxIndex = probArray[i] > probArray[maxIndex] ? i : maxIndex;
-    }
-    agentStrikePosition = maxIndex;
-    isPredictedByAgent = true;
   }
 
   @Override

@@ -95,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // Agent action
-            StrikePrediction agentStrikePosition = agent.predictNextMove(playerBoard);
-            if (agentStrikePosition == null) {
+            int agentStrikePosition = agent.predictNextMove(playerBoard);
+            if (agentStrikePosition == -1) {
               Toast.makeText(
                       MainActivity.this,
                       "Something went wrong with the RL agent! Please restart the app.",
@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
                   .show();
               return;
             }
-            int agentStrikePositionX = agentStrikePosition.x;
-            int agentStrikePositionY = agentStrikePosition.y;
+            int agentStrikePositionX = agentStrikePosition / Constants.BOARD_SIZE;
+            int agentStrikePositionY = agentStrikePosition % Constants.BOARD_SIZE;
 
             if (playerHiddenBoard[agentStrikePositionX][agentStrikePositionY]
                 == HiddenBoardCellStatus.OCCUPIED_BY_PLANE) {

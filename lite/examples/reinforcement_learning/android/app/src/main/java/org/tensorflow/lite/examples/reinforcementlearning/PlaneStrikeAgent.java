@@ -31,7 +31,6 @@ public abstract class PlaneStrikeAgent {
   protected Interpreter.Options tfliteOptions;
 
   protected int agentStrikePosition;
-  protected boolean isPredictedByAgent;
 
   public PlaneStrikeAgent(Activity activity) throws IOException {
     tfliteOptions = new Interpreter.Options();
@@ -39,7 +38,7 @@ public abstract class PlaneStrikeAgent {
   }
 
   /** Predict the next move based on current board state. */
-  protected abstract StrikePrediction predictNextMove(BoardCellStatus[][] board);
+  protected abstract int predictNextMove(BoardCellStatus[][] board);
 
   /** Run model inference on current board state. */
   protected abstract void runInference();
