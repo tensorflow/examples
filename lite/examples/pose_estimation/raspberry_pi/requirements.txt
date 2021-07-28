@@ -1,0 +1,5 @@
+--extra-index-url https://google-coral.github.io/py-repo/
+numpy~=1.21.0
+opencv-python~=4.5.3.56
+argparse
+tflite-runtime==2.5.0
