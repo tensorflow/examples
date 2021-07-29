@@ -21,7 +21,7 @@ class DatasetDetailViewController: UIViewController {
   /// Selected `Dataset` to run the Bert model.
   var dataset: Dataset?
 
-  var bertQA: BertQAHandler?
+  var bertQA: BertQAClient?
 
   // MARK: Views created at Storyboard
   @IBOutlet weak var contentView: UITextView!

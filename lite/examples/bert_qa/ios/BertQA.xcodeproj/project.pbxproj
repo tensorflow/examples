@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		047C313826B1A4D60006CA15 /* BertQAClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047C313726B1A4D60006CA15 /* BertQAClient.swift */; };
+		047C313926B1A4D60006CA15 /* BertQAClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047C313726B1A4D60006CA15 /* BertQAClient.swift */; };
+		047C313A26B1A4D60006CA15 /* BertQAClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047C313726B1A4D60006CA15 /* BertQAClient.swift */; };
 		3A4D441F43E606AFFBEDC0F4 /* Pods_BertQA_UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */; };
 		8073F32F9E31519DA1C60690 /* Pods_BertQA_SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */; };
 		840245262424CB63002D1DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245252424CB63002D1DAD /* AppDelegate.swift */; };
@@ -71,6 +74,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		047C313726B1A4D60006CA15 /* BertQAClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BertQAClient.swift; sourceTree = "<group>"; };
 		20076681A0E239448C8D4B05 /* Pods-BertQA.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.release.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.release.xcconfig"; sourceTree = "<group>"; };
 		2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BertQA_SwiftUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F95CAA32D15283DD33CF2F /* Pods-BertQA.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.debug.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.debug.xcconfig"; sourceTree = "<group>"; };
@@ -194,6 +198,7 @@
 			children = (
 				840C6F3E2403A39E00E6905E /* Result.swift */,
 				840C6F3D2403A39E00E6905E /* BertQAHandler.swift */,
+				047C313726B1A4D60006CA15 /* BertQAClient.swift */,
 			);
 			path = ML;
 			sourceTree = "<group>";
@@ -625,6 +630,7 @@
 				844C87072424D019006DA707 /* KeyboardHeightObserver.swift in Sources */,
 				844C87012424CE29006DA707 /* DatasetListView.swift in Sources */,
 				84D84026243C4DFB00E0B769 /* BertQAHandler.swift in Sources */,
+				047C313926B1A4D60006CA15 /* BertQAClient.swift in Sources */,
 				846918EF2425213800A90808 /* FileLoader.swift in Sources */,
 				844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */,
 				840245282424CB63002D1DAD /* SceneDelegate.swift in Sources */,
@@ -642,6 +648,7 @@
 			files = (
 				849401FB24447883005F0C25 /* FullTokenizerTest.swift in Sources */,
 				849401F924447883005F0C25 /* UnicodeScalarExtensionTest.swift in Sources */,
+				047C313A26B1A4D60006CA15 /* BertQAClient.swift in Sources */,
 				849401F824447883005F0C25 /* StringExtensionTest.swift in Sources */,
 				849401FC24447883005F0C25 /* BasicTokenizerTest.swift in Sources */,
 				849401FA24447883005F0C25 /* WordpieceTokenizerTest.swift in Sources */,
@@ -664,6 +671,7 @@
 				840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */,
 				84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */,
 				840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */,
+				047C313826B1A4D60006CA15 /* BertQAClient.swift in Sources */,
 				84E81C6123FFC2B400D50692 /* FileLoader.swift in Sources */,
 				84F035502418B7800039B5D5 /* OptionTableViewController.swift in Sources */,
 				8475815023CDC24D0003472A /* DataSetDetailViewController.swift in Sources */,
