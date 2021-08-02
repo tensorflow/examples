@@ -71,12 +71,12 @@ This BERT QA Android reference app demonstrates two implementation
 solutions:
 
 (1)
-[`lib_task_api`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_task_api)
+[`lib_task_api`](/lite/examples/bert_qa/android/lib_task_api)
 that leverages the out-of-box API from the
 [TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/bert_question_answerer);
 
 (2)
-[`lib_interpreter`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_interpreter)
+[`lib_interpreter`](/lite/examples/bert_qa/android/lib_interpreter)
 that creates the custom inference pipleline using the
 [TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
 

@@ -23,18 +23,18 @@ file
 
 This BERT QA Android reference app demonstrates two implementation
 solutions,
-[`lib_task_api`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_task_api)
+[`lib_task_api`](/lite/examples/bert_qa/android/lib_task_api)
 that leverages the out-of-box API from the
 [TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/bert_question_answerer),
 and
-[`lib_interpreter`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_interpreter)
+[`lib_interpreter`](/lite/examples/bert_qa/android/lib_interpreter)
 that creates the custom inference pipleline using the
 [TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
 
 Both solutions implement the file `QaClient.java` (see
-[the one in lib_task_api](https://github.com/SunitRoy2703/examples/blob/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_task_api/src/main/java/org/tensorflow/lite/examples/bertqa/ml/QaClient.java)
+[the one in lib_task_api](/lite/examples/bert_qa/android/lib_task_api/src/main/java/org/tensorflow/lite/examples/bertqa/ml/QaClient.java)
 and
-[the one in lib_interpreter](https://github.com/SunitRoy2703/examples/blob/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_interpreter/src/main/java/org/tensorflow/lite/examples/bertqa/ml/QaClient.java)
+[the one in lib_interpreter](/lite/examples/bert_qa/android/lib_interpreter/src/main/java/org/tensorflow/lite/examples/bertqa/ml/QaClient.java)
 that contains most of the complex logic for processing the text input and
 running inference.
 
@@ -87,8 +87,8 @@ demo models are single head models, therefore, `results` only contains one
 `QaAnswer` object.
 
 To match the implementation of
-[`lib_interpreter`](https://github.com/SunitRoy2703/examples/tree/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_interpreter),
-`results` is converted into List<[`Answer`](https://github.com/SunitRoy2703/examples/blob/bertQa-android-task-lib/lite/examples/bert_qa/android/lib_task_api/src/main/java/org/tensorflow/lite/examples/bertqa/ml/Answer.java)>.
+[`lib_interpreter`](/lite/examples/bert_qa/android/lib_interpreter),
+`results` is converted into List<[`Answer`](/lite/examples/bert_qa/android/lib_task_api/src/main/java/org/tensorflow/lite/examples/bertqa/ml/Answer.java)>.
 
 #### Using the TensorFlow Lite Interpreter
 
@@ -145,7 +145,7 @@ tflite.runForMultipleInputsOutputs(inputs, output);
 
 The QaClient is invoked and inference results are displayed by the
 `presentAnswer()` function in
-[`QaActivity.java`](https://github.com/SunitRoy2703/examples/blob/bertQa-android-task-lib/lite/examples/bert_qa/android/app/src/main/java/org/tensorflow/lite/examples/bertqa/QaActivity.java).
+[`QaActivity.java`](/lite/examples/bert_qa/android/app/src/main/java/org/tensorflow/lite/examples/bertqa/QaActivity.java).
 
 ```java
 private void presentAnswer(Answer answer) {
