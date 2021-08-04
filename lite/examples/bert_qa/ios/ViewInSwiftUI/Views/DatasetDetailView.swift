@@ -104,7 +104,10 @@ struct DatasetDetailView: View {
     statusMessage = result.description
 
     // Render the answer in the `contentView`.
-    highlightRange = result.answer.text.range
+    //highlightRange = result.answer.text.range
+    if let answerRange = dataset.content.range(of: result.answer.text){
+    highlightRange = answerRange
+    }
   }
 
   func hideKeyboard() {
