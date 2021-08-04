@@ -7,21 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		047C313826B1A4D60006CA15 /* BertQAClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047C313726B1A4D60006CA15 /* BertQAClient.swift */; };
-		047C313926B1A4D60006CA15 /* BertQAClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047C313726B1A4D60006CA15 /* BertQAClient.swift */; };
-		047C313A26B1A4D60006CA15 /* BertQAClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047C313726B1A4D60006CA15 /* BertQAClient.swift */; };
+		0425A94F26BAF30000A58007 /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 0425A94E26BAF30000A58007 /* model.tflite */; };
+		0425A95026BAF30000A58007 /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 0425A94E26BAF30000A58007 /* model.tflite */; };
+		0425A95126BAF30000A58007 /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 0425A94E26BAF30000A58007 /* model.tflite */; };
 		3A4D441F43E606AFFBEDC0F4 /* Pods_BertQA_UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */; };
 		8073F32F9E31519DA1C60690 /* Pods_BertQA_SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */; };
 		840245262424CB63002D1DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245252424CB63002D1DAD /* AppDelegate.swift */; };
 		840245282424CB63002D1DAD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245272424CB63002D1DAD /* SceneDelegate.swift */; };
 		840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 840245302424CB64002D1DAD /* LaunchScreen.storyboard */; };
-		840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3B2403A39E00E6905E /* DataExtension.swift */; };
 		840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
 		840C6F422403A39E00E6905E /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
 		840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
 		842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D023CEDD6F00AE9416 /* Constants.swift */; };
 		842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */; };
-		8433178E23E933AC001B0AE8 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8433178D23E933AC001B0AE8 /* StringExtension.swift */; };
 		844C87012424CE29006DA707 /* DatasetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FC2424CD7F006DA707 /* DatasetListView.swift */; };
 		844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FE2424CD97006DA707 /* DatasetDetailView.swift */; };
 		844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
@@ -30,10 +28,6 @@
 		84551A6C23F2710100C71C16 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
 		845B4FD42434856500943980 /* Dataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B4FD32434856500943980 /* Dataset.swift */; };
 		845B4FD52434856A00943980 /* Dataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B4FD32434856500943980 /* Dataset.swift */; };
-		846918EB2425212B00A90808 /* DataExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3B2403A39E00E6905E /* DataExtension.swift */; };
-		846918EC2425212F00A90808 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */; };
-		846918ED2425213100A90808 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8433178D23E933AC001B0AE8 /* StringExtension.swift */; };
-		846918EF2425213800A90808 /* FileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E81C6023FFC2B400D50692 /* FileLoader.swift */; };
 		846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
 		846918FA2425214D00A90808 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
 		8475814E23CDC1660003472A /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8475814D23CDC1660003472A /* README.md */; };
@@ -41,9 +35,6 @@
 		8475815223CDC28C0003472A /* DataSetsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475815123CDC28C0003472A /* DataSetsTableViewController.swift */; };
 		849401F824447883005F0C25 /* StringExtensionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F024447883005F0C25 /* StringExtensionTest.swift */; };
 		849401F924447883005F0C25 /* UnicodeScalarExtensionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F124447883005F0C25 /* UnicodeScalarExtensionTest.swift */; };
-		849401FA24447883005F0C25 /* WordpieceTokenizerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F324447883005F0C25 /* WordpieceTokenizerTest.swift */; };
-		849401FB24447883005F0C25 /* FullTokenizerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F424447883005F0C25 /* FullTokenizerTest.swift */; };
-		849401FC24447883005F0C25 /* BasicTokenizerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F524447883005F0C25 /* BasicTokenizerTest.swift */; };
 		849401FD24447883005F0C25 /* BertQAHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F724447883005F0C25 /* BertQAHandlerTest.swift */; };
 		8496E7E123CF019C00386218 /* SuggestedQuestionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */; };
 		8498AA6D240FA5DF003ABA5E /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
@@ -51,14 +42,12 @@
 		84C3285423B49E2E00A7980D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285223B49E2E00A7980D /* Main.storyboard */; };
 		84C3285623B49E2F00A7980D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285523B49E2F00A7980D /* Assets.xcassets */; };
 		84C3285923B49E2F00A7980D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285723B49E2F00A7980D /* LaunchScreen.storyboard */; };
-		84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */; };
 		84CBD8F92424DCBF00DC20AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285523B49E2F00A7980D /* Assets.xcassets */; };
 		84D84026243C4DFB00E0B769 /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
 		84D84029243C4E0600E0B769 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
 		84D8402E243C4E3E00E0B769 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402B243C4E3E00E0B769 /* StatusView.swift */; };
 		84D8402F243C4E3E00E0B769 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402C243C4E3E00E0B769 /* ContentView.swift */; };
 		84D84030243C4E3E00E0B769 /* SuggestedQuestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D8402D243C4E3E00E0B769 /* SuggestedQuestionsView.swift */; };
-		84E81C6123FFC2B400D50692 /* FileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E81C6023FFC2B400D50692 /* FileLoader.swift */; };
 		84F0354E2418B7380039B5D5 /* OptionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F0354D2418B7380039B5D5 /* OptionViewController.swift */; };
 		84F035502418B7800039B5D5 /* OptionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F0354F2418B7800039B5D5 /* OptionTableViewController.swift */; };
 /* End PBXBuildFile section */
@@ -74,7 +63,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		047C313726B1A4D60006CA15 /* BertQAClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BertQAClient.swift; sourceTree = "<group>"; };
+		0425A94E26BAF30000A58007 /* model.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; name = model.tflite; path = ../../../../../../../../model.tflite; sourceTree = "<group>"; };
 		20076681A0E239448C8D4B05 /* Pods-BertQA.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.release.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.release.xcconfig"; sourceTree = "<group>"; };
 		2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BertQA_SwiftUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F95CAA32D15283DD33CF2F /* Pods-BertQA.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.debug.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.debug.xcconfig"; sourceTree = "<group>"; };
@@ -88,14 +77,12 @@
 		840245272424CB63002D1DAD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		840245312424CB64002D1DAD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		840245332424CB64002D1DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		840C6F3B2403A39E00E6905E /* DataExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataExtension.swift; sourceTree = "<group>"; };
 		840C6F3D2403A39E00E6905E /* BertQAHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandler.swift; sourceTree = "<group>"; };
 		840C6F3E2403A39E00E6905E /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = mobilebert_float_20191023.tflite; sourceTree = "<group>"; };
 		84126CCB24111D5E00349A2A /* ControlPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlPanelView.swift; sourceTree = "<group>"; };
 		842E65D023CEDD6F00AE9416 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetTitleCell.swift; sourceTree = "<group>"; };
-		8433178D23E933AC001B0AE8 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		844C86FC2424CD7F006DA707 /* DatasetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetListView.swift; sourceTree = "<group>"; };
 		844C86FE2424CD97006DA707 /* DatasetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetDetailView.swift; sourceTree = "<group>"; };
 		844C87062424D019006DA707 /* KeyboardHeightObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightObserver.swift; sourceTree = "<group>"; };
@@ -109,9 +96,6 @@
 		849401DA244462AB005F0C25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		849401F024447883005F0C25 /* StringExtensionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtensionTest.swift; sourceTree = "<group>"; };
 		849401F124447883005F0C25 /* UnicodeScalarExtensionTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnicodeScalarExtensionTest.swift; sourceTree = "<group>"; };
-		849401F324447883005F0C25 /* WordpieceTokenizerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordpieceTokenizerTest.swift; sourceTree = "<group>"; };
-		849401F424447883005F0C25 /* FullTokenizerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FullTokenizerTest.swift; sourceTree = "<group>"; };
-		849401F524447883005F0C25 /* BasicTokenizerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasicTokenizerTest.swift; sourceTree = "<group>"; };
 		849401F724447883005F0C25 /* BertQAHandlerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandlerTest.swift; sourceTree = "<group>"; };
 		8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedQuestionButton.swift; sourceTree = "<group>"; };
 		8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = contents_from_squad_dict_format.json; sourceTree = "<group>"; };
@@ -121,11 +105,9 @@
 		84C3285523B49E2F00A7980D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		84C3285823B49E2F00A7980D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		84C3285A23B49E2F00A7980D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnicodeScalarExtension.swift; sourceTree = "<group>"; };
 		84D8402B243C4E3E00E0B769 /* StatusView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
 		84D8402C243C4E3E00E0B769 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		84D8402D243C4E3E00E0B769 /* SuggestedQuestionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SuggestedQuestionsView.swift; sourceTree = "<group>"; };
-		84E81C6023FFC2B400D50692 /* FileLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileLoader.swift; sourceTree = "<group>"; };
 		84F0354D2418B7380039B5D5 /* OptionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionViewController.swift; sourceTree = "<group>"; };
 		84F0354F2418B7800039B5D5 /* OptionTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionTableViewController.swift; sourceTree = "<group>"; };
 		FA8F6BA054A264013FFDBD91 /* Pods-BertQA-UIKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA-UIKit.debug.xcconfig"; path = "Target Support Files/Pods-BertQA-UIKit/Pods-BertQA-UIKit.debug.xcconfig"; sourceTree = "<group>"; };
@@ -198,7 +180,6 @@
 			children = (
 				840C6F3E2403A39E00E6905E /* Result.swift */,
 				840C6F3D2403A39E00E6905E /* BertQAHandler.swift */,
-				047C313726B1A4D60006CA15 /* BertQAClient.swift */,
 			);
 			path = ML;
 			sourceTree = "<group>";
@@ -208,7 +189,6 @@
 			children = (
 				842E65CD23CEDBA900AE9416 /* Resources */,
 				8475815523CDC64B0003472A /* Models */,
-				84E81C6223FFC2F600D50692 /* Extensions */,
 				842E65D023CEDD6F00AE9416 /* Constants.swift */,
 			);
 			path = BertQACore;
@@ -230,6 +210,7 @@
 		842E65CD23CEDBA900AE9416 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				0425A94E26BAF30000A58007 /* model.tflite */,
 				8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */,
 				840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */,
 				84551A6B23F2710100C71C16 /* vocab.txt */,
@@ -263,7 +244,6 @@
 			isa = PBXGroup;
 			children = (
 				845B4FD32434856500943980 /* Dataset.swift */,
-				84E81C6023FFC2B400D50692 /* FileLoader.swift */,
 				840C6F322403A36000E6905E /* ML */,
 			);
 			path = Models;
@@ -274,7 +254,6 @@
 			children = (
 				849401EF24447883005F0C25 /* ExtensionTest */,
 				849401F624447883005F0C25 /* MLTest */,
-				849401F224447883005F0C25 /* TokenizerTest */,
 				849401DA244462AB005F0C25 /* Info.plist */,
 			);
 			path = BertQATests;
@@ -287,16 +266,6 @@
 				849401F124447883005F0C25 /* UnicodeScalarExtensionTest.swift */,
 			);
 			path = ExtensionTest;
-			sourceTree = "<group>";
-		};
-		849401F224447883005F0C25 /* TokenizerTest */ = {
-			isa = PBXGroup;
-			children = (
-				849401F324447883005F0C25 /* WordpieceTokenizerTest.swift */,
-				849401F424447883005F0C25 /* FullTokenizerTest.swift */,
-				849401F524447883005F0C25 /* BasicTokenizerTest.swift */,
-			);
-			path = TokenizerTest;
 			sourceTree = "<group>";
 		};
 		849401F624447883005F0C25 /* MLTest */ = {
@@ -340,16 +309,6 @@
 				849401D6244462AB005F0C25 /* BertQA-Tests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		84E81C6223FFC2F600D50692 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				8433178D23E933AC001B0AE8 /* StringExtension.swift */,
-				84C62F6123F6BD3A00E4BB77 /* UnicodeScalarExtension.swift */,
-				840C6F3B2403A39E00E6905E /* DataExtension.swift */,
-			);
-			path = Extensions;
 			sourceTree = "<group>";
 		};
 		84F96F0023CDACA0009FBDF5 /* Controllers */ = {
@@ -472,6 +431,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				846918FA2425214D00A90808 /* vocab.txt in Resources */,
+				0425A95026BAF30000A58007 /* model.tflite in Resources */,
 				840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */,
 				844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */,
 				846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */,
@@ -483,6 +443,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0425A95126BAF30000A58007 /* model.tflite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,6 +454,7 @@
 				84551A6C23F2710100C71C16 /* vocab.txt in Resources */,
 				84C3285923B49E2F00A7980D /* LaunchScreen.storyboard in Resources */,
 				84C3285623B49E2F00A7980D /* Assets.xcassets in Resources */,
+				0425A94F26BAF30000A58007 /* model.tflite in Resources */,
 				840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */,
 				8475814E23CDC1660003472A /* README.md in Resources */,
 				8498AA6D240FA5DF003ABA5E /* contents_from_squad_dict_format.json in Resources */,
@@ -626,16 +588,11 @@
 				84D8402F243C4E3E00E0B769 /* ContentView.swift in Sources */,
 				84D84030243C4E3E00E0B769 /* SuggestedQuestionsView.swift in Sources */,
 				840245262424CB63002D1DAD /* AppDelegate.swift in Sources */,
-				846918EC2425212F00A90808 /* UnicodeScalarExtension.swift in Sources */,
 				844C87072424D019006DA707 /* KeyboardHeightObserver.swift in Sources */,
 				844C87012424CE29006DA707 /* DatasetListView.swift in Sources */,
 				84D84026243C4DFB00E0B769 /* BertQAHandler.swift in Sources */,
-				047C313926B1A4D60006CA15 /* BertQAClient.swift in Sources */,
-				846918EF2425213800A90808 /* FileLoader.swift in Sources */,
 				844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */,
 				840245282424CB63002D1DAD /* SceneDelegate.swift in Sources */,
-				846918EB2425212B00A90808 /* DataExtension.swift in Sources */,
-				846918ED2425213100A90808 /* StringExtension.swift in Sources */,
 				84D8402E243C4E3E00E0B769 /* StatusView.swift in Sources */,
 				844C87082424D03E006DA707 /* Constants.swift in Sources */,
 				845B4FD52434856A00943980 /* Dataset.swift in Sources */,
@@ -646,12 +603,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				849401FB24447883005F0C25 /* FullTokenizerTest.swift in Sources */,
 				849401F924447883005F0C25 /* UnicodeScalarExtensionTest.swift in Sources */,
-				047C313A26B1A4D60006CA15 /* BertQAClient.swift in Sources */,
 				849401F824447883005F0C25 /* StringExtensionTest.swift in Sources */,
-				849401FC24447883005F0C25 /* BasicTokenizerTest.swift in Sources */,
-				849401FA24447883005F0C25 /* WordpieceTokenizerTest.swift in Sources */,
 				849401FD24447883005F0C25 /* BertQAHandlerTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -665,14 +618,9 @@
 				842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */,
 				842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */,
 				8475815223CDC28C0003472A /* DataSetsTableViewController.swift in Sources */,
-				8433178E23E933AC001B0AE8 /* StringExtension.swift in Sources */,
 				840C6F422403A39E00E6905E /* Result.swift in Sources */,
 				84C3284F23B49E2E00A7980D /* AppDelegate.swift in Sources */,
-				840C6F3F2403A39E00E6905E /* DataExtension.swift in Sources */,
-				84C62F6223F6BD3A00E4BB77 /* UnicodeScalarExtension.swift in Sources */,
 				840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */,
-				047C313826B1A4D60006CA15 /* BertQAClient.swift in Sources */,
-				84E81C6123FFC2B400D50692 /* FileLoader.swift in Sources */,
 				84F035502418B7800039B5D5 /* OptionTableViewController.swift in Sources */,
 				8475815023CDC24D0003472A /* DataSetDetailViewController.swift in Sources */,
 				8496E7E123CF019C00386218 /* SuggestedQuestionButton.swift in Sources */,

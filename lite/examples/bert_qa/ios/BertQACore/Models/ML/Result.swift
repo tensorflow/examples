@@ -16,34 +16,34 @@ import Foundation
 import TensorFlowLiteTaskText
 
 struct Result {
-  let answer: TFLQAAnswer
-  let inferenceTime: Double
-  var description: String {
-    """
+    let answer: TFLQAAnswer
+    let inferenceTime: Double
+    var description: String {
+        """
     Inference time: \(String(format: "%.2lf ms", inferenceTime))
     Score: \(String(format: "%.2lf", answer.pos.logit))
     """
-  }
+    }
 }
 
 struct Answer {
-  let text: Excerpt
-  let score: Score
+    let text: Excerpt
+    let score: Score
 }
 
 /// Stores exceprted text and its range from the original text.
 struct Excerpt {
-  let value: String
-  let range: Range<String.Index>
+    let value: String
+    let range: Range<String.Index>
 }
 
 /// Stores probability score of given range of words in the original content.
 struct Score {
-  let value: Float
-  /// Score's range of original word.
-  let range: ClosedRange<Int>
-  /// Logit value of this score.
-  let logit: Float
+    let value: Float
+    /// Score's range of original word.
+    let range: ClosedRange<Int>
+    /// Logit value of this score.
+    let logit: Float
 }
 
 
@@ -51,46 +51,46 @@ struct Score {
 
 /// Stores logit value and its range in token and word list.
 struct Prediction {
-  /// Logit value.
-  let logit: Float
-  /// Logit's range of result token.
-  let tokenRange: ClosedRange<Int>
-  /// Logit's range of original word.
-  let wordRange: ClosedRange<Int>
-
-  init?(logit: Float, start: Int, end: Int, tokenIdxToWordIdxMapping: [Int: Int]) {
-    self.logit = logit
-    guard start <= end else { return nil }
-    self.tokenRange = start...end
-
-    guard
-      let wordRange = Prediction.convert(from: tokenRange, with: tokenIdxToWordIdxMapping)
-    else {
-      return nil
+    /// Logit value.
+    let logit: Float
+    /// Logit's range of result token.
+    let tokenRange: ClosedRange<Int>
+    /// Logit's range of original word.
+    let wordRange: ClosedRange<Int>
+    
+    init?(logit: Float, start: Int, end: Int, tokenIdxToWordIdxMapping: [Int: Int]) {
+        self.logit = logit
+        guard start <= end else { return nil }
+        self.tokenRange = start...end
+        
+        guard
+            let wordRange = Prediction.convert(from: tokenRange, with: tokenIdxToWordIdxMapping)
+        else {
+            return nil
+        }
+        self.wordRange = wordRange
     }
-    self.wordRange = wordRange
-  }
-
-  private static func convert(from tokenRange: ClosedRange<Int>, with map: [Int: Int])
+    
+    private static func convert(from tokenRange: ClosedRange<Int>, with map: [Int: Int])
     -> ClosedRange<Int>?
-  {
-    guard
-      tokenRange.count <= MobileBERT.maxAnsLen,
-      let start = tokenRange.first,
-      let end = tokenRange.last,
-      let startIndex = map[start + MobileBERT.outputOffset],
-      let endIndex = map[end + MobileBERT.outputOffset]
-    else {
-      return nil
+    {
+        guard
+            tokenRange.count <= MobileBERT.maxAnsLen,
+            let start = tokenRange.first,
+            let end = tokenRange.last,
+            let startIndex = map[start + MobileBERT.outputOffset],
+            let endIndex = map[end + MobileBERT.outputOffset]
+        else {
+            return nil
+        }
+        
+        guard startIndex <= endIndex else { return nil }
+        return startIndex...endIndex
     }
-
-    guard startIndex <= endIndex else { return nil }
-    return startIndex...endIndex
-  }
 }
 
 extension Prediction: Equatable {
-  static func == (lhs: Prediction, rhs: Prediction) -> Bool {
-    return lhs.logit == rhs.logit && lhs.tokenRange == rhs.tokenRange
-  }
+    static func == (lhs: Prediction, rhs: Prediction) -> Bool {
+        return lhs.logit == rhs.logit && lhs.tokenRange == rhs.tokenRange
+    }
 }

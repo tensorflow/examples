@@ -22,8 +22,8 @@ class BertQAClient{
         }
         
     self.bertAnswerer = TFLBertQuestionAnswerer.questionAnswerer(modelPath: modelPath)
-        
     }
+    
     
     func run(query: String, content: String) -> Result? {
         
@@ -39,6 +39,4 @@ class BertQAClient{
         
         return Result(answer: answer, inferenceTime: inferenceTime)
       }
-    
-    
 }

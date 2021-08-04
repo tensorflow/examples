@@ -19,7 +19,7 @@ import os
 class DatasetsTableViewController: UITableViewController {
   /// List of `Dataset`s to run the Bert model.
   var datasets: [Dataset] = Dataset.load()
-  var bertQA: BertQAClient?
+  var bertQA: BertQAHandler?
 
   required init?(coder: NSCoder) {
     super.init(coder: coder)
@@ -87,7 +87,7 @@ class DatasetsTableViewController: UITableViewController {
 //    let threadCount = UserDefaults.standard.integer(forKey: InterpreterOptions.threadCount.id)
 
     do {
-      bertQA = try BertQAClient()
+      bertQA = try BertQAHandler()
     } catch let error {
       fatalError(error.localizedDescription)
     }
