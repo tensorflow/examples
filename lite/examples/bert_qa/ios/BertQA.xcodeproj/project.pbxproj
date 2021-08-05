@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0425A94F26BAF30000A58007 /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 0425A94E26BAF30000A58007 /* model.tflite */; };
-		0425A95026BAF30000A58007 /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 0425A94E26BAF30000A58007 /* model.tflite */; };
-		0425A95126BAF30000A58007 /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 0425A94E26BAF30000A58007 /* model.tflite */; };
 		3A4D441F43E606AFFBEDC0F4 /* Pods_BertQA_UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C806A982D14ED6BC003A9A /* Pods_BertQA_UIKit.framework */; };
 		8073F32F9E31519DA1C60690 /* Pods_BertQA_SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */; };
 		840245262424CB63002D1DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840245252424CB63002D1DAD /* AppDelegate.swift */; };
@@ -17,25 +14,19 @@
 		840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 840245302424CB64002D1DAD /* LaunchScreen.storyboard */; };
 		840C6F412403A39E00E6905E /* BertQAHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3D2403A39E00E6905E /* BertQAHandler.swift */; };
 		840C6F422403A39E00E6905E /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840C6F3E2403A39E00E6905E /* Result.swift */; };
-		840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
 		842E65D123CEDD6F00AE9416 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D023CEDD6F00AE9416 /* Constants.swift */; };
 		842E65D423CEDF7200AE9416 /* DatasetTitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */; };
 		844C87012424CE29006DA707 /* DatasetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FC2424CD7F006DA707 /* DatasetListView.swift */; };
 		844C87022424CE2E006DA707 /* DatasetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C86FE2424CD97006DA707 /* DatasetDetailView.swift */; };
-		844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
 		844C87072424D019006DA707 /* KeyboardHeightObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844C87062424D019006DA707 /* KeyboardHeightObserver.swift */; };
 		844C87082424D03E006DA707 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842E65D023CEDD6F00AE9416 /* Constants.swift */; };
-		84551A6C23F2710100C71C16 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
 		845B4FD42434856500943980 /* Dataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B4FD32434856500943980 /* Dataset.swift */; };
 		845B4FD52434856A00943980 /* Dataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845B4FD32434856500943980 /* Dataset.swift */; };
-		846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */ = {isa = PBXBuildFile; fileRef = 840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */; };
-		846918FA2425214D00A90808 /* vocab.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84551A6B23F2710100C71C16 /* vocab.txt */; };
 		8475814E23CDC1660003472A /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 8475814D23CDC1660003472A /* README.md */; };
 		8475815023CDC24D0003472A /* DataSetDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475814F23CDC24D0003472A /* DataSetDetailViewController.swift */; };
 		8475815223CDC28C0003472A /* DataSetsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475815123CDC28C0003472A /* DataSetsTableViewController.swift */; };
 		849401FD24447883005F0C25 /* BertQAHandlerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849401F724447883005F0C25 /* BertQAHandlerTest.swift */; };
 		8496E7E123CF019C00386218 /* SuggestedQuestionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */; };
-		8498AA6D240FA5DF003ABA5E /* contents_from_squad_dict_format.json in Resources */ = {isa = PBXBuildFile; fileRef = 8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */; };
 		84C3284F23B49E2E00A7980D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C3284E23B49E2E00A7980D /* AppDelegate.swift */; };
 		84C3285423B49E2E00A7980D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285223B49E2E00A7980D /* Main.storyboard */; };
 		84C3285623B49E2F00A7980D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84C3285523B49E2F00A7980D /* Assets.xcassets */; };
@@ -59,7 +50,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0425A94E26BAF30000A58007 /* model.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; name = model.tflite; path = ../../../../../../../../model.tflite; sourceTree = "<group>"; };
 		20076681A0E239448C8D4B05 /* Pods-BertQA.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.release.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.release.xcconfig"; sourceTree = "<group>"; };
 		2D0CCBAA9B671F431851D96A /* Pods_BertQA_SwiftUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BertQA_SwiftUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F95CAA32D15283DD33CF2F /* Pods-BertQA.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BertQA.debug.xcconfig"; path = "Target Support Files/Pods-BertQA/Pods-BertQA.debug.xcconfig"; sourceTree = "<group>"; };
@@ -75,14 +65,12 @@
 		840245332424CB64002D1DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		840C6F3D2403A39E00E6905E /* BertQAHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandler.swift; sourceTree = "<group>"; };
 		840C6F3E2403A39E00E6905E /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
-		840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = mobilebert_float_20191023.tflite; sourceTree = "<group>"; };
 		84126CCB24111D5E00349A2A /* ControlPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlPanelView.swift; sourceTree = "<group>"; };
 		842E65D023CEDD6F00AE9416 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		842E65D323CEDF7200AE9416 /* DatasetTitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetTitleCell.swift; sourceTree = "<group>"; };
 		844C86FC2424CD7F006DA707 /* DatasetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetListView.swift; sourceTree = "<group>"; };
 		844C86FE2424CD97006DA707 /* DatasetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetDetailView.swift; sourceTree = "<group>"; };
 		844C87062424D019006DA707 /* KeyboardHeightObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardHeightObserver.swift; sourceTree = "<group>"; };
-		84551A6B23F2710100C71C16 /* vocab.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = vocab.txt; sourceTree = "<group>"; };
 		845B4FD32434856500943980 /* Dataset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dataset.swift; sourceTree = "<group>"; };
 		8475814D23CDC1660003472A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8475814F23CDC24D0003472A /* DataSetDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSetDetailViewController.swift; sourceTree = "<group>"; };
@@ -92,7 +80,6 @@
 		849401DA244462AB005F0C25 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		849401F724447883005F0C25 /* BertQAHandlerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BertQAHandlerTest.swift; sourceTree = "<group>"; };
 		8496E7E023CF019C00386218 /* SuggestedQuestionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedQuestionButton.swift; sourceTree = "<group>"; };
-		8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = contents_from_squad_dict_format.json; sourceTree = "<group>"; };
 		84C3284B23B49E2E00A7980D /* BertQA-UIKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BertQA-UIKit.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		84C3284E23B49E2E00A7980D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		84C3285323B49E2E00A7980D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -132,6 +119,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04A56AB426BBD7EB00328288 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		5A57E91BD94E10B803571A3B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -179,7 +173,7 @@
 		841BD7242422698B0050D71C /* BertQACore */ = {
 			isa = PBXGroup;
 			children = (
-				842E65CD23CEDBA900AE9416 /* Resources */,
+				04A56AB426BBD7EB00328288 /* Resources */,
 				8475815523CDC64B0003472A /* Models */,
 				842E65D023CEDD6F00AE9416 /* Constants.swift */,
 			);
@@ -197,17 +191,6 @@
 				84C3285A23B49E2F00A7980D /* Info.plist */,
 			);
 			path = ViewInUIKit;
-			sourceTree = "<group>";
-		};
-		842E65CD23CEDBA900AE9416 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				0425A94E26BAF30000A58007 /* model.tflite */,
-				8498AA6C240FA5DF003ABA5E /* contents_from_squad_dict_format.json */,
-				840C6F432403A5C900E6905E /* mobilebert_float_20191023.tflite */,
-				84551A6B23F2710100C71C16 /* vocab.txt */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		842E65D223CEDF4700AE9416 /* Views */ = {
@@ -348,7 +331,7 @@
 			buildConfigurationList = 84C3285D23B49E2F00A7980D /* Build configuration list for PBXNativeTarget "BertQA-UIKit" */;
 			buildPhases = (
 				F18482CEB971E4CB207BA1C9 /* [CP] Check Pods Manifest.lock */,
-				84B3C6AC240F758B00BA6F5E /* ShellScript */,
+				84B3C6AC240F758B00BA6F5E /* Run Script */,
 				84C3284723B49E2E00A7980D /* Sources */,
 				84C3284823B49E2E00A7980D /* Frameworks */,
 				84C3284923B49E2E00A7980D /* Resources */,
@@ -410,11 +393,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				846918FA2425214D00A90808 /* vocab.txt in Resources */,
-				0425A95026BAF30000A58007 /* model.tflite in Resources */,
 				840245322424CB64002D1DAD /* LaunchScreen.storyboard in Resources */,
-				844C87032424CFD0006DA707 /* contents_from_squad_dict_format.json in Resources */,
-				846918F82425214B00A90808 /* mobilebert_float_20191023.tflite in Resources */,
 				84CBD8F92424DCBF00DC20AA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -423,7 +402,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0425A95126BAF30000A58007 /* model.tflite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,13 +409,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84551A6C23F2710100C71C16 /* vocab.txt in Resources */,
 				84C3285923B49E2F00A7980D /* LaunchScreen.storyboard in Resources */,
 				84C3285623B49E2F00A7980D /* Assets.xcassets in Resources */,
-				0425A94F26BAF30000A58007 /* model.tflite in Resources */,
-				840C6F442403A5C900E6905E /* mobilebert_float_20191023.tflite in Resources */,
 				8475814E23CDC1660003472A /* README.md in Resources */,
-				8498AA6D240FA5DF003ABA5E /* contents_from_squad_dict_format.json in Resources */,
 				84C3285423B49E2E00A7980D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -479,7 +453,7 @@
 			shellPath = /bin/sh;
 			shellScript = "$SRCROOT/RunScripts/download_resources.sh\n";
 		};
-		84B3C6AC240F758B00BA6F5E /* ShellScript */ = {
+		84B3C6AC240F758B00BA6F5E /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -488,6 +462,7 @@
 			);
 			inputPaths = (
 			);
+			name = "Run Script";
 			outputFileListPaths = (
 			);
 			outputPaths = (

@@ -17,11 +17,13 @@
 # Download TF Lite model from the internet if it does not exist.
 
 TFLITE_RESOURCES="mobilebert_qa_vocab.zip"
-TFLITE_MODEL="mobilebert_float_20191023.tflite"
+#TFLITE_MODEL="mobilebert_float_20191023.tflite"
+TFLITE_MODEL="model.tflite"
 TFLITE_VOCA="vocab.txt"
 TFLITE_DIC="contents_from_squad_dict_format.json"
 
 TFLITE_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/bert_qa"
+TFLITE_MODEL_URL="https://tfhub.dev/tensorflow/lite-model/mobilebert/1/metadata/1?lite-format=tflite"
 
 RESOURCES_DIR="BertQACore/Resources"
 RESOURCES_ZIP_PATH="${RESOURCES_DIR}/${TFLITE_RESOURCES}"
@@ -47,9 +49,9 @@ tf_resource_exists=$( is_all_existing "${RESOURCES[@]}" )
 
 if [ "${tf_resource_exists}" = "false" ]; then
     # Download zipped resources.
-    curl --create-dirs -o "${RESOURCES_ZIP_PATH}" "${TFLITE_URL}/${TFLITE_RESOURCES}"
-    unzip -n "${RESOURCES_ZIP_PATH}" -d "${RESOURCES_DIR}"
-    rm "${RESOURCES_ZIP_PATH}"
+    curl --create-dirs -o "${MODEL_PATH}" "${TFLITE_MODEL_URL}"
+#    unzip -n "${RESOURCES_ZIP_PATH}" -d "${RESOURCES_DIR}"
+#    rm "${RESOURCES_ZIP_PATH}"
     echo "INFO: Downloaded TensorFlow Lite resources to ${RESOURCES_DIR}."
 fi
 
