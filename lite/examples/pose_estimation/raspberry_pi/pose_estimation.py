@@ -19,7 +19,6 @@ import time
 from classifier import Classifier
 import cv2
 from movenet import Movenet
-import numpy as np
 from posenet import Posenet
 import utils
 
@@ -93,8 +92,7 @@ def run(estimation_model, classification_model, label_file, camera_id, width,
 
     if classification_model:
       # Run pose classification
-      prob_list = classifier.classify_pose(keypoints.flatten().astype(
-          np.float32))
+      prob_list = classifier.classify_pose(keypoints)
 
       # Show classification results on the image
       for i in range(detection_results_to_show):

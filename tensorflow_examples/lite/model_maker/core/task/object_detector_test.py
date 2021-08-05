@@ -88,7 +88,7 @@ class ObjectDetectorTest(tf.test.TestCase):
         self.get_temp_dir(),
         tflite_filename=filename,
         export_format=ExportFormat.TFLITE)
-    model_size = 4439987
+    model_size = 4312187
     err = model_size * 0.05
     self.assertTrue(os.path.isfile(output_path))
     self.assertNear(os.path.getsize(output_path), model_size, err)

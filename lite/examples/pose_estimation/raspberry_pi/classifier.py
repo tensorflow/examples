@@ -28,12 +28,13 @@ except ImportError:
 class Classifier(object):
   """A wrapper class for a TFLite pose classification model."""
 
-  def __init__(self, model_name, label_file):
+  def __init__(self, model_name, label_file, score_threshold=0.1):
     """Initialize a pose classification model.
 
     Args:
       model_name: Name of the TFLite pose classification model.
       label_file: Path of the label list file.
+      score_threshold: The minimum keypoint score to run classification.
     """
 
     # Append TFLITE extension to model_name if there's no extension
@@ -50,6 +51,7 @@ class Classifier(object):
     self._interpreter = interpreter
 
     self.pose_class_names = self._load_labels(label_file)
+    self.score_threshold = score_threshold
 
   def _load_labels(self, label_path):
     """Load label list from file.
@@ -67,15 +69,21 @@ class Classifier(object):
     """Run classification on an input.
 
     Args:
-        keypoints_and_scores: A list of coordinates and scores of 17 COCO
-          keypoints. Shape: (17, 3). You can pass the output of Posenet#detect()
-            and Movenet#detect() here.
+      keypoints_and_scores: A list of coordinates and scores of 17 COCO
+        keypoints. Shape: (17, 3). You can pass the output of Posenet#detect()
+        and Movenet#detect() here.
 
     Returns:
-        prob_list: A list of prediction result in the (class_name,
-        probability) format.
-            Sorted by probability descendingly.
+      A list of prediction result in the (class_name, probability) format.
+      Sorted by probability descendingly.
     """
+    # Check if keypoints are all detected before running the classifier.
+    # If there's a keypoint below the threshold, return zero probability for all
+    # class.
+    min_score = np.amin(keypoints_and_scores[:, 2])
+    if min_score < self.score_threshold:
+      return [(class_name, 0) for class_name in self.pose_class_names]
+
     # Flatten the input and add an extra dimension to match with the requirement
     # of the TFLite model.
     input_tensor = keypoints_and_scores.flatten().astype(np.float32)
