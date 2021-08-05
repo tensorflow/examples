@@ -60,12 +60,16 @@ KEYPOINT_EDGE_INDS_TO_COLOR = {
 }
 
 
-def draw_landmarks_edges(image, keypoint_locs, keypoint_edges, edge_colors):
+def draw_landmarks_edges(image,
+                         keypoint_locs,
+                         keypoint_edges,
+                         edge_colors,
+                         keypoint_color=(0, 255, 0)):
   """Draw landmarks and edges on the input image and return it."""
   for landmark in keypoint_locs:
     landmark_x = min(landmark[0], image.shape[1] - 1)
     landmark_y = min(landmark[1], image.shape[0] - 1)
-    cv2.circle(image, (int(landmark_x), int(landmark_y)), 2, (0, 255, 0), 9)
+    cv2.circle(image, (int(landmark_x), int(landmark_y)), 2, keypoint_color, 4)
 
   for idx, edge in enumerate(keypoint_edges):
     cv2.line(image, (int(edge[0][0]), int(edge[0][1])),

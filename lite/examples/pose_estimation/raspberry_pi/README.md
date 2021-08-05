@@ -53,20 +53,23 @@ python3 pose_estimation.py \
 
 ## Customization options
 
-*   Here is the full list of parameters supported by the sample:
-```python3 pose_classification.py \
-      --model model_name \
-      --classifier classification_model_name`
-```
-*   `model`: Name of the TFLite pose estimation model to be used.
+*  Here is the full list of parameters supported by the sample:
+```python3 pose_classification.py```
+  *   `model`: Name of the TFLite pose estimation model to be used.
     *   One of these values: `posenet`, `movenet_lightning`, `movenet_thunder`.
     *   Default value is `movenet_lightning`.
-*   `classifier`: Name of the TFLite pose classification model to be used.
+  *   `classifier`: Name of the TFLite pose classification model to be used.
     *   Default value is empty.
     *   If no classification model specified, the sample will only run the pose
         estimation step.
-*   `camera_id`: Specify the camera for OpenCV to capture images from.
+  *   `camera_id`: Specify the camera for OpenCV to capture images from.
     *   Default value is `0`.
-*   `frameWidth`, `frameHeight`: Resolution of the image to be captured from the
-    camera.
+  *   `frameWidth`, `frameHeight`: Resolution of the image to be captured from
+      the camera.
     *   Default value is `(640, 480)`.
+
+## Visualize pose estimation result of test data
+
+*  Run this script to visualize the pose estimation on test data
+
+```python3 visualizer.py```

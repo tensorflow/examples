@@ -31,4 +31,11 @@ if [ ! -f "$FILE" ]; then
     -o ${FILE}
 fi
 
+FILE=${DATA_DIR}/classifier.tflite
+if [ ! -f "$FILE" ]; then
+  curl \
+    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/pose_classifier/yoga_classifier.tflite' \
+    -o ${FILE}
+fi
+
 echo -e "Downloaded files are in ${DATA_DIR}"

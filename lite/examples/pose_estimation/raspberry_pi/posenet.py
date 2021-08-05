@@ -43,6 +43,7 @@ class Posenet(object):
 
     # Initialize model
     interpreter = Interpreter(model_path=model_name, num_threads=4)
+    interpreter.allocate_tensors()
 
     self._input_index = interpreter.get_input_details()[0]['index']
     self._output_heatmap_index = interpreter.get_output_details()[0]['index']
