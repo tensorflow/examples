@@ -45,8 +45,8 @@ import org.tensorflow.lite.examples.poseestimation.data.Device
 
 class MainActivity : AppCompatActivity() {
     companion object {
-        private const val PREVIEW_WIDTH = 640
-        private const val PREVIEW_HEIGHT = 480
+        private const val PREVIEW_WIDTH = 320
+        private const val PREVIEW_HEIGHT = 240
         private const val FRAGMENT_DIALOG = "dialog"
         private const val TAG = "PoseEstimation"
     }
@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvTime: TextView
     private lateinit var spnDevice: Spinner
     private lateinit var spnModel: Spinner
+    private val averageCalculator = MovingAverageCalculator(50)
 
     private val stateCallback = object : CameraDevice.StateCallback() {
         override fun onOpened(camera: CameraDevice) {
@@ -144,6 +145,8 @@ class MainActivity : AppCompatActivity() {
 
     private var imageAvailableListener = object : ImageReader.OnImageAvailableListener {
         override fun onImageAvailable(imageReader: ImageReader) {
+            val frameStartTime = SystemClock.elapsedRealtimeNanos()
+
             // We need wait until we have some size from onPreviewSizeChosen
             if (previewWidth == 0 || previewHeight == 0) {
                 return
@@ -164,7 +167,21 @@ class MainActivity : AppCompatActivity() {
             )
             image.close()
 
+            val conversionTime = (SystemClock.elapsedRealtimeNanos() - frameStartTime) / 1_000_000
+            Log.d(TAG, "Conversion time = ${conversionTime}ms")
+
             processImage(rotatedBitmap)
+
+            val timePerFrame = (SystemClock.elapsedRealtimeNanos() - frameStartTime) / 1_000_000
+            averageCalculator.add(timePerFrame.toFloat())
+            val fps = 1_000 / averageCalculator.average()
+            Log.d(TAG, "Time per frame = ${averageCalculator.average()}ms")
+            runOnUiThread {
+                tvTime.text =
+                    getString(R.string.tfe_pe_tv_time).format(averageCalculator.average().toInt())
+            }
+
+
         }
     }
 
@@ -459,6 +476,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        tvScore.text = getString(R.string.tfe_pe_tv_score).format(score)
+        poseDetector?.lastInferenceTimeNanos()?.let {
+//            averageCalculator.add(it / 1_000_000f)
+//            Log.d(TAG, "Inference time = ${averageCalculator.average()}ms",  )
+//            val fps = (1_000 / averageCalculator.average()).toInt()
+//            tvTime.text =
+//                getString(R.string.tfe_pe_tv_time).format(fps)
+        }
+
+        val visualizationStartTimeNanos = SystemClock.elapsedRealtimeNanos()
+
         // Draw `bitmap` and `person`
         val canvas: Canvas = surfaceHolder.lockCanvas()
 
@@ -488,11 +516,9 @@ class MainActivity : AppCompatActivity() {
             Rect(left, top, right, bottom), Paint()
         )
         surfaceHolder.unlockCanvasAndPost(canvas)
-        tvScore.text = getString(R.string.tfe_pe_tv_score).format(score)
-        poseDetector?.lastInferenceTimeNanos()?.let {
-            tvTime.text =
-                getString(R.string.tfe_pe_tv_time).format(it * 1.0f / 1_000_000)
-        }
+        val visualizationTimeMs = (SystemClock.elapsedRealtimeNanos() - visualizationStartTimeNanos) / 1_000_000
+        Log.d(TAG, "Visualization time = ${visualizationTimeMs}ms",  )
+
     }
 
     /**

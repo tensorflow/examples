@@ -20,8 +20,10 @@ import android.content.Context
 import android.graphics.*
 import android.os.SystemClock
 import org.tensorflow.lite.DataType
+import org.tensorflow.lite.HexagonDelegate
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.poseestimation.data.*
+import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -57,7 +59,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 }
                 Device.GPU -> {
                     // TODO: Create a new Movenet model that can run on GPUDelegate
-//                    options.addDelegate(GpuDelegate())
+                    options.addDelegate(GpuDelegate())
                 }
                 Device.NNAPI -> options.setUseNNAPI(true)
             }
@@ -65,8 +67,8 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        if (modelType == ModelType.Lightning) "movenet_lightning_v3.tflite"
-                        else "movenet_thunder_v3.tflite"
+                        if (modelType == ModelType.Lightning) "lightning_fp16.tflite"
+                        else "thunder_fp16.tflite"
                     ), options
                 )
             )
@@ -183,7 +185,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             add(ResizeWithCropOrPadOp(size, size))
             add(ResizeOp(inputWidth, inputHeight, ResizeOp.ResizeMethod.BILINEAR))
         }.build()
-        val tensorImage = TensorImage(DataType.FLOAT32)
+        val tensorImage = TensorImage(DataType.UINT8)
         tensorImage.load(bitmap)
         return imageProcessor.process(tensorImage)
     }
