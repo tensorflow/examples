@@ -79,7 +79,7 @@ public class BorderedText {
   }
 
   public void drawText(
-      final Canvas canvas, final float posX, final float posY, final String text, Paint bgPaint) {
+          final Canvas canvas, final float posX, final float posY, final String text, Paint bgPaint) {
 
     float width = exteriorPaint.measureText(text);
     float textSize = exteriorPaint.getTextSize();
@@ -117,7 +117,7 @@ public class BorderedText {
   }
 
   public void getTextBounds(
-      final String line, final int index, final int count, final Rect lineBounds) {
+          final String line, final int index, final int count, final Rect lineBounds) {
     interiorPaint.getTextBounds(line, index, count, lineBounds);
   }
 

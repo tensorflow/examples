@@ -17,10 +17,12 @@ package org.tensorflow.lite.examples.detection.tflite;
 
 import static java.lang.Math.min;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Trace;
 import android.util.Log;
@@ -109,6 +111,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
    * @param inputSize The size of image input
    * @param isQuantized Boolean representing model is quantized or not
    */
+  @SuppressLint("LongLogTag")
   public static Detector create(
       final Context context,
       final String modelFilename,
@@ -275,5 +278,55 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   private void recreateInterpreter() {
     tfLite.close();
     tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
+  }
+
+  public static Matrix getTransformationMatrix(
+          final int srcWidth,
+          final int srcHeight,
+          final int dstWidth,
+          final int dstHeight,
+          final int applyRotation,
+          final boolean maintainAspectRatio) {
+    final Matrix matrix = new Matrix();
+
+    // Translate so center of image is at origin.
+    matrix.postTranslate(-srcWidth / 2f, -srcHeight / 2f);
+
+    if (applyRotation != 0) {
+      // Rotate around origin.
+      matrix.postRotate(applyRotation);
+    }
+
+    // Account for the already applied rotation, if any, and then determine how
+    // much scaling is needed for each axis.
+    final boolean transpose = (Math.abs(applyRotation) + 90) % 180 == 0;
+
+    final int inWidth = transpose ? srcHeight : srcWidth;
+    final int inHeight = transpose ? srcWidth : srcHeight;
+
+    // Apply scaling if necessary.
+    if (inWidth != dstWidth || inHeight != dstHeight) {
+      final float scaleFactorX = dstWidth / (float) inWidth;
+      final float scaleFactorY = dstHeight / (float) inHeight;
+
+      if (maintainAspectRatio) {
+        // Scale by minimum factor so that dst is filled completely while
+        // maintaining the aspect ratio. Some image may fall off the edge.
+        final float scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+        matrix.postScale(scaleFactor, scaleFactor);
+      } else {
+        // Scale exactly to fill dst from src.
+        matrix.postScale(scaleFactorX, scaleFactorY);
+      }
+    }
+
+    // Translate back from origin centered reference to destination frame.
+    if (applyRotation == 90) {
+      matrix.postTranslate(dstWidth / 3f, dstHeight / 2f);
+    }else if(applyRotation == 0 || applyRotation == 180){
+      matrix.postTranslate(dstWidth / 2f, dstHeight / 3f);
+    }
+
+    return matrix;
   }
 }

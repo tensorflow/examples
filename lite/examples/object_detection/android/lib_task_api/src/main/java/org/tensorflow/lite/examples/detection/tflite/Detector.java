@@ -15,13 +15,17 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.detection.tflite;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+import android.media.Image;
+
+import java.io.IOException;
 import java.util.List;
 
 /** Generic interface for interacting with different recognition engines. */
 public interface Detector {
-  List<Recognition> recognizeImage(Bitmap bitmap);
+  List<Recognition> recognizeImage(Image image, int sensorOrientation);
 
   void enableStatLogging(final boolean debug);
 
@@ -53,7 +57,7 @@ public interface Detector {
     private RectF location;
 
     public Recognition(
-        final String id, final String title, final Float confidence, final RectF location) {
+            final String id, final String title, final Float confidence, final RectF location) {
       this.id = id;
       this.title = title;
       this.confidence = confidence;
