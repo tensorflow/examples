@@ -15,12 +15,9 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.detection.tflite;
 
-import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.media.Image;
 
-import java.io.IOException;
 import java.util.List;
 
 /** Generic interface for interacting with different recognition engines. */
