@@ -24,7 +24,8 @@ try:
   from tflite_runtime.interpreter import Interpreter
 except ImportError:
   # If not, fallback to use the TFLite interpreter from the full TF package.
-  from tensorflow.lite import Interpreter
+  import tensorflow as tf
+  Interpreter = tf.lite.Interpreter
 # pylint: enable=g-import-not-at-top
 
 
