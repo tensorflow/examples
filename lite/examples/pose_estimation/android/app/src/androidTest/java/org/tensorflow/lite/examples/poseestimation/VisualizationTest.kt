@@ -17,12 +17,14 @@ import org.tensorflow.lite.examples.poseestimation.ml.PoseNet
  * This test is used to visually verify detection results by the models.
  * You can put a breakpoint at the end of the method, debug this method, than use the
  * "View Bitmap" feature of the debugger to check the visualized detection result.
+ * This test can also be used to generate expected result for the detection tests.
+ * See goto.google.com/tflite-pose-estimation-testgen for details.
  */
 @RunWith(AndroidJUnit4::class)
 class VisualizationTest {
 
     companion object {
-        private const val TEST_INPUT_IMAGE = "image2.jpg"
+        private const val TEST_INPUT_IMAGE = "image1"
     }
 
     private lateinit var appContext: Context
@@ -31,7 +33,7 @@ class VisualizationTest {
     @Before
     fun setup() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        inputBitmap = EvaluationUtils.loadBitmapAssetByName(TEST_INPUT_IMAGE)
+        inputBitmap = EvaluationUtils.loadBitmapResourceByName(TEST_INPUT_IMAGE)
     }
 
     @Test

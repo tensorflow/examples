@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.*
 import android.os.SystemClock
 import org.tensorflow.lite.DataType
+import org.tensorflow.lite.HexagonDelegate
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.poseestimation.data.*
 import org.tensorflow.lite.gpu.GpuDelegate
@@ -38,8 +39,7 @@ enum class ModelType {
     Thunder
 }
 
-class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: GpuDelegate?) :
-    PoseDetector {
+class MoveNet(private val interpreter: Interpreter) : PoseDetector {
 
     companion object {
         private const val MIN_CROP_KEYPOINT_SCORE = .2f
@@ -53,14 +53,13 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
             val options = Interpreter.Options()
-            var gpuDelegate: GpuDelegate? = null
             options.setNumThreads(CPU_NUM_THREADS)
             when (device) {
                 Device.CPU -> {
                 }
                 Device.GPU -> {
-                    gpuDelegate = GpuDelegate()
-                    options.addDelegate(gpuDelegate)
+                    // TODO: Create a new Movenet model that can run on GPUDelegate
+                    options.addDelegate(GpuDelegate())
                 }
                 Device.NNAPI -> options.setUseNNAPI(true)
             }
@@ -68,11 +67,10 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        if (modelType == ModelType.Lightning) "movenet_lightning_v4.tflite"
-                        else "movenet_thunder_v4.tflite"
+                        if (modelType == ModelType.Lightning) "lightning_fp16.tflite"
+                        else "thunder_fp16.tflite"
                     ), options
-                ),
-                gpuDelegate
+                )
             )
         }
 
@@ -113,7 +111,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 bitmap,
                 -rect.left,
                 -rect.top,
-                null
+                Paint()
             )
             val inputTensor = processInputImage(detectBitmap, inputWidth, inputHeight)
             val outputTensor = TensorBuffer.createFixedSize(outputShape, DataType.FLOAT32)
@@ -123,7 +121,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             val positions = mutableListOf<Float>()
 
             inputTensor?.let { input ->
-                interpreter.run(input.buffer, outputTensor.buffer.rewind())
+                interpreter.run(input.tensorBuffer.buffer, outputTensor.buffer)
                 val output = outputTensor.floatArray
                 for (idx in 0 until numKeyPoints) {
                     val x = output[idx * 3 + 1] * inputWidth * widthRatio
@@ -171,7 +169,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
 
     override fun close() {
-        gpuDelegate?.close()
         interpreter.close()
         cropRegion = null
     }
@@ -258,8 +255,8 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 KeyPoint(
                     it.bodyPart,
                     PointF(
-                        it.coordinate.x,
-                        it.coordinate.y
+                        it.coordinate.x * imageWidth,
+                        it.coordinate.y * imageHeight
                     ),
                     it.score
                 )
