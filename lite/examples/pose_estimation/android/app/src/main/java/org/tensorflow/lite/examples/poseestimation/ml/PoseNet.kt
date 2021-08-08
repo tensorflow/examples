@@ -36,7 +36,8 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import kotlin.math.exp
 
-class PoseNet(private val interpreter: Interpreter) : PoseDetector {
+class PoseNet(private val interpreter: Interpreter, private var gpuDelegate: GpuDelegate?) :
+    PoseDetector {
 
     companion object {
         private const val CPU_NUM_THREADS = 4
@@ -46,12 +47,14 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
 
         fun create(context: Context, device: Device): PoseNet {
             val options = Interpreter.Options()
+            var gpuDelegate: GpuDelegate? = null
             options.setNumThreads(CPU_NUM_THREADS)
             when (device) {
                 Device.CPU -> {
                 }
                 Device.GPU -> {
-                    options.addDelegate(GpuDelegate())
+                    gpuDelegate = GpuDelegate()
+                    options.addDelegate(gpuDelegate)
                 }
                 Device.NNAPI -> options.setUseNNAPI(true)
             }
@@ -61,7 +64,8 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
                         context,
                         "posenet_model.tflite"
                     ), options
-                )
+                ),
+                gpuDelegate
             )
         }
     }
@@ -147,15 +151,19 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
         keypointPositions.forEachIndexed { idx, position ->
             val positionY = keypointPositions[idx].first
             val positionX = keypointPositions[idx].second
-            yCoords[idx] = ((
-                    position.first / (height - 1).toFloat() * inputHeight +
-                            offsets[0][positionY][positionX][idx]
-                    ) * (cropSize.toFloat() / inputHeight)).toInt() + (cropHeight / 2).toInt()
-            xCoords[idx] = ((
-                    position.second / (width - 1).toFloat() * inputWidth +
-                            offsets[0][positionY]
-                                    [positionX][idx + numKeypoints]
-                    ) * (cropSize.toFloat() / inputWidth)).toInt() + (cropWidth / 2).toInt()
+
+            val inputImageCoordinateY =
+                position.first / (height - 1).toFloat() * inputHeight + offsets[0][positionY][positionX][idx]
+            val ratioHeight = cropSize.toFloat() / inputHeight
+            val paddingHeight = cropHeight / 2
+            yCoords[idx] = (inputImageCoordinateY * ratioHeight - paddingHeight).toInt()
+
+            val inputImageCoordinateX =
+                position.second / (width - 1).toFloat() * inputWidth + offsets[0][positionY][positionX][idx + numKeypoints]
+            val ratioWidth = cropSize.toFloat() / inputWidth
+            val paddingWidth = cropWidth / 2
+            xCoords[idx] = (inputImageCoordinateX * ratioWidth - paddingWidth).toInt()
+
             confidenceScores[idx] = sigmoid(heatmaps[0][positionY][positionX][idx])
         }
 
@@ -177,6 +185,7 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
 
     override fun close() {
+        gpuDelegate?.close()
         interpreter.close()
     }
 
@@ -188,11 +197,11 @@ class PoseNet(private val interpreter: Interpreter) : PoseDetector {
         cropWidth = 0f
         cropHeight = 0f
         cropSize = if (bitmap.width > bitmap.height) {
-            cropWidth = (bitmap.width - bitmap.height).toFloat()
-            bitmap.height
-        } else {
-            cropHeight = (bitmap.height - bitmap.width).toFloat()
+            cropHeight = (bitmap.width - bitmap.height).toFloat()
             bitmap.width
+        } else {
+            cropWidth = (bitmap.height - bitmap.width).toFloat()
+            bitmap.height
         }
 
         val imageProcessor = ImageProcessor.Builder().apply {
