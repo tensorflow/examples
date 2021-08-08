@@ -68,8 +68,8 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        if (modelType == ModelType.Lightning) "movenet_lightning_v4.tflite"
-                        else "movenet_thunder_v4.tflite"
+                        if (modelType == ModelType.Lightning) "movenet_lightning.tflite"
+                        else "movenet_thunder.tflite"
                     ), options
                 ),
                 gpuDelegate

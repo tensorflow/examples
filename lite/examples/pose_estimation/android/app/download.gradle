@@ -13,7 +13,7 @@ task downloadMovenetLightningModel(type: DownloadUrlTask) {
         println "Downloading ${modelMovenetLightningDownloadUrl}"
     }
     sourceUrl = "${modelMovenetLightningDownloadUrl}"
-    target = file("src/main/assets/movenet_lightning_v4.tflite")
+    target = file("src/main/assets/movenet_lightning.tflite")
 }
 
 task downloadMovenetThunderModel(type: DownloadUrlTask) {
@@ -22,7 +22,7 @@ task downloadMovenetThunderModel(type: DownloadUrlTask) {
         println "Downloading ${modelMovenetThunderDownloadUrl}"
     }
     sourceUrl = "${modelMovenetThunderDownloadUrl}"
-    target = file("src/main/assets/movenet_thunder_v4.tflite")
+    target = file("src/main/assets/movenet_thunder.tflite")
 }
 
 task downloadPoseClassifierModel(type: DownloadUrlTask) {
