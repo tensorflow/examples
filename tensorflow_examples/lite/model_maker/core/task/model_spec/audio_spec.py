@@ -283,6 +283,9 @@ class BrowserFFTSpec(BaseSpec):
   ])
   def _preprocess(self, x, label):
     """Preprocess the dataset to extract the spectrum."""
+    # Add small Gaussian noise to the input x
+    # to solve the potential "nan" problem of the preprocess_model.
+    x = x + 1e-05 * tf.random.normal(x.shape)
     # x has shape (1, EXPECTED_WAVEFORM_LENGTH)
     spectrum = self._preprocess_model(x)
     # y has shape (1, embedding_len)
