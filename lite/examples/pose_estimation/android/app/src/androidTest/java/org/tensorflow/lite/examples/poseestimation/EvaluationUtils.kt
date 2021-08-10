@@ -32,7 +32,7 @@ object EvaluationUtils {
 
     /**
      * Assert whether the detected person from the image match with the expected result.
-     * Detection result is accepted as correct if it is within the ACCEPTABLE_ERROR range from the
+     * Detection result is accepted as correct if it is within the acceptableError range from the
      * expected result.
      */
     fun assertPoseDetectionResult(

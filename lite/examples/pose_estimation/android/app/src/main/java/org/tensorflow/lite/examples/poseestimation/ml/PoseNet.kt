@@ -44,6 +44,7 @@ class PoseNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         private const val MEAN = 127.5f
         private const val STD = 127.5f
         private const val TAG = "Posenet"
+        private const val MODEL_FILENAME = "posenet.tflite"
 
         fun create(context: Context, device: Device): PoseNet {
             val options = Interpreter.Options()
@@ -62,7 +63,7 @@ class PoseNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        "posenet_model.tflite"
+                        MODEL_FILENAME
                     ), options
                 ),
                 gpuDelegate

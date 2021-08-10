@@ -50,6 +50,10 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         private const val TORSO_EXPANSION_RATIO = 1.9f
         private const val BODY_EXPANSION_RATIO = 1.2f
 
+        // TFLite file names.
+        private const val LIGHTNING_FILENAME = "movenet_lightning.tflite"
+        private const val THUNDER_FILENAME = "movenet_thunder.tflite"
+
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
             val options = Interpreter.Options()
@@ -68,8 +72,8 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        if (modelType == ModelType.Lightning) "movenet_lightning.tflite"
-                        else "movenet_thunder.tflite"
+                        if (modelType == ModelType.Lightning) LIGHTNING_FILENAME
+                        else THUNDER_FILENAME
                     ), options
                 ),
                 gpuDelegate

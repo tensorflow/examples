@@ -4,7 +4,7 @@ task downloadPosenetModel(type: DownloadUrlTask) {
         println "Downloading ${modelPosenetDownloadUrl}"
     }
     sourceUrl = "${modelPosenetDownloadUrl}"
-    target = file("src/main/assets/posenet_model.tflite")
+    target = file("src/main/assets/posenet.tflite")
 }
 
 task downloadMovenetLightningModel(type: DownloadUrlTask) {
