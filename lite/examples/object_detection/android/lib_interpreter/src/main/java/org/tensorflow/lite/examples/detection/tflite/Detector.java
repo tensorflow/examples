@@ -17,9 +17,12 @@ package org.tensorflow.lite.examples.detection.tflite;
 
 import android.graphics.Bitmap;
 import android.graphics.RectF;
+
 import java.util.List;
 
-/** Generic interface for interacting with different recognition engines. */
+/**
+ * Generic interface for interacting with different recognition engines.
+ */
 public interface Detector {
   List<Recognition> recognizeImage(Bitmap bitmap);
 
@@ -33,7 +36,9 @@ public interface Detector {
 
   void setUseNNAPI(boolean isChecked);
 
-  /** An immutable result returned by a Detector describing what was recognized. */
+  /**
+   * An immutable result returned by a Detector describing what was recognized.
+   */
   public class Recognition {
     /**
      * A unique identifier for what has been recognized. Specific to the class, not the instance of
@@ -41,7 +46,9 @@ public interface Detector {
      */
     private final String id;
 
-    /** Display name for the recognition. */
+    /**
+     * Display name for the recognition.
+     */
     private final String title;
 
     /**
@@ -49,7 +56,9 @@ public interface Detector {
      */
     private final Float confidence;
 
-    /** Optional location within the source image for the location of the recognized object. */
+    /**
+     * Optional location within the source image for the location of the recognized object.
+     */
     private RectF location;
 
     public Recognition(

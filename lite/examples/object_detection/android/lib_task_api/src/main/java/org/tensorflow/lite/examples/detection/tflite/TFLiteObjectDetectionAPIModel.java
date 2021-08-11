@@ -19,7 +19,9 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.media.Image;
+
 import static java.lang.Math.min;
+
 import android.os.Trace;
 
 import java.io.IOException;
@@ -85,12 +87,11 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
    * @param isQuantized   Boolean representing model is quantized or not
    */
   public static Detector create(
-          final Context context,
-          final String modelFilename,
-          final String labelFilename,
-          final int inputSize,
-          final boolean isQuantized)
-          throws IOException {
+      final Context context,
+      final String modelFilename,
+      final String labelFilename,
+      final int inputSize,
+      final boolean isQuantized) throws IOException {
     return new TFLiteObjectDetectionAPIModel(context, modelFilename);
   }
 
@@ -111,16 +112,16 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     int cropSize = min(width, height);
 
     ImageProcessingOptions imageOptions =
-            ImageProcessingOptions.builder()
-                    .setOrientation(getOrientation(sensorOrientation))
-                    // Set the ROI to the center of the image.
-                    .setRoi(
-                            new Rect(
-                                    /*left=*/ (width - cropSize) / 2,
-                                    /*top=*/ (height - cropSize) / 2,
-                                    /*right=*/ (width + cropSize) / 2,
-                                    /*bottom=*/ (height + cropSize) / 2))
-                    .build();
+        ImageProcessingOptions.builder()
+            .setOrientation(getOrientation(sensorOrientation))
+            // Set the ROI to the center of the image.
+            .setRoi(
+                new Rect(
+                    /*left=*/ (width - cropSize) / 2,
+                    /*top=*/ (height - cropSize) / 2,
+                    /*right=*/ (width + cropSize) / 2,
+                    /*bottom=*/ (height + cropSize) / 2))
+            .build();
 
     List<Detection> results = objectDetector.detect(inputImage, imageOptions);
 
@@ -133,11 +134,11 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     int cnt = 0;
     for (Detection detection : results) {
       recognitions.add(
-              new Recognition(
-                      "" + cnt++,
-                      detection.getCategories().get(0).getLabel(),
-                      detection.getCategories().get(0).getScore(),
-                      detection.getBoundingBox()));
+          new Recognition(
+              "" + cnt++,
+              detection.getCategories().get(0).getLabel(),
+              detection.getCategories().get(0).getScore(),
+              detection.getBoundingBox()));
     }
     Trace.endSection(); // "recognizeImage"
     return recognitions;
@@ -185,7 +186,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   @Override
-  public void setNumThreads( int numThreads) {
+  public void setNumThreads(int numThreads) {
     if (objectDetector != null) {
       optionsBuilder.setNumThreads(numThreads);
       recreateDetector();
@@ -195,8 +196,8 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   @Override
   public void setUseNNAPI(boolean isChecked) {
     throw new UnsupportedOperationException(
-            "Manipulating the hardware accelerators is not allowed in the Task"
-                    + " library currently. Only CPU is allowed.");
+        "Manipulating the hardware accelerators is not allowed in the Task"
+            + " library currently. Only CPU is allowed.");
   }
 
   private void recreateDetector() {
@@ -206,12 +207,12 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   public static Matrix getTransformationMatrix(
-          final int srcWidth,
-          final int srcHeight,
-          final int dstWidth,
-          final int dstHeight,
-          final int applyRotation,
-          final boolean maintainAspectRatio) {
+      final int srcWidth,
+      final int srcHeight,
+      final int dstWidth,
+      final int dstHeight,
+      final int applyRotation,
+      final boolean maintainAspectRatio) {
     final Matrix matrix = new Matrix();
 
     // Translate so center of image is at origin.
@@ -248,7 +249,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     // Translate back from origin centered reference to destination frame.
     if (applyRotation == 90) {
       matrix.postTranslate(dstWidth / 3f, dstHeight / 2f);
-    }else if(applyRotation == 0 || applyRotation == 180){
+    } else if (applyRotation == 0 || applyRotation == 180) {
       matrix.postTranslate(dstWidth / 2f, dstHeight / 3f);
     }
 

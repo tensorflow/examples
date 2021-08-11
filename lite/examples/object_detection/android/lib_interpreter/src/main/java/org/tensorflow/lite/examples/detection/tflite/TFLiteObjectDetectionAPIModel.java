@@ -26,6 +26,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Trace;
 import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.support.metadata.MetadataExtractor;
 
@@ -90,9 +92,12 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   private Interpreter.Options tfLiteOptions;
   private Interpreter tfLite;
 
-  private TFLiteObjectDetectionAPIModel() {}
+  private TFLiteObjectDetectionAPIModel() {
+  }
 
-  /** Memory-map the model file in Assets. */
+  /**
+   * Memory-map the model file in Assets.
+   */
   private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename)
       throws IOException {
     AssetFileDescriptor fileDescriptor = assets.openFd(modelFilename);
@@ -108,8 +113,8 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
    *
    * @param modelFilename The model file path relative to the assets folder
    * @param labelFilename The label file path relative to the assets folder
-   * @param inputSize The size of image input
-   * @param isQuantized Boolean representing model is quantized or not
+   * @param inputSize     The size of image input
+   * @param isQuantized   Boolean representing model is quantized or not
    */
   @SuppressLint("LongLogTag")
   public static Detector create(
@@ -124,9 +129,9 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     MappedByteBuffer modelFile = loadModelFile(context.getAssets(), modelFilename);
     MetadataExtractor metadata = new MetadataExtractor(modelFile);
     try (BufferedReader br =
-        new BufferedReader(
-            new InputStreamReader(
-                metadata.getAssociatedFile(labelFilename), Charset.defaultCharset()))) {
+             new BufferedReader(
+                 new InputStreamReader(
+                     metadata.getAssociatedFile(labelFilename), Charset.defaultCharset()))) {
       String line;
       while ((line = br.readLine()) != null) {
         Log.w(TAG, line);
@@ -244,7 +249,8 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   @Override
-  public void enableStatLogging(final boolean logStats) {}
+  public void enableStatLogging(final boolean logStats) {
+  }
 
   @Override
   public String getStatString() {
@@ -281,12 +287,12 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   public static Matrix getTransformationMatrix(
-          final int srcWidth,
-          final int srcHeight,
-          final int dstWidth,
-          final int dstHeight,
-          final int applyRotation,
-          final boolean maintainAspectRatio) {
+      final int srcWidth,
+      final int srcHeight,
+      final int dstWidth,
+      final int dstHeight,
+      final int applyRotation,
+      final boolean maintainAspectRatio) {
     final Matrix matrix = new Matrix();
 
     // Translate so center of image is at origin.
@@ -323,7 +329,7 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     // Translate back from origin centered reference to destination frame.
     if (applyRotation == 90) {
       matrix.postTranslate(dstWidth / 3f, dstHeight / 2f);
-    }else if(applyRotation == 0 || applyRotation == 180){
+    } else if (applyRotation == 0 || applyRotation == 180) {
       matrix.postTranslate(dstWidth / 2f, dstHeight / 3f);
     }
 

@@ -22,9 +22,12 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+
 import java.util.Vector;
 
-/** A class that encapsulates the tedious bits of rendering legible, bordered text onto a canvas. */
+/**
+ * A class that encapsulates the tedious bits of rendering legible, bordered text onto a canvas.
+ */
 public class BorderedText {
   private final Paint interiorPaint;
   private final Paint exteriorPaint;
@@ -47,7 +50,7 @@ public class BorderedText {
    *
    * @param interiorColor the interior text color
    * @param exteriorColor the exterior text color
-   * @param textSize text size in pixels
+   * @param textSize      text size in pixels
    */
   public BorderedText(final int interiorColor, final int exteriorColor, final float textSize) {
     interiorPaint = new Paint();
@@ -79,7 +82,7 @@ public class BorderedText {
   }
 
   public void drawText(
-          final Canvas canvas, final float posX, final float posY, final String text, Paint bgPaint) {
+      final Canvas canvas, final float posX, final float posY, final String text, Paint bgPaint) {
 
     float width = exteriorPaint.measureText(text);
     float textSize = exteriorPaint.getTextSize();
@@ -117,7 +120,7 @@ public class BorderedText {
   }
 
   public void getTextBounds(
-          final String line, final int index, final int count, final Rect lineBounds) {
+      final String line, final int index, final int count, final Rect lineBounds) {
     interiorPaint.getTextBounds(line, index, count, lineBounds);
   }
 

@@ -118,10 +118,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     binding = DataBindingUtil.setContentView(this, R.layout.tfe_od_activity_camera);
 
     if (hasPermission()) {
-      //Start CameraX
+      // Start CameraX
       startCamera();
     } else {
-      //Requesting Permission for CameraX
+      // Requesting Permission for CameraX
       requestPermission();
     }
 
@@ -129,56 +129,56 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
     bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
 
-    //Controlling bottom modal sheet
+    // Controlling bottom modal sheet
     ViewTreeObserver vto = binding.bottomSheetLayout.gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
-            new ViewTreeObserver.OnGlobalLayoutListener() {
-              @Override
-              public void onGlobalLayout() {
-                binding.bottomSheetLayout.gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                int height = binding.bottomSheetLayout.gestureLayout.getMeasuredHeight();
-                sheetBehavior.setPeekHeight(height);
-              }
-            });
+        new ViewTreeObserver.OnGlobalLayoutListener() {
+          @Override
+          public void onGlobalLayout() {
+            binding.bottomSheetLayout.gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            int height = binding.bottomSheetLayout.gestureLayout.getMeasuredHeight();
+            sheetBehavior.setPeekHeight(height);
+          }
+        });
     sheetBehavior.setHideable(false);
 
     sheetBehavior.setBottomSheetCallback(
-            new BottomSheetBehavior.BottomSheetCallback() {
-              @Override
-              public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                switch (newState) {
-                  case BottomSheetBehavior.STATE_HIDDEN:
-                    break;
-                  case BottomSheetBehavior.STATE_EXPANDED: {
-                    bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
-                  }
-                  break;
-                  case BottomSheetBehavior.STATE_COLLAPSED: {
-                    bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                  }
-                  break;
-                  case BottomSheetBehavior.STATE_DRAGGING:
-                    break;
-                  case BottomSheetBehavior.STATE_SETTLING:
-                    bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                    break;
-                }
+        new BottomSheetBehavior.BottomSheetCallback() {
+          @Override
+          public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            switch (newState) {
+              case BottomSheetBehavior.STATE_HIDDEN:
+                break;
+              case BottomSheetBehavior.STATE_EXPANDED: {
+                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
               }
+              break;
+              case BottomSheetBehavior.STATE_COLLAPSED: {
+                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+              }
+              break;
+              case BottomSheetBehavior.STATE_DRAGGING:
+                break;
+              case BottomSheetBehavior.STATE_SETTLING:
+                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
+                break;
+            }
+          }
 
-              @Override
-              public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-              }
-            });
+          @Override
+          public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+          }
+        });
 
     binding.bottomSheetLayout.plus.setOnClickListener(this);
     binding.bottomSheetLayout.minus.setOnClickListener(this);
   }
 
   private void onStartCameraX(Size size, final int rotation) {
-    final float textSizePx =
-            TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
-    BorderedText borderedText = new BorderedText(textSizePx);
+    final float textSize =
+        TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
+    BorderedText borderedText = new BorderedText(textSize);
     borderedText.setTypeface(Typeface.MONOSPACE);
     Log.v("Camera Image Rotation", String.valueOf(rotation));
 
@@ -188,20 +188,18 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     tracker = new MultiBoxTracker(this);
 
     try {
-      detector =
-              TFLiteObjectDetectionAPIModel.create(
-                      this,
-                      TF_OD_API_MODEL_FILE,
-                      TF_OD_API_LABELS_FILE,
-                      TF_OD_API_INPUT_SIZE,
-                      TF_OD_API_IS_QUANTIZED);
+      detector = TFLiteObjectDetectionAPIModel.create(
+              this,
+              TF_OD_API_MODEL_FILE,
+              TF_OD_API_LABELS_FILE,
+              TF_OD_API_INPUT_SIZE,
+              TF_OD_API_IS_QUANTIZED);
       setUseNNAPI(true);
     } catch (final IOException e) {
       e.printStackTrace();
       LOGGER.e(e, "Exception initializing Detector!");
-      Toast toast =
-              Toast.makeText(
-                      getApplicationContext(), "Detector could not be initialized", Toast.LENGTH_SHORT);
+      Toast toast = Toast.makeText(
+              getApplicationContext(), "Detector could not be initialized", Toast.LENGTH_SHORT);
       toast.show();
       finish();
     }
@@ -210,12 +208,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
 
     binding.trackingOverlay.addCallback(
-            canvas -> {
-              tracker.draw(canvas);
-              if (isDebug()) {
-                tracker.drawDebug(canvas);
-              }
-            });
+        canvas -> {
+          tracker.draw(canvas);
+          if (isDebug()) {
+            tracker.drawDebug(canvas);
+          }
+        });
 
     tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
   }
@@ -228,20 +226,20 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
       try {
         ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
         Preview preview = new Preview.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .build();
+            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            .build();
 
-        //Selecting the Camera here - Back Camera
+        // Selecting the Camera here - Back Camera
         CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                .build();
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build();
 
-        //Images are processed by passing an executor in which the image analysis is run
+        // Images are processed by passing an executor in which the image analysis is run
         ImageAnalysis imageAnalysis =
-                new ImageAnalysis.Builder()
-                        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build();
+            new ImageAnalysis.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build();
 
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), image -> {
           int rotationDegrees = image.getImageInfo().getRotationDegrees();
@@ -258,42 +256,37 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
           if (!isProcessingFrame) {
             runInBackground(
-                    () -> {
-                      if (detector != null) {
-                        final long startTime = SystemClock.uptimeMillis();
-                        final List<Detector.Recognition> results = detector.recognizeImage(image.getImage(), sensorOrientation);
-                        lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-                        LOGGER.e("Degrees: %s", results);
+                () -> {
+                  if (detector != null) {
+                    final long startTime = SystemClock.uptimeMillis();
+                    final List<Detector.Recognition> results = detector.recognizeImage(image.getImage(), sensorOrientation);
+                    lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
+                    LOGGER.e("Degrees: %s", results);
 
-                        float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-                        if (MODE == DetectorMode.TF_OD_API) {
-                          minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-                        }
+                    final List<Detector.Recognition> mappedRecognitions =
+                        new ArrayList<>();
 
-                        final List<Detector.Recognition> mappedRecognitions =
-                                new ArrayList<>();
-
-                        for (final Detector.Recognition result : results) {
-                          final RectF location = result.getLocation();
-                          if (location != null && result.getConfidence() >= minimumConfidence) {
-                            result.setLocation(location);
-                            mappedRecognitions.add(result);
-                          }
-                        }
-
-                        tracker.trackResults(mappedRecognitions, currTimestamp);
-                        binding.trackingOverlay.postInvalidate();
-
-                        runOnUiThread(
-                                () -> {
-                                  showFrameInfo(DESIRED_ANALYSIS_SIZE.getWidth() + "x" + DESIRED_ANALYSIS_SIZE.getHeight());
-                                  showCropInfo(TF_OD_API_INPUT_SIZE + "x" + TF_OD_API_INPUT_SIZE);
-                                  showInference(lastProcessingTimeMs + "ms");
-                                });
+                    for (final Detector.Recognition result : results) {
+                      final RectF location = result.getLocation();
+                      if (location != null && result.getConfidence() >= MINIMUM_CONFIDENCE_TF_OD_API) {
+                        result.setLocation(location);
+                        mappedRecognitions.add(result);
                       }
-                      image.close();
-                      isProcessingFrame = false;
-                    });
+                    }
+
+                    tracker.trackResults(mappedRecognitions, currTimestamp);
+                    binding.trackingOverlay.postInvalidate();
+
+                    runOnUiThread(
+                        () -> {
+                          showFrameInfo(DESIRED_ANALYSIS_SIZE.getWidth() + "x" + DESIRED_ANALYSIS_SIZE.getHeight());
+                          showCropInfo(TF_OD_API_INPUT_SIZE + "x" + TF_OD_API_INPUT_SIZE);
+                          showInference(lastProcessingTimeMs + "ms");
+                        });
+                  }
+                  image.close();
+                  isProcessingFrame = false;
+                });
             isProcessingFrame = true;
           }
         });
@@ -304,14 +297,14 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         // Attach use cases to the camera with the same lifecycle owner
         if (cameraProvider != null) {
           Camera camera = cameraProvider.bindToLifecycle(
-                  this,
-                  cameraSelector,
-                  imageAnalysis,
-                  preview);
+              this,
+              cameraSelector,
+              imageAnalysis,
+              preview);
         }
 
       } catch (ExecutionException | InterruptedException e) {
-        e.printStackTrace();
+        LOGGER.d("cameraException", e.toString());
       }
     }, ContextCompat.getMainExecutor(this));
   }
@@ -370,14 +363,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
   }
 
-
   @Override
   public void onRequestPermissionsResult(
-          final int requestCode, final String[] permissions, final int[] grantResults) {
+      final int requestCode, final String[] permissions, final int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     if (requestCode == PERMISSIONS_REQUEST) {
       if (allPermissionsGranted(grantResults)) {
-        //Start CameraX
+        // Start CameraX
         startCamera();
       } else {
         requestPermission();
@@ -406,10 +398,11 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       if (shouldShowRequestPermissionRationale(PERMISSION_CAMERA)) {
         Toast.makeText(
-                CameraActivity.this,
-                "Camera permission is required for this demo",
-                Toast.LENGTH_LONG)
-                .show();
+            CameraActivity.this,
+            "Camera permission is required for this demo",
+            Toast.LENGTH_LONG)
+            .show();
+
       }
       requestPermissions(new String[]{PERMISSION_CAMERA}, PERMISSIONS_REQUEST);
     }
@@ -429,13 +422,13 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
   protected void setUseNNAPI(final boolean isChecked) {
     runInBackground(
-            () -> {
-              try {
-                detector.setUseNNAPI(isChecked);
-              } catch (UnsupportedOperationException e) {
-                LOGGER.e(e, "Failed to set \"Use NNAPI\".");
-              }
-            });
+        () -> {
+          try {
+            detector.setUseNNAPI(isChecked);
+          } catch (UnsupportedOperationException e) {
+            LOGGER.e(e, "Failed to set \"Use NNAPI\".");
+          }
+        });
   }
 
   private void setNumThreads(final int numThreads) {
