@@ -14,16 +14,6 @@
 
 import UIKit
 
-enum InterpreterOptions {
-    // Default thread count is 2, unless maximum thread count is 1.
-    static let threadCount = (
-        defaultValue: 2,
-        minimumValue: 1,
-        maximumValue: Int(ProcessInfo.processInfo.activeProcessorCount),
-        id: "threadCount"
-    )
-}
-
 enum MobileBERT {
     static let maxAnsLen = 32
     static let maxQueryLen = 64
