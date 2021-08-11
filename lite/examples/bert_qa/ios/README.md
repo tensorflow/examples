@@ -25,39 +25,10 @@ Question input to the application is discarded after inference.
 of pre-training language representations which obtains state-of-the-art results
 on a wide array of Natural Language Processing tasks.
 
-This app uses MobileBERT, a compressed version of [BERT] that runs 4x faster and
+This app uses [MobileBERT], a compressed version of [BERT] that runs 4x faster and
 has 4x smaller model size.
 
 For more information, refer to the [BERT github page][BERT].
-
-### Preprocessing
-
-While preprocessing, it tokenizes input query and content with given vocabulary
-data. Tokenization process mostly followed the [bert tokenization], except
-handling Chinese characters as we don’t have passages written in Chinese.
-
-It hands over the IDs of tokens with two other data. One is its segment ID to
-verify whether it is a question or a content. The other is a mask, which
-indicates if the given token is valid input to be processed or just a padding to
-fit the input tensor. As the model requires a fixed size of token ID array, some
-entries of the array could have invalid data.
-
-### Inference
-
-Assign preprocessed data to the input tensor and run the model. Output data is
-assigned to the output tensors as a result.
-
-### Postprocessing
-
-While postprocessing, it retrieves original string from the arrays of start &
-end logits in the output tensor. A logit of a token from `start` to `end` is
-derived from a summation of start logit array’s `start`th value and end logit
-array’s `end`th value. The higher sum of two logits, the more likely the token
-between starting point and end point could be an answer.
-
-After finding an answer, it retrieves the original string in the given range and
-calculates the score. The score of the answer is calculated by the softmax
-function.
 
 ## Requirements
 
@@ -110,6 +81,7 @@ function.
 [UIKit screencast]: https://storage.googleapis.com/download.tensorflow.org/models/tflite/screenshots/bertqa_ios_uikit_demo.gif
 [SwiftUI screencast]: https://storage.googleapis.com/download.tensorflow.org/models/tflite/screenshots/bertqa_ios_swiftui_demo.gif
 [BERT]: https://github.com/google-research/bert
+[MobileBERT]:https://tfhub.dev/tensorflow/tfjs-model/mobilebert/1
 [SQuAD]: https://rajpurkar.github.io/SQuAD-explorer/
 [UIKit]: https://developer.apple.com/documentation/uikit
 [SwiftUI]: https://developer.apple.com/documentation/swiftui
