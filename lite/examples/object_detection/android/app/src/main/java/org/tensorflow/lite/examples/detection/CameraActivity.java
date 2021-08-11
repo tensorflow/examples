@@ -142,7 +142,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         });
     sheetBehavior.setHideable(false);
 
-    sheetBehavior.setBottomSheetCallback(
+    sheetBehavior.addBottomSheetCallback(
         new BottomSheetBehavior.BottomSheetCallback() {
           @Override
           public void onStateChanged(@NonNull View bottomSheet, int newState) {
