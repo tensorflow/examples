@@ -71,6 +71,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
   protected int previewWidth = 0;
   protected int previewHeight = 0;
 
+  // To draw the bounding boxes
   private boolean debug = false;
 
   private Handler handler;
@@ -81,15 +82,10 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
   private LinearLayout bottomSheetLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
 
-  private enum DetectorMode {
-    TF_OD_API;
-  }
-
-  private static final int TF_OD_API_INPUT_SIZE = 300;
-  private static final boolean TF_OD_API_IS_QUANTIZED = true;
-  private static final String TF_OD_API_MODEL_FILE = "detect.tflite";
-  private static final String TF_OD_API_LABELS_FILE = "labelmap.txt";
-  private static final DetectorMode MODE = DetectorMode.TF_OD_API;
+  private static final int INPUT_SIZE = 300;
+  private static final boolean IS_QUANTIZED = true;
+  private static final String MODEL_FILE = "detect.tflite";
+  private static final String LABELS_FILE = "labelmap.txt";
 
   // Minimum detection confidence to track a detection.
   private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
@@ -174,7 +170,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     binding.bottomSheetLayout.minus.setOnClickListener(this);
   }
 
-  private void onStartCameraX(Size size, final int rotation) {
+  private void onStartCameraX(final int rotation) {
     final float textSize =
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
@@ -183,17 +179,17 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     Log.v("Camera Image Rotation", String.valueOf(rotation));
 
     sensorOrientation = rotation;
-    previewWidth = size.getWidth();
-    previewHeight = size.getHeight();
+    previewWidth = DESIRED_ANALYSIS_SIZE.getWidth();
+    previewHeight = DESIRED_ANALYSIS_SIZE.getHeight();
     tracker = new MultiBoxTracker(this);
 
     try {
       detector = TFLiteObjectDetectionAPIModel.create(
               this,
-              TF_OD_API_MODEL_FILE,
-              TF_OD_API_LABELS_FILE,
-              TF_OD_API_INPUT_SIZE,
-              TF_OD_API_IS_QUANTIZED);
+              MODEL_FILE,
+              LABELS_FILE,
+              INPUT_SIZE,
+              IS_QUANTIZED);
       setUseNNAPI(true);
     } catch (final IOException e) {
       e.printStackTrace();
@@ -250,7 +246,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
           final long currTimestamp = timestamp;
 
           if (firstTimeStartModel) {
-            onStartCameraX(DESIRED_ANALYSIS_SIZE, rotationDegrees);
+            onStartCameraX(rotationDegrees);
             firstTimeStartModel = false;
           }
 
@@ -280,7 +276,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                     runOnUiThread(
                         () -> {
                           showFrameInfo(DESIRED_ANALYSIS_SIZE.getWidth() + "x" + DESIRED_ANALYSIS_SIZE.getHeight());
-                          showCropInfo(TF_OD_API_INPUT_SIZE + "x" + TF_OD_API_INPUT_SIZE);
+                          showCropInfo(INPUT_SIZE + "x" + INPUT_SIZE);
                           showInference(lastProcessingTimeMs + "ms");
                         });
                   }
