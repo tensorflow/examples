@@ -45,6 +45,7 @@ import java.util.Map;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.support.common.TensorOperator;
 import org.tensorflow.lite.support.image.ImageProcessor;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
@@ -64,7 +65,7 @@ import org.tensorflow.lite.support.metadata.MetadataExtractor;
  * -
  * https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_on_mobile_tensorflowlite.md#running-our-model-on-android
  */
-public class TFLiteObjectDetectionAPIModel implements Detector {
+public abstract class TFLiteObjectDetectionAPIModel implements Detector {
   private static final String TAG = "TFLiteObjectDetectionAPIModelWithInterpreter";
   private byte[][] yuvBytes = new byte[3][];
   private int[] rgbBytes = null;
@@ -83,7 +84,9 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   private int inputSize;
   // Pre-allocated buffers.
   private final List<String> labels = new ArrayList<>();
-  private int[] intValues;
+  /**
+   * Input image TensorBuffer.
+   */
   // outputLocations: array of shape [Batchsize, NUM_DETECTIONS,4]
   // contains the location of detected boxes
   private float[][][] outputLocations;
@@ -96,12 +99,12 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   // numDetections: array of shape [Batchsize]
   // contains the number of detected boxes
   private float[] numDetections;
-
-  private ByteBuffer imgData;
-
   private MappedByteBuffer tfLiteModel;
   private Interpreter.Options tfLiteOptions;
   private Interpreter tfLite;
+
+  private ByteBuffer imgData;
+  private int[] intValues;
 
   private TFLiteObjectDetectionAPIModel() {
   }
@@ -135,7 +138,13 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
       final int inputSize,
       final boolean isQuantized)
       throws IOException {
-    final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel();
+    final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel() {
+
+      @Override
+      protected TensorOperator getPreprocessNormalizeOp() {
+        return null;
+      }
+    };
 
     MappedByteBuffer modelFile = loadModelFile(context.getAssets(), modelFilename);
     MetadataExtractor metadata = new MetadataExtractor(modelFile);
@@ -164,6 +173,8 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     }
 
     d.isModelQuantized = isQuantized;
+    Log.i("QUANTIZED", String.valueOf(isQuantized));
+
     // Pre-allocate buffers.
     int numBytesPerChannel;
     if (isQuantized) {
@@ -389,17 +400,17 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   @Override
-  public void setNumThreads(int numThreads) {
+  public void setUseNNAPI(boolean isChecked) {
     if (tfLite != null) {
-      tfLiteOptions.setNumThreads(numThreads);
+      tfLiteOptions.setUseNNAPI(isChecked);
       recreateInterpreter();
     }
   }
 
   @Override
-  public void setUseNNAPI(boolean isChecked) {
+  public void setNumThreads(int numThreads) {
     if (tfLite != null) {
-      tfLiteOptions.setUseNNAPI(isChecked);
+      tfLiteOptions.setNumThreads(numThreads);
       recreateInterpreter();
     }
   }
@@ -408,6 +419,11 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     tfLite.close();
     tfLite = new Interpreter(tfLiteModel, tfLiteOptions);
   }
+
+  /**
+   * Gets the TensorOperator to normalize the input image in preprocessing.
+   */
+  protected abstract TensorOperator getPreprocessNormalizeOp();
 
   public static Matrix getTransformationMatrix(
       final int srcWidth,
@@ -421,9 +437,9 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     // Translate so center of image is at origin.
     matrix.postTranslate(-srcWidth / 2f, -srcHeight / 2f);
 
-    if (applyRotation != 0) {
+    if (applyRotation == 90) {
       // Rotate around origin.
-      matrix.postRotate(applyRotation);
+      matrix.postRotate(180);
     }
 
     // Account for the already applied rotation, if any, and then determine how
@@ -432,6 +448,8 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
 
     final int inWidth = transpose ? srcHeight : srcWidth;
     final int inHeight = transpose ? srcWidth : srcHeight;
+
+    final float margin = 1f;
 
     // Apply scaling if necessary.
     if (inWidth != dstWidth || inHeight != dstHeight) {
@@ -442,7 +460,13 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
         // Scale by minimum factor so that dst is filled completely while
         // maintaining the aspect ratio. Some image may fall off the edge.
         final float scaleFactor = Math.min(scaleFactorX, scaleFactorY);
-        matrix.postScale(scaleFactor, scaleFactor);
+        if (applyRotation == 90) {
+          // Rotate around origin.
+          matrix.postScale(scaleFactor - margin, scaleFactor + margin);
+        } else {
+          matrix.postScale(scaleFactor, scaleFactor);
+        }
+
       } else {
         // Scale exactly to fill dst from src.
         matrix.postScale(scaleFactorX, scaleFactorY);
