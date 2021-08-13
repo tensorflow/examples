@@ -22,6 +22,7 @@ import android.os.SystemClock
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.poseestimation.data.*
+import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -37,7 +38,8 @@ enum class ModelType {
     Thunder
 }
 
-class MoveNet(private val interpreter: Interpreter) : PoseDetector {
+class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: GpuDelegate?) :
+    PoseDetector {
 
     companion object {
         private const val MIN_CROP_KEYPOINT_SCORE = .2f
@@ -48,16 +50,21 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
         private const val TORSO_EXPANSION_RATIO = 1.9f
         private const val BODY_EXPANSION_RATIO = 1.2f
 
+        // TFLite file names.
+        private const val LIGHTNING_FILENAME = "movenet_lightning.tflite"
+        private const val THUNDER_FILENAME = "movenet_thunder.tflite"
+
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
             val options = Interpreter.Options()
+            var gpuDelegate: GpuDelegate? = null
             options.setNumThreads(CPU_NUM_THREADS)
             when (device) {
                 Device.CPU -> {
                 }
                 Device.GPU -> {
-                    // TODO: Create a new Movenet model that can run on GPUDelegate
-//                    options.addDelegate(GpuDelegate())
+                    gpuDelegate = GpuDelegate()
+                    options.addDelegate(gpuDelegate)
                 }
                 Device.NNAPI -> options.setUseNNAPI(true)
             }
@@ -65,10 +72,11 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 Interpreter(
                     FileUtil.loadMappedFile(
                         context,
-                        if (modelType == ModelType.Lightning) "movenet_lightning_v3.tflite"
-                        else "movenet_thunder_v3.tflite"
+                        if (modelType == ModelType.Lightning) LIGHTNING_FILENAME
+                        else THUNDER_FILENAME
                     ), options
-                )
+                ),
+                gpuDelegate
             )
         }
 
@@ -109,7 +117,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 bitmap,
                 -rect.left,
                 -rect.top,
-                Paint()
+                null
             )
             val inputTensor = processInputImage(detectBitmap, inputWidth, inputHeight)
             val outputTensor = TensorBuffer.createFixedSize(outputShape, DataType.FLOAT32)
@@ -119,7 +127,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             val positions = mutableListOf<Float>()
 
             inputTensor?.let { input ->
-                interpreter.run(input.tensorBuffer.buffer, outputTensor.buffer)
+                interpreter.run(input.buffer, outputTensor.buffer.rewind())
                 val output = outputTensor.floatArray
                 for (idx in 0 until numKeyPoints) {
                     val x = output[idx * 3 + 1] * inputWidth * widthRatio
@@ -167,6 +175,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
 
     override fun close() {
+        gpuDelegate?.close()
         interpreter.close()
         cropRegion = null
     }
@@ -183,7 +192,7 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
             add(ResizeWithCropOrPadOp(size, size))
             add(ResizeOp(inputWidth, inputHeight, ResizeOp.ResizeMethod.BILINEAR))
         }.build()
-        val tensorImage = TensorImage(DataType.FLOAT32)
+        val tensorImage = TensorImage(DataType.UINT8)
         tensorImage.load(bitmap)
         return imageProcessor.process(tensorImage)
     }
@@ -253,8 +262,8 @@ class MoveNet(private val interpreter: Interpreter) : PoseDetector {
                 KeyPoint(
                     it.bodyPart,
                     PointF(
-                        it.coordinate.x * imageWidth,
-                        it.coordinate.y * imageHeight
+                        it.coordinate.x,
+                        it.coordinate.y
                     ),
                     it.score
                 )

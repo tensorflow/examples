@@ -4,31 +4,41 @@ task downloadPosenetModel(type: DownloadUrlTask) {
         println "Downloading ${modelPosenetDownloadUrl}"
     }
     sourceUrl = "${modelPosenetDownloadUrl}"
-    target = file("src/main/assets/posenet_model.tflite")
+    target = file("src/main/assets/posenet.tflite")
 }
 
 task downloadMovenetLightningModel(type: DownloadUrlTask) {
-    def modelMovenetLightningDownloadUrl = "https://tfhub.dev/google/lite-model/movenet/singlepose/lightning/3?lite-format=tflite"
+    def modelMovenetLightningDownloadUrl = "https://tfhub.dev/google/lite-model/movenet/singlepose/lightning/tflite/float16/4?lite-format=tflite"
     doFirst {
         println "Downloading ${modelMovenetLightningDownloadUrl}"
     }
     sourceUrl = "${modelMovenetLightningDownloadUrl}"
-    target = file("src/main/assets/movenet_lightning_v3.tflite")
+    target = file("src/main/assets/movenet_lightning.tflite")
 }
 
 task downloadMovenetThunderModel(type: DownloadUrlTask) {
-    def modelMovenetThunderDownloadUrl = "https://tfhub.dev/google/lite-model/movenet/singlepose/thunder/3?lite-format=tflite"
+    def modelMovenetThunderDownloadUrl = "https://tfhub.dev/google/lite-model/movenet/singlepose/thunder/tflite/float16/4?lite-format=tflite"
     doFirst {
         println "Downloading ${modelMovenetThunderDownloadUrl}"
     }
     sourceUrl = "${modelMovenetThunderDownloadUrl}"
-    target = file("src/main/assets/movenet_thunder_v3.tflite")
+    target = file("src/main/assets/movenet_thunder.tflite")
+}
+
+task downloadPoseClassifierModel(type: DownloadUrlTask) {
+    def modelPoseClassifierDownloadUrl = "https://storage.googleapis.com/download.tensorflow.org/models/tflite/pose_classifier/yoga_classifier.tflite"
+    doFirst {
+        println "Downloading ${modelPoseClassifierDownloadUrl}"
+    }
+    sourceUrl = "${modelPoseClassifierDownloadUrl}"
+    target = file("src/main/assets/classifier.tflite")
 }
 
 task downloadModel {
     dependsOn downloadPosenetModel
     dependsOn downloadMovenetLightningModel
     dependsOn downloadMovenetThunderModel
+    dependsOn downloadPoseClassifierModel
 }
 
 class DownloadUrlTask extends DefaultTask {
