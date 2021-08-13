@@ -66,7 +66,7 @@ public class MultiBoxTracker {
   private final Queue<Integer> availableColors = new LinkedList<Integer>();
   private final List<TrackedRecognition> trackedObjects = new LinkedList<TrackedRecognition>();
   private final Paint boxPaint = new Paint();
-  private final float textSizePx;
+  private final float textSize;
   private final BorderedText borderedText;
   private Matrix frameToCanvasMatrix;
   private int frameWidth;
@@ -85,10 +85,10 @@ public class MultiBoxTracker {
     boxPaint.setStrokeJoin(Join.ROUND);
     boxPaint.setStrokeMiter(100);
 
-    textSizePx =
+    textSize =
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.getResources().getDisplayMetrics());
-    borderedText = new BorderedText(textSizePx);
+    borderedText = new BorderedText(textSize);
   }
 
   public synchronized void setFrameConfiguration(
