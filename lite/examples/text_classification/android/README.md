@@ -1,9 +1,11 @@
 # TensorFlow Lite text classification sample
 
+<img src="https://www.tensorflow.org/lite/examples/text_classification/images/screenshot.gif" width="400px" alt="Video">
+
 ## Overview
 
 This is an end-to-end example of movie review sentiment classification built
-with TensorFlow 2.0 (Keras API), and trained on IMDB dataset. The demo app
+with TensorFlow 2.0 (Keras API), and trained on [IMDB dataset](http://ai.stanford.edu/%7Eamaas/data/sentiment/) version 1.0. The demo app
 processes input movie review texts, and classifies its sentiment into negative
 (0) or positive (1).
 
@@ -14,19 +16,23 @@ mobile app.
 ## Model
 
 See
-[Text Classification with Movie Reviews](https://www.tensorflow.org/tutorials/keras/basic_text_classification)
+[Text Classification with Movie Reviews](https://www.tensorflow.org/tutorials/keras/text_classification)
 for a step-by-step instruction of building a simple text classification model.
 
-## Android app
+## Build the demo using Android Studio
+                                                                                                                                          
+### Prerequisites
 
-Follow the steps below to build and run the sample Android app.
+*   If you don't have already, install
+    [Android Studio](https://developer.android.com/studio/index.html), following
+    the instructions on the website.
 
-### Requirements
+*   Android Studio 3.2 or later.
+    - Gradle 4.6 or higher.
+    - SDK Build Tools 29.0.2 or higher.
 
-*   Android Studio 3.2 or later. Install instructions can be found on
-    [Android Studio](https://developer.android.com/studio/index.html) website.
-
-*   An Android device or an Android emulator and with API level higher than 21.
+*   You need an Android device or Android emulator and Android development
+    environment with minimum API 21.
 
 ### Building
 
@@ -53,34 +59,26 @@ Follow the steps below to build and run the sample Android app.
 
 *   Click `Run` to run the demo app on your Android device.
 
-#### Switch between inference solutions (Task library vs TFLite Interpreter)
+## Build the demo using gradle (command line)
 
-This Text Classification Android reference app demonstrates two implementation
-solutions:
+### Building and Installing
 
-(1)
-[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
-that leverages the out-of-box API from the
-[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/text_classifier);
+*   Use the following command to build a demo apk:
 
-(2)
-[`lib_interpreter`](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_interpreter)
-that creates the custom inference pipleline using the
-[TensorFlow Lite Interpreter Java API](https://www.tensorflow.org/lite/guide/inference#load_and_run_a_model_in_java).
+```
+cd lite/examples/bert_qa/android   # Folder for Android app.
 
-The [`build.gradle`](app/build.gradle) inside `app` folder shows how to change
-`flavorDimensions "tfliteInference"` to switch between the two solutions.
+./gradlew build
+```
 
-Inside **Android Studio**, you can change the build variant to whichever one you
-want to build and run—just go to `Build > Select Build Variant` and select one
-from the drop-down menu. See
-[configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
-for more details.
+*   Use the following command to install the apk onto your connected device:
 
-For gradle CLI, running `./gradlew build` can create APKs for both solutions
-under `app/build/outputs/apk`.
+```
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
 
-*Note: If you simply want the out-of-box API to run the app, we recommend
-`lib_task_api`for inference. If you want to customize your own models and
-control the detail of inputs and outputs, it might be easier to adapt your model
-inputs and outputs by using `lib_interpreter`.*
+## Assets folder
+
+_Do not delete the assets folder content_. If you explicitly deleted the files,
+choose `Build -> Rebuild` to re-download the deleted model files into the assets
+folder.
