@@ -1,5 +1,10 @@
 # Release 0.3
 
+## 0.3.3
+
+*   Minor fix: update tensorflow==2.6 and fix the failure of `evaluate_tflite`
+    for the object detection task.
+
 ## 0.3.2
 
 *   Minor fix: Move librosa to an optional library for audio task.

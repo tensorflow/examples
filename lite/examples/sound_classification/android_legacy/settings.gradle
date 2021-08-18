@@ -1,2 +1,0 @@
-rootProject.name = "TFLite Sound Classifier Demo App"
-include ':app'
