@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,11 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.StateFlow
 import org.tensorflow.lite.examples.soundclassifier.compose.R
 import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.*
@@ -107,7 +104,7 @@ fun ControlPanel(
 ) {
   Row {
     val labelText = stringResource(id = R.string.label_input)
-    Text(labelText, color = darkBlueGray800)
+    Text(labelText, style = MaterialTheme.typography.body1)
     Switch(
       checked = inputEnabled,
       onCheckedChange = onInputChanged,
@@ -117,8 +114,8 @@ fun ControlPanel(
   }
   Spacer(modifier = Modifier.height(12.dp))
   Row(verticalAlignment = Alignment.CenterVertically) {
-    val labelText = stringResource(id = R.string.label_overlap_factor)
-    Text(labelText)
+    val labelText = stringResource(id = R.string.label_classification_interval)
+    Text(labelText, style = MaterialTheme.typography.body1)
     Slider(
       value = interval / 1000f,
       onValueChange = { onIntervalChanged(it.toLong() * 1000L) },
@@ -142,17 +139,15 @@ fun ProbabilityItem(text: String, progress: Float, index: Int = 0) {
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(text,
-      color = lightBlue,
-      fontSize = 16.sp,
-      fontWeight = FontWeight.Bold,
-      modifier = Modifier.width(92.dp)
+      modifier = Modifier.width(92.dp),
+      style = MaterialTheme.typography.body2,
     )
     LinearProgressIndicator(
       progress = progress,
       modifier = Modifier
         .height(52.dp)
         .padding(start = 12.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
-        .clip(RoundedCornerShape(4.dp))
+        .clip(MaterialTheme.shapes.medium)
         .fillMaxWidth(),
       color = indicatorColor,
       backgroundColor = backgroundColor
@@ -175,7 +170,7 @@ fun Preview() {
       ) {
         ControlPanel(
           inputEnabled = true,
-          interval = 800L
+          interval = 500L
         )
 
         Divider(modifier = Modifier.padding(vertical = 24.dp))
