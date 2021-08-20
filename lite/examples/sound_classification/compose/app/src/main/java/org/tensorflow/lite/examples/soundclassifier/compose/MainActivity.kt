@@ -1,20 +1,4 @@
-/*
- * Copyright 2020 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package org.tensorflow.lite.examples.soundclassifier
+package org.tensorflow.lite.examples.soundclassifier.compose
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -25,52 +9,67 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.os.HandlerCompat
-import org.tensorflow.lite.examples.soundclassifier.databinding.ActivityMainBinding
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.tensorflow.lite.examples.soundclassifier.compose.ui.SoundClassifierScene
+import org.tensorflow.lite.support.label.Category
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 
-
-class MainActivity : AppCompatActivity() {
-  private val probabilitiesAdapter by lazy { ProbabilitiesAdapter() }
+class MainActivity : ComponentActivity() {
+  private val classifierEnabled: Boolean
+    get() = (audioClassifier != null)
 
   private var audioClassifier: AudioClassifier? = null
   private var audioRecord: AudioRecord? = null
+
+  // TODO move this to ViewModel
   private var classificationInterval = 500L // how often should classification run in milli-secs
   private lateinit var handler: Handler // background thread handler to run classification
+
+  /** As a result of sound classification, this value emits map of probabilities */
+  private val probabilities = MutableStateFlow<List<Category>>(emptyList())
+
+  private val requestAudioPermissionLauncher = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+  ) { isGranted ->
+    if (isGranted) {
+      Log.i(LOG_TAG, "Audio permission granted")
+      startAudioClassification()
+    } else {
+      Log.w(LOG_TAG, "Audio permission not granted!")
+    }
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    val binding = ActivityMainBinding.inflate(layoutInflater)
-    setContentView(binding.root)
+    setContent {
+      var overlapFactor by rememberSaveable { mutableStateOf(0.8f) }
 
-    with(binding) {
-      recyclerView.apply {
-        setHasFixedSize(false)
-        adapter = probabilitiesAdapter
-      }
-
-      // Input switch to turn on/off classification
-      keepScreenOn(inputSwitch.isChecked)
-      inputSwitch.setOnCheckedChangeListener { _, isChecked ->
-        if (isChecked) startAudioClassification() else stopAudioClassification()
-        keepScreenOn(isChecked)
-      }
-
-      // Slider which control how often the classification task should run
-      classificationIntervalSlider.value = classificationInterval.toFloat()
-      classificationIntervalSlider.setLabelFormatter { value: Float ->
-        "${value.toInt()} ms"
-      }
-      classificationIntervalSlider.addOnChangeListener { _, value, _ ->
-        classificationInterval = value.toLong()
-        stopAudioClassification()
-        startAudioClassification()
-      }
+      SoundClassifierScene(
+        probabilities = probabilities,
+        classifierEnabled = classifierEnabled,
+        interval = classificationInterval,
+        onClassifierToggle = { enabled: Boolean ->
+          if (enabled) startAudioClassification() else stopAudioClassification()
+          keepScreenOn(enabled)
+        },
+        onIntervalChanged = { value ->
+          classificationInterval = value
+        }
+      )
     }
+
+    keepScreenOn(classifierEnabled)
 
     // Create a handler to run classification in a background thread
     val handlerThread = HandlerThread("backgroundThread")
@@ -87,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun startAudioClassification() {
     // If the audio classifier is initialized and running, do nothing.
-    if (audioClassifier != null) return;
+    if (audioClassifier != null) return
 
     // Initialize the audio classifier
     val classifier = AudioClassifier.createFromFile(this, MODEL_FILE)
@@ -112,16 +111,10 @@ class MainActivity : AppCompatActivity() {
         }.sortedBy {
           -it.score
         }
-
         val finishTime = System.currentTimeMillis()
+        Log.d(LOG_TAG, "Latency = ${finishTime - startTime} ms")
 
-        Log.d(TAG, "Latency = ${finishTime - startTime}ms")
-
-        // Updating the UI
-        runOnUiThread {
-          probabilitiesAdapter.categoryList = filteredModelOutput
-          probabilitiesAdapter.notifyDataSetChanged()
-        }
+        probabilities.value = filteredModelOutput
 
         // Rerun the classification after a certain interval
         handler.postDelayed(this, classificationInterval)
@@ -146,37 +139,22 @@ class MainActivity : AppCompatActivity() {
   override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
     // Handles "top" resumed event on multi-window environment
     if (isTopResumedActivity) {
-      startAudioClassification()
+      requestMicrophonePermission()
     } else {
       stopAudioClassification()
-    }
-  }
-
-  override fun onRequestPermissionsResult(
-          requestCode: Int,
-          permissions: Array<out String>,
-          grantResults: IntArray
-  ) {
-    if (requestCode == REQUEST_RECORD_AUDIO) {
-      if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        Log.i(TAG, "Audio permission granted :)")
-        startAudioClassification()
-      } else {
-        Log.e(TAG, "Audio permission not granted :(")
-      }
     }
   }
 
   @RequiresApi(Build.VERSION_CODES.M)
   private fun requestMicrophonePermission() {
     if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED
+        this,
+        Manifest.permission.RECORD_AUDIO
+      ) == PackageManager.PERMISSION_GRANTED
     ) {
       startAudioClassification()
     } else {
-      requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO)
+      requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
   }
 
@@ -188,8 +166,7 @@ class MainActivity : AppCompatActivity() {
     }
 
   companion object {
-    const val REQUEST_RECORD_AUDIO = 1337
-    private const val TAG = "AudioDemo"
+    private const val LOG_TAG = "AudioDemo"
     private const val MODEL_FILE = "yamnet.tflite"
     private const val MINIMUM_DISPLAY_THRESHOLD: Float = 0.3f
   }
