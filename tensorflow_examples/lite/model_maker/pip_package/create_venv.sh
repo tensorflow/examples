@@ -28,5 +28,4 @@ function create_venv_or_activate {
   else
     source "${VENV_HOME}/bin/activate"
   fi
-
 }
