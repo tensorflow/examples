@@ -131,7 +131,10 @@ class AverageWordVecModelSpec(object):
       writer.write(tf_example.SerializeToString())
     writer.close()
 
-  def create_model(self, num_classes, optimizer='rmsprop'):
+  def create_model(self,
+                   num_classes,
+                   optimizer='rmsprop',
+                   with_loss_and_metrics=True):
     """Creates the keras model."""
     # Gets a classifier model.
     model = tf.keras.Sequential([
@@ -143,11 +146,12 @@ class AverageWordVecModelSpec(object):
         tf.keras.layers.Dropout(self.dropout_rate),
         tf.keras.layers.Dense(num_classes, activation='softmax')
     ])
-
-    model.compile(
-        optimizer=optimizer,
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy'])
+    if with_loss_and_metrics:
+      # Add loss and metrics in the keras model.
+      model.compile(
+          optimizer=optimizer,
+          loss='sparse_categorical_crossentropy',
+          metrics=['accuracy'])
 
     return model
 
@@ -472,7 +476,10 @@ class BertClassifierModelSpec(BertModelSpec):
     classifier_data_lib.file_based_convert_examples_to_features(
         examples, label_names, self.seq_len, self.tokenizer, tfrecord_file)
 
-  def create_model(self, num_classes, optimizer='adam'):
+  def create_model(self,
+                   num_classes,
+                   optimizer='adam',
+                   with_loss_and_metrics=True):
     """Creates the keras model."""
     bert_model, _ = create_classifier_model(
         self.bert_config,
@@ -488,10 +495,12 @@ class BertClassifierModelSpec(BertModelSpec):
       return tf.keras.metrics.SparseCategoricalAccuracy(
           'test_accuracy', dtype=tf.float32)
 
-    bert_model.compile(
-        optimizer=optimizer,
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-        metrics=[metric_fn()])
+    if with_loss_and_metrics:
+      # Add loss and metrics in the keras model.
+      bert_model.compile(
+          optimizer=optimizer,
+          loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+          metrics=[metric_fn()])
 
     return bert_model
 
