@@ -164,12 +164,14 @@ class AverageWordVecModelSpec(object):
     model = self.create_model(num_classes)
 
     # Trains the models.
-    model.fit(
-        train_ds,
-        epochs=epochs,
-        validation_data=validation_ds,
-        steps_per_epoch=steps_per_epoch,
-        **kwargs)
+    for i in range(epochs):
+      model.fit(
+          train_ds,
+          initial_epoch=i,
+          epochs=i + 1,
+          validation_data=validation_ds,
+          steps_per_epoch=steps_per_epoch,
+          **kwargs)
 
     return model
 
@@ -538,8 +540,13 @@ class BertClassifierModelSpec(BertModelSpec):
                                                 warmup_steps)
       bert_model = self.create_model(num_classes, optimizer)
 
-    bert_model.fit(
-        x=train_ds, validation_data=validation_ds, epochs=epochs, **kwargs)
+    for i in range(epochs):
+      bert_model.fit(
+          x=train_ds,
+          initial_epoch=i,
+          epochs=i + 1,
+          validation_data=validation_ds,
+          **kwargs)
 
     return bert_model
 
