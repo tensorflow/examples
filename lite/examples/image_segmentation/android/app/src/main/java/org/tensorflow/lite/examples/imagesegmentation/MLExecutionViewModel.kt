@@ -16,10 +16,10 @@
 
 package org.tensorflow.lite.examples.imagesegmentation
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -49,10 +49,7 @@ class MLExecutionViewModel : ViewModel() {
     inferenceThread: ExecutorCoroutineDispatcher
   ) {
     viewModelScope.launch(inferenceThread) {
-      val contentImage =
-        ImageUtils.decodeBitmap(
-          File(filePath)
-        )
+      val contentImage = ImageUtils.decodeBitmap(File(filePath))
       try {
         val result = imageSegmentationModel?.execute(contentImage)
         _resultingBitmap.postValue(result)
