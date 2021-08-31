@@ -19,7 +19,10 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-from tensorflow_examples.lite.examples.reinforcement_learning.ml import common
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import common
 from tf_agents.environments import py_environment
 from tf_agents.specs import array_spec
 from tf_agents.trajectories import time_step as ts

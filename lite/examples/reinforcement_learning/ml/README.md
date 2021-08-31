@@ -78,7 +78,7 @@ that the TFLite model converted from the TF Agents policy is a little from
 TF/JAX model in that it takes 4 tensors as input (only the 3rd tensor
 'observation' is useful for inferene though):
 
-![TFLITE_FROM_TF_AGENTS](tflite_from_tf_agents.png)
+![TFLITE_FROM_TF_AGENTS](tf_agents/tflite_from_tf_agents.png)
 
 ### TensorFlow or JAX:
 
@@ -112,7 +112,7 @@ tensorboard --logdir=./jax_log
 You can see the agent become smarter (indicated by the decreasing game length),
 as training progresses.
 
-![TRAINING_PROGRESS](tf_training.png)
+![TRAINING_PROGRESS](tf_and_jax/tf_training.png)
 
 After training, you will get a `planestrike_tf.tflite` file, which you can then
 integrate into the Android app we provide in the `android` folder.

@@ -55,10 +55,10 @@ public class RLAgentFromTFAgents extends PlaneStrikeAgent {
   protected void runInference() {
     Map<Integer, Object> output = new HashMap<>();
     // TF Agent directly returns the predicted action
-    int[][] prediction = new int[1][1];
+    int[] prediction = new int[1];
     output.put(0, prediction);
     tflite.runForMultipleInputsOutputs(inputs, output);
-    agentStrikePosition = prediction[0][0];
+    agentStrikePosition = prediction[0];
   }
 
   @Override

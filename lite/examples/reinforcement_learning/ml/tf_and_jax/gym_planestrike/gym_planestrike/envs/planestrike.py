@@ -19,7 +19,10 @@
 import gym
 from gym import spaces
 import numpy as np
-from tensorflow_examples.lite.examples.reinforcement_learning.ml import common
+import os
+import sys
+sys.path.append(os.path.dirname(__file__))
+import common
 
 
 # Rewards for each strike

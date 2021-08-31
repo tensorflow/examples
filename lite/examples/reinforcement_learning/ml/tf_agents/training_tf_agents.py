@@ -18,7 +18,7 @@ from typing import Sequence
 
 from absl import app
 import tensorflow as tf
-from tensorflow_examples.lite.examples.reinforcement_learning.ml.tf_agents import planestrike_py_environment
+import planestrike_py_environment
 import tensorflow_probability as tfp
 import tf_agents as tfa
 from tf_agents.agents.reinforce import reinforce_agent
@@ -34,7 +34,7 @@ COLLECT_EPISODES_PER_ITERATION = 1
 REPLAY_BUFFER_CAPACITY = 2000
 DISCOUNT = 0.5
 
-FC_LAYER_PARAMS = BOARD_SIZE**2
+FC_LAYER_PARAMS = 100
 
 LEARNING_RATE = 1e-3
 NUM_EVAL_EPISODES = 20
