@@ -28,16 +28,6 @@ SKIPPED_BUILDS="
 gesture_classification/ios
 "
 
-function install_helper_tools {
-  if ! [ -x "$(command -v jq)" ]; then
-    brew install jq
-  fi
-
-  if ! [ -x "$(command -v xcpretty)" ]; then
-    sudo gem install xcpretty
-  fi
-}
-
 function build_ios_example {
   # Check if this directory appears in the skipped builds list.
   RELATIVE_DIR="${1#"${EXAMPLES_DIR}/"}"
@@ -102,5 +92,4 @@ function build_ios_example {
   echo
 }
 
-install_helper_tools
 build_ios_example "$1"

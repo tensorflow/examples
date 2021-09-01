@@ -18,6 +18,7 @@ set -e  # Exit immediately when one of the commands fails.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
+NUM_PROCESSES=16   # Run tests in parallel. Adjust this to your own machine.
 
 # Finds all <example_name>/ios* directories under lite/examples.
 # Runs the xcode build script for each of those directories.
@@ -25,8 +26,19 @@ function build_ios_examples {
   # In case the one of the build fails, overwrite the exit code to 255, in order
   # to make xargs to terminate early and stop processing the remaining builds.
   find "${EXAMPLES_DIR}" -mindepth 2 -maxdepth 2 -type d -name "ios*" -print0 \
-    | xargs -0 -n1 -I{} bash -c \
+    | xargs -0 -n 1 -P ${NUM_PROCESSES} -I{} bash -c \
         "${SCRIPT_DIR}/build_ios_app.sh \"{}\" || exit 255"
 }
 
+function install_helper_tools {
+  if ! [ -x "$(command -v jq)" ]; then
+    brew install jq
+  fi
+
+  if ! [ -x "$(command -v xcpretty)" ]; then
+    sudo gem install xcpretty
+  fi
+}
+
+install_helper_tools
 build_ios_examples
