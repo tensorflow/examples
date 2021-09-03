@@ -17,7 +17,6 @@ limitations under the License.
 package org.tensorflow.lite.examples.ocr
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
@@ -32,6 +31,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup

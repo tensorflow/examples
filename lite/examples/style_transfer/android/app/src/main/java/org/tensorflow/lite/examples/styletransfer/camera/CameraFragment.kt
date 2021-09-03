@@ -17,7 +17,6 @@
 package org.tensorflow.lite.examples.styletransfer.camera
 
 import android.annotation.SuppressLint
-import androidx.lifecycle.Observer
 import android.content.Context
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCaptureSession
@@ -42,6 +41,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import java.io.Closeable
 import java.io.File
 import java.io.FileOutputStream
@@ -75,14 +75,10 @@ class CameraFragment : Fragment() {
   private var cameraFacing = CameraCharacteristics.LENS_FACING_FRONT
   private var cameraId = "0"
 
-  /**
-   * define the aspect ratio that will be used by the camera
-   */
+  /** define the aspect ratio that will be used by the camera */
   private val aspectRatio = Size(4, 3)
 
-  /**
-   * Max preview width that is guaranteed by Camera2 API
-   */
+  /** Max preview width that is guaranteed by Camera2 API */
   private val MAX_PREVIEW_WIDTH = 1080
 
   internal lateinit var callback: OnCaptureFinished
@@ -133,53 +129,51 @@ class CameraFragment : Fragment() {
 
     cameraId = getCameraId()
     characteristics = cameraManager.getCameraCharacteristics(cameraId)
-    val size = characteristics.get(
-      CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP
-    )!!
-      .getOutputSizes(ImageFormat.JPEG)
-      .filter {
-        it.width <= MAX_PREVIEW_WIDTH && verifyAspectRatio(it.width, it.height, aspectRatio)
-      }.first()
-    imageReader = ImageReader.newInstance(
-      size.width, size.height,
-      ImageFormat.JPEG, IMAGE_BUFFER_SIZE
+    val size =
+      characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+        .getOutputSizes(ImageFormat.JPEG)
+        .filter {
+          it.width <= MAX_PREVIEW_WIDTH && verifyAspectRatio(it.width, it.height, aspectRatio)
+        }
+        .first()
+    imageReader =
+      ImageReader.newInstance(size.width, size.height, ImageFormat.JPEG, IMAGE_BUFFER_SIZE)
+
+    view.holder.addCallback(
+      object : SurfaceHolder.Callback {
+        override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
+
+        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) =
+          Unit
+
+        override fun surfaceCreated(holder: SurfaceHolder) {
+          // Selects appropriate preview size and configures view finder
+          val previewSize =
+            getPreviewOutputSize(
+              viewFinder.display,
+              characteristics,
+              SurfaceHolder::class.java,
+              aspectRatio
+            )
+          Log.d(TAG, "View finder size: ${viewFinder.width} x ${viewFinder.height}")
+          Log.d(TAG, "Selected preview size: $previewSize")
+          view.holder.setFixedSize(previewSize.width, previewSize.height)
+          view.setAspectRatio(previewSize.width, previewSize.height)
+
+          // To ensure that size is set, initialize camera in the view's thread
+          view.post { initializeCamera() }
+        }
+      }
     )
 
-    view.holder.addCallback(object : SurfaceHolder.Callback {
-      override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
-
-      override fun surfaceChanged(
-        holder: SurfaceHolder,
-        format: Int,
-        width: Int,
-        height: Int
-      ) = Unit
-
-      override fun surfaceCreated(holder: SurfaceHolder) {
-        // Selects appropriate preview size and configures view finder
-        val previewSize = getPreviewOutputSize(
-          viewFinder.display, characteristics, SurfaceHolder::class.java, aspectRatio
-        )
-        Log.d(TAG, "View finder size: ${viewFinder.width} x ${viewFinder.height}")
-        Log.d(TAG, "Selected preview size: $previewSize")
-        view.holder.setFixedSize(previewSize.width, previewSize.height)
-        view.setAspectRatio(previewSize.width, previewSize.height)
-
-        // To ensure that size is set, initialize camera in the view's thread
-        view.post { initializeCamera() }
-      }
-    })
-
     // Used to rotate the output media to match device orientation
-    relativeOrientation = OrientationLiveData(requireContext(), characteristics).apply {
-      observe(
-        this@CameraFragment,
-        Observer {
-          orientation ->
-          Log.d(TAG, "Orientation changed: $orientation")
-        }
-      )
-    }
+    relativeOrientation =
+      OrientationLiveData(requireContext(), characteristics).apply {
+        observe(
+          this@CameraFragment,
+          Observer { orientation -> Log.d(TAG, "Orientation changed: $orientation") }
+        )
+      }
   }
 
   /**
@@ -189,18 +183,20 @@ class CameraFragment : Fragment() {
    * - Starts the preview by dispatching a repeating capture request
    * - Sets up the image capture listeners
    */
-  private fun initializeCamera() = fragmentScope.launch(Dispatchers.Main) {
-    val camera = openCamera()
-    session = startCaptureSession(camera)
-    cameraInitialized = true
-    val captureRequest = camera.createCaptureRequest(
-      CameraDevice.TEMPLATE_PREVIEW
-    ).apply { addTarget(viewFinder.holder.surface) }
+  private fun initializeCamera() =
+    fragmentScope.launch(Dispatchers.Main) {
+      val camera = openCamera()
+      session = startCaptureSession(camera)
+      cameraInitialized = true
+      val captureRequest =
+        camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
+          addTarget(viewFinder.holder.surface)
+        }
 
-    // This will keep sending the capture request as frequently as possible until the
-    // session is torn down or session.stopRepeating() is called
-    session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
-  }
+      // This will keep sending the capture request as frequently as possible until the
+      // session is torn down or session.stopRepeating() is called
+      session.setRepeatingRequest(captureRequest.build(), null, cameraHandler)
+    }
 
   /** Opens the camera and returns the opened device (as the result of the suspend coroutine) */
   @SuppressLint("MissingPermission")
@@ -228,15 +224,13 @@ class CameraFragment : Fragment() {
 
   private fun getCameraId(): String {
     // Get list of all compatible cameras
-    val cameraIds = cameraManager.cameraIdList.filter {
-      val characteristics = cameraManager.getCameraCharacteristics(it)
-      val capabilities = characteristics.get(
-        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES
-      )
-      capabilities?.contains(
-        CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE
-      ) ?: false
-    }
+    val cameraIds =
+      cameraManager.cameraIdList.filter {
+        val characteristics = cameraManager.getCameraCharacteristics(it)
+        val capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+        capabilities?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE)
+          ?: false
+      }
 
     // Iterate over the list of cameras and return the one that is facing the selected direction
     cameraIds.forEach { id ->
@@ -252,31 +246,32 @@ class CameraFragment : Fragment() {
    * Starts a [CameraCaptureSession] and returns the configured session (as the result of the
    * suspend coroutine
    */
-  private suspend fun startCaptureSession(device: CameraDevice):
-    CameraCaptureSession = suspendCoroutine { cont ->
+  private suspend fun startCaptureSession(device: CameraDevice): CameraCaptureSession =
+      suspendCoroutine { cont ->
 
-      // Create list of Surfaces where the camera will output frames
-      val targets: MutableList<Surface> =
-        arrayOf(viewFinder.holder.surface, imageReader.surface).toMutableList()
+    // Create list of Surfaces where the camera will output frames
+    val targets: MutableList<Surface> =
+      arrayOf(viewFinder.holder.surface, imageReader.surface).toMutableList()
 
-      // Create a capture session using the predefined targets; this also involves defining the
-      // session state callback to be notified of when the session is ready
-      device.createCaptureSession(
-        targets,
-        object : CameraCaptureSession.StateCallback() {
-          override fun onConfigureFailed(session: CameraCaptureSession) {
-            val exc = RuntimeException(
+    // Create a capture session using the predefined targets; this also involves defining the
+    // session state callback to be notified of when the session is ready
+    device.createCaptureSession(
+      targets,
+      object : CameraCaptureSession.StateCallback() {
+        override fun onConfigureFailed(session: CameraCaptureSession) {
+          val exc =
+            RuntimeException(
               "Camera ${device.id} session configuration failed, see log for details"
             )
-            Log.e(TAG, exc.message, exc)
-            cont.resumeWithException(exc)
-          }
+          Log.e(TAG, exc.message, exc)
+          cont.resumeWithException(exc)
+        }
 
-          override fun onConfigured(session: CameraCaptureSession) = cont.resume(session)
-        },
-        cameraHandler
-      )
-    }
+        override fun onConfigured(session: CameraCaptureSession) = cont.resume(session)
+      },
+      cameraHandler
+    )
+  }
 
   fun takePicture() {
     // Perform I/O heavy operations in a different scope
@@ -310,8 +305,7 @@ class CameraFragment : Fragment() {
   private suspend fun internalTakePicture(): CombinedCaptureResult = suspendCoroutine { cont ->
 
     // Flush any images left in the image reader
-    @Suppress("ControlFlowWithEmptyBody")
-    while (imageReader.acquireNextImage() != null) {}
+    @Suppress("ControlFlowWithEmptyBody") while (imageReader.acquireNextImage() != null) {}
 
     // Start a new image queue
     val imageQueue = ArrayBlockingQueue<Image>(IMAGE_BUFFER_SIZE)
@@ -324,9 +318,10 @@ class CameraFragment : Fragment() {
       imageReaderHandler
     )
 
-    val captureRequest = session.device.createCaptureRequest(
-      CameraDevice.TEMPLATE_STILL_CAPTURE
-    ).apply { addTarget(imageReader.surface) }
+    val captureRequest =
+      session.device.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
+        addTarget(imageReader.surface)
+      }
     session.capture(
       captureRequest.build(),
       object : CameraCaptureSession.CaptureCallback() {
@@ -365,15 +360,14 @@ class CameraFragment : Fragment() {
 
               // Compute EXIF orientation metadata
               val rotation = relativeOrientation.value ?: 0
-              val mirrored = characteristics.get(CameraCharacteristics.LENS_FACING) ==
-                CameraCharacteristics.LENS_FACING_FRONT
+              val mirrored =
+                characteristics.get(CameraCharacteristics.LENS_FACING) ==
+                  CameraCharacteristics.LENS_FACING_FRONT
               val exifOrientation = ImageUtils.computeExifOrientation(rotation, mirrored)
 
               // Build the result and resume progress
               cont.resume(
-                CombinedCaptureResult(
-                  image, result, exifOrientation, imageReader.imageFormat
-                )
+                CombinedCaptureResult(image, result, exifOrientation, imageReader.imageFormat)
               )
 
               // There is no need to break out of the loop, this coroutine will suspend
@@ -429,8 +423,7 @@ class CameraFragment : Fragment() {
   }
 
   /**
-   Keeping a reference to the activity to make communication between it and this fragment
-   easier.
+   * Keeping a reference to the activity to make communication between it and this fragment easier.
    */
   override fun onAttach(context: Context) {
     super.onAttach(context)
@@ -470,8 +463,6 @@ class CameraFragment : Fragment() {
       return File(context.filesDir, "IMG_${sdf.format(Date())}.$extension")
     }
 
-    @JvmStatic
-    fun newInstance(): CameraFragment =
-      CameraFragment()
+    @JvmStatic fun newInstance(): CameraFragment = CameraFragment()
   }
 }
