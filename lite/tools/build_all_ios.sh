@@ -18,7 +18,7 @@ set -e  # Exit immediately when one of the commands fails.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
-NUM_PROCESSES=16   # Run tests in parallel. Adjust this to your own machine.
+NUM_PROCESSES=4   # Run tests in parallel. Adjust this to your own machine.
 
 # Finds all <example_name>/ios* directories under lite/examples.
 # Runs the xcode build script for each of those directories.
