@@ -15,6 +15,8 @@
 # limitations under the License.
 """Example using TF Lite to detect objects with the Raspberry Pi camera."""
 
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+from pymongo import MongoClient
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -23,6 +25,7 @@ import argparse
 import io
 import re
 import time
+import json
 
 from annotation import Annotator
 
@@ -105,24 +108,46 @@ def annotate_objects(annotator, results, labels):
 
 
 def main():
-  parser = argparse.ArgumentParser(
-      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument(
-      '--model', help='File path of .tflite file.', required=True)
-  parser.add_argument(
-      '--labels', help='File path of labels file.', required=True)
-  parser.add_argument(
-      '--threshold',
-      help='Score threshold for detected objects.',
-      required=False,
-      type=float,
-      default=0.4)
+  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  parser.add_argument('--model', help='File path of .tflite file.', required=True)
+  parser.add_argument('--labels', help='File path of labels file.', required=True)
+  parser.add_argument('--threshold', help='Score threshold for detected objects.', required=False, type=float, default=0.4)
+  parser.add_argument("-e", "--endpoint", action="store", required=True, dest="host", help="Your AWS IoT custom endpoint")
+  parser.add_argument("-r", "--rootCA", action="store", required=True, dest="rootCAPath", help="Root CA file path")
+  parser.add_argument("-c", "--cert", action="store", dest="certificatePath", help="Certificate file path")
+  parser.add_argument("-k", "--key", action="store", dest="privateKeyPath", help="Private key file path")
+  parser.add_argument("-p", "--port", action="store", dest="port", type=int, help="Port number override")
+  parser.add_argument("-id", "--clientId", action="store", dest="clientId", default="sensorPub",
+                      help="Targeted client id")
+  parser.add_argument("-t", "--topic", action="store", dest="topic", default="home", help="Targeted topic")
+  parser.add_argument("-d", "--dbMongo", action="store", required=True, dest="dbMongo", 
+                      help="Provide the mongoDB client key to store sensor data",)
   args = parser.parse_args()
 
   labels = load_labels(args.labels)
   interpreter = Interpreter(args.model)
   interpreter.allocate_tensors()
   _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
+
+  args = parser.parse_args()
+  host = args.host
+  rootCAPath = args.rootCAPath
+  certificatePath = args.certificatePath
+  privateKeyPath = args.privateKeyPath
+  port = args.port
+  clientId = args.clientId
+  topic = args.topic
+
+  #Connect to AWS IoT Core
+  myMQTTClient = AWSIoTMQTTClient("rpi-sensor") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
+  myMQTTClient.configureEndpoint(host, port)
+  myMQTTClient.configureCredentials(rootCAPath, privateKeyPath, certificatePath)
+  myMQTTClient.configureOfflinePublishQueueing(-1) # Infinite offline Publish queueing
+  myMQTTClient.configureDrainingFrequency(2) # Draining: 2 Hz
+  myMQTTClient.configureConnectDisconnectTimeout(10) # 10 sec
+  myMQTTClient.configureMQTTOperationTimeout(5) # 5 sec
+  print ('Initiating Realtime Data Transfer From Raspberry Pi...')
+  myMQTTClient.connect()
 
   with picamera.PiCamera(
       resolution=(CAMERA_WIDTH, CAMERA_HEIGHT), framerate=30) as camera:
@@ -138,6 +163,9 @@ def main():
         start_time = time.monotonic()
         results = detect_objects(interpreter, image, args.threshold)
         elapsed_ms = (time.monotonic() - start_time) * 1000
+
+        messageJSON(results)
+        myMQTTClient.publish(topic, messageJSON, 1)
 
         annotator.clear()
         annotate_objects(annotator, results, labels)
