@@ -12,11 +12,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""Common utils for both TF and JAX training."""
+"""Common utils for training."""
 
-import gym
-# pylint: disable=unused-import
-import gym_planestrike
+import random
+
 import numpy as np
 
 # We always use square board, so only one size is needed
@@ -26,10 +25,30 @@ PLANE_SIZE = 8
 # Reward discount factor
 GAMMA = 0.5
 
+# Plane direction
+PLANE_HEADING_RIGHT = 0
+PLANE_HEADING_UP = 1
+PLANE_HEADING_LEFT = 2
+PLANE_HEADING_DOWN = 3
+
+# Hidden board cell status; 'occupied' means it's part of the plane
+HIDDEN_BOARD_CELL_OCCUPIED = 1
+HIDDEN_BOARD_CELL_UNOCCUPIED = 0
+
+# Visible board cell status
+BOARD_CELL_HIT = 1
+BOARD_CELL_MISS = -1
+BOARD_CELL_UNTRIED = 0
+
 
 def play_game(predict_fn):
-  """Play one round of game to gather logs."""
+  """Play one round of game to gather logs for TF/JAX training."""
 
+  # Only import gym-related libraries when absolutely needed
+  # pylint: disable=g-import-not-at-top
+  import gym
+  # pylint: disable=unused-import,g-import-not-at-top
+  import gym_planestrike
   env = gym.make('PlaneStrike-v0', board_size=BOARD_SIZE)
   observation = env.reset()
 
@@ -55,7 +74,7 @@ def play_game(predict_fn):
 
 
 def compute_rewards(game_result_log, gamma=GAMMA):
-  """Compute discounted rewards."""
+  """Compute discounted rewards for TF/JAX training."""
   discounted_rewards = []
   discounted_sum = 0
 
@@ -63,3 +82,78 @@ def compute_rewards(game_result_log, gamma=GAMMA):
     discounted_sum = reward + gamma * discounted_sum
     discounted_rewards.append(discounted_sum)
   return np.asarray(discounted_rewards[::-1])
+
+
+def initialize_random_hidden_board(board_size):
+  """Initialize the hidden board."""
+
+  hidden_board = np.ones(
+      (board_size, board_size)) * HIDDEN_BOARD_CELL_UNOCCUPIED
+
+  # Populate the plane's position
+  # First figure out the plane's orientation
+  #   0: heading right
+  #   1: heading up
+  #   2: heading left
+  #   3: heading down
+
+  plane_orientation = random.randint(0, 3)
+
+  # Figrue out the location of plane core as the '*' below
+  #   | |      |      | |    ---
+  #   |-*-    -*-    -*-|     |
+  #   | |      |      | |    -*-
+  #           ---             |
+  if plane_orientation == PLANE_HEADING_RIGHT:
+    plane_core_row = random.randint(1, board_size - 2)
+    plane_core_column = random.randint(2, board_size - 2)
+    # Populate the tail
+    hidden_board[plane_core_row][plane_core_column -
+                                 2] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row - 1][plane_core_column -
+                                     2] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row + 1][plane_core_column -
+                                     2] = HIDDEN_BOARD_CELL_OCCUPIED
+  elif plane_orientation == PLANE_HEADING_UP:
+    plane_core_row = random.randint(1, board_size - 3)
+    plane_core_column = random.randint(1, board_size - 3)
+    # Populate the tail
+    hidden_board[plane_core_row +
+                 2][plane_core_column] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row + 2][plane_core_column +
+                                     1] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row + 2][plane_core_column -
+                                     1] = HIDDEN_BOARD_CELL_OCCUPIED
+  elif plane_orientation == PLANE_HEADING_LEFT:
+    plane_core_row = random.randint(1, board_size - 2)
+    plane_core_column = random.randint(1, board_size - 3)
+    # Populate the tail
+    hidden_board[plane_core_row][plane_core_column +
+                                 2] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row - 1][plane_core_column +
+                                     2] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row + 1][plane_core_column +
+                                     2] = HIDDEN_BOARD_CELL_OCCUPIED
+  elif plane_orientation == PLANE_HEADING_DOWN:
+    plane_core_row = random.randint(2, board_size - 2)
+    plane_core_column = random.randint(1, board_size - 2)
+    # Populate the tail
+    hidden_board[plane_core_row -
+                 2][plane_core_column] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row - 2][plane_core_column +
+                                     1] = HIDDEN_BOARD_CELL_OCCUPIED
+    hidden_board[plane_core_row - 2][plane_core_column -
+                                     1] = HIDDEN_BOARD_CELL_OCCUPIED
+
+  # Populate the cross
+  hidden_board[plane_core_row][plane_core_column] = HIDDEN_BOARD_CELL_OCCUPIED
+  hidden_board[plane_core_row +
+               1][plane_core_column] = HIDDEN_BOARD_CELL_OCCUPIED
+  hidden_board[plane_core_row -
+               1][plane_core_column] = HIDDEN_BOARD_CELL_OCCUPIED
+  hidden_board[plane_core_row][plane_core_column +
+                               1] = HIDDEN_BOARD_CELL_OCCUPIED
+  hidden_board[plane_core_row][plane_core_column -
+                               1] = HIDDEN_BOARD_CELL_OCCUPIED
+
+  return hidden_board

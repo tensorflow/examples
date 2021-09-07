@@ -1,0 +1,16 @@
+apply plugin: 'de.undercouch.download'
+
+task downloadTextDetectionModelFile(type: Download) {
+    src 'https://tfhub.dev/sayakpaul/lite-model/east-text-detector/fp16/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/text_detection.tflite'
+    overwrite false
+}
+
+task downloadTextRecognitionModelFile(type: Download) {
+    src 'https://tfhub.dev/tulasiram58827/lite-model/keras-ocr/float16/2?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/text_recognition.tflite'
+    overwrite false
+}
+
+preBuild.dependsOn downloadTextDetectionModelFile
+preBuild.dependsOn downloadTextRecognitionModelFile

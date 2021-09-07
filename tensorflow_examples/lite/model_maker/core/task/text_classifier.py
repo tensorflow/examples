@@ -81,8 +81,9 @@ class TextClassifier(classification_model.ClassificationModel):
         shuffle,
         train_whole_model=True)
 
-  def create_model(self):
-    self.model = self.model_spec.create_model(self.num_classes)
+  def create_model(self, with_loss_and_metrics=True):
+    self.model = self.model_spec.create_model(
+        self.num_classes, with_loss_and_metrics=with_loss_and_metrics)
 
   def train(self,
             train_data,

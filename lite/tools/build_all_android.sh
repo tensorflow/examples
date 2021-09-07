@@ -18,6 +18,7 @@ set -e  # Exit immediately when one of the commands fails.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXAMPLES_DIR="$(realpath "${SCRIPT_DIR}/../examples")"
+NUM_PROCESSES=16   # Run tests in parallel. Adjust this to your own machine.
 
 # Finds all <example_name>/android directories under lite/examples.
 # Runs the android build script for each of those directories.
@@ -45,10 +46,11 @@ function build_android_examples {
     target_list=( "${app_dir_list[@]:$start:$length}" )
   fi
 
-  # Run the builds in sequence.
+  # Run the builds in parallel.
   for app_dir in "${target_list[@]}"; do
-    "${SCRIPT_DIR}/build_android_app.sh" "${app_dir}"
-  done
+    echo ${app_dir}
+  done | xargs -0 -n 1 -P ${NUM_PROCESSES?} -I{} \
+         ${SCRIPT_DIR}/build_android_app.sh {}
 }
 
 build_android_examples "$@"

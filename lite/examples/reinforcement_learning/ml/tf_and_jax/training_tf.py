@@ -17,6 +17,9 @@ import os
 from typing import Sequence
 from absl import app
 import tensorflow as tf
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import common
 
 ITERATIONS = 80000

@@ -1,0 +1,4 @@
+numpy==1.19.5
+tf-agents-nightly==0.9.0.dev20210804
+dm-reverb-nightly==0.4.0.dev20210804
+dm-reverb==0.3.1

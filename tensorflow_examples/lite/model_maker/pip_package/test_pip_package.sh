@@ -14,6 +14,9 @@ create_venv_or_activate  # Use virtualenv and activate.
 PYTHON_BIN="$(which python3.7)"
 PIP_BIN="$(which pip3.7)"
 CLI_BIN="tflite_model_maker"
+NUM_PROCESSES=30   # Run tests in parallel. Adjust this to your own machine.
+
+MODEL_MAKER_VERSION="$1"   # "--nightly", or empty (for stable)
 
 function build_pip_and_install {
   # Build and install pip package.
@@ -24,7 +27,7 @@ function build_pip_and_install {
 
   local ver=""
   local pkg="tflite_model_maker"
-  if [[ "$1" == "--nightly" ]]; then
+  if [[ "${MODEL_MAKER_VERSION}" == "--nightly" ]]; then
     pkg="${pkg}_nightly"
     ver="--nightly"
   fi
@@ -50,7 +53,7 @@ function uninstall_pip {
   echo "------ uninstall pip -----"
 
   local pip_pkg="tflite-model-maker"
-  if [[ "$1" == "--nightly" ]]; then
+  if [[ "${MODEL_MAKER_VERSION}" == "--nightly" ]]; then
     pip_pkg="${pip_pkg}-nightly"
   fi
 
@@ -84,10 +87,10 @@ function test_unittest {
   export TEST_SRCDIR=${TEST_DIR}
   # Tests all, excluding "*v1_test" and "tensorflowjs".
   find "${TEST_DIR}" -name "*_test.py" \
-        ! -name "*v1_test.py" \
-        ! -wholename "*tfjs*" \
-        -print0 | \
-    xargs -0 -I{} ${PYTHON_BIN?} {}
+      ! -name "*v1_test.py" \
+      ! -wholename "*tfjs*" \
+      -print0 | \
+  xargs -0 -P ${NUM_PROCESSES?} -I{} ${PYTHON_BIN?} {}
 
   popd > /dev/null
   echo "=== END UNIT TESTS: ${TEST_DIR} ==="
@@ -96,18 +99,18 @@ function test_unittest {
 }
 
 function test_model_maker {
-  if [[ "$1" == "--nightly" ]]; then
+  if [[ "${MODEL_MAKER_VERSION}" == "--nightly" ]]; then
     echo "===== Test Model Maker (nightly) ====="
   else
     echo "===== Test Model Maker (stable) ====="
   fi
 
-  build_pip_and_install $1
+  build_pip_and_install
   test_import
   test_cli
   test_unittest
-  uninstall_pip $1
+  uninstall_pip
   echo
 }
 
-test_model_maker $1
+test_model_maker
