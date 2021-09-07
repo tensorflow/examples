@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">JetSoundClassifier</string>
     <string name="label_input">Input:</string>
-    <string name="label_classification_interval">Classification Interval</string>
+    <string name="label_classification_interval">Classification\nInterval</string>
     <string name="tensorflow_lite_logo">TensorFlow Lite Logo</string>
 </resources>

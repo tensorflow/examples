@@ -12,31 +12,26 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.os.HandlerCompat
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collect
 import org.tensorflow.lite.examples.soundclassifier.compose.ui.SoundClassifierScene
-import org.tensorflow.lite.support.label.Category
+import org.tensorflow.lite.examples.soundclassifier.compose.ui.SoundClassifierViewModel
 import org.tensorflow.lite.task.audio.classifier.AudioClassifier
 
 class MainActivity : ComponentActivity() {
-  private val classifierEnabled: Boolean
-    get() = (audioClassifier != null)
+  private val viewModel: SoundClassifierViewModel by viewModels()
 
   private var audioClassifier: AudioClassifier? = null
   private var audioRecord: AudioRecord? = null
 
   // TODO move this to ViewModel
-  private var classificationInterval = 500L // how often should classification run in milli-secs
   private lateinit var handler: Handler // background thread handler to run classification
-
-  /** As a result of sound classification, this value emits map of probabilities */
-  private val probabilities = MutableStateFlow<List<Category>>(emptyList())
 
   private val requestAudioPermissionLauncher = registerForActivityResult(
     ActivityResultContracts.RequestPermission()
@@ -53,40 +48,47 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     setContent {
-      var overlapFactor by rememberSaveable { mutableStateOf(0.8f) }
+      val classifierEnabled by viewModel.classifierEnabled.collectAsState()
+      val classificationInterval by viewModel.classificationInterval.collectAsState()
+      val probabilities by viewModel.probabilities.collectAsState()
 
       SoundClassifierScene(
         probabilities = probabilities,
         classifierEnabled = classifierEnabled,
         interval = classificationInterval,
-        onClassifierToggle = { enabled: Boolean ->
-          if (enabled) startAudioClassification() else stopAudioClassification()
-          keepScreenOn(enabled)
-        },
-        onIntervalChanged = { value ->
-          classificationInterval = value
-        }
+        onClassifierToggle = viewModel::setClassifierEnabled,
+        onIntervalChanged = viewModel::setClassificationInterval,
       )
     }
-
-    keepScreenOn(classifierEnabled)
 
     // Create a handler to run classification in a background thread
     val handlerThread = HandlerThread("backgroundThread")
     handlerThread.start()
     handler = HandlerCompat.createAsync(handlerThread.looper)
 
-    // Request microphone permission and start running classification
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      requestMicrophonePermission()
-    } else {
-      startAudioClassification()
+    lifecycleScope.launchWhenCreated {
+      viewModel.classifierEnabled.collect { enabled ->
+        if (enabled) {
+          // Request microphone permission and start running classification
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestMicrophonePermission()
+          } else {
+            startAudioClassification()
+          }
+        } else {
+          stopAudioClassification()
+        }
+        keepScreenOn(enabled)
+      }
     }
   }
 
   private fun startAudioClassification() {
     // If the audio classifier is initialized and running, do nothing.
-    if (audioClassifier != null) return
+    if (audioClassifier != null) {
+      viewModel.setClassifierEnabled(true)
+      return
+    }
 
     // Initialize the audio classifier
     val classifier = AudioClassifier.createFromFile(this, MODEL_FILE)
@@ -114,10 +116,10 @@ class MainActivity : ComponentActivity() {
         val finishTime = System.currentTimeMillis()
         Log.d(LOG_TAG, "Latency = ${finishTime - startTime} ms")
 
-        probabilities.value = filteredModelOutput
+        viewModel.setProbabilities(filteredModelOutput)
 
         // Rerun the classification after a certain interval
-        handler.postDelayed(this, classificationInterval)
+        handler.postDelayed(this, viewModel.classificationInterval.value)
       }
     }
 
