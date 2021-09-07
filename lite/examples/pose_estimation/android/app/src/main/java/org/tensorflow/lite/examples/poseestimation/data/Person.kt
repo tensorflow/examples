@@ -16,4 +16,4 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.poseestimation.data
 
-data class Person(val keyPoints: List<KeyPoint>, val score: Float)
+data class Person(var keyPoints: List<KeyPoint>, val score: Float)

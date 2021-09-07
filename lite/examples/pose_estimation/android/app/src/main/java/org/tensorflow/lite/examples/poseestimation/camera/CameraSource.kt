@@ -219,7 +219,12 @@ class CameraSource(
 
         synchronized(lock) {
             detector?.estimateSinglePose(bitmap)?.let {
+                it.keyPoints = it.keyPoints.filter { it.score >= .3f }
                 person = it
+                it.keyPoints.forEach { k ->
+                    Log.e(TAG, "${k.bodyPart}: ${k.coordinate.x},${k.coordinate.y}------${k.score}")
+                }
+                Log.i(TAG, "---------------next-----------------")
                 classifier?.run {
                     classificationResult = classify(person)
                 }

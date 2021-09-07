@@ -4,8 +4,10 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.util.Log
 import org.tensorflow.lite.examples.poseestimation.data.BodyPart
 import org.tensorflow.lite.examples.poseestimation.data.Person
+import java.lang.Exception
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
@@ -38,26 +40,39 @@ object VisualizationUtils {
 
     // Draw line and point indicate body pose
     fun drawBodyKeypoints(input: Bitmap, person: Person): Bitmap {
+//        val h = input.height
+//        val w = input.width
         val paintCircle = Paint().apply {
             strokeWidth = CIRCLE_RADIUS
             color = Color.RED
             style = Paint.Style.FILL
         }
-        val paintLine = Paint().apply {
+//        val paintLine = Paint().apply {
+//            strokeWidth = LINE_WIDTH
+//            color = Color.RED
+//            style = Paint.Style.FILL
+//        }
+
+        val paintText = Paint().apply {
             strokeWidth = LINE_WIDTH
-            color = Color.RED
+            color = Color.GREEN
             style = Paint.Style.FILL
         }
 
         val output = input.copy(Bitmap.Config.ARGB_8888,true)
         val originalSizeCanvas = Canvas(output)
-        bodyJoints.forEach {
-            val pointA = person.keyPoints[it.first.position].coordinate
-            val pointB = person.keyPoints[it.second.position].coordinate
-            originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
-        }
+//        try {
+//            bodyJoints.forEach {
+//                val pointA = person.keyPoints[it.first.position].coordinate
+//                val pointB = person.keyPoints[it.second.position].coordinate
+//            Log.i("", "drawBodyKeypoints: $person.keyPoints[it.first.position],$person.keyPoints[it.second.position]")
+//                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+//            }
+//        } catch (e: Exception){}
+
 
         person.keyPoints.forEach { point ->
+            originalSizeCanvas.drawText(point.bodyPart.toString(),point.coordinate.x,point.coordinate.y,paintText)
             originalSizeCanvas.drawCircle(
                 point.coordinate.x,
                 point.coordinate.y,

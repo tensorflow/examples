@@ -42,7 +42,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     PoseDetector {
 
     companion object {
-        private const val MIN_CROP_KEYPOINT_SCORE = .2f
+        private const val MIN_CROP_KEYPOINT_SCORE = .3f
         private const val CPU_NUM_THREADS = 4
 
         // Parameters that control how large crop region should be expanded from previous frames'

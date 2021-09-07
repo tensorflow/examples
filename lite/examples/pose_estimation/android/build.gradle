@@ -2,11 +2,13 @@
 buildscript {
     ext.kotlin_version = "1.4.32"
     repositories {
+        maven{url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+        maven{url "https://jitpack.io"}
         google()
-        jcenter()
+        //jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.3"
+        classpath 'com.android.tools.build:gradle:7.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -18,10 +20,11 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            name 'ossrh-snapshot'
-            url 'http://oss.sonatype.org/content/repositories/snapshots'
-        }
+        maven{url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+//        maven {
+//            name 'ossrh-snapshot'
+//            url 'http://oss.sonatype.org/content/repositories/snapshots'
+//        }
     }
 }
 
