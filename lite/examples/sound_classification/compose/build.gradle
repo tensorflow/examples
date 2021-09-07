@@ -2,14 +2,14 @@
 buildscript {
     ext {
         kotlin_version = '1.5.21'
-        compose_version = '1.0.1'
+        compose_version = '1.0.2'
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.0.1"
+        classpath "com.android.tools.build:gradle:7.0.2"
         classpath 'de.undercouch:gradle-download-task:4.1.1' // to download model
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
