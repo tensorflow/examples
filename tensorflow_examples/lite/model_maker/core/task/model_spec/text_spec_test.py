@@ -110,6 +110,17 @@ class AverageWordVecModelSpecTest(tf.test.TestCase):
         num_classes=num_classes)
     self.assertIsInstance(model, tf.keras.Model)
 
+  def test_create_model_without_compilation(self):
+    num_classes = 2
+    model = self.model_spec.create_model(
+        num_classes=num_classes, with_loss_and_metrics=False)
+    with self.assertRaises(RuntimeError):
+      model.fit(
+          self._gen_random_ds(num_classes),
+          validation_data=self._gen_random_ds(num_classes),
+          epochs=1,
+          steps_per_epoch=1)
+
   def _gen_random_ds(self, num_classes, data_size=1, batch_size=4):
     batched_features = tf.random.uniform(
         (data_size, batch_size, self.model_spec.seq_len),
@@ -136,6 +147,7 @@ class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
         uri, is_tf2=is_tf2, distribution_strategy='off', seq_len=3)
     self._test_convert_examples_to_features(model_spec)
     self._test_run_classifier(model_spec)
+    self._test_create_model_without_compilation(model_spec)
 
   def _test_convert_examples_to_features(self, model_spec):
     examples = _gen_examples()
@@ -171,6 +183,17 @@ class BertClassifierModelSpecTest(tf.test.TestCase, parameterized.TestCase):
         steps_per_epoch=1,
         num_classes=num_classes)
     self.assertIsInstance(model, tf.keras.Model)
+
+  def _test_create_model_without_compilation(self, model_spec):
+    num_classes = 2
+    model = model_spec.create_model(
+        num_classes=num_classes, with_loss_and_metrics=False)
+    with self.assertRaises(RuntimeError):
+      model.fit(
+          self._gen_random_ds(model_spec.seq_len, num_classes),
+          validation_data=self._gen_random_ds(model_spec.seq_len, num_classes),
+          epochs=1,
+          steps_per_epoch=1)
 
   def _gen_random_ds(self, seq_len, num_classes, data_size=1, batch_size=1):
 

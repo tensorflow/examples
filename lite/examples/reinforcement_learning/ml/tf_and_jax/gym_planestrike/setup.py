@@ -13,8 +13,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """Setup file for the OpenAI gym environment."""
+import os
+import shutil
+
 from setuptools import find_packages
 from setuptools import setup
+
+source = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../../common.py'))
+target = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), 'gym_planestrike/envs/common.py'))
+shutil.copyfile(source, target)
 
 setup(
     name='gym_planestrike',

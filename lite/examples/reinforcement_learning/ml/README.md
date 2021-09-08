@@ -30,37 +30,72 @@ as a miss. The app also tracks the number of hits of both boards so that you can
 get a quick idea of the game progress. You can tap the same cell multiple times,
 but it won't do anything other than wasting your strike opportunities.
 
-To train the agent, we have implemented an
-[OpenAI gym environment](https://gym.openai.com/) 'gym_planestrike'. The actual
-training algorithm is vanilla policy gradient (REINFORCE). We provide 2
-different versions of training code, one written in TensorFlow/Keras and the
-other in
-[JAX](https://github.com/google/jax)/[Flax](https://github.com/google/flax)
-(Note that the JAX implementation is highly experimental). They are implemented
-using slightly different logic but the trained models have similar performance.
-It's certainly possible to make training faster or more effective by taking
-advantage of the board symmetry, better reward shaping, parallel runs and etc.
+To train the agent, we have implemented different ways:
+
+*   [TF Agents](https://www.tensorflow.org/agents) (along with a python
+    envronment for TF Agents)
+*   TensorFlow and
+    [JAX](https://github.com/google/jax)/[Flax](https://github.com/google/flax)
+    (along with an [OpenAI gym environment](https://gym.openai.com/))
+
+*Note that the JAX implementation is highly experimental
+
+You can choose one of the 3 training paths to train the model by yourself. It's
+possible to make training faster or more effective by taking advantage
+of the board symmetry, better reward shaping, parallel runs and etc.
 
 ## Requirements
 
 Please install the required libraries in requirements.txt first.
 
+```
+pip install -r requirements.txt
+```
+
+As of 7/2021, only the nightly version of TF/TF Agents can support converting a
+policy into TFLite model.
+
 ## Build and run
 
-### Step 1. Install the OpenAI gym environment
+### TF Agents:
 
-Go into 'gym_planestrike' folder and run the following to install the
-environment:
+Go into the `tf_agents` folder and run the following:
+
+```
+python training_tf_agents.py
+tensorboard --logdir=./tf_agents_log
+```
+
+You can also use TensorBoard to visualize the training process by looking at the
+average reward and the average episode length.
+
+You can see the agent become smarter (indicated by the increasing average reward
+and decreasing episode length), as training progresses.
+
+After training, you will get a `planestrike_tf_agents.tflite` file, which you
+can then integrate into the Android app we provide in the `android` folder. Note
+that the TFLite model converted from the TF Agents policy is a little from
+TF/JAX model in that it takes 4 tensors as input (only the 3rd tensor
+'observation' is useful for inferene though):
+
+![TFLITE_FROM_TF_AGENTS](tf_agents/tflite_from_tf_agents.png)
+
+### TensorFlow or JAX:
+
+#### Step 1. Install the OpenAI gym environment
+
+Go into the `tf_and_jax/gym_planestrike` folder and run the following to install
+the gym environment:
 
 ```
 python setup.py install
 ```
 
-### Step 2. Train the model
+#### Step 2. Train the model
 
-Choose either training_tf.py or training_jax.py to train the model. You can also
-use TensorBoard to visualize the training process by looking at the game_length
-(a smoothing factor of 0.9 is recommended):
+Choose either training_tf.py or training_jax.py in the `tf_and_jax` folder to
+train the model. You can also use TensorBoard to visualize the training process
+by looking at the game_length (a smoothing factor of 0.9 is recommended):
 
 ```
 python training_tf.py
@@ -77,9 +112,9 @@ tensorboard --logdir=./jax_log
 You can see the agent become smarter (indicated by the decreasing game length),
 as training progresses.
 
-![TRAINING_PROGRESS](tf_training.png)
+![TRAINING_PROGRESS](tf_and_jax/tf_training.png)
 
-After training, you will get a `planestrike.tflite` file, which you can then
+After training, you will get a `planestrike_tf.tflite` file, which you can then
 integrate into the Android app we provide in the `android` folder.
 
 ## References

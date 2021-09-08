@@ -26,6 +26,9 @@ from jax.experimental import jax2tf
 import jax.numpy as jnp
 import numpy as np
 import tensorflow as tf
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import common
 
 ITERATIONS = 500000

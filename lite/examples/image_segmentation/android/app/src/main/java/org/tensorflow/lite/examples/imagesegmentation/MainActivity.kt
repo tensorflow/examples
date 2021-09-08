@@ -17,7 +17,6 @@
 package org.tensorflow.lite.examples.imagesegmentation
 
 import android.Manifest
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -39,6 +38,7 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -101,11 +101,7 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
     if (allPermissionsGranted()) {
       addCameraFragment()
     } else {
-      ActivityCompat.requestPermissions(
-        this,
-        REQUIRED_PERMISSIONS,
-        REQUEST_CODE_PERMISSIONS
-      )
+      ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
     }
 
     viewModel = AndroidViewModelFactory(application).create(MLExecutionViewModel::class.java)
@@ -123,9 +119,7 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
 
     useGpuSwitch.setOnCheckedChangeListener { _, isChecked ->
       useGPU = isChecked
-      mainScope.async(inferenceThread) {
-        createModelExecutor(useGPU)
-      }
+      mainScope.async(inferenceThread) { createModelExecutor(useGPU) }
     }
 
     rerunButton = findViewById(R.id.rerun_button)
@@ -167,10 +161,8 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
   private fun setChipsToLogView(itemsFound: Map<String, Int>) {
     chipsGroup.removeAllViews()
 
-    val paddingDp = TypedValue.applyDimension(
-      TypedValue.COMPLEX_UNIT_DIP, 10F,
-      resources.displayMetrics
-    ).toInt()
+    val paddingDp =
+      TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10F, resources.displayMetrics).toInt()
 
     for ((label, color) in itemsFound) {
       val chip = Chip(this)
@@ -190,21 +182,18 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
   }
 
   private fun getColorStateListForChip(color: Int): ColorStateList {
-    val states = arrayOf(
-      intArrayOf(android.R.attr.state_enabled), // enabled
-      intArrayOf(android.R.attr.state_pressed) // pressed
-    )
+    val states =
+      arrayOf(
+        intArrayOf(android.R.attr.state_enabled), // enabled
+        intArrayOf(android.R.attr.state_pressed) // pressed
+      )
 
     val colors = intArrayOf(color, color)
     return ColorStateList(states, colors)
   }
 
   private fun setImageView(imageView: ImageView, image: Bitmap) {
-    Glide.with(baseContext)
-      .load(image)
-      .override(512, 512)
-      .fitCenter()
-      .into(imageView)
+    Glide.with(baseContext).load(image).override(512, 512).fitCenter().into(imageView)
   }
 
   private fun updateUIWithResults(modelExecutionResult: ModelExecutionResult) {
@@ -230,19 +219,20 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
     }
 
     findViewById<ImageButton>(R.id.toggle_button).setOnClickListener {
-      lensFacing = if (lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
-        CameraCharacteristics.LENS_FACING_FRONT
-      } else {
-        CameraCharacteristics.LENS_FACING_BACK
-      }
+      lensFacing =
+        if (lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
+          CameraCharacteristics.LENS_FACING_FRONT
+        } else {
+          CameraCharacteristics.LENS_FACING_BACK
+        }
       cameraFragment.setFacingCamera(lensFacing)
       addCameraFragment()
     }
   }
 
   /**
-   * Process result from permission request dialog box, has the request
-   * been granted? If yes, start Camera. Otherwise display a toast
+   * Process result from permission request dialog box, has the request been granted? If yes, start
+   * Camera. Otherwise display a toast
    */
   override fun onRequestPermissionsResult(
     requestCode: Int,
@@ -255,11 +245,7 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
         addCameraFragment()
         viewFinder.post { setupControls() }
       } else {
-        Toast.makeText(
-          this,
-          "Permissions not granted by the user.",
-          Toast.LENGTH_SHORT
-        ).show()
+        Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
         finish()
       }
     }
@@ -269,19 +255,14 @@ class MainActivity : AppCompatActivity(), CameraFragment.OnCaptureFinished {
     cameraFragment = CameraFragment.newInstance()
     cameraFragment.setFacingCamera(lensFacing)
     supportFragmentManager.popBackStack()
-    supportFragmentManager.beginTransaction()
-      .replace(R.id.view_finder, cameraFragment)
-      .commit()
+    supportFragmentManager.beginTransaction().replace(R.id.view_finder, cameraFragment).commit()
   }
 
-  /**
-   * Check if all permission specified in the manifest have been granted
-   */
-  private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-    checkPermission(
-      it, Process.myPid(), Process.myUid()
-    ) == PackageManager.PERMISSION_GRANTED
-  }
+  /** Check if all permission specified in the manifest have been granted */
+  private fun allPermissionsGranted() =
+    REQUIRED_PERMISSIONS.all {
+      checkPermission(it, Process.myPid(), Process.myUid()) == PackageManager.PERMISSION_GRANTED
+    }
 
   override fun onCaptureFinished(file: File) {
     val msg = "Photo capture succeeded: ${file.absolutePath}"

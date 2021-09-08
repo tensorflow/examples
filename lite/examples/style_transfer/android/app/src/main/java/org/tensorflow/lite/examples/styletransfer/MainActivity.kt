@@ -17,7 +17,6 @@
 package org.tensorflow.lite.examples.styletransfer
 
 import android.Manifest
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -40,6 +39,7 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
@@ -112,11 +112,7 @@ class MainActivity :
     if (allPermissionsGranted()) {
       addCameraFragment()
     } else {
-      ActivityCompat.requestPermissions(
-        this,
-        REQUIRED_PERMISSIONS,
-        REQUEST_CODE_PERMISSIONS
-      )
+      ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
     }
 
     viewModel = AndroidViewModelFactory(application).create(MLExecutionViewModel::class.java)
@@ -151,9 +147,7 @@ class MainActivity :
     }
 
     rerunButton = findViewById(R.id.rerun_button)
-    rerunButton.setOnClickListener {
-      startRunningModel()
-    }
+    rerunButton.setOnClickListener { startRunningModel() }
 
     styleImageView.setOnClickListener {
       if (!isRunningModel) {
@@ -180,11 +174,7 @@ class MainActivity :
   }
 
   private fun setImageView(imageView: ImageView, image: Bitmap) {
-    Glide.with(baseContext)
-      .load(image)
-      .override(512, 512)
-      .fitCenter()
-      .into(imageView)
+    Glide.with(baseContext).load(image).override(512, 512).fitCenter().into(imageView)
   }
 
   private fun setImageView(imageView: ImageView, imagePath: String) {
@@ -219,11 +209,12 @@ class MainActivity :
     }
 
     findViewById<ImageButton>(R.id.toggle_button).setOnClickListener {
-      lensFacing = if (lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
-        CameraCharacteristics.LENS_FACING_FRONT
-      } else {
-        CameraCharacteristics.LENS_FACING_BACK
-      }
+      lensFacing =
+        if (lensFacing == CameraCharacteristics.LENS_FACING_BACK) {
+          CameraCharacteristics.LENS_FACING_FRONT
+        } else {
+          CameraCharacteristics.LENS_FACING_BACK
+        }
       cameraFragment.setFacingCamera(lensFacing)
       addCameraFragment()
     }
@@ -233,14 +224,12 @@ class MainActivity :
     cameraFragment = CameraFragment.newInstance()
     cameraFragment.setFacingCamera(lensFacing)
     supportFragmentManager.popBackStack()
-    supportFragmentManager.beginTransaction()
-      .replace(R.id.view_finder, cameraFragment)
-      .commit()
+    supportFragmentManager.beginTransaction().replace(R.id.view_finder, cameraFragment).commit()
   }
 
   /**
-   * Process result from permission request dialog box, has the request
-   * been granted? If yes, start Camera. Otherwise display a toast
+   * Process result from permission request dialog box, has the request been granted? If yes, start
+   * Camera. Otherwise display a toast
    */
   override fun onRequestPermissionsResult(
     requestCode: Int,
@@ -253,24 +242,17 @@ class MainActivity :
         addCameraFragment()
         viewFinder.post { setupControls() }
       } else {
-        Toast.makeText(
-          this,
-          "Permissions not granted by the user.",
-          Toast.LENGTH_SHORT
-        ).show()
+        Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
         finish()
       }
     }
   }
 
-  /**
-   * Check if all permission specified in the manifest have been granted
-   */
-  private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-    checkPermission(
-      it, Process.myPid(), Process.myUid()
-    ) == PackageManager.PERMISSION_GRANTED
-  }
+  /** Check if all permission specified in the manifest have been granted */
+  private fun allPermissionsGranted() =
+    REQUIRED_PERMISSIONS.all {
+      checkPermission(it, Process.myPid(), Process.myUid()) == PackageManager.PERMISSION_GRANTED
+    }
 
   override fun onCaptureFinished(file: File) {
     val msg = "Photo capture succeeded: ${file.absolutePath}"
@@ -317,7 +299,10 @@ class MainActivity :
       resultImageView.visibility = View.INVISIBLE
       progressBar.visibility = View.VISIBLE
       viewModel.onApplyStyle(
-        baseContext, lastSavedFile, selectedStyle, styleTransferModelExecutor,
+        baseContext,
+        lastSavedFile,
+        selectedStyle,
+        styleTransferModelExecutor,
         inferenceThread
       )
     } else {

@@ -16,10 +16,10 @@
 
 package org.tensorflow.lite.examples.styletransfer
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.Job
@@ -43,8 +43,7 @@ class MLExecutionViewModel : ViewModel() {
     inferenceThread: ExecutorCoroutineDispatcher
   ) {
     viewModelScope.launch(inferenceThread) {
-      val result =
-        styleTransferModelExecutor.execute(contentFilePath, styleFilePath, context)
+      val result = styleTransferModelExecutor.execute(contentFilePath, styleFilePath, context)
       _styledBitmap.postValue(result)
     }
   }
