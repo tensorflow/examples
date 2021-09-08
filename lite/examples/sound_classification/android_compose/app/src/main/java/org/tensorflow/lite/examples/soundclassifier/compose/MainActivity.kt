@@ -30,7 +30,6 @@ class MainActivity : ComponentActivity() {
   private var audioClassifier: AudioClassifier? = null
   private var audioRecord: AudioRecord? = null
 
-  // TODO move this to ViewModel
   private lateinit var handler: Handler // background thread handler to run classification
 
   private val requestAudioPermissionLauncher = registerForActivityResult(
@@ -48,17 +47,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     setContent {
-      val classifierEnabled by viewModel.classifierEnabled.collectAsState()
-      val classificationInterval by viewModel.classificationInterval.collectAsState()
-      val probabilities by viewModel.probabilities.collectAsState()
-
-      SoundClassifierScene(
-        probabilities = probabilities,
-        classifierEnabled = classifierEnabled,
-        interval = classificationInterval,
-        onClassifierToggle = viewModel::setClassifierEnabled,
-        onIntervalChanged = viewModel::setClassificationInterval,
-      )
+      SoundClassifierScene(viewModel)
     }
 
     // Create a handler to run classification in a background thread

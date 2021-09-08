@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,13 +25,11 @@ import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.progressCol
 import org.tensorflow.lite.support.label.Category
 
 @Composable
-fun SoundClassifierScene(
-  probabilities: List<Category>,
-  classifierEnabled: Boolean,
-  interval: Long,
-  onClassifierToggle: (Boolean) -> Unit,
-  onIntervalChanged: (Long) -> Unit,
-) {
+fun SoundClassifierScene(viewModel: SoundClassifierViewModel) {
+  val classifierEnabled by viewModel.classifierEnabled.collectAsState()
+  val classificationInterval by viewModel.classificationInterval.collectAsState()
+  val probabilities by viewModel.probabilities.collectAsState()
+
   JetSoundClassifierTheme {
     Surface(color = MaterialTheme.colors.background) {
       Scaffold(
@@ -48,9 +48,9 @@ fun SoundClassifierScene(
         SoundClassifierBody(
           probabilities = probabilities,
           classifierEnabled = classifierEnabled,
-          interval = interval,
-          onClassifierToggle = onClassifierToggle,
-          onIntervalChanged = onIntervalChanged,
+          interval = classificationInterval,
+          onClassifierToggle = viewModel::setClassifierEnabled,
+          onIntervalChanged = viewModel::setClassificationInterval,
           modifier = Modifier.padding(innerPadding),
         )
       }
@@ -157,38 +157,29 @@ fun ProbabilityItem(text: String, progress: Float, index: Int = 0) {
   }
 }
 
+val DummyCategories = listOf(
+  Category("Background Noise", 0.8f),
+  Category("Clap", 0.8f),
+  Category("Snap", 0.8f),
+)
+
 @Preview(name = "Day mode, small device", widthDp = 360, heightDp = 640)
 @Preview(
   name = "Night mode, small device", widthDp = 360, heightDp = 640,
   uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
-@Preview(name = "Day mode", device = Devices.PIXEL_4)
+@Preview(name = "Day mode", device = Devices.PIXEL_4_XL)
 @Composable
 fun Preview() {
   JetSoundClassifierTheme {
     Surface(color = MaterialTheme.colors.background) {
-      Column(
-        modifier = Modifier.padding(16.dp)
-      ) {
-        ControlPanel(
-          inputEnabled = true,
-          interval = 500L
-        )
-
-        Divider(modifier = Modifier.padding(vertical = 24.dp))
-
-        LazyColumn {
-          item {
-            ProbabilityItem(text = "Background Noise", progress = 0.8f, index = 0)
-          }
-          item {
-            ProbabilityItem(text = "Clap", progress = 0.8f, index = 1)
-          }
-          item {
-            ProbabilityItem(text = "Snap", progress = 0.8f, index = 2)
-          }
-        }
-      }
+      SoundClassifierBody(
+        probabilities = DummyCategories,
+        classifierEnabled = true,
+        interval = 500L,
+        onClassifierToggle = {},
+        onIntervalChanged = {},
+      )
     }
   }
 }
