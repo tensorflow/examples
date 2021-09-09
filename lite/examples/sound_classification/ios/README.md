@@ -30,7 +30,7 @@ for performing sound classification.
 
 *   Xcode command-line tools (run `xcode-select --install`)
 
-*   [CocoaPods](https://cocoapods.org/) (run `bash sudo gem install cocoapods`)
+*   [CocoaPods](https://cocoapods.org/) (run `sudo gem install cocoapods`)
 
 If this is a new install, you will need to run the Xcode application once to
 agree to the license before continuing.
@@ -42,10 +42,10 @@ raise a exception while initializing TensorFlow Lite runtime.
 
 ## Build and run
 
-1.  Clone this GitHub repository to your workstation. `bash git clone
+1.  Clone this GitHub repository to your workstation. `git clone
     https://github.com/tensorflow/examples.git`
 
-2.  Install the pod to generate the workspace file: `bash cd
+2.  Install the pod to generate the workspace file: `cd
     examples/lite/examples/sound_classification/ios && pod install`
 
 Note: If you have installed this pod before and that command doesn't work, try
@@ -54,7 +54,7 @@ Note: If you have installed this pod before and that command doesn't work, try
 At the end of this step you should have a directory called
 `SoundClassification.xcworkspace`.
 
-1.  Open the project in Xcode with the following command: `bash open
+1.  Open the project in Xcode with the following command: `open
     SoundClassification.xcworkspace`
 
 This launches Xcode and opens the `SoundClassification` project.
