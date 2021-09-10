@@ -2,10 +2,28 @@ package org.tensorflow.lite.examples.soundclassifier.compose.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
+import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,19 +36,19 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.tensorflow.lite.examples.soundclassifier.compose.R
-import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.JetSoundClassifierTheme
+import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.SoundClassifierTheme
 import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.gray800
 import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.orange500
 import org.tensorflow.lite.examples.soundclassifier.compose.ui.theme.progressColorPairs
 import org.tensorflow.lite.support.label.Category
 
 @Composable
-fun SoundClassifierScene(viewModel: SoundClassifierViewModel) {
+fun SoundClassifierScreen(viewModel: SoundClassifierViewModel) {
   val classifierEnabled by viewModel.classifierEnabled.collectAsState()
   val classificationInterval by viewModel.classificationInterval.collectAsState()
   val probabilities by viewModel.probabilities.collectAsState()
 
-  JetSoundClassifierTheme {
+  SoundClassifierTheme {
     Surface(color = MaterialTheme.colors.background) {
       Scaffold(
         topBar = {
@@ -45,7 +63,7 @@ fun SoundClassifierScene(viewModel: SoundClassifierViewModel) {
             backgroundColor = MaterialTheme.colors.primarySurface
           )
         }) { innerPadding ->
-        SoundClassifierBody(
+        SoundClassifierScreen(
           probabilities = probabilities,
           classifierEnabled = classifierEnabled,
           interval = classificationInterval,
@@ -56,11 +74,10 @@ fun SoundClassifierScene(viewModel: SoundClassifierViewModel) {
       }
     }
   }
-
 }
 
 @Composable
-private fun SoundClassifierBody(
+private fun SoundClassifierScreen(
   probabilities: List<Category>,
   classifierEnabled: Boolean,
   interval: Long,
@@ -152,12 +169,12 @@ fun ProbabilityItem(text: String, progress: Float, index: Int = 0) {
         .clip(MaterialTheme.shapes.medium)
         .fillMaxWidth(),
       color = indicatorColor,
-      backgroundColor = backgroundColor
+      backgroundColor = backgroundColor,
     )
   }
 }
 
-val DummyCategories = listOf(
+private val SampleCategories = listOf(
   Category("Background Noise", 0.8f),
   Category("Clap", 0.8f),
   Category("Snap", 0.8f),
@@ -171,10 +188,10 @@ val DummyCategories = listOf(
 @Preview(name = "Day mode", device = Devices.PIXEL_4_XL)
 @Composable
 fun Preview() {
-  JetSoundClassifierTheme {
+  SoundClassifierTheme {
     Surface(color = MaterialTheme.colors.background) {
-      SoundClassifierBody(
-        probabilities = DummyCategories,
+      SoundClassifierScreen(
+        probabilities = SampleCategories,
         classifierEnabled = true,
         interval = 500L,
         onClassifierToggle = {},

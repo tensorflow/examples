@@ -8,7 +8,8 @@ an audio event classification model.
 
 ## Requirements
 
-*   Android Studio 2020.3.1 Patch 2 (installed on a Linux, Mac or Windows machine)
+*   [Android Studio Arctic Fox](https://developer.android.com/studio) Patch 2 or newer
+(installed on a Linux, Mac or Windows machine)
 *   An Android device with Android 6.0+
 
 ## Build and run

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.JetSoundClassifier" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.SoundClassifier" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryVariant">@color/gray500</item>
@@ -11,12 +11,12 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.JetSoundClassifier.NoActionBar">
+    <style name="Theme.SoundClassifier.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.JetSoundClassifier.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.SoundClassifier.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="Theme.JetSoundClassifier.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.SoundClassifier.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

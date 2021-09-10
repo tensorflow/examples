@@ -20,7 +20,7 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun JetSoundClassifierTheme(
+fun SoundClassifierTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
   content: @Composable() () -> Unit
 ) {
