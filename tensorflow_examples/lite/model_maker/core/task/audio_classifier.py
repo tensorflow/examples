@@ -47,11 +47,7 @@ class AudioClassifier(classification_model.ClassificationModel):
       validation_ds = validation_data.gen_dataset(
           batch_size, is_training=False) if validation_data else None
 
-      self.model = self.model_spec.create_model(
-          train_data.num_classes, train_whole_model=self.train_whole_model)
-
-      # Display model summary
-      self.model.summary()
+      self.create_model(train_data.num_classes, self.train_whole_model)
 
       return self.model_spec.run_classifier(
           self.model,
@@ -59,6 +55,11 @@ class AudioClassifier(classification_model.ClassificationModel):
           train_ds,
           validation_ds,
           callbacks=self._keras_callbacks(self.model_spec.model_dir))
+
+  def create_model(self, num_classes, train_whole_model):
+    self.model = self.model_spec.create_model(
+        num_classes, train_whole_model=train_whole_model)
+    self.model.summary()
 
   def _export_tflite(self,
                      tflite_filepath,
