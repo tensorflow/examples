@@ -1,8 +1,12 @@
-# Tensorflow Lite PoseNet iOS Example Application
+# See the new pose estimation TFLite iOS sample [here](../../pose_estimation/ios), which demonstrates both Posenet and Movenet models. This old Posenet sample will no longer be maintained.
+
+<br/> <br/> <br/> <br/>
+
+## Tensorflow Lite PoseNet iOS Example Application
 
 ![Demo image](https://storage.googleapis.com/download.tensorflow.org/models/tflite/screenshots/posenet_ios_demo.gif)
 
-## Overview
+### Overview
 This is an on-device camera app that continuously detects the key points of a
 person in real-time with the camera activity using the
 [Pose Estimation model][posenet-model]. Key point of a person means a point
@@ -15,26 +19,26 @@ shaded. The result is rendered when the total inference score is higher than
 
 Camera captures are discarded immediately after use, nothing is stored or saved.
 
-### Model used
+#### Model used
 [Pose Estimation model][posenet-model] is a vision model that can be used to
 estimate the pose of a person in an image or video by estimating where key body
 joints are.
 
-### Structure
+#### Structure
 
 ![Structure diagram](https://storage.googleapis.com/download.tensorflow.org/models/tflite/screenshots/posenet_ios_diagram.png)
 
-#### Preprocessing
+##### Preprocessing
 While preprocessing, it converts camera input image to satisfy the model input
 specification. It crops the original image to have the same aspect ratio as the
 model input size. After that it resizes the cropped image to the model input
 size, and converts it to the required data type.
 
-#### Inference
+##### Inference
 Assign preprocessed data to the input tensor and run [the model][posenet-model].
 Output data is assigned to the output tensors as a result.
 
-#### Postprocessing
+##### Postprocessing
 In postprocessing, it calculates the positions of the key points and the lines
 to display, along with the total confidence score. Total confidence score is the
 average of all the key points' confidence scores. Coordinates of the key points
@@ -46,7 +50,7 @@ the transformed dots, the skeleton of a person can be drawn by connecting the
 dots between adjacent joints.
 
 
-## Requirements
+### Requirements
 
 * Xcode
 * Valid Apple Developer ID
@@ -55,7 +59,7 @@ dots between adjacent joints.
 * Xcode command line tools (to install, run `xcode-select --install`)
 * CocoaPods (to install, run `sudo gem install cocoapods`)
 
-## Build and run
+### Build and run
 1. Clone the TensorFlow examples GitHub repository to your computer to get the
 demo application.
 
