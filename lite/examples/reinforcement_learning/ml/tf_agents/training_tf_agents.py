@@ -17,21 +17,26 @@ import os
 from typing import Sequence
 
 from absl import app
+import reverb
 import tensorflow as tf
 import planestrike_py_environment
 import tensorflow_probability as tfp
 import tf_agents as tfa
 from tf_agents.agents.reinforce import reinforce_agent
+from tf_agents.drivers import py_driver
 from tf_agents.environments import tf_py_environment
 from tf_agents.policies import policy_saver
-from tf_agents.replay_buffers import tf_uniform_replay_buffer
-from tf_agents.trajectories import trajectory
+from tf_agents.policies import py_tf_eager_policy
+from tf_agents.replay_buffers import reverb_replay_buffer
+from tf_agents.replay_buffers import reverb_utils
+from tf_agents.specs import tensor_spec
 from tf_agents.utils import common
 
 BOARD_SIZE = 8
-ITERATIONS = 350000
+ITERATIONS = 250000
 COLLECT_EPISODES_PER_ITERATION = 1
 REPLAY_BUFFER_CAPACITY = 2000
+REPLAY_BUFFER_TABLE_NAME = 'uniform_table'
 DISCOUNT = 0.5
 
 FC_LAYER_PARAMS = 100
@@ -68,22 +73,17 @@ def compute_avg_return_and_steps(environment, policy, num_episodes=10):
   return average_return.numpy()[0], average_episode_steps
 
 
-def collect_episode(environment, policy, num_episodes, replay_buffer):
+def collect_episode(environment, policy, num_episodes, replay_buffer_observer):
   """Collect game episode trajectories."""
-  episode_counter = 0
-  environment.reset()
+  initial_time_step = environment.reset()
 
-  while episode_counter < num_episodes:
-    time_step = environment.current_time_step()
-    action_step = policy.action(time_step)
-    next_time_step = environment.step(action_step.action)
-    traj = trajectory.from_transition(time_step, action_step, next_time_step)
-
-    # Add trajectory to the replay buffer
-    replay_buffer.add_batch(traj)
-
-    if traj.is_boundary():
-      episode_counter += 1
+  driver = py_driver.PyDriver(
+      environment,
+      py_tf_eager_policy.PyTFEagerPolicy(policy, use_tf_function=True),
+      [replay_buffer_observer],
+      max_episodes=num_episodes)
+  initial_time_step = environment.reset()
+  driver.run(initial_time_step)
 
 
 def train_agent(iterations, modeldir, logdir, policydir):
@@ -126,16 +126,30 @@ def train_agent(iterations, modeldir, logdir, policydir):
 
   tf_policy_saver = policy_saver.PolicySaver(collect_policy)
 
-  replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
-      data_spec=tf_agent.collect_data_spec,
-      batch_size=train_env.batch_size,
-      max_length=REPLAY_BUFFER_CAPACITY)
+  # Use reverb as replay buffer
+  replay_buffer_signature = tensor_spec.from_spec(tf_agent.collect_data_spec)
+  table = reverb.Table(
+      REPLAY_BUFFER_TABLE_NAME,
+      max_size=REPLAY_BUFFER_CAPACITY,
+      sampler=reverb.selectors.Uniform(),
+      remover=reverb.selectors.Fifo(),
+      rate_limiter=reverb.rate_limiters.MinSize(1),
+      signature=replay_buffer_signature
+  )  # specify signature here for validation at insertion time
+
+  reverb_server = reverb.Server([table])
+
+  replay_buffer = reverb_replay_buffer.ReverbReplayBuffer(
+      tf_agent.collect_data_spec,
+      sequence_length=None,
+      table_name=REPLAY_BUFFER_TABLE_NAME,
+      local_server=reverb_server)
+
+  replay_buffer_observer = reverb_utils.ReverbAddEpisodeObserver(
+      replay_buffer.py_client, REPLAY_BUFFER_TABLE_NAME, REPLAY_BUFFER_CAPACITY)
 
   # Optimize by wrapping some of the code in a graph using TF function.
   tf_agent.train = common.function(tf_agent.train)
-
-  # Reset the train step
-  tf_agent.train_step_counter.assign(0)
 
   # Evaluate the agent's policy once before training.
   avg_return = compute_avg_return_and_steps(eval_env, tf_agent.policy,
@@ -145,18 +159,17 @@ def train_agent(iterations, modeldir, logdir, policydir):
 
   for i in range(iterations):
     # Collect a few episodes using collect_policy and save to the replay buffer.
-    collect_episode(train_env, tf_agent.collect_policy,
-                    COLLECT_EPISODES_PER_ITERATION, replay_buffer)
+    collect_episode(train_py_env, collect_policy,
+                    COLLECT_EPISODES_PER_ITERATION, replay_buffer_observer)
 
     # Use data from the buffer and update the agent's network.
-    experience = replay_buffer.gather_all()
-    tf_agent.train(experience)
+    iterator = iter(replay_buffer.as_dataset(sample_batch_size=1))
+    trajectories, _ = next(iterator)
+    tf_agent.train(experience=trajectories)
     replay_buffer.clear()
 
-    step = tf_agent.train_step_counter.numpy()
-
     logger = tf.get_logger()
-    if step % EVAL_INTERVAL == 0:
+    if i % EVAL_INTERVAL == 0:
       avg_return, avg_episode_length = compute_avg_return_and_steps(
           eval_env, eval_policy, NUM_EVAL_EPISODES)
       with summary_writer.as_default():
@@ -164,8 +177,8 @@ def train_agent(iterations, modeldir, logdir, policydir):
         tf.summary.scalar('Average episode length', avg_episode_length, step=i)
         summary_writer.flush()
       logger.info(
-          'step = {0}: Average Return = {1}, Average Episode Length = {2}'
-          .format(step, avg_return, avg_episode_length))
+          'iteration = {0}: Average Return = {1}, Average Episode Length = {2}'
+          .format(i, avg_return, avg_episode_length))
 
   summary_writer.close()
 
