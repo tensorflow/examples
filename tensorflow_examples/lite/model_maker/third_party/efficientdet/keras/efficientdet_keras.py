@@ -289,7 +289,7 @@ class ResampleFeatureMap(tf.keras.layers.Layer):
           data_format=self.data_format)(inputs)
     raise ValueError('Unsupported pooling type {}.'.format(self.pooling_type))
 
-  def _upsample2d(self, inputs, target_height, target_width):
+  def _upsample2d(self, inputs, target_height, target_width, training=False):
     return tf.cast(
         tf.compat.v1.image.resize_nearest_neighbor(
             tf.cast(inputs, tf.float32), [target_height, target_width]),
@@ -324,7 +324,7 @@ class ResampleFeatureMap(tf.keras.layers.Layer):
     elif height <= target_height and width <= target_width:
       feat = self._maybe_apply_1x1(feat, training, num_channels)
       if height < target_height or width < target_width:
-        feat = self._upsample2d(feat, target_height, target_width)
+        feat = self._upsample2d(feat, target_height, target_width, training)
     else:
       raise ValueError(
           'Incompatible Resampling : feat shape {}x{} target_shape: {}x{}'
