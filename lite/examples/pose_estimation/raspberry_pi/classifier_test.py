@@ -32,12 +32,12 @@ class ClassifierTest(unittest.TestCase):
     # Detect the pose from the input image
     pose_detector = Movenet(_ESTIMATION_MODEL)
     image = cv2.imread(_TEST_IMAGE)
-    keypoints_with_scores = pose_detector.detect(image)
+    person = pose_detector.detect(image)
 
     # Initialize a pose classifier
     classifier = Classifier(_CLASSIFIER_MODEL, _LABELS)
-    prob_list = classifier.classify_pose(keypoints_with_scores)
-    class_name = prob_list[0][0]
+    categories = classifier.classify_pose(person)
+    class_name = categories[0].label
     self.assertEqual(class_name, 'tree',
                      'Predicted pose is different from ground truth.')
 

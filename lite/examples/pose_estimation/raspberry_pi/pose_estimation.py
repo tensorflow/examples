@@ -79,26 +79,23 @@ def run(estimation_model, classification_model, label_file, camera_id, width,
 
     counter += 1
     image = cv2.flip(image, 1)
-    keypoints = pose_detector.detect(image)
 
-    # get location of landmarks and edges
-    (keypoint_locs, keypoint_edges,
-     edge_colors) = utils.keypoints_and_edges_for_display(
-         keypoints, height, width)
+    # Run pose estimation using a SinglePose model, and wrap the result in an
+    # array.
+    list_persons = [pose_detector.detect(image)]
 
     # Draw keypoints and edges on input image
-    image = utils.draw_landmarks_edges(image, keypoint_locs, keypoint_edges,
-                                       edge_colors)
+    image = utils.visualize(image, list_persons)
 
     if classification_model:
       # Run pose classification
-      prob_list = classifier.classify_pose(keypoints)
+      prob_list = classifier.classify_pose(list_persons[0])
 
       # Show classification results on the image
       for i in range(detection_results_to_show):
-        class_name = prob_list[i][0]
-        probablity = round(prob_list[i][1], 2)
-        result_text = class_name + ' (' + str(probablity) + ')'
+        class_name = prob_list[i].label
+        probability = round(prob_list[i].score, 2)
+        result_text = class_name + ' (' + str(probability) + ')'
         text_location = (left_margin, (i + 2) * row_size)
         cv2.putText(image, result_text, text_location, cv2.FONT_HERSHEY_PLAIN,
                     font_size, text_color, font_thickness)

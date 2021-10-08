@@ -17,10 +17,10 @@ import logging
 import unittest
 
 import cv2
+from data import BodyPart
 import numpy as np
 import pandas as pd
 from posenet import Posenet
-import utils
 
 _MODEL = 'posenet'
 _IMAGE_TEST1 = 'test_data/image1.png'
@@ -40,6 +40,7 @@ class PosenetTest(unittest.TestCase):
     self.posenet = Posenet(_MODEL)
     # Get pose landmarks truth
     pose_landmarks_truth = pd.read_csv(_GROUND_TRUTH_CSV)
+
     self.keypoints_truth_1 = pose_landmarks_truth.iloc[0].to_numpy().reshape(
         (17, 2))
     self.keypoints_truth_2 = pose_landmarks_truth.iloc[1].to_numpy().reshape(
@@ -47,22 +48,18 @@ class PosenetTest(unittest.TestCase):
 
   def _detect_and_assert(self, detector, image, keypoints_truth):
     """Run pose estimation and assert if the result is close to ground truth."""
-    keypoints_with_scores = detector.detect(image)
-
-    (keypoint_locs, _,
-     _) = utils.keypoints_and_edges_for_display(keypoints_with_scores,
-                                                image.shape[0], image.shape[1],
-                                                0)
-    for idx, key in enumerate(utils.KEYPOINT_DICT.keys()):
-      distance = np.linalg.norm(keypoint_locs[idx] - keypoints_truth[idx],
-                                np.inf)
+    person = detector.detect(image)
+    keypoints = person.keypoints
+    for idx in range(len(BodyPart)):
+      distance = np.linalg.norm(
+          keypoints[idx].coordinate - keypoints_truth[idx], np.inf)
 
       self.assertGreaterEqual(
           _ALLOWED_DISTANCE, distance,
           '{0} is too far away ({1}) from ground truth data.'.format(
-              key, int(distance)))
-      logging.debug('Detected %s close to expected result (%d)', key,
-                    int(distance))
+              BodyPart(idx).name, int(distance)))
+      logging.debug('Detected %s close to expected result (%d)',
+                    BodyPart(idx).name, int(distance))
 
   def test_pose_estimation_image1(self):
     """Test if Posenet detection's close to ground truth of image1."""
