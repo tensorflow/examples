@@ -2,6 +2,7 @@
 A minimal tensorflow implementation of YOLOv3, with support for training, inference and evaluation.
 
 ## Installations
+install requirements and download pretrained weights
 ```
 $ pip3 install -r requirements.txt
 $ wget https://pjreddie.com/media/files/yolov3.weights
@@ -10,12 +11,13 @@ $ wget https://pjreddie.com/media/files/yolov3.weights
 ## Demo 
 We will use pretrained weights to make predictions on image.
 
+
 ```
 $ python detect.py
 ```
 ## Result
+<img src="">
 
-//show imgage
 
 ## Useful Resources and Links
 
