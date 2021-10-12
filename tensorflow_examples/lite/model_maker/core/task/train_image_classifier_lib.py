@@ -93,6 +93,18 @@ def create_optimizer(init_lr, num_decay_steps, num_warmup_steps):
   return optimizer
 
 
+def get_default_callbacks(model_dir):
+  """Gets default callbacks."""
+  summary_dir = os.path.join(model_dir, "summaries")
+  summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
+  # Save checkpoint every 20 epochs.
+
+  checkpoint_path = os.path.join(model_dir, "checkpoint")
+  checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+      checkpoint_path, save_weights_only=True, period=20)
+  return [summary_callback, checkpoint_callback]
+
+
 def hub_train_model(model, hparams, train_ds, validation_ds, steps_per_epoch):
   """Trains model with the given data and hyperparameters.
 
@@ -179,17 +191,11 @@ def train_model(model, hparams, train_ds, validation_ds, steps_per_epoch):
 
   loss = tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1)
   model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
-
-  summary_dir = os.path.join(hparams.model_dir, "summaries")
-  summary_callback = tf.keras.callbacks.TensorBoard(summary_dir)
-  # Save checkpoint every 20 epochs.
-  checkpoint_path = os.path.join(hparams.model_dir, "checkpoint")
-  checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-      checkpoint_path, save_weights_only=True, period=20)
+  callbacks = get_default_callbacks(hparams.model_dir)
 
   # Trains the models.
   return model.fit(
       train_ds,
       epochs=hparams.train_epochs,
       validation_data=validation_ds,
-      callbacks=[summary_callback, checkpoint_callback])
+      callbacks=callbacks)
