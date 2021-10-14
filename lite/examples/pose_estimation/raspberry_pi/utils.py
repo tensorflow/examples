@@ -63,7 +63,7 @@ def visualize(image: np.ndarray,
   """
   for person in list_persons:
     if person.score < instance_threshold:
-      continue
+      break
 
     keypoints = person.keypoints
     bounding_box = person.bounding_box
