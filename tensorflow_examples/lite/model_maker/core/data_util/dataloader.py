@@ -114,7 +114,9 @@ class DataLoader(object):
         # TODO(wangtz): Do we want to do shuffle before / after repeat?
         # Shuffle after repeat will give a more randomized dataset and mix the
         # epoch boundary: https://www.tensorflow.org/guide/data
-        ds = ds.shuffle(buffer_size=min(self._size, buffer_size))
+        if self._size:
+          buffer_size = min(self._size, buffer_size)
+        ds = ds.shuffle(buffer_size=buffer_size)
 
     ds = ds.batch(batch_size, drop_remainder=drop_remainder)
     ds = ds.prefetch(tf.data.AUTOTUNE)

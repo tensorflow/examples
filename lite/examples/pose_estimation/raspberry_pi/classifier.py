@@ -13,6 +13,10 @@
 # limitations under the License.
 """Code to run a TFLite pose classification model."""
 import os
+from typing import List
+
+from data import Category
+from data import Person
 import numpy as np
 
 # pylint: disable=g-import-not-at-top
@@ -29,7 +33,10 @@ except ImportError:
 class Classifier(object):
   """A wrapper class for a TFLite pose classification model."""
 
-  def __init__(self, model_name, label_file, score_threshold=0.1):
+  def __init__(self,
+               model_name: str,
+               label_file: str,
+               score_threshold: float = 0.1) -> None:
     """Initialize a pose classification model.
 
     Args:
@@ -43,7 +50,7 @@ class Classifier(object):
     if not ext:
       model_name += '.tflite'
 
-    # Initialize model
+    # Initialize the TFLite model.
     interpreter = Interpreter(model_path=model_name, num_threads=4)
     interpreter.allocate_tensors()
 
@@ -54,7 +61,7 @@ class Classifier(object):
     self.pose_class_names = self._load_labels(label_file)
     self.score_threshold = score_threshold
 
-  def _load_labels(self, label_path):
+  def _load_labels(self, label_path: str) -> List[str]:
     """Load label list from file.
 
     Args:
@@ -66,31 +73,35 @@ class Classifier(object):
     with open(label_path, 'r') as f:
       return [line.strip() for _, line in enumerate(f.readlines())]
 
-  def classify_pose(self, keypoints_and_scores):
+  def classify_pose(self, person: Person) -> List[Category]:
     """Run classification on an input.
 
     Args:
-      keypoints_and_scores: A list of coordinates and scores of 17 COCO
-        keypoints. Shape: (17, 3). You can pass the output of Posenet#detect()
-        and Movenet#detect() here.
+      person: A data.Person instance.
 
     Returns:
-      A list of prediction result in the (class_name, probability) format.
-      Sorted by probability descendingly.
+      A list of classification result (data.Category).
+      Sorted by probability descending.
     """
-    # Check if keypoints are all detected before running the classifier.
+    # Check if all keypoints are detected before running the classifier.
     # If there's a keypoint below the threshold, return zero probability for all
     # class.
-    min_score = np.amin(keypoints_and_scores[:, 2])
+    min_score = min([keypoint.score for keypoint in person.keypoints])
     if min_score < self.score_threshold:
-      return [(class_name, 0) for class_name in self.pose_class_names]
+      return [
+          Category(label=class_name, score=0)
+          for class_name in self.pose_class_names
+      ]
 
     # Flatten the input and add an extra dimension to match with the requirement
     # of the TFLite model.
-    input_tensor = keypoints_and_scores.flatten().astype(np.float32)
+    input_tensor = [[
+        keypoint.coordinate.y, keypoint.coordinate.x, keypoint.score
+    ] for keypoint in person.keypoints]
+    input_tensor = np.array(input_tensor).flatten().astype(np.float32)
     input_tensor = np.expand_dims(input_tensor, axis=0)
 
-    # Set the input and run inference
+    # Set the input and run inference.
     self._interpreter.set_tensor(self._input_index, input_tensor)
     self._interpreter.invoke()
 
@@ -98,11 +109,12 @@ class Classifier(object):
     output = self._interpreter.get_tensor(self._output_index)
     output = np.squeeze(output, axis=0)
 
-    # Sort output by probability descendingly
+    # Sort output by probability descending.
     prob_descending = sorted(
         range(len(output)), key=lambda k: output[k], reverse=True)
     prob_list = [
-        (self.pose_class_names[idx], output[idx]) for idx in prob_descending
+        Category(label=self.pose_class_names[idx], score=output[idx])
+        for idx in prob_descending
     ]
 
     return prob_list

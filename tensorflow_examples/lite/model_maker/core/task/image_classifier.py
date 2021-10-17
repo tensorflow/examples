@@ -103,7 +103,7 @@ class ImageClassifier(classification_model.ClassificationModel):
       use_augmentation: Use data augmentation for preprocessing.
       representative_data:  Representative dataset for full integer
         quantization. Used when converting the keras model to the TFLite model
-        with full interger quantization.
+        with full integer quantization.
     """
     super(ImageClassifier, self).__init__(model_spec, index_to_label, shuffle,
                                           hparams.do_fine_tuning)

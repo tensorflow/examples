@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0F1854E826A95F48004780E1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F1854CC26A95F48004780E1 /* Main.storyboard */; };
 		0F1854E926A95F48004780E1 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0F1854CE26A95F48004780E1 /* Launch Screen.storyboard */; };
+		0F1854EB26A95F48004780E1 /* CameraFeedManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854D226A95F48004780E1 /* CameraFeedManager.swift */; };
 		0F1854EC26A95F48004780E1 /* MoveNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854D426A95F48004780E1 /* MoveNet.swift */; };
 		0F1854ED26A95F48004780E1 /* PoseNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854D526A95F48004780E1 /* PoseNet.swift */; };
 		0F1854EE26A95F48004780E1 /* PoseEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854D626A95F48004780E1 /* PoseEstimator.swift */; };
@@ -16,7 +17,9 @@
 		0F1854F026A95F48004780E1 /* CGSize+TFLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854D926A95F48004780E1 /* CGSize+TFLite.swift */; };
 		0F1854F226A95F48004780E1 /* CVPixelBuffer+TFLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854DB26A95F48004780E1 /* CVPixelBuffer+TFLite.swift */; };
 		0F1854F326A95F48004780E1 /* Data+TFLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854DC26A95F48004780E1 /* Data+TFLite.swift */; };
+		0F1854F426A95F48004780E1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854DE26A95F48004780E1 /* ViewController.swift */; };
 		0F1854F826A95F48004780E1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854E326A95F48004780E1 /* AppDelegate.swift */; };
+		0F1854F926A95F48004780E1 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1854E526A95F48004780E1 /* OverlayView.swift */; };
 		33CECB32BE623AB8D720B3EA /* Pods_PoseEstimation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A08F93117A75BFCA9BB9C0F /* Pods_PoseEstimation.framework */; };
 		7FB1192B26EA499500B86E0A /* PoseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB1192926EA499500B86E0A /* PoseData.swift */; };
 		7FB1192C26EA499500B86E0A /* PoseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB1192A26EA499500B86E0A /* PoseConfig.swift */; };
@@ -28,6 +31,7 @@
 /* Begin PBXFileReference section */
 		0F1854CD26A95F48004780E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0F1854CF26A95F48004780E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "Base.lproj/Launch Screen.storyboard"; sourceTree = "<group>"; };
+		0F1854D226A95F48004780E1 /* CameraFeedManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraFeedManager.swift; sourceTree = "<group>"; };
 		0F1854D426A95F48004780E1 /* MoveNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoveNet.swift; sourceTree = "<group>"; };
 		0F1854D526A95F48004780E1 /* PoseNet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoseNet.swift; sourceTree = "<group>"; };
 		0F1854D626A95F48004780E1 /* PoseEstimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoseEstimator.swift; sourceTree = "<group>"; };
@@ -35,7 +39,9 @@
 		0F1854D926A95F48004780E1 /* CGSize+TFLite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGSize+TFLite.swift"; sourceTree = "<group>"; };
 		0F1854DB26A95F48004780E1 /* CVPixelBuffer+TFLite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+TFLite.swift"; sourceTree = "<group>"; };
 		0F1854DC26A95F48004780E1 /* Data+TFLite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Data+TFLite.swift"; sourceTree = "<group>"; };
+		0F1854DE26A95F48004780E1 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		0F1854E326A95F48004780E1 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		0F1854E526A95F48004780E1 /* OverlayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		0F1854E626A95F48004780E1 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		515FF91A588EB715C5E320A7 /* Pods-PoseEstimation.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PoseEstimation.release.xcconfig"; path = "Target Support Files/Pods-PoseEstimation/Pods-PoseEstimation.release.xcconfig"; sourceTree = "<group>"; };
 		737F4A896F2232015436950C /* Pods-PoseEstimation.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PoseEstimation.debug.xcconfig"; path = "Target Support Files/Pods-PoseEstimation/Pods-PoseEstimation.debug.xcconfig"; sourceTree = "<group>"; };
@@ -85,6 +91,7 @@
 		0F1854D026A95F48004780E1 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				0F1854D226A95F48004780E1 /* CameraFeedManager.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -102,6 +109,7 @@
 		0F1854DD26A95F48004780E1 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				0F1854DE26A95F48004780E1 /* ViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -124,6 +132,7 @@
 		0F1854E426A95F48004780E1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0F1854E526A95F48004780E1 /* OverlayView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -306,8 +315,11 @@
 				0F1854EE26A95F48004780E1 /* PoseEstimator.swift in Sources */,
 				0F1854F226A95F48004780E1 /* CVPixelBuffer+TFLite.swift in Sources */,
 				0F1854F026A95F48004780E1 /* CGSize+TFLite.swift in Sources */,
+				0F1854F426A95F48004780E1 /* ViewController.swift in Sources */,
+				0F1854EB26A95F48004780E1 /* CameraFeedManager.swift in Sources */,
 				0F1854ED26A95F48004780E1 /* PoseNet.swift in Sources */,
 				7FB1192C26EA499500B86E0A /* PoseConfig.swift in Sources */,
+				0F1854F926A95F48004780E1 /* OverlayView.swift in Sources */,
 				0F1854F326A95F48004780E1 /* Data+TFLite.swift in Sources */,
 				0F1854EC26A95F48004780E1 /* MoveNet.swift in Sources */,
 			);

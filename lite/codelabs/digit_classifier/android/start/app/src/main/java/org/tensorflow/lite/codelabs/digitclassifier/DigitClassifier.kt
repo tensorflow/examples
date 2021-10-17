@@ -40,8 +40,8 @@ class DigitClassifier(private val context: Context) {
   private var inputImageHeight: Int = 0 // will be inferred from TF Lite model.
   private var modelInputSize: Int = 0 // will be inferred from TF Lite model.
 
-  fun initialize(): Task<Void> {
-    val task = TaskCompletionSource<Void>()
+  fun initialize(): Task<Void?> {
+    val task = TaskCompletionSource<Void?>()
     executorService.execute {
       try {
         initializeInterpreter()

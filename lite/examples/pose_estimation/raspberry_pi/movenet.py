@@ -14,9 +14,13 @@
 """Code to run a pose estimation with a TFLite MoveNet model."""
 
 import os
+from typing import Dict, List
+
 import cv2
+from data import BodyPart
+from data import Person
+from data import person_from_keypoints_with_scores
 import numpy as np
-from utils import KEYPOINT_DICT
 
 # pylint: disable=g-import-not-at-top
 try:
@@ -38,7 +42,7 @@ class Movenet(object):
   _TORSO_EXPANSION_RATIO = 1.9
   _BODY_EXPANSION_RATIO = 1.2
 
-  def __init__(self, model_name):
+  def __init__(self, model_name: str) -> None:
     """Initialize a MoveNet pose estimation model.
 
     Args:
@@ -63,7 +67,8 @@ class Movenet(object):
     self._interpreter = interpreter
     self._crop_region = None
 
-  def init_crop_region(self, image_height, image_width):
+  def init_crop_region(self, image_height: int,
+                       image_width: int) -> Dict[(str, float)]:
     """Defines the default crop region.
 
     The function provides the initial crop region (pads the full image from
@@ -99,7 +104,7 @@ class Movenet(object):
         'width': box_width
     }
 
-  def _torso_visible(self, keypoints):
+  def _torso_visible(self, keypoints: np.ndarray) -> bool:
     """Checks whether there are enough torso keypoints.
 
     This function checks whether the model is confident at predicting one of
@@ -111,10 +116,10 @@ class Movenet(object):
     Returns:
       True/False
     """
-    left_hip_score = keypoints[KEYPOINT_DICT['left_hip'], 2]
-    right_hip_score = keypoints[KEYPOINT_DICT['right_hip'], 2]
-    left_shoulder_score = keypoints[KEYPOINT_DICT['left_shoulder'], 2]
-    right_shoulder_score = keypoints[KEYPOINT_DICT['right_shoulder'], 2]
+    left_hip_score = keypoints[BodyPart.LEFT_HIP.value, 2]
+    right_hip_score = keypoints[BodyPart.RIGHT_HIP.value, 2]
+    left_shoulder_score = keypoints[BodyPart.LEFT_SHOULDER.value, 2]
+    right_shoulder_score = keypoints[BodyPart.RIGHT_SHOULDER.value, 2]
 
     left_hip_visible = left_hip_score > Movenet._MIN_CROP_KEYPOINT_SCORE
     right_hip_visible = right_hip_score > Movenet._MIN_CROP_KEYPOINT_SCORE
@@ -124,8 +129,10 @@ class Movenet(object):
     return ((left_hip_visible or right_hip_visible) and
             (left_shoulder_visible or right_shoulder_visible))
 
-  def _determine_torso_and_body_range(self, keypoints, target_keypoints,
-                                      center_y, center_x):
+  def _determine_torso_and_body_range(self, keypoints: np.ndarray,
+                                      target_keypoints: Dict[(str, float)],
+                                      center_y: float,
+                                      center_x: float) -> List[float]:
     """Calculates the maximum distance from each keypoints to the center.
 
     The function returns the maximum distances from the two sets of keypoints:
@@ -142,7 +149,10 @@ class Movenet(object):
     Returns:
       The maximum distance from each keypoints to the center location.
     """
-    torso_joints = ['left_shoulder', 'right_shoulder', 'left_hip', 'right_hip']
+    torso_joints = [
+        BodyPart.LEFT_SHOULDER, BodyPart.RIGHT_SHOULDER, BodyPart.LEFT_HIP,
+        BodyPart.RIGHT_HIP
+    ]
     max_torso_yrange = 0.0
     max_torso_xrange = 0.0
     for joint in torso_joints:
@@ -155,8 +165,8 @@ class Movenet(object):
 
     max_body_yrange = 0.0
     max_body_xrange = 0.0
-    for joint in KEYPOINT_DICT.keys():
-      if keypoints[KEYPOINT_DICT[joint], 2] < Movenet._MIN_CROP_KEYPOINT_SCORE:
+    for idx in range(len(BodyPart)):
+      if keypoints[BodyPart(idx).value, 2] < Movenet._MIN_CROP_KEYPOINT_SCORE:
         continue
       dist_y = abs(center_y - target_keypoints[joint][0])
       dist_x = abs(center_x - target_keypoints[joint][1])
@@ -170,7 +180,8 @@ class Movenet(object):
         max_torso_yrange, max_torso_xrange, max_body_yrange, max_body_xrange
     ]
 
-  def _determine_crop_region(self, keypoints, image_height, image_width):
+  def _determine_crop_region(self, keypoints: np.ndarray, image_height: int,
+                             image_width: int) -> Dict[(str, float)]:
     """Determines the region to crop the image for the model to run inference on.
 
     The algorithm uses the detected joints from the previous frame to
@@ -191,18 +202,17 @@ class Movenet(object):
     """
     # Convert keypoint index to human-readable names.
     target_keypoints = {}
-    for joint in KEYPOINT_DICT.keys():
-      target_keypoints[joint] = [
-          keypoints[KEYPOINT_DICT[joint], 0] * image_height,
-          keypoints[KEYPOINT_DICT[joint], 1] * image_width
+    for idx in range(len(BodyPart)):
+      target_keypoints[BodyPart(idx)] = [
+          keypoints[idx, 0] * image_height, keypoints[idx, 1] * image_width
       ]
 
     # Calculate crop region if the torso is visible.
     if self._torso_visible(keypoints):
-      center_y = (target_keypoints['left_hip'][0] +
-                  target_keypoints['right_hip'][0]) / 2
-      center_x = (target_keypoints['left_hip'][1] +
-                  target_keypoints['right_hip'][1]) / 2
+      center_y = (target_keypoints[BodyPart.LEFT_HIP][0] +
+                  target_keypoints[BodyPart.RIGHT_HIP][0]) / 2
+      center_x = (target_keypoints[BodyPart.LEFT_HIP][1] +
+                  target_keypoints[BodyPart.RIGHT_HIP][1]) / 2
 
       (max_torso_yrange, max_torso_xrange, max_body_yrange,
        max_body_xrange) = self._determine_torso_and_body_range(
@@ -244,7 +254,9 @@ class Movenet(object):
     else:
       return self.init_crop_region(image_height, image_width)
 
-  def _crop_and_resize(self, image, crop_region, crop_size):
+  def _crop_and_resize(
+      self, image: np.ndarray, crop_region: Dict[(str, float)],
+      crop_size: (int, int)) -> np.ndarray:
     """Crops and resize the image to prepare for the model input."""
     y_min, x_min, y_max, x_max = [
         crop_region['y_min'], crop_region['x_min'], crop_region['y_max'],
@@ -270,7 +282,9 @@ class Movenet(object):
 
     return output_image
 
-  def _run_detector(self, image, crop_region, crop_size):
+  def _run_detector(
+      self, image: np.ndarray, crop_region: Dict[(str, float)],
+      crop_size: (int, int)) -> np.ndarray:
     """Runs model inference on the cropped region.
 
     The function runs the model inference on the cropped region and updates
@@ -297,7 +311,7 @@ class Movenet(object):
     keypoints_with_scores = np.squeeze(keypoints_with_scores)
 
     # Update the coordinates.
-    for idx in KEYPOINT_DICT.values():
+    for idx in range(len(BodyPart)):
       keypoints_with_scores[idx, 0] = crop_region[
           'y_min'] + crop_region['height'] * keypoints_with_scores[idx, 0]
       keypoints_with_scores[idx, 1] = crop_region[
@@ -305,7 +319,9 @@ class Movenet(object):
 
     return keypoints_with_scores
 
-  def detect(self, input_image, reset_crop_region=False):
+  def detect(self,
+             input_image: np.ndarray,
+             reset_crop_region: bool = False) -> Person:
     """Run detection on an input image.
 
     Args:
@@ -331,9 +347,12 @@ class Movenet(object):
     keypoint_with_scores = self._run_detector(
         input_image,
         self._crop_region,
-        crop_size=[self._input_height, self._input_width])
+        crop_size=(self._input_height, self._input_width))
     # Calculate the crop region for the next frame
     self._crop_region = self._determine_crop_region(keypoint_with_scores,
                                                     image_height, image_width)
 
-    return keypoint_with_scores
+    # Convert the keypoints with scores to a Person data type
+
+    return person_from_keypoints_with_scores(keypoint_with_scores, image_height,
+                                             image_width)

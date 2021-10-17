@@ -83,7 +83,6 @@ class MainActivity : AppCompatActivity() {
     } else {
       startAudioClassification()
     }
-
   }
 
   private fun startAudioClassification() {

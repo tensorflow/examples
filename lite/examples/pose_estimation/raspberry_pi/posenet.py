@@ -14,7 +14,10 @@
 """Code to run a pose estimation with a TFLite PoseNet model."""
 
 import os
+
 import cv2
+from data import Person
+from data import person_from_keypoints_with_scores
 import numpy as np
 
 # pylint: disable=g-import-not-at-top
@@ -31,7 +34,7 @@ except ImportError:
 class Posenet(object):
   """A wrapper class for a Posenet TFLite pose estimation model."""
 
-  def __init__(self, model_name):
+  def __init__(self, model_name: str) -> None:
     """Initialize a PoseNet pose estimation model.
 
     Args:
@@ -55,7 +58,7 @@ class Posenet(object):
 
     self._interpreter = interpreter
 
-  def detect(self, input_image):
+  def detect(self, input_image: np.ndarray) -> Person:
     """Run detection on an input image.
 
     Args:
@@ -64,13 +67,12 @@ class Posenet(object):
           to the needs of the model within this function.
 
     Returns:
-        An array of shape [17, 3] representing the keypoint coordinates and
-        scores.
+        A Person instance.
     """
 
+    image_height, image_width, _ = input_image.shape
     input_image = cv2.resize(input_image,
                              (self._input_width, self._input_height))
-
     input_tensor = np.expand_dims(input_image, axis=0)
 
     # check the type of the input tensor
@@ -96,12 +98,14 @@ class Posenet(object):
 
     keypoints_with_scores = self._process_output(raw_heatmap, raw_offset)
 
-    return keypoints_with_scores
+    return person_from_keypoints_with_scores(keypoints_with_scores,
+                                             image_height, image_width)
 
-  def _sigmoid(self, x):
+  def _sigmoid(self, x: np.ndarray) -> float:
     return 1 / (1 + np.exp(-x))
 
-  def _process_output(self, heatmap_data, offset_data):
+  def _process_output(self, heatmap_data: np.ndarray,
+                      offset_data: np.ndarray) -> np.ndarray:
     """Post-process the output of Posenet TFLite model.
 
     Args:
