@@ -1,4 +1,4 @@
-# Python packages required for classify_picamera.py
+# Python packages required for detect_picamera.py
 numpy
 picamera
 Pillow
