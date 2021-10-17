@@ -93,19 +93,17 @@ class ModelDataHandler {
     // Run inference by invoking the `Interpreter`.
     
     let interval: TimeInterval
-    let output: TFLiteFlatArray<Float32>?
+    let results: [Float]
     do {
       let startDate = Date()
       // Get the output `TFLiteFlatArray` to process the inference results.
-      output = try interpreter.inference(with: pixelBuffer).first
+      results = try interpreter.inference(with: pixelBuffer).first?.array ?? []
       
       interval = Date().timeIntervalSince(startDate) * 1000
     } catch let error {
       print("Failed to invoke the interpreter with error: \(error.localizedDescription)")
       return nil
     }
-    
-    let results: [Float32] = output?.array ?? []
 
     // Process the results.
     let topNInferences = getTopN(results: results)
