@@ -13,12 +13,12 @@
 # limitations under the License.
 """A module to run object detection with a TensorFlow Lite model."""
 
+import platform
 from typing import List, NamedTuple
 import zipfile
 
 import cv2
 import numpy as np
-import utils
 
 # pylint: disable=g-import-not-at-top
 try:
@@ -31,6 +31,7 @@ except ImportError:
 
   Interpreter = tf.lite.Interpreter
   load_delegate = tf.lite.experimental.load_delegate
+
 # pylint: enable=g-import-not-at-top
 
 
@@ -50,10 +51,7 @@ class ObjectDetectorOptions(NamedTuple):
   """The maximum number of top-scored detection results to return."""
 
   num_threads: int = 1
-  """The number of threads to be used for TFLite ops that support
-
-  multi-threading when running inference with CPU.
-  """
+  """The number of CPU threads to be used."""
 
   score_threshold: float = 0.0
   """The score threshold of detection results to return."""
@@ -78,6 +76,15 @@ class Detection(NamedTuple):
   """A detected object as the result of an ObjectDetector."""
   bounding_box: Rect
   categories: List[Category]
+
+
+def edgetpu_lib_name():
+  """Returns the library name of EdgeTPU in the current platform."""
+  return {
+      'Darwin': 'libedgetpu.1.dylib',
+      'Linux': 'libedgetpu.so.1',
+      'Windows': 'edgetpu.dll',
+  }.get(platform.system(), None)
 
 
 class ObjectDetector:
@@ -127,11 +134,11 @@ class ObjectDetector:
 
     # Initialize TFLite model.
     if options.enable_edgetpu:
-      if utils.edgetpu_lib_name() is None:
+      if edgetpu_lib_name() is None:
         raise OSError("The current OS isn't supported by Coral EdgeTPU.")
       interpreter = Interpreter(
           model_path=model_path,
-          experimental_delegates=[load_delegate(utils.edgetpu_lib_name())],
+          experimental_delegates=[load_delegate(edgetpu_lib_name())],
           num_threads=options.num_threads)
     else:
       interpreter = Interpreter(
