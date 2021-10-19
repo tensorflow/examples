@@ -108,8 +108,7 @@ def person_from_keypoints_with_scores(
   # Calculate person score by averaging keypoint scores.
   scores_above_threshold = list(
       filter(lambda x: x > keypoint_score_threshold, scores))
-  scores_above_threshold = np.append(scores_above_threshold, 0)
-  person_score = np.average(scores_above_threshold)
+  person_score = np.average(scores_above_threshold) if scores_above_threshold else 0
 
   return Person(keypoints, bounding_box, person_score)
 
