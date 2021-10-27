@@ -36,7 +36,7 @@
   <string
       name="switch_to_inference_hint"
       description="Hint message telling that the user can switch to the inference mode [CHAR_LIMIT=100]">
-    You can switch back to inference mode now. Pause training so that inference can start.
+    You can switch to inference mode now. Pause training so that inference can start.
   </string>
 
   <string

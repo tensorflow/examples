@@ -29,7 +29,7 @@ python3 -m venv env
 source env/bin/activate
 
 # Install the package requirements.
-pip install -r transfer_learning/requirements.txt
+pip install -r requirements.txt
 
 # Generate the model flatbuffer file `model.tflite` in the current directory.
 python generate_training_model.py

@@ -1,1 +1,1 @@
-tf-nightly==2.8.*
+tf-nightly>=2.8.*
