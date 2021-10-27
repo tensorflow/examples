@@ -64,6 +64,7 @@ class Person(NamedTuple):
   keypoints: List[KeyPoint]
   bounding_box: Rectangle
   score: float
+  id: int = None
 
 
 def person_from_keypoints_with_scores(
