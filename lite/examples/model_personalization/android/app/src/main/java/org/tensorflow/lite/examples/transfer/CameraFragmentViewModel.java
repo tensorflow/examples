@@ -41,14 +41,19 @@ public class CameraFragmentViewModel extends ViewModel {
     PAUSED
   };
 
-  private MutableLiveData<Boolean> captureMode = new MutableLiveData<>(false);
-  private MutableLiveData<Map<String, Float>> confidence = new MutableLiveData<>(new TreeMap<>());
-  private MutableLiveData<Integer> trainBatchSize = new MutableLiveData<>(0);
-  private MutableLiveData<Map<String, Integer>> numSamples = new MutableLiveData<>(new TreeMap<>());
-  private MutableLiveData<TrainingState> trainingState =
+  private final MutableLiveData<Boolean> captureMode = new MutableLiveData<>(true);
+  private final MutableLiveData<Map<String, Float>> confidence =
+      new MutableLiveData<>(new TreeMap<>());
+  private final MutableLiveData<Integer> trainBatchSize = new MutableLiveData<>(0);
+  private final MutableLiveData<Map<String, Integer>> numSamples =
+      new MutableLiveData<>(new TreeMap<>());
+  private final MutableLiveData<Integer> numCollectedSamples = new MutableLiveData<>(0);
+  private final MutableLiveData<Boolean> sampleCollectionLongPressed = new MutableLiveData<>(false);
+  private final MutableLiveData<TrainingState> trainingState =
       new MutableLiveData<>(TrainingState.NOT_STARTED);
-  private MutableLiveData<Float> lastLoss = new MutableLiveData<>();
-  private MutableLiveData<Boolean> inferenceSnackbarWasDisplayed = new MutableLiveData<>(false);
+  private final MutableLiveData<Float> lastLoss = new MutableLiveData<>();
+  private final MutableLiveData<Boolean> inferenceSnackbarWasDisplayed =
+      new MutableLiveData<>(false);
 
   private LiveData<String> firstChoice;
   private LiveData<String> secondChoice;
@@ -66,9 +71,25 @@ public class CameraFragmentViewModel extends ViewModel {
     captureMode.postValue(newValue);
   }
 
-  /**
-   * Number of added samples for each class.
-   */
+  /** Number of sample collected continuously together. */
+  public MutableLiveData<Integer> getNumCollectedSamples() {
+    return numCollectedSamples;
+  }
+
+  public void setNumCollectedSamples(int newValue) {
+    numCollectedSamples.postValue(newValue);
+  }
+
+  /** Whether sample collection button is long-pressed. */
+  public MutableLiveData<Boolean> getSampleCollectionLongPressed() {
+    return sampleCollectionLongPressed;
+  }
+
+  public void setSampleCollectionLongPressed(boolean newValue) {
+    sampleCollectionLongPressed.postValue(newValue);
+  }
+
+  /** Number of added samples for each class. */
   public LiveData<Map<String, Integer>> getNumSamples() {
     return numSamples;
   }

@@ -47,7 +47,7 @@ public class ImageUtils {
 
   private static int yuv2Rgb(int y, int u, int v) {
     // Adjust and check YUV values
-    y = (y - 16) < 0 ? 0 : (y - 16);
+    y = Math.max((y - 16), 0);
     u -= 128;
     v -= 128;
 

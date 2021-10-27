@@ -4,6 +4,17 @@
 
   </style>
 
+  <style name="Toast" parent="@style/Widget.AppCompat.Button">
+    <item name="android:layout_width">300dp</item>
+    <item name="android:layout_height">68dp</item>
+    <item name="android:layout_margin">8dp</item>
+    <item name="android:orientation">vertical</item>
+    <item name="android:padding">10dp</item>
+    <item name="android:textColor">@color/black</item>
+    <item name="android:background">@drawable/toast_default</item>
+    <item name="android:foreground">@color/transparent</item>
+  </style>
+
   <style name="ClassButton" parent="@style/Widget.AppCompat.Button">
     <item name="android:layout_margin">6dp</item>
     <item name="android:paddingLeft">4dp</item>

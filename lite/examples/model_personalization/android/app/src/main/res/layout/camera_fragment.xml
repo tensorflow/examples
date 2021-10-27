@@ -22,38 +22,80 @@
         android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/mode_chip_group"
+    <Button
+        android:id="@+id/help_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:text="@string/help_button_title"
+        android:textColor="@color/dark_blue"
+        android:textAppearance="@style/ChipTextAppearance"
+        android:background="@drawable/help_background"
         app:layout_constraintTop_toTopOf="parent"
-        app:singleSelection="true">
+        app:layout_constraintLeft_toLeftOf="parent"/>
 
-      <com.google.android.material.chip.Chip
-          android:id="@+id/inference_mode_chip"
-          style="@style/Widget.MaterialComponents.Chip.Choice"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
+    <RadioGroup
+        android:id="@+id/mode_toggle_button_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:orientation="horizontal"
+        android:background="@drawable/tf_out_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+      <RadioButton
+          android:id="@+id/capture_mode_button"
+          style="@style/Widget.AppCompat.CompoundButton.RadioButton"
+          android:padding="10dp"
+          android:layout_marginTop="1dp"
+          android:layout_marginBottom="1dp"
+          android:layout_marginStart="1dp"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
           android:textAppearance="@style/ChipTextAppearance"
-          app:chipStartPadding="8dp"
-          app:chipEndPadding="8dp"
-          app:chipMinHeight="36dp"
-          android:text="@string/inference_mode_title"/>
+          android:background="@drawable/toggle_widget_background"
+          android:layout_weight="1"
+          android:button="@null"
+          android:gravity="center"
+          android:text="@string/capture_mode_title"
+          android:textColor="@color/white" />
 
-      <com.google.android.material.chip.Chip
-          android:id="@+id/capture_mode_chip"
-          style="@style/Widget.MaterialComponents.Chip.Choice"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
+      <RadioButton
+          android:id="@+id/inference_mode_button"
+          style="@style/Widget.AppCompat.CompoundButton.RadioButton"
+          android:padding="10dp"
+          android:layout_marginTop="1dp"
+          android:layout_marginBottom="1dp"
+          android:layout_marginStart="1dp"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
           android:textAppearance="@style/ChipTextAppearance"
-          app:chipStartPadding="8dp"
-          app:chipEndPadding="8dp"
-          app:chipMinHeight="36dp"
-          android:text="@string/capture_mode_title"/>
+          android:background="@drawable/toggle_widget_background"
+          android:layout_weight="1"
+          android:button="@null"
+          android:gravity="center"
+          android:text="@string/inference_mode_title"
+          android:textColor="@color/white" />
 
-    </com.google.android.material.chip.ChipGroup>
+    </RadioGroup>
+
+    <LinearLayout
+        style="@style/Toast"
+        android:visibility='@{vm.getSampleCollectionLongPressed}'
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/help_button"
+        app:layout_constraintBottom_toTopOf="@+id/classes_bar">
+      <TextView
+          style="@style/BigButtonTitle"
+          android:textColor="@color/black"
+          android:text='@{String.format("Collecting %d samples", vm.numCollectedSamples)}' />
+    </LinearLayout>
 
     <LinearLayout
         style="@style/BigButton"
@@ -65,11 +107,13 @@
 
       <TextView
           style="@style/BigButtonTitle"
-          android:text='@{String.format("Need %d samples", vm.neededSamples)}' />
+          android:textColor="@color/black"
+          android:text="Collect samples" />
     </LinearLayout>
 
     <LinearLayout
         style="@style/BigButton"
+        android:id="@+id/train_start_button"
         android:visibility='@{vm.neededSamples == 0 &amp;&amp; vm.trainingState == TrainingState.NOT_STARTED}'
         android:background="@drawable/btn_big_green"
         android:clickable="true"
@@ -81,6 +125,7 @@
 
       <TextView
           style="@style/BigButtonTitle"
+          android:textColor="@color/black"
           android:text="@string/train_action" />
     </LinearLayout>
 
@@ -97,11 +142,13 @@
 
       <TextView
           style="@style/BigButtonTitle"
+          android:textColor="@color/black"
           android:text="@string/pause_action" />
 
       <TextView
           style="@style/BigButtonSubtitle"
           android:visibility="@{vm.lastLoss != null}"
+          android:textColor="@color/black"
           android:text='@{String.format("Loss: %.3f", vm.lastLoss)}' />
     </LinearLayout>
 
@@ -118,11 +165,13 @@
 
       <TextView
           style="@style/BigButtonTitle"
+          android:textColor="@color/black"
           android:text="@string/resume_action" />
 
       <TextView
           style="@style/BigButtonSubtitle"
           android:visibility="@{vm.lastLoss != null}"
+          android:textColor="@color/black"
           android:text='@{String.format("Loss: %.3f", vm.lastLoss)}' />
     </LinearLayout>
 
@@ -130,7 +179,6 @@
     <LinearLayout
         android:id="@+id/classes_bar"
         android:baselineAligned="false"
-        android:layout_marginStart="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/view_finder"
@@ -159,6 +207,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textColor="@color/black"
             app:captureMode='@{vm.captureMode}'
             app:inferenceText='@{vm.confidence["1"]}'
             app:captureText='@{vm.numSamples["1"]}' />
@@ -186,6 +235,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textColor="@color/black"
             app:captureMode='@{vm.captureMode}'
             app:inferenceText='@{vm.confidence["2"]}'
             app:captureText='@{vm.numSamples["2"]}' />
@@ -213,6 +263,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textColor="@color/black"
             app:captureMode='@{vm.captureMode}'
             app:inferenceText='@{vm.confidence["3"]}'
             app:captureText='@{vm.numSamples["3"]}' />
@@ -240,6 +291,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textColor="@color/black"
             app:captureMode='@{vm.captureMode}'
             app:inferenceText='@{vm.confidence["4"]}'
             app:captureText='@{vm.numSamples["4"]}' />

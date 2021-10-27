@@ -21,7 +21,7 @@ import java.io.Closeable;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.tensorflow.lite.examples.transfer.api.AssetModelLoader;
+import org.tensorflow.lite.examples.transfer.api.ModelLoader;
 import org.tensorflow.lite.examples.transfer.api.TransferLearningModel;
 import org.tensorflow.lite.examples.transfer.api.TransferLearningModel.LossConsumer;
 import org.tensorflow.lite.examples.transfer.api.TransferLearningModel.Prediction;
@@ -43,7 +43,7 @@ public class TransferLearningModelWrapper implements Closeable {
   TransferLearningModelWrapper(Context context) {
     model =
         new TransferLearningModel(
-            new AssetModelLoader(context, "model"), Arrays.asList("1", "2", "3", "4"));
+            new ModelLoader(context, "model"), Arrays.asList("1", "2", "3", "4"));
 
     new Thread(() -> {
       while (!Thread.interrupted()) {
@@ -60,12 +60,12 @@ public class TransferLearningModelWrapper implements Closeable {
   }
 
   // This method is thread-safe.
-  public Future<Void> addSample(float[] image, String className) {
+  public Future<Void> addSample(float[][][] image, String className) {
     return model.addSample(image, className);
   }
 
   // This method is thread-safe, but blocking.
-  public Prediction[] predict(float[] image) {
+  public Prediction[] predict(float[][][] image) {
     return model.predict(image);
   }
 

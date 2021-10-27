@@ -16,7 +16,6 @@ limitations under the License.
 package org.tensorflow.lite.examples.transfer;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 /**
@@ -42,19 +41,22 @@ public class MainActivity extends FragmentActivity {
         .beginTransaction()
         .add(R.id.fragment_container, firstFragment)
         .commit();
-  }
 
-  @Override
-  public void onAttachFragment(Fragment fragment) {
-    if (fragment instanceof PermissionsFragment) {
-      ((PermissionsFragment) fragment).setOnPermissionsAcquiredListener(() -> {
-        CameraFragment cameraFragment = new CameraFragment();
+    getSupportFragmentManager()
+        .addFragmentOnAttachListener(
+            (fragmentManager, fragment) -> {
+              if (fragment instanceof PermissionsFragment) {
+                ((PermissionsFragment) fragment)
+                    .setOnPermissionsAcquiredListener(
+                        () -> {
+                          CameraFragment cameraFragment = new CameraFragment();
 
-        getSupportFragmentManager()
-            .beginTransaction()
-            .replace(R.id.fragment_container, cameraFragment)
-            .commit();
-      });
-    }
+                          getSupportFragmentManager()
+                              .beginTransaction()
+                              .replace(R.id.fragment_container, cameraFragment)
+                              .commit();
+                        });
+              }
+            });
   }
 }

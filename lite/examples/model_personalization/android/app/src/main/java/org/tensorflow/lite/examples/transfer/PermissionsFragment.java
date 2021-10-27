@@ -46,7 +46,7 @@ public class PermissionsFragment extends Fragment {
 
   private boolean hasPermissions() {
     for (String permission : PERMISSIONS_REQUIRED) {
-      if (getContext().checkPermission(permission, Process.myPid(), Process.myUid())
+      if (requireContext().checkPermission(permission, Process.myPid(), Process.myUid())
           != PackageManager.PERMISSION_GRANTED) {
         return false;
       }

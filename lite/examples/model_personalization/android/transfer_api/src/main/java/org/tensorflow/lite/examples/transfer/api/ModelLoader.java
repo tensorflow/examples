@@ -15,17 +15,40 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.transfer.api;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 
-/** Interface for model loaders: objects that handle loading different parts of the model. */
-public interface ModelLoader {
-  LiteModelWrapper loadInitializeModel() throws IOException;
+/**
+ * Handles loading the trained multiple signature model stored as a directory under Android assets.
+ */
+public class ModelLoader {
 
-  LiteModelWrapper loadBaseModel() throws IOException;
+  private AssetManager assetManager;
+  private String directoryName;
 
-  LiteModelWrapper loadTrainModel() throws IOException;
+  /**
+   * Create a loader for a transfer learning model under given directory.
+   *
+   * @param directoryName path to model directory in assets tree.
+   */
+  public ModelLoader(Context context, String directoryName) {
+    this.directoryName = directoryName;
+    this.assetManager = context.getAssets();
+  }
 
-  LiteModelWrapper loadInferenceModel() throws IOException;
+  protected MappedByteBuffer loadMappedFile(String filePath) throws IOException {
+    AssetFileDescriptor fileDescriptor = assetManager.openFd(this.directoryName + "/" + filePath);
 
-  LiteModelWrapper loadOptimizerModel() throws IOException;
+    FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
+    FileChannel fileChannel = inputStream.getChannel();
+    long startOffset = fileDescriptor.getStartOffset();
+    long declaredLength = fileDescriptor.getDeclaredLength();
+    return fileChannel.map(MapMode.READ_ONLY, startOffset, declaredLength);
+  }
 }

@@ -1,13 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">TFL Transfer</string>
+  <string
+      name="app_name"
+      description="Name of the application [CHAR_LIMIT=25]">
+    TransferLearningDemoApp
+  </string>
 
-  <string name="inference_mode_title">Inference</string>
-  <string name="capture_mode_title">Capture</string>
+  <string
+      name="inference_mode_title"
+      description="Title text displayed on the button when inference mode is on [CHAR_LIMIT=10]">
+    Inference
+  </string>
+  <string
+      name="capture_mode_title"
+      description="Title text displayed on the button when capture mode is on [CHAR_LIMIT=10]">
+    Training
+  </string>
 
-  <string name="train_action">Train</string>
-  <string name="pause_action">Pause</string>
-  <string name="resume_action">Resume</string>
+  <string
+      name="train_action"
+      description="Text displayed on the button that the user clicks to start model training [CHAR_LIMIT=6]">
+    Train
+  </string>
+  <string
+      name="pause_action"
+      description="Text displayed on the button that the user clicks to pause model training [CHAR_LIMIT=6]">
+    Pause
+  </string>
+  <string
+      name="resume_action"
+      description="Text displayed on the button that the user clicks to resume model training [CHAR_LIMIT=6]">
+    Resume
+  </string>
 
-  <string name="switch_to_inference_hint">You can switch back to inference mode now.</string>
+  <string
+      name="switch_to_inference_hint"
+      description="Hint message telling that the user can switch to the inference mode [CHAR_LIMIT=100]">
+    You can switch back to inference mode now. Pause training so that inference can start.
+  </string>
+
+  <string
+      name="help_button_title"
+      description="Help button text [CHAR_LIMIT=5]">
+    Help?
+  </string>
 </resources>

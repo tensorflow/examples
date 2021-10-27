@@ -23,17 +23,24 @@ import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Rational;
 import android.util.Size;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.CameraX.LensFacing;
 import androidx.camera.core.ImageAnalysis;
@@ -47,8 +54,7 @@ import androidx.databinding.BindingAdapter;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import java.nio.ByteBuffer;
 import java.util.Locale;
@@ -56,6 +62,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import org.tensorflow.lite.examples.transfer.CameraFragmentViewModel.TrainingState;
 import org.tensorflow.lite.examples.transfer.api.TransferLearningModel.Prediction;
 import org.tensorflow.lite.examples.transfer.databinding.CameraFragmentBinding;
 
@@ -73,6 +80,8 @@ public class CameraFragment extends Fragment {
 
   private static final LensFacing LENS_FACING = LensFacing.BACK;
 
+  private static final int LONG_PRESS_DURATION = 500;
+
   private TextureView viewFinder;
 
   private Integer viewFinderRotation = null;
@@ -82,6 +91,12 @@ public class CameraFragment extends Fragment {
 
   private CameraFragmentViewModel viewModel;
   private TransferLearningModelWrapper tlModel;
+
+  private long sampleCollectionButtonPressedTime;
+  private boolean isCollectingSamples = false;
+  private final Handler sampleCollectionHandler = new Handler(Looper.getMainLooper());
+
+  private final HelpDialog helpDialog = new HelpDialog();
 
   // When the user presses the "add sample" button for some class,
   // that class will be added to this queue. It is later extracted by
@@ -149,7 +164,8 @@ public class CameraFragment extends Fragment {
         final String imageId = UUID.randomUUID().toString();
 
         inferenceBenchmark.startStage(imageId, "preprocess");
-        float[] rgbImage = prepareCameraImage(yuvCameraImageToBitmap(imageProxy), rotationDegrees);
+        float[][][] rgbImage =
+            prepareCameraImage(yuvCameraImageToBitmap(imageProxy), rotationDegrees);
         inferenceBenchmark.endStage(imageId, "preprocess");
 
         // Adding samples is also handled by inference thread / use case.
@@ -187,22 +203,64 @@ public class CameraFragment extends Fragment {
         inferenceBenchmark.finish(imageId);
       };
 
-  public final View.OnClickListener onAddSampleClickListener = view -> {
+  public final View.OnTouchListener onAddSampleTouchListener =
+      (view, motionEvent) -> {
+        switch (motionEvent.getAction()) {
+          case MotionEvent.ACTION_DOWN:
+            isCollectingSamples = true;
+            sampleCollectionButtonPressedTime = SystemClock.uptimeMillis();
+            sampleCollectionHandler.post(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    long timePressed =
+                        SystemClock.uptimeMillis() - sampleCollectionButtonPressedTime;
+                    if (timePressed < LONG_PRESS_DURATION) {
+                      view.findViewById(view.getId()).performClick();
+                      sampleCollectionHandler.postDelayed(this, LONG_PRESS_DURATION);
+                    } else if (isCollectingSamples) {
+                      view.findViewById(view.getId()).performClick();
+                      viewModel.setNumCollectedSamples(
+                          viewModel.getNumCollectedSamples().getValue() + 1);
+                      sampleCollectionHandler.postDelayed(this, 300);
+                      viewModel.setSampleCollectionLongPressed(true);
+                    }
+                  }
+                });
+            break;
+          case MotionEvent.ACTION_UP:
+            sampleCollectionHandler.removeCallbacksAndMessages(null);
+            isCollectingSamples = false;
+            viewModel.setSampleCollectionLongPressed(false);
+            viewModel.setNumCollectedSamples(0);
+            break;
+          default:
+            break;
+        }
+        return true;
+      };
+
+  public final View.OnClickListener onAddSampleClickListener =
+      view -> {
+        String className = getClassNameFromResourceId(view.getId());
+        addSampleRequests.add(className);
+      };
+
+  private String getClassNameFromResourceId(int id) {
     String className;
-    if (view.getId() == R.id.class_btn_1) {
+    if (id == R.id.class_btn_1) {
       className = "1";
-    } else if (view.getId() == R.id.class_btn_2) {
+    } else if (id == R.id.class_btn_2) {
       className = "2";
-    } else if (view.getId() == R.id.class_btn_3) {
+    } else if (id == R.id.class_btn_3) {
       className = "3";
-    } else if (view.getId() == R.id.class_btn_4) {
+    } else if (id == R.id.class_btn_4) {
       className = "4";
     } else {
       throw new RuntimeException("Listener called for unexpected view");
     }
-
-    addSampleRequests.add(className);
-  };
+    return className;
+  }
 
   /**
    * Fit the camera preview into [viewFinder].
@@ -213,8 +271,8 @@ public class CameraFragment extends Fragment {
    */
   private void updateTransform(Integer rotation, Size newBufferDimens, Size newViewFinderDimens) {
     if (Objects.equals(rotation, viewFinderRotation)
-      && Objects.equals(newBufferDimens, bufferDimens)
-      && Objects.equals(newViewFinderDimens, viewFinderDimens)) {
+        && Objects.equals(newBufferDimens, bufferDimens)
+        && Objects.equals(newViewFinderDimens, viewFinderDimens)) {
       return;
     }
 
@@ -287,22 +345,48 @@ public class CameraFragment extends Fragment {
     for (int buttonId : new int[] {
         R.id.class_btn_1, R.id.class_btn_2, R.id.class_btn_3, R.id.class_btn_4}) {
       rootView.findViewById(buttonId).setOnClickListener(onAddSampleClickListener);
+      rootView.findViewById(buttonId).setOnTouchListener(onAddSampleTouchListener);
     }
 
-    ChipGroup chipGroup = (ChipGroup) rootView.findViewById(R.id.mode_chip_group);
     if (viewModel.getCaptureMode().getValue()) {
-      ((Chip) rootView.findViewById(R.id.capture_mode_chip)).setChecked(true);
+      ((RadioButton) rootView.findViewById(R.id.capture_mode_button)).setChecked(true);
     } else {
-      ((Chip) rootView.findViewById(R.id.inference_mode_chip)).setChecked(true);
+      ((RadioButton) rootView.findViewById(R.id.inference_mode_button)).setChecked(true);
     }
 
-    chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-      if (checkedId == R.id.capture_mode_chip) {
-        viewModel.setCaptureMode(true);
-      } else if (checkedId == R.id.inference_mode_chip) {
-        viewModel.setCaptureMode(false);
-      }
-    });
+    RadioGroup toggleButtonGroup = rootView.findViewById(R.id.mode_toggle_button_group);
+    toggleButtonGroup.setOnCheckedChangeListener(
+        (radioGroup, checkedId) -> {
+          if (viewModel.getTrainingState().getValue() == TrainingState.NOT_STARTED) {
+            ((RadioButton) rootView.findViewById(R.id.capture_mode_button)).setChecked(true);
+            ((RadioButton) rootView.findViewById(R.id.inference_mode_button)).setChecked(false);
+
+            Snackbar.make(
+                    requireActivity().findViewById(R.id.classes_bar),
+                    "Inference can only start after training is done.",
+                    BaseTransientBottomBar.LENGTH_LONG)
+                .show();
+          } else {
+            if (checkedId == R.id.capture_mode_button) {
+              viewModel.setCaptureMode(true);
+            } else {
+              viewModel.setCaptureMode(false);
+              Snackbar.make(
+                      requireActivity().findViewById(R.id.classes_bar),
+                      "Point your camera at one of the trained objects.",
+                      BaseTransientBottomBar.LENGTH_LONG)
+                  .show();
+            }
+          }
+        });
+
+    Button helpButton = rootView.findViewById(R.id.help_button);
+    helpButton.setOnClickListener(
+        (button) -> {
+          helpDialog.show(requireActivity().getSupportFragmentManager(), "Help Dialog");
+        });
+    // Display HelpDialog when opened.
+    helpDialog.show(requireActivity().getSupportFragmentManager(), "Help Dialog");
 
     return dataBinding.getRoot();
   }
@@ -311,13 +395,8 @@ public class CameraFragment extends Fragment {
   public void onViewCreated(View view, Bundle bundle) {
     super.onViewCreated(view, bundle);
 
-    viewFinder = getActivity().findViewById(R.id.view_finder);
+    viewFinder = requireActivity().findViewById(R.id.view_finder);
     viewFinder.post(this::startCamera);
-  }
-
-  @Override
-  public void onActivityCreated(Bundle bundle) {
-    super.onActivityCreated(bundle);
 
     viewModel
         .getTrainingState()
@@ -329,9 +408,9 @@ public class CameraFragment extends Fragment {
                   tlModel.enableTraining((epoch, loss) -> viewModel.setLastLoss(loss));
                   if (!viewModel.getInferenceSnackbarWasDisplayed().getValue()) {
                     Snackbar.make(
-                            getActivity().findViewById(R.id.classes_bar),
+                            requireActivity().findViewById(R.id.classes_bar),
                             R.string.switch_to_inference_hint,
-                            Snackbar.LENGTH_LONG)
+                            BaseTransientBottomBar.LENGTH_LONG)
                         .show();
                     viewModel.markInferenceSnackbarWasCalled();
                   }
@@ -401,10 +480,10 @@ public class CameraFragment extends Fragment {
   }
 
   /**
-   * Normalizes a camera image to [0; 1], cropping it
-   * to size expected by the model and adjusting for camera rotation.
+   * Normalizes a camera image to [0; 1], cropping it to size expected by the model and adjusting
+   * for camera rotation.
    */
-  private static float[] prepareCameraImage(Bitmap bitmap, int rotationDegrees)  {
+  private static float[][][] prepareCameraImage(Bitmap bitmap, int rotationDegrees) {
     int modelImageSize = TransferLearningModelWrapper.IMAGE_SIZE;
 
     Bitmap paddedBitmap = padToSquare(bitmap);
@@ -416,8 +495,7 @@ public class CameraFragment extends Fragment {
     Bitmap rotatedBitmap = Bitmap.createBitmap(
         scaledBitmap, 0, 0, modelImageSize, modelImageSize, rotationMatrix, false);
 
-    float[] normalizedRgb = new float[modelImageSize * modelImageSize * 3];
-    int nextIdx = 0;
+    float[][][] normalizedRgb = new float[modelImageSize][modelImageSize][3];
     for (int y = 0; y < modelImageSize; y++) {
       for (int x = 0; x < modelImageSize; x++) {
         int rgb = rotatedBitmap.getPixel(x, y);
@@ -426,9 +504,9 @@ public class CameraFragment extends Fragment {
         float g = ((rgb >> 8) & LOWER_BYTE_MASK) * (1 / 255.f);
         float b = (rgb & LOWER_BYTE_MASK) * (1 / 255.f);
 
-        normalizedRgb[nextIdx++] = r;
-        normalizedRgb[nextIdx++] = g;
-        normalizedRgb[nextIdx++] = b;
+        normalizedRgb[y][x][0] = r;
+        normalizedRgb[y][x][1] = g;
+        normalizedRgb[y][x][2] = b;
       }
     }
 
@@ -475,6 +553,6 @@ public class CameraFragment extends Fragment {
     } else {
       drawableId = R.drawable.btn_default;
     }
-    view.setBackground(view.getContext().getDrawable(drawableId));
+    view.setBackground(AppCompatResources.getDrawable(view.getContext(), drawableId));
   }
 }
