@@ -1,0 +1,2 @@
+tf-nightly==2.8.*
+numpy==1.21.*

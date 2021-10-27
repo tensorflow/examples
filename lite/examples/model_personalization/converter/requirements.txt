@@ -1,3 +1,0 @@
-tensorflow==2.6.*
-Pillow>=7.1.*
-scipy==1.3.*
