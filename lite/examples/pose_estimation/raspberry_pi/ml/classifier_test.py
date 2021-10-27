@@ -15,9 +15,9 @@
 
 import unittest
 
-from classifier import Classifier
 import cv2
-from movenet import Movenet
+from ml.classifier import Classifier
+from ml.movenet import Movenet
 
 _ESTIMATION_MODEL = 'movenet_lightning'
 _CLASSIFIER_MODEL = 'classifier'

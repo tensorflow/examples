@@ -14,11 +14,12 @@
 """Script to run visualize pose estimation on test data."""
 import argparse
 import logging
+
 import cv2
-from movenet import Movenet
+from ml import Movenet
+from ml import Posenet
 import numpy as np
 import pandas as pd
-from posenet import Posenet
 import utils
 
 _MODEL_POSENET = 'posenet'

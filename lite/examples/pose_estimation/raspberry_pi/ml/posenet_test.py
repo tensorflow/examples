@@ -11,26 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unit test of pose estimation using MoveNet."""
+"""Unit test of pose estimation using PoseNet."""
 
 import logging
 import unittest
 
 import cv2
 from data import BodyPart
-from movenet import Movenet
+from ml.posenet import Posenet
 import numpy as np
 import pandas as pd
 
-_MODEL_LIGHTNING = 'movenet_lightning'
-_MODEL_THUNDER = 'movenet_thunder'
+_MODEL = 'posenet'
 _IMAGE_TEST1 = 'test_data/image1.png'
 _IMAGE_TEST2 = 'test_data/image2.jpeg'
 _GROUND_TRUTH_CSV = 'test_data/pose_landmark_truth.csv'
-_ALLOWED_DISTANCE = 21
+_ALLOWED_DISTANCE = 35
 
 
-class MovenetTest(unittest.TestCase):
+class PosenetTest(unittest.TestCase):
 
   def setUp(self):
     super().setUp()
@@ -38,10 +37,10 @@ class MovenetTest(unittest.TestCase):
     self.image_2 = cv2.imread(_IMAGE_TEST2)
 
     # Initialize model
-    self.movenet_lightning = Movenet(_MODEL_LIGHTNING)
-    self.movenet_thunder = Movenet(_MODEL_THUNDER)
+    self.posenet = Posenet(_MODEL)
     # Get pose landmarks truth
     pose_landmarks_truth = pd.read_csv(_GROUND_TRUTH_CSV)
+
     self.keypoints_truth_1 = pose_landmarks_truth.iloc[0].to_numpy().reshape(
         (17, 2))
     self.keypoints_truth_2 = pose_landmarks_truth.iloc[1].to_numpy().reshape(
@@ -49,9 +48,8 @@ class MovenetTest(unittest.TestCase):
 
   def _detect_and_assert(self, detector, image, keypoints_truth):
     """Run pose estimation and assert if the result is close to ground truth."""
-    person = detector.detect(image, reset_crop_region=True)
+    person = detector.detect(image)
     keypoints = person.keypoints
-
     for idx in range(len(BodyPart)):
       distance = np.linalg.norm(
           keypoints[idx].coordinate - keypoints_truth[idx], np.inf)
@@ -63,25 +61,13 @@ class MovenetTest(unittest.TestCase):
       logging.debug('Detected %s close to expected result (%d)',
                     BodyPart(idx).name, int(distance))
 
-  def test_pose_estimation_image1_lightning(self):
-    """Test if MoveNet Lightning detection's close to ground truth of image1."""
-    self._detect_and_assert(self.movenet_lightning, self.image_1,
-                            self.keypoints_truth_1)
+  def test_pose_estimation_image1(self):
+    """Test if Posenet detection's close to ground truth of image1."""
+    self._detect_and_assert(self.posenet, self.image_1, self.keypoints_truth_1)
 
-  def test_pose_estimation_image1_thunder(self):
-    """Test if MoveNet Thunder detection's close to ground truth of image1."""
-    self._detect_and_assert(self.movenet_thunder, self.image_1,
-                            self.keypoints_truth_1)
-
-  def test_pose_estimation_image2_lightning(self):
-    """Test if MoveNet Lightning detection's close to ground truth of image2."""
-    self._detect_and_assert(self.movenet_lightning, self.image_2,
-                            self.keypoints_truth_2)
-
-  def test_pose_estimation_image2_thunder(self):
-    """Test if MoveNet Thunder detection's close to ground truth of image2."""
-    self._detect_and_assert(self.movenet_thunder, self.image_2,
-                            self.keypoints_truth_2)
+  def test_pose_estimation_image2(self):
+    """Test if Posenet detection's close to ground truth of image2."""
+    self._detect_and_assert(self.posenet, self.image_2, self.keypoints_truth_2)
 
 
 if __name__ == '__main__':

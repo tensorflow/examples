@@ -16,10 +16,10 @@ import argparse
 import sys
 import time
 
-from classifier import Classifier
 import cv2
-from movenet import Movenet
-from posenet import Posenet
+from ml import Classifier
+from ml import Movenet
+from ml import Posenet
 import utils
 
 
