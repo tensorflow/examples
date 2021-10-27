@@ -42,7 +42,7 @@ function build_pip_and_install {
   ${PYTHON_BIN} setup.py ${ver?} sdist bdist_wheel
   local dist_pkg="$(ls dist/${pkg}*.whl)"
   ${PIP_BIN} install ${dist_pkg?} --ignore-installed
-  ${PIP_BIN} install pycocotools
+  ${PIP_BIN} install pycocotools pyparsing==2.4.7
 
   popd > /dev/null
   echo
