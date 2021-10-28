@@ -94,7 +94,7 @@
       <TextView
           style="@style/BigButtonTitle"
           android:textColor="@color/black"
-          android:text='@{String.format("Collecting %d samples", vm.numCollectedSamples)}' />
+          android:text='@{String.format("%d samples collected", vm.numCollectedSamples)}' />
     </LinearLayout>
 
     <LinearLayout

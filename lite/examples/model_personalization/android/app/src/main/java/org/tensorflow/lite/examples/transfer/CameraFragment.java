@@ -81,6 +81,7 @@ public class CameraFragment extends Fragment {
   private static final LensFacing LENS_FACING = LensFacing.BACK;
 
   private static final int LONG_PRESS_DURATION = 500;
+  private static final int SAMPLE_COLLECTION_DELAY = 300;
 
   private TextureView viewFinder;
 
@@ -215,14 +216,14 @@ public class CameraFragment extends Fragment {
                   public void run() {
                     long timePressed =
                         SystemClock.uptimeMillis() - sampleCollectionButtonPressedTime;
+                    view.findViewById(view.getId()).performClick();
                     if (timePressed < LONG_PRESS_DURATION) {
-                      view.findViewById(view.getId()).performClick();
                       sampleCollectionHandler.postDelayed(this, LONG_PRESS_DURATION);
                     } else if (isCollectingSamples) {
-                      view.findViewById(view.getId()).performClick();
+                      String className = getClassNameFromResourceId(view.getId());
                       viewModel.setNumCollectedSamples(
-                          viewModel.getNumCollectedSamples().getValue() + 1);
-                      sampleCollectionHandler.postDelayed(this, 300);
+                          viewModel.getNumSamples().getValue().get(className) + 1);
+                      sampleCollectionHandler.postDelayed(this, SAMPLE_COLLECTION_DELAY);
                       viewModel.setSampleCollectionLongPressed(true);
                     }
                   }
@@ -232,7 +233,6 @@ public class CameraFragment extends Fragment {
             sampleCollectionHandler.removeCallbacksAndMessages(null);
             isCollectingSamples = false;
             viewModel.setSampleCollectionLongPressed(false);
-            viewModel.setNumCollectedSamples(0);
             break;
           default:
             break;
