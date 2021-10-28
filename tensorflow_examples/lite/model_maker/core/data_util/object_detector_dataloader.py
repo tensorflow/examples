@@ -360,3 +360,8 @@ class DataLoader(dataloader.DataLoader):
         debug=model_spec.config.debug)
     self._dataset = reader(model_spec.config.as_dict(), batch_size=batch_size)
     return self._dataset
+
+  def split(self, fraction):
+    """This function isn't implemented for the object detection task."""
+    raise NotImplementedError(
+        'split function is not supported in the object detection task.')
