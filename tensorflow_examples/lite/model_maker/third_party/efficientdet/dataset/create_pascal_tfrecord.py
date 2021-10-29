@@ -159,7 +159,10 @@ def dict_to_tf_example(data,
   difficult_obj = []
   if 'object' in data:
     for obj in data['object']:
-      difficult = bool(int(obj['difficult']))
+      if obj['difficult'] == 'Unspecified':
+        difficult = False
+      else:
+        difficult = bool(int(obj['difficult']))
       if ignore_difficult_instances and difficult:
         continue
 
@@ -172,7 +175,10 @@ def dict_to_tf_example(data,
       area.append((xmax[-1] - xmin[-1]) * (ymax[-1] - ymin[-1]))
       classes_text.append(obj['name'].encode('utf8'))
       classes.append(label_map_dict[obj['name']])
-      truncated.append(int(obj['truncated']))
+      if obj['truncated'] == 'Unspecified':
+        truncated.append(0)
+      else:
+        truncated.append(int(obj['truncated']))
       poses.append(obj['pose'].encode('utf8'))
 
       if ann_json_dict:
