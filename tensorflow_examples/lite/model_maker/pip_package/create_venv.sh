@@ -4,7 +4,11 @@
 set -e
 set -x
 
-VENV_HOME=/tmp/venv
+if [[ "$1" == "--nightly" ]]; then
+  VENV_HOME=/tmp/venv_nightly/
+else
+  VENV_HOME=/tmp/venv/
+fi
 PIP_FLAG="--user"
 
 function create_venv_or_activate {

@@ -7,8 +7,9 @@ set -x
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 WORKSPACE_DIR="$(realpath "${SCRIPT_DIR}/../../../../")"
+MODEL_MAKER_VERSION="$1"   # "--nightly", or empty (for stable)
 
-source "${SCRIPT_DIR}/create_venv.sh"
+source "${SCRIPT_DIR}/create_venv.sh" ${MODEL_MAKER_VERSION}
 create_venv_or_activate  # Use virtualenv and activate.
 
 PYTHON_BIN="$(which python3.7)"
@@ -16,7 +17,6 @@ PIP_BIN="$(which pip3.7)"
 CLI_BIN="tflite_model_maker"
 NUM_PROCESSES=30   # Run tests in parallel. Adjust this to your own machine.
 
-MODEL_MAKER_VERSION="$1"   # "--nightly", or empty (for stable)
 
 function build_pip_and_install {
   # Build and install pip package.
@@ -114,3 +114,4 @@ function test_model_maker {
 }
 
 test_model_maker
+deactivate  # deactivate virtualenv.
