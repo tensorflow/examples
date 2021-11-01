@@ -25,46 +25,13 @@ from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import custom_model
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
-from tensorflow_examples.lite.model_maker.core.task.metadata_writers.object_detector import metadata_writer_for_object_detector as metadata_writer
 from tensorflow_examples.lite.model_maker.core.task.model_spec import object_detector_spec
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet.keras import label_util
+from tflite_support.metadata_writers import object_detector as metadata_writer
+from tflite_support.metadata_writers import writer_utils
 
 T = TypeVar('T', bound='ObjectDetector')
-
-
-def _get_model_info(
-    model_spec: object_detector_spec.EfficientDetModelSpec,
-    quantization_config: Optional[configs.QuantizationConfig] = None,
-) -> metadata_writer.ModelSpecificInfo:
-  """Gets the specific info for the object detection model."""
-
-  # Gets image_min/image_max for float/quantized model.
-  image_min = -1
-  image_max = 1
-  if quantization_config:
-    if quantization_config.inference_input_type == tf.uint8:
-      image_min = 0
-      image_max = 255
-    elif quantization_config.inference_input_type == tf.int8:
-      image_min = -128
-      image_max = 127
-
-  def _get_list(v):
-    if isinstance(v, list) or isinstance(v, tuple):
-      return v
-    else:
-      return [v]
-
-  return metadata_writer.ModelSpecificInfo(
-      name=model_spec.model_name,
-      version='v1',
-      image_width=model_spec.config.image_size[1],
-      image_height=model_spec.config.image_size[0],
-      image_min=image_min,
-      image_max=image_max,
-      mean=_get_list(model_spec.config.mean_rgb),
-      std=_get_list(model_spec.config.stddev_rgb))
 
 
 @mm_export('object_detector.ObjectDetector')
@@ -224,11 +191,17 @@ class ObjectDetector(custom_model.CustomModel):
             'Label file is inside the TFLite model with metadata.')
         label_filepath = os.path.join(temp_dir, 'labelmap.txt')
         self._export_labels(label_filepath)
-        model_info = _get_model_info(self.model_spec, quantization_config)
-        export_dir = os.path.dirname(tflite_filepath)
-        populator = metadata_writer.MetadataPopulatorForObjectDetector(
-            tflite_filepath, export_dir, model_info, label_filepath)
-        populator.populate(export_metadata_json_file)
+        writer = metadata_writer.MetadataWriter.create_for_inference(
+            writer_utils.load_file(tflite_filepath),
+            [self.model_spec.config.mean_rgb],
+            [self.model_spec.config.stddev_rgb], [label_filepath])
+        writer_utils.save_file(writer.populate(), tflite_filepath)
+
+        if export_metadata_json_file:
+          metadata_json = writer.get_populated_metadata_json()
+          export_json_path = os.path.splitext(tflite_filepath)[0] + '.json'
+          with open(export_json_path, 'w') as f:
+            f.write(metadata_json)
 
   def _export_labels(self, label_filepath: str) -> None:
     """Export labels to label_filepath."""

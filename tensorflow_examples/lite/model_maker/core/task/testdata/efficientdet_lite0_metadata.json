@@ -1,13 +1,12 @@
 {
-  "name": "efficientdet-lite0",
+  "name": "ObjectDetector",
   "description": "Identify which of a known set of objects might be present and provide information about their positions within the given image or a video stream.",
-  "version": "v1",
   "subgraph_metadata": [
     {
       "input_tensor_metadata": [
         {
           "name": "image",
-          "description": "Input image to be detected. The expected image is 320 x 320, with three channels (red, blue, and green) per pixel. Each value in the tensor is a single byte between 0 and 255.",
+          "description": "Input image to be detected.",
           "content": {
             "content_properties_type": "ImageProperties",
             "content_properties": {
@@ -32,12 +31,27 @@
               1.0
             ],
             "min": [
-              -1.0
+              -0.992188
             ]
           }
         }
       ],
       "output_tensor_metadata": [
+        {
+          "name": "score",
+          "description": "The scores of the detected boxes.",
+          "content": {
+            "content_properties_type": "FeatureProperties",
+            "content_properties": {
+            },
+            "range": {
+              "min": 2,
+              "max": 2
+            }
+          },
+          "stats": {
+          }
+        },
         {
           "name": "location",
           "description": "The locations of the detected boxes.",
@@ -56,6 +70,19 @@
               "min": 2,
               "max": 2
             }
+          },
+          "stats": {
+          }
+        },
+        {
+          "name": "number of detections",
+          "description": "The number of the detected boxes.",
+          "content": {
+            "content_properties_type": "FeatureProperties",
+            "content_properties": {
+            }
+          },
+          "stats": {
           }
         },
         {
@@ -70,40 +97,20 @@
               "max": 2
             }
           },
+          "stats": {
+          },
           "associated_files": [
             {
               "name": "labelmap.txt",
-              "description": "Label of objects that this model can recognize.",
+              "description": "Labels for categories that the model can recognize.",
               "type": "TENSOR_VALUE_LABELS"
             }
           ]
-        },
-        {
-          "name": "score",
-          "description": "The scores of the detected boxes.",
-          "content": {
-            "content_properties_type": "FeatureProperties",
-            "content_properties": {
-            },
-            "range": {
-              "min": 2,
-              "max": 2
-            }
-          }
-        },
-        {
-          "name": "number of detections",
-          "description": "The number of the detected boxes.",
-          "content": {
-            "content_properties_type": "FeatureProperties",
-            "content_properties": {
-            }
-          }
         }
       ],
       "output_tensor_groups": [
         {
-          "name": "detection result",
+          "name": "detection_result",
           "tensor_names": [
             "location",
             "category",
@@ -113,7 +120,5 @@
       ]
     }
   ],
-  "author": "TensorFlow Lite Model Maker",
-  "license": "Apache License. Version 2.0 http://www.apache.org/licenses/LICENSE-2.0.",
   "min_parser_version": "1.2.0"
 }
