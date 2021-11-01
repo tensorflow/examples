@@ -271,6 +271,7 @@ def default_detection_configs():
   h.fpn_name = None
   h.fpn_weight_method = None
   h.fpn_config = None
+  h.batch_norm_trainable = True
 
   # No stochastic depth in default.
   h.survival_prob = None

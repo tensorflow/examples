@@ -61,7 +61,8 @@ def resample_feature_map(feat,
                          is_training=None,
                          conv_after_downsample=False,
                          strategy=None,
-                         data_format='channels_last'):
+                         data_format='channels_last',
+                         batch_norm_trainable=True):
   """Resample input feature map to have target number of channels and size."""
   if data_format == 'channels_first':
     _, num_channels, height, width = feat.get_shape().as_list()
@@ -91,6 +92,7 @@ def resample_feature_map(feat,
             act_type=None,
             data_format=data_format,
             strategy=strategy,
+            batch_norm_trainable=batch_norm_trainable,
             name='bn')
     return feat
 
@@ -383,7 +385,8 @@ def build_feature_network(features, config):
               is_training=config.is_training_bn,
               conv_after_downsample=config.conv_after_downsample,
               strategy=config.strategy,
-              data_format=config.data_format
+              data_format=config.data_format,
+              batch_norm_trainable=config.batch_norm_trainable
           ))
 
   utils.verify_feats_size(
@@ -500,7 +503,8 @@ def build_bifpn_layer(feats, feat_sizes, config):
             p.apply_bn_for_resampling, p.is_training_bn,
             p.conv_after_downsample,
             strategy=p.strategy,
-            data_format=config.data_format)
+            data_format=config.data_format,
+            batch_norm_trainable=p.batch_norm_trainable)
         nodes.append(input_node)
 
       new_node = fuse_features(nodes, fpn_config.weight_method)
@@ -530,6 +534,7 @@ def build_bifpn_layer(feats, feat_sizes, config):
             act_type=None if not p.conv_bn_act_pattern else p.act_type,
             data_format=config.data_format,
             strategy=p.strategy,
+            batch_norm_trainable=p.batch_norm_trainable,
             name='bn')
 
       feats.append(new_node)

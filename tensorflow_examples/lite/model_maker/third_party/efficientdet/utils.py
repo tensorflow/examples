@@ -281,7 +281,8 @@ def batch_norm_act(inputs,
                    momentum: float = 0.99,
                    epsilon: float = 1e-3,
                    strategy: Text = None,
-                   name: Text = None):
+                   name: Text = None,
+                   batch_norm_trainable: bool = True):
   """Performs a batch normalization followed by a non-linear activation.
 
   Args:
@@ -296,6 +297,8 @@ def batch_norm_act(inputs,
     epsilon: `float`, small value for numerical stability.
     strategy: string to specify training strategy for TPU/GPU/CPU.
     name: the name of the batch normalization layer
+    batch_norm_trainable: 'bool' if False, the batch statistics will not be
+      updated.
 
   Returns:
     A normalized `Tensor` with the same `data_format`.
@@ -317,6 +320,7 @@ def batch_norm_act(inputs,
       epsilon=epsilon,
       center=True,
       scale=True,
+      trainable=batch_norm_trainable,
       training=is_training_bn,
       strategy=strategy,
       gamma_initializer=gamma_initializer,
