@@ -19,6 +19,7 @@ package org.tensorflow.lite.examples.poseestimation.tracker
 import android.graphics.PointF
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.Assert
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -80,7 +81,7 @@ class KeyPointsTrackerTest {
         val d = 0.1f
         val expectedOks: Float =
             (1f + 1f + exp(-1f * d.pow(2) / (2f * boxArea * x.pow(2)))) / 3f
-        Assert.assertEquals(expectedOks, oks, 0.000001f)
+        assertEquals(expectedOks, oks, 0.000001f)
     }
 
     @Test
@@ -108,7 +109,7 @@ class KeyPointsTrackerTest {
             )
 
         val oks = keyPointsTracker.oks(persons, tracks.person)
-        Assert.assertEquals(0f, oks, 0.000001f)
+        assertEquals(0f, oks, 0.000001f)
     }
 
     @Test
@@ -121,7 +122,7 @@ class KeyPointsTrackerTest {
         )
         val area = keyPointsTracker.area(keyPoints)
         val expectedArea = (0.4f - 0.1f) * (0.6f - 0.2f)
-        Assert.assertEquals(expectedArea, area)
+        assertEquals(expectedArea, area)
     }
 
     @Test
@@ -139,11 +140,11 @@ class KeyPointsTrackerTest {
         )
         persons = keyPointsTracker.apply(persons, 0)
         var track = keyPointsTracker.tracks
-        Assert.assertEquals(1, persons.size)
-        Assert.assertEquals(1, persons[0].id)
-        Assert.assertEquals(1, track.size)
-        Assert.assertEquals(1, track[0].person.id)
-        Assert.assertEquals(0, track[0].lastTimestamp)
+        assertEquals(1, persons.size)
+        assertEquals(1, persons[0].id)
+        assertEquals(1, track.size)
+        assertEquals(1, track[0].person.id)
+        assertEquals(0, track[0].lastTimestamp)
 
         // Timestamp: 100000. First person is linked with track 1. Second person spawns
         // a new track (id = 2).
@@ -173,14 +174,14 @@ class KeyPointsTrackerTest {
         )
         persons = keyPointsTracker.apply(persons, 100000)
         track = keyPointsTracker.tracks
-        Assert.assertEquals(2, persons.size)
-        Assert.assertEquals(1, persons[0].id)
-        Assert.assertEquals(2, persons[1].id)
-        Assert.assertEquals(2, track.size)
-        Assert.assertEquals(1, track[0].person.id)
-        Assert.assertEquals(100000, track[0].lastTimestamp)
-        Assert.assertEquals(2, track[1].person.id)
-        Assert.assertEquals(100000, track[1].lastTimestamp)
+        assertEquals(2, persons.size)
+        assertEquals(1, persons[0].id)
+        assertEquals(2, persons[1].id)
+        assertEquals(2, track.size)
+        assertEquals(1, track[0].person.id)
+        assertEquals(100000, track[0].lastTimestamp)
+        assertEquals(2, track[1].person.id)
+        assertEquals(100000, track[1].lastTimestamp)
 
         // Timestamp: 900000. First person is linked with track 2. Second person spawns
         // a new track (id = 3).
@@ -210,16 +211,16 @@ class KeyPointsTrackerTest {
         )
         persons = keyPointsTracker.apply(persons, 900000)
         track = keyPointsTracker.tracks
-        Assert.assertEquals(2, persons.size)
-        Assert.assertEquals(2, persons[0].id)
-        Assert.assertEquals(3, persons[1].id)
-        Assert.assertEquals(3, track.size)
-        Assert.assertEquals(2, track[0].person.id)
-        Assert.assertEquals(900000, track[0].lastTimestamp)
-        Assert.assertEquals(3, track[1].person.id)
-        Assert.assertEquals(900000, track[1].lastTimestamp)
-        Assert.assertEquals(1, track[2].person.id)
-        Assert.assertEquals(100000, track[2].lastTimestamp)
+        assertEquals(2, persons.size)
+        assertEquals(2, persons[0].id)
+        assertEquals(3, persons[1].id)
+        assertEquals(3, track.size)
+        assertEquals(2, track[0].person.id)
+        assertEquals(900000, track[0].lastTimestamp)
+        assertEquals(3, track[1].person.id)
+        assertEquals(900000, track[1].lastTimestamp)
+        assertEquals(1, track[2].person.id)
+        assertEquals(100000, track[2].lastTimestamp)
 
         // Timestamp: 1200000. First person spawns a new track (id = 4), even though
         // it has the same keypoints as track 1. This is because the age exceeds
@@ -262,18 +263,18 @@ class KeyPointsTrackerTest {
         )
         persons = keyPointsTracker.apply(persons, 1200000)
         track = keyPointsTracker.tracks
-        Assert.assertEquals(3, persons.size)
-        Assert.assertEquals(4, persons[0].id)
-        Assert.assertEquals(2, persons[1].id)
-        Assert.assertEquals(4, track.size)
-        Assert.assertEquals(2, track[0].person.id)
-        Assert.assertEquals(1200000, track[0].lastTimestamp)
-        Assert.assertEquals(4, track[1].person.id)
-        Assert.assertEquals(1200000, track[1].lastTimestamp)
-        Assert.assertEquals(5, track[2].person.id)
-        Assert.assertEquals(1200000, track[2].lastTimestamp)
-        Assert.assertEquals(3, track[3].person.id)
-        Assert.assertEquals(900000, track[3].lastTimestamp)
+        assertEquals(3, persons.size)
+        assertEquals(4, persons[0].id)
+        assertEquals(2, persons[1].id)
+        assertEquals(4, track.size)
+        assertEquals(2, track[0].person.id)
+        assertEquals(1200000, track[0].lastTimestamp)
+        assertEquals(4, track[1].person.id)
+        assertEquals(1200000, track[1].lastTimestamp)
+        assertEquals(5, track[2].person.id)
+        assertEquals(1200000, track[2].lastTimestamp)
+        assertEquals(3, track[3].person.id)
+        assertEquals(900000, track[3].lastTimestamp)
 
         // Timestamp: 1300000. First person spawns a new track (id = 6). Since
         // maxTracks is 4, the oldest track (id = 3) is removed.
@@ -292,16 +293,16 @@ class KeyPointsTrackerTest {
         )
         persons = keyPointsTracker.apply(persons, 1300000)
         track = keyPointsTracker.tracks
-        Assert.assertEquals(1, persons.size)
-        Assert.assertEquals(6, persons[0].id)
-        Assert.assertEquals(4, track.size)
-        Assert.assertEquals(6, track[0].person.id)
-        Assert.assertEquals(1300000, track[0].lastTimestamp)
-        Assert.assertEquals(2, track[1].person.id)
-        Assert.assertEquals(1200000, track[1].lastTimestamp)
-        Assert.assertEquals(4, track[2].person.id)
-        Assert.assertEquals(1200000, track[2].lastTimestamp)
-        Assert.assertEquals(5, track[3].person.id)
-        Assert.assertEquals(1200000, track[3].lastTimestamp)
+        assertEquals(1, persons.size)
+        assertEquals(6, persons[0].id)
+        assertEquals(4, track.size)
+        assertEquals(6, track[0].person.id)
+        assertEquals(1300000, track[0].lastTimestamp)
+        assertEquals(2, track[1].person.id)
+        assertEquals(1200000, track[1].lastTimestamp)
+        assertEquals(4, track[2].person.id)
+        assertEquals(1200000, track[2].lastTimestamp)
+        assertEquals(5, track[3].person.id)
+        assertEquals(1200000, track[3].lastTimestamp)
     }
 }

@@ -18,7 +18,7 @@ package org.tensorflow.lite.examples.poseestimation.tracker
 
 import android.graphics.RectF
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import junit.framework.Assert
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,7 +65,7 @@ class BoundingBoxTrackerTest {
                 ), 1000000
             )
         val computedIoU = boundingBoxTracker.iou(persons, track.person)
-        Assert.assertEquals("Wrong IoU value.", 1f / 3, computedIoU, 0.000001f)
+        assertEquals("Wrong IoU value.", 1f / 3, computedIoU, 0.000001f)
     }
 
     @Test
@@ -94,7 +94,7 @@ class BoundingBoxTrackerTest {
                 ), 1000000
             )
         val computedIoU = boundingBoxTracker.iou(persons, track.person)
-        Assert.assertEquals("Wrong IoU value.", 1f, computedIoU, 0.000001f)
+        assertEquals("Wrong IoU value.", 1f, computedIoU, 0.000001f)
     }
 
     @Test
@@ -123,7 +123,7 @@ class BoundingBoxTrackerTest {
                 ), 1000000
             )
         val computedIoU = boundingBoxTracker.iou(persons, track.person)
-        Assert.assertEquals("Wrong IoU value.", 0f, computedIoU, 0.000001f)
+        assertEquals("Wrong IoU value.", 0f, computedIoU, 0.000001f)
     }
 
     @Test
@@ -149,14 +149,14 @@ class BoundingBoxTrackerTest {
         )
         persons = boundingBoxTracker.apply(persons, 0)
         var track = boundingBoxTracker.tracks
-        Assert.assertEquals(2, persons.size)
-        Assert.assertEquals(1, persons[0].id)
-        Assert.assertEquals(2, persons[1].id)
-        Assert.assertEquals(2, track.size)
-        Assert.assertEquals(1, track[0].person.id)
-        Assert.assertEquals(0, track[0].lastTimestamp)
-        Assert.assertEquals(2, track[1].person.id)
-        Assert.assertEquals(0, track[1].lastTimestamp)
+        assertEquals(2, persons.size)
+        assertEquals(1, persons[0].id)
+        assertEquals(2, persons[1].id)
+        assertEquals(2, track.size)
+        assertEquals(1, track[0].person.id)
+        assertEquals(0, track[0].lastTimestamp)
+        assertEquals(2, track[1].person.id)
+        assertEquals(0, track[1].lastTimestamp)
 
         // Timestamp: 100000. First pose is linked with track 1. Second pose spawns
         // a new track (id = 2).
@@ -180,16 +180,16 @@ class BoundingBoxTrackerTest {
         )
         persons = boundingBoxTracker.apply(persons, 100000)
         track = boundingBoxTracker.tracks
-        Assert.assertEquals(2, persons.size)
-        Assert.assertEquals(1, persons[0].id)
-        Assert.assertEquals(3, persons[1].id)
-        Assert.assertEquals(3, track.size)
-        Assert.assertEquals(1, track[0].person.id)
-        Assert.assertEquals(100000, track[0].lastTimestamp)
-        Assert.assertEquals(3, track[1].person.id)
-        Assert.assertEquals(100000, track[1].lastTimestamp)
-        Assert.assertEquals(2, track[2].person.id)
-        Assert.assertEquals(0, track[2].lastTimestamp)
+        assertEquals(2, persons.size)
+        assertEquals(1, persons[0].id)
+        assertEquals(3, persons[1].id)
+        assertEquals(3, track.size)
+        assertEquals(1, track[0].person.id)
+        assertEquals(100000, track[0].lastTimestamp)
+        assertEquals(3, track[1].person.id)
+        assertEquals(100000, track[1].lastTimestamp)
+        assertEquals(2, track[2].person.id)
+        assertEquals(0, track[2].lastTimestamp)
 
         // Timestamp: 1050000. First pose is linked with track 1. Second pose is
         // identical to track 2, but is not linked because track 2 is deleted due to
@@ -214,15 +214,15 @@ class BoundingBoxTrackerTest {
         )
         persons = boundingBoxTracker.apply(persons, 1050000)
         track = boundingBoxTracker.tracks
-        Assert.assertEquals(2, persons.size)
-        Assert.assertEquals(1, persons[0].id)
-        Assert.assertEquals(4, persons[1].id)
-        Assert.assertEquals(3, track.size)
-        Assert.assertEquals(1, track[0].person.id)
-        Assert.assertEquals(1050000, track[0].lastTimestamp)
-        Assert.assertEquals(4, track[1].person.id)
-        Assert.assertEquals(1050000, track[1].lastTimestamp)
-        Assert.assertEquals(3, track[2].person.id)
-        Assert.assertEquals(100000, track[2].lastTimestamp)
+        assertEquals(2, persons.size)
+        assertEquals(1, persons[0].id)
+        assertEquals(4, persons[1].id)
+        assertEquals(3, track.size)
+        assertEquals(1, track[0].person.id)
+        assertEquals(1050000, track[0].lastTimestamp)
+        assertEquals(4, track[1].person.id)
+        assertEquals(1050000, track[1].lastTimestamp)
+        assertEquals(3, track[2].person.id)
+        assertEquals(100000, track[2].lastTimestamp)
     }
 }
