@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================
 */
 
-package org.tensorflow.lite.examples.poseestimation
+package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

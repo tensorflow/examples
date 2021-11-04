@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================
 */
 
-package org.tensorflow.lite.examples.poseestimation
+package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.content.Context
 import android.graphics.PointF
@@ -25,17 +25,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.tensorflow.lite.examples.poseestimation.data.BodyPart
 import org.tensorflow.lite.examples.poseestimation.data.Device
-import org.tensorflow.lite.examples.poseestimation.ml.ModelType
-import org.tensorflow.lite.examples.poseestimation.ml.MoveNet
-import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
 
 @RunWith(AndroidJUnit4::class)
-class MovenetLightningTest {
+class MovenetThunderTest {
 
     companion object {
         private const val TEST_INPUT_IMAGE1 = "image1.png"
         private const val TEST_INPUT_IMAGE2 = "image2.jpg"
-        private const val ACCEPTABLE_ERROR = 21f
+        private const val ACCEPTABLE_ERROR = 15f
     }
 
     private lateinit var poseDetector: PoseDetector
@@ -45,7 +42,7 @@ class MovenetLightningTest {
     @Before
     fun setup() {
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        poseDetector = MoveNet.create(appContext, Device.CPU, ModelType.Lightning)
+        poseDetector = MoveNet.create(appContext, Device.CPU, ModelType.Thunder)
         expectedDetectionResult =
             EvaluationUtils.loadCSVAsset("pose_landmark_truth.csv")
     }
@@ -56,10 +53,10 @@ class MovenetLightningTest {
 
         // As Movenet use previous frame to optimize detection result, we run it multiple times
         // using the same image to improve result.
-        poseDetector.estimateSinglePose(input)
-        poseDetector.estimateSinglePose(input)
-        poseDetector.estimateSinglePose(input)
-        val person = poseDetector.estimateSinglePose(input)
+        poseDetector.estimatePoses(input)
+        poseDetector.estimatePoses(input)
+        poseDetector.estimatePoses(input)
+        val person = poseDetector.estimatePoses(input)[0]
         EvaluationUtils.assertPoseDetectionResult(
             person,
             expectedDetectionResult[0],
@@ -73,10 +70,10 @@ class MovenetLightningTest {
 
         // As Movenet use previous frame to optimize detection result, we run it multiple times
         // using the same image to improve result.
-        poseDetector.estimateSinglePose(input)
-        poseDetector.estimateSinglePose(input)
-        poseDetector.estimateSinglePose(input)
-        val person = poseDetector.estimateSinglePose(input)
+        poseDetector.estimatePoses(input)
+        poseDetector.estimatePoses(input)
+        poseDetector.estimatePoses(input)
+        val person = poseDetector.estimatePoses(input)[0]
         EvaluationUtils.assertPoseDetectionResult(
             person,
             expectedDetectionResult[1],

@@ -91,7 +91,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     private val inputHeight = interpreter.getInputTensor(0).shape()[2]
     private var outputShape: IntArray = interpreter.getOutputTensor(0).shape()
 
-    override fun estimateSinglePose(bitmap: Bitmap): Person {
+    override fun estimatePoses(bitmap: Bitmap): List<Person> {
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         if (cropRegion == null) {
             cropRegion = initRectF(bitmap.width, bitmap.height)
@@ -166,10 +166,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         }
         lastInferenceTimeNanos =
             SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
-        return Person(
-            keyPoints,
-            totalScore / numKeyPoints
-        )
+        return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
     }
 
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos

@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================
 */
 
-package org.tensorflow.lite.examples.poseestimation
+package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -24,10 +24,8 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.tensorflow.lite.examples.poseestimation.VisualizationUtils
 import org.tensorflow.lite.examples.poseestimation.data.Device
-import org.tensorflow.lite.examples.poseestimation.ml.ModelType
-import org.tensorflow.lite.examples.poseestimation.ml.MoveNet
-import org.tensorflow.lite.examples.poseestimation.ml.PoseNet
 
 /**
  * This test is used to visually verify detection results by the models.
@@ -53,7 +51,7 @@ class VisualizationTest {
     @Test
     fun testPosenet() {
         val poseDetector = PoseNet.create(appContext, Device.CPU)
-        val person = poseDetector.estimateSinglePose(inputBitmap)
+        val person = poseDetector.estimatePoses(inputBitmap)[0]
         val outputBitmap = VisualizationUtils.drawBodyKeypoints(inputBitmap, person)
         assertThat(outputBitmap).isNotNull()
     }
@@ -63,9 +61,9 @@ class VisualizationTest {
         // Due to Movenet's cropping logic, we run inference several times with the same input
         // image to improve accuracy
         val poseDetector = MoveNet.create(appContext, Device.CPU, ModelType.Lightning)
-        poseDetector.estimateSinglePose(inputBitmap)
-        poseDetector.estimateSinglePose(inputBitmap)
-        val person2 = poseDetector.estimateSinglePose(inputBitmap)
+        poseDetector.estimatePoses(inputBitmap)
+        poseDetector.estimatePoses(inputBitmap)
+        val person2 = poseDetector.estimatePoses(inputBitmap)[0]
         val outputBitmap2 = VisualizationUtils.drawBodyKeypoints(inputBitmap, person2)
         assertThat(outputBitmap2).isNotNull()
     }
@@ -75,9 +73,9 @@ class VisualizationTest {
         // Due to Movenet's cropping logic, we run inference several times with the same input
         // image to improve accuracy
         val poseDetector = MoveNet.create(appContext, Device.CPU, ModelType.Thunder)
-        poseDetector.estimateSinglePose(inputBitmap)
-        poseDetector.estimateSinglePose(inputBitmap)
-        val person = poseDetector.estimateSinglePose(inputBitmap)
+        poseDetector.estimatePoses(inputBitmap)
+        poseDetector.estimatePoses(inputBitmap)
+        val person = poseDetector.estimatePoses(inputBitmap)[0]
         val outputBitmap = VisualizationUtils.drawBodyKeypoints(inputBitmap, person)
         assertThat(outputBitmap).isNotNull()
     }

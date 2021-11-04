@@ -79,7 +79,7 @@ class PoseNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     private var cropSize = 0
 
     @Suppress("UNCHECKED_CAST")
-    override fun estimateSinglePose(bitmap: Bitmap): Person {
+    override fun estimatePoses(bitmap: Bitmap): List<Person> {
         val estimationStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         val inputArray = arrayOf(processInputImage(bitmap).tensorBuffer.buffer)
         Log.i(
@@ -113,7 +113,7 @@ class PoseNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             )
         )
 
-        return person
+        return listOf(person)
     }
 
     /**
@@ -180,7 +180,7 @@ class PoseNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             )
             totalScore += confidenceScores[idx]
         }
-        return Person(keypointList.toList(), totalScore / numKeypoints)
+        return Person(keyPoints = keypointList.toList(), score = totalScore / numKeypoints)
     }
 
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
