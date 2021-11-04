@@ -14,20 +14,16 @@ limitations under the License.
 ==============================================================================
 */
 
-package org.tensorflow.lite.examples.poseestimation
+package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.tensorflow.lite.examples.poseestimation.data.Device
-import org.tensorflow.lite.examples.poseestimation.ml.ModelType
-import org.tensorflow.lite.examples.poseestimation.ml.MoveNet
-import org.tensorflow.lite.examples.poseestimation.ml.PoseClassifier
-import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
 
 @RunWith(AndroidJUnit4::class)
 class PoseClassifierTest {
@@ -52,13 +48,13 @@ class PoseClassifierTest {
         val input = EvaluationUtils.loadBitmapAssetByName(TEST_INPUT_IMAGE)
         // As Movenet use previous frame to optimize detection result, we run it multiple times
         // using the same image to improve result.
-        poseDetector.estimateSinglePose(input)
-        poseDetector.estimateSinglePose(input)
-        poseDetector.estimateSinglePose(input)
-        val person = poseDetector.estimateSinglePose(input)
+        poseDetector.estimatePoses(input)
+        poseDetector.estimatePoses(input)
+        poseDetector.estimatePoses(input)
+        val person = poseDetector.estimatePoses(input)[0]
         val classificationResult = poseClassifier.classify(person)
         val predictedPose = classificationResult.maxByOrNull { it.second }?.first ?: "n/a"
-        assertEquals(
+        TestCase.assertEquals(
             "Predicted pose is different from ground truth.",
             "tree",
             predictedPose
