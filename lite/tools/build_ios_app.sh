@@ -26,6 +26,7 @@ WORKSPACE_EXT=".xcworkspace"
 # Keep a list of iOS apps which should be excluded from the CI builds.
 SKIPPED_BUILDS="
 gesture_classification/ios
+classification_by_retrieval/ios
 "
 
 function build_ios_example {
