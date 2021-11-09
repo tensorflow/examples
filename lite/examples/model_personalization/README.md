@@ -69,7 +69,9 @@ If you need to install gradle, you can reference this [link](https://docs.gradle
 
 The running application will look like
 
-![Screenshot from the app](app_screenshot.png)
+<p align="center">
+  <img src="app_screenshot.png" alt="app_screenshot" width="350"/>
+</p>
 
 You should now have the app started on your device. Please refer to the `Help`
 menu for more detailed instruction.
