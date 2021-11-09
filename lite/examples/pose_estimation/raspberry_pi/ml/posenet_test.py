@@ -46,13 +46,21 @@ class PosenetTest(unittest.TestCase):
     self.keypoints_truth_2 = pose_landmarks_truth.iloc[1].to_numpy().reshape(
         (17, 2))
 
-  def _detect_and_assert(self, detector, image, keypoints_truth):
-    """Run pose estimation and assert if the result is close to ground truth."""
+  def _detect_and_assert(self, detector: Posenet, image: np.ndarray,
+                         keypoints_truth: np.ndarray) -> None:
+    """Run pose estimation and assert if the result is close to ground truth.
+
+    Args:
+      detector: Posenet detector.
+      image: A [height, width, 3] RGB image.
+      keypoints_truth: Ground truth keypoint coordinates to be compared to.
+    """
     person = detector.detect(image)
     keypoints = person.keypoints
     for idx in range(len(BodyPart)):
-      distance = np.linalg.norm(
-          keypoints[idx].coordinate - keypoints_truth[idx], np.inf)
+      kpt_estimate = np.array(
+          [keypoints[idx].coordinate.x, keypoints[idx].coordinate.y])
+      distance = np.linalg.norm(kpt_estimate - keypoints_truth[idx], np.inf)
 
       self.assertGreaterEqual(
           _ALLOWED_DISTANCE, distance,
