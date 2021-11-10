@@ -1,1 +1,1 @@
-tensorflow>=2.7.*
+tf-nightly>=2.8.*
