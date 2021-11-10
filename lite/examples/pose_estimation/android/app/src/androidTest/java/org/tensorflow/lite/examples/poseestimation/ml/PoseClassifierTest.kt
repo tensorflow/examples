@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import junit.framework.TestCase
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +55,7 @@ class PoseClassifierTest {
         val person = poseDetector.estimatePoses(input)[0]
         val classificationResult = poseClassifier.classify(person)
         val predictedPose = classificationResult.maxByOrNull { it.second }?.first ?: "n/a"
-        TestCase.assertEquals(
+        assertEquals(
             "Predicted pose is different from ground truth.",
             "tree",
             predictedPose
