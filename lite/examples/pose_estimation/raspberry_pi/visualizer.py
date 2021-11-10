@@ -16,6 +16,8 @@ import argparse
 import logging
 
 import cv2
+from data import BodyPart
+from data import person_from_keypoints_with_scores
 from ml import Movenet
 from ml import Posenet
 import numpy as np
@@ -56,7 +58,7 @@ def _visualize_detection_result(input_image, ground_truth):
 
   Args:
     input_image: Numpy array of shape (height, width, 3)
-    ground_truth: Numpy array with absolute coordiates of the keypoints to be
+    ground_truth: Numpy array with absolute coordinates of the keypoints to be
       plotted.
 
   Returns:
@@ -65,37 +67,25 @@ def _visualize_detection_result(input_image, ground_truth):
   output_image = input_image.copy()
 
   # Draw detection result from Posenet (blue)
-  keypoints_with_scores = _POSENET.detect(input_image)
-  (keypoint_locs, _,
-   _) = utils.keypoints_and_edges_for_display(keypoints_with_scores,
-                                              input_image.shape[0],
-                                              input_image.shape[1], 0)
-  output_image = utils.draw_landmarks_edges(output_image, keypoint_locs, [],
-                                            None, (255, 0, 0))
+  person = _POSENET.detect(input_image)
+  output_image = utils.visualize(output_image, [person], (255, 0, 0))
 
   # Draw detection result from Movenet Lightning (red)
-  keypoints_with_scores = _MOVENET_LIGHTNING.detect(
-      input_image, reset_crop_region=True)
-  (keypoint_locs, _,
-   _) = utils.keypoints_and_edges_for_display(keypoints_with_scores,
-                                              input_image.shape[0],
-                                              input_image.shape[1], 0)
-  output_image = utils.draw_landmarks_edges(output_image, keypoint_locs, [],
-                                            None, (0, 0, 255))
+  person = _MOVENET_LIGHTNING.detect(input_image, reset_crop_region=True)
+  output_image = utils.visualize(output_image, [person], (0, 0, 255))
 
   # Draw detection result from Movenet Thunder (yellow)
-  keypoints_with_scores = _MOVENET_THUNDER.detect(
-      input_image, reset_crop_region=True)
-  (keypoint_locs, _,
-   _) = utils.keypoints_and_edges_for_display(keypoints_with_scores,
-                                              input_image.shape[0],
-                                              input_image.shape[1], 0)
-  output_image = utils.draw_landmarks_edges(output_image, keypoint_locs, [],
-                                            None, (0, 255, 255))
+  person = _MOVENET_THUNDER.detect(input_image, reset_crop_region=True)
+  output_image = utils.visualize(output_image, [person], (0, 255, 255))
+
+  # Create a fake score column to convert ground truth to "Person" type
+  ground_truth[:, :2] = ground_truth[:, 1::-1]
+  score = np.ones((17, 1), dtype=float)
+  ground_truth = np.append(ground_truth, score, axis=1)
+  person = person_from_keypoints_with_scores(ground_truth, 1, 1)
 
   # Draw ground truth detection result (green)
-  output_image = utils.draw_landmarks_edges(output_image, ground_truth, [],
-                                            None, (0, 255, 0))
+  output_image = utils.visualize(output_image, [person], (0, 255, 0))
 
   return output_image
 
@@ -109,27 +99,25 @@ def _create_ground_truth_csv(input_images, ground_truth_csv_path):
   """
   # Create column name for CSV file
   column_names = []
-  for keypoint_name in utils.KEYPOINT_DICT.keys():
-    column_names.append(keypoint_name + '_x')
-    column_names.append(keypoint_name + '_y')
+  for body_part in BodyPart:
+    column_names.append(body_part.name + '_x')
+    column_names.append(body_part.name + '_y')
 
   # Create ground truth data by feeding the test images through MoveNet
   # Thunder 3 times to leverage the cropping logic and improve accuracy.
   keypoints_data = []
   for input_image in input_images:
-    _MOVENET_THUNDER.detect(input_image, reset_crop_region=True)
+    person = _MOVENET_THUNDER.detect(input_image, reset_crop_region=True)
     for _ in range(3):
-      keypoints_with_scores = _MOVENET_THUNDER.detect(
-          input_image, reset_crop_region=False)
+      person = _MOVENET_THUNDER.detect(input_image, reset_crop_region=False)
 
-    # Convert the detected keypoints to the original image's coordinate system
-    (keypoint_locs, _,
-     _) = utils.keypoints_and_edges_for_display(keypoints_with_scores,
-                                                input_image.shape[0],
-                                                input_image.shape[1], 0)
+    kpts = []
+    keypoints = person.keypoints
+    for idx in range(len(keypoints)):
+      kpts.extend((keypoints[idx].coordinate.x, keypoints[idx].coordinate.y))
 
-    # Round the coordinate values to integer and store them
-    keypoints_data.append(keypoint_locs.flatten().astype(np.int16))
+    # Store kpts into keypoints_data
+    keypoints_data.append(kpts)
 
   # Write ground truth CSV file
   keypoints_df = pd.DataFrame(keypoints_data, columns=column_names)

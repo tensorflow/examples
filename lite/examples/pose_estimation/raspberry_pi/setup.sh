@@ -32,6 +32,13 @@ if [ ! -f "$FILE" ]; then
     -o ${FILE}
 fi
 
+FILE=${DATA_DIR}/movenet_multipose.tflite
+if [ ! -f "$FILE" ]; then
+  curl \
+    -L 'https://tfhub.dev/google/lite-model/movenet/multipose/lightning/tflite/float16/1?lite-format=tflite' \
+    -o ${FILE}
+fi
+
 FILE=${DATA_DIR}/classifier.tflite
 if [ ! -f "$FILE" ]; then
   curl \

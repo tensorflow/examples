@@ -13,22 +13,25 @@
 # limitations under the License.
 """Main script to run pose classification and pose estimation."""
 import argparse
+import logging
 import sys
 import time
 
 import cv2
 from ml import Classifier
 from ml import Movenet
+from ml import MoveNetMultiPose
 from ml import Posenet
 import utils
 
 
-def run(estimation_model, classification_model, label_file, camera_id, width,
-        height):
+def run(estimation_model: str, tracker_type: str, classification_model: str,
+        label_file: str, camera_id: int, width: int, height: int) -> None:
   """Continuously run inference on images acquired from the camera.
 
   Args:
     estimation_model: Name of the TFLite pose estimation model.
+    tracker_type: Type of Tracker('keypoint' or 'bounding_box').
     classification_model: Name of the TFLite pose classification model.
       (Optional)
     label_file: Path to the label file for the pose classification model. Class
@@ -38,10 +41,20 @@ def run(estimation_model, classification_model, label_file, camera_id, width,
     width: The width of the frame captured from the camera.
     height: The height of the frame captured from the camera.
   """
+
+  # Ensure tracker is only enabled for MoveNet MultiPose model.
+  if tracker_type and (estimation_model != 'movenet_multipose'):
+    logging.warning(
+        'No tracker will be used as tracker can only be enabled for '
+        'MoveNet MultiPose model.')
+
+  # Initialize the pose estimator selected.
   if estimation_model in ['movenet_lightning', 'movenet_thunder']:
     pose_detector = Movenet(estimation_model)
   elif estimation_model == 'posenet':
     pose_detector = Posenet(estimation_model)
+  elif estimation_model == 'movenet_multipose':
+    pose_detector = MoveNetMultiPose(estimation_model, tracker_type)
   else:
     sys.exit('ERROR: Model is not supported.')
 
@@ -80,9 +93,13 @@ def run(estimation_model, classification_model, label_file, camera_id, width,
     counter += 1
     image = cv2.flip(image, 1)
 
-    # Run pose estimation using a SinglePose model, and wrap the result in an
-    # array.
-    list_persons = [pose_detector.detect(image)]
+    if estimation_model == 'movenet_multipose':
+      # Run pose estimation using a MultiPose model.
+      list_persons = pose_detector.detect(image)
+    else:
+      # Run pose estimation using a SinglePose model, and wrap the result in an
+      # array.
+      list_persons = [pose_detector.detect(image)]
 
     # Draw keypoints and edges on input image
     image = utils.visualize(image, list_persons)
@@ -130,6 +147,11 @@ def main():
       required=False,
       default='movenet_lightning')
   parser.add_argument(
+      '--tracker',
+      help='Type of tracker to track poses across frames.',
+      required=False,
+      default='bounding_box')
+  parser.add_argument(
       '--classifier', help='Name of classification model.', required=False)
   parser.add_argument(
       '--label_file',
@@ -150,8 +172,8 @@ def main():
       default=480)
   args = parser.parse_args()
 
-  run(args.model, args.classifier, args.label_file, int(args.cameraId),
-      args.frameWidth, args.frameHeight)
+  run(args.model, args.tracker, args.classifier, args.label_file,
+      int(args.cameraId), args.frameWidth, args.frameHeight)
 
 
 if __name__ == '__main__':

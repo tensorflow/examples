@@ -32,7 +32,9 @@ python3 pose_estimation.py
 
 *   You can optionally specify the `model_name` parameter to try other pose
     estimation models:
-    *   Use values: `posenet`, `movenet_lightning`, `movenet_thunder`.
+    *   Use values:
+        * Single-pose: `posenet`, `movenet_lightning`, `movenet_thunder`
+        * Multi-poses: `movenet_multipose`
     *   The default value is `movenet_lightning`.
 
 ```
@@ -56,8 +58,15 @@ python3 pose_estimation.py \
 *  Here is the full list of parameters supported by the sample:
 ```python3 pose_classification.py```
   *   `model`: Name of the TFLite pose estimation model to be used.
-    *   One of these values: `posenet`, `movenet_lightning`, `movenet_thunder`.
+    *   One of these values: `posenet`, `movenet_lightning`, `movenet_thunder`, `movenet_multipose`
     *   Default value is `movenet_lightning`.
+  *   `tracker`: Type of tracker to track poses across frames.
+    *   One of these values: `bounding_box`, `keypoint`
+    *   Only supported in multi-poses models.
+    *   Default value is empty (the default tracker of each pose estimation
+        model is used.).
+        *  MoveNet MultiPose: default to bounding box tracker
+        *  PoseNet, MoveNet Lightning, MoveNet Thunder: no tracker
   *   `classifier`: Name of the TFLite pose classification model to be used.
     *   Default value is empty.
     *   If no classification model specified, the sample will only run the pose
