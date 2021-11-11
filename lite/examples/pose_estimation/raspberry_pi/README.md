@@ -63,10 +63,7 @@ python3 pose_estimation.py \
   *   `tracker`: Type of tracker to track poses across frames.
     *   One of these values: `bounding_box`, `keypoint`
     *   Only supported in multi-poses models.
-    *   Default value is empty (the default tracker of each pose estimation
-        model is used.).
-        *  MoveNet MultiPose: default to bounding box tracker
-        *  PoseNet, MoveNet Lightning, MoveNet Thunder: no tracker
+    *   Default value is `bounding_box`.
   *   `classifier`: Name of the TFLite pose classification model to be used.
     *   Default value is empty.
     *   If no classification model specified, the sample will only run the pose

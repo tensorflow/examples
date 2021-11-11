@@ -47,7 +47,7 @@ class TrackerConfig(NamedTuple):
   keypoint_tracker_params: KeypointTrackerConfig = KeypointTrackerConfig()
   """Keypoint tracker params."""
 
-  max_tracks: int = 4
+  max_tracks: int = 12
   """The maximum number of tracks that an internal tracker will maintain."""
 
   max_age: int = 1000 * 1000

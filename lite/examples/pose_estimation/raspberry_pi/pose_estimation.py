@@ -42,7 +42,7 @@ def run(estimation_model: str, tracker_type: str, classification_model: str,
     height: The height of the frame captured from the camera.
   """
 
-  # Ensure tracker is only enabled for MoveNet MultiPose model.
+  # Notify users that tracker is only enabled for MoveNet MultiPose model.
   if tracker_type and (estimation_model != 'movenet_multipose'):
     logging.warning(
         'No tracker will be used as tracker can only be enabled for '
