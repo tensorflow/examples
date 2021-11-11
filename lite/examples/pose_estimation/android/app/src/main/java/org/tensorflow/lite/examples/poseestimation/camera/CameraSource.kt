@@ -218,8 +218,8 @@ class CameraSource(
         var classificationResult: List<Pair<String, Float>>? = null
 
         synchronized(lock) {
-            detector?.estimateSinglePose(bitmap)?.let {
-                person = it
+            detector?.estimatePoses(bitmap)?.let {
+                person = it[0]
                 classifier?.run {
                     classificationResult = classify(person)
                 }

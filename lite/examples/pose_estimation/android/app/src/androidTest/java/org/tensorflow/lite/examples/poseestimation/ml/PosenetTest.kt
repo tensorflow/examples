@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================
 */
 
-package org.tensorflow.lite.examples.poseestimation
+package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.content.Context
 import android.graphics.PointF
@@ -25,8 +25,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.tensorflow.lite.examples.poseestimation.data.BodyPart
 import org.tensorflow.lite.examples.poseestimation.data.Device
-import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
-import org.tensorflow.lite.examples.poseestimation.ml.PoseNet
 
 @RunWith(AndroidJUnit4::class)
 class PosenetTest {
@@ -52,7 +50,7 @@ class PosenetTest {
     @Test
     fun testPoseEstimationResultWithImage1() {
         val input = EvaluationUtils.loadBitmapAssetByName(TEST_INPUT_IMAGE1)
-        val person = poseDetector.estimateSinglePose(input)
+        val person = poseDetector.estimatePoses(input)[0]
         EvaluationUtils.assertPoseDetectionResult(
             person,
             expectedDetectionResult[0],
@@ -63,7 +61,7 @@ class PosenetTest {
     @Test
     fun testPoseEstimationResultWithImage2() {
         val input = EvaluationUtils.loadBitmapAssetByName(TEST_INPUT_IMAGE2)
-        val person = poseDetector.estimateSinglePose(input)
+        val person = poseDetector.estimatePoses(input)[0]
         EvaluationUtils.assertPoseDetectionResult(
             person,
             expectedDetectionResult[1],

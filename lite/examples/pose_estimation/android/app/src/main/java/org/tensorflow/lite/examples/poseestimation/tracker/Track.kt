@@ -14,13 +14,11 @@ limitations under the License.
 ==============================================================================
 */
 
-package org.tensorflow.lite.examples.poseestimation.data
+package org.tensorflow.lite.examples.poseestimation.tracker
 
-import android.graphics.RectF
+import org.tensorflow.lite.examples.poseestimation.data.Person
 
-data class Person(
-    var id: Int = -1, // default id is -1
-    val keyPoints: List<KeyPoint>,
-    val boundingBox: RectF? = null, // Only MoveNet MultiPose return bounding box.
-    val score: Float
+data class Track(
+    val person: Person,
+    val lastTimestamp: Long
 )
