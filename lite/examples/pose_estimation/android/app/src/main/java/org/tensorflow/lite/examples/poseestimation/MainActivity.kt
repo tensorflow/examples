@@ -121,7 +121,6 @@ class MainActivity : AppCompatActivity() {
         override fun onNothingSelected(parent: AdapterView<*>?) {
             // do nothing
         }
-
     }
 
     private var setClassificationListener =
@@ -331,7 +330,7 @@ class MainActivity : AppCompatActivity() {
                     Type.Dynamic
                 )
             }
-            4 -> {
+            3 -> {
                 // PoseNet (SinglePose)
                 showPoseClassifier(true)
                 showDetectionScore(true)
