@@ -25,6 +25,15 @@ task downloadMovenetThunderModel(type: DownloadUrlTask) {
     target = file("src/main/assets/movenet_thunder.tflite")
 }
 
+task downloadMovenetMultiPoseModel(type: DownloadUrlTask) {
+    def modelMovenetThunderDownloadUrl = "https://tfhub.dev/google/lite-model/movenet/multipose/lightning/tflite/float16/1?lite-format=tflite"
+    doFirst {
+        println "Downloading ${modelMovenetThunderDownloadUrl}"
+    }
+    sourceUrl = "${modelMovenetThunderDownloadUrl}"
+    target = file("src/main/assets/movenet_multipose_fp16.tflite")
+}
+
 task downloadPoseClassifierModel(type: DownloadUrlTask) {
     def modelPoseClassifierDownloadUrl = "https://storage.googleapis.com/download.tensorflow.org/models/tflite/pose_classifier/yoga_classifier.tflite"
     doFirst {
@@ -39,6 +48,7 @@ task downloadModel {
     dependsOn downloadMovenetLightningModel
     dependsOn downloadMovenetThunderModel
     dependsOn downloadPoseClassifierModel
+    dependsOn downloadMovenetMultiPoseModel
 }
 
 class DownloadUrlTask extends DefaultTask {

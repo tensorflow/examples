@@ -1,3 +1,19 @@
+/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+*/
+
 package org.tensorflow.lite.examples.poseestimation.camera
 
 import android.annotation.SuppressLint
@@ -20,8 +36,10 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.tensorflow.lite.examples.poseestimation.VisualizationUtils
 import org.tensorflow.lite.examples.poseestimation.YuvToRgbConverter
 import org.tensorflow.lite.examples.poseestimation.data.Person
+import org.tensorflow.lite.examples.poseestimation.ml.MoveNetMultiPose
 import org.tensorflow.lite.examples.poseestimation.ml.PoseClassifier
 import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
+import org.tensorflow.lite.examples.poseestimation.ml.TrackerType
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -43,6 +61,7 @@ class CameraSource(
     private val lock = Any()
     private var detector: PoseDetector? = null
     private var classifier: PoseClassifier? = null
+    private var isTrackerEnabled = false
     private var yuvConverter: YuvToRgbConverter = YuvToRgbConverter(surfaceView.context)
     private lateinit var imageBitmap: Bitmap
 
@@ -178,6 +197,14 @@ class CameraSource(
         }
     }
 
+    /**
+     * Set Tracker for Movenet MuiltiPose model.
+     */
+    fun setTracker(trackerType: TrackerType) {
+        isTrackerEnabled = trackerType != TrackerType.OFF
+        (this.detector as? MoveNetMultiPose)?.setTracker(trackerType)
+    }
+
     fun resume() {
         imageReaderThread = HandlerThread("imageReaderThread").apply { start() }
         imageReaderHandler = Handler(imageReaderThread!!.looper)
@@ -214,14 +241,18 @@ class CameraSource(
 
     // process image
     private fun processImage(bitmap: Bitmap) {
-        var person: Person? = null
+        val persons = mutableListOf<Person>()
         var classificationResult: List<Pair<String, Float>>? = null
 
         synchronized(lock) {
             detector?.estimatePoses(bitmap)?.let {
-                person = it[0]
-                classifier?.run {
-                    classificationResult = classify(person)
+                persons.addAll(it)
+
+                // if the model only returns one item, allow running the Pose classifier.
+                if (persons.isNotEmpty()) {
+                    classifier?.run {
+                        classificationResult = classify(persons[0])
+                    }
                 }
             }
         }
@@ -230,18 +261,20 @@ class CameraSource(
             // send fps to view
             listener?.onFPSListener(framesPerSecond)
         }
-        listener?.onDetectedInfo(person?.score, classificationResult)
-        person?.let {
-            visualize(it, bitmap)
+
+        // if the model returns only one item, show that item's score.
+        if (persons.isNotEmpty()) {
+            listener?.onDetectedInfo(persons[0].score, classificationResult)
         }
+        visualize(persons, bitmap)
     }
 
-    private fun visualize(person: Person, bitmap: Bitmap) {
-        var outputBitmap = bitmap
+    private fun visualize(persons: List<Person>, bitmap: Bitmap) {
 
-        if (person.score > MIN_CONFIDENCE) {
-            outputBitmap = VisualizationUtils.drawBodyKeypoints(bitmap, person)
-        }
+        val outputBitmap = VisualizationUtils.drawBodyKeypoints(
+            bitmap,
+            persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
+        )
 
         val holder = surfaceView.holder
         val surfaceCanvas = holder.lockCanvas()
