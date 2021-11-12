@@ -18,6 +18,7 @@ package org.tensorflow.lite.examples.poseestimation.ml
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.PointF
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -88,8 +89,25 @@ object EvaluationUtils {
         return data
     }
 
-
+    /**
+     * Calculate the distance between two points
+     */
     private fun distance(point1: PointF, point2: PointF): Float {
         return ((point1.x - point2.x).pow(2) + (point1.y - point2.y).pow(2)).pow(0.5f)
+    }
+
+    /**
+     * Concatenate images of same height horizontally
+     */
+    fun hConcat(image1: Bitmap, image2: Bitmap): Bitmap {
+        if (image1.height != image2.height) {
+            throw Exception("Input images are not same height.")
+        }
+        val finalBitmap =
+            Bitmap.createBitmap(image1.width + image2.width, image1.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(finalBitmap)
+        canvas.drawBitmap(image1, 0f, 0f, null)
+        canvas.drawBitmap(image2, image1.width.toFloat(), 0f, null)
+        return finalBitmap
     }
 }
