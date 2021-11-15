@@ -1,0 +1,92 @@
+"""Classification-by-Retrieval Workspace"""
+
+workspace(name = "org_tensorflow_lite_examples_classificationbyretrieval")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
+# TFLite Support
+http_archive(
+    name = "org_tensorflow_lite_support",
+    strip_prefix = "tflite-support-f5dadc83b36d863700f080ca45877f8b3b3d7f47",
+    sha256 = "c07c1e54eced03d568168f03ecb3cde34c6f8b8fad7d29d2b09c39c14d2f0899",
+    urls = ["https://github.com/tensorflow/tflite-support/archive/f5dadc83b36d863700f080ca45877f8b3b3d7f47.zip"],
+)
+
+# TFLite Support dependencies.
+http_archive(
+    name = "com_google_glog",
+    sha256 = "1ee310e5d0a19b9d584a855000434bb724aa744745d5b8ab1855c85bff8a8e21",
+    strip_prefix = "glog-028d37889a1e80e8a07da1b8945ac706259e5fd8",
+    urls = [
+        "https://mirror.bazel.build/github.com/google/glog/archive/028d37889a1e80e8a07da1b8945ac706259e5fd8.tar.gz",
+        "https://github.com/google/glog/archive/028d37889a1e80e8a07da1b8945ac706259e5fd8.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "zlib",
+    build_file = "@org_tensorflow_lite_support//third_party:zlib.BUILD",
+    sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+    strip_prefix = "zlib-1.2.11",
+    urls = [
+        "http://mirror.bazel.build/zlib.net/fossils/zlib-1.2.11.tar.gz",
+        "http://zlib.net/fossils/zlib-1.2.11.tar.gz",  # 2017-01-15
+    ],
+)
+
+http_archive(
+    name = "org_libzip",
+    build_file = "@org_tensorflow_lite_support//third_party:libzip.BUILD",
+    sha256 = "a5d22f0c87a2625450eaa5e10db18b8ee4ef17042102d04c62e311993a2ba363",
+    strip_prefix = "libzip-rel-1-5-1",
+    urls = [
+        # Bazel does not like the official download link at libzip.org,
+        # so use the GitHub release tag.
+        "https://mirror.bazel.build/github.com/nih-at/libzip/archive/rel-1-5-1.zip",
+        "https://github.com/nih-at/libzip/archive/rel-1-5-1.zip",
+    ],
+)
+
+http_archive(
+    name = "libyuv",
+    urls = ["https://chromium.googlesource.com/libyuv/libyuv/+archive/39240f7149cffde62e3620344d222c8ab2c21178.tar.gz"],
+    # Adding the constrain of sha256 and strip_prefix will cause failure as of
+    # Jan 2021. It seems that the downloaded libyuv was different every time,
+    # so that the specified sha256 and strip_prefix cannot match.
+    # sha256 = "01c2e30eb8e83880f9ba382f6bece9c38cd5b07f9cadae46ef1d5a69e07fafaf",
+    # strip_prefix = "libyuv-39240f7149cffde62e3620344d222c8ab2c21178",
+    build_file = "@org_tensorflow_lite_support//third_party:libyuv.BUILD",
+)
+
+http_archive(
+    name = "com_google_absl",
+    strip_prefix = "abseil-cpp-20210324.2",
+    sha256 = "59b862f50e710277f8ede96f083a5bb8d7c9595376146838b9580be90374ee1f",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/20210324.2.tar.gz"],
+)
+
+# TF on 2021-09-29.
+http_archive(
+    name = "org_tensorflow",
+    strip_prefix = "tensorflow-a221f72e69fea7a46977e35961e5cdb1e51fec36",
+    sha256 = "d0e57bcf455df772cfdf65fdf59a94dfef7547c6aafd50b382dab3a182b0c5b3",
+    urls = ["https://github.com/tensorflow/tensorflow/archive/a221f72e69fea7a46977e35961e5cdb1e51fec36.tar.gz"],
+)
+
+# Set up TF.
+load("@org_tensorflow//tensorflow:workspace3.bzl", "tf_workspace3")
+tf_workspace3()
+load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+tf_workspace2()
+load("@org_tensorflow//tensorflow:workspace1.bzl", "tf_workspace1")
+tf_workspace1()
+load("@org_tensorflow//tensorflow:workspace0.bzl", "tf_workspace0")
+tf_workspace0()
+
+# Download the model file.
+http_file(
+    name = "imagenet-mobilenet_v3_small_100_224-feature_vector",
+    downloaded_file_path = "imagenet-mobilenet_v3_small_100_224-feature_vector.tflite",
+    sha256 = "383220188d049b60b044da89b1a1e9eacb676c63562867875aceaf6885a8c761",
+    urls = ["https://tfhub.dev/google/lite-model/imagenet/mobilenet_v3_small_100_224/feature_vector/5/metadata/1?lite-format=tflite"],
+)

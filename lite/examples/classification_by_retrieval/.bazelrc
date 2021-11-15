@@ -1,0 +1,170 @@
+# Align with TensorFlow .bazelrc to build from the source.
+# Please refer to TensorFlow .bazelrc for more details:
+# https://github.com/tensorflow/tensorflow/blob/master/.bazelrc
+
+# Android configs. Bazel needs to have --cpu and --fat_apk_cpu both set to the
+# target CPU to build transient dependencies correctly. See
+# https://docs.bazel.build/versions/master/user-manual.html#flag--fat_apk_cpu
+build:android --crosstool_top=//external:android/crosstool
+build:android --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+build:android_arm --config=android
+build:android_arm --cpu=armeabi-v7a
+build:android_arm --fat_apk_cpu=armeabi-v7a
+build:android_arm64 --config=android
+build:android_arm64 --cpu=arm64-v8a
+build:android_arm64 --fat_apk_cpu=arm64-v8a
+build:android_x86 --config=android
+build:android_x86 --cpu=x86
+build:android_x86 --fat_apk_cpu=x86
+build:android_x86_64 --config=android
+build:android_x86_64 --cpu=x86_64
+build:android_x86_64 --fat_apk_cpu=x86_64
+
+# Sets the default Apple platform to macOS.
+build --apple_platform_type=macos
+
+# iOS configs for each architecture and the fat binary builds.
+build:ios --apple_platform_type=ios
+build:ios --apple_bitcode=embedded --copt=-fembed-bitcode
+build:ios_armv7 --config=ios
+build:ios_armv7 --cpu=ios_armv7
+build:ios_armv7 --cops -Wno-c++11-narrowing
+build:ios_arm64 --config=ios
+build:ios_arm64 --cpu=ios_arm64
+build:ios_x86_64 --config=ios
+build:ios_x86_64 --cpu=ios_x86_64
+build:ios_fat --config=ios
+build:ios_fat --ios_multi_cpus=armv7,arm64
+build:ios_fat --copt -Wno-c++11-narrowing
+
+# BEGIN OF REMOTE BUILD EXECUTION OPTIONS
+# Options when using remote execution
+# WARNING: THESE OPTIONS WONT WORK IF YOU DO NOT HAVE PROPER AUTHENTICATION AND PERMISSIONS
+# Flag to enable remote config
+common --experimental_repo_remote_exec
+
+# Config to use a mostly-static build and disable modular op registration
+# support (this will revert to loading TensorFlow with RTLD_GLOBAL in Python).
+# By default, TensorFlow will build with a dependence on
+# //tensorflow:libtensorflow_framework.so.
+build:monolithic --define framework_shared_object=false
+
+# Flags for open source build, always set to be true.
+build --define open_source_build=true
+test --define open_source_build=true
+
+# Flags for fat_apk_cpu build, always set to multiple cpus.
+build --fat_apk_cpu=x86,x86_64,arm64-v8a,armeabi-v7a
+test --fat_apk_cpu=x86,x86_64,arm64-v8a,armeabi-v7a
+
+# Other build flags.
+build --define=grpc_no_ares=true
+
+# See https://github.com/bazelbuild/bazel/issues/7362 for information on what
+# --incompatible_remove_legacy_whole_archive flag does.
+# This flag is set to true in Bazel 1.0 and newer versions. We tried to migrate
+# Tensorflow to the default, however test coverage wasn't enough to catch the
+# errors.
+# There is ongoing work on Bazel team's side to provide support for transitive
+# shared libraries. As part of migrating to transitive shared libraries, we
+# hope to provide a better mechanism for control over symbol exporting, and
+# then tackle this issue again.
+#
+# TODO: Remove this line once TF doesn't depend on Bazel wrapping all library
+# archives in -whole_archive -no_whole_archive.
+build --noincompatible_remove_legacy_whole_archive
+
+# These are bazel 2.0's incompatible flags. Tensorflow needs to use bazel 2.0.0
+# to use cc_shared_library, as part of the Tensorflow Build Improvements RFC:
+# https://github.com/tensorflow/community/pull/179
+build --noincompatible_prohibit_aapt1
+
+# Modular TF build options
+build:dynamic_kernels --define=dynamic_loaded_kernels=true
+build:dynamic_kernels --copt=-DAUTOLOAD_DYNAMIC_KERNELS
+
+# Build TF with C++ 17 features.
+build:c++17 --cxxopt=-std=c++1z
+build:c++17 --cxxopt=-stdlib=libc++
+build:c++1z --config=c++17
+
+# Enable using platform specific build settings
+build --enable_platform_specific_config
+
+# Suppress C++ compiler warnings, otherwise build logs become 10s of MBs.
+build:linux --copt=-w
+build:macos --copt=-w
+build:windows --copt=/w
+
+# Tensorflow uses M_* math constants that only get defined by MSVC headers if
+# _USE_MATH_DEFINES is defined.
+build:windows --copt=/D_USE_MATH_DEFINES
+build:windows --host_copt=/D_USE_MATH_DEFINES
+
+# Default paths for TF_SYSTEM_LIBS
+build:linux --define=PREFIX=/usr
+build:linux --define=LIBDIR=$(PREFIX)/lib
+build:linux --define=INCLUDEDIR=$(PREFIX)/include
+build:macos --define=PREFIX=/usr
+build:macos --define=LIBDIR=$(PREFIX)/lib
+build:macos --define=INCLUDEDIR=$(PREFIX)/include
+# TF_SYSTEM_LIBS do not work on windows.
+
+# By default, build TF in C++ 14 mode.
+build:linux --cxxopt=-std=c++14
+build:linux --host_cxxopt=-std=c++14
+build:macos --cxxopt=-std=c++14
+build:macos --host_cxxopt=-std=c++14
+build:windows --cxxopt=/std:c++14
+build:windows --host_cxxopt=/std:c++14
+
+# On windows, we still link everything into a single DLL.
+build:windows --config=monolithic
+
+# On linux, we dynamically link small amount of kernels
+build:linux --config=dynamic_kernels
+
+# Make sure to include as little of windows.h as possible
+build:windows --copt=-DWIN32_LEAN_AND_MEAN
+build:windows --host_copt=-DWIN32_LEAN_AND_MEAN
+build:windows --copt=-DNOGDI
+build:windows --host_copt=-DNOGDI
+
+# Misc build options we need for windows.
+build:windows --linkopt=/DEBUG
+build:windows --host_linkopt=/DEBUG
+build:windows --linkopt=/OPT:REF
+build:windows --host_linkopt=/OPT:REF
+build:windows --linkopt=/OPT:ICF
+build:windows --host_linkopt=/OPT:ICF
+build:windows --experimental_strict_action_env=true
+
+# Verbose failure logs when something goes wrong
+build:windows --verbose_failures
+
+# On windows, we never cross compile
+build:windows --distinct_host_configuration=false
+
+# Suppress all warning messages.
+build:short_logs --output_filter=DONT_MATCH_ANYTHING
+
+# Instruction set optimizations
+# TODO(gunan): Create a feature in toolchains for avx/avx2 to
+#   avoid having to define linux/win separately.
+build:avx_linux --copt=-mavx
+build:avx2_linux --copt=-mavx2
+build:native_arch_linux --copt=-march=native
+build:avx_win --copt=/arch=AVX
+build:avx2_win --copt=/arch=AVX2
+
+# Options to build TensorFlow 1.x or 2.x.
+build:v1 --define=tf_api_version=1
+build:v2 --define=tf_api_version=2
+build:v1 --action_env=TF2_BEHAVIOR=0
+build:v2 --action_env=TF2_BEHAVIOR=1
+build --config=v2
+test --config=v2
+
+# Enable XLA
+build:xla --action_env=TF_ENABLE_XLA=1
+build:xla --define=with_xla_support=true
