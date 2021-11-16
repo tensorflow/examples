@@ -16,14 +16,22 @@ limitations under the License.
 package org.tensorflow.lite.examples.detection.tflite;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.media.Image;
+
+import static java.lang.Math.min;
+
 import android.os.Trace;
+
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.task.core.vision.ImageProcessingOptions;
 import org.tensorflow.lite.task.vision.detector.Detection;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector.ObjectDetectorOptions;
@@ -45,19 +53,26 @@ import org.tensorflow.lite.task.vision.detector.ObjectDetector.ObjectDetectorOpt
  * href="https://www.tensorflow.org/lite/convert/metadata#read_the_metadata_from_models">Read the
  * metadata from models</a>
  */
+
 public class TFLiteObjectDetectionAPIModel implements Detector {
   private static final String TAG = "TFLiteObjectDetectionAPIModelWithTaskApi";
 
-  /** Only return this many results. */
+  /**
+   * Only return this many results.
+   */
   private static final int NUM_DETECTIONS = 10;
 
-  private final MappedByteBuffer modelBuffer;
+  private MappedByteBuffer modelBuffer;
 
-  /** An instance of the driver class to run model inference with Tensorflow Lite. */
+  /**
+   * An instance of the driver class to run model inference with Tensorflow Lite.
+   */
   private ObjectDetector objectDetector;
 
-  /** Builder of the options used to config the ObjectDetector. */
-  private final ObjectDetectorOptions.Builder optionsBuilder;
+  /**
+   * Builder of the options used to config the ObjectDetector.
+   */
+  private ObjectDetectorOptions.Builder optionsBuilder;
 
   /**
    * Initializes a native TensorFlow session for classifying images.
@@ -68,16 +83,15 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
    *
    * @param modelFilename The model file path relative to the assets folder
    * @param labelFilename The label file path relative to the assets folder
-   * @param inputSize The size of image input
-   * @param isQuantized Boolean representing model is quantized or not
+   * @param inputSize     The size of image input
+   * @param isQuantized   Boolean representing model is quantized or not
    */
   public static Detector create(
       final Context context,
       final String modelFilename,
       final String labelFilename,
       final int inputSize,
-      final boolean isQuantized)
-      throws IOException {
+      final boolean isQuantized) throws IOException {
     return new TFLiteObjectDetectionAPIModel(context, modelFilename);
   }
 
@@ -88,10 +102,29 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   }
 
   @Override
-  public List<Recognition> recognizeImage(final Bitmap bitmap) {
+  public List<Recognition> recognizeImage(final Image image, int sensorOrientation) {
     // Log this method so that it can be analyzed with systrace.
     Trace.beginSection("recognizeImage");
-    List<Detection> results = objectDetector.detect(TensorImage.fromBitmap(bitmap));
+    TensorImage inputImage = new TensorImage();
+    inputImage.load(image);
+    int width = image.getWidth();
+    int height = image.getHeight();
+    int cropSize = min(width, height);
+
+    ImageProcessingOptions imageOptions =
+        ImageProcessingOptions.builder()
+            .setOrientation(getOrientation(sensorOrientation))
+            // Set the ROI to the center of the image.
+            .setRoi(
+                new Rect(
+                    /*left=*/ (width - cropSize) / 2,
+                    /*top=*/ (height - cropSize) / 2,
+                    /*right=*/ (width + cropSize) / 2,
+                    /*bottom=*/ (height + cropSize) / 2))
+            .build();
+
+    List<Detection> results = objectDetector.detect(inputImage, imageOptions);
+
 
     // Converts a list of {@link Detection} objects into a list of {@link Recognition} objects
     // to match the interface of other inference method, such as using the <a
@@ -111,8 +144,34 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
     return recognitions;
   }
 
+  /**
+   * See http://jpegclub.org/exif_orientation.html for info
+   *
+   * @param cameraOrientation which is the degrees of the Image CameraX is providing
+   * @return orientation to be used with ImageProcessingOptions
+   */
+  private static ImageProcessingOptions.Orientation getOrientation(int cameraOrientation) {
+    ImageProcessingOptions.Orientation orientation;
+    switch (cameraOrientation / 90) {
+      case 1:
+        orientation = ImageProcessingOptions.Orientation.LEFT_TOP;
+        break;
+      case 2:
+        orientation = ImageProcessingOptions.Orientation.BOTTOM_LEFT;
+        break;
+      case 3:
+        orientation = ImageProcessingOptions.Orientation.RIGHT_BOTTOM;
+        break;
+      default:
+        orientation = ImageProcessingOptions.Orientation.TOP_RIGHT;
+    }
+
+    return orientation;
+  }
+
   @Override
-  public void enableStatLogging(final boolean logStats) {}
+  public void enableStatLogging(final boolean logStats) {
+  }
 
   @Override
   public String getStatString() {
@@ -144,5 +203,56 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   private void recreateDetector() {
     objectDetector.close();
     objectDetector = ObjectDetector.createFromBufferAndOptions(modelBuffer, optionsBuilder.build());
+
+  }
+
+  public static Matrix getTransformationMatrix(
+      final int srcWidth,
+      final int srcHeight,
+      final int dstWidth,
+      final int dstHeight,
+      final int applyRotation,
+      final boolean maintainAspectRatio) {
+    final Matrix matrix = new Matrix();
+
+    // Translate so center of image is at origin.
+    matrix.postTranslate(-srcWidth / 2f, -srcHeight / 2f);
+
+    if (applyRotation != 0) {
+      // Rotate around origin.
+      matrix.postRotate(applyRotation);
+    }
+
+    // Account for the already applied rotation, if any, and then determine how
+    // much scaling is needed for each axis.
+    final boolean transpose = (Math.abs(applyRotation) + 90) % 180 == 0;
+
+    final int inWidth = transpose ? srcHeight : srcWidth;
+    final int inHeight = transpose ? srcWidth : srcHeight;
+
+    // Apply scaling if necessary.
+    if (inWidth != dstWidth || inHeight != dstHeight) {
+      final float scaleFactorX = dstWidth / (float) inWidth;
+      final float scaleFactorY = dstHeight / (float) inHeight;
+
+      if (maintainAspectRatio) {
+        // Scale by minimum factor so that dst is filled completely while
+        // maintaining the aspect ratio. Some image may fall off the edge.
+        final float scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+        matrix.postScale(scaleFactor, scaleFactor);
+      } else {
+        // Scale exactly to fill dst from src.
+        matrix.postScale(scaleFactorX, scaleFactorY);
+      }
+    }
+
+    // Translate back from origin centered reference to destination frame.
+    if (applyRotation == 90) {
+      matrix.postTranslate(dstWidth / 3f, dstHeight / 2f);
+    } else if (applyRotation == 0 || applyRotation == 180) {
+      matrix.postTranslate(dstWidth / 2f, dstHeight / 3f);
+    }
+
+    return matrix;
   }
 }

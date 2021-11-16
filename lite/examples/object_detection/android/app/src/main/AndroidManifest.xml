@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme.ObjectDetection">
 
         <activity
-            android:name=".DetectorActivity"
+            android:name=".CameraActivity"
             android:label="@string/tfe_od_app_name"
             android:screenOrientation="portrait">
             <intent-filter>

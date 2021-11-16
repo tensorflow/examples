@@ -27,41 +27,46 @@ import android.graphics.RectF;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.TypedValue;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
 import org.tensorflow.lite.examples.detection.env.BorderedText;
-import org.tensorflow.lite.examples.detection.env.ImageUtils;
 import org.tensorflow.lite.examples.detection.env.Logger;
 import org.tensorflow.lite.examples.detection.tflite.Detector.Recognition;
 
-/** A tracker that handles non-max suppression and matches existing objects to new detections. */
+import static org.tensorflow.lite.examples.detection.tflite.TFLiteObjectDetectionAPIModel.getTransformationMatrix;
+
+/**
+ * A tracker that handles non-max suppression and matches existing objects to new detections.
+ */
 public class MultiBoxTracker {
   private static final float TEXT_SIZE_DIP = 18;
   private static final float MIN_SIZE = 16.0f;
   private static final int[] COLORS = {
-    Color.BLUE,
-    Color.RED,
-    Color.GREEN,
-    Color.YELLOW,
-    Color.CYAN,
-    Color.MAGENTA,
-    Color.WHITE,
-    Color.parseColor("#55FF55"),
-    Color.parseColor("#FFA500"),
-    Color.parseColor("#FF8888"),
-    Color.parseColor("#AAAAFF"),
-    Color.parseColor("#FFFFAA"),
-    Color.parseColor("#55AAAA"),
-    Color.parseColor("#AA33AA"),
-    Color.parseColor("#0D0068")
+      Color.BLUE,
+      Color.RED,
+      Color.GREEN,
+      Color.YELLOW,
+      Color.CYAN,
+      Color.MAGENTA,
+      Color.WHITE,
+      Color.parseColor("#55FF55"),
+      Color.parseColor("#FFA500"),
+      Color.parseColor("#FF8888"),
+      Color.parseColor("#AAAAFF"),
+      Color.parseColor("#FFFFAA"),
+      Color.parseColor("#55AAAA"),
+      Color.parseColor("#AA33AA"),
+      Color.parseColor("#0D0068")
   };
   final List<Pair<Float, RectF>> screenRects = new LinkedList<Pair<Float, RectF>>();
   private final Logger logger = new Logger();
   private final Queue<Integer> availableColors = new LinkedList<Integer>();
   private final List<TrackedRecognition> trackedObjects = new LinkedList<TrackedRecognition>();
   private final Paint boxPaint = new Paint();
-  private final float textSizePx;
+  private final float textSize;
   private final BorderedText borderedText;
   private Matrix frameToCanvasMatrix;
   private int frameWidth;
@@ -80,16 +85,17 @@ public class MultiBoxTracker {
     boxPaint.setStrokeJoin(Join.ROUND);
     boxPaint.setStrokeMiter(100);
 
-    textSizePx =
+    textSize =
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.getResources().getDisplayMetrics());
-    borderedText = new BorderedText(textSizePx);
+    borderedText = new BorderedText(textSize);
   }
 
   public synchronized void setFrameConfiguration(
       final int width, final int height, final int sensorOrientation) {
     frameWidth = width;
     frameHeight = height;
+    logger.i("Frame Height %d Frame Width %d Sensor Orientation %d", frameHeight, frameWidth, sensorOrientation);
     this.sensorOrientation = sensorOrientation;
   }
 
@@ -123,17 +129,16 @@ public class MultiBoxTracker {
   public synchronized void draw(final Canvas canvas) {
     final boolean rotated = sensorOrientation % 180 == 90;
     final float multiplier =
-        Math.min(
-            canvas.getHeight() / (float) (rotated ? frameWidth : frameHeight),
+        Math.max(
+            canvas.getHeight() / (float) (rotated ? frameWidth : frameHeight), //min -> max
             canvas.getWidth() / (float) (rotated ? frameHeight : frameWidth));
-    frameToCanvasMatrix =
-        ImageUtils.getTransformationMatrix(
-            frameWidth,
-            frameHeight,
-            (int) (multiplier * (rotated ? frameHeight : frameWidth)),
-            (int) (multiplier * (rotated ? frameWidth : frameHeight)),
-            sensorOrientation,
-            false);
+    frameToCanvasMatrix = getTransformationMatrix(
+        frameWidth,
+        frameHeight,
+        (int) (multiplier * (rotated ? frameHeight : frameWidth)),
+        (int) (multiplier * (rotated ? frameWidth : frameHeight)),
+        sensorOrientation,
+        true);
     for (final TrackedRecognition recognition : trackedObjects) {
       final RectF trackedPos = new RectF(recognition.location);
 
@@ -147,8 +152,6 @@ public class MultiBoxTracker {
           !TextUtils.isEmpty(recognition.title)
               ? String.format("%s %.2f", recognition.title, (100 * recognition.detectionConfidence))
               : String.format("%.2f", (100 * recognition.detectionConfidence));
-      //            borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.top,
-      // labelString);
       borderedText.drawText(
           canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
     }

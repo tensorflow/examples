@@ -13,16 +13,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package org.tensorflow.lite.examples.detection.customview;
+package org.tensorflow.lite.examples.detection.tracking;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
+
 import java.util.LinkedList;
 import java.util.List;
 
-/** A simple View providing a render callback to other classes. */
+/**
+ * A simple View providing a render callback to other classes.
+ */
 public class OverlayView extends View {
   private final List<DrawCallback> callbacks = new LinkedList<DrawCallback>();
 
@@ -41,7 +44,9 @@ public class OverlayView extends View {
     }
   }
 
-  /** Interface defining the callback for client classes. */
+  /**
+   * Interface defining the callback for client classes.
+   */
   public interface DrawCallback {
     public void drawCallback(final Canvas canvas);
   }
