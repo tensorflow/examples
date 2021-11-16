@@ -39,11 +39,8 @@ retrieval layers baked into it.
 With the CbR technology, one can easily create a TensorFlow classification model
 without any training.
 
-<img src="docs/images/conventional-approaches.svg" alt="Conventional Approaches"
-     style="background-color:white; background-blend-mode: multiply;">
-<img src="docs/images/classification-by-retrieval.svg"
-     alt="Classification-by-Retrieval"
-     style="background-color:white; background-blend-mode: multiply;">
+![Conventional Approaches](docs/images/conventional-approaches.svg)
+![Classification-by-Retrieval](docs/images/classification-by-retrieval.svg)
 
 ## How do the retrieval layers work?
 
