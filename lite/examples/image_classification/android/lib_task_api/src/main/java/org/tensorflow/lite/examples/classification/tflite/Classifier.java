@@ -28,11 +28,11 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import org.tensorflow.lite.examples.classification.tflite.Classifier.Device;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.label.Category;
 import org.tensorflow.lite.support.metadata.MetadataExtractor;
+import org.tensorflow.lite.task.core.BaseOptions;
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions;
 import org.tensorflow.lite.task.core.vision.ImageProcessingOptions.Orientation;
 import org.tensorflow.lite.task.vision.classifier.Classifications;
@@ -165,17 +165,23 @@ public abstract class Classifier {
 
   /** Initializes a {@code Classifier}. */
   protected Classifier(Activity activity, Device device, int numThreads) throws IOException {
-    if (device != Device.CPU) {
-      throw new IllegalArgumentException(
-          "Manipulating the hardware accelerators is not allowed in the Task"
-              + " library currently. Only CPU is allowed.");
+    BaseOptions.Builder baseOptionsBuilder = BaseOptions.builder();
+    switch (device) {
+      case GPU:
+        baseOptionsBuilder.useGpu();
+        break;
+      case NNAPI:
+        baseOptionsBuilder.useNnapi();
+        break;
+      default:
+        break;
     }
 
     // Create the ImageClassifier instance.
     ImageClassifierOptions options =
         ImageClassifierOptions.builder()
+            .setBaseOptions(baseOptionsBuilder.setNumThreads(numThreads).build())
             .setMaxResults(MAX_RESULTS)
-            .setNumThreads(numThreads)
             .build();
     imageClassifier = ImageClassifier.createFromFileAndOptions(activity, getModelPath(), options);
     Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");

@@ -85,7 +85,7 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
-    implementation 'org.tensorflow:tensorflow-lite-task-audio:0.2.0'
+    implementation 'org.tensorflow:tensorflow-lite-task-audio:0.3.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

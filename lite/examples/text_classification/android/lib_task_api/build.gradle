@@ -36,7 +36,7 @@ project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
 apply from:'download_model.gradle'
 
 dependencies {
-    implementation 'org.tensorflow:tensorflow-lite-task-text:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-task-text:0.3.0'
     implementation 'org.jetbrains:annotations:15.0'
 
     testImplementation 'androidx.test:core:1.2.0'

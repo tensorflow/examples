@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.image.TensorImage;
+import org.tensorflow.lite.task.core.BaseOptions;
 import org.tensorflow.lite.task.vision.detector.Detection;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector;
 import org.tensorflow.lite.task.vision.detector.ObjectDetector.ObjectDetectorOptions;
@@ -129,16 +130,17 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
   @Override
   public void setNumThreads(int numThreads) {
     if (objectDetector != null) {
-      optionsBuilder.setNumThreads(numThreads);
+      optionsBuilder.setBaseOptions(BaseOptions.builder().setNumThreads(numThreads).build());
       recreateDetector();
     }
   }
 
   @Override
   public void setUseNNAPI(boolean isChecked) {
-    throw new UnsupportedOperationException(
-        "Manipulating the hardware accelerators is not allowed in the Task"
-            + " library currently. Only CPU is allowed.");
+    if (objectDetector != null) {
+      optionsBuilder.setBaseOptions(BaseOptions.builder().useNnapi().build());
+      recreateDetector();
+    }
   }
 
   private void recreateDetector() {

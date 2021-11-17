@@ -24,25 +24,23 @@ import android.os.SystemClock
 import android.util.Log
 import kotlin.collections.HashMap
 import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.task.core.BaseOptions
 import org.tensorflow.lite.task.vision.segmenter.ImageSegmenter
+import org.tensorflow.lite.task.vision.segmenter.ImageSegmenter.ImageSegmenterOptions
 import org.tensorflow.lite.task.vision.segmenter.Segmentation
 
 /**
- * Class responsible to run the Image Segmentation model.
- * more information about the DeepLab model being used can
- * be found here:
+ * Class responsible to run the Image Segmentation model. more information about the DeepLab model
+ * being used can be found here:
  * https://ai.googleblog.com/2018/03/semantic-image-segmentation-with.html
  * https://www.tensorflow.org/lite/models/segmentation/overview
  * https://github.com/tensorflow/models/tree/master/research/deeplab
  *
- * Label names: 'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
- * 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
- * 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tv'
+ * Label names: 'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat',
+ * 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
+ * 'sofa', 'train', 'tv'
  */
-class ImageSegmentationModelExecutor(
-  context: Context,
-  private var useGPU: Boolean = false
-) {
+class ImageSegmentationModelExecutor(context: Context, private var useGPU: Boolean = false) {
 
   private val imageSegmenter: ImageSegmenter
 
@@ -51,11 +49,16 @@ class ImageSegmentationModelExecutor(
   private var maskFlatteningTime = 0L
 
   init {
+    val baseOptionsBuilder = BaseOptions.builder()
     if (useGPU) {
-      throw IllegalArgumentException("ImageSegmenter does not support GPU currently, but CPU.")
-    } else {
-      imageSegmenter = ImageSegmenter.createFromFile(context, IMAGE_SEGMENTATION_MODEL)
+      baseOptionsBuilder.useGpu()
     }
+    val options =
+      ImageSegmenterOptions.builder()
+        .setBaseOptions(baseOptionsBuilder.setNumThreads(NUM_THREADS).build())
+        .build()
+    imageSegmenter =
+      ImageSegmenter.createFromFileAndOptions(context, IMAGE_SEGMENTATION_MODEL, options)
   }
 
   fun execute(inputImage: Bitmap): ModelExecutionResult {
@@ -69,10 +72,8 @@ class ImageSegmentationModelExecutor(
       Log.d(TAG, "Time to run the ImageSegmenter $imageSegmentationTime")
 
       maskFlatteningTime = SystemClock.uptimeMillis()
-      val (maskBitmap, itemsFound) = createMaskBitmapAndLabels(
-        results.get(0), inputImage.getWidth(),
-        inputImage.getHeight()
-      )
+      val (maskBitmap, itemsFound) =
+        createMaskBitmapAndLabels(results.get(0), inputImage.getWidth(), inputImage.getHeight())
       maskFlatteningTime = SystemClock.uptimeMillis() - maskFlatteningTime
       Log.d(TAG, "Time to create the mask and labels $maskFlatteningTime")
 
@@ -129,10 +130,13 @@ class ImageSegmentationModelExecutor(
       pixels[i] = color
       itemsFound.put(coloredLabels.get(maskArray[i].toInt()).getlabel(), color)
     }
-    val maskBitmap = Bitmap.createBitmap(
-      pixels, maskTensor.getWidth(), maskTensor.getHeight(),
-      Bitmap.Config.ARGB_8888
-    )
+    val maskBitmap =
+      Bitmap.createBitmap(
+        pixels,
+        maskTensor.getWidth(),
+        maskTensor.getHeight(),
+        Bitmap.Config.ARGB_8888
+      )
     // Scale the maskBitmap to the same size as the input image.
     return Pair(Bitmap.createScaledBitmap(maskBitmap, inputWidth, inputHeight, true), itemsFound)
   }
