@@ -199,12 +199,10 @@ int AddQuantizedRetrievalBlock(flatbuffers::FlatBufferBuilder* fb_builder,
           .Union());
 
   // Add a float retrieval result tensor.
-  // BEGIN GOOGLE-INTERNAL
-  // TODO(187715553): this is a temporary solution. Converting the result back
-  // to FLOAT32 is not an optimal solution, but we do that because the
-  // aggregation block and the final output does not support INT8. We will need
-  // to find a better way to support INT8 in the later stage.
-  // END GOOGLE-INTERNAL
+  // TODO: this is a temporary solution. Converting the result back to FLOAT32
+  // is not an optimal solution, but we do that because the aggregation block
+  // and the final output does not support INT8. We will need to find a better
+  // way to support INT8 in the later stage.
   const int32_t instances_tensor_index = tflite_builder->AddTensor(
       output_tensor_name, tflite::TensorType_FLOAT32, {1, num_instances});
 
