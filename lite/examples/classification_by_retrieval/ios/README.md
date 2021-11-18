@@ -10,7 +10,7 @@ of a small sample of user-provided images.
 These instructions walk you through building and running the demo on an iOS
 device.
 
-| ![Demo of the iOS app](https://storage.googleapis.com/download.tensorflow.org/models/tflite_support/files/ios_app.gif) |
+| ![Demo of the iOS app](https://user-images.githubusercontent.com/197492/142282646-679b960c-e10d-4570-85e3-ba479225ee29.gif) |
 | ------ |
 
 ## Requirements
