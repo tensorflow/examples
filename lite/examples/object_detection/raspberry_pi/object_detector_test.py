@@ -19,7 +19,7 @@ import unittest
 import cv2
 import object_detector as od
 
-_MODEL_FILE = 'coco_efficientdet_lite0_v1_1.0_quant_2021_09_06.tflite'
+_MODEL_FILE = 'efficientdet_lite0.tflite'
 _GROUND_TRUTH_FILE = 'test_data/table_results.csv'
 _IMAGE_FILE = 'test_data/table.jpg'
 _BBOX_IOU_THRESHOLD = 0.9
