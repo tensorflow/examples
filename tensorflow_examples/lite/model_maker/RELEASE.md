@@ -1,5 +1,10 @@
 # Release 0.3
 
+## 0.3.4
+
+*   Minor fix: remove tensorflow-estimator version requirements to avoid the
+    incompatible version error message during pip installation.
+
 ## 0.3.3
 
 *   Minor fix: update tensorflow==2.6 and fix the failure of `evaluate_tflite`
