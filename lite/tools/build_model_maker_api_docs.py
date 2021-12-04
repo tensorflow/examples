@@ -97,7 +97,14 @@ def main(_):
   doc_generator = generate_lib.DocGenerator(
       root_title='TensorFlow Lite Model Maker',
       py_modules=[('tflite_model_maker', tflite_model_maker)],
-      code_url_prefix=FLAGS.code_url_prefix,
+      base_dir=[
+          pathlib.Path(tflite_model_maker.__file__).parent,
+          pathlib.Path(tensorflow_examples.__file__).parent,
+      ],
+      code_url_prefix=[
+          FLAGS.code_url_prefix,
+          'https://github.com/tensorflow/examples/blob/master/tensorflow_examples/'
+      ],
       search_hints=FLAGS.search_hints,
       site_path=FLAGS.site_path,
       callbacks=[
