@@ -1,4 +1,0 @@
-# Python packages required for classify_picamera.py
-numpy
-picamera
-Pillow

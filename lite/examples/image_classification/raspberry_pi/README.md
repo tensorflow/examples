@@ -1,14 +1,11 @@
-# TensorFlow Lite Python classification example with Pi Camera
+# TensorFlow Lite Python image classification example with Raspberry Pi.
 
 This example uses [TensorFlow Lite](https://tensorflow.org/lite) with Python
 on a Raspberry Pi to perform real-time image classification using images
-streamed from the Pi Camera.
+streamed from the camera.
 
-Although the TensorFlow model and nearly all the code in here can work with
-other hardware, the code in `classify_picamera.py` uses the [`picamera`](
-https://picamera.readthedocs.io/en/latest/) API to capture images from the Pi
-Camera. So you can modify those parts of the code if you want to use a different
-camera input.
+At the end of this page, there are extra steps to accelerate the example using
+the Coral USB Accelerator, which increases the inference speed by ~10x.
 
 
 ## Set up your hardware
@@ -18,7 +15,8 @@ https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up) with
 Raspberry Pi OS (preferably updated to Buster).
 
 You also need to [connect and configure the Pi Camera](
-https://www.raspberrypi.org/documentation/configuration/camera.md).
+https://www.raspberrypi.org/documentation/configuration/camera.md) if you use
+the Pi Camera. This code also works with USB camera connect to the Raspberry Pi.
 
 And to see the results from the camera, you need a monitor connected
 to the Raspberry Pi. It's okay if you're using SSH to access the Pi shell
@@ -34,8 +32,12 @@ much smaller `tflite_runtime` package.
 
 To install this on your Raspberry Pi, follow the instructions in the
 [Python quickstart](https://www.tensorflow.org/lite/guide/python#install_tensorflow_lite_for_python).
-Return here after you perform the `apt-get install` command.
 
+You can install the TFLite runtime using this script.
+
+```
+sh setup.sh
+```
 
 ## Download the example files
 
@@ -46,32 +48,37 @@ git clone https://github.com/tensorflow/examples --depth 1
 ```
 
 Then use our script to install a couple Python packages, and
-download the MobileNet model and labels file:
+download the TFLite model:
 
 ```
 cd examples/lite/examples/image_classification/raspberry_pi
 
-# The script takes an argument specifying where you want to save the model files
-bash download.sh /tmp
+# Run this script to install the required dependencies and download the TFLite models.
+sh setup.sh
 ```
-
 
 ## Run the example
 
 ```
-python3 classify_picamera.py \
-  --model /tmp/mobilenet_v1_1.0_224_quant.tflite \
-  --labels /tmp/labels_mobilenet_quant_v1_224.txt
+python3 classify.py
 ```
+*   You can optionally specify the `model` parameter to set the TensorFlow Lite
+    model to be used:
+    *   The default value is `efficientnet_lite0.tflite`
+    *   TensorFlow Lite image classification models **with metadatafrom**
+    (including models from [TensorFlow Hub](https://tfhub.dev/tensorflow/collections/lite/task-library/image-classifier/1)
+    or models trained with TensorFlow Lite Model Maker are supported.)
+*   You can optionally specify the `maxResults` parameter to limit the list of
+    classification results:
+    *   Supported value: A positive integer.
+    *   Default value: `3`.
+*   Example usage:
 
-You should see the camera feed appear on the monitor attached to your Raspberry
-Pi. Put some objects in front of the camera, like a coffee mug or keyboard, and
-you'll see the predictions printed. It also prints the amount of time it took
-to perform each inference in milliseconds.
-
-For more information about executing inferences with TensorFlow Lite, read
-[TensorFlow Lite inference](https://www.tensorflow.org/lite/guide/inference).
-
+```
+python3 classify.py \
+  --model efficientnet_lite0.tflite \
+  --maxResults 5
+```
 
 ## Speed up the inferencing time (optional)
 
@@ -81,55 +88,18 @@ https://coral.withgoogle.com/products/accelerator)—a USB accessory that adds
 the [Edge TPU ML accelerator](https://coral.withgoogle.com/docs/edgetpu/faq/)
 to any Linux-based system.
 
-If you have a Coral USB Accelerator, follow these additional steps to
-delegate model execution to the Edge TPU processor:
+If you have a Coral USB Accelerator, you can run the sample with it enabled:
 
 1.  First, be sure you have completed the [USB Accelerator setup instructions](
-    https://coral.withgoogle.com/docs/accelerator/get-started/#set-up-on-linux-or-raspberry-pi).
+    https://coral.withgoogle.com/docs/accelerator/get-started/).
 
-2.  Now open the `classify_picamera.py` file and add the following import at
-    the top:
-
-    ```
-    from tflite_runtime.interpreter import load_delegate
-    ```
-
-    And then find the line that initializes the `Interpreter`, which looks like
-    this:
-
-    ```
-    interpreter = Interpreter(args.model)
-    ```
-
-    And change it to specify the Edge TPU delegate:
-
-    ```
-    interpreter = Interpreter(args.model,
-        experimental_delegates=[load_delegate('libedgetpu.so.1.0')])
-    ```
-
-    The `libedgetpu.so.1.0` file is provided by the Edge TPU library you
-    installed during the USB Accelerator setup in step 1.
-
-3.  Finally, you need a version of the model that's compiled for the Edge TPU.
-
-    Normally, you need to use use the [Edge TPU Compiler](
-    https://coral.withgoogle.com/docs/edgetpu/compiler/) to compile your
-    `.tflite` file. But the compiler tool isn't compatible with Raspberry
-    Pi, so we included a pre-compiled version of the model in the `download.sh`
-    script above.
-
-    So you already have the compiled model you need:
-    `mobilenet_v1_1.0_224_quant_edgetpu.tflite`.
-
-Now you're ready to execute the TensorFlow Lite model on the Edge TPU. Just run
-`classify_picamera.py` again, but be sure you specify the model that's compiled
-for the Edge TPU (it uses the same labels file as before):
+2.  Run the image classification script using the Edge TPU TFLite model and
+    enable the Edge TPU option.
 
 ```
-python3 classify_picamera.py \
-  --model /tmp/mobilenet_v1_1.0_224_quant_edgetpu.tflite \
-  --labels /tmp/labels_mobilenet_quant_v1_224.txt
+python3 classify.py \
+  --model efficientnet_lite0_edgetpu.tflite \
+  --enableEdgeTPU
 ```
 
 You should see significantly faster inference speeds.
@@ -137,3 +107,6 @@ You should see significantly faster inference speeds.
 For more information about creating and running TensorFlow Lite models with
 Coral devices, read [TensorFlow models on the Edge TPU](
 https://coral.withgoogle.com/docs/edgetpu/models-intro/).
+
+For more information about executing inferences with TensorFlow Lite, read
+[TensorFlow Lite inference](https://www.tensorflow.org/lite/guide/inference).
