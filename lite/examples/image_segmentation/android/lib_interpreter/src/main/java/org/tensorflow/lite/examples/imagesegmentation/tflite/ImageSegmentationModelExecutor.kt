@@ -20,8 +20,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.SystemClock
-import androidx.core.graphics.ColorUtils
 import android.util.Log
+import androidx.core.graphics.ColorUtils
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -34,21 +34,17 @@ import org.tensorflow.lite.examples.imagesegmentation.utils.ImageUtils
 import org.tensorflow.lite.gpu.GpuDelegate
 
 /**
- * Class responsible to run the Image Segmentation model.
- * more information about the DeepLab model being used can
- * be found here:
+ * Class responsible to run the Image Segmentation model. more information about the DeepLab model
+ * being used can be found here:
  * https://ai.googleblog.com/2018/03/semantic-image-segmentation-with.html
  * https://www.tensorflow.org/lite/models/segmentation/overview
  * https://github.com/tensorflow/models/tree/master/research/deeplab
  *
- * Label names: 'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
- * 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
- * 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tv'
+ * Label names: 'background', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat',
+ * 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep',
+ * 'sofa', 'train', 'tv'
  */
-class ImageSegmentationModelExecutor(
-  context: Context,
-  private var useGPU: Boolean = false
-) {
+class ImageSegmentationModelExecutor(context: Context, private var useGPU: Boolean = false) {
   private var gpuDelegate: GpuDelegate? = null
 
   private val segmentationMasks: ByteBuffer
@@ -73,20 +69,10 @@ class ImageSegmentationModelExecutor(
       fullTimeExecutionTime = SystemClock.uptimeMillis()
 
       preprocessTime = SystemClock.uptimeMillis()
-      val scaledBitmap =
-        ImageUtils.scaleBitmapAndKeepRatio(
-          data,
-          imageSize, imageSize
-        )
+      val scaledBitmap = ImageUtils.scaleBitmapAndKeepRatio(data, imageSize, imageSize)
 
       val contentArray =
-        ImageUtils.bitmapToByteBuffer(
-          scaledBitmap,
-          imageSize,
-          imageSize,
-          IMAGE_MEAN,
-          IMAGE_STD
-        )
+        ImageUtils.bitmapToByteBuffer(scaledBitmap, imageSize, imageSize, IMAGE_MEAN, IMAGE_STD)
       preprocessTime = SystemClock.uptimeMillis() - preprocessTime
 
       imageSegmentationTime = SystemClock.uptimeMillis()
@@ -97,7 +83,10 @@ class ImageSegmentationModelExecutor(
       maskFlatteningTime = SystemClock.uptimeMillis()
       val (maskImageApplied, maskOnly, itemsFound) =
         convertBytebufferMaskToBitmap(
-          segmentationMasks, imageSize, imageSize, scaledBitmap,
+          segmentationMasks,
+          imageSize,
+          imageSize,
+          scaledBitmap,
           segmentColors
         )
       maskFlatteningTime = SystemClock.uptimeMillis() - maskFlatteningTime
@@ -117,11 +106,7 @@ class ImageSegmentationModelExecutor(
       val exceptionLog = "something went wrong: ${e.message}"
       Log.d(TAG, exceptionLog)
 
-      val emptyBitmap =
-        ImageUtils.createEmptyBitmap(
-          imageSize,
-          imageSize
-        )
+      val emptyBitmap = ImageUtils.createEmptyBitmap(imageSize, imageSize)
       return ModelExecutionResult(
         emptyBitmap,
         emptyBitmap,
@@ -132,7 +117,8 @@ class ImageSegmentationModelExecutor(
     }
   }
 
-  // base: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/java/demo/app/src/main/java/com/example/android/tflitecamerademo/ImageClassifier.java
+  // base:
+  // https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/java/demo/app/src/main/java/com/example/android/tflitecamerademo/ImageClassifier.java
   @Throws(IOException::class)
   private fun loadModelFile(context: Context, modelFile: String): MappedByteBuffer {
     val fileDescriptor = context.assets.openFd(modelFile)
@@ -193,11 +179,7 @@ class ImageSegmentationModelExecutor(
     val maskBitmap = Bitmap.createBitmap(imageWidth, imageHeight, conf)
     val resultBitmap = Bitmap.createBitmap(imageWidth, imageHeight, conf)
     val scaledBackgroundImage =
-      ImageUtils.scaleBitmapAndKeepRatio(
-        backgroundImage,
-        imageWidth,
-        imageHeight
-      )
+      ImageUtils.scaleBitmapAndKeepRatio(backgroundImage, imageWidth, imageHeight)
     val mSegmentBits = Array(imageWidth) { IntArray(imageHeight) }
     val itemsFound = HashMap<String, Int>()
     inputBuffer.rewind()
@@ -208,8 +190,7 @@ class ImageSegmentationModelExecutor(
         mSegmentBits[x][y] = 0
 
         for (c in 0 until NUM_CLASSES) {
-          val value = inputBuffer
-            .getFloat((y * imageWidth * NUM_CLASSES + x * NUM_CLASSES + c) * 4)
+          val value = inputBuffer.getFloat((y * imageWidth * NUM_CLASSES + x * NUM_CLASSES + c) * 4)
           if (c == 0 || value > maxVal) {
             maxVal = value
             mSegmentBits[x][y] = c
@@ -218,10 +199,11 @@ class ImageSegmentationModelExecutor(
         val label = labelsArrays[mSegmentBits[x][y]]
         val color = colors[mSegmentBits[x][y]]
         itemsFound.put(label, color)
-        val newPixelColor = ColorUtils.compositeColors(
-          colors[mSegmentBits[x][y]],
-          scaledBackgroundImage.getPixel(x, y)
-        )
+        val newPixelColor =
+          ColorUtils.compositeColors(
+            colors[mSegmentBits[x][y]],
+            scaledBackgroundImage.getPixel(x, y)
+          )
         resultBitmap.setPixel(x, y, newPixelColor)
         maskBitmap.setPixel(x, y, colors[mSegmentBits[x][y]])
       }
@@ -240,29 +222,43 @@ class ImageSegmentationModelExecutor(
     private const val IMAGE_STD = 127.5f
 
     val segmentColors = IntArray(NUM_CLASSES)
-    val labelsArrays = arrayOf(
-      "background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus",
-      "car", "cat", "chair", "cow", "dining table", "dog", "horse", "motorbike",
-      "person", "potted plant", "sheep", "sofa", "train", "tv"
-    )
+    val labelsArrays =
+      arrayOf(
+        "background",
+        "aeroplane",
+        "bicycle",
+        "bird",
+        "boat",
+        "bottle",
+        "bus",
+        "car",
+        "cat",
+        "chair",
+        "cow",
+        "dining table",
+        "dog",
+        "horse",
+        "motorbike",
+        "person",
+        "potted plant",
+        "sheep",
+        "sofa",
+        "train",
+        "tv"
+      )
 
     init {
 
       val random = Random(System.currentTimeMillis())
       segmentColors[0] = Color.TRANSPARENT
       for (i in 1 until NUM_CLASSES) {
-        segmentColors[i] = Color.argb(
-          (128),
-          getRandomRGBInt(
-            random
-          ),
-          getRandomRGBInt(
-            random
-          ),
-          getRandomRGBInt(
-            random
+        segmentColors[i] =
+          Color.argb(
+            (128),
+            getRandomRGBInt(random),
+            getRandomRGBInt(random),
+            getRandomRGBInt(random)
           )
-        )
       }
     }
 
