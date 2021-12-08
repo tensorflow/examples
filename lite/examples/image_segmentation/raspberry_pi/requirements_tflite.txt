@@ -1,0 +1,2 @@
+--extra-index-url https://google-coral.github.io/py-repo/
+tflite-runtime==2.5.0.post1
