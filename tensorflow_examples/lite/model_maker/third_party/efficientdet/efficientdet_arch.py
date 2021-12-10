@@ -440,10 +440,16 @@ def fuse_features(nodes, weight_method):
     nodes = tf.stack(nodes, axis=-1)
     new_node = tf.reduce_sum(nodes * normalized_weights, -1)
   elif weight_method == 'fastattn':
-    edge_weights = [
-        tf.nn.relu(tf.cast(tf.Variable(1.0, name='WSM'), dtype=dtype))
-        for _ in nodes
-    ]
+    edge_weights = []
+    for i, _ in enumerate(nodes):
+      edge_weights.append(
+          tf.nn.relu(
+              tf.get_variable(
+                  'WSM' if i == 0 else f'WSM_{i}',
+                  shape=[],
+                  initializer=tf.ones_initializer(),
+                  dtype=dtype)))
+
     weights_sum = tf.add_n(edge_weights)
     nodes = [nodes[i] * edge_weights[i] / (weights_sum + 0.0001)
              for i in range(len(nodes))]

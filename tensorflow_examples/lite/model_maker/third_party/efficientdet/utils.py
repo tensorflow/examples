@@ -17,6 +17,7 @@ import contextlib
 import os
 from typing import Text, Tuple, Union
 from absl import logging
+import gin
 import numpy as np
 import tensorflow.compat.v1 as tf
 import tensorflow.compat.v2 as tf2
@@ -266,10 +267,43 @@ def batch_norm_class(is_training, strategy=None):
   else:
     return BatchNormalization
 
+# A cache of variable scope to BatchNorm layer.
+_BN_LAYER_CACHE = {}
 
-def batch_normalization(inputs, training=False, strategy=None, **kwargs):
-  """A wrapper for TpuBatchNormalization."""
-  bn_layer = batch_norm_class(training, strategy)(**kwargs)
+
+@gin.configurable
+def batch_normalization(inputs,
+                        training=False,
+                        strategy=None,
+                        reuse_scope: bool = False,
+                        **kwargs):
+  """A wrapper for TpuBatchNormalization.
+
+  Keras layers are incompatible with automatic tf scope reuse.
+
+  Supports reuse of the exiting variable scope when a model is called multiple
+  times. Otherwise, checkpoint weights would not be restored correctly.
+
+  Args:
+    inputs: Input to BatchNorm layer.
+    training: Argument of Keras BatchNorm layer.
+    strategy: Argument of Keras BatchNorm layer.
+    reuse_scope: Whether to reuse existing layer in same scope.
+    **kwargs: Arguments passed to Keras BatchNorm layer.
+
+  Returns:
+    Result of BatchNorm applied to inputs.
+  """
+  if reuse_scope:
+    scope_name = tf.get_variable_scope().name
+    if scope_name in _BN_LAYER_CACHE:
+      bn_layer = _BN_LAYER_CACHE[scope_name]
+      logging.info('Reusing variable scope %s', scope_name)
+    else:
+      bn_layer = batch_norm_class(training, strategy)(**kwargs)
+      _BN_LAYER_CACHE[scope_name] = bn_layer
+  else:
+    bn_layer = batch_norm_class(training, strategy)(**kwargs)
   return bn_layer(inputs, training=training)
 
 
