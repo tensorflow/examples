@@ -43,6 +43,7 @@ class OverlayView: UIImageView {
 
   /// CGContext to draw the detection result.
   var context: CGContext!
+  var label: UILabel = UILabel()
 
   /// Draw the detected keypoints on top of the input image.
   ///
@@ -73,15 +74,20 @@ class OverlayView: UIImageView {
   /// - Parameters:
   ///     - context: The context to be drawn on.
   ///     - dots: The list of dots to be drawn.
-  private func drawDots(at context: CGContext, dots: [CGPoint]) {
+  private func drawDots(at context: CGContext, dots: [Dot]) {
     for dot in dots {
       let dotRect = CGRect(
-        x: dot.x - Config.dot.radius / 2, y: dot.y - Config.dot.radius / 2,
+        x: dot.position.x - Config.dot.radius / 2, y: dot.position.y - Config.dot.radius / 2,
         width: Config.dot.radius, height: Config.dot.radius)
       let path = CGPath(
         roundedRect: dotRect, cornerWidth: Config.dot.radius, cornerHeight: Config.dot.radius,
         transform: nil)
       context.addPath(path)
+      if (dot.name == .rightShoulder) {
+        let font = UIFont.systemFont(ofSize: 50)
+        let string = NSAttributedString(string: dot.name.rawValue, attributes: [.font: font, .foregroundColor: UIColor.purple])
+        string.draw(at: CGPoint(x: dot.position.x + 25 , y: dot.position.y - 25))
+      }
     }
   }
 
@@ -104,13 +110,14 @@ class OverlayView: UIImageView {
   private func strokes(from person: Person) -> Strokes? {
     var strokes = Strokes(dots: [], lines: [])
     // MARK: Visualization of detection result
-    var bodyPartToDotMap: [BodyPart: CGPoint] = [:]
+    var bodyPartToDotMap: [BodyPart: Dot] = [:]
     for (index, part) in BodyPart.allCases.enumerated() {
       let position = CGPoint(
         x: person.keyPoints[index].coordinate.x,
         y: person.keyPoints[index].coordinate.y)
-      bodyPartToDotMap[part] = position
-      strokes.dots.append(position)
+      let dot = Dot(name: part, position: position)
+      bodyPartToDotMap[part] = dot
+      strokes.dots.append(dot)
     }
 
     do {
@@ -121,7 +128,7 @@ class OverlayView: UIImageView {
         guard let to = bodyPartToDotMap[map.to] else {
           throw VisualizationError.missingBodyPart(of: map.to)
         }
-        return Line(from: from, to: to)
+        return Line(from: from.position, to: to.position)
       }
     } catch VisualizationError.missingBodyPart(let missingPart) {
       os_log("Visualization error: %s is missing.", type: .error, missingPart.rawValue)
@@ -136,7 +143,7 @@ class OverlayView: UIImageView {
 
 /// The strokes to be drawn in order to visualize a pose estimation result.
 fileprivate struct Strokes {
-  var dots: [CGPoint]
+  var dots: [Dot]
   var lines: [Line]
 }
 
@@ -144,6 +151,11 @@ fileprivate struct Strokes {
 fileprivate struct Line {
   let from: CGPoint
   let to: CGPoint
+}
+
+fileprivate struct Dot {
+    let name: BodyPart
+    let position: CGPoint
 }
 
 fileprivate enum VisualizationError: Error {
