@@ -6,7 +6,7 @@ the Pi Camera. It draws a bounding box around each detected object in the camera
 preview (when the object score is above a given threshold).
 
 At the end of this page, there are extra steps to accelerate the example using
-the Coral USB Accelerator, which increases the inference speed by ~10x.
+the Coral USB Accelerator to increase inference speed.
 
 ## Set up your hardware
 

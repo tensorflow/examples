@@ -455,7 +455,8 @@ class YAMNetSpec(BaseSpec):
       frame_length: The number of samples in each audio frame. If the audio file
         is shorter than `frame_length`, then the audio file will be ignored.
       frame_step: The number of samples between two audio frames. This value
-        should be bigger than `frame_length`.
+        should be smaller than `frame_length`, otherwise some samples will be
+        ignored.
       keep_yamnet_and_custom_heads: Boolean, decides if the final TFLite model
         contains both YAMNet and custom trained classification heads. When set
         to False, only the trained custom head will be preserved.

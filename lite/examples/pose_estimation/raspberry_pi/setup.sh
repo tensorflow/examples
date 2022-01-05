@@ -7,8 +7,8 @@ else
 fi
 
 # Install Python dependencies
-python3 -m pip install -r requirements_pypi.txt
-python3 -m pip install -r requirements_tflite.txt
+python3 -m pip install pip --upgrade
+python3 -m pip install -r requirements.txt
 
 # Download TF Lite models
 FILE=${DATA_DIR}/posenet.tflite
