@@ -40,7 +40,9 @@ only displayed if the confidence score is greater than a defined threshold.
 
 ## Speech command recognition
 
-This application recognizes a set of voice commands using the device's microphone input. When a command is spoken, the corresponding class in the app is highlighted.
+This application recognizes a set of voice commands using the device's
+microphone input. When a command is spoken, the corresponding class in the app
+is highlighted.
 
 <!-- TODO(b/124116863): Add app screenshot and model details. -->
 
