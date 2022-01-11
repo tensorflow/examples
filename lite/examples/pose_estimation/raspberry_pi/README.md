@@ -49,8 +49,8 @@ python3 pose_estimation.py --model_name movenet_thunder
 
 ```
 python3 pose_estimation.py \
-    --classifier yoga_classifier
-    --label_file yoga_labels.txt
+    --classifier classifier
+    --label_file labels.txt
 ```
 
 ## Customization options
