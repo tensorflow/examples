@@ -33,16 +33,12 @@ except ImportError:
 class Classifier(object):
   """A wrapper class for a TFLite pose classification model."""
 
-  def __init__(self,
-               model_name: str,
-               label_file: str,
-               score_threshold: float = 0.1) -> None:
+  def __init__(self, model_name: str, label_file: str) -> None:
     """Initialize a pose classification model.
 
     Args:
       model_name: Name of the TFLite pose classification model.
       label_file: Path of the label list file.
-      score_threshold: The minimum keypoint score to run classification.
     """
 
     # Append TFLITE extension to model_name if there's no extension
@@ -59,7 +55,6 @@ class Classifier(object):
     self._interpreter = interpreter
 
     self.pose_class_names = self._load_labels(label_file)
-    self.score_threshold = score_threshold
 
   def _load_labels(self, label_path: str) -> List[str]:
     """Load label list from file.
@@ -83,15 +78,6 @@ class Classifier(object):
       A list of classification result (data.Category).
       Sorted by probability descending.
     """
-    # Check if all keypoints are detected before running the classifier.
-    # If there's a keypoint below the threshold, return zero probability for all
-    # class.
-    min_score = min([keypoint.score for keypoint in person.keypoints])
-    if min_score < self.score_threshold:
-      return [
-          Category(label=class_name, score=0)
-          for class_name in self.pose_class_names
-      ]
 
     # Flatten the input and add an extra dimension to match with the requirement
     # of the TFLite model.

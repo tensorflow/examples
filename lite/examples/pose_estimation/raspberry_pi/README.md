@@ -44,14 +44,17 @@ python3 pose_estimation.py --model_name movenet_thunder
 ## Run the pose classification sample
 
 *   Use this command to run the pose estimation sample using the default
-    `movenet_lightning` pose estimation model and the `yoga_classifier.tflite`
+    `movenet_lightning` pose estimation model and the `classifier.tflite` yoga
     pose classification model.
 
 ```
 python3 pose_estimation.py \
-    --classifier yoga_classifier
-    --label_file yoga_labels.txt
+    --classifier classifier
+    --label_file labels.txt
 ```
+
+*   If you want to train a custom pose classification model, check out
+    [this tutorial](https://www.tensorflow.org/lite/tutorials/pose_classification).
 
 ## Customization options
 

@@ -73,14 +73,16 @@ def run(estimation_model: str, tracker_type: str, classification_model: str,
   text_color = (0, 0, 255)  # red
   font_size = 1
   font_thickness = 1
-  max_detection_results = 3
+  classification_results_to_show = 3
   fps_avg_frame_count = 10
+  keypoint_detection_threshold_for_classifier = 0.1
+  classifier = None
 
   # Initialize the classification model
   if classification_model:
     classifier = Classifier(classification_model, label_file)
-    detection_results_to_show = min(max_detection_results,
-                                    len(classifier.pose_class_names))
+    classification_results_to_show = min(classification_results_to_show,
+                                         len(classifier.pose_class_names))
 
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
@@ -104,18 +106,32 @@ def run(estimation_model: str, tracker_type: str, classification_model: str,
     # Draw keypoints and edges on input image
     image = utils.visualize(image, list_persons)
 
-    if classification_model:
-      # Run pose classification
-      prob_list = classifier.classify_pose(list_persons[0])
-
-      # Show classification results on the image
-      for i in range(detection_results_to_show):
-        class_name = prob_list[i].label
-        probability = round(prob_list[i].score, 2)
-        result_text = class_name + ' (' + str(probability) + ')'
-        text_location = (left_margin, (i + 2) * row_size)
-        cv2.putText(image, result_text, text_location, cv2.FONT_HERSHEY_PLAIN,
+    if classifier:
+      # Check if all keypoints are detected before running the classifier.
+      # If there's a keypoint below the threshold, show an error.
+      person = list_persons[0]
+      min_score = min([keypoint.score for keypoint in person.keypoints])
+      if min_score < keypoint_detection_threshold_for_classifier:
+        error_text = 'Some keypoints are not detected.'
+        text_location = (left_margin, 2 * row_size)
+        cv2.putText(image, error_text, text_location, cv2.FONT_HERSHEY_PLAIN,
                     font_size, text_color, font_thickness)
+        error_text = 'Make sure the person is fully visible in the camera.'
+        text_location = (left_margin, 3 * row_size)
+        cv2.putText(image, error_text, text_location, cv2.FONT_HERSHEY_PLAIN,
+                    font_size, text_color, font_thickness)
+      else:
+        # Run pose classification
+        prob_list = classifier.classify_pose(person)
+
+        # Show classification results on the image
+        for i in range(classification_results_to_show):
+          class_name = prob_list[i].label
+          probability = round(prob_list[i].score, 2)
+          result_text = class_name + ' (' + str(probability) + ')'
+          text_location = (left_margin, (i + 2) * row_size)
+          cv2.putText(image, result_text, text_location, cv2.FONT_HERSHEY_PLAIN,
+                      font_size, text_color, font_thickness)
 
     # Calculate the FPS
     if counter % fps_avg_frame_count == 0:
