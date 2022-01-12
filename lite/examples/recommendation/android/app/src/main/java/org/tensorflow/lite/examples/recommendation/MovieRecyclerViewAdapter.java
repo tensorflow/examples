@@ -60,9 +60,11 @@ public class MovieRecyclerViewAdapter
             // Use checked status.
             boolean selected = sw.isChecked();
             holder.setSelected(selected);
+            notifyItemChanged(holder.getAdapterPosition());
           }
         });
     holder.movieTitle.setText(values.get(position).title);
+    holder.movieSwitch.setChecked(holder.item.selected);
 
     holder.view.setOnClickListener(
         new View.OnClickListener() {
@@ -71,6 +73,7 @@ public class MovieRecyclerViewAdapter
             // Toggle checked status.
             boolean selected = !holder.movieSwitch.isChecked();
             holder.setSelected(selected);
+            notifyItemChanged(holder.getAdapterPosition());
           }
         });
   }
@@ -99,9 +102,7 @@ public class MovieRecyclerViewAdapter
 
     public void setSelected(boolean selected) {
       item.selected = selected;
-      if (movieSwitch.isChecked() != selected) {
-        movieSwitch.setChecked(selected);
-      }
+
       if (null != listener) {
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
