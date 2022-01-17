@@ -21,6 +21,7 @@ allprojects {
         maven {
             name 'ossrh-snapshot'
             url 'http://oss.sonatype.org/content/repositories/snapshots'
+            allowInsecureProtocol = true
         }
     }
 }
