@@ -246,7 +246,8 @@ class EfficientDetModelSpec(object):
             validation_steps: int,
             epochs: Optional[int] = None,
             batch_size: Optional[int] = None,
-            val_json_file: Optional[str] = None) -> tf.keras.Model:
+            val_json_file: Optional[str] = None,
+            load_checkpoint_path: Optional[str] = None) -> tf.keras.Model:
     """Run EfficientDet training."""
     config = self.config
     if not epochs:
@@ -263,6 +264,10 @@ class EfficientDetModelSpec(object):
             batch_size=batch_size))
     train.setup_model(model, config)
     train.init_experimental(config)
+
+    if load_checkpoint_path is not None:
+      model.load_weights(load_checkpoint_path)
+
     model.fit(
         train_dataset,
         epochs=epochs,

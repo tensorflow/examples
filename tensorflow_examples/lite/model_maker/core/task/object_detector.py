@@ -94,7 +94,8 @@ class ObjectDetector(custom_model.CustomModel):
             validation_data: Optional[
                 object_detector_dataloader.DataLoader] = None,
             epochs: Optional[int] = None,
-            batch_size: Optional[int] = None) -> tf.keras.Model:
+            batch_size: Optional[int] = None,
+            load_checkpoint_path: Optional[str] = None) -> tf.keras.Model:
     """Feeds the training data for training."""
     if not self.model_spec.config.drop_remainder:
       raise ValueError('Must set `drop_remainder=True` during training. '
@@ -122,7 +123,7 @@ class ObjectDetector(custom_model.CustomModel):
           validation_data, batch_size, is_training=False)
       return self.model_spec.train(self.model, train_ds, steps_per_epoch,
                                    validation_ds, validation_steps, epochs,
-                                   batch_size, val_json_file)
+                                   batch_size, val_json_file, load_checkpoint_path)
 
   def evaluate(self,
                data: object_detector_dataloader.DataLoader,
@@ -225,7 +226,8 @@ class ObjectDetector(custom_model.CustomModel):
              epochs: Optional[object_detector_dataloader.DataLoader] = None,
              batch_size: Optional[int] = None,
              train_whole_model: bool = False,
-             do_train: bool = True) -> T:
+             do_train: bool = True, 
+             load_checkpoint_path: Optional[str] = None) -> T:
     """Loads data and train the model for object detection.
 
     Args:
@@ -238,6 +240,8 @@ class ObjectDetector(custom_model.CustomModel):
         model. Otherwise, only train the layers that are not match
         `model_spec.config.var_freeze_expr`.
       do_train: Whether to run training.
+      load_checkpoint_path: Optional, Path to checkpoint to load model weights from, 
+        before training is started. 
 
     Returns:
       An instance based on ObjectDetector.
@@ -257,7 +261,7 @@ class ObjectDetector(custom_model.CustomModel):
 
     if do_train:
       tf.compat.v1.logging.info('Retraining the models...')
-      object_detector.train(train_data, validation_data, epochs, batch_size)
+      object_detector.train(train_data, validation_data, epochs, batch_size, load_checkpoint_path)
     else:
       object_detector.create_model()
 
