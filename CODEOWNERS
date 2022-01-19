@@ -9,3 +9,4 @@
 
 # TF Lite
 /lite/ @khanhlvg @lu-wang-g
+/tensorflow_examples/lite/ @ziyeqinghan @khanhlvg @lu-wang-g
