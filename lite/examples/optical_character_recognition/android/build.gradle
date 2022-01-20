@@ -39,8 +39,6 @@ allprojects {
             name 'ossrh-snapshot'
             url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
-        // OpenCV from Quick Bird Studio has not finished migration to maven
-        jcenter()
     }
 }
 
