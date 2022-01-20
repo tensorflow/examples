@@ -39,7 +39,6 @@ allprojects {
             name 'ossrh-snapshot'
             url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
-        mavenCentral()
     }
 }
 
