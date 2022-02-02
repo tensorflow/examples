@@ -182,14 +182,13 @@ class VideoClassifier private constructor(
     }
 
     /**
-     * Convert input bitmap to TensorImage and normalize.
+     * Convert output logits of the model to a list of Category objects.
      */
     private fun postprocessOutputLogits(logitsByteBuffer: ByteBuffer): MutableList<Category> {
         // Convert ByteBuffer to FloatArray.
-        val tensorBuffer = TensorBuffer.createFixedSize(
-            intArrayOf(outputCategoryCount), DataType.FLOAT32)
-        tensorBuffer.loadBuffer(logitsByteBuffer)
-        val logits = tensorBuffer.floatArray
+        val logits = FloatArray(outputCategoryCount)
+        logitsByteBuffer.rewind()
+        logitsByteBuffer.asFloatBuffer().get(logits)
 
         // Convert logits into probability list.
         val probabilities = CalculateUtils.softmax(logits)

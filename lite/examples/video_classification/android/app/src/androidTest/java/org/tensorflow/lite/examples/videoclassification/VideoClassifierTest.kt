@@ -36,7 +36,7 @@ import java.io.*
 class VideoClassificationTest {
 
     companion object {
-        private const val INPUT_FILE_NAME = "example_video01.mp4"
+        private const val INPUT_FILE_NAME = "carving_ice.mp4"
     }
 
     private lateinit var videoClassifier: VideoClassifier
@@ -53,7 +53,7 @@ class VideoClassificationTest {
                 .build()
         videoClassifier = VideoClassifier.createFromFileAndLabelsAndOptions(
             appContext,
-            "movinet_a0_stream_fl16.tflite",
+            "movinet_a0_stream_int8.tflite",
             "kinetics600_label_map.txt",
             options
         )
@@ -83,7 +83,7 @@ class VideoClassificationTest {
 
         // Assert if the top-1 classification result matches with ground truth.
         assertTrue("Classification result isn't empty.", categories.isNotEmpty())
-        assertEquals("Top1 category matches.", "rope pushdown", categories[0].label)
+        assertEquals("Top1 category matches.", "carving ice", categories[0].label)
         assertThat("Score is larger than threshold.", categories[0].score, greaterThan(0.6f))
     }
 
