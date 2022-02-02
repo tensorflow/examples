@@ -29,18 +29,15 @@ import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.label.Category
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.collections.HashMap
 import kotlin.math.max
 import kotlin.math.min
 
 class VideoClassifier private constructor(
     private val interpreter: Interpreter,
     private val labels: List<String>,
-    private val maxResults: Int
+    private val maxResults: Int?
 ) {
     private val inputShape = interpreter
         .getInputTensorFromSignature(IMAGE_INPUT_NAME, SIGNATURE_KEY)
@@ -77,7 +74,7 @@ class VideoClassifier private constructor(
 
             // Save the max result option.
             val maxResults = if (options.maxResults > 0 && options.maxResults <= labels.size)
-                options.maxResults else labels.size
+                options.maxResults else null
 
             return VideoClassifier(interpreter, labels, maxResults)
         }
@@ -87,7 +84,7 @@ class VideoClassifier private constructor(
         if (outputCategoryCount != labels.size)
             throw java.lang.IllegalArgumentException(
                 "Label list size doesn't match with model output shape " +
-                        "(${labels.size} != ${outputCategoryCount}"
+                        "(${labels.size} != $outputCategoryCount"
             )
         inputState = initializeInput()
     }
@@ -145,7 +142,7 @@ class VideoClassifier private constructor(
             interpreter.runSignature(inputState, outputs)
 
             // Post-process the outputs.
-            val categories = postprocessOutputLogits(outputs[LOGITS_OUTPUT_NAME] as ByteBuffer)
+            var categories = postprocessOutputLogits(outputs[LOGITS_OUTPUT_NAME] as ByteBuffer)
 
             // Store the output states to feed as input for the next frame.
             outputs.remove(LOGITS_OUTPUT_NAME)
@@ -155,7 +152,10 @@ class VideoClassifier private constructor(
             categories.sortByDescending { it.score }
 
             // Take only maxResults number of result.
-            return categories.subList(0, max(maxResults, categories.size))
+            maxResults?.let {
+                categories = categories.subList(0, max(maxResults, categories.size))
+            }
+            return categories
         }
     }
 
@@ -239,8 +239,8 @@ class VideoClassifier private constructor(
             }
 
             fun setMaxResult(maxResults: Int): Builder {
-                if (maxResults == 0) {
-                    throw IllegalArgumentException("maxResults cannot be 0.")
+                if ((maxResults <= 0) && (maxResults != -1)) {
+                    throw IllegalArgumentException("maxResults must be positive or -1.")
                 }
                 this.maxResult = maxResults
                 return this
