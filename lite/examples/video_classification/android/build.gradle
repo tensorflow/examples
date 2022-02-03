@@ -3,6 +3,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven {
+            name 'ossrh-snapshot'
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
