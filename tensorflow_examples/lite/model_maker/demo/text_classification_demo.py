@@ -35,7 +35,8 @@ FLAGS = flags.FLAGS
 def define_flags():
   flags.DEFINE_string('export_dir', None,
                       'The directory to save exported files.')
-  flags.DEFINE_string('spec', 'bert_classifier', 'The text classifier to run.')
+  flags.DEFINE_string('spec', 'mobilebert_classifier',
+                      'The text classifier to run.')
   flags.mark_flag_as_required('export_dir')
 
 
@@ -49,7 +50,7 @@ def download_demo_data(**kwargs):
   return os.path.join(os.path.dirname(data_path), 'SST-2')  # folder name
 
 
-def run(data_dir, export_dir, spec='bert_classifier', **kwargs):
+def run(data_dir, export_dir, spec='mobilebert_classifier', **kwargs):
   """Runs demo."""
   # Chooses model specification that represents model.
   spec = model_spec.get(spec)
