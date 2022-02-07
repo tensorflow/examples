@@ -28,7 +28,7 @@ function create_venv_or_activate {
 
     # Install required package: twine, wheel
     PY="$(which python3.7)"
-    "${PY?}" -m pip install twine wheel
+    "${PY?}" -m pip install twine==3.7.1 wheel
   else
     source "${VENV_HOME}/bin/activate"
   fi
