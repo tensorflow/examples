@@ -230,8 +230,7 @@ class EfficientDetModelSpec(object):
 
     # set mixed precision policy by keras api.
     precision = utils.get_precision(config.strategy, config.mixed_precision)
-    policy = tf.keras.mixed_precision.experimental.Policy(precision)
-    tf.keras.mixed_precision.experimental.set_policy(policy)
+    tf.keras.mixed_precision.set_global_policy(precision)
 
   def create_model(self) -> tf.keras.Model:
     """Creates the EfficientDet model."""
