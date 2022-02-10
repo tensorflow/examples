@@ -1,0 +1,28 @@
+def modelMovinetA0Url = "https://tfhub.dev/tensorflow/lite-model/movinet/a0/stream/kinetics-600/classification/tflite/int8/1?lite-format=tflite"
+def modelMovinetA0File = "movinet_a0_stream_int8.tflite"
+def modelMovinetA1Url = "https://tfhub.dev/tensorflow/lite-model/movinet/a1/stream/kinetics-600/classification/tflite/int8/1?lite-format=tflite"
+def modelMovinetA1File = "movinet_a1_stream_int8.tflite"
+def modelMovinetA2Url = "https://tfhub.dev/tensorflow/lite-model/movinet/a2/stream/kinetics-600/classification/tflite/int8/1?lite-format=tflite"
+def modelMovinetA2File = "movinet_a2_stream_int8.tflite"
+
+task downloadMovinetA0(type: Download) {
+    src "${modelMovinetA0Url}"
+    dest project.ext.ASSET_DIR + "/${modelMovinetA0File}"
+    overwrite false
+}
+
+task downloadMovinetA1(type: Download) {
+    src "${modelMovinetA1Url}"
+    dest project.ext.ASSET_DIR + "/${modelMovinetA1File}"
+    overwrite false
+}
+
+task downloadMovinetA2(type: Download) {
+    src "${modelMovinetA2Url}"
+    dest project.ext.ASSET_DIR + "/${modelMovinetA2File}"
+    overwrite false
+}
+
+preBuild.dependsOn downloadMovinetA0
+preBuild.dependsOn downloadMovinetA1
+preBuild.dependsOn downloadMovinetA2

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">TFL Video Classification</string>
+    <string name="tfe_tv_frame">Input Size</string>
+    <string name="tfe_tv_inference_time">Inference Time</string>
+    <string name="tfe_tv_input_fps">Input FPS</string>
+    <string name="tfe_tv_threads">Threads</string>
+    <string name="inference_time">%dms</string>
+    <string name="frame_size">%d*%d</string>
+    <string name="tfe_btn_clear_model_state">Clear model state</string>
+    <string name="tfe_tv_model">Model:</string>
+    <string-array name="tfe_pe_models_array">
+        <item>MoviNet-A0</item>
+        <item>MoviNet-A1</item>
+        <item>MoviNet-A2</item>
+    </string-array>
+</resources>
