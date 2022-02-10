@@ -247,29 +247,31 @@ class MainActivity : AppCompatActivity() {
             // Check to ensure that we only run inference at a frequency required by the
             // model, within an acceptable error range (e.g. 10%). Discard the frames
             // that comes too early.
-            if (diff * MODEL_FPS >= 1000 * (1 - MODEL_FPS_ERROR_RANGE)) {
+            if (diff * MODEL_FPS >= 1000 /* milliseconds */ * (1 - MODEL_FPS_ERROR_RANGE)) {
                 lastInferenceStartTime = currentTime
 
                 val image = imageProxy.image
                 image?.let {
                     videoClassifier?.let { classifier ->
+                        // Convert the captured frame to Bitmap.
                         val imageBitmap = Bitmap.createBitmap(
                             it.width,
                             it.height,
                             Bitmap.Config.ARGB_8888
                         )
                         CalculateUtils.yuvToRgb(image, imageBitmap)
-                        // Create a rotated version for portrait display.
+
+                        // Rotate the image to the correct orientation.
                         val rotateMatrix = Matrix()
                         rotateMatrix.postRotate(
                             imageProxy.imageInfo.rotationDegrees.toFloat()
                         )
-                        val startCrop = (it.width - it.height) / 2
                         val rotatedBitmap = Bitmap.createBitmap(
-                            imageBitmap, startCrop, 0, it.height, it.height,
+                            imageBitmap, 0, 0, it.width, it.height,
                             rotateMatrix, false
                         )
 
+                        // Run inference using the TFLite model.
                         val startTimeForReference = SystemClock.uptimeMillis()
                         val results = classifier.classify(rotatedBitmap)
                         val endTimeForReference =
