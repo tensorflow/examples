@@ -72,7 +72,8 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     image = cv2.flip(image, 1)
 
     # Run object detection estimation using the model.
-    detections = detector.detect(image)
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    detections = detector.detect(rgb_image)
 
     # Draw keypoints and edges on input image
     image = utils.visualize(image, detections)

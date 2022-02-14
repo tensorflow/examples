@@ -36,6 +36,7 @@ class ObjectDetectorTest(unittest.TestCase):
     super().setUp()
     self._load_ground_truth()
     self.image = cv2.imread(_IMAGE_FILE)
+    self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
 
   def test_default_option(self):
     """Check if the default option works correctly."""
