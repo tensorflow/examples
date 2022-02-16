@@ -47,8 +47,8 @@ open Android Studio and select `Open an existing project`, setting the folder to
 Select `Build -> Make Project` and check that the project builds successfully.
 You will need Android SDK configured in the settings. You'll need at least SDK
 version 23. The `build.gradle` file will prompt you to download any missing
-libraries. The `download.gradle` file directs gradle to download the two models
-used in the example, placing them into `assets`.
+libraries. The `download.gradle` file directs gradle to download the model used
+in the example, placing it into `assets`.
 
 ### Step 3. Install and run the app
 
