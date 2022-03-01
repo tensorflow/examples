@@ -72,7 +72,8 @@ class AverageWordVecModelSpec(object):
                name='AverageWordVec',
                default_training_epochs=2,
                default_batch_size=32,
-               model_dir=None):
+               model_dir=None,
+               index_to_label=None):
     """Initialze a instance with preprocessing and model paramaters.
 
     Args:
@@ -86,6 +87,7 @@ class AverageWordVecModelSpec(object):
       default_training_epochs: Default training epochs for training.
       default_batch_size: Default batch size for training.
       model_dir: The location of the model checkpoint files.
+      index_to_label: List of labels in the training data. e.g. ['neg', 'pos'].
     """
     self.num_words = num_words
     self.seq_len = seq_len
@@ -95,6 +97,7 @@ class AverageWordVecModelSpec(object):
     self.name = name
     self.default_training_epochs = default_training_epochs
     self.default_batch_size = default_batch_size
+    self.index_to_label = index_to_label
 
     self.model_dir = model_dir
     if self.model_dir is None:
@@ -344,7 +347,7 @@ class BertModelSpec(object):
       name='Bert',
       tflite_input_name=None,
       default_batch_size=32):
-    """Initialze an instance with model paramaters.
+    """Initialze an instance with model parameters.
 
     Args:
       uri: TF-Hub path/url to Bert module.
@@ -449,6 +452,70 @@ class BertModelSpec(object):
 @mm_export('text_classifier.BertClassifierSpec')
 class BertClassifierModelSpec(BertModelSpec):
   """A specification of BERT model for text classification."""
+
+  def __init__(
+      self,
+      uri='https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/1',
+      model_dir=None,
+      seq_len=128,
+      dropout_rate=0.1,
+      initializer_range=0.02,
+      learning_rate=3e-5,
+      distribution_strategy='mirrored',
+      num_gpus=-1,
+      tpu='',
+      trainable=True,
+      do_lower_case=True,
+      is_tf2=True,
+      name='Bert',
+      tflite_input_name=None,
+      default_batch_size=32,
+      index_to_label=None):
+    """Initialze an instance with model parameters.
+
+    Args:
+      uri: TF-Hub path/url to Bert module.
+      model_dir: The location of the model checkpoint files.
+      seq_len: Length of the sequence to feed into the model.
+      dropout_rate: The rate for dropout.
+      initializer_range: The stdev of the truncated_normal_initializer for
+        initializing all weight matrices.
+      learning_rate: The initial learning rate for Adam.
+      distribution_strategy:  A string specifying which distribution strategy to
+        use. Accepted values are 'off', 'one_device', 'mirrored',
+        'parameter_server', 'multi_worker_mirrored', and 'tpu' -- case
+        insensitive. 'off' means not to use Distribution Strategy; 'tpu' means
+        to use TPUStrategy using `tpu_address`.
+      num_gpus: How many GPUs to use at each worker with the
+        DistributionStrategies API. The default is -1, which means utilize all
+        available GPUs.
+      tpu: TPU address to connect to.
+      trainable: boolean, whether pretrain layer is trainable.
+      do_lower_case: boolean, whether to lower case the input text. Should be
+        True for uncased models and False for cased models.
+      is_tf2: boolean, whether the hub module is in TensorFlow 2.x format.
+      name: The name of the object.
+      tflite_input_name: Dict, input names for the TFLite model.
+      default_batch_size: Default batch size for training.
+      index_to_label: List of labels in the training data. e.g. ['neg', 'pos'].
+    """
+    super().__init__(
+        uri=uri,
+        model_dir=model_dir,
+        seq_len=seq_len,
+        dropout_rate=dropout_rate,
+        initializer_range=initializer_range,
+        learning_rate=learning_rate,
+        distribution_strategy=distribution_strategy,
+        num_gpus=num_gpus,
+        tpu=tpu,
+        trainable=trainable,
+        do_lower_case=do_lower_case,
+        is_tf2=is_tf2,
+        name=name,
+        tflite_input_name=tflite_input_name,
+        default_batch_size=default_batch_size)
+    self.index_to_label = index_to_label
 
   def get_name_to_features(self):
     """Gets the dictionary describing the features."""

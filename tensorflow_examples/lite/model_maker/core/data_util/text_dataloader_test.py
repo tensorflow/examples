@@ -34,8 +34,9 @@ from official.nlp.data import squad_lib
 class MockClassifierModelSpec(object):
   need_gen_vocab = False
 
-  def __init__(self, seq_len=4):
+  def __init__(self, seq_len=4, index_to_label=None):
     self.seq_len = seq_len
+    self.index_to_label = index_to_label
 
   def get_name_to_features(self):
     """Gets the dictionary describing the features."""
@@ -220,6 +221,8 @@ class LoaderFunctionTest(tf.test.TestCase):
 
 
 class TextClassifierDataLoaderTest(tf.test.TestCase):
+  TRAIN_LABELS_AND_TEXT = (('neutral', 'indifferent'),
+                           ('pos', 'extremely great'), ('neg', 'totally awful'))
   TEST_LABELS_AND_TEXT = (('pos', 'super good'), ('neg', 'really bad'))
 
   def _get_folder_path(self):
@@ -235,15 +238,20 @@ class TextClassifierDataLoaderTest(tf.test.TestCase):
         f.write(text)
     return folder_path
 
-  def _get_csv_file(self):
-    csv_file = os.path.join(self.get_temp_dir(), 'tmp.csv')
+  def _get_csv_file(self, is_training):
+    file_name = 'train.csv' if is_training else 'test.csv'
+    csv_file = os.path.join(self.get_temp_dir(), file_name)
+
+    labels_and_text = (
+        self.TRAIN_LABELS_AND_TEXT
+        if is_training else self.TEST_LABELS_AND_TEXT)
     if os.path.exists(csv_file):
       return csv_file
     fieldnames = ['text', 'label']
     with open(csv_file, 'w') as f:
       writer = csv.DictWriter(f, fieldnames=fieldnames)
       writer.writeheader()
-      for label, text in self.TEST_LABELS_AND_TEXT:
+      for label, text in labels_and_text:
         writer.writerow({'text': text, 'label': label})
     return csv_file
 
@@ -252,41 +260,64 @@ class TextClassifierDataLoaderTest(tf.test.TestCase):
     data = text_dataloader.TextClassifierDataLoader(ds, 4, ['pos', 'neg'])
     train_data, test_data = data.split(0.5)
 
-    self.assertEqual(len(train_data), 2)
+    self.assertLen(train_data, 2)
     for i, elem in enumerate(train_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 1])).all())
     self.assertEqual(train_data.num_classes, 2)
     self.assertEqual(train_data.index_to_label, ['pos', 'neg'])
 
-    self.assertEqual(len(test_data), 2)
+    self.assertLen(test_data, 2)
     for i, elem in enumerate(test_data.gen_dataset()):
       self.assertTrue((elem.numpy() == np.array([i, 0])).all())
     self.assertEqual(test_data.num_classes, 2)
     self.assertEqual(test_data.index_to_label, ['pos', 'neg'])
 
   def test_from_csv(self):
-    csv_file = self._get_csv_file()
+    train_csv_file = self._get_csv_file(is_training=True)
     model_spec = MockClassifierModelSpec()
-    data = text_dataloader.TextClassifierDataLoader.from_csv(
-        csv_file,
+    train_data = text_dataloader.TextClassifierDataLoader.from_csv(
+        train_csv_file,
         text_column='text',
         label_column='label',
-        model_spec=model_spec)
-    self._test_data(data, model_spec)
+        model_spec=model_spec,
+        is_training=True)
+    self._test_data(
+        train_data,
+        model_spec,
+        size=3,
+        num_classes=3,
+        index_to_label=['neg', 'neutral', 'pos'])
+
+    test_csv_file = self._get_csv_file(is_training=False)
+    test_data = text_dataloader.TextClassifierDataLoader.from_csv(
+        test_csv_file,
+        text_column='text',
+        label_column='label',
+        model_spec=model_spec,
+        is_training=False)
+
+    # Labels should be the same as the training data.
+    self._test_data(
+        test_data,
+        model_spec,
+        size=2,
+        num_classes=3,
+        index_to_label=['neg', 'neutral', 'pos'])
 
   def test_from_folder(self):
     folder_path = self._get_folder_path()
     model_spec = MockClassifierModelSpec()
     data = text_dataloader.TextClassifierDataLoader.from_folder(
         folder_path, model_spec=model_spec)
-    self._test_data(data, model_spec)
+    self._test_data(
+        data, model_spec, size=2, num_classes=2, index_to_label=['neg', 'pos'])
 
-  def _test_data(self, data, model_spec):
-    self.assertEqual(len(data), 2)
-    self.assertEqual(data.num_classes, 2)
-    self.assertEqual(data.index_to_label, ['neg', 'pos'])
+  def _test_data(self, data, model_spec, size, num_classes, index_to_label):
+    self.assertLen(data, size)
+    self.assertEqual(data.num_classes, num_classes)
+    self.assertEqual(data.index_to_label, index_to_label)
     for input_ids, label in data.gen_dataset():
-      self.assertTrue(label.numpy() == 1 or label.numpy() == 0)
+      self.assertTrue(label.numpy() >= 0 and label.numpy() < num_classes)
       actual_input_ids = [label.numpy()] * model_spec.seq_len
       self.assertTrue((input_ids.numpy() == actual_input_ids).all())
 

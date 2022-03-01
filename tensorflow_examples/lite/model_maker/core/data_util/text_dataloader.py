@@ -206,16 +206,25 @@ class TextClassifierDataLoader(dataloader.ClassificationDataLoader):
     if shuffle:
       random.shuffle(lines)
 
-    # Gets labels.
-    label_set = set()
-    for line in lines:
-      label_set.add(line[label_column])
-    label_names = sorted(label_set)
+    # Gets labels: if already loaded labels previously, directly use the
+    # loaded labels. Otherwise, load the labels and sort the labels by name.
+    if model_spec.index_to_label and not is_training:
+      label_names = model_spec.index_to_label
+      label_set = set(label_names)
+    else:
+      label_set = set()
+      for line in lines:
+        label_set.add(line[label_column])
+      label_names = sorted(label_set)
+      model_spec.index_to_label = label_names
 
     # Generates text examples from csv file.
     examples = []
     for i, line in enumerate(lines):
       text, label = line[text_column], line[label_column]
+      if label not in label_set:
+        logging.warning('Skip line: "%s" since label %s is not in label set',
+                        line, label)
       guid = '%s-%d' % (csv_name, i)
       examples.append(classifier_data_lib.InputExample(guid, text, None, label))
 
