@@ -23,7 +23,9 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
-        applicationId 'org.tensorflow.lite.examples.imageclassification.playservices'
+        applicationId 'org.tensorflow.lite.examples.classification.playservices'
+        // ImageClassificationHelper class uses android.util.Size(), which is
+        // available from SDK 21.
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 1
