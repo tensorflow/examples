@@ -36,7 +36,7 @@ import tensorflow as tf
 FLAGS = flags.FLAGS
 
 # Permalinks to download movielens data.
-MOVIELENS_1M_URL = "http://files.grouplens.org/datasets/movielens/ml-1m.zip"
+MOVIELENS_1M_URL = "https://files.grouplens.org/datasets/movielens/ml-1m.zip"
 MOVIELENS_ZIP_FILENAME = "ml-1m.zip"
 MOVIELENS_ZIP_HASH = "a6898adb50b9ca05aa231689da44c217cb524e7ebd39d264c56e2832f2c54e20"
 MOVIELENS_EXTRACTED_DIR = "ml-1m"
