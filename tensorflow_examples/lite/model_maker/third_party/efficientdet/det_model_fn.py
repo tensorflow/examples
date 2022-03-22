@@ -18,6 +18,7 @@ import re
 from absl import logging
 import numpy as np
 import tensorflow.compat.v1 as tf
+from tensorflow.compat.v1 import estimator as tf_estimator
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import coco_metric
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import efficientdet_arch
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import hparams_config
@@ -323,7 +324,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
   if params['img_summary_steps']:
     utils.image('input_image', features, is_tpu)
   training_hooks = []
-  params['is_training_bn'] = (mode == tf.estimator.ModeKeys.TRAIN)
+  params['is_training_bn'] = (mode == tf_estimator.ModeKeys.TRAIN)
 
   if params['use_keras_model']:
 
@@ -359,7 +360,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
   reg_l2loss = reg_l2_loss(params['weight_decay'])
   total_loss = det_loss + reg_l2loss
 
-  if mode == tf.estimator.ModeKeys.TRAIN:
+  if mode == tf_estimator.ModeKeys.TRAIN:
     utils.scalar('lrn_rate', learning_rate, is_tpu)
     utils.scalar('trainloss/cls_loss', cls_loss, is_tpu)
     utils.scalar('trainloss/box_loss', box_loss, is_tpu)
@@ -375,7 +376,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
         decay=moving_average_decay, num_updates=global_step)
     ema_vars = utils.get_ema_vars()
 
-  if mode == tf.estimator.ModeKeys.TRAIN:
+  if mode == tf_estimator.ModeKeys.TRAIN:
     if params['optimizer'].lower() == 'sgd':
       optimizer = tf.train.MomentumOptimizer(
           learning_rate, momentum=params['momentum'])
@@ -425,7 +426,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
     train_op = None
 
   eval_metrics = None
-  if mode == tf.estimator.ModeKeys.EVAL:
+  if mode == tf_estimator.ModeKeys.EVAL:
 
     def metric_fn(**kwargs):
       """Returns a dictionary that has the evaluation metrics."""
@@ -517,7 +518,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
 
   checkpoint = params.get('ckpt') or params.get('backbone_ckpt')
 
-  if checkpoint and mode == tf.estimator.ModeKeys.TRAIN:
+  if checkpoint and mode == tf_estimator.ModeKeys.TRAIN:
     # Initialize the model from an EfficientDet or backbone checkpoint.
     if params.get('ckpt') and params.get('backbone_ckpt'):
       raise RuntimeError(
@@ -546,7 +547,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
 
       tf.train.init_from_checkpoint(checkpoint, var_map)
       return tf.train.Scaffold()
-  elif mode == tf.estimator.ModeKeys.EVAL and moving_average_decay:
+  elif mode == tf_estimator.ModeKeys.EVAL and moving_average_decay:
 
     def scaffold_fn():
       """Load moving average variables for eval."""
@@ -558,7 +559,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
     scaffold_fn = None
 
   if is_tpu:
-    return tf.estimator.tpu.TPUEstimatorSpec(
+    return tf_estimator.tpu.TPUEstimatorSpec(
         mode=mode,
         loss=total_loss,
         train_op=train_op,
@@ -569,21 +570,21 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
   else:
     # Profile every 1K steps.
     if params.get('profile', False):
-      profile_hook = tf.estimator.ProfilerHook(
+      profile_hook = tf_estimator.ProfilerHook(
           save_steps=1000, output_dir=params['model_dir'], show_memory=True)
       training_hooks.append(profile_hook)
 
       # Report memory allocation if OOM; it will slow down the running.
-      class OomReportingHook(tf.estimator.SessionRunHook):
+      class OomReportingHook(tf_estimator.SessionRunHook):
 
         def before_run(self, run_context):
-          return tf.estimator.SessionRunArgs(
+          return tf_estimator.SessionRunArgs(
               fetches=[],
               options=tf.RunOptions(report_tensor_allocations_upon_oom=True))
 
       training_hooks.append(OomReportingHook())
 
-    logging_hook = tf.estimator.LoggingTensorHook(
+    logging_hook = tf_estimator.LoggingTensorHook(
         {
             'step': global_step,
             'det_loss': det_loss,
@@ -596,7 +597,7 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
 
     eval_metric_ops = (
         eval_metrics[0](**eval_metrics[1]) if eval_metrics else None)
-    return tf.estimator.EstimatorSpec(
+    return tf_estimator.EstimatorSpec(
         mode=mode,
         loss=total_loss,
         train_op=train_op,

@@ -20,6 +20,7 @@ from absl import flags
 from absl import logging
 import numpy as np
 import tensorflow.compat.v1 as tf
+from tensorflow.compat.v1 import estimator as tf_estimator
 
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import dataloader
 from tensorflow_examples.lite.model_maker.third_party.efficientdet import det_model_fn
@@ -246,13 +247,13 @@ def main(_):
       max_instances_per_image=max_instances_per_image)
 
   if FLAGS.strategy == 'tpu':
-    tpu_config = tf.estimator.tpu.TPUConfig(
+    tpu_config = tf_estimator.tpu.TPUConfig(
         FLAGS.iterations_per_loop if FLAGS.strategy == 'tpu' else 1,
         num_cores_per_replica=num_cores_per_replica,
         input_partition_dims=input_partition_dims,
-        per_host_input_for_training=tf.estimator.tpu.InputPipelineConfig
+        per_host_input_for_training=tf_estimator.tpu.InputPipelineConfig
         .PER_HOST_V2)
-    run_config = tf.estimator.tpu.RunConfig(
+    run_config = tf_estimator.tpu.RunConfig(
         cluster=tpu_cluster_resolver,
         model_dir=model_dir,
         log_step_count_steps=FLAGS.iterations_per_loop,
@@ -262,7 +263,7 @@ def main(_):
         tf_random_seed=FLAGS.tf_random_seed,
     )
     # TPUEstimator can do both train and eval.
-    train_est = tf.estimator.tpu.TPUEstimator(
+    train_est = tf_estimator.tpu.TPUEstimator(
         model_fn=model_fn_instance,
         train_batch_size=FLAGS.train_batch_size,
         eval_batch_size=FLAGS.eval_batch_size,
@@ -273,7 +274,7 @@ def main(_):
     strategy = None
     if FLAGS.strategy == 'gpus':
       strategy = tf.distribute.MirroredStrategy()
-    run_config = tf.estimator.RunConfig(
+    run_config = tf_estimator.RunConfig(
         model_dir=model_dir,
         train_distribute=strategy,
         log_step_count_steps=FLAGS.iterations_per_loop,
@@ -285,7 +286,7 @@ def main(_):
     def get_estimator(global_batch_size):
       params['num_shards'] = getattr(strategy, 'num_replicas_in_sync', 1)
       params['batch_size'] = global_batch_size // params['num_shards']
-      return tf.estimator.Estimator(
+      return tf_estimator.Estimator(
           model_fn=model_fn_instance, config=run_config, params=params)
 
     # train and eval need different estimator due to different batch size.
