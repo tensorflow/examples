@@ -14,8 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<resources>
-    <string name="app_name">Image Classification</string>
-    <string name="capture_button_alt">Capture</string>
-    <string name="unknown">UNKNOWN</string>
-</resources>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.tensorflow.lite.examples.classification.playservices">
+    <!-- ImageClassificationHelper class uses android.util.Size(), which is available after SDK 21.
+    -->
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="31" />
+</manifest>

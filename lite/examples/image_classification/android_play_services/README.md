@@ -50,6 +50,22 @@ version 23. The `build.gradle` file will prompt you to download any missing
 libraries. The `download.gradle` file directs gradle to download the model used
 in the example, placing it into `assets`.
 
+#### Optional: Switch between source code language (Kotlin and Java)
+
+This sample app demonstrates two implementation options:
+
+*   Kotlin: Under `app/src/kotlin`
+*   Java: Under `app/src/java`
+
+The [`build.gradle`](app/build.gradle) inside the `app` folder shows how to
+change `flavorDimensions "language"` to switch between the two options.
+
+Inside **Android Studio**, you can change the build variant to whichever one you
+want to build and run — just go to `Build > Select Build Variant` and select one
+from the drop-down menu. See
+[configure product flavors in Android Studio](https://developer.android.com/studio/build/build-variants#product-flavors)
+for more details.
+
 ### Step 3. Install and run the app
 
 Connect the Android device to the computer and be sure to approve any ADB
@@ -57,9 +73,10 @@ permission prompts that appear on your phone. Select `Run -> Run app.` Select
 the deployment target in the connected devices to the device on which the app
 will be installed. This will install the app on the device.
 
-To test the app, open the app called `TFL Classify` on your device. When you run
-the app the first time, the app will request permission to access the camera.
-Re-installing the app may require you to uninstall the previous installations.
+To test the app, open the app called `Image Classification` on your device. When
+you run the app the first time, the app will request permission to access the
+camera. Re-installing the app may require you to uninstall the previous
+installations.
 
 ## Screenshots
 
@@ -69,6 +86,7 @@ Re-installing the app may require you to uninstall the previous installations.
 ## Source Code Structure
 
 *   `app/src/kotlin`: Sample app implemented in Kotlin language.
+*   `app/src/java`: Sample app implemented in Java language.
 *   `app/src/main`: Resources and Assets.
 
 > Note: Gradle expects the directory structure to match the following:
