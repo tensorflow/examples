@@ -66,7 +66,20 @@ Re-installing the app may require you to uninstall the previous installations.
 ![demo](https://storage.googleapis.com/download.tensorflow.org/tflite/examples/android_play_services_demo.gif "demo animation")
 ![screenshot 1](screenshots/screenshot-1.jpg "screenshot 1")
 
-## Assets folder
+## Source Code Structure
+
+*   `app/src/kotlin`: Sample app implemented in Kotlin language.
+*   `app/src/main`: Resources and Assets.
+
+> Note: Gradle expects the directory structure to match the following:
+> `$module`/src/`$build_variant`/(`$language`|res|assets|AndroidManifest.xml|...)
+> For this app:
+>
+> *   `$module` == app
+> *   `$build_variant` == kotlin
+> *   `$language` == kotlin
+
+### Assets folder
 
 *Do not delete the assets folder content*. If you explicitly deleted the files,
 choose `Build -> Rebuild` to re-download the deleted model files into the assets
