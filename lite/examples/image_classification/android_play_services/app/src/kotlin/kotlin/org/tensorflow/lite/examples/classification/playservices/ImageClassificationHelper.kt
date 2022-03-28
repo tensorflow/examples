@@ -38,7 +38,7 @@ import org.tensorflow.lite.support.label.TensorLabel
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 
 /** Helper class used to communicate between our app and the TF image classification model */
-class ImageClassificationHelper(context: Context) : Closeable {
+class ImageClassificationHelper(context: Context, private val maxResult: Int) : Closeable {
 
   /** Abstraction object that wraps a classification output in an easy to parse way */
   data class Recognition(val id: String, val title: String, val confidence: Float)
@@ -127,15 +127,13 @@ class ImageClassificationHelper(context: Context) : Closeable {
   private fun getTopKProbability(labelProb: Map<String, Float>): List<Recognition> {
     // Sort the recognition by confidence from high to low.
     val pq: PriorityQueue<Recognition> =
-      PriorityQueue(MAX_RESULTS, compareByDescending<Recognition> { it.confidence })
+      PriorityQueue(maxResult, compareByDescending<Recognition> { it.confidence })
     pq += labelProb.map { (label, prob) -> Recognition(label, label, prob) }
-    return List(min(MAX_RESULTS, pq.size)) { pq.poll()!! }
+    return List(min(maxResult, pq.size)) { pq.poll()!! }
   }
 
   companion object {
     private val TAG = ImageClassificationHelper::class.java.simpleName
-    // Returns the top MAX_RESULTS recognitions
-    private const val MAX_RESULTS = 10
 
     // ClassifierFloatEfficientNet model
     private const val MODEL_PATH = "efficientnet-lite0-fp32.tflite"

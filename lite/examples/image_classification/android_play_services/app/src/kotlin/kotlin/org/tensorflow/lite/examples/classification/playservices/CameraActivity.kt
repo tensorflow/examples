@@ -72,7 +72,7 @@ class CameraActivity : AppCompatActivity() {
     initializeTask
       .addOnSuccessListener {
         Log.d(TAG, "TFLite in Play Services initialized successfully.")
-        classifier = ImageClassificationHelper(this)
+        classifier = ImageClassificationHelper(this, MAX_REPORT)
       }
       .addOnFailureListener { e -> Log.e(TAG, "TFLite in Play Services failed to initialize.", e) }
 
