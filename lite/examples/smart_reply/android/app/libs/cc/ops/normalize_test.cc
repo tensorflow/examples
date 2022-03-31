@@ -61,20 +61,20 @@ class NormalizeOpModel : public SingleOpModel {
 
 TEST(NormalizeOpTest, RegularInput) {
   NormalizeOpModel m("I'm good; you're welcome");
-  m.Invoke();
+  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
   EXPECT_THAT(m.GetStringOutput(),
               ElementsAreArray({"<S> i am good; you are welcome <E>"}));
 }
 
 TEST(NormalizeOpTest, OneInput) {
   NormalizeOpModel m("Hi!!!!");
-  m.Invoke();
+  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
   EXPECT_THAT(m.GetStringOutput(), ElementsAreArray({"<S> hi ! <E>"}));
 }
 
 TEST(NormalizeOpTest, EmptyInput) {
   NormalizeOpModel m("");
-  m.Invoke();
+  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
   EXPECT_THAT(m.GetStringOutput(), ElementsAreArray({"<S>  <E>"}));
 }
 
