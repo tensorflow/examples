@@ -30,8 +30,16 @@ android {
         targetSdkVersion 31
         versionCode 1
         versionName "0.0.1"
+
+        testApplicationId 'org.tensorflow.lite.examples.classification.playservices.test'
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildTypes {
+        all {
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
     compileOptions {
         sourceCompatibility rootProject.ext.java_version
         targetCompatibility rootProject.ext.java_version
@@ -40,7 +48,6 @@ android {
     kotlinOptions {
         jvmTarget = rootProject.ext.java_version
     }
-
 
     buildFeatures {
         viewBinding true
@@ -58,6 +65,18 @@ android {
             dimension 'language'
             applicationIdSuffix ".java"
             versionNameSuffix "-java"
+        }
+    }
+    sourceSets {
+        main {
+            assets {
+                srcDirs 'src/main/assets'
+            }
+        }
+        androidTest {
+            assets {
+                srcDirs 'src/androidTest/assets'
+            }
         }
     }
 }
@@ -85,8 +104,18 @@ dependencies {
     implementation "com.google.android.gms:play-services-tflite-java:${tflite_version}"
     implementation "com.google.android.gms:play-services-tflite-support:${tflite_version}"
 
+    // Testing-only dependencies
     testImplementation 'org.robolectric:robolectric:4.4'
     testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.3'
+    androidTestImplementation 'androidx.test:core-ktx:1.4.0'
+    def androidx_version = "1.4.0"
+    androidTestImplementation "androidx.test:runner:${androidx_version}"
+    androidTestImplementation "androidx.test:rules:${androidx_version}"
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'com.google.truth:truth:1.1.3'
+    androidTestImplementation 'com.google.android.gms:play-services-tasks:18.0.1'
+
 }
 
 // Download default models; if you wish to use your own models then

@@ -54,7 +54,7 @@ in the example, placing it into `assets`.
 
 This sample app demonstrates two implementation options:
 
-*   Kotlin: Under `app/src/kotlin`
+*   [Default] Kotlin: Under `app/src/kotlin`
 *   Java: Under `app/src/java`
 
 The [`build.gradle`](app/build.gradle) inside the `app` folder shows how to
@@ -88,6 +88,12 @@ installations.
 *   `app/src/kotlin`: Sample app implemented in Kotlin language.
 *   `app/src/java`: Sample app implemented in Java language.
 *   `app/src/main`: Resources and Assets.
+*   `app/src/androidTest`: Instrumentation test code that are shared between
+    build variants.
+*   `app/src/androidTestKotlin`: Instrumentation test code that only applies to
+    Kotlin implementation.
+*   `app/src/androidTestJava`: Instrumentation test code that only applies to
+    Java implementation.
 
 > Note: Gradle expects the directory structure to match the following:
 > `$module`/src/`$build_variant`/(`$language`|res|assets|AndroidManifest.xml|...)
