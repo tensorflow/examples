@@ -111,7 +111,7 @@ TEST(PredictOpTest, AllLabelsAreValid) {
   m.SetModelKey({1, 2, 4, 6, 7});
   m.SetModelLabel({11, 12, 11, 12, 11, 12, 11, 12, 11, 12});
   m.SetModelWeight({0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetLabel(), ElementsAreArray({12, 11}));
   EXPECT_THAT(m.GetWeight(), ElementsAreArray(ArrayFloatNear({0.1, 0.05})));
 }
@@ -122,7 +122,7 @@ TEST(PredictOpTest, MoreLabelsThanRequired) {
   m.SetModelKey({1, 2, 4, 6, 7});
   m.SetModelLabel({11, 12, 11, 12, 11, 12, 11, 12, 11, 12});
   m.SetModelWeight({0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetLabel(), ElementsAreArray({12}));
   EXPECT_THAT(m.GetWeight(), ElementsAreArray(ArrayFloatNear({0.1})));
 }
@@ -133,7 +133,7 @@ TEST(PredictOpTest, OneLabelDoesNotPassThreshold) {
   m.SetModelKey({1, 2, 4, 6, 7});
   m.SetModelLabel({11, 12, 11, 12, 11, 12, 11, 12, 11, 12});
   m.SetModelWeight({0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetLabel(), ElementsAreArray({12, -1}));
   EXPECT_THAT(m.GetWeight(), ElementsAreArray(ArrayFloatNear({0.1, 0})));
 }
@@ -144,7 +144,7 @@ TEST(PredictOpTest, NoneLabelPassThreshold) {
   m.SetModelKey({1, 2, 4, 6, 7});
   m.SetModelLabel({11, 12, 11, 12, 11, 12, 11, 12, 11, 12});
   m.SetModelWeight({0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetLabel(), ElementsAreArray({-1, -1}));
   EXPECT_THAT(m.GetWeight(), ElementsAreArray(ArrayFloatNear({0, 0})));
 }
@@ -155,7 +155,7 @@ TEST(PredictOpTest, OnlyOneLabelGenerated) {
   m.SetModelKey({1, 2, 4, 6, 7});
   m.SetModelLabel({11, 0, 11, 0, 11, 0, 11, 0, 11, 0});
   m.SetModelWeight({0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetLabel(), ElementsAreArray({11, -1}));
   EXPECT_THAT(m.GetWeight(), ElementsAreArray(ArrayFloatNear({0.05, 0})));
 }
@@ -166,7 +166,7 @@ TEST(PredictOpTest, NoLabelGenerated) {
   m.SetModelKey({1, 2, 4, 6, 7});
   m.SetModelLabel({11, 0, 11, 0, 11, 0, 11, 0, 0, 0});
   m.SetModelWeight({0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0, 0});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetLabel(), ElementsAreArray({-1, -1}));
   EXPECT_THAT(m.GetWeight(), ElementsAreArray(ArrayFloatNear({0, 0})));
 }

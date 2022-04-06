@@ -59,7 +59,7 @@ int CalcFeature(const string& str) {
 
 TEST(ExtractFeatureOpTest, RegularInput) {
   ExtractFeatureOpModel m({"<S>", "<S> Hi", "Hi", "Hi !", "!", "! <E>", "<E>"});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetSignature(),
               ElementsAre(0, CalcFeature("<S> Hi"), CalcFeature("Hi"),
                           CalcFeature("Hi !"), CalcFeature("!"),
@@ -69,21 +69,21 @@ TEST(ExtractFeatureOpTest, RegularInput) {
 
 TEST(ExtractFeatureOpTest, OneInput) {
   ExtractFeatureOpModel m({"Hi"});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetSignature(), ElementsAre(CalcFeature("Hi")));
   EXPECT_THAT(m.GetWeight(), ElementsAre(1));
 }
 
 TEST(ExtractFeatureOpTest, ZeroInput) {
   ExtractFeatureOpModel m({});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetSignature(), ElementsAre(0));
   EXPECT_THAT(m.GetWeight(), ElementsAre(0));
 }
 
 TEST(ExtractFeatureOpTest, AllBlacklistInput) {
   ExtractFeatureOpModel m({"<S>", "<E>"});
-  ASSERT_EQ(m.InvokeUnchecked(), kTfLiteOk);
+  ASSERT_EQ(m.Invoke(), kTfLiteOk);
   EXPECT_THAT(m.GetSignature(), ElementsAre(0, 0));
   EXPECT_THAT(m.GetWeight(), ElementsAre(0, 0));
 }
