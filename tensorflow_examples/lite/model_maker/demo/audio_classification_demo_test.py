@@ -21,6 +21,7 @@ import tempfile
 import unittest
 
 from absl.testing import parameterized
+from packaging import version
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
@@ -48,8 +49,9 @@ def patch_data_loader():
       audio_classifier.DataLoader, 'from_folder', side_effect=side_effect)
 
 
-@unittest.skipIf(tf.__version__ < '2.5',
-                 'Audio Classification requires TF 2.5 or later')
+@unittest.skipIf(
+    version.parse(tf.__version__) < version.parse('2.5'),
+    'Audio Classification requires TF 2.5 or later')
 class AudioClassificationDemoTest(tf.test.TestCase, parameterized.TestCase):
 
   @parameterized.parameters(

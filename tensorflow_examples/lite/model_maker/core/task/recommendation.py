@@ -16,6 +16,7 @@ import collections
 import tempfile
 
 import numpy as np
+from packaging import version
 import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core.api import mm_export
@@ -155,7 +156,7 @@ class Recommendation(custom_model.CustomModel):
     # concrete function conversion API be based on the new SavedModel importer,
     # which will enable new TensorFlow Lite features including variable support,
     # resources and variant tensor, and signature concept.
-    if float('.'.join(tf.__version__.split('.')[:2])) >= 2.7:
+    if version.parse(tf.__version__) >= version.parse('2.7'):
       converter = tf.lite.TFLiteConverter.from_concrete_functions([serve_fn],
                                                                   self.model)
     else:

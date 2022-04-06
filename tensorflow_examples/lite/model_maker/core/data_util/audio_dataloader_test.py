@@ -22,6 +22,7 @@ import shutil
 import unittest
 
 import numpy as np
+from packaging import version
 from scipy.io import wavfile
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader
@@ -112,8 +113,9 @@ class Base(tf.test.TestCase):
     return folder_path
 
 
-@unittest.skipIf(tf.__version__ < '2.5',
-                 'Audio Classification requires TF 2.5 or later')
+@unittest.skipIf(
+    version.parse(tf.__version__) < version.parse('2.5'),
+    'Audio Classification requires TF 2.5 or later')
 class LoadFromESC50Test(Base):
 
   def test_from_esc50(self):
@@ -210,8 +212,9 @@ class ExamplesHelperTest(Base):
          (0, 0, 1)))
 
 
-@unittest.skipIf(tf.__version__ < '2.5',
-                 'Audio Classification requires TF 2.5 or later')
+@unittest.skipIf(
+    version.parse(tf.__version__) < version.parse('2.5'),
+    'Audio Classification requires TF 2.5 or later')
 class LoadFromFolderTest(Base):
 
   def test_spec(self):

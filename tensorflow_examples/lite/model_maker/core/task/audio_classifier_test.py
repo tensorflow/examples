@@ -20,6 +20,7 @@ import os
 import unittest
 
 import numpy as np
+from packaging import version
 from scipy.io import wavfile
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core import compat
@@ -74,8 +75,9 @@ def write_sample(root,
   return full_path
 
 
-@unittest.skipIf(tf.__version__ < '2.5',
-                 'Audio Classification requires TF 2.5 or later')
+@unittest.skipIf(
+    version.parse(tf.__version__) < version.parse('2.5'),
+    'Audio Classification requires TF 2.5 or later')
 class AudioClassifierTest(tf.test.TestCase):
 
   def testBrowserFFT(self):

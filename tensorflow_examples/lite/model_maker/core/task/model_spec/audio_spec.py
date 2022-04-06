@@ -24,6 +24,7 @@ import io
 import os
 import tempfile
 
+from packaging import version
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.task import model_util
@@ -124,8 +125,8 @@ class MetadataWriter:
           writer.get_metadata_json(), json_filepath, mode='wt')
 
 
-def _ensure_tf25(version):
-  if version < '2.5':
+def _ensure_tf25(tf_version):
+  if version.parse(tf_version) < version.parse('2.5.0rc0'):
     raise RuntimeError(
         'Audio Tasks requires TF2.5 or later. For example, you can run the '
         'following command to install TF2.5.0rc2:\n\n'

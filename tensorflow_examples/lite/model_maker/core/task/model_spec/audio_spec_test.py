@@ -21,6 +21,7 @@ import os
 import unittest
 
 import numpy as np
+from packaging import version
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.task import configs
 from tensorflow_examples.lite.model_maker.core.task import model_util
@@ -70,12 +71,12 @@ class BaseSpecTest(tf.test.TestCase):
 
     tmp_version_fn = audio_spec._get_tf_version
     for spec in specs:
-      for version in valid_versions:
-        audio_spec._get_tf_version = lambda: version  # pylint: disable=cell-var-from-loop
+      for valid_version in valid_versions:
+        audio_spec._get_tf_version = lambda: valid_version  # pylint: disable=cell-var-from-loop
         spec()
 
-      for version in invalid_versions:
-        audio_spec._get_tf_version = lambda: version  # pylint: disable=cell-var-from-loop
+      for valid_version in invalid_versions:
+        audio_spec._get_tf_version = lambda: valid_version  # pylint: disable=cell-var-from-loop
         with self.assertRaisesRegexp(RuntimeError, '2.5.0'):
           spec()
 
@@ -111,8 +112,9 @@ class BaseTest(tf.test.TestCase):
     return tflite_filepath
 
 
-@unittest.skipIf(tf.__version__ < '2.5',
-                 'Audio Classification requires TF 2.5 or later')
+@unittest.skipIf(
+    version.parse(tf.__version__) < version.parse('2.5'),
+    'Audio Classification requires TF 2.5 or later')
 class YAMNetSpecTest(BaseTest):
 
   def _test_preprocess(self, input_shape, input_count, output_shape,
@@ -355,8 +357,9 @@ class YAMNetSpecTest(BaseTest):
         quantization_config=configs.QuantizationConfig.for_dynamic())
 
 
-@unittest.skipIf(tf.__version__ < '2.5',
-                 'Audio Classification requires TF 2.5 or later')
+@unittest.skipIf(
+    version.parse(tf.__version__) < version.parse('2.5'),
+    'Audio Classification requires TF 2.5 or later')
 class BrowserFFTSpecTest(BaseTest):
 
   @classmethod

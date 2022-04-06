@@ -20,6 +20,7 @@ import os
 import unittest
 
 from absl.testing import parameterized
+from packaging import version
 import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core.data_util import recommendation_testutil
@@ -49,8 +50,9 @@ class ModelSpecTest(tf.test.TestCase, parameterized.TestCase):
     spec = ms.get(model)
     self.assertIsNotNone(spec)
 
-  @unittest.skipIf(tf.__version__ < '2.5',
-                   'Audio Classification requires TF 2.5 or later')
+  @unittest.skipIf(
+      version.parse(tf.__version__) < version.parse('2.5'),
+      'Audio Classification requires TF 2.5 or later')
   @parameterized.parameters(ms.AUDIO_CLASSIFICATION_MODELS)
   def test_get_not_none_audio_models(self, model):
     spec = ms.get(model)
