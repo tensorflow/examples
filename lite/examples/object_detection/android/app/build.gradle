@@ -18,15 +18,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    aaptOptions {
-        noCompress "tflite"
-    }
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
-    }
-    lintOptions {
-        abortOnError false
     }
     flavorDimensions "tfliteInference"
     productFlavors {
@@ -39,6 +33,12 @@ android {
            getIsDefault().set(true)
            dimension "tfliteInference"
        }
+    }
+    androidResources {
+        noCompress 'tflite'
+    }
+    lint {
+        abortOnError false
     }
 }
 
