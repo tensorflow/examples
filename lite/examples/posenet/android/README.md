@@ -17,8 +17,8 @@ This is an app that continuously detects the body parts in the frames seen by
 ### Prerequisites
 
 * If you don't have it already, install **[Android Studio](
- https://developer.android.com/studio/index.html)** 3.2 or
- later, following the instructions on the website.
+ https://developer.android.com/studio/index.html)** 4.2 or
+ above, following the instructions on the website.
 
 * Android device and Android development environment with minimum API 21.
 

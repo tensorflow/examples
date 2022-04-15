@@ -8,10 +8,10 @@
     [Android Studio](https://developer.android.com/studio/index.html), following
     the instructions on the website.
 
-*   Android Studio 3.2 or later.
+*   Android Studio 4.2 or above.
 
 *   You need an Android device or Android emulator and Android development
-    environment with minimum API 15.
+    environment with minimum API 19.
 
 ### Building and Run with Android Studio.
 
