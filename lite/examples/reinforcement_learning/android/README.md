@@ -33,7 +33,7 @@ you can a quick idea of the game progress.
 
 ## Requirements
 
-*   Android Studio 4+ (installed on a Linux, Mac or Windows machine)
+*   Android Studio 4.2 or above (installed on a Linux, Mac or Windows machine)
 *   An Android device, or an Android Emulator
 
 ## Build and run

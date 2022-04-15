@@ -27,7 +27,7 @@ Application can run either on device or emulator.
 *   You need an Android device and Android development environment with minimum
     API 21.
 
-*   Android Studio 3.2 or later.
+*   Android Studio 4.2 or above.
 
 ### Building
 
