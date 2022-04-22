@@ -10,34 +10,30 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GMLAudioFormat : NSObject
 
-@property (nonatomic) NSInteger channelCount;
-@property (nonatomic) NSInteger sampleRate;
-
-
-@end
 
 @interface GMLFloatBuffer : NSObject
 
-@property (nonatomic) float *buffer;
-@property (nonatomic) NSInteger length;
+@property (nonatomic, readonly) NSInteger length;
+@property (nonatomic, readonly) float *buffer;
 
 
 @end
 
 @interface GMLAudioFormat : NSObject
 
-@property (nonatomic) NSInteger channelCount;
-@property (nonatomic) NSInteger sampleRate;
+@property (nonatomic, readonly) NSUInteger channelCount;
+@property (nonatomic, readonly) NSUInteger sampleRate;
 
+-(instancetype)initWithChannelCount:(NSInteger)channelCount sampleRate:(NSInteger)sampleRate;
 
 @end
 
 @interface GMLAudioRingBuffer : NSObject
+- (instancetype)initWithBufferLength:(NSInteger)length;
+-(void)loadWithNewData:(GMLFloatBuffer *)data offset:(NSInteger)offset length:(NSInteger)length;
 
 @end
-
 
 
 @interface GMLAudio : NSObject
@@ -45,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) GMLAudioFormat *audioFormat;
 @property (nonatomic, readonly) GMLFloatBuffer *buffer;
 
+-(instancetype)initWithAudioFormat:(GMLAudioFormat *)format modelSampleCount:(NSInteger)modelSampleCount;
 
 @end
 

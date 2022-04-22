@@ -36,7 +36,7 @@ public class AudioInputManager {
 
   public init(sampleRate: Int) {
     self.sampleRate = sampleRate
-    self.bufferSize = sampleRate * 2
+    self.bufferSize = 256
   }
 
   public func checkPermissionsAndStartTappingMicrophone() {
@@ -68,7 +68,7 @@ public class AudioInputManager {
     let inputNode = audioEngine.inputNode
     let inputFormat = inputNode.outputFormat(forBus: 0)
     guard let recordingFormat = AVAudioFormat(
-      commonFormat: .pcmFormatInt16,
+      commonFormat: .pcmFormatFloat32,
       sampleRate: Double(sampleRate),
       channels: 1,
       interleaved: true
@@ -77,13 +77,13 @@ public class AudioInputManager {
     // installs a tap on the audio engine and specifying the buffer size and the input format.
     inputNode.installTap(onBus: 0, bufferSize: AVAudioFrameCount(bufferSize), format: inputFormat) {
       buffer, _ in
-
+      print(buffer.frameLength);
       self.conversionQueue.async {
         // An AVAudioConverter is used to convert the microphone input to the format required
         // for the model.(pcm 16)
         guard let pcmBuffer = AVAudioPCMBuffer(
           pcmFormat: recordingFormat,
-          frameCapacity: AVAudioFrameCount(recordingFormat.sampleRate * 2.0)
+          frameCapacity: AVAudioFrameCount(ceil(Double(buffer.frameLength) * recordingFormat.sampleRate / inputFormat.sampleRate))
         ) else { return }
 
         var error: NSError?
@@ -98,17 +98,18 @@ public class AudioInputManager {
           print(error.localizedDescription)
           return
         }
-        if let channelData = pcmBuffer.int16ChannelData {
+        if let channelData = pcmBuffer.floatChannelData {
           let channelDataValue = channelData.pointee
           let channelDataValueArray = stride(
             from: 0,
             to: Int(pcmBuffer.frameLength),
             by: buffer.stride
           ).map { channelDataValue[$0] }
+          print(channelDataValueArray.count)
+          print(channelDataValueArray)
 
           // Converted pcm 16 values are delegated to the controller.
-          print(channelDataValueArray.count)
-          self.delegate?.audioInputManager(self, didCaptureChannelData: channelDataValueArray)
+//          self.delegate?.audioInputManager(self, didCaptureChannelData: channelDataValueArray)
         }
       }
     }

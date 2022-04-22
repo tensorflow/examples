@@ -27,6 +27,20 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    let audioRecord = TFLAudioRecord(channelCount: 2, sampleRate: 8000, bufferSize: 1024);
+    audioRecord.checkPermissionAndStartTappingMicrophone { error in
+      
+      if error != nil {
+        print(error!);
+      }
+      print("Worked");
+    }
+    
+    
+//    TFLAudioRecord.startTappingMicrophone { UnsafeMutablePointer<Float>?, <#Error?#> in
+//      <#code#>
+//    }
+
 
     tableView.dataSource = self
     tableView.backgroundColor = .white

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		66049BD7077F73C9210873F2 /* Pods_SoundClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */; };
 		AA2587C3280EF9D30056CC58 /* GMLAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = AA2587C2280EF9D30056CC58 /* GMLAudio.m */; };
+		AA2587C8281115BB0056CC58 /* TFLAudioRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = AA2587C7281115BB0056CC58 /* TFLAudioRecord.m */; };
 		C83580DC253929A7007E9603 /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = C83580DA253929A7007E9603 /* labels.txt */; };
 		C83580DD253929A7007E9603 /* sound_classification.tflite in Resources */ = {isa = PBXBuildFile; fileRef = C83580DB253929A7007E9603 /* sound_classification.tflite */; };
 		C83B9C82256BB4C000EA2282 /* AudioInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */; };
@@ -44,6 +45,8 @@
 		AA2587C0280EF9D30056CC58 /* SoundClassification-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SoundClassification-Bridging-Header.h"; sourceTree = "<group>"; };
 		AA2587C1280EF9D30056CC58 /* GMLAudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GMLAudio.h; sourceTree = "<group>"; };
 		AA2587C2280EF9D30056CC58 /* GMLAudio.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GMLAudio.m; sourceTree = "<group>"; };
+		AA2587C6281115BB0056CC58 /* TFLAudioRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFLAudioRecord.h; sourceTree = "<group>"; };
+		AA2587C7281115BB0056CC58 /* TFLAudioRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFLAudioRecord.m; sourceTree = "<group>"; };
 		AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SoundClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C83580DA253929A7007E9603 /* labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = labels.txt; sourceTree = "<group>"; };
 		C83580DB253929A7007E9603 /* sound_classification.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sound_classification.tflite; sourceTree = "<group>"; };
@@ -137,6 +140,8 @@
 				C86E5CAC2525DB8600F53BEA /* Info.plist */,
 				C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */,
 				AA2587C1280EF9D30056CC58 /* GMLAudio.h */,
+				AA2587C6281115BB0056CC58 /* TFLAudioRecord.h */,
+				AA2587C7281115BB0056CC58 /* TFLAudioRecord.m */,
 				AA2587C2280EF9D30056CC58 /* GMLAudio.m */,
 				C83B9C8C256D38DB00EA2282 /* SoundClassifier.swift */,
 				C8FF9D322577CFB2004ED628 /* ProbabilityTableViewCell.swift */,
@@ -335,6 +340,7 @@
 				C86E5CA32525DB8400F53BEA /* ViewController.swift in Sources */,
 				C86E5C9F2525DB8400F53BEA /* AppDelegate.swift in Sources */,
 				C8FF9D332577CFB2004ED628 /* ProbabilityTableViewCell.swift in Sources */,
+				AA2587C8281115BB0056CC58 /* TFLAudioRecord.m in Sources */,
 				C83B9C8D256D38DB00EA2282 /* SoundClassifier.swift in Sources */,
 				C83B9C82256BB4C000EA2282 /* AudioInputManager.swift in Sources */,
 				AA2587C3280EF9D30056CC58 /* GMLAudio.m in Sources */,
@@ -514,9 +520,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = EQHXZ8M8AV;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = R828ZATN6C;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteSwift/TensorFlowLite.framework/Headers\"",
+					"/Users/priankakariat/Documents/Projects/TensorFlow/examples/lite/examples/sound_classification/ios/**",
+				);
 				INFOPLIST_FILE = SoundClassification/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -537,9 +548,9 @@
 					"-force_load",
 					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.tensorflow.SoundClassification;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prianka.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "Google Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "SoundClassification/SoundClassification-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -553,9 +564,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = EQHXZ8M8AV;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SoundClassification/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -576,9 +587,9 @@
 					"-force_load",
 					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.tensorflow.SoundClassification;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prianka.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "Google Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "SoundClassification/SoundClassification-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
