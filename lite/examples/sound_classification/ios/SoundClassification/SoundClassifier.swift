@@ -61,19 +61,22 @@ public class SoundClassifier {
   }
 
   /// Invokes the `Interpreter` and processes and returns the inference results.
-  public func start(inputBuffer: [Int16]) {
+  public func start(inputBuffer: GMLFloatBuffer) {
     let outputTensor: Tensor
     do {
-      let audioBufferData = int16ArrayToData(inputBuffer)
-      try interpreter.copy(audioBufferData, toInputAt: audioBufferInputTensorIndex)
-      try interpreter.invoke()
+            
+      // This will be handled by Task Library.
+      let inputTensorData = Data(buffer: UnsafeBufferPointer(start: inputBuffer.data, count: Int(inputBuffer.size)))
 
+      try interpreter.copy(inputTensorData , toInputAt: audioBufferInputTensorIndex)
+      try interpreter.invoke()
+      
       outputTensor = try interpreter.output(at: 0)
     } catch let error {
       print(">>> Failed to invoke the interpreter with error: \(error.localizedDescription)")
       return
     }
-
+    
     // Gets the formatted and averaged results.
     let probabilities = dataToFloatArray(outputTensor.data) ?? []
     delegate?.soundClassifier(self, didInterpreteProbabilities: probabilities)
@@ -132,8 +135,10 @@ public class SoundClassifier {
   /// Creates a new buffer by copying the buffer pointer of the given `Int16` array.
   private func int16ArrayToData(_ buffer: [Int16]) -> Data {
     let floatData = buffer.map { Float($0) / Float(Int16.max) }
+    
     return floatData.withUnsafeBufferPointer(Data.init)
   }
+  
 
   /// Creates a new array from the bytes of the given unsafe data.
   /// - Returns: `nil` if `unsafeData.count` is not a multiple of `MemoryLayout<Float>.stride`.

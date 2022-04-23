@@ -8,8 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		66049BD7077F73C9210873F2 /* Pods_SoundClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */; };
-		AA2587C3280EF9D30056CC58 /* GMLAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = AA2587C2280EF9D30056CC58 /* GMLAudio.m */; };
-		AA2587C8281115BB0056CC58 /* TFLAudioRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = AA2587C7281115BB0056CC58 /* TFLAudioRecord.m */; };
+		AA0E76E828141E4D008F1B55 /* GMLRingBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0E76DF28141E49008F1B55 /* GMLRingBuffer.m */; };
+		AA0E76E928141E4D008F1B55 /* GMLAudio.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0E76E128141E4A008F1B55 /* GMLAudio.m */; };
+		AA0E76EA28141E4D008F1B55 /* GMLAudioFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0E76E528141E4C008F1B55 /* GMLAudioFormat.m */; };
+		AA0E76EB28141E4D008F1B55 /* GMLUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0E76E628141E4C008F1B55 /* GMLUtils.m */; };
+		AA36040B28144C4A00F312E4 /* GMLFloatBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = AA36040A28144C4A00F312E4 /* GMLFloatBuffer.m */; };
+		AA8E503D28141C4400883004 /* TFLAudioRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = AA8E503C28141C4400883004 /* TFLAudioRecord.m */; };
 		C83580DC253929A7007E9603 /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = C83580DA253929A7007E9603 /* labels.txt */; };
 		C83580DD253929A7007E9603 /* sound_classification.tflite in Resources */ = {isa = PBXBuildFile; fileRef = C83580DB253929A7007E9603 /* sound_classification.tflite */; };
 		C83B9C82256BB4C000EA2282 /* AudioInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */; };
@@ -42,12 +46,21 @@
 /* Begin PBXFileReference section */
 		5AFAE9051D797536BC360191 /* Pods-SoundClassification.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.release.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.release.xcconfig"; sourceTree = "<group>"; };
 		8D3C72E2E6452206717A5F8A /* Pods-SoundClassification.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.debug.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.debug.xcconfig"; sourceTree = "<group>"; };
+		AA0E76DF28141E49008F1B55 /* GMLRingBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GMLRingBuffer.m; sourceTree = "<group>"; };
+		AA0E76E028141E49008F1B55 /* GMLAudioError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMLAudioError.h; sourceTree = "<group>"; };
+		AA0E76E128141E4A008F1B55 /* GMLAudio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GMLAudio.m; sourceTree = "<group>"; };
+		AA0E76E228141E4A008F1B55 /* GMLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMLAudio.h; sourceTree = "<group>"; };
+		AA0E76E328141E4B008F1B55 /* GMLAudioFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMLAudioFormat.h; sourceTree = "<group>"; };
+		AA0E76E428141E4B008F1B55 /* GMLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMLUtils.h; sourceTree = "<group>"; };
+		AA0E76E528141E4C008F1B55 /* GMLAudioFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GMLAudioFormat.m; sourceTree = "<group>"; };
+		AA0E76E628141E4C008F1B55 /* GMLUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GMLUtils.m; sourceTree = "<group>"; };
+		AA0E76E728141E4D008F1B55 /* GMLRingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMLRingBuffer.h; sourceTree = "<group>"; };
 		AA2587C0280EF9D30056CC58 /* SoundClassification-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SoundClassification-Bridging-Header.h"; sourceTree = "<group>"; };
-		AA2587C1280EF9D30056CC58 /* GMLAudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GMLAudio.h; sourceTree = "<group>"; };
-		AA2587C2280EF9D30056CC58 /* GMLAudio.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GMLAudio.m; sourceTree = "<group>"; };
-		AA2587C6281115BB0056CC58 /* TFLAudioRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TFLAudioRecord.h; sourceTree = "<group>"; };
-		AA2587C7281115BB0056CC58 /* TFLAudioRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TFLAudioRecord.m; sourceTree = "<group>"; };
+		AA36040928144C4A00F312E4 /* GMLFloatBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GMLFloatBuffer.h; sourceTree = "<group>"; };
+		AA36040A28144C4A00F312E4 /* GMLFloatBuffer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GMLFloatBuffer.m; sourceTree = "<group>"; };
 		AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SoundClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA8E503B28141C4300883004 /* TFLAudioRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLAudioRecord.h; sourceTree = "<group>"; };
+		AA8E503C28141C4400883004 /* TFLAudioRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLAudioRecord.m; sourceTree = "<group>"; };
 		C83580DA253929A7007E9603 /* labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = labels.txt; sourceTree = "<group>"; };
 		C83580DB253929A7007E9603 /* sound_classification.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sound_classification.tflite; sourceTree = "<group>"; };
 		C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputManager.swift; sourceTree = "<group>"; };
@@ -99,6 +112,33 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		AA36040C281454DE00F312E4 /* GMLAudio */ = {
+			isa = PBXGroup;
+			children = (
+				AA0E76E228141E4A008F1B55 /* GMLAudio.h */,
+				AA0E76E128141E4A008F1B55 /* GMLAudio.m */,
+				AA0E76E028141E49008F1B55 /* GMLAudioError.h */,
+				AA0E76E328141E4B008F1B55 /* GMLAudioFormat.h */,
+				AA0E76E528141E4C008F1B55 /* GMLAudioFormat.m */,
+				AA36040928144C4A00F312E4 /* GMLFloatBuffer.h */,
+				AA36040A28144C4A00F312E4 /* GMLFloatBuffer.m */,
+				AA0E76E728141E4D008F1B55 /* GMLRingBuffer.h */,
+				AA0E76DF28141E49008F1B55 /* GMLRingBuffer.m */,
+				AA0E76E428141E4B008F1B55 /* GMLUtils.h */,
+				AA0E76E628141E4C008F1B55 /* GMLUtils.m */,
+			);
+			path = GMLAudio;
+			sourceTree = "<group>";
+		};
+		AA36040E2814550B00F312E4 /* TFLAudioRecord */ = {
+			isa = PBXGroup;
+			children = (
+				AA8E503B28141C4300883004 /* TFLAudioRecord.h */,
+				AA8E503C28141C4400883004 /* TFLAudioRecord.m */,
+			);
+			path = TFLAudioRecord;
+			sourceTree = "<group>";
+		};
 		C83580D925392981007E9603 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -133,16 +173,14 @@
 			children = (
 				C83580D925392981007E9603 /* Model */,
 				C86E5C9E2525DB8400F53BEA /* AppDelegate.swift */,
+				AA36040E2814550B00F312E4 /* TFLAudioRecord */,
+				AA36040C281454DE00F312E4 /* GMLAudio */,
 				C86E5CA22525DB8400F53BEA /* ViewController.swift */,
 				C86E5CA42525DB8400F53BEA /* Main.storyboard */,
 				C86E5CA72525DB8600F53BEA /* Assets.xcassets */,
 				C86E5CA92525DB8600F53BEA /* LaunchScreen.storyboard */,
 				C86E5CAC2525DB8600F53BEA /* Info.plist */,
 				C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */,
-				AA2587C1280EF9D30056CC58 /* GMLAudio.h */,
-				AA2587C6281115BB0056CC58 /* TFLAudioRecord.h */,
-				AA2587C7281115BB0056CC58 /* TFLAudioRecord.m */,
-				AA2587C2280EF9D30056CC58 /* GMLAudio.m */,
 				C83B9C8C256D38DB00EA2282 /* SoundClassifier.swift */,
 				C8FF9D322577CFB2004ED628 /* ProbabilityTableViewCell.swift */,
 				AA2587C0280EF9D30056CC58 /* SoundClassification-Bridging-Header.h */,
@@ -337,13 +375,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0E76EB28141E4D008F1B55 /* GMLUtils.m in Sources */,
+				AA8E503D28141C4400883004 /* TFLAudioRecord.m in Sources */,
+				AA0E76E828141E4D008F1B55 /* GMLRingBuffer.m in Sources */,
 				C86E5CA32525DB8400F53BEA /* ViewController.swift in Sources */,
+				AA36040B28144C4A00F312E4 /* GMLFloatBuffer.m in Sources */,
 				C86E5C9F2525DB8400F53BEA /* AppDelegate.swift in Sources */,
 				C8FF9D332577CFB2004ED628 /* ProbabilityTableViewCell.swift in Sources */,
-				AA2587C8281115BB0056CC58 /* TFLAudioRecord.m in Sources */,
 				C83B9C8D256D38DB00EA2282 /* SoundClassifier.swift in Sources */,
 				C83B9C82256BB4C000EA2282 /* AudioInputManager.swift in Sources */,
-				AA2587C3280EF9D30056CC58 /* GMLAudio.m in Sources */,
+				AA0E76EA28141E4D008F1B55 /* GMLAudioFormat.m in Sources */,
+				AA0E76E928141E4D008F1B55 /* GMLAudio.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -522,7 +564,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = R828ZATN6C;
+				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteSwift/TensorFlowLite.framework/Headers\"",
@@ -548,7 +590,7 @@
 					"-force_load",
 					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.prianka.SoundClassification;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "SoundClassification/SoundClassification-Bridging-Header.h";
@@ -587,7 +629,7 @@
 					"-force_load",
 					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.prianka.SoundClassification;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "SoundClassification/SoundClassification-Bridging-Header.h";

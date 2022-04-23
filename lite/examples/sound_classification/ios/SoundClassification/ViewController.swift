@@ -18,28 +18,17 @@ class ViewController: UIViewController {
   // MARK: - Variables
   @IBOutlet weak var tableView: UITableView!
 
-  private var audioInputManager: AudioInputManager!
   private var soundClassifier: SoundClassifier!
   private var bufferSize: Int = 0
   private var probabilities: [Float32] = []
+  private var audioRecord: AudioRecord?
+  private var gmlAudio: Audio!
+
 
   // MARK: - View controller lifecycle methods
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    let audioRecord = TFLAudioRecord(channelCount: 2, sampleRate: 8000, bufferSize: 1024);
-    audioRecord.checkPermissionAndStartTappingMicrophone { error in
-      
-      if error != nil {
-        print(error!);
-      }
-      print("Worked");
-    }
-    
-    
-//    TFLAudioRecord.startTappingMicrophone { UnsafeMutablePointer<Float>?, <#Error?#> in
-//      <#code#>
-//    }
 
 
     tableView.dataSource = self
@@ -47,28 +36,48 @@ class ViewController: UIViewController {
     tableView.tableFooterView = UIView()
 
     soundClassifier = SoundClassifier(modelFileName: "sound_classification", delegate: self)
+    
+    // This initializer defaults to channel count 1
+    let audioFormat = GMLAudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
+    
+    gmlAudio = Audio(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
+    
+    // Initialize audio record and gmlAudio with same buffer size and audio format as GMLAudio.
+    // Once we move to the
+    
+    do {
+      audioRecord = try AudioRecord(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
+      startAudioRecognition()
 
-    startAudioRecognition()
+    }
+    catch {
+      print(error.localizedDescription)
+    }
   }
 
   // MARK: - Private Methods
 
-  /// Initializes the AudioInputManager and starts recognizing on the output buffers.
+  /// Starts tapping AuudioRecord and recognizing on the output buffers
   private func startAudioRecognition() {
-    audioInputManager = AudioInputManager(sampleRate: soundClassifier.sampleRate)
-    audioInputManager.delegate = self
+    audioRecord?.checkPermissionsAndStartTappingMicrophone {[weak self] buffer, error in
 
-    bufferSize = audioInputManager.bufferSize
+      if let selfPtr = self, let
+           buffer = buffer  {
 
-    audioInputManager.checkPermissionsAndStartTappingMicrophone()
+        do {
+          try selfPtr.gmlAudio.loadRecord(buffer)
+        }
+        catch {
+
+        }
+        selfPtr.soundClassifier.start(inputBuffer: buffer)
+      }
+    }
   }
 
-  private func runModel(inputBuffer: [Int16]) {
-    soundClassifier.start(inputBuffer: inputBuffer)
-  }
 }
 
-extension ViewController: AudioInputManagerDelegate {
+extension ViewController {
   func audioInputManagerDidFailToAchievePermission(_ audioInputManager: AudioInputManager) {
     let alertController = UIAlertController(
       title: "Microphone Permissions Denied",
@@ -88,15 +97,6 @@ extension ViewController: AudioInputManagerDelegate {
     alertController.addAction(settingsAction)
 
     present(alertController, animated: true, completion: nil)
-  }
-
-  func audioInputManager(
-    _ audioInputManager: AudioInputManager,
-    didCaptureChannelData channelData: [Int16]
-  ) {
-    let sampleRate = soundClassifier.sampleRate
-    self.runModel(inputBuffer: Array(channelData[0..<sampleRate]))
-    self.runModel(inputBuffer: Array(channelData[sampleRate..<bufferSize]))
   }
 }
 
