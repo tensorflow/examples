@@ -30,6 +30,9 @@ typedef NS_ENUM(NSUInteger, GMLAudioErrorCode) {
   GMLAudioErrorCodeInvalidArgumentError = 2,
 
   GMLAudioErrorCodeAudioProcessingError = 3,
+  
+  /** Record permissions denied by user*/
+  GMLAudioErrorCodeRecordPermissionDeniedError = 4,
 
   /** kInternal indicates an internal error has occurred and some invariants expected by the
    * underlying system have not been satisfied. This error code is reserved for serious errors.
