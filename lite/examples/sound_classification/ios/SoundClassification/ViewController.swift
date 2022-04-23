@@ -60,7 +60,6 @@ class ViewController: UIViewController {
   /// Starts tapping AuudioRecord and recognizing on the output buffers
   private func startAudioRecognition() {
     audioRecord?.checkPermissionsAndStartTappingMicrophone {[weak self] buffer, error in
-      print(error?.localizedDescription)
       if let selfPtr = self, let
            resultBuffer = buffer  {
 
