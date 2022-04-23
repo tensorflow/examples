@@ -20,10 +20,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GMLFloatBuffer : NSObject <NSCopying>
 
 /** Size of the array. */
-@property (nonatomic, readonly) NSUInteger size;
+@property(nonatomic, readonly) NSUInteger size;
 
 /** Pointer to float array wrapped by GMLFloatBuffer. */
-@property (nonatomic, readonly) float *data;
+@property(nonatomic, readonly) float *data;
 
 /**
  * Initializes a GMLFloatBuffer by copying the array specified in the arguments.
@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return An instance of GMLFloatBuffer
  */
--(instancetype)initWithData:(float * _Nullable)data size:(NSUInteger)size;
+- (instancetype)initWithData:(float *_Nullable)data size:(NSUInteger)size;
 
 /**
  * Initializes a GMLFloatBuffer of the specified size with the zeros .
@@ -42,8 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return An instance of GMLFloatBuffer
  */
--(instancetype)initWithSize:(NSUInteger)size;
-
+- (instancetype)initWithSize:(NSUInteger)size;
 
 @end
 

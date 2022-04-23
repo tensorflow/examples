@@ -17,7 +17,7 @@
 #define DEFAULT_CHANNEL_COUNT 1
 
 @implementation GMLAudioFormat
--(instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate {
+- (instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate {
   self = [self init];
   if (self) {
     _channelCount = channelCount;
@@ -26,7 +26,7 @@
   return self;
 }
 
--(instancetype)initWithSampleRate:(NSUInteger)sampleRate {
+- (instancetype)initWithSampleRate:(NSUInteger)sampleRate {
   return [self initWithChannelCount:DEFAULT_CHANNEL_COUNT sampleRate:sampleRate];
 }
 

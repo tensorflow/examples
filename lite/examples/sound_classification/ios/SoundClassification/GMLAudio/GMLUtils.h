@@ -31,7 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
                  withCode:(NSInteger)code
               description:(NSString *)description;
 
-
 @end
 
 NS_ASSUME_NONNULL_END

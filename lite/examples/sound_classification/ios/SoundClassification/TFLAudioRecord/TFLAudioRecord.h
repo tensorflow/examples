@@ -20,16 +20,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** A wrapper class to tap the device's microphone continuously. Currently this class only supports tapping
- the input node of the AVAudioEngine which emits audio data having only one channel.*/
+/** A wrapper class to tap the device's microphone continuously. Currently this class only supports
+ tapping the input node of the AVAudioEngine which emits audio data having only one channel.*/
 NS_SWIFT_NAME(AudioRecord)
 @interface TFLAudioRecord : NSObject
 
 /** Audio format specifying the number of channels and sample rate supported. */
-@property(nonatomic, readonly)GMLAudioFormat *audioFormat;
+@property(nonatomic, readonly) GMLAudioFormat *audioFormat;
 
-/** Size of the buffer held by TFLAudioRecod. It ensures delivery of audio data of length bufferSize arrays when you tap the input microphone. */
-@property(nonatomic, readonly)NSUInteger bufferSize;
+/** Size of the buffer held by TFLAudioRecod. It ensures delivery of audio data of length bufferSize
+ * arrays when you tap the input microphone. */
+@property(nonatomic, readonly) NSUInteger bufferSize;
 
 /**
  * Initializes TFLAudioRecord with a GMLAudioFormat and sample count.
@@ -37,23 +38,29 @@ NS_SWIFT_NAME(AudioRecord)
  * @param format An audio format of type GMLAudioFormat.
  * @seealso GMLAudioFormat
  *
- * @param sampleCount The number of samples this TFLAudioRecord instance should delliver continuously when you tap the on-device microphone. The tap callback will deliver arrays of size sampleCount * bufferSize when you tap the microphone using (checkAndStartTappingMicrophoneWithCompletionHandler:).
+ * @param sampleCount The number of samples this TFLAudioRecord instance should delliver
+ * continuously when you tap the on-device microphone. The tap callback will deliver arrays of size
+ * sampleCount * bufferSize when you tap the microphone using
+ * (checkAndStartTappingMicrophoneWithCompletionHandler:).
  *
  * @return An instance of TFLAudioRecord
  */
--(nullable instancetype)initWithAudioFormat:(GMLAudioFormat *)format sampleCount:(NSUInteger)sampleCount error:(NSError *_Nullable *)error;
+- (nullable instancetype)initWithAudioFormat:(GMLAudioFormat *)format
+                                 sampleCount:(NSUInteger)sampleCount
+                                       error:(NSError *_Nullable *)error;
 
 /**
- * Taps the input of the on-device microphone and delivers the incoming audio data continuously in a completion handler.
- * Note that the completion handler delivers results on a background thread.
+ * Taps the input of the on-device microphone and delivers the incoming audio data continuously in a
+ * completion handler. Note that the completion handler delivers results on a background thread.
  *
- * @param completionHandler Completion handler deliivers either a buffer of size bufferSize or an error failing to do so .
+ * @param completionHandler Completion handler deliivers either a buffer of size bufferSize or an
+ * error failing to do so .
  *
- * @return An instance of TFLAudioRecord
  */
-- (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:(void(^)(GMLFloatBuffer *_Nullable buffer, NSError * _Nullable error))completionHandler;
+- (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:
+    (void (^)(GMLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler;
 
--(void)stopTappingMicrophone;
+- (void)stopTappingMicrophone;
 
 @end
 

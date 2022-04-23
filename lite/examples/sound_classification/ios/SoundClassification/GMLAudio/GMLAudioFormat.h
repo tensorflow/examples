@@ -23,19 +23,20 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NAME(AudioFormat)
 @interface GMLAudioFormat : NSObject
 
-@property (nonatomic, readonly) NSUInteger channelCount;
-@property (nonatomic, readonly) NSUInteger sampleRate;
+@property(nonatomic, readonly) NSUInteger channelCount;
+@property(nonatomic, readonly) NSUInteger sampleRate;
 
--(instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate;
+- (instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate;
 
 /**
- * Initializes GMLAudioFormat with a default channel count oof 1 and the sample rate specified in the argument.
+ * Initializes GMLAudioFormat with a default channel count oof 1 and the sample rate specified in
+ * the argument.
  *
  * @param sampleRate Sample rate.
  *
  * @return An instance of GMLAudioFormat
  */
--(instancetype)initWithSampleRate:(NSUInteger)sampleRate;
+- (instancetype)initWithSampleRate:(NSUInteger)sampleRate;
 
 @end
 

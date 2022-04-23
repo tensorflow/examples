@@ -13,146 +13,174 @@
 // limitations under the License.
 
 #import "TFLAudioRecord.h"
+#import "GMLAudioError.h"
 #import "GMLRingBuffer.h"
 #import "GMLUtils.h"
-#import "GMLAudioError.h"
 
 #define SUPPORTED_CHANNEL_COUNT 1
 
-
 @implementation TFLAudioRecord {
   AVAudioEngine *_audioEngine;
-  
-  /* Specifying a custom buffer size on AVAUdioEngine while tapping does not take effect. Hence we are storing the returned samples in a ring buffer to acheive the desired buffer size. If specified buffer size is shorter than the buffer size supported by AVAUdioEngine only the most recent data of the buffer of size bufferSize will be stored by the ring buffer. */
+
+  /* Specifying a custom buffer size on AVAUdioEngine while tapping does not take effect. Hence we
+   * are storing the returned samples in a ring buffer to acheive the desired buffer size. If
+   * specified buffer size is shorter than the buffer size supported by AVAUdioEngine only the most
+   * recent data of the buffer of size bufferSize will be stored by the ring buffer. */
   GMLRingBuffer *_ringBuffer;
   dispatch_queue_t _delegateQueue;
 }
 
--(nullable instancetype)initWithAudioFormat:(GMLAudioFormat *)audioFormat sampleCount:(NSUInteger)sampleCount error:(NSError *_Nullable *)error {
+- (nullable instancetype)initWithAudioFormat:(GMLAudioFormat *)audioFormat
+                                 sampleCount:(NSUInteger)sampleCount
+                                       error:(NSError *_Nullable *)error {
   self = [self init];
   if (self) {
     if (audioFormat.channelCount > SUPPORTED_CHANNEL_COUNT) {
-      [GMLUtils createCustomError:error withCode:GMLAudioErrorCodeInvalidArgumentError description:@"The channel count provided does not match the supported channel count. Only 1 audio channel is currently supported."];
+      [GMLUtils createCustomError:error
+                         withCode:GMLAudioErrorCodeInvalidArgumentError
+                      description:@"The channel count provided does not match the supported "
+                                  @"channel count. Only 1 audio channel is currently supported."];
       return nil;
     }
     _audioFormat = audioFormat;
     _audioEngine = [[AVAudioEngine alloc] init];
     _bufferSize = sampleCount * audioFormat.channelCount;
     _ringBuffer = [[GMLRingBuffer alloc] initWithBufferSize:sampleCount * audioFormat.channelCount];
-    _delegateQueue = dispatch_queue_create("com.gmlAudio.AudioConversionQueue",
-                                           DISPATCH_QUEUE_CONCURRENT);
+    _delegateQueue =
+        dispatch_queue_create("com.gmlAudio.AudioConversionQueue", DISPATCH_QUEUE_CONCURRENT);
   }
   return self;
 }
 
 /**
- * Uses AVAudioConverter to acheive the desired sample rate since the tap on the input node raises an exception if any format other than the input nodes default format is specified.
- * completion handler structure is used as opposed to polling since this is the pattern followed by all iOS APIs delivering continuous data on a background thread.
- * Even if we implement a read method, it will have to return data in a callback since installTapOnBus delivers data in a callback on a different thread. There will also be extra overhead to ensure thread safety to make sure that reads and writes happen on the same thread sine GMLAudio buffer is meant to be non local. 
+ * Uses AVAudioConverter to acheive the desired sample rate since the tap on the input node raises
+ * an exception if any format other than the input nodes default format is specified. completion
+ * handler structure is used as opposed to polling since this is the pattern followed by all iOS
+ * APIs delivering continuous data on a background thread. Even if we implement a read method, it
+ * will have to return data in a callback since installTapOnBus delivers data in a callback on a
+ * different thread. There will also be extra overhead to ensure thread safety to make sure that
+ * reads and writes happen on the same thread sine GMLAudio buffer is meant to be non local.
  */
--(void)startTappingMicrophoneWithCompletionHandler:(void(^)(GMLFloatBuffer *_Nullable buffer, NSError * _Nullable error))completionHandler {
+- (void)startTappingMicrophoneWithCompletionHandler:
+    (void (^)(GMLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
   AVAudioNode *inputNode = [_audioEngine inputNode];
-  AVAudioFormat *format = [inputNode outputFormatForBus: 0];
+  AVAudioFormat *format = [inputNode outputFormatForBus:0];
 
-  
-  AVAudioFormat *recordingFormat = [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32 sampleRate:format.sampleRate channels:(AVAudioChannelCount)self.audioFormat.channelCount interleaved:YES];
-  
-  AVAudioConverter *audioConverter = [[AVAudioConverter alloc] initFromFormat:format toFormat:recordingFormat];
-  
-  // Setting buffer size takes no effect on the input node. This class uses a ring buffer internally to ensure the requested buffer size.
-  [inputNode installTapOnBus:0 bufferSize:(AVAudioFrameCount)self.bufferSize format:recordingFormat block:^(AVAudioPCMBuffer *buffer, AVAudioTime *when) {
-    dispatch_barrier_async(self->_delegateQueue, ^{
+  AVAudioFormat *recordingFormat =
+      [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32
+                                       sampleRate:format.sampleRate
+                                         channels:(AVAudioChannelCount)self.audioFormat.channelCount
+                                      interleaved:YES];
 
-    // Capacity of converted PCM buffer is calculated in order to maintain the same latency as the input pcmBuffer.
-    AVAudioFrameCount capacity = ceil(buffer.frameLength * recordingFormat.sampleRate / format.sampleRate);
-      
-    AVAudioPCMBuffer *pcmBuffer = [[AVAudioPCMBuffer alloc] initWithPCMFormat:recordingFormat frameCapacity:capacity * (AVAudioFrameCount)self.audioFormat.channelCount];
-      
-   AVAudioConverterInputBlock inputBlock = ^AVAudioBuffer * _Nullable(AVAudioPacketCount inNumberOfPackets, AVAudioConverterInputStatus * _Nonnull outStatus) {
-     
-     *outStatus = AVAudioConverterInputStatus_HaveData;
-     return buffer;
+  AVAudioConverter *audioConverter = [[AVAudioConverter alloc] initFromFormat:format
+                                                                     toFormat:recordingFormat];
 
-   };
-    
-    NSError *conversionError = nil;
-    AVAudioConverterOutputStatus converterStatus = [audioConverter convertToBuffer:pcmBuffer error:&conversionError withInputFromBlock:inputBlock];
-    
-    switch (converterStatus) {
-        
-      case AVAudioConverterOutputStatus_HaveData: {
-        GMLFloatBuffer *floatBuffer = [[GMLFloatBuffer alloc] initWithData:pcmBuffer.floatChannelData[0] size:pcmBuffer.frameLength];
-        
-        NSError *frameBufferFormatError = nil;
-        NSError *loadError = nil;
+  // Setting buffer size takes no effect on the input node. This class uses a ring buffer internally
+  // to ensure the requested buffer size.
+  [inputNode
+      installTapOnBus:0
+           bufferSize:(AVAudioFrameCount)self.bufferSize
+               format:recordingFormat
+                block:^(AVAudioPCMBuffer *buffer, AVAudioTime *when) {
+                  dispatch_barrier_async(self->_delegateQueue, ^{
+                    // Capacity of converted PCM buffer is calculated in order to maintain the same
+                    // latency as the input pcmBuffer.
+                    AVAudioFrameCount capacity =
+                        ceil(buffer.frameLength * recordingFormat.sampleRate / format.sampleRate);
 
-        if (pcmBuffer.frameLength == 0) {
-          [GMLUtils createCustomError:&frameBufferFormatError withCode:GMLAudioErrorCodeInvalidArgumentError description:@"You may have to try with a different channel count or sample rate"];
-          completionHandler(nil, frameBufferFormatError);
-        }
-        else if ((pcmBuffer.frameLength % recordingFormat.channelCount) != 0) {
-          
-          [GMLUtils createCustomError:&frameBufferFormatError withCode:GMLAudioErrorCodeInvalidArgumentError description:@"You have passed an unsupported number of channels."];
-          completionHandler(nil, frameBufferFormatError);
-        }
-        else if(![self->_ringBuffer loadWithBuffer:floatBuffer offset:0 size:floatBuffer.size error:&loadError]) {
-          completionHandler(nil, loadError);
-        }
-        else {
-          GMLFloatBuffer *outFloatBuffer = [self->_ringBuffer.buffer copy];
-          completionHandler(outFloatBuffer, nil);
-        }
-        break;
-        }
-      case AVAudioConverterOutputStatus_Error: {
-        completionHandler(nil, conversionError);
-        break;
-      }
-      default:
-        completionHandler(nil, nil);
-        break;
-    }
-    
-    });
-     
-  }];
- 
+                    AVAudioPCMBuffer *pcmBuffer = [[AVAudioPCMBuffer alloc]
+                        initWithPCMFormat:recordingFormat
+                            frameCapacity:capacity *
+                                          (AVAudioFrameCount)self.audioFormat.channelCount];
+
+                    AVAudioConverterInputBlock inputBlock =
+                        ^AVAudioBuffer *_Nullable(AVAudioPacketCount inNumberOfPackets,
+                                                  AVAudioConverterInputStatus *_Nonnull outStatus) {
+                      *outStatus = AVAudioConverterInputStatus_HaveData;
+                      return buffer;
+                    };
+
+                    NSError *conversionError = nil;
+                    AVAudioConverterOutputStatus converterStatus =
+                        [audioConverter convertToBuffer:pcmBuffer
+                                                  error:&conversionError
+                                     withInputFromBlock:inputBlock];
+
+                    switch (converterStatus) {
+                      case AVAudioConverterOutputStatus_HaveData: {
+                        GMLFloatBuffer *floatBuffer =
+                            [[GMLFloatBuffer alloc] initWithData:pcmBuffer.floatChannelData[0]
+                                                            size:pcmBuffer.frameLength];
+
+                        NSError *frameBufferFormatError = nil;
+                        NSError *loadError = nil;
+
+                        if (pcmBuffer.frameLength == 0) {
+                          [GMLUtils createCustomError:&frameBufferFormatError
+                                             withCode:GMLAudioErrorCodeInvalidArgumentError
+                                          description:@"You may have to try with a different "
+                                                      @"channel count or sample rate"];
+                          completionHandler(nil, frameBufferFormatError);
+                        } else if ((pcmBuffer.frameLength % recordingFormat.channelCount) != 0) {
+                          [GMLUtils
+                              createCustomError:&frameBufferFormatError
+                                       withCode:GMLAudioErrorCodeInvalidArgumentError
+                                    description:
+                                        @"You have passed an unsupported number of channels."];
+                          completionHandler(nil, frameBufferFormatError);
+                        } else if (![self->_ringBuffer loadWithBuffer:floatBuffer
+                                                               offset:0
+                                                                 size:floatBuffer.size
+                                                                error:&loadError]) {
+                          completionHandler(nil, loadError);
+                        } else {
+                          GMLFloatBuffer *outFloatBuffer = [self->_ringBuffer.buffer copy];
+                          completionHandler(outFloatBuffer, nil);
+                        }
+                        break;
+                      }
+                      case AVAudioConverterOutputStatus_Error: {
+                        completionHandler(nil, conversionError);
+                        break;
+                      }
+                      default:
+                        completionHandler(nil, nil);
+                        break;
+                    }
+                  });
+                }];
+
   NSError *engineStartError = nil;
-  
+
   [_audioEngine prepare];
   [_audioEngine startAndReturnError:&engineStartError];
-  
+
   if (engineStartError) {
     completionHandler(nil, engineStartError);
   }
- 
 }
 
-
-
-- (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:(void(^)(GMLFloatBuffer *_Nullable buffer, NSError * _Nullable error))completionHandler {
+- (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:
+    (void (^)(GMLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
   [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
     if (granted) {
-      [self startTappingMicrophoneWithCompletionHandler:^(GMLFloatBuffer * _Nullable buffer, NSError * _Nullable error) {
+      [self startTappingMicrophoneWithCompletionHandler:^(GMLFloatBuffer *_Nullable buffer,
+                                                          NSError *_Nullable error) {
         completionHandler(buffer, error);
       }];
-    }
-    else {
-      NSError *permissionError = [NSError errorWithDomain:@"gml.imagge.errors" code:01 userInfo:nil];
-      
+    } else {
+      NSError *permissionError = [NSError errorWithDomain:@"gml.imagge.errors"
+                                                     code:01
+                                                 userInfo:nil];
+
       completionHandler(nil, permissionError);
     }
   }];
-  
 }
-  
 
--(void)stopTappingMicrophone {
-  
+- (void)stopTappingMicrophone {
   [[_audioEngine inputNode] removeTapOnBus:0];
   [_audioEngine stop];
-  
 }
-
 
 @end

@@ -16,7 +16,7 @@
 
 @implementation GMLFloatBuffer
 
--(instancetype)initWithData:(float * _Nullable)data size:(NSUInteger)size  {
+- (instancetype)initWithData:(float *_Nullable)data size:(NSUInteger)size {
   self = [self init];
   if (self) {
     _size = size;
@@ -31,7 +31,7 @@
   return self;
 }
 
--(instancetype)initWithSize:(NSUInteger)size  {
+- (instancetype)initWithSize:(NSUInteger)size {
   self = [self initWithData:NULL size:size];
   if (self) {
     _size = size;
@@ -43,11 +43,11 @@
   return self;
 }
 
--(id)copyWithZone:(NSZone *)zone {
+- (id)copyWithZone:(NSZone *)zone {
   return [[GMLFloatBuffer alloc] initWithData:self.data size:self.size];
 }
 
--(void)dealloc {
+- (void)dealloc {
   free(_data);
 }
 

@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GMLRingBuffer : NSObject
 
 /** Float buffer that holds the values of the current values of the ring buffer. */
-@property (nonatomic, readonly) GMLFloatBuffer *buffer;
+@property(nonatomic, readonly) GMLFloatBuffer *buffer;
 
 /**
  * Initializes a GMLRingBuffer by copying the array with the specified size.
@@ -39,14 +39,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithBufferSize:(NSInteger)size;
 
 /**
- * Loads a slice of a float array to the ring buffer. If the float array is longer than ring buffer's capacity, samples
- * with lower indices in the array will be ignored.
+ * Loads a slice of a float array to the ring buffer. If the float array is longer than ring
+ * buffer's capacity, samples with lower indices in the array will be ignored.
  *
  * @return Boolean indicating success or failure of loading operation.
  */
--(BOOL)loadWithBuffer:(GMLFloatBuffer *)sourceBuffer offset:(NSUInteger)offset size:(NSUInteger)size error:(NSError **)error;
+- (BOOL)loadWithBuffer:(GMLFloatBuffer *)sourceBuffer
+                offset:(NSUInteger)offset
+                  size:(NSUInteger)size
+                 error:(NSError **)error;
 
 @end
-
 
 NS_ASSUME_NONNULL_END

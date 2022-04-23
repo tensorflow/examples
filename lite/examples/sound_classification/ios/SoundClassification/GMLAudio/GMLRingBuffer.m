@@ -13,9 +13,8 @@
 // limitations under the License.
 
 #import "GMLRingBuffer.h"
-#import "GMLUtils.h"
 #import "GMLAudioError.h"
-
+#import "GMLUtils.h"
 
 @implementation GMLRingBuffer
 
@@ -27,37 +26,37 @@
   return self;
 }
 
-
--(BOOL)loadWithBuffer:(GMLFloatBuffer *)sourceBuffer offset:(NSUInteger)offset size:(NSUInteger)size error:(NSError **)error {
-  
+- (BOOL)loadWithBuffer:(GMLFloatBuffer *)sourceBuffer
+                offset:(NSUInteger)offset
+                  size:(NSUInteger)size
+                 error:(NSError **)error {
   NSInteger sizeToCopy = size;
   NSInteger newOffset = offset;
-  
+
   if (offset + size > sourceBuffer.size) {
-    [GMLUtils createCustomError:error withCode:GMLAudioErrorCodeInvalidArgumentError description:@"offset + size exceeds the maximum size of the source buffer."];
+    [GMLUtils createCustomError:error
+                       withCode:GMLAudioErrorCodeInvalidArgumentError
+                    description:@"offset + size exceeds the maximum size of the source buffer."];
     return NO;
   }
-  
+
   // Length is greater than buffer length, then keep most recent data.
   if (size >= _buffer.size) {
     sizeToCopy = _buffer.size;
     newOffset = offset + (size - _buffer.size);
-    memcpy(_buffer.data , sourceBuffer.data + newOffset, sizeof(float) * sizeToCopy);
-  }
-  else {
+    memcpy(_buffer.data, sourceBuffer.data + newOffset, sizeof(float) * sizeToCopy);
+  } else {
     NSInteger sizeToShiftOut = size;
     NSInteger numElementsToShift = _buffer.size - size;
-    
+
     // Shift out old data from beginning of buffer.
     memcpy(_buffer.data, _buffer.data + sizeToShiftOut, sizeof(float) * numElementsToShift);
-    
+
     // Insert new data to end of buffer.
     memcpy(_buffer.data + numElementsToShift, sourceBuffer.data + offset, sizeof(float) * size);
   }
-  
+
   return YES;
-  
 }
 
 @end
-
