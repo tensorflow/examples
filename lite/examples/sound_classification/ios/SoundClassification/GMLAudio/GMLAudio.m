@@ -13,14 +13,14 @@
 // limitations under the License.
 
 #import "GMLAudio.h"
-#import "GMLUtils.h"
 #import "GMLAudioError.h"
+#import "GMLUtils.h"
 
 @implementation GMLAudio {
   GMLRingBuffer *_ringBuffer;
 }
 
--(instancetype)initWithAudioFormat:(GMLAudioFormat *)format sampleCount:(NSUInteger)sampleCount {
+- (instancetype)initWithAudioFormat:(GMLAudioFormat *)format sampleCount:(NSUInteger)sampleCount {
   self = [self init];
   if (self) {
     _audioFormat = format;
@@ -29,38 +29,33 @@
   return self;
 }
 
--(BOOL)loadWithBuffer:(GMLFloatBuffer *)floatBuffer offset:(NSInteger)offset size:(NSInteger)size error:(NSError **)error {
-  
+- (BOOL)loadWithBuffer:(GMLFloatBuffer *)floatBuffer
+                offset:(NSInteger)offset
+                  size:(NSInteger)size
+                 error:(NSError **)error {
   return [_ringBuffer loadWithBuffer:floatBuffer offset:offset size:floatBuffer.size error:error];
-
 }
 
--(BOOL)loadAudioRecordBuffer:(GMLFloatBuffer *)floatBuffer withError:(NSError **)error {
-  
-  // Sample rate and channel count need not be checked here as they will be checked and reported when TFLAudioRecord which created this record buffer starts emitting wrong sized buffers.
-  
+- (BOOL)loadAudioRecordBuffer:(GMLFloatBuffer *)floatBuffer withError:(NSError **)error {
+  // Sample rate and channel count need not be checked here as they will be checked and reported
+  // when TFLAudioRecord which created this record buffer starts emitting wrong sized buffers.
+
   // Checking buffer size makes sure that channel count and buffer size match.
   if (_ringBuffer.buffer.size != floatBuffer.size) {
-    [GMLUtils createCustomError:error withCode:GMLAudioErrorCodeInvalidArgumentError description:@"Size of TFLAudioRecord buffer does not match GMLAudio's buffer size. Please make sure that the TFLAudioRecord object which created floatBuffer is initialized with the same format (channels, sampleRate) and buffer size as GMLAudio."];
+    [GMLUtils createCustomError:error
+                       withCode:GMLAudioErrorCodeInvalidArgumentError
+                    description:@"Size of TFLAudioRecord buffer does not match GMLAudio's buffer "
+                                @"size. Please make sure that the TFLAudioRecord object which "
+                                @"created floatBuffer is initialized with the same format "
+                                @"(channels, sampleRate) and buffer size as GMLAudio."];
     return NO;
   }
-  
+
   return [self loadWithBuffer:floatBuffer offset:0 size:floatBuffer.size error:error];
-
 }
 
--(GMLFloatBuffer *)getBuffer {
-  
+- (GMLFloatBuffer *)getBuffer {
   return [_ringBuffer.buffer copy];
-  
 }
-
 
 @end
-
-
-
-
-
-
-

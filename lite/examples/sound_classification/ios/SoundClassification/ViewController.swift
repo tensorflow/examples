@@ -62,15 +62,15 @@ class ViewController: UIViewController {
     audioRecord?.checkPermissionsAndStartTappingMicrophone {[weak self] buffer, error in
 
       if let selfPtr = self, let
-           buffer = buffer  {
+           resultBuffer = buffer  {
 
         do {
-          try selfPtr.gmlAudio.loadRecord(buffer)
+          try selfPtr.gmlAudio.loadAudioRecordBuffer(buffer: resultBuffer)
+          selfPtr.soundClassifier.start(inputBuffer: selfPtr.gmlAudio.getBuffer())
         }
         catch {
 
         }
-        selfPtr.soundClassifier.start(inputBuffer: buffer)
       }
     }
   }
