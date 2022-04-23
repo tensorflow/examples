@@ -38,7 +38,7 @@ class ViewController: UIViewController {
     soundClassifier = SoundClassifier(modelFileName: "sound_classification", delegate: self)
     
     // This initializer defaults to channel count 1
-    let audioFormat = GMLAudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
+    let audioFormat = AudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
     
     gmlAudio = Audio(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
     

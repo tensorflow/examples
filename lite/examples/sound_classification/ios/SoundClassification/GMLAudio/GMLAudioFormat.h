@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Wraps a few constants describing the format of the incoming audio samples, namely number of
  * channels and the sample rate.
  */
+NS_SWIFT_NAME(AudioFormat)
 @interface GMLAudioFormat : NSObject
 
 @property (nonatomic, readonly) NSUInteger channelCount;
