@@ -14,7 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "GMLRingBuffer.h"
-#import "TFLAudioRecord.h"
+#import "GMLAudioRecord.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -43,15 +43,15 @@ NS_SWIFT_NAME(Audio)
 - (instancetype)initWithAudioFormat:(GMLAudioFormat *)format sampleCount:(NSUInteger)sampleCount;
 
 /**
- * Convenience method to load the audio record buffer output by a TFLAudioRecord.
+ * Convenience method to load the audio record buffer output by a GMLAudioRecord.
  *
- * @seealso TFLAudioRecord
+ * @seealso GMLAudioRecord
  *
- * @discussion You must make sure that the buffer size and audio format of TFLAudioRecord matches
+ * @discussion You must make sure that the buffer size and audio format of GMLAudioRecord matches
  * the the format.
  *
- * @param audioRecordBuffer  A buffer of type GMLFloatBuffer output by TFLAudioRecord. You must make
- * sure that the buffer size and audio format of TFLAudioRecord matches the the format.
+ * @param audioRecordBuffer  A buffer of type GMLFloatBuffer output by GMLAudioRecord. You must make
+ * sure that the buffer size and audio format of GMLAudioRecord matches the the format.
  *
  * @return An instance of GMLAudioFormat
  */
@@ -66,11 +66,11 @@ NS_SWIFT_NAME(Audio)
  * data to be copied is more than the capacity of GMLAudio's buffer, only the most recent data of
  * the GMLAudio's buffer size will be copied from the input buffer .
  *
- * @seealso TFLAudioRecord
+ * @seealso GMLAudioRecord
  *
  *
- * @param sourceBuffer  A buffer of type GMLFloatBuffer output by TFLAudioRecord. You must make sure
- * that the buffer size and audio format of TFLAudioRecord matches the the format. For multi-channel
+ * @param sourceBuffer  A buffer of type GMLFloatBuffer output by GMLAudioRecord. You must make sure
+ * that the buffer size and audio format of GMLAudioRecord matches the the format. For multi-channel
  * input, the array is interleaved.
  * @param offset Starting position in the sorce buffer.
  * @param size The number of  values to be copied.

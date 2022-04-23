@@ -23,27 +23,27 @@ NS_ASSUME_NONNULL_BEGIN
 /** A wrapper class to tap the device's microphone continuously. Currently this class only supports
  tapping the input node of the AVAudioEngine which emits audio data having only one channel.*/
 NS_SWIFT_NAME(AudioRecord)
-@interface TFLAudioRecord : NSObject
+@interface GMLAudioRecord : NSObject
 
 /** Audio format specifying the number of channels and sample rate supported. */
 @property(nonatomic, readonly) GMLAudioFormat *audioFormat;
 
-/** Size of the buffer held by TFLAudioRecod. It ensures delivery of audio data of length bufferSize
+/** Size of the buffer held by GMLAudioRecord. It ensures delivery of audio data of length bufferSize
  * arrays when you tap the input microphone. */
 @property(nonatomic, readonly) NSUInteger bufferSize;
 
 /**
- * Initializes TFLAudioRecord with a GMLAudioFormat and sample count.
+ * Initializes GMLAudioRecord with a GMLAudioFormat and sample count.
  *
  * @param format An audio format of type GMLAudioFormat.
  * @seealso GMLAudioFormat
  *
- * @param sampleCount The number of samples this TFLAudioRecord instance should delliver
+ * @param sampleCount The number of samples this GMLAudioRecord instance should delliver
  * continuously when you tap the on-device microphone. The tap callback will deliver arrays of size
  * sampleCount * bufferSize when you tap the microphone using
  * (checkAndStartTappingMicrophoneWithCompletionHandler:).
  *
- * @return An instance of TFLAudioRecord
+ * @return An instance of GMLAudioRecord
  */
 - (nullable instancetype)initWithAudioFormat:(GMLAudioFormat *)format
                                  sampleCount:(NSUInteger)sampleCount

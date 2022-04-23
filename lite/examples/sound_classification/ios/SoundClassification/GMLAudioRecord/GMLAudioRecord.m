@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "TFLAudioRecord.h"
+#import "GMLAudioRecord.h"
 #import "GMLAudioError.h"
 #import "GMLRingBuffer.h"
 #import "GMLUtils.h"
 
 #define SUPPORTED_CHANNEL_COUNT 1
 
-@implementation TFLAudioRecord {
+@implementation GMLAudioRecord {
   AVAudioEngine *_audioEngine;
 
   /* Specifying a custom buffer size on AVAUdioEngine while tapping does not take effect. Hence we
@@ -169,9 +169,8 @@
         completionHandler(buffer, error);
       }];
     } else {
-      NSError *permissionError = [NSError errorWithDomain:@"gml.imagge.errors"
-                                                     code:01
-                                                 userInfo:nil];
+      NSError *permissionError = nil;
+      [GMLUtils createCustomError:&permissionError                 withCode:GMLAudioErrorCodeRecordPermissionDeniedError description:@"User denied the permission to record mic input."];
 
       completionHandler(nil, permissionError);
     }
