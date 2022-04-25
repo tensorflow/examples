@@ -22,7 +22,7 @@ class ViewController: UIViewController {
   private var bufferSize: Int = 0
   private var probabilities: [Float32] = []
   private var audioRecord: AudioRecord?
-  private var gmlAudio: Audio!
+  private var audioTensor: AudioTensor!
 
 
   // MARK: - View controller lifecycle methods
@@ -40,7 +40,7 @@ class ViewController: UIViewController {
     // This initializer defaults to channel count 1
     let audioFormat = AudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
     
-    gmlAudio = Audio(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
+    audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
     
     // Initialize audio record and gmlAudio with same buffer size and audio format as GMLAudio.
     // Once we move to the
@@ -64,8 +64,8 @@ class ViewController: UIViewController {
            resultBuffer = buffer  {
 
         do {
-          try selfPtr.gmlAudio.loadAudioRecordBuffer(buffer: resultBuffer)
-          selfPtr.soundClassifier.start(inputBuffer: selfPtr.gmlAudio.getBuffer())
+          try selfPtr.audioTensor.loadAudioRecordBuffer(buffer: resultBuffer)
+          selfPtr.soundClassifier.start(inputBuffer: selfPtr.audioTensor.buffer())
         }
         catch {
 

@@ -12,43 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "GMLFloatBuffer.h"
+#import "TFLAudioFormat.h"
 
-@implementation GMLFloatBuffer
+#define DEFAULT_CHANNEL_COUNT 1
 
-- (instancetype)initWithData:(float *_Nullable)data size:(NSUInteger)size {
+@implementation TFLAudioFormat
+- (instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate {
   self = [self init];
   if (self) {
-    _size = size;
-    _data = malloc(sizeof(float) * size);
-    if (!_data) {
-      exit(-1);
-    }
-    if (data) {
-      memcpy(_data, data, sizeof(float) * size);
-    }
+    _channelCount = channelCount;
+    _sampleRate = sampleRate;
   }
   return self;
 }
 
-- (instancetype)initWithSize:(NSUInteger)size {
-  self = [self initWithData:NULL size:size];
-  if (self) {
-    _size = size;
-    _data = calloc(size, sizeof(float));
-    if (!_data) {
-      exit(-1);
-    }
-  }
-  return self;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-  return [[GMLFloatBuffer alloc] initWithData:self.data size:self.size];
-}
-
-- (void)dealloc {
-  free(_data);
+- (instancetype)initWithSampleRate:(NSUInteger)sampleRate {
+  return [self initWithChannelCount:DEFAULT_CHANNEL_COUNT sampleRate:sampleRate];
 }
 
 @end

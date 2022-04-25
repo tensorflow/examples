@@ -1,9 +1,3 @@
-//
-//  GMLRingBuffer.h
-//  TFLAudioRecord
-//
-//  Created by Prianka Kariat on 22/04/22.
-//
 // Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,22 +13,22 @@
 // limitations under the License.
 
 #import <Foundation/Foundation.h>
-#import "GMLFloatBuffer.h"
+#import "TFLFloatBuffer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /** An wrapper class which stores a buffer that is written in circular fashion. */
-@interface GMLRingBuffer : NSObject
+@interface TFLRingBuffer : NSObject
 
 /** Float buffer that holds the values of the current values of the ring buffer. */
-@property(nonatomic, readonly) GMLFloatBuffer *buffer;
+@property(nonatomic, readonly) TFLFloatBuffer *buffer;
 
 /**
- * Initializes a GMLRingBuffer by copying the array with the specified size.
+ * Initializes a TFLRingBuffer by copying the array with the specified size.
  *
  * @param size Size of the ring buffer.
  *
- * @return An instance of GMLRingBuffer.
+ * @return An instance of TFLRingBuffer.
  */
 - (instancetype)initWithBufferSize:(NSInteger)size;
 
@@ -44,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return Boolean indicating success or failure of loading operation.
  */
-- (BOOL)loadWithBuffer:(GMLFloatBuffer *)sourceBuffer
+- (BOOL)loadBuffer:(TFLFloatBuffer *)sourceBuffer
                 offset:(NSUInteger)offset
                   size:(NSUInteger)size
                  error:(NSError **)error;

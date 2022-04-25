@@ -16,20 +16,27 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Helper utility for the all tasks which encapsulates common functionality. */
-@interface GMLUtils : NSObject
+/**
+ * Wraps a few constants describing the format of the incoming audio samples, namely number of
+ * channels and the sample rate.
+ */
+NS_SWIFT_NAME(AudioFormat)
+@interface TFLAudioFormat : NSObject
+
+@property(nonatomic, readonly) NSUInteger channelCount;
+@property(nonatomic, readonly) NSUInteger sampleRate;
+
+- (instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate;
 
 /**
- * Creates and saves an NSError with the given code and description.
+ * Initializes TFLAudioFormat with a default channel count of 1 and the sample rate specified in
+ * the argument.
  *
- * @param code Error code.
- * @param description Error description.
- * @param error Pointer to the memory location where the created error should be saved. If `nil`,
- * no error will be saved.
+ * @param sampleRate Sample rate.
+ *
+ * @return An instance of tFLAudioFormat
  */
-+ (void)createCustomError:(NSError **)error
-                 withCode:(NSInteger)code
-              description:(NSString *)description;
+- (instancetype)initWithSampleRate:(NSUInteger)sampleRate;
 
 @end
 

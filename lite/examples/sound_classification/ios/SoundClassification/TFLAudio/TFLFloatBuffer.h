@@ -17,30 +17,30 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /** An wrapper class to store pointer to a float array and its size. */
-@interface GMLFloatBuffer : NSObject <NSCopying>
+@interface TFLFloatBuffer : NSObject <NSCopying>
 
 /** Size of the array. */
 @property(nonatomic, readonly) NSUInteger size;
 
-/** Pointer to float array wrapped by GMLFloatBuffer. */
+/** Pointer to float array wrapped by TFLFloatBuffer. */
 @property(nonatomic, readonly) float *data;
 
 /**
- * Initializes a GMLFloatBuffer by copying the array specified in the arguments.
+ * Initializes a TFLFloatBuffer by copying the array specified in the arguments.
  *
  * @param data A pointer to a float array whose values are to be copied into the buffer.
  * @param size Size of the array pointed to by the input float array.
  *
- * @return An instance of GMLFloatBuffer
+ * @return An instance of TFLFloatBuffer
  */
 - (instancetype)initWithData:(float *_Nullable)data size:(NSUInteger)size;
 
 /**
- * Initializes a GMLFloatBuffer of the specified size with the zeros .
+ * Initializes a TFLFloatBuffer of the specified size with the zeros .
  *
  * @param size Number of elements the float buffer can hold.
  *
- * @return An instance of GMLFloatBuffer
+ * @return An instance of TFLFloatBuffer
  */
 - (instancetype)initWithSize:(NSUInteger)size;
 

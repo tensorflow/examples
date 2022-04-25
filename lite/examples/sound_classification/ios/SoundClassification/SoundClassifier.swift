@@ -61,7 +61,7 @@ public class SoundClassifier {
   }
 
   /// Invokes the `Interpreter` and processes and returns the inference results.
-  public func start(inputBuffer: GMLFloatBuffer) {
+  public func start(inputBuffer: TFLFloatBuffer) {
     let outputTensor: Tensor
     do {
             

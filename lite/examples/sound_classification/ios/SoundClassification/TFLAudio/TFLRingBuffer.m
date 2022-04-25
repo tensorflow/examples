@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "GMLRingBuffer.h"
-#import "GMLAudioError.h"
-#import "GMLUtils.h"
+#import "TFLRingBuffer.h"
+#import "TFLAudioError.h"
+#import "TFLUtils.h"
 
-@implementation GMLRingBuffer
+@implementation TFLRingBuffer
 
 - (instancetype)initWithBufferSize:(NSInteger)size {
   self = [self init];
   if (self) {
-    _buffer = [[GMLFloatBuffer alloc] initWithSize:size];
+    _buffer = [[TFLFloatBuffer alloc] initWithSize:size];
   }
   return self;
 }
 
-- (BOOL)loadWithBuffer:(GMLFloatBuffer *)sourceBuffer
+- (BOOL)loadBuffer:(TFLFloatBuffer *)sourceBuffer
                 offset:(NSUInteger)offset
                   size:(NSUInteger)size
                  error:(NSError **)error {
@@ -34,8 +34,8 @@
   NSInteger newOffset = offset;
 
   if (offset + size > sourceBuffer.size) {
-    [GMLUtils createCustomError:error
-                       withCode:GMLAudioErrorCodeInvalidArgumentError
+    [TFLUtils createCustomError:error
+                       withCode:TFLAudioErrorCodeInvalidArgumentError
                     description:@"offset + size exceeds the maximum size of the source buffer."];
     return NO;
   }

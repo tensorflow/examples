@@ -12,49 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "GMLAudio.h"
-#import "GMLAudioError.h"
-#import "GMLUtils.h"
+#import "TFLAudioTensor.h"
+#import "TFLAudioError.h"
+#import "TFLUtils.h"
 
-@implementation GMLAudio {
-  GMLRingBuffer *_ringBuffer;
+@implementation TFLAudioTensor {
+  TFLRingBuffer *_ringBuffer;
 }
 
-- (instancetype)initWithAudioFormat:(GMLAudioFormat *)format sampleCount:(NSUInteger)sampleCount {
+- (instancetype)initWithAudioFormat:(TFLAudioFormat *)format sampleCount:(NSUInteger)sampleCount {
   self = [self init];
   if (self) {
     _audioFormat = format;
-    _ringBuffer = [[GMLRingBuffer alloc] initWithBufferSize:sampleCount * format.channelCount];
+    _ringBuffer = [[TFLRingBuffer alloc] initWithBufferSize:sampleCount * format.channelCount];
   }
   return self;
 }
 
-- (BOOL)loadWithBuffer:(GMLFloatBuffer *)floatBuffer
+- (BOOL)loadBuffer:(TFLFloatBuffer *)floatBuffer
                 offset:(NSInteger)offset
                   size:(NSInteger)size
                  error:(NSError **)error {
-  return [_ringBuffer loadWithBuffer:floatBuffer offset:offset size:floatBuffer.size error:error];
+  return [_ringBuffer loadBuffer:floatBuffer offset:offset size:floatBuffer.size error:error];
 }
 
-- (BOOL)loadAudioRecordBuffer:(GMLFloatBuffer *)floatBuffer withError:(NSError **)error {
+- (BOOL)loadAudioRecordBuffer:(TFLFloatBuffer *)floatBuffer withError:(NSError **)error {
   // Sample rate and channel count need not be checked here as they will be checked and reported
   // when TFLAudioRecord which created this record buffer starts emitting wrong sized buffers.
 
   // Checking buffer size makes sure that channel count and buffer size match.
   if (_ringBuffer.buffer.size != floatBuffer.size) {
-    [GMLUtils createCustomError:error
-                       withCode:GMLAudioErrorCodeInvalidArgumentError
-                    description:@"Size of TFLAudioRecord buffer does not match GMLAudio's buffer "
+    [TFLUtils createCustomError:error
+                       withCode:TFLAudioErrorCodeInvalidArgumentError
+                    description:@"Size of TFLAudioRecord buffer does not match TFLAudioTensor's buffer "
                                 @"size. Please make sure that the TFLAudioRecord object which "
                                 @"created floatBuffer is initialized with the same format "
-                                @"(channels, sampleRate) and buffer size as GMLAudio."];
+                                @"(channels, sampleRate) and buffer size as TFLAudioTensor."];
     return NO;
   }
 
-  return [self loadWithBuffer:floatBuffer offset:0 size:floatBuffer.size error:error];
+  return [self loadBuffer:floatBuffer offset:0 size:floatBuffer.size error:error];
 }
 
-- (GMLFloatBuffer *)getBuffer {
+- (TFLFloatBuffer *)buffer {
   return [_ringBuffer.buffer copy];
 }
 

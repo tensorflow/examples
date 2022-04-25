@@ -12,32 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "GMLAudioRecord.h"
-#import "GMLAudioError.h"
-#import "GMLRingBuffer.h"
-#import "GMLUtils.h"
+#import "TFLAudioRecord.h"
+#import "TFLAudioError.h"
+#import "TFLRingBuffer.h"
+#import "TFLUtils.h"
 
 #define SUPPORTED_CHANNEL_COUNT 1
 
-@implementation GMLAudioRecord {
+@implementation TFLAudioRecord {
   AVAudioEngine *_audioEngine;
 
   /* Specifying a custom buffer size on AVAUdioEngine while tapping does not take effect. Hence we
    * are storing the returned samples in a ring buffer to acheive the desired buffer size. If
    * specified buffer size is shorter than the buffer size supported by AVAUdioEngine only the most
    * recent data of the buffer of size bufferSize will be stored by the ring buffer. */
-  GMLRingBuffer *_ringBuffer;
+  TFLRingBuffer *_ringBuffer;
   dispatch_queue_t _delegateQueue;
 }
 
-- (nullable instancetype)initWithAudioFormat:(GMLAudioFormat *)audioFormat
+- (nullable instancetype)initWithAudioFormat:(TFLAudioFormat *)audioFormat
                                  sampleCount:(NSUInteger)sampleCount
                                        error:(NSError *_Nullable *)error {
   self = [self init];
   if (self) {
     if (audioFormat.channelCount > SUPPORTED_CHANNEL_COUNT) {
-      [GMLUtils createCustomError:error
-                         withCode:GMLAudioErrorCodeInvalidArgumentError
+      [TFLUtils createCustomError:error
+                         withCode:TFLAudioErrorCodeInvalidArgumentError
                       description:@"The channel count provided does not match the supported "
                                   @"channel count. Only 1 audio channel is currently supported."];
       return nil;
@@ -45,9 +45,9 @@
     _audioFormat = audioFormat;
     _audioEngine = [[AVAudioEngine alloc] init];
     _bufferSize = sampleCount * audioFormat.channelCount;
-    _ringBuffer = [[GMLRingBuffer alloc] initWithBufferSize:sampleCount * audioFormat.channelCount];
+    _ringBuffer = [[TFLRingBuffer alloc] initWithBufferSize:sampleCount * audioFormat.channelCount];
     _delegateQueue =
-        dispatch_queue_create("com.gmlAudio.AudioConversionQueue", DISPATCH_QUEUE_CONCURRENT);
+        dispatch_queue_create("com.tflAudio.AudioConversionQueue", DISPATCH_QUEUE_CONCURRENT);
   }
   return self;
 }
@@ -59,10 +59,10 @@
  * APIs delivering continuous data on a background thread. Even if we implement a read method, it
  * will have to return data in a callback since installTapOnBus delivers data in a callback on a
  * different thread. There will also be extra overhead to ensure thread safety to make sure that
- * reads and writes happen on the same thread sine GMLAudio buffer is meant to be non local.
+ * reads and writes happen on the same thread sine TFLAudioTensor buffer is meant to be non local.
  */
 - (void)startTappingMicrophoneWithCompletionHandler:
-    (void (^)(GMLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
+    (void (^)(TFLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
   AVAudioNode *inputNode = [_audioEngine inputNode];
   AVAudioFormat *format = [inputNode outputFormatForBus:0];
 
@@ -108,33 +108,33 @@
 
                     switch (converterStatus) {
                       case AVAudioConverterOutputStatus_HaveData: {
-                        GMLFloatBuffer *floatBuffer =
-                            [[GMLFloatBuffer alloc] initWithData:pcmBuffer.floatChannelData[0]
+                        TFLFloatBuffer *floatBuffer =
+                            [[TFLFloatBuffer alloc] initWithData:pcmBuffer.floatChannelData[0]
                                                             size:pcmBuffer.frameLength];
 
                         NSError *frameBufferFormatError = nil;
                         NSError *loadError = nil;
 
                         if (pcmBuffer.frameLength == 0) {
-                          [GMLUtils createCustomError:&frameBufferFormatError
-                                             withCode:GMLAudioErrorCodeInvalidArgumentError
+                          [TFLUtils createCustomError:&frameBufferFormatError
+                                             withCode:TFLAudioErrorCodeInvalidArgumentError
                                           description:@"You may have to try with a different "
                                                       @"channel count or sample rate"];
                           completionHandler(nil, frameBufferFormatError);
                         } else if ((pcmBuffer.frameLength % recordingFormat.channelCount) != 0) {
-                          [GMLUtils
+                          [TFLUtils
                               createCustomError:&frameBufferFormatError
-                                       withCode:GMLAudioErrorCodeInvalidArgumentError
+                                       withCode:TFLAudioErrorCodeInvalidArgumentError
                                     description:
                                         @"You have passed an unsupported number of channels."];
                           completionHandler(nil, frameBufferFormatError);
-                        } else if (![self->_ringBuffer loadWithBuffer:floatBuffer
+                        } else if (![self->_ringBuffer loadBuffer:floatBuffer
                                                                offset:0
                                                                  size:floatBuffer.size
                                                                 error:&loadError]) {
                           completionHandler(nil, loadError);
                         } else {
-                          GMLFloatBuffer *outFloatBuffer = [self->_ringBuffer.buffer copy];
+                          TFLFloatBuffer *outFloatBuffer = [self->_ringBuffer.buffer copy];
                           completionHandler(outFloatBuffer, nil);
                         }
                         break;
@@ -161,16 +161,16 @@
 }
 
 - (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:
-    (void (^)(GMLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
+    (void (^)(TFLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
   [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
     if (granted) {
-      [self startTappingMicrophoneWithCompletionHandler:^(GMLFloatBuffer *_Nullable buffer,
+      [self startTappingMicrophoneWithCompletionHandler:^(TFLFloatBuffer *_Nullable buffer,
                                                           NSError *_Nullable error) {
         completionHandler(buffer, error);
       }];
     } else {
       NSError *permissionError = nil;
-      [GMLUtils createCustomError:&permissionError                 withCode:GMLAudioErrorCodeRecordPermissionDeniedError description:@"User denied the permission to record mic input."];
+      [TFLUtils createCustomError:&permissionError                 withCode:TFLAudioErrorCodeRecordPermissionDeniedError description:@"User denied the permission to record mic input."];
 
       completionHandler(nil, permissionError);
     }

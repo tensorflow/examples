@@ -17,27 +17,27 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * Wraps a few constants describing the format of the incoming audio samples, namely number of
- * channels and the sample rate.
+ * @enum TFLAudioErrorCode
+ * This enum specifies  error codes for audio TensorFlow Lite Task Library.
  */
-NS_SWIFT_NAME(AudioFormat)
-@interface GMLAudioFormat : NSObject
+typedef NS_ENUM(NSUInteger, TFLAudioErrorCode) {
 
-@property(nonatomic, readonly) NSUInteger channelCount;
-@property(nonatomic, readonly) NSUInteger sampleRate;
+  /** Unspecified error. */
+  TFLAudioErrorCodeUnspecifiedError = 1,
 
-- (instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate;
+  /** Invalid argument specified. */
+  TFLAudioErrorCodeInvalidArgumentError = 2,
 
-/**
- * Initializes GMLAudioFormat with a default channel count oof 1 and the sample rate specified in
- * the argument.
- *
- * @param sampleRate Sample rate.
- *
- * @return An instance of GMLAudioFormat
- */
-- (instancetype)initWithSampleRate:(NSUInteger)sampleRate;
+  TFLAudioErrorCodeAudioProcessingError = 3,
+  
+  /** Record permissions denied by user*/
+  TFLAudioErrorCodeRecordPermissionDeniedError = 4,
 
-@end
+  /** kInternal indicates an internal error has occurred and some invariants expected by the
+   * underlying system have not been satisfied. This error code is reserved for serious errors.
+   */
+  TFLAudioErrorCodeInternalError
+
+} NS_SWIFT_NAME(AudioErrorCode);
 
 NS_ASSUME_NONNULL_END

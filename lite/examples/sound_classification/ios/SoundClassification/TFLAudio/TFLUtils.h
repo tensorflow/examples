@@ -12,22 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "GMLAudioFormat.h"
+#import <Foundation/Foundation.h>
 
-#define DEFAULT_CHANNEL_COUNT 1
+NS_ASSUME_NONNULL_BEGIN
 
-@implementation GMLAudioFormat
-- (instancetype)initWithChannelCount:(NSUInteger)channelCount sampleRate:(NSUInteger)sampleRate {
-  self = [self init];
-  if (self) {
-    _channelCount = channelCount;
-    _sampleRate = sampleRate;
-  }
-  return self;
-}
+/** Helper utility for the all tasks which encapsulates common functionality. */
+@interface TFLUtils : NSObject
 
-- (instancetype)initWithSampleRate:(NSUInteger)sampleRate {
-  return [self initWithChannelCount:DEFAULT_CHANNEL_COUNT sampleRate:sampleRate];
-}
+/**
+ * Creates and saves an NSError with the given code and description.
+ *
+ * @param code Error code.
+ * @param description Error description.
+ * @param error Pointer to the memory location where the created error should be saved. If `nil`,
+ * no error will be saved.
+ */
++ (void)createCustomError:(NSError **)error
+                 withCode:(NSInteger)code
+              description:(NSString *)description;
 
 @end
+
+NS_ASSUME_NONNULL_END

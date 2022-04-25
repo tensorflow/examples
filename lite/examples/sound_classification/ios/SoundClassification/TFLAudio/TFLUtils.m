@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "GMLUtils.h"
-#import "GMLAudioError.h"
+#import "TFLUtils.h"
+#import "TFLAudioError.h"
 
-/** Error domain of GML Audio related errors. */
-static NSString *const GMLAudioErrorDomain = @"org.gml.audio";
+/** Error domain of Audio Task Library  errors. */
+static NSString *const TFLAudioErrorDomain = @"org.gml.audio";
 
-@implementation GMLUtils
+@implementation TFLUtils
 
 + (void)createCustomError:(NSError **)error
                  withCode:(NSInteger)code
               description:(NSString *)description {
   if (error) {
-    *error = [NSError errorWithDomain:GMLAudioErrorDomain
+    *error = [NSError errorWithDomain:TFLAudioErrorDomain
                                  code:code
                              userInfo:@{NSLocalizedDescriptionKey : description}];
   }
