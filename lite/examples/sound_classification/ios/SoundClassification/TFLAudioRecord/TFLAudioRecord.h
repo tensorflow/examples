@@ -57,10 +57,10 @@ NS_SWIFT_NAME(AudioRecord)
  * error failing to do so .
  *
  */
-- (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:
+- (void)startRecordingWithCompletionHandler:
     (void (^)(TFLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler;
 
-- (void)stopTappingMicrophone;
+- (void)stop;
 
 @end
 

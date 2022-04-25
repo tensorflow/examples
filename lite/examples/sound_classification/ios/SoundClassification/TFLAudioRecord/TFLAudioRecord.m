@@ -160,7 +160,7 @@
   }
 }
 
-- (void)checkPermissionsAndStartTappingMicrophoneWithCompletionHandler:
+- (void)startRecordingWithCompletionHandler:
     (void (^)(TFLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler {
   [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
     if (granted) {
@@ -177,7 +177,7 @@
   }];
 }
 
-- (void)stopTappingMicrophone {
+- (void)stop {
   [[_audioEngine inputNode] removeTapOnBus:0];
   [_audioEngine stop];
 }
