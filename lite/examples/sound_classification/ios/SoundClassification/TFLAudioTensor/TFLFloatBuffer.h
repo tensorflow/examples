@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return An instance of TFLFloatBuffer
  */
-- (instancetype)initWithData:(float *_Nullable)data size:(NSUInteger)size;
+- (instancetype)initWithData:(float *)data size:(NSUInteger)size;
 
 /**
  * Initializes a TFLFloatBuffer of the specified size with the zeros .

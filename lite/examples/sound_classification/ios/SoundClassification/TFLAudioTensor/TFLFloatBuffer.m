@@ -16,7 +16,7 @@
 
 @implementation TFLFloatBuffer
 
-- (instancetype)initWithData:(float *_Nullable)data size:(NSUInteger)size {
+- (instancetype)initWithData:(float *)data size:(NSUInteger)size {
   self = [self init];
   if (self) {
     _size = size;
@@ -32,7 +32,7 @@
 }
 
 - (instancetype)initWithSize:(NSUInteger)size {
-  self = [self initWithData:NULL size:size];
+  self = [self init];
   if (self) {
     _size = size;
     _data = calloc(size, sizeof(float));
