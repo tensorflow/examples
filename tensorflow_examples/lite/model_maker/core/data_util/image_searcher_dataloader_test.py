@@ -31,8 +31,9 @@ class ImageSearcherDataloaderTest(tf.test.TestCase):
     data_loader.load_from_folder(image_dir2)
     self.assertLen(data_loader, 3)
     self.assertEqual(data_loader.dataset.shape, (3, 1280))
-    self.assertEqual(data_loader.metadata,
-                     ["burger", "sparrow", "cats_and_dogs"])
+    # The order of file may be different.
+    self.assertEqual(set(data_loader.metadata),
+                     set(["burger", "sparrow", "cats_and_dogs"]))
 
 
 if __name__ == "__main__":
