@@ -39,7 +39,7 @@
   // when TFLAudioRecord which created this record buffer starts emitting wrong sized buffers.
 
   // Checking buffer size makes sure that channel count and buffer size match.
-  if (_ringBuffer.buffer.size != floatBuffer.size) {
+  if ([_ringBuffer size] != floatBuffer.size) {
     [TFLUtils createCustomError:error
                        withCode:TFLAudioErrorCodeInvalidArgumentError
                     description:@"Size of TFLAudioRecord buffer does not match TFLAudioTensor's buffer "
@@ -51,9 +51,5 @@
 
   return [self loadBuffer:floatBuffer offset:0 size:floatBuffer.size error:error];
 }
-
-//- (TFLFloatBuffer *)buffer {
-//  return [_ringBuffer.buffer copy];
-//}
 
 @end

@@ -134,7 +134,7 @@
                                                                 error:&loadError]) {
                           completionHandler(nil, loadError);
                         } else {
-                          TFLFloatBuffer *outFloatBuffer = [self->_ringBuffer.buffer copy];
+                          TFLFloatBuffer *outFloatBuffer = [self->_ringBuffer floatBuffer];
                           completionHandler(outFloatBuffer, nil);
                         }
                         break;

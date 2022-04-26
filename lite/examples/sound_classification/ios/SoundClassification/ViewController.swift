@@ -59,16 +59,17 @@ class ViewController: UIViewController {
 
   /// Starts tapping AuudioRecord and recognizing on the output buffers
   private func startAudioRecognition() {
+    
     audioRecord?.startRecording {[weak self] buffer, error in
       if let selfPtr = self, let
-           resultBuffer = buffer  {
-
+          resultBuffer = buffer  {
+        
         do {
           try selfPtr.audioTensor.loadAudioRecordBuffer(buffer: resultBuffer)
           selfPtr.soundClassifier.start(inputBuffer: selfPtr.audioTensor.ringBuffer.floatBuffer())
         }
         catch {
-
+          
         }
       }
     }
