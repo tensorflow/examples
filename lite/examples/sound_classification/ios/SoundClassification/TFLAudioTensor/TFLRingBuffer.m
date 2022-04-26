@@ -18,6 +18,7 @@
 
 @implementation TFLRingBuffer {
   NSInteger nextIndex;
+  TFLFloatBuffer *_buffer;
 }
 
 - (instancetype)initWithBufferSize:(NSInteger)size {
@@ -82,6 +83,11 @@
   memcpy(floatBuffer.data + endChunkSize, _buffer.data, sizeof(float) * nextIndex);
 
   return floatBuffer;
+}
+
+-(NSUInteger)size {
+  
+  return _buffer.size;
 }
 
 @end
