@@ -25,6 +25,9 @@ NS_SWIFT_NAME(AudioTensor)
 /** Audio format specifying the number of channels and sample rate supported. */
 @property(nonatomic, readonly) TFLAudioFormat *audioFormat;
 
+@property(nonatomic, readonly) TFLRingBuffer *ringBuffer;
+
+
 /**
  * Initializes TFLAudioTensor with a TFLAudioFormat and sample countl.
  *
@@ -82,7 +85,7 @@ NS_SWIFT_NAME(AudioTensor)
                   size:(NSInteger)size
                  error:(NSError **)error;
 
-- (TFLFloatBuffer *)buffer;
+//- (TFLFloatBuffer *)floatBu;
 
 @end
 

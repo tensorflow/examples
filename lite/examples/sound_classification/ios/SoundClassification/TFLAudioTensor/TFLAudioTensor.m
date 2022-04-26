@@ -16,9 +16,7 @@
 #import "TFLAudioError.h"
 #import "TFLUtils.h"
 
-@implementation TFLAudioTensor {
-  TFLRingBuffer *_ringBuffer;
-}
+@implementation TFLAudioTensor
 
 - (instancetype)initWithAudioFormat:(TFLAudioFormat *)format sampleCount:(NSUInteger)sampleCount {
   self = [self init];
@@ -54,8 +52,8 @@
   return [self loadBuffer:floatBuffer offset:0 size:floatBuffer.size error:error];
 }
 
-- (TFLFloatBuffer *)buffer {
-  return [_ringBuffer.buffer copy];
-}
+//- (TFLFloatBuffer *)buffer {
+//  return [_ringBuffer.buffer copy];
+//}
 
 @end

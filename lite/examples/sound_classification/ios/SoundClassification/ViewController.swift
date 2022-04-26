@@ -65,7 +65,7 @@ class ViewController: UIViewController {
 
         do {
           try selfPtr.audioTensor.loadAudioRecordBuffer(buffer: resultBuffer)
-          selfPtr.soundClassifier.start(inputBuffer: selfPtr.audioTensor.buffer())
+          selfPtr.soundClassifier.start(inputBuffer: selfPtr.audioTensor.ringBuffer.floatBuffer())
         }
         catch {
 
