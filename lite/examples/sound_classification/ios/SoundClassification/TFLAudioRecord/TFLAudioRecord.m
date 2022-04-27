@@ -17,7 +17,7 @@
 #import "TFLRingBuffer.h"
 #import "TFLUtils.h"
 
-#define SUPPORTED_CHANNEL_COUNT 1
+#define SUPPORTED_CHANNEL_COUNT 2
 
 @implementation TFLAudioRecord {
   AVAudioEngine *_audioEngine;
@@ -41,7 +41,7 @@
       [TFLUtils createCustomError:error
                          withCode:TFLAudioErrorCodeWaitingForNewInputError
                       description:@"The channel count provided does not match the supported "
-                                  @"channel count. Only 1 audio channel is currently supported."];
+                                  @"channel count. Only upto 2 audio channels are currently supported."];
       return nil;
     }
     
@@ -70,11 +70,12 @@
  */
 - (void)startTappingMicrophoneWithError: (NSError **)error {
   AVAudioNode *inputNode = [_audioEngine inputNode];
-  AVAudioFormat *format = [inputNode outputFormatForBus:0];
+  AVAudioFormat *format =   [inputNode outputFormatForBus:0];
+
 
   AVAudioFormat *recordingFormat =
       [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32
-                                       sampleRate:format.sampleRate
+                                       sampleRate:self.audioFormat.sampleRate
                                          channels:(AVAudioChannelCount)self.audioFormat.channelCount
                                       interleaved:YES];
 
@@ -86,14 +87,14 @@
   [inputNode
       installTapOnBus:0
            bufferSize:(AVAudioFrameCount)self.bufferSize
-               format:recordingFormat
+               format:format
                 block:^(AVAudioPCMBuffer *buffer, AVAudioTime *when) {
                   dispatch_async(self->_conversionQueue, ^{
                     // Capacity of converted PCM buffer is calculated in order to maintain the same
                     // latency as the input pcmBuffer.
                     AVAudioFrameCount capacity =
                         ceil(buffer.frameLength * recordingFormat.sampleRate / format.sampleRate);
-
+                    
                     AVAudioPCMBuffer *pcmBuffer = [[AVAudioPCMBuffer alloc]
                         initWithPCMFormat:recordingFormat
                             frameCapacity:capacity *
@@ -117,7 +118,7 @@
                         TFLFloatBuffer *floatBuffer =
                             [[TFLFloatBuffer alloc] initWithData:pcmBuffer.floatChannelData[0]
                                                             size:pcmBuffer.frameLength];
-
+                        
                         NSError *frameBufferProcessingError = nil;
 
                         if (pcmBuffer.frameLength == 0) {
@@ -133,18 +134,15 @@
                                     description:
                                         @"You have passed an unsupported number of channels."];
                           self->globalError = frameBufferProcessingError;
-                        } else {
-
-                          if ([self->_ringBuffer loadBuffer:floatBuffer
-                                                 offset:0
-                                                   size:floatBuffer.size
-                                                      error:&frameBufferProcessingError]) {
-                            self->globalError = nil;
-                          }
-                          else {
+                        } else if (![self->_ringBuffer loadBuffer:floatBuffer
+                                                          offset:0
+                                                            size:floatBuffer.size
+                                                           error:&frameBufferProcessingError]){
                             self->globalError = frameBufferProcessingError;
                           }
-                        }
+                          else {
+                            self->globalError = nil;
+                          }
                         break;
                       }
                       case AVAudioConverterOutputStatus_Error: // fall through
@@ -217,6 +215,5 @@
  
   return bufferToReturn;
 }
-
-
+                              
 @end
