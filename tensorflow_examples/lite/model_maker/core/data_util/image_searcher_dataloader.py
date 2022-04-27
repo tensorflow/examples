@@ -29,7 +29,7 @@ _BaseOptions = base_options_pb2.BaseOptions
 
 
 class DataLoader(searcher_dataloader.DataLoader):
-  """DataLoader class for Image Searcher."""
+  """DataLoader class for Image Searcher Task."""
 
   def __init__(
       self,
