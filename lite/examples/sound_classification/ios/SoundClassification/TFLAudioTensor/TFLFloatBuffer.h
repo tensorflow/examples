@@ -44,6 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithSize:(NSUInteger)size;
 
+- (TFLFloatBuffer *)floatBufferWithOffset:(NSUInteger)offset size:(NSUInteger)size;
+
 @end
 
 NS_ASSUME_NONNULL_END

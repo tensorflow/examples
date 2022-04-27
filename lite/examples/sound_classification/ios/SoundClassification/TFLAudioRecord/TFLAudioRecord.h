@@ -14,7 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "TFLAudioFormat.h"
-#import "TFLRingBuffer.h"
+#import "TFLFloatBuffer.h"
 
 @import AVFoundation;
 
@@ -53,14 +53,29 @@ NS_SWIFT_NAME(AudioRecord)
  * Taps the input of the on-device microphone and delivers the incoming audio data continuously in a
  * completion handler. Note that the completion handler delivers results on a background thread.
  *
- * @param completionHandler Completion handler deliivers either a buffer of size bufferSize or an
- * error failing to do so .
+ * @param completionHandler Completion handler delivers the status of audio record permission request, once it completes.
+ *  If permission is not granted a n error is passed as the completion handler argument.
  *
  */
 - (void)startRecordingWithCompletionHandler:
-    (void (^)(TFLFloatBuffer *_Nullable buffer, NSError *_Nullable error))completionHandler;
+(void (^)(NSError *_Nullable error))completionHandler
+NS_SWIFT_NAME(startRecording(_:));
 
 - (void)stop;
+
+
+/**
+ * Returns the size number of elements in the TFLAudioRecord's buffer starting at offset.
+ *
+ * @param offset Offset inTFLAudioRecord's buffer from which elements are to be returned.
+ *
+ * @param size Number of elements to be returned.
+ *
+ * @returns A TFLFloatBuffer if offset + size is within the bounds of the TFLAudioRecord's buffer , otherwise nil.
+ */
+- (nullable TFLFloatBuffer *)readAtOffset:(NSUInteger)offset
+                                 withSize:(NSUInteger)size
+                                    error:(NSError *_Nullable *)error;
 
 @end
 

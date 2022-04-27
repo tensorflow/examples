@@ -23,6 +23,8 @@ class ViewController: UIViewController {
   private var probabilities: [Float32] = []
   private var audioRecord: AudioRecord?
   private var audioTensor: AudioTensor!
+  private var error: NSError?
+  var timer: Timer?
 
 
   // MARK: - View controller lifecycle methods
@@ -41,14 +43,11 @@ class ViewController: UIViewController {
     let audioFormat = AudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
     
     audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
-    
-    // Initialize audio record and gmlAudio with same buffer size and audio format as GMLAudio.
-    // Once we move to the
-    
-    do {
-      audioRecord = try AudioRecord(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
-      startAudioRecognition()
 
+    do {
+      audioRecord = try AudioRecord(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate) * 2)
+      startAudioClassifyingMicInput()
+      
     }
     catch {
       print(error.localizedDescription)
@@ -58,24 +57,48 @@ class ViewController: UIViewController {
   // MARK: - Private Methods
 
   /// Starts tapping AuudioRecord and recognizing on the output buffers
-  private func startAudioRecognition() {
+  private func startAudioClassifyingMicInput() {
     
-    audioRecord?.startRecording {[weak self] buffer, error in
-      if let selfPtr = self, let
-          resultBuffer = buffer  {
-        
+    audioRecord?.startRecording({[weak self] error in
+      
+      // Start Audio Classification if audio record permission is granted by user.
+      if let selfPtr = self, error == nil {
+        selfPtr.startAudioClassification()
+      }
+      else {
+        print(error!.localizedDescription)
+      }
+    })
+    
+  }
+  
+  private func startAudioClassification() {
+    
+    // Perform classification at regular intervals
+    timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true, block: { timer in
+      DispatchQueue.global(qos: .background).async {
         do {
-          try selfPtr.audioTensor.loadAudioRecordBuffer(buffer: resultBuffer)
-          selfPtr.soundClassifier.start(inputBuffer: selfPtr.audioTensor.ringBuffer.floatBuffer())
+          // Read the audio record's latest buffer into audioTensor's buffer.
+          try self.audioTensor.loadAudioRecord(audioRecord: self.audioRecord!)
+          
+          // Get the audio tensor buffer
+          let floatBuffer = self.audioTensor.ringBuffer.floatBuffer()
+          
+          // Classify the resulting audio tensor buffer.
+          self.soundClassifier.start(inputBuffer: floatBuffer)
         }
         catch {
-          
+          print(error.localizedDescription)
         }
       }
-    }
+    })
   }
-
+  
+  deinit {
+    timer?.invalidate()
+  }
 }
+
 
 extension ViewController {
   func audioInputManagerDidFailToAchievePermission(_ audioInputManager: AudioInputManager) {

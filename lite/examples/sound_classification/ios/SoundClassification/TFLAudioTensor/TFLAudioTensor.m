@@ -52,4 +52,23 @@
   return [self loadBuffer:floatBuffer offset:0 size:floatBuffer.size error:error];
 }
 
+- (BOOL)loadAudioRecord:(TFLAudioRecord *)audioRecord withError:(NSError **)error {
+  if (![self.audioFormat isEqual:audioRecord.audioFormat]) {
+    [TFLUtils createCustomError:error
+                       withCode:TFLAudioErrorCodeInvalidArgumentError
+                    description:@"Audio format of TFLAudioRecord does not match the audio format "
+     @"of Tensor Audio. Please ensure that the channelCount and "
+     @"sampleRate of both audio formats are equal."];
+  }
+  
+  NSUInteger sizeToLoad = audioRecord.bufferSize;
+  TFLFloatBuffer *buffer = [audioRecord readAtOffset:0 withSize:sizeToLoad error:error];
+  
+  if (!buffer) {
+    return NO;
+  }
+  
+  return [self loadBuffer:buffer offset:0 size:sizeToLoad error:error];
+}
+
 @end

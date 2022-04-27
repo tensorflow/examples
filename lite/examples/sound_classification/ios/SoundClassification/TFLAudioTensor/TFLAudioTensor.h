@@ -14,7 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "TFLRingBuffer.h"
-#import "TFLAudioFormat.h"
+#import "TFLAudioRecord.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -26,7 +26,6 @@ NS_SWIFT_NAME(AudioTensor)
 @property(nonatomic, readonly) TFLAudioFormat *audioFormat;
 
 @property(nonatomic, readonly) TFLRingBuffer *ringBuffer;
-
 
 /**
  * Initializes TFLAudioTensor with a TFLAudioFormat and sample countl.
@@ -46,20 +45,19 @@ NS_SWIFT_NAME(AudioTensor)
 - (instancetype)initWithAudioFormat:(TFLAudioFormat *)format sampleCount:(NSUInteger)sampleCount;
 
 /**
- * Convenience method to load the audio record buffer output by a TFLAudioRecord.
+ * Convenience method to load the of  TFLAudioRecord into TFLTensorAudio.
  *
  * @seealso TFLAudioRecord
  *
- * @discussion You must make sure that the buffer size and audio format of TFLAudioRecord matches
- * the the format.
+ * @discussion You must make sure that the  audio formats of TFLAudioRecord and the current
+ * TFLTensorAudio match.
  *
- * @param audioRecordBuffer  A buffer of type TFLFloatBuffer output by TFLAudioRecord. You must make
- * sure that the buffer size and audio format of TFLAudiorRecord matches the the format.
+ * @param audioRecord  A TFLAudioRecord.
  *
- * @return An instance of TFLAudioFormat
+ * @return A boolean indicating if the load operation succeded.
  */
-- (BOOL)loadAudioRecordBuffer:(TFLFloatBuffer *)audioRecordBuffer
-                    withError:(NSError **)error NS_SWIFT_NAME(loadAudioRecordBuffer(buffer:));
+- (BOOL)loadAudioRecord:(TFLAudioRecord *)audioRecord
+              withError:(NSError **)error NS_SWIFT_NAME(loadAudioRecord(audioRecord:));
 
 /**
  * This function loads the TFLAudioTensor ring buffer with a the provided buffer.
@@ -84,8 +82,6 @@ NS_SWIFT_NAME(AudioTensor)
                 offset:(NSInteger)offset
                   size:(NSInteger)size
                  error:(NSError **)error;
-
-//- (TFLFloatBuffer *)floatBu;
 
 @end
 
