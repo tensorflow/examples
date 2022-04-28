@@ -20,6 +20,7 @@ import os
 import numpy as np
 from tensorflow_examples.lite.model_maker.core.data_util import searcher_dataloader
 from tensorflow_lite_support.python.task.core.proto import base_options_pb2
+from tensorflow_lite_support.python.task.processor.proto import embedding_options_pb2
 from tensorflow_lite_support.python.task.text import text_embedder
 
 _BaseOptions = base_options_pb2.BaseOptions
@@ -38,11 +39,18 @@ class DataLoader(searcher_dataloader.DataLoader):
     super().__init__(embedder_path=embedder.options.base_options.file_name)
 
   @classmethod
-  def create(cls, text_embedder_path: str) -> "DataLoader":
+  def create(cls,
+             text_embedder_path: str,
+             l2_normalize: bool = False) -> "DataLoader":
     """Creates DataLoader for the Text Searcher task.
 
     Args:
-      text_embedder_path: Path to the ".tflite" text embedder model.
+      text_embedder_path: Path to the ".tflite" text embedder model. case and L2
+        norm is thus achieved through TF Lite inference.
+      l2_normalize: Whether to normalize the returned feature vector with L2
+        norm. Use this option only if the model does not already contain a
+        native L2_NORMALIZATION TF Lite Op. In most cases, this is already the
+        case and L2 norm is thus achieved through TF Lite inference.
 
     Returns:
       DataLoader object created for the Text Searcher task.
@@ -50,7 +58,10 @@ class DataLoader(searcher_dataloader.DataLoader):
     # Creates TextEmbedder.
     text_embedder_path = os.path.abspath(text_embedder_path)
     base_options = _BaseOptions(file_name=text_embedder_path)
-    options = text_embedder.TextEmbedderOptions(base_options=base_options)
+    embedding_options = embedding_options_pb2.EmbeddingOptions(
+        l2_normalize=l2_normalize)
+    options = text_embedder.TextEmbedderOptions(
+        base_options=base_options, embedding_options=embedding_options)
     embedder = text_embedder.TextEmbedder.create_from_options(options)
 
     return cls(embedder)

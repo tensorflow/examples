@@ -13,24 +13,35 @@
 # limitations under the License.
 """Tests for image_searcher_dataloader."""
 
+from absl.testing import parameterized
+
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import image_searcher_dataloader
 from tensorflow_examples.lite.model_maker.core import test_util
 
 
-class ImageSearcherDataloaderTest(tf.test.TestCase):
+class ImageSearcherDataloaderTest(parameterized.TestCase, tf.test.TestCase):
 
-  def test_from_folder(self):
-    tflite_path = test_util.get_test_data_path(
+  def setUp(self):
+    super().setUp()
+    self.tflite_path = test_util.get_test_data_path(
         "mobilenet_v2_035_96_embedder_with_metadata.tflite")
-    image_dir1 = test_util.get_test_data_path("food")
-    image_dir2 = test_util.get_test_data_path("animals")
+    self.image_dir1 = test_util.get_test_data_path("food")
+    self.image_dir2 = test_util.get_test_data_path("animals")
 
-    data_loader = image_searcher_dataloader.DataLoader.create(tflite_path)
-    data_loader.load_from_folder(image_dir1)
-    data_loader.load_from_folder(image_dir2)
+  @parameterized.parameters(
+      (False, 1.335398),
+      (True, 0.0494329),
+  )
+  def test_from_folder(self, l2_normalize, expected_value):
+    data_loader = image_searcher_dataloader.DataLoader.create(
+        self.tflite_path, l2_normalize=l2_normalize)
+
+    data_loader.load_from_folder(self.image_dir1)
+    data_loader.load_from_folder(self.image_dir2)
     self.assertLen(data_loader, 3)
     self.assertEqual(data_loader.dataset.shape, (3, 1280))
+    self.assertAlmostEqual(data_loader.dataset[0][0], expected_value, places=6)
     # The order of file may be different.
     self.assertEqual(set(data_loader.metadata),
                      set(["burger", "sparrow", "cats_and_dogs"]))

@@ -21,6 +21,7 @@ import numpy as np
 from tensorflow_examples.lite.model_maker.core.data_util import metadata_loader
 from tensorflow_examples.lite.model_maker.core.data_util import searcher_dataloader
 from tensorflow_lite_support.python.task.core.proto import base_options_pb2
+from tensorflow_lite_support.python.task.processor.proto import embedding_options_pb2
 from tensorflow_lite_support.python.task.vision import image_embedder
 from tensorflow_lite_support.python.task.vision.core import tensor_image
 
@@ -54,11 +55,10 @@ class DataLoader(searcher_dataloader.DataLoader):
       raise ValueError("Unsuported metadata_type.")
 
   @classmethod
-  def create(
-      cls,
-      image_embedder_path: str,
-      metadata_type: _MetadataType = _MetadataType.FROM_FILE_NAME
-  ) -> "DataLoader":
+  def create(cls,
+             image_embedder_path: str,
+             metadata_type: _MetadataType = _MetadataType.FROM_FILE_NAME,
+             l2_normalize: bool = False) -> "DataLoader":
     """Creates DataLoader for the Image Searcher task.
 
     Args:
@@ -66,6 +66,10 @@ class DataLoader(searcher_dataloader.DataLoader):
       metadata_type: Type of MetadataLoader to load metadata for each input
         image based on image path. By default, load the file name as metadata
         for each input image.
+      l2_normalize: Whether to normalize the returned feature vector with L2
+        norm. Use this option only if the model does not already contain a
+        native L2_NORMALIZATION TF Lite Op. In most cases, this is already the
+        case and L2 norm is thus achieved through TF Lite inference.
 
     Returns:
       DataLoader object created for the Image Searcher task.
@@ -73,7 +77,10 @@ class DataLoader(searcher_dataloader.DataLoader):
     # Creates ImageEmbedder.
     image_embedder_path = os.path.abspath(image_embedder_path)
     base_options = _BaseOptions(file_name=image_embedder_path)
-    options = image_embedder.ImageEmbedderOptions(base_options=base_options)
+    embedding_options = embedding_options_pb2.EmbeddingOptions(
+        l2_normalize=l2_normalize)
+    options = image_embedder.ImageEmbedderOptions(
+        base_options=base_options, embedding_options=embedding_options)
     embedder = image_embedder.ImageEmbedder.create_from_options(options)
 
     return cls(embedder, metadata_type)
