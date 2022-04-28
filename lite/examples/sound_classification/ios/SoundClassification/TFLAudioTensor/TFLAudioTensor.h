@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #import <Foundation/Foundation.h>
-#import "TFLRingBuffer.h"
 #import "TFLAudioRecord.h"
+#import "TFLRingBuffer.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -36,9 +36,9 @@ NS_SWIFT_NAME(AudioTensor)
  * @param format An audio format of type TFLAudioFormat.
  * @seealso TFLAudioFormat
  *
- * @param sampleCount The number of samples this TFLAudioTensor instance can store at any given time. The
- * sampleCount provided will be used to calculate the buffer size needed by multiplying with
- * channelCount of format.
+ * @param sampleCount The number of samples this TFLAudioTensor instance can store at any given
+ * time. The sampleCount provided will be used to calculate the buffer size needed by multiplying
+ * with channelCount of format.
  *
  * @return An instance of TFLAudioFormat
  */
@@ -64,8 +64,8 @@ NS_SWIFT_NAME(AudioTensor)
  *
  * @discussion New data from the input buffer is appended to the end of the buffer by shifting out
  * any old data from the beginning of the buffer if need be to make space. If the size of the new
- * data to be copied is more than the capacity of TFLAudioTensor's buffer, only the most recent data of
- * the TFLAudioTensor's buffer size will be copied from the input buffer .
+ * data to be copied is more than the capacity of TFLAudioTensor's buffer, only the most recent data
+ * of the TFLAudioTensor's buffer size will be copied from the input buffer .
  *
  * @seealso TFLAudioRecord
  *
@@ -79,9 +79,9 @@ NS_SWIFT_NAME(AudioTensor)
  * @return An instance of TFLAudioFormat
  */
 - (BOOL)loadBuffer:(TFLFloatBuffer *)sourceBuffer
-                offset:(NSInteger)offset
-                  size:(NSInteger)size
-                 error:(NSError **)error;
+            offset:(NSInteger)offset
+              size:(NSInteger)size
+             error:(NSError **)error;
 
 @end
 

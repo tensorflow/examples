@@ -28,9 +28,9 @@
 }
 
 - (BOOL)loadBuffer:(TFLFloatBuffer *)floatBuffer
-                offset:(NSInteger)offset
-                  size:(NSInteger)size
-                 error:(NSError **)error {
+            offset:(NSInteger)offset
+              size:(NSInteger)size
+             error:(NSError **)error {
   return [_ringBuffer loadBuffer:floatBuffer offset:offset size:floatBuffer.size error:error];
 }
 
@@ -40,12 +40,13 @@
 
   // Checking buffer size makes sure that channel count and buffer size match.
   if ([_ringBuffer size] != floatBuffer.size) {
-    [TFLUtils createCustomError:error
-                       withCode:TFLAudioErrorCodeInvalidArgumentError
-                    description:@"Size of TFLAudioRecord buffer does not match TFLAudioTensor's buffer "
-                                @"size. Please make sure that the TFLAudioRecord object which "
-                                @"created floatBuffer is initialized with the same format "
-                                @"(channels, sampleRate) and buffer size as TFLAudioTensor."];
+    [TFLUtils
+        createCustomError:error
+                 withCode:TFLAudioErrorCodeInvalidArgumentError
+              description:@"Size of TFLAudioRecord buffer does not match TFLAudioTensor's buffer "
+                          @"size. Please make sure that the TFLAudioRecord object which "
+                          @"created floatBuffer is initialized with the same format "
+                          @"(channels, sampleRate) and buffer size as TFLAudioTensor."];
     return NO;
   }
 
@@ -57,17 +58,17 @@
     [TFLUtils createCustomError:error
                        withCode:TFLAudioErrorCodeInvalidArgumentError
                     description:@"Audio format of TFLAudioRecord does not match the audio format "
-     @"of Tensor Audio. Please ensure that the channelCount and "
-     @"sampleRate of both audio formats are equal."];
+                                @"of Tensor Audio. Please ensure that the channelCount and "
+                                @"sampleRate of both audio formats are equal."];
   }
-  
+
   NSUInteger sizeToLoad = audioRecord.bufferSize;
   TFLFloatBuffer *buffer = [audioRecord readAtOffset:0 withSize:sizeToLoad error:error];
-  
+
   if (!buffer) {
     return NO;
   }
-  
+
   return [self loadBuffer:buffer offset:0 size:sizeToLoad error:error];
 }
 

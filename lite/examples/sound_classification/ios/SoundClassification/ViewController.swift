@@ -59,17 +59,15 @@ class ViewController: UIViewController {
   /// Starts tapping AuudioRecord and recognizing on the output buffers
   private func startAudioClassifyingMicInput() {
     
-    audioRecord?.startRecording({[weak self] error in
-      
-      // Start Audio Classification if audio record permission is granted by user.
-      if let selfPtr = self, error == nil {
-        selfPtr.startAudioClassification()
+    AVAudioSession.sharedInstance().requestRecordPermission {[weak self] granted in
+      do {
+          try self?.audioRecord?.startRecording()
+          self?.startAudioClassification()
+        }
+      catch {
+        print(error.localizedDescription)
       }
-      else {
-        print(error!.localizedDescription)
-      }
-    })
-    
+    }
   }
   
   private func startAudioClassification() {

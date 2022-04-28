@@ -55,16 +55,17 @@
   if (nextIndex + sizeToCopy < _buffer.size) {
     memcpy(_buffer.data + nextIndex, sourceBuffer.data + newOffset, sizeof(float) * sizeToCopy);
   } else {
-    //If 
+    // If
     NSInteger endChunkSize = _buffer.size - nextIndex;
     memcpy(_buffer.data + nextIndex, sourceBuffer.data + newOffset, sizeof(float) * endChunkSize);
 
     NSInteger startChunkSize = sizeToCopy - endChunkSize;
-    memcpy(_buffer.data, sourceBuffer.data + newOffset + endChunkSize, sizeof(float) * startChunkSize);
+    memcpy(_buffer.data, sourceBuffer.data + newOffset + endChunkSize,
+           sizeof(float) * startChunkSize);
   }
-  
+
   nextIndex = (nextIndex + sizeToCopy) % _buffer.size;
-  
+
   return YES;
 }
 
@@ -73,39 +74,35 @@
 }
 
 - (nullable TFLFloatBuffer *)floatBufferWithOffset:(NSUInteger)offset size:(NSUInteger)size {
-  
   if (offset + size > _buffer.size) {
     return nil;
   }
-  
+
   // Return buffer in correct order.
   // Compute offset in flat ring buffer array considering warping.
   NSUInteger correctOffset = (nextIndex + offset) % _buffer.size;
 
-  
   TFLFloatBuffer *floatBuffer = [[TFLFloatBuffer alloc] initWithSize:size];
-  
+
   // If no; elements to be copied are within the end of the flat ring buffer.
-  if ((correctOffset + size) <= _buffer.size ){
+  if ((correctOffset + size) <= _buffer.size) {
     memcpy(floatBuffer.data, _buffer.data + correctOffset, sizeof(float) * size);
-  }
-  else {
+  } else {
     // If no; elements to be copied warps around to the beginning of the ring buffer.
     // Copy the chunk starting at ringBuffer[nextIndex + offset : size] to
     // beginning of the result array.
     NSInteger endChunkSize = _buffer.size - correctOffset;
     memcpy(floatBuffer.data, _buffer.data + correctOffset, sizeof(float) * endChunkSize);
-    
+
     // Next copy the chunk starting at ringBuffer[0 : size - endChunkSize] to the result array.
     NSInteger firstChunkSize = size - endChunkSize;
-    memcpy(floatBuffer.data + endChunkSize , _buffer.data, sizeof(float) * firstChunkSize);
+    memcpy(floatBuffer.data + endChunkSize, _buffer.data, sizeof(float) * firstChunkSize);
   }
 
   return floatBuffer;
 }
 
--(NSUInteger)size {
-  
+- (NSUInteger)size {
   return _buffer.size;
 }
 

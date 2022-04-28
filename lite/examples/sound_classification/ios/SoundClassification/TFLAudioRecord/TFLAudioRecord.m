@@ -38,23 +38,27 @@
   self = [self init];
   if (self) {
     if (audioFormat.channelCount > SUPPORTED_CHANNEL_COUNT) {
-      [TFLUtils createCustomError:error
-                         withCode:TFLAudioErrorCodeWaitingForNewInputError
-                      description:@"The channel count provided does not match the supported "
-                                  @"channel count. Only upto 2 audio channels are currently supported."];
+      [TFLUtils
+          createCustomError:error
+                   withCode:TFLAudioErrorCodeWaitingForNewInputError
+                description:@"The channel count provided does not match the supported "
+                            @"channel count. Only upto 2 audio channels are currently supported."];
       return nil;
     }
-    
+
     NSError *waitError = nil;
-    [TFLUtils createCustomError:&waitError withCode:TFLAudioErrorCodeWaitingForNewInputError description:@"TFLAudioRecord hasn't started receiving samples from the audio input source. Please wait for the input."];
-    
-     globalError = waitError;
+    [TFLUtils createCustomError:&waitError
+                       withCode:TFLAudioErrorCodeWaitingForNewInputError
+                    description:@"TFLAudioRecord hasn't started receiving samples from the audio "
+                                @"input source. Please wait for the input."];
+
+    globalError = waitError;
     _audioFormat = audioFormat;
     _audioEngine = [[AVAudioEngine alloc] init];
     _bufferSize = sampleCount * audioFormat.channelCount;
     _ringBuffer = [[TFLRingBuffer alloc] initWithBufferSize:sampleCount * audioFormat.channelCount];
-    _conversionQueue = dispatch_queue_create("com.tflAudio.AudioConversionQueue", NULL); // Serial Queue
-
+    _conversionQueue =
+        dispatch_queue_create("com.tflAudio.AudioConversionQueue", NULL);  // Serial Queue
   }
   return self;
 }
@@ -68,10 +72,9 @@
  * different thread. There will also be extra overhead to ensure thread safety to make sure that
  * reads and writes happen on the same thread sine TFLAudioTensor buffer is meant to be non local.
  */
-- (void)startTappingMicrophoneWithError: (NSError **)error {
+- (void)startTappingMicrophoneWithError:(NSError **)error {
   AVAudioNode *inputNode = [_audioEngine inputNode];
-  AVAudioFormat *format =   [inputNode outputFormatForBus:0];
-
+  AVAudioFormat *format = [inputNode outputFormatForBus:0];
 
   AVAudioFormat *recordingFormat =
       [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32
@@ -94,7 +97,7 @@
                     // latency as the input pcmBuffer.
                     AVAudioFrameCount capacity =
                         ceil(buffer.frameLength * recordingFormat.sampleRate / format.sampleRate);
-                    
+
                     AVAudioPCMBuffer *pcmBuffer = [[AVAudioPCMBuffer alloc]
                         initWithPCMFormat:recordingFormat
                             frameCapacity:capacity *
@@ -118,7 +121,7 @@
                         TFLFloatBuffer *floatBuffer =
                             [[TFLFloatBuffer alloc] initWithData:pcmBuffer.floatChannelData[0]
                                                             size:pcmBuffer.frameLength];
-                        
+
                         NSError *frameBufferProcessingError = nil;
 
                         if (pcmBuffer.frameLength == 0) {
@@ -135,20 +138,22 @@
                                         @"You have passed an unsupported number of channels."];
                           self->globalError = frameBufferProcessingError;
                         } else if (![self->_ringBuffer loadBuffer:floatBuffer
-                                                          offset:0
-                                                            size:floatBuffer.size
-                                                           error:&frameBufferProcessingError]){
-                            self->globalError = frameBufferProcessingError;
-                          }
-                          else {
-                            self->globalError = nil;
-                          }
+                                                           offset:0
+                                                             size:floatBuffer.size
+                                                            error:&frameBufferProcessingError]) {
+                          self->globalError = frameBufferProcessingError;
+                        } else {
+                          self->globalError = nil;
+                        }
                         break;
                       }
-                      case AVAudioConverterOutputStatus_Error: // fall through
+                      case AVAudioConverterOutputStatus_Error:  // fall through
                       default: {
                         if (!conversionError) {
-                          [TFLUtils createCustomError:&conversionError withCode:TFLAudioErrorCodeAudioProcessingError description:@"Some error occurred during audio processing"];
+                          [TFLUtils
+                              createCustomError:&conversionError
+                                       withCode:TFLAudioErrorCodeAudioProcessingError
+                                    description:@"Some error occurred during audio processing"];
                         }
                         self->globalError = conversionError;
                         break;
@@ -157,27 +162,35 @@
                   });
                 }];
 
-
   [_audioEngine prepare];
   [_audioEngine startAndReturnError:error];
-
 }
 
-- (void)startRecordingWithCompletionHandler:
-    (void (^)(NSError *_Nullable error))completionHandler {
-  [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-    if (granted) {
-      
-      NSError *tapError = nil;
-      [self startTappingMicrophoneWithError:&tapError];
-      completionHandler(tapError);
-    } else {
-      
-      NSError *permissionError = nil;
-      [TFLUtils createCustomError:&permissionError                 withCode:TFLAudioErrorCodeRecordPermissionDeniedError description:@"User denied the permission to record mic input."];
-      completionHandler(permissionError);
+- (BOOL)startRecordingWithError:(NSError **)error {
+  switch ([AVAudioSession sharedInstance].recordPermission) {
+    case AVAudioSessionRecordPermissionDenied: {
+      [TFLUtils createCustomError:error
+                         withCode:TFLAudioErrorCodeRecordPermissionDeniedError
+                      description:@"Record permissions were denied by the user. "];
+      return NO;
     }
-  }];
+
+    case AVAudioSessionRecordPermissionGranted: {
+      [self startTappingMicrophoneWithError:error];
+      return YES;
+    }
+
+    case AVAudioSessionRecordPermissionUndetermined: {
+      [TFLUtils
+          createCustomError:error
+                   withCode:TFLAudioErrorCodeRecordPermissionUndeterminedError
+                description:@"Record permissions are undertermined. Yo must use AVAudioSession's "
+                            @"requestRecordPermission() to request audio record permission from "
+                            @"the user. If record permissions are granted, you can call this "
+                            @"method in the completion handler of requestRecordPermission()."];
+      return NO;
+    }
+  }
 }
 
 - (void)stop {
@@ -188,32 +201,27 @@
 - (nullable TFLFloatBuffer *)readAtOffset:(NSUInteger)offset
                                  withSize:(NSUInteger)size
                                     error:(NSError *_Nullable *)error {
-  
   __block TFLFloatBuffer *bufferToReturn = nil;
   __block NSError *readError = nil;
-  
+
   dispatch_sync(_conversionQueue, ^{
     if (globalError) {
       [TFLUtils createCustomError:&readError
                          withCode:TFLAudioErrorCodeAudioProcessingError
                       description:@"Some error occured during audio processing."];
-    }
-    else if (offset + size > [_ringBuffer size]) {
+    } else if (offset + size > [_ringBuffer size]) {
       [TFLUtils createCustomError:&readError
                          withCode:TFLAudioErrorCodeInvalidArgumentError
                       description:@"Index out of bounds: offset + size should be <= to the size of "
-       @"TFLAudioRecord's internal buffer. "];
-    }
-    else {
+                                  @"TFLAudioRecord's internal buffer. "];
+    } else {
       bufferToReturn = [_ringBuffer floatBufferWithOffset:offset size:size];
-
     }
   });
-    
-  if (error)
-    *error = readError;
- 
+
+  if (error) *error = readError;
+
   return bufferToReturn;
 }
-                              
+
 @end

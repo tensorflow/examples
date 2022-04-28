@@ -32,8 +32,8 @@
 
 - (BOOL)isEqual:(id)object {
   return [object isKindOfClass:[self class]] &&
-  self.channelCount == [(TFLAudioFormat *)object channelCount] &&
-  self.sampleRate == [(TFLAudioFormat *)object sampleRate];
+         self.channelCount == [(TFLAudioFormat *)object channelCount] &&
+         self.sampleRate == [(TFLAudioFormat *)object sampleRate];
 }
 
 @end

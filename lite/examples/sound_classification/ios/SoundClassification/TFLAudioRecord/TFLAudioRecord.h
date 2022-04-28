@@ -28,8 +28,8 @@ NS_SWIFT_NAME(AudioRecord)
 /** Audio format specifying the number of channels and sample rate supported. */
 @property(nonatomic, readonly) TFLAudioFormat *audioFormat;
 
-/** Size of the buffer held by TFLAudioRecord. It ensures delivery of audio data of length bufferSize
- * arrays when you tap the input microphone. */
+/** Size of the buffer held by TFLAudioRecord. It ensures delivery of audio data of length
+ * bufferSize arrays when you tap the input microphone. */
 @property(nonatomic, readonly) NSUInteger bufferSize;
 
 /**
@@ -50,19 +50,29 @@ NS_SWIFT_NAME(AudioRecord)
                                        error:(NSError *_Nullable *)error;
 
 /**
- * Taps the input of the on-device microphone and delivers the incoming audio data continuously in a
- * completion handler. Note that the completion handler delivers results on a background thread.
+ * This function starts tapping the input audio samplles from the mic if audio record permissions
+ * have been granted by the user. Before calling this function, you must use [AVAudioSession
+ * sharedInstance]'s  - (void)requestRecordPermission:(void (^)(BOOL granted))response to acquire
+ * record permissions. If  the user has denied permission or the permissions are undetermined, an
+ * appropriate error is populated in the error pointer. The return value will be false in such cases
+ * The internal buffer of TFLAudioRecord is of size bufferSize. bufferSize =
+ * audioFormat.channelCount * sampleCount passed while initializing TFLAudioRecord. This buffer will
+ * always have the most recent data samples acquired from the mic.  You can use:
+ * - (nullable TFLFloatBuffer *)readAtOffset:(NSUInteger)offset withSize:(NSUInteger)size
+ * error:(NSError *_Nullable *)error for getting the data from the buffer if audio recording has
+ * started successfully.
  *
- * @param completionHandler Completion handler delivers the status of audio record permission request, once it completes.
- *  If permission is not granted a n error is passed as the completion handler argument.
+ * You can use - (void)stop to stop tapping the  mic input.
  *
+ * @return Boolean value indicating if audio recording started successfully. If False and an address
+ * to an error is passed in, the error will hold the reason for failure once the function returns.
  */
-- (void)startRecordingWithCompletionHandler:
-(void (^)(NSError *_Nullable error))completionHandler
-NS_SWIFT_NAME(startRecording(_:));
+- (BOOL)startRecordingWithError:(NSError **)error NS_SWIFT_NAME(startRecording());
 
+/**
+ * Stops tapping the audio samples from input mic.
+ */
 - (void)stop;
-
 
 /**
  * Returns the size number of elements in the TFLAudioRecord's buffer starting at offset.
@@ -71,7 +81,8 @@ NS_SWIFT_NAME(startRecording(_:));
  *
  * @param size Number of elements to be returned.
  *
- * @returns A TFLFloatBuffer if offset + size is within the bounds of the TFLAudioRecord's buffer , otherwise nil.
+ * @returns A TFLFloatBuffer if offset + size is within the bounds of the TFLAudioRecord's buffer ,
+ * otherwise nil.
  */
 - (nullable TFLFloatBuffer *)readAtOffset:(NSUInteger)offset
                                  withSize:(NSUInteger)size

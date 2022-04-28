@@ -46,11 +46,11 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return A TFLFloatBuffer.
  */
-- (TFLFloatBuffer *)floatBuffer
-NS_SWIFT_NAME(floatBuffer());
+- (TFLFloatBuffer *)floatBuffer NS_SWIFT_NAME(floatBuffer());
 
 /**
- * Returns a TFLFloatBuffer with the  size number of ring buffer elements in order starting at offset.
+ * Returns a TFLFloatBuffer with the  size number of ring buffer elements in order starting at
+ * offset.
  *
  * @param offset Offset in the ring buffer from which elements are to be returned.
  *
@@ -60,13 +60,10 @@ NS_SWIFT_NAME(floatBuffer());
  */
 - (nullable TFLFloatBuffer *)floatBufferWithOffset:(NSUInteger)offset size:(NSUInteger)size;
 
-
 /**
  * Capacity of ring buffer in number of elements.
  */
-- (NSUInteger)size
-NS_SWIFT_NAME(size());
-
+- (NSUInteger)size NS_SWIFT_NAME(size());
 
 @end
 
