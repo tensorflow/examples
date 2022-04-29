@@ -43,9 +43,9 @@
   return self;
 }
 
-//- (id)copyWithZone:(NSZone *)zone {
-//  return [[TFLFloatBuffer alloc] initWithData:self.data size:self.size];
-//}
+- (id)copyWithZone:(NSZone *)zone {
+  return [[TFLFloatBuffer alloc] initWithData:self.data size:self.size];
+}
 
 - (void)dealloc {
   free(_data);
