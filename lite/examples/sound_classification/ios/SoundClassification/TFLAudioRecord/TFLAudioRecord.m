@@ -186,7 +186,8 @@
                    withCode:TFLAudioErrorCodeRecordPermissionUndeterminedError
                 description:@"Record permissions are undertermined. Yo must use AVAudioSession's "
                             @"requestRecordPermission() to request audio record permission from "
-                            @"the user. If record permissions are granted, you can call this "
+                            @"the user. Please read Apple's documentation for further details"
+                            @"If record permissions are granted, you can call this "
                             @"method in the completion handler of requestRecordPermission()."];
       return NO;
     }
