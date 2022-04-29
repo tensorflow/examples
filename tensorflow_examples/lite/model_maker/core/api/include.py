@@ -13,26 +13,32 @@
 # limitations under the License.
 """Packages included in API."""
 
-from tensorflow_examples.lite.model_maker.core import compat  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader  # pylint: disable=unused-import
+# pylint: disable=unused-import
+from tensorflow_examples.lite.model_maker.core import compat
+from tensorflow_examples.lite.model_maker.core.data_util import audio_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import image_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import object_detector_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
 
-from tensorflow_examples.lite.model_maker.core.data_util.audio_dataloader import DataLoader as AudioDataLoader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util.object_detector_dataloader import DataLoader as ObjectDetectorDataloader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import QuestionAnswerDataLoader  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader  # pylint: disable=unused-import
+from tensorflow_examples.lite.model_maker.core.data_util.audio_dataloader import DataLoader as AudioDataLoader
+from tensorflow_examples.lite.model_maker.core.data_util.image_dataloader import ImageClassifierDataLoader
+from tensorflow_examples.lite.model_maker.core.data_util.object_detector_dataloader import DataLoader as ObjectDetectorDataloader
+from tensorflow_examples.lite.model_maker.core.data_util.recommendation_dataloader import RecommendationDataLoader
+from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import QuestionAnswerDataLoader
+from tensorflow_examples.lite.model_maker.core.data_util.text_dataloader import TextClassifierDataLoader
 
-from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat  # pylint: disable=unused-import
+from tensorflow_examples.lite.model_maker.core.export_format import ExportFormat
 
-from tensorflow_examples.lite.model_maker.core.task import audio_classifier  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import configs  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import image_classifier  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import model_spec  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import object_detector  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import question_answer  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import recommendation  # pylint: disable=unused-import
-from tensorflow_examples.lite.model_maker.core.task import text_classifier  # pylint: disable=unused-import
+from tensorflow_examples.lite.model_maker.core.task import audio_classifier
+from tensorflow_examples.lite.model_maker.core.task import configs
+from tensorflow_examples.lite.model_maker.core.task import image_classifier
+from tensorflow_examples.lite.model_maker.core.task import model_spec
+from tensorflow_examples.lite.model_maker.core.task import object_detector
+from tensorflow_examples.lite.model_maker.core.task import question_answer
+from tensorflow_examples.lite.model_maker.core.task import recommendation
+from tensorflow_examples.lite.model_maker.core.task import text_classifier
+
+from tensorflow_examples.lite.model_maker.core.data_util import image_searcher_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import metadata_loader
+from tensorflow_examples.lite.model_maker.core.data_util import searcher_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import text_searcher_dataloader

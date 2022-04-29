@@ -48,6 +48,7 @@ from tflite_model_maker import model_spec
 from tflite_model_maker import object_detector
 from tflite_model_maker import question_answer
 from tflite_model_maker import recommendation
+from tflite_model_maker import searcher
 from tflite_model_maker import text_classifier
 
 # Deprecated imports are kept for backward compatiblity and to be removed in

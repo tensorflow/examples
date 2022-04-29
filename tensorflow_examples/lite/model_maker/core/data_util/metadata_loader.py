@@ -17,7 +17,10 @@ import enum
 import os
 from typing import AnyStr, Callable
 
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 
+
+@mm_export("searcher.MetadataType")
 @enum.unique
 class MetadataType(enum.Enum):
   FROM_FILE_NAME = 1

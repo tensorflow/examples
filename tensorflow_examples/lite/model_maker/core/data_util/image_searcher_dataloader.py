@@ -18,6 +18,7 @@ import logging
 import os
 
 import numpy as np
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import metadata_loader
 from tensorflow_examples.lite.model_maker.core.data_util import searcher_dataloader
 from tensorflow_lite_support.python.task.core.proto import base_options_pb2
@@ -29,6 +30,7 @@ _MetadataType = metadata_loader.MetadataType
 _BaseOptions = base_options_pb2.BaseOptions
 
 
+@mm_export("searcher.ImageDataLoader")
 class DataLoader(searcher_dataloader.DataLoader):
   """DataLoader class for Image Searcher Task."""
 

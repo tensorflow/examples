@@ -16,8 +16,10 @@
 from typing import AnyStr, List, Optional
 
 import numpy as np
+from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 
 
+@mm_export("searcher.DataLoader")
 class DataLoader(object):
   """Base DataLoader class for Searcher task."""
 
