@@ -17,7 +17,7 @@
 #import "TFLUtils.h"
 
 @implementation TFLRingBuffer {
-  NSInteger nextIndex;
+  NSInteger _nextIndex;
   TFLFloatBuffer *_buffer;
 }
 
@@ -52,19 +52,19 @@
 
   // If the new nextIndex + sizeToCopy is smaller than the size of the ring buffer directly
   // copy all elements to the end of the ring buffer.
-  if (nextIndex + sizeToCopy < _buffer.size) {
-    memcpy(_buffer.data + nextIndex, sourceBuffer.data + newOffset, sizeof(float) * sizeToCopy);
+  if (_nextIndex + sizeToCopy < _buffer.size) {
+    memcpy(_buffer.data + _nextIndex, sourceBuffer.data + newOffset, sizeof(float) * sizeToCopy);
   } else {
     // If
-    NSInteger endChunkSize = _buffer.size - nextIndex;
-    memcpy(_buffer.data + nextIndex, sourceBuffer.data + newOffset, sizeof(float) * endChunkSize);
+    NSInteger endChunkSize = _buffer.size - _nextIndex;
+    memcpy(_buffer.data + _nextIndex, sourceBuffer.data + newOffset, sizeof(float) * endChunkSize);
 
     NSInteger startChunkSize = sizeToCopy - endChunkSize;
     memcpy(_buffer.data, sourceBuffer.data + newOffset + endChunkSize,
            sizeof(float) * startChunkSize);
   }
 
-  nextIndex = (nextIndex + sizeToCopy) % _buffer.size;
+  _nextIndex = (_nextIndex + sizeToCopy) % _buffer.size;
 
   return YES;
 }
@@ -80,7 +80,7 @@
 
   // Return buffer in correct order.
   // Compute offset in flat ring buffer array considering warping.
-  NSUInteger correctOffset = (nextIndex + offset) % _buffer.size;
+  NSUInteger correctOffset = (_nextIndex + offset) % _buffer.size;
 
   TFLFloatBuffer *floatBuffer = [[TFLFloatBuffer alloc] initWithSize:size];
 
