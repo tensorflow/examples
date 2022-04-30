@@ -19,12 +19,12 @@ class ViewController: UIViewController {
   @IBOutlet weak var tableView: UITableView!
 
   private var soundClassifier: SoundClassifier!
-  private var bufferSize: Int = 0
-  private var probabilities: [Float32] = []
-  private var audioRecord: AudioRecord?
-  private var audioTensor: AudioTensor!
-  private var error: NSError?
-  var timer: Timer?
+//  private var bufferSize: Int = 0
+  private var categories: [ClassificationCategory] = []
+//  private var audioRecord: AudioRecord?
+//  private var audioTensor: AudioTensor!
+//  private var error: NSError?
+//  var timer: Timer?
 
 
   // MARK: - View controller lifecycle methods
@@ -37,64 +37,64 @@ class ViewController: UIViewController {
     tableView.backgroundColor = .white
     tableView.tableFooterView = UIView()
 
-    soundClassifier = SoundClassifier(modelFileName: "sound_classification", delegate: self)
-    
-    // This initializer defaults to channel count 1
-    let audioFormat = AudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
-    
-    audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
-
-    do {
-      audioRecord = try AudioRecord(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate) * 2)
-      startAudioClassifyingMicInput()
-      
-    }
-    catch {
-      print(error.localizedDescription)
-    }
+    soundClassifier = SoundClassifier(modelFileName: "yamnet_audio_classifier_with_metadata", delegate: self)
+    soundClassifier.startAudioClassification()
+//    // This initializer defaults to channel count 1
+//    let audioFormat = AudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
+//
+//    audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
+//
+//    do {
+//      audioRecord = try AudioRecord(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate) * 2)
+//      startAudioClassifyingMicInput()
+//
+//    }
+//    catch {
+//      print(error.localizedDescription)
+//    }
   }
 
   // MARK: - Private Methods
 
   /// Starts tapping AuudioRecord and recognizing on the output buffers
-  private func startAudioClassifyingMicInput() {
-    
-    AVAudioSession.sharedInstance().requestRecordPermission {[weak self] granted in
-      do {
-          try self?.audioRecord?.startRecording()
-          self?.startAudioClassification()
-        }
-      catch {
-        print(error.localizedDescription)
-      }
-    }
-  }
+//  private func startAudioClassifyingMicInput() {
+//
+//    AVAudioSession.sharedInstance().requestRecordPermission {[weak self] granted in
+//      do {
+//          try self?.audioRecord?.startRecording()
+//          self?.startAudioClassification()
+//        }
+//      catch {
+//        print(error.localizedDescription)
+//      }
+//    }
+//  }
+//
+//  private func startAudioClassification() {
+//
+//    // Perform classification at regular intervals
+//    timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true, block: { timer in
+//      DispatchQueue.global(qos: .background).async {
+//        do {
+//          // Read the audio record's latest buffer into audioTensor's buffer.
+//          try self.audioTensor.loadAudioRecord(audioRecord: self.audioRecord!)
+//
+//          // Get the audio tensor buffer
+//          let floatBuffer = self.audioTensor.ringBuffer.floatBuffer()
+//
+//          // Classify the resulting audio tensor buffer.
+//          self.soundClassifier.start(inputBuffer: floatBuffer)
+//        }
+//        catch {
+//          print(error.localizedDescription)
+//        }
+//      }
+//    })
+//  }
   
-  private func startAudioClassification() {
-    
-    // Perform classification at regular intervals
-    timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true, block: { timer in
-      DispatchQueue.global(qos: .background).async {
-        do {
-          // Read the audio record's latest buffer into audioTensor's buffer.
-          try self.audioTensor.loadAudioRecord(audioRecord: self.audioRecord!)
-          
-          // Get the audio tensor buffer
-          let floatBuffer = self.audioTensor.ringBuffer.floatBuffer()
-          
-          // Classify the resulting audio tensor buffer.
-          self.soundClassifier.start(inputBuffer: floatBuffer)
-        }
-        catch {
-          print(error.localizedDescription)
-        }
-      }
-    })
-  }
-  
-  deinit {
-    timer?.invalidate()
-  }
+//  deinit {
+//    timer?.invalidate()
+//  }
 }
 
 
@@ -122,21 +122,27 @@ extension ViewController {
 }
 
 extension ViewController: SoundClassifierDelegate {
-  func soundClassifier(
-    _ soundClassifier: SoundClassifier,
-    didInterpreteProbabilities probabilities: [Float32]
-  ) {
-    self.probabilities = probabilities
-    DispatchQueue.main.async {
-      self.tableView.reloadData()
+  
+  func soundClassifier(_ soundClassifier: SoundClassifier, didClassifyWithCategories categories: [ClassificationCategory]) {
+    for category in categories {
+      print("Label: \(category.label!), Score: \(category.score)")
     }
   }
+//  func soundClassifier(
+//    _ soundClassifier: SoundClassifier,
+//    didClassifyWithCategories categories: [ClassificationCategory]
+//  ) {
+//    self.categories = categories
+//    DispatchQueue.main.async {
+//      self.tableView.reloadData()
+//    }
+//  }
 }
 
 // MARK: - UITableViewDataSource
 extension ViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return probabilities.count
+    return categories.count
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -147,7 +153,7 @@ extension ViewController: UITableViewDataSource {
 
     cell.label.text = soundClassifier.labelNames[indexPath.row]
     UIView.animate(withDuration: 0.4) {
-      cell.progressView.setProgress(self.probabilities[indexPath.row], animated: true)
+      cell.progressView.setProgress(self.categories[indexPath.row].score, animated: true)
     }
     return cell
   }

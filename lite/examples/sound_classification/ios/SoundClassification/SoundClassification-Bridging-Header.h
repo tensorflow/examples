@@ -4,3 +4,7 @@
 #import "TFLAudioTensor.h"
 #import "TFLAudioRecord.h"
 #import "TFLFloatBuffer.h"
+#import "TFLAudioClassifier.h"
+#import "TFLClassificationResult.h"
+#import "TFLClassificationOptions.h"
+
