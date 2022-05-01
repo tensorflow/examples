@@ -19,13 +19,7 @@ class ViewController: UIViewController {
   @IBOutlet weak var tableView: UITableView!
 
   private var soundClassifier: SoundClassifier!
-//  private var bufferSize: Int = 0
   private var categories: [ClassificationCategory] = []
-//  private var audioRecord: AudioRecord?
-//  private var audioTensor: AudioTensor!
-//  private var error: NSError?
-//  var timer: Timer?
-
 
   // MARK: - View controller lifecycle methods
 
@@ -38,63 +32,10 @@ class ViewController: UIViewController {
     tableView.tableFooterView = UIView()
 
     soundClassifier = SoundClassifier(modelFileName: "yamnet_audio_classifier_with_metadata", delegate: self)
-    soundClassifier.startAudioClassification()
-//    // This initializer defaults to channel count 1
-//    let audioFormat = AudioFormat(sampleRate: UInt(soundClassifier.sampleRate))
-//
-//    audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate))
-//
-//    do {
-//      audioRecord = try AudioRecord(audioFormat: audioFormat, sampleCount: UInt(soundClassifier.sampleRate) * 2)
-//      startAudioClassifyingMicInput()
-//
-//    }
-//    catch {
-//      print(error.localizedDescription)
-//    }
+    soundClassifier.startAudioClassificationOnMicInput()
   }
 
   // MARK: - Private Methods
-
-  /// Starts tapping AuudioRecord and recognizing on the output buffers
-//  private func startAudioClassifyingMicInput() {
-//
-//    AVAudioSession.sharedInstance().requestRecordPermission {[weak self] granted in
-//      do {
-//          try self?.audioRecord?.startRecording()
-//          self?.startAudioClassification()
-//        }
-//      catch {
-//        print(error.localizedDescription)
-//      }
-//    }
-//  }
-//
-//  private func startAudioClassification() {
-//
-//    // Perform classification at regular intervals
-//    timer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true, block: { timer in
-//      DispatchQueue.global(qos: .background).async {
-//        do {
-//          // Read the audio record's latest buffer into audioTensor's buffer.
-//          try self.audioTensor.loadAudioRecord(audioRecord: self.audioRecord!)
-//
-//          // Get the audio tensor buffer
-//          let floatBuffer = self.audioTensor.ringBuffer.floatBuffer()
-//
-//          // Classify the resulting audio tensor buffer.
-//          self.soundClassifier.start(inputBuffer: floatBuffer)
-//        }
-//        catch {
-//          print(error.localizedDescription)
-//        }
-//      }
-//    })
-//  }
-  
-//  deinit {
-//    timer?.invalidate()
-//  }
 }
 
 
@@ -124,19 +65,11 @@ extension ViewController {
 extension ViewController: SoundClassifierDelegate {
   
   func soundClassifier(_ soundClassifier: SoundClassifier, didClassifyWithCategories categories: [ClassificationCategory]) {
-    for category in categories {
-      print("Label: \(category.label!), Score: \(category.score)")
+    guard let label = categories[0].label else {
+      return
     }
+    print("Label: \(label), Score: \(categories[0].score)");
   }
-//  func soundClassifier(
-//    _ soundClassifier: SoundClassifier,
-//    didClassifyWithCategories categories: [ClassificationCategory]
-//  ) {
-//    self.categories = categories
-//    DispatchQueue.main.async {
-//      self.tableView.reloadData()
-//    }
-//  }
 }
 
 // MARK: - UITableViewDataSource
@@ -151,7 +84,7 @@ extension ViewController: UITableViewDataSource {
       for: indexPath
     ) as? ProbabilityTableViewCell else { return UITableViewCell() }
 
-    cell.label.text = soundClassifier.labelNames[indexPath.row]
+//    cell.label.text = soundClassifier.labelNames[indexPath.row]
     UIView.animate(withDuration: 0.4) {
       cell.progressView.setProgress(self.categories[indexPath.row].score, animated: true)
     }

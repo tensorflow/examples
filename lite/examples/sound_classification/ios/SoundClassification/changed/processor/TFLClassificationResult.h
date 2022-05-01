@@ -27,6 +27,8 @@ NS_SWIFT_NAME(Classifications)
  */
 @property(nonatomic, readonly) NSInteger headIndex;
 
+@property(nonatomic, readonly) NSString *headName;
+
 /** The array of predicted classes, usually sorted by descending scores (e.g.from high to low
  * probability). */
 @property(nonatomic, readonly) NSArray<TFLCategory *> *categories;
@@ -36,12 +38,16 @@ NS_SWIFT_NAME(Classifications)
  *
  * @param categories Array of TFLCategory objects encapsulating a list of
  * predictions usually sorted by descending scores (e.g. from high to low probability).
- * @seealso TFLCategory
  *
  * @return An instance of TFLClassifications initialized to
  * the specified values.
  */
 - (instancetype)initWithHeadIndex:(NSInteger)headIndex
+                       categories:(NSArray<TFLCategory *> *)categories;
+
+
+- (instancetype)initWithHeadIndex:(NSInteger)headIndex
+                         headName:(nullable NSString *)headName
                        categories:(NSArray<TFLCategory *> *)categories;
 
 @end
@@ -60,7 +66,6 @@ NS_SWIFT_NAME(ClassificationResult)
  *
  * @param classifications Array of TFLClassifications objects containing image classifier
  * predictions per image classifier head.
- * @seealso TFLClassifications
  *
  * @return An instance of TFLClassificationResult initialized to the specified values.
  */

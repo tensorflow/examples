@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #import "TFLAudioRecord.h"
-#import "TFLAudioError.h"
+#import "TFLCommonUtils.h"
 #import "TFLRingBuffer.h"
-#import "TFLUtils.h"
+#import "TFLCommon.h"
 
 #define SUPPORTED_CHANNEL_COUNT 2
 
@@ -37,17 +37,17 @@
   self = [self init];
   if (self) {
     if (audioFormat.channelCount > SUPPORTED_CHANNEL_COUNT) {
-      [TFLUtils
+      [TFLCommonUtils
           createCustomError:error
-                   withCode:TFLAudioErrorCodeWaitingForNewInputError
+                   withCode:TFLSupportErrorCodeInvalidArgumentError
                 description:@"The channel count provided does not match the supported "
                             @"channel count. Only upto 2 audio channels are currently supported."];
       return nil;
     }
 
     NSError *waitError = nil;
-    [TFLUtils createCustomError:&waitError
-                       withCode:TFLAudioErrorCodeWaitingForNewInputError
+    [TFLCommonUtils createCustomError:&waitError
+                       withCode:TFLSupportErrorCodeWaitingForNewMicInputError
                     description:@"TFLAudioRecord hasn't started receiving samples from the audio "
                                 @"input source. Please wait for the input."];
 
@@ -116,15 +116,15 @@
                         NSError *frameBufferProcessingError = nil;
 
                         if (pcmBuffer.frameLength == 0) {
-                          [TFLUtils createCustomError:&frameBufferProcessingError
-                                             withCode:TFLAudioErrorCodeInvalidArgumentError
+                          [TFLCommonUtils createCustomError:&frameBufferProcessingError
+                                             withCode:TFLSupportErrorCodeInvalidArgumentError
                                           description:@"You may have to try with a different "
                                                       @"channel count or sample rate"];
                           self->_globalError = frameBufferProcessingError;
                         } else if ((pcmBuffer.frameLength % recordingFormat.channelCount) != 0) {
-                          [TFLUtils
+                          [TFLCommonUtils
                               createCustomError:&frameBufferProcessingError
-                                       withCode:TFLAudioErrorCodeInvalidArgumentError
+                                       withCode:TFLSupportErrorCodeInvalidArgumentError
                                     description:
                                         @"You have passed an unsupported number of channels."];
                           self->_globalError = frameBufferProcessingError;
@@ -141,9 +141,9 @@
                       case AVAudioConverterOutputStatus_Error:  // fall through
                       default: {
                         if (!conversionError) {
-                          [TFLUtils
+                          [TFLCommonUtils
                               createCustomError:&conversionError
-                                       withCode:TFLAudioErrorCodeAudioProcessingError
+                                       withCode:TFLSupportErrorCodeAudioProcessingError
                                     description:@"Some error occurred during audio processing"];
                         }
                         self->_globalError = conversionError;
@@ -160,8 +160,8 @@
 - (BOOL)startRecordingWithError:(NSError **)error {
   switch ([AVAudioSession sharedInstance].recordPermission) {
     case AVAudioSessionRecordPermissionDenied: {
-      [TFLUtils createCustomError:error
-                         withCode:TFLAudioErrorCodeRecordPermissionDeniedError
+      [TFLCommonUtils createCustomError:error
+                         withCode:TFLSupportErrorCodeAudioRecordPermissionDeniedError
                       description:@"Record permissions were denied by the user. "];
       return NO;
     }
@@ -172,9 +172,9 @@
     }
 
     case AVAudioSessionRecordPermissionUndetermined: {
-      [TFLUtils
+      [TFLCommonUtils
           createCustomError:error
-                   withCode:TFLAudioErrorCodeRecordPermissionUndeterminedError
+                   withCode:TFLSupportErrorCodeAudioRecordPermissionUndeterminedError
                 description:@"Record permissions are undertermined. Yo must use AVAudioSession's "
                             @"requestRecordPermission() to request audio record permission from "
                             @"the user. Please read Apple's documentation for further details"
@@ -198,12 +198,12 @@
 
   dispatch_sync(_conversionQueue, ^{
     if (_globalError) {
-      [TFLUtils createCustomError:&readError
-                         withCode:TFLAudioErrorCodeAudioProcessingError
+      [TFLCommonUtils createCustomError:&readError
+                         withCode:TFLSupportErrorCodeAudioProcessingError
                       description:@"Some error occured during audio processing."];
     } else if (offset + size > [_ringBuffer size]) {
-      [TFLUtils createCustomError:&readError
-                         withCode:TFLAudioErrorCodeInvalidArgumentError
+      [TFLCommonUtils createCustomError:&readError
+                         withCode:TFLSupportErrorCodeInvalidArgumentError
                       description:@"Index out of bounds: offset + size should be <= to the size of "
                                   @"TFLAudioRecord's internal buffer. "];
     } else {

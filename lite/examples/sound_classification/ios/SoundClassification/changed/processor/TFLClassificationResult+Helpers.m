@@ -29,7 +29,13 @@
       TfLiteCategory cCategory = cClassifications.categories[j];
       [categories addObject:[TFLCategory categoryWithCCategory:&cCategory]];
     }
-    TFLClassifications *classifications = [[TFLClassifications alloc] initWithHeadIndex:i
+    
+    NSString *headName = nil;
+    if (cClassifications.head_name) {
+      headName = [NSString stringWithCString:cClassifications.head_name encoding:NSUTF8StringEncoding];
+    }
+    TFLClassifications *classifications = [[TFLClassifications alloc] initWithHeadIndex:cClassifications.head_index
+                                                                               headName:headName
                                                                              categories:categories];
 
     [classificationHeads addObject:classifications];

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #import "TFLRingBuffer.h"
-#import "TFLAudioError.h"
-#import "TFLUtils.h"
+#import "TFLCommon.h"
+#import "TFLCommonUtils.h"
 
 @implementation TFLRingBuffer {
   NSInteger _nextIndex;
@@ -37,9 +37,10 @@
   NSInteger newOffset = offset;
 
   if (offset + size > sourceBuffer.size) {
-    [TFLUtils createCustomError:error
-                       withCode:TFLAudioErrorCodeInvalidArgumentError
-                    description:@"offset + size exceeds the maximum size of the source buffer."];
+    [TFLCommonUtils
+        createCustomError:error
+                 withCode:TFLSupportErrorCodeInvalidArgumentError
+              description:@"offset + size exceeds the maximum size of the source buffer."];
     return NO;
   }
 

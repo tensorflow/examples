@@ -36,7 +36,6 @@ NS_SWIFT_NAME(AudioRecord)
  * Initializes TFLAudioRecord with a TFLAudioFormat and sample count.
  *
  * @param format An audio format of type TFLAudioFormat.
- * @seealso TFLAudioFormat
  *
  * @param sampleCount The number of samples this TFLAudioRecord instance should delliver
  * continuously when you tap the on-device microphone. The tap callback will deliver arrays of size

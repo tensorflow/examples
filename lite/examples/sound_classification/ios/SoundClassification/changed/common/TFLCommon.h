@@ -205,6 +205,19 @@ typedef NS_ENUM(NSUInteger, TFLSupportErrorCode) {
    * underlying system have not been satisfied. This error code is reserved for serious errors.
    */
   TFLSupportErrorCodeInternalError,
+  
+  /**
+   * Audio processing operatiions failed.
+   * E.g. Format conversion operations by TFLAudioRecord.
+   */
+  TFLSupportErrorCodeAudioProcessingError = 3000,
+  
+  TFLSupportErrorCodeAudioRecordPermissionDeniedError,
+  
+  TFLSupportErrorCodeAudioRecordPermissionUndeterminedError,
+  
+  TFLSupportErrorCodeWaitingForNewMicInputError
+
 } NS_SWIFT_NAME(SupportErrorCode);
 
 NS_ASSUME_NONNULL_END

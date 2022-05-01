@@ -1,4 +1,4 @@
-/* Copyright 2021 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2022 The TensorFlow Authors. All Rights Reserved.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -12,21 +12,14 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  ==============================================================================*/
-#import "TFLCommon.h"
-#import "TFLCommonUtils.h"
-#import "TFLAudioTensor+Utils.h"
+#import "TFLAudioTensor.h"
+@import TensorFlowLiteTaskAudioC;
 
-@implementation TFLAudioTensor (Utils)
+NS_ASSUME_NONNULL_BEGIN
 
-- (TfLiteAudioBuffer)cAudioBufferFromFloatBuffer:(TFLFloatBuffer *)floatBuffer {
-  
-  TfLiteAudioFormat cFormat = {.channels = (int)self.audioFormat.channelCount, .sample_rate = (int)self.audioFormat.sampleRate};
-  
-  TfLiteAudioBuffer cAudioBuffer = {.format = cFormat, .data = floatBuffer.data, .size = [floatBuffer size]};
-    
-  return cAudioBuffer;
-
-}
-
+@interface TFLAudioTensor (Utils)
+- (TfLiteAudioBuffer)cAudioBufferFromFloatBuffer:(TFLFloatBuffer *)floatBuffer;
 
 @end
+
+NS_ASSUME_NONNULL_END

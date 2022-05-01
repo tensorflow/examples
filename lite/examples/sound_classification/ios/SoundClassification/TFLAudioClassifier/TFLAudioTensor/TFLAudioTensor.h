@@ -34,7 +34,6 @@ NS_SWIFT_NAME(AudioTensor)
  * TFLAudioFormat.channelCount.
  *
  * @param format An audio format of type TFLAudioFormat.
- * @seealso TFLAudioFormat
  *
  * @param sampleCount The number of samples this TFLAudioTensor instance can store at any given
  * time. The sampleCount provided will be used to calculate the buffer size needed by multiplying
@@ -46,8 +45,6 @@ NS_SWIFT_NAME(AudioTensor)
 
 /**
  * Convenience method to load the of  TFLAudioRecord into TFLTensorAudio.
- *
- * @seealso TFLAudioRecord
  *
  * @discussion You must make sure that the  audio formats of TFLAudioRecord and the current
  * TFLTensorAudio match.
@@ -66,9 +63,6 @@ NS_SWIFT_NAME(AudioTensor)
  * any old data from the beginning of the buffer if need be to make space. If the size of the new
  * data to be copied is more than the capacity of TFLAudioTensor's buffer, only the most recent data
  * of the TFLAudioTensor's buffer size will be copied from the input buffer .
- *
- * @seealso TFLAudioRecord
- *
  *
  * @param sourceBuffer  A buffer of type TFLFloatBuffer output by TFLAudioRecord. You must make sure
  * that the buffer size and audio format of TFLAudioRecord matches the the format. For multi-channel
