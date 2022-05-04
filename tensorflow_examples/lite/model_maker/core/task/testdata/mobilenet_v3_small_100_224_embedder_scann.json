@@ -1,0 +1,54 @@
+{
+  "name": "ImageEmbedder",
+  "description": "Performs dense feature vector extraction on image.",
+  "subgraph_metadata": [
+    {
+      "input_tensor_metadata": [
+        {
+          "name": "image",
+          "description": "Input image.",
+          "content": {
+            "content_properties_type": "ImageProperties",
+            "content_properties": {
+              "color_space": "RGB"
+            }
+          },
+          "process_units": [
+            {
+              "options_type": "NormalizationOptions",
+              "options": {
+                "mean": [
+                  127.5
+                ],
+                "std": [
+                  127.5
+                ]
+              }
+            }
+          ],
+          "stats": {
+            "max": [
+              1.0
+            ],
+            "min": [
+              -1.0
+            ]
+          }
+        }
+      ],
+      "output_tensor_metadata": [
+        {
+          "name": "StatefulPartitionedCall:0",
+          "associated_files": [
+            {
+              "name": "on_device_scann_index.ldb",
+              "description": "On-device Scann Index file with LevelDB format.",
+              "type": "SCANN_INDEX_FILE"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "min_parser_version": "1.4.0"
+}
