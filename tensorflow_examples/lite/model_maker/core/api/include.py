@@ -42,3 +42,4 @@ from tensorflow_examples.lite.model_maker.core.data_util import image_searcher_d
 from tensorflow_examples.lite.model_maker.core.data_util import metadata_loader
 from tensorflow_examples.lite.model_maker.core.data_util import searcher_dataloader
 from tensorflow_examples.lite.model_maker.core.data_util import text_searcher_dataloader
+from tensorflow_examples.lite.model_maker.core.task import searcher

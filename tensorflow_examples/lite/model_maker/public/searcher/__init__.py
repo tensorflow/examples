@@ -22,3 +22,9 @@ from tensorflow_examples.lite.model_maker.core.data_util.image_searcher_dataload
 from tensorflow_examples.lite.model_maker.core.data_util.metadata_loader import MetadataType
 from tensorflow_examples.lite.model_maker.core.data_util.searcher_dataloader import DataLoader
 from tensorflow_examples.lite.model_maker.core.data_util.text_searcher_dataloader import DataLoader as TextDataLoader
+from tensorflow_examples.lite.model_maker.core.task.searcher import ExportFormat
+from tensorflow_examples.lite.model_maker.core.task.searcher import ScaNNOptions
+from tensorflow_examples.lite.model_maker.core.task.searcher import ScoreAH
+from tensorflow_examples.lite.model_maker.core.task.searcher import ScoreBruteForce
+from tensorflow_examples.lite.model_maker.core.task.searcher import Searcher
+from tensorflow_examples.lite.model_maker.core.task.searcher import Tree
