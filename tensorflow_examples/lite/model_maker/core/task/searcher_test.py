@@ -15,7 +15,9 @@
 import os
 import tempfile
 
+from absl.testing import parameterized
 import numpy as np
+import requests
 import tensorflow as tf
 from tensorflow_lite_support.metadata.python import metadata as _metadata
 from tensorflow_examples.lite.model_maker.core.data_util import image_searcher_dataloader
@@ -27,7 +29,7 @@ from tensorflow_lite_support.python.task.vision.core import tensor_image
 from tensorflow_examples.lite.model_maker.core import test_util
 
 
-class SearcherTest(tf.test.TestCase):
+class SearcherTest(tf.test.TestCase, parameterized.TestCase):
 
   def test_searcher_with_image_embedder(self):
     tflite_path = test_util.get_test_data_path(
@@ -155,6 +157,73 @@ class SearcherTest(tf.test.TestCase):
           output_tflite_path)
       result = searcher_infer.search(test_text)
       self.assertLen(result.nearest_neighbors, 5)
+
+  @parameterized.parameters(
+      ("universal_sentence_encoder_embedder.tflite",
+       "https://tfhub.dev/google/lite-model/universal-sentence-encoder-qa-ondevice/1?lite-format=tflite",
+       100),
+      ("mobilebert_embedding_with_metadata.tflite",
+       " https://storage.googleapis.com/download.tensorflow.org/models/tflite_support/bert_embedder/mobilebert_embedding_with_metadata.tflite",
+       512),
+  )
+  def test_searcher_with_3_inputs_models(self, tflite_filename, url, dim):
+    # Tests seacher with the universal sentence encoder model or bert model.
+    # Gets the path to the tflite embedder model.
+    try:
+      tflite_path = test_util.get_test_data_path(tflite_filename)
+    except ValueError:
+      # Used for external test, download the tflite model in the tensorflow
+      # hub.
+      r = requests.get(url)
+      tflite_path = os.path.join(self.get_temp_dir(), "embedder.tflite")
+      with open(tflite_path, "wb") as f:
+        f.write(r.content)
+
+    # Gets the data loader.
+    data_loader = searcher_dataloader.DataLoader(
+        embedder_path=tflite_path,
+        dataset=np.random.rand(200, dim),
+        metadata=["1"] * 200)
+
+    # Creates searcher model with ScaNN options.
+    scann_options = searcher.ScaNNOptions(
+        distance_measure="dot_product",
+        tree=searcher.Tree(num_leaves=10, num_leaves_to_search=2),
+        score_brute_force=searcher.ScoreBruteForce())
+    model = searcher.Searcher.create_from_data(data_loader, scann_options)
+
+    # Exports the standalone on-device ScaNN index file.
+    output_scann_path = os.path.join(self.get_temp_dir(), "scann_index.ldb")
+    model.export(
+        export_filename=output_scann_path,
+        userinfo="",
+        export_format=searcher.ExportFormat.SCANN_INDEX_FILE)
+
+    self.assertTrue(os.path.exists(output_scann_path))
+    self.assertGreater(os.path.getsize(output_scann_path), 0)
+
+    # Runs the inference to see if it works.
+    searcher_infer = task_text_searcher.TextSearcher.create_from_file(
+        tflite_path, output_scann_path)
+    result = searcher_infer.search("The weather is good.")
+    self.assertLen(result.nearest_neighbors, 5)
+
+    # Exports the TFLite with on-device ScaNN index file as the associate
+    # file.
+    output_tflite_path = os.path.join(self.get_temp_dir(), "searcher.tflite")
+    model.export(
+        export_filename=output_tflite_path,
+        userinfo="",
+        export_format=searcher.ExportFormat.TFLITE)
+
+    self.assertTrue(os.path.exists(output_tflite_path))
+    self.assertGreater(os.path.getsize(output_tflite_path), 0)
+
+    # Runs the inference to see if it works.
+    searcher_infer = task_text_searcher.TextSearcher.create_from_file(
+        output_tflite_path)
+    result = searcher_infer.search("The weather is so bad.")
+    self.assertLen(result.nearest_neighbors, 5)
 
 if __name__ == "__main__":
   tf.test.main()

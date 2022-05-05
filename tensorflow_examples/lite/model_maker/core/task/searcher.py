@@ -30,6 +30,10 @@ from tensorflow_examples.lite.model_maker.core.data_util import searcher_dataloa
 from tensorflow_examples.lite.model_maker.core.utils import ondevice_scann_builder
 from tensorflow_examples.lite.model_maker.core.utils import scann_converter
 
+# Expected index of the response encoding output tensor in Universal Sentence
+# Encoder models.
+_USE_RESPONSE_ENCODING_INDEX = 1
+
 
 @mm_export("searcher.ExportFormat")
 @enum.unique
@@ -288,6 +292,10 @@ class Searcher(object):
         model_buffer = f.read()
         populator = _metadata.MetadataPopulator.with_model_buffer(model_buffer)
 
+      # Gets the output index by the number of input tensors.
+      model = _schema_fb.Model.GetRootAsModel(model_buffer, 0)
+      num_input_tensors = model.Subgraphs(0).InputsLength()
+
       # Extracts the metadata.
       metadata_buffer = _metadata.get_metadata_buffer(model_buffer)
       if metadata_buffer:
@@ -296,8 +304,6 @@ class Searcher(object):
                 metadata_buffer, 0))
       else:
         # Creates the empty metadata.
-        model = _schema_fb.Model.GetRootAsModel(model_buffer, 0)
-        num_input_tensors = model.Subgraphs(0).InputsLength()
         input_metadata = [
             _metadata_fb.TensorMetadataT() for i in range(num_input_tensors)
         ]
@@ -313,12 +319,20 @@ class Searcher(object):
         metadata = _metadata_fb.ModelMetadataT()
         metadata.subgraphMetadata = [subgraph_metadata]
 
+      if num_input_tensors == 3 and (
+          not metadata.subgraphMetadata[0].inputProcessUnits):
+        # Assume Universal Sentence Encoder-based model.
+        output_index = _USE_RESPONSE_ENCODING_INDEX
+      else:
+        output_index = 0
+
       # Updates the metadata with the scann associated file.
       scann_file = _metadata_fb.AssociatedFileT()
       scann_file.name = os.path.basename(output_scann_path)
       scann_file.description = "On-device Scann Index file with LevelDB format."
       scann_file.type = _metadata_fb.AssociatedFileType.SCANN_INDEX_FILE
-      output_metadata = metadata.subgraphMetadata[0].outputTensorMetadata[0]
+      output_metadata = metadata.subgraphMetadata[0].outputTensorMetadata[
+          output_index]
       if output_metadata.associatedFiles is None:
         output_metadata.associatedFiles = [scann_file]
       else:
