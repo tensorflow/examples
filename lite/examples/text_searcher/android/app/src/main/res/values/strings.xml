@@ -1,0 +1,27 @@
+<resources>
+    <string name="tfe_app_name">TFL Text Searcher</string>
+    <string name="tfe_tv_enter_your_search_query">Enter your search query</string>
+    <string name="tfe_tv_note">Note: Enter your query as a sentence. It works better than just keywords.</string>
+    <string name="tfe_tv_suggest_preset">or select a preset query:</string>
+    <string name="tfe_tv_search_query">Search query</string>
+    <string name="tfe_tv_search_result">Search results</string>
+    <string name="tfe_tv_search_result_description">Note: Most relevant results come first.</string>
+    <string name="tfe_tv_distance">Distance: %1$s</string>
+    <string name="tfe_menu_close">Close</string>
+    <string name="tfe_search_result_id">search_result</string>
+    <string name="tfe_search_query_content">search_query_content</string>
+    <string name="tfe_target_url">target_url</string>
+    <string-array name="tfe_preset_queries">
+        <item>Shuttle will deliver final U.S. portion of the international space station</item>
+        <item>Usain Bolt wins third gold of world championship.</item>
+        <item>The radio personality was taken to a hospital Sunday.</item>
+        <item>The Airline Quality Rankings Report looks at the 14 largest U.S. airlines.</item>
+        <item>Valentine\'s Day has evolved to incorporate more than just romantic interests.</item>
+        <item>Digital game distribution continues to grow, thanks to new titles and smartphone apps.</item>
+        <item>The incident is the latest in a spate of fires attributed to e-cigarettes.</item>
+        <item>Liverpool have received heavy criticism over the last week.</item>
+        <item>Older adults can use social media to access health-related information and join forums.</item>
+        <item>Space Shuttle Enterprise floated past New York City landmarks Wednesday as it made its way north.</item>
+        <item>Erratic weather continues this month as sun spells are predicted.</item>
+    </string-array>
+</resources>

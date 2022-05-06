@@ -1,0 +1,10 @@
+def textSearcherModelFile = "text_searcher.tflite"
+def modelDownloadUrl = "https://storage.googleapis.com/tflite_sample_public/text_searcher/cnn_daily_text_searcher.tflite"
+
+task downloadTextSearcherModel(type: Download) {
+    src "${modelDownloadUrl}"
+    dest project.ext.ASSET_DIR + "/${textSearcherModelFile}"
+    overwrite false
+}
+
+preBuild.dependsOn downloadTextSearcherModel
