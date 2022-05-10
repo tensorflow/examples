@@ -3,8 +3,8 @@
 This sample app demonstrates how to use the TensorFlow Lite Task Library's Text
 Searcher API on Android. It works by using a model to embed the search query
 into a high-dimensional vector representing the semantic meaning of the query.
-Then it uses [ScaNN (Scalable Nearest
-Neighbors)]((https://github.com/google-research/google-research/tree/master/scann)
+Then it uses
+[ScaNN (Scalable Nearest Neighbors)](https://github.com/google-research/google-research/tree/master/scann)
 to search for similar items from a predefined database.
 
 ## Requirements
