@@ -17,8 +17,9 @@ import sys
 import time
 
 import cv2
-from object_detector import ObjectDetector
-from object_detector import ObjectDetectorOptions
+from tflite_support.task import core
+from tflite_support.task import processor
+from tflite_support.task import vision
 import utils
 
 
@@ -53,12 +54,13 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   fps_avg_frame_count = 10
 
   # Initialize the object detection model
-  options = ObjectDetectorOptions(
-      num_threads=num_threads,
-      score_threshold=0.3,
-      max_results=3,
-      enable_edgetpu=enable_edgetpu)
-  detector = ObjectDetector(model_path=model, options=options)
+  base_options = core.BaseOptions(
+      file_name=model, use_coral=enable_edgetpu, num_threads=num_threads)
+  detection_options = processor.DetectionOptions(
+      max_results=3, score_threshold=0.3)
+  options = vision.ObjectDetectorOptions(
+      base_options=base_options, detection_options=detection_options)
+  detector = vision.ObjectDetector.create_from_options(options)
 
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
@@ -71,12 +73,17 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     counter += 1
     image = cv2.flip(image, 1)
 
-    # Run object detection estimation using the model.
+    # Convert the image from BGR to RGB as required by the TFLite model.
     rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    detections = detector.detect(rgb_image)
+
+    # Create a TensorImage object from the RGB image.
+    input_tensor = vision.TensorImage.create_from_array(rgb_image)
+
+    # Run object detection estimation using the model.
+    detection_result = detector.detect(input_tensor)
 
     # Draw keypoints and edges on input image
-    image = utils.visualize(image, detections)
+    image = utils.visualize(image, detection_result)
 
     # Calculate the FPS
     if counter % fps_avg_frame_count == 0:
