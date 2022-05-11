@@ -12,16 +12,15 @@
     <string name="tfe_search_query_content">search_query_content</string>
     <string name="tfe_target_url">target_url</string>
     <string-array name="tfe_preset_queries">
-        <item>Shuttle will deliver final U.S. portion of the international space station</item>
-        <item>Usain Bolt wins third gold of world championship.</item>
-        <item>The radio personality was taken to a hospital Sunday.</item>
         <item>The Airline Quality Rankings Report looks at the 14 largest U.S. airlines.</item>
         <item>Valentine\'s Day has evolved to incorporate more than just romantic interests.</item>
         <item>Digital game distribution continues to grow, thanks to new titles and smartphone apps.</item>
         <item>The incident is the latest in a spate of fires attributed to e-cigarettes.</item>
         <item>Liverpool have received heavy criticism over the last week.</item>
-        <item>Older adults can use social media to access health-related information and join forums.</item>
         <item>Space Shuttle Enterprise floated past New York City landmarks Wednesday as it made its way north.</item>
-        <item>Erratic weather continues this month as sun spells are predicted.</item>
+        <item>Tips on how to recognise eating habits and understand real food needs.</item>
+        <item>Lung cancer is the second most common cancer in the UK.</item>
+        <item>Elephants were pictured enjoying a mud bath in Southern Mozambique.</item>
+        <item>Scientists suggest short bursts of daily exercise more effective than long infrequent sessions.</item>
     </string-array>
 </resources>
