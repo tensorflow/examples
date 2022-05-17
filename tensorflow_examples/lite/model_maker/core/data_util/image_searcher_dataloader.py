@@ -106,6 +106,7 @@ class DataLoader(searcher_dataloader.DataLoader):
     embedding_list = []
     metadata_list = []
 
+    i = 0
     # Gets the image files in the folder and loads images.
     for root, _, files in os.walk(path):
       for name in files:
@@ -125,6 +126,10 @@ class DataLoader(searcher_dataloader.DataLoader):
         embedding_list.append(embedding)
         metadata = self._metadata_loader.load(image_path)
         metadata_list.append(metadata)
+
+        i += 1
+        if i % 1000 == 0:
+          logging.info("Processed %d images.", i)
 
     cache_dataset = np.stack(embedding_list)
     self._cache_dataset_list.append(cache_dataset)

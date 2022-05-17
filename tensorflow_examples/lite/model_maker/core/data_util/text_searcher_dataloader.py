@@ -99,6 +99,7 @@ class DataLoader(searcher_dataloader.DataLoader):
     embedding_list = []
     metadata_list = []
 
+    i = 0
     # Reads the text and metadata one by one from the csv file.
     with open(path, "r") as f:
       reader = csv.DictReader(f, delimiter=delimiter, quotechar=quotechar)
@@ -114,6 +115,10 @@ class DataLoader(searcher_dataloader.DataLoader):
 
         embedding_list.append(embedding)
         metadata_list.append(metadata)
+
+        i += 1
+        if i % 1000 == 0:
+          logging.info("Processed %d text strings.", i)
 
     cache_dataset = np.stack(embedding_list)
     self._cache_dataset_list.append(cache_dataset)
