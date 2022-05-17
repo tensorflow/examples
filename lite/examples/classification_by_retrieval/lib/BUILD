@@ -76,6 +76,6 @@ cc_library(
         "@org_tensorflow_lite_support//tensorflow_lite_support/cc/port:statusor",
         "@org_tensorflow_lite_support//tensorflow_lite_support/cc/task/vision/core:frame_buffer",
         "@org_tensorflow_lite_support//tensorflow_lite_support/cc/task/vision/utils:frame_buffer_common_utils",
-        "@org_tensorflow_lite_support//tensorflow_lite_support/examples/task/vision/desktop/utils:image_utils",
+        "@org_tensorflow_lite_support//tensorflow_lite_support/cc/task/vision/utils:image_utils",
     ],
 )

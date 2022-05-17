@@ -1,3 +1,9 @@
+# Release 0.4
+
+## 0.4.0
+
+*   Add one new task: Searcher that support Image / Text as the inputs.
+
 # Release 0.3
 
 ## 0.3.4

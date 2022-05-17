@@ -1,9 +1,12 @@
 # TensorFlow Lite in Play Services image classification Android example application
 
-## TensorFlow Lite(TFLite)
+## TensorFlow Lite (TFLite)
 
-This example implements an Activity that performs real-time image classification
-on the live camera frames. It performs the following operations:
+This example performs real-time image classification on live camera frames. It
+demonstrates loading a model using Tensorflow Lite in Google Play Services and
+using it to classify the camera feed.
+
+It performs the following operations:
 
 1.  Initializes camera preview and image analysis frame streams using CameraX
 2.  Loads a EfficientNet-Lite model using Tensorflow Lite in Play Services

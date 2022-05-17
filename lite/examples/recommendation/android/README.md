@@ -19,10 +19,10 @@ These instructions walk you through running the demo on an Android device.
     [Android Studio](https://developer.android.com/studio/index.html), following
     the instructions on the website.
 
-*   Android Studio 3.2 or later.
+*   Android Studio 4.2 or above.
 
 *   You need an Android device or Android emulator and Android development
-    environment with minimum API 15.
+    environment with minimum API 26.
 
 ### Building
 
@@ -45,7 +45,7 @@ These instructions walk you through running the demo on an Android device.
     for more details on setting up developer devices.
 
 *   If you already have Android emulator installed in Android Studio, select a
-    virtual device with minimum API 15.
+    virtual device with minimum API 26.
 
 *   Click `Run` to run the demo app on your Android device.
 
