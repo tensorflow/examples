@@ -1,0 +1,16 @@
+# GOOGLE SAMPLE PACKAGING DATA
+#
+# This file is used by Google as part of our samples packaging process.
+# End users may safely ignore this file. It has no relevance to other systems.
+---
+status:       PUBLISHED
+technologies: [Android, TensorFlow, Google Play Services]
+categories:   [AI]
+languages:    [Java, Kotlin]
+solutions:    [Mobile]
+github:       tensorflow-examples
+level:        INTERMEDIATE
+icon:         screenshots/icon-web.png
+apiRefs:
+- android:com.google.android.gms.tflite.java.TfLite
+license: apache2

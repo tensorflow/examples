@@ -130,6 +130,12 @@ spec = model_spec.get(
 ```
 """.lstrip()
 
+DOCS['searcher'] = """APIs to create the searcher model.
+
+Task guide:
+https://www.tensorflow.org/lite/tutorials/model_maker_text_searcher.
+"""
+
 DOCS['text_classifier'] = """APIs to train a text classification model.
 
 Task guide:

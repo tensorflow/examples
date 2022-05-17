@@ -13,9 +13,7 @@
 # limitations under the License.
 """A module with util functions."""
 import sys
-from typing import List
 
-from audio_classifier import Category
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 
@@ -47,12 +45,14 @@ class Plotter(object):
 
     plt.show(block=False)
 
-  def plot(self, categories: List[Category]) -> None:
+  # TODO(khanhlvg): Add type hint for result once ClassificationResult added
+  # to tflite_support.task.processor module
+  def plot(self, result) -> None:
     """Plot the audio classification result.
 
     Args:
-        categories: A list of Category instances from an audio classification
-          model.
+      result: Classification results returned by an audio classification
+        model.
     """
     # Clear the axes
     self._axes.cla()
@@ -60,8 +60,9 @@ class Plotter(object):
     self._axes.set_xlim((0, 1))
 
     # Plot the results so that the most probable category comes at the top.
-    label_list = [category.label for category in categories]
-    score_list = [category.score for category in categories]
+    classification = result.classifications[0]
+    label_list = [category.class_name for category in classification.classes]
+    score_list = [category.score for category in classification.classes]
     self._axes.barh(label_list[::-1], score_list[::-1])
 
     # Wait for the UI event.

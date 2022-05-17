@@ -8,7 +8,7 @@ an audio event classification model.
 
 ## Requirements
 
-*   Android Studio 4.1 (installed on a Linux, Mac or Windows machine)
+*   Android Studio 4.2 (installed on a Linux, Mac or Windows machine)
 *   An Android device with Android 6.0+
 
 ## Build and run

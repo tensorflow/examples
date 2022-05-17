@@ -7,7 +7,7 @@ image, but “painted” in the style of the style reference image.
 
 ## Requirements
 
-*   Android Studio 3.2 (installed on a Linux, Mac or Windows machine)
+*   Android Studio 4.2 or above (installed on a Linux, Mac or Windows machine)
 *   An Android device, or an Android Emulator
 
 ## Build and run

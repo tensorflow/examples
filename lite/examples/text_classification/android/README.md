@@ -23,10 +23,10 @@ Follow the steps below to build and run the sample Android app.
 
 ### Requirements
 
-*   Android Studio 3.2 or later. Install instructions can be found on
+*   Android Studio 4.2 or above. Install instructions can be found on
     [Android Studio](https://developer.android.com/studio/index.html) website.
 
-*   An Android device or an Android emulator and with API level higher than 15.
+*   An Android device or an Android emulator and with minimum API 21.
 
 ### Building
 
@@ -49,7 +49,7 @@ Follow the steps below to build and run the sample Android app.
     for more details on setting up developer devices.
 
 *   If you already have an Android emulator installed in Android Studio, select
-    a virtual device with API level higher than 15.
+    a virtual device with minimum API 21.
 
 *   Click `Run` to run the demo app on your Android device.
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.MainActivity">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_query_text_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/tfe_tv_enter_your_search_query"
+        android:paddingStart="@dimen/tfe_default_padding"
+        android:paddingTop="@dimen/tfe_default_padding"
+        android:paddingEnd="0dp"
+        android:paddingBottom="@dimen/tfe_default_padding"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/search_button"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ImageButton
+        android:id="@+id/search_button"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@null"
+        android:paddingStart="@dimen/tfe_default_padding"
+        android:paddingEnd="@dimen/tfe_default_padding"
+        android:src="@drawable/ic_baseline_search_48"
+        app:layout_constraintBottom_toBottomOf="@id/search_query_text_input"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/search_query_text_input" />
+
+    <TextView
+        android:id="@+id/tvNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/tfe_default_padding"
+        android:text="@string/tfe_tv_note"
+        android:textStyle="italic"
+        app:layout_constraintTop_toBottomOf="@id/search_query_text_input" />
+
+    <TextView
+        android:id="@+id/tvSuggestPreset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/tfe_default_padding"
+        android:text="@string/tfe_tv_suggest_preset"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tvNote" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintTop_toBottomOf="@id/tvSuggestPreset" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/preset_query_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSuggestPreset" />
+</androidx.constraintlayout.widget.ConstraintLayout>

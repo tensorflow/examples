@@ -16,8 +16,9 @@
 import argparse
 import time
 
-from audio_classifier import AudioClassifier
-from audio_classifier import AudioClassifierOptions
+from tflite_support.task import audio
+from tflite_support.task import core
+from tflite_support.task import processor
 from utils import Plotter
 
 
@@ -42,12 +43,13 @@ def run(model: str, max_results: int, score_threshold: float,
     raise ValueError('Score threshold must be between (inclusive) 0 and 1.')
 
   # Initialize the audio classification model.
-  options = AudioClassifierOptions(
-      num_threads=num_threads,
-      max_results=max_results,
-      score_threshold=score_threshold,
-      enable_edgetpu=enable_edgetpu)
-  classifier = AudioClassifier(model, options)
+  base_options = core.BaseOptions(
+      file_name=model, use_coral=enable_edgetpu, num_threads=num_threads)
+  classification_options = processor.ClassificationOptions(
+      max_results=max_results, score_threshold=score_threshold)
+  options = audio.AudioClassifierOptions(
+      base_options=base_options, classification_options=classification_options)
+  classifier = audio.AudioClassifier.create_from_options(options)
 
   # Initialize the audio recorder and a tensor to store the audio input.
   audio_record = classifier.create_audio_record()
@@ -81,10 +83,10 @@ def run(model: str, max_results: int, score_threshold: float,
 
     # Load the input audio and run classify.
     tensor_audio.load_from_audio_record(audio_record)
-    categories = classifier.classify(tensor_audio)
+    result = classifier.classify(tensor_audio)
 
     # Plot the classification results.
-    plotter.plot(categories)
+    plotter.plot(result)
 
 
 def main():

@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Common utils."""
+import collections
 import contextlib
 import os
 from typing import Text, Tuple, Union
@@ -268,7 +269,7 @@ def batch_norm_class(is_training, strategy=None):
     return BatchNormalization
 
 # A cache of variable scope to BatchNorm layer.
-_BN_LAYER_CACHE = {}
+_BN_LAYER_CACHE = collections.defaultdict(dict)
 
 
 @gin.configurable
@@ -296,12 +297,13 @@ def batch_normalization(inputs,
   """
   if reuse_scope:
     scope_name = tf.get_variable_scope().name
-    if scope_name in _BN_LAYER_CACHE:
-      bn_layer = _BN_LAYER_CACHE[scope_name]
+    bn_layer_cache = _BN_LAYER_CACHE[hash(inputs.graph)]
+    if scope_name in bn_layer_cache:
+      bn_layer = bn_layer_cache[scope_name]
       logging.info('Reusing variable scope %s', scope_name)
     else:
       bn_layer = batch_norm_class(training, strategy)(**kwargs)
-      _BN_LAYER_CACHE[scope_name] = bn_layer
+      bn_layer_cache[scope_name] = bn_layer
   else:
     bn_layer = batch_norm_class(training, strategy)(**kwargs)
   return bn_layer(inputs, training=training)
