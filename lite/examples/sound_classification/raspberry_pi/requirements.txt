@@ -2,5 +2,4 @@ argparse
 matplotlib>=3.2.1
 sounddevice>=0.4.1
 scipy>=1.7.3 # Only required for test code.
-tflite-runtime>=2.7.0
-tflite-support>=0.3.1
+tflite-support>=0.4.0

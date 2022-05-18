@@ -17,7 +17,7 @@ This app performs recognition of speech Commands on mobile, highlighting the spo
 * If you don't have already, install **[Android Studio](https://developer.android.com/studio/index.html)**, following the instructions on the website.
 
 * You need an Android device and Android development environment with minimum API 21.
-* Android Studio 3.2 or later.
+* Android Studio 4.2 or above.
 
 ### Building
 * Open Android Studio, and from the Welcome screen, select Open an existing Android Studio project.

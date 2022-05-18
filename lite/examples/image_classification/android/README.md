@@ -37,7 +37,7 @@ automatically by download.gradle.
 
 ## Requirements
 
-*   Android Studio 3.2 (installed on a Linux, Mac or Windows machine)
+*   Android Studio 4.2 or above (installed on a Linux, Mac or Windows machine)
 
 *   Android device in
     [developer mode](https://developer.android.com/studio/debug/dev-options)

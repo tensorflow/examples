@@ -14,7 +14,7 @@ Application can run either on device or emulator.
 
 * If you don't have already, install **[Android Studio](https://developer.android.com/studio/index.html)**, following the instructions on their website.
 * You need an Android device and Android development environment with minimum API 21.
-* Android Studio 3.2 or later.
+* Android Studio 4.2 or above.
 
 * This is the  **[guide](../web/README.md)**  to generate TensorFlow.js model.
 * Name the .tflite file as **model.tflite** and the subset of labels should be named as **labels.txt**.

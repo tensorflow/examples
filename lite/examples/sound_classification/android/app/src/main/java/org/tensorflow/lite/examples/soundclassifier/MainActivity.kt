@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
 
   override fun onTopResumedActivityChanged(isTopResumedActivity: Boolean) {
     // Handles "top" resumed event on multi-window environment
-    if (isTopResumedActivity) {
+    if (isTopResumedActivity && isRecordAudioPermissionGranted()) {
       startAudioClassification()
     } else {
       stopAudioClassification()
@@ -169,15 +169,16 @@ class MainActivity : AppCompatActivity() {
 
   @RequiresApi(Build.VERSION_CODES.M)
   private fun requestMicrophonePermission() {
-    if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_GRANTED
-    ) {
+    if (isRecordAudioPermissionGranted()) {
       startAudioClassification()
     } else {
       requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_RECORD_AUDIO)
     }
+  }
+
+  private fun isRecordAudioPermissionGranted(): Boolean {
+      return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO
+      ) == PackageManager.PERMISSION_GRANTED
   }
 
   private fun keepScreenOn(enable: Boolean) =

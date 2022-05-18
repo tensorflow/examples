@@ -388,6 +388,9 @@ class BertModelSpec(object):
       self.model_dir = tempfile.mkdtemp()
 
     num_gpus = util.get_num_gpus(num_gpus)
+    # Always set the number of gpus to 0 if distribution strategy is off.
+    if distribution_strategy == 'off':
+      num_gpus = 0
     self.strategy = distribute_utils.get_distribution_strategy(
         distribution_strategy=distribution_strategy,
         num_gpus=num_gpus,

@@ -84,5 +84,5 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly-SNAPSHOT'
 
-    implementation 'com.quickbirdstudios:opencv:4.3.0'
+    implementation 'com.quickbirdstudios:opencv:4.5.3.0'
 }
