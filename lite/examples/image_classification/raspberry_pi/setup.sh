@@ -7,8 +7,8 @@ else
 fi
 
 # Install Python dependencies.
-python3 -m pip install pip --upgrade
-python3 -m pip install -r requirements.txt
+# python3 -m pip install pip --upgrade
+# python3 -m pip install -r requirements.txt
 
 # Download TF Lite model with metadata.
 FILE=${DATA_DIR}/efficientnet_lite0.tflite
@@ -21,7 +21,7 @@ fi
 FILE=${DATA_DIR}/efficientnet_lite0_edgetpu.tflite
 if [ ! -f "$FILE" ]; then
   curl \
-    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/edgetpu/efficientnet-edgetpu-M_quant_edgetpu.tflite' \
+    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/edgetpu/efficientnet_lite0_edgetpu.tflite' \
     -o ${FILE}
 fi
 echo -e "Downloaded files are in ${DATA_DIR}"
