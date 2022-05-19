@@ -19,9 +19,9 @@ import time
 from typing import List
 
 import cv2
-from image_segmenter import ColoredLabel
-from image_segmenter import ImageSegmenter
-from image_segmenter import ImageSegmenterOptions
+from tflite_support.task import core
+from tflite_support.task import processor
+from tflite_support.task import vision
 import numpy as np
 import utils
 
@@ -42,7 +42,6 @@ _PADDING_WIDTH_FOR_LEGEND = 150  # pixels
 def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
         camera_id: int, width: int, height: int) -> None:
   """Continuously run inference on images acquired from the camera.
-
   Args:
       model: Name of the TFLite image segmentation model.
       display_mode: Name of mode to display image segmentation.
@@ -54,9 +53,15 @@ def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
   """
 
   # Initialize the image segmentation model.
-  options = ImageSegmenterOptions(
-      num_threads=num_threads, enable_edgetpu=enable_edgetpu)
-  segmenter = ImageSegmenter(model_path=model, options=options)
+  base_options = core.BaseOptions(file_name=model,
+                                  use_coral=enable_edgetpu,
+                                  num_threads=num_threads)
+  segmentation_options = processor.SegmentationOptions(
+      output_type=processor.SegmentationOptions.OutputType.CATEGORY_MASK)
+  options = vision.ImageSegmenterOptions(base_options=base_options,
+                                         segmentation_options=segmentation_options)
+
+  segmenter = vision.ImageSegmenter.create_from_options(options)
 
   # Variables to calculate FPS
   counter, fps = 0, 0
@@ -77,9 +82,14 @@ def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
 
     counter += 1
     image = cv2.flip(image, 1)
-
+    
+    # Convert the image from BGR to RGB as required by the TFLite model.
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    # Create TensorImage from the RGB image
+    tensor_image = vision.TensorImage.create_from_array(rgb_image)
     # Segment with each frame from camera.
-    segmentation_result = segmenter.segment(image)
+    segmentation_result = segmenter.segment(tensor_image)
 
     # Convert the segmentation result into an image.
     seg_map_img, found_colored_labels = utils.segmentation_map_to_image(
@@ -112,9 +122,8 @@ def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
 
 def visualize(input_image: np.ndarray, segmentation_map_image: np.ndarray,
               display_mode: str, fps: float,
-              colored_labels: List[ColoredLabel]) -> np.ndarray:
+              colored_labels: List) -> np.ndarray:
   """Visualize segmentation result on image.
-
   Args:
       input_image: The [height, width, 3] RGB input image.
       segmentation_map_image: The [height, width, 3] RGB segmentation map image.
@@ -122,7 +131,6 @@ def visualize(input_image: np.ndarray, segmentation_map_image: np.ndarray,
         'side-by-side'.
       fps: Value of fps.
       colored_labels: List of colored labels found in the segmentation result.
-
   Returns:
       Input image overlaid with segmentation result.
   """
@@ -154,14 +162,14 @@ def visualize(input_image: np.ndarray, segmentation_map_image: np.ndarray,
 
   # Show the label on right-side frame.
   for colored_label in colored_labels:
-    rect_color = colored_label.color
+    rect_color = (colored_label.r, colored_label.g, colored_label.b)
     start_point = (legend_x, legend_y)
     end_point = (legend_x + _LEGEND_RECT_SIZE, legend_y + _LEGEND_RECT_SIZE)
     cv2.rectangle(overlay, start_point, end_point, rect_color,
                   -_LEGEND_FONT_THICKNESS)
 
     label_location = legend_x + _LEGEND_RECT_SIZE + _LABEL_MARGIN, legend_y + _LABEL_MARGIN
-    cv2.putText(overlay, colored_label.label, label_location,
+    cv2.putText(overlay, colored_label.class_name, label_location,
                 cv2.FONT_HERSHEY_PLAIN, _LEGEND_FONT_SIZE, _LEGEND_TEXT_COLOR,
                 _LEGEND_FONT_THICKNESS)
     legend_y += (_LEGEND_RECT_SIZE + _LABEL_MARGIN)
