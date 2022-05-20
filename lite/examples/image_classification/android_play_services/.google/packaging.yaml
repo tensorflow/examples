@@ -5,7 +5,8 @@
 ---
 status:       PUBLISHED
 technologies: [Android, TensorFlow, Google Play Services]
-categories:   [AⅠ]
+# Note that categories are run through .toLowerCase() and then .capitalize(), so "AI" becomes "Ai"
+categories:   [Artificial Intelligence, Machine Learning]
 languages:    [Java, Kotlin]
 solutions:    [Mobile]
 github:       tensorflow-examples
