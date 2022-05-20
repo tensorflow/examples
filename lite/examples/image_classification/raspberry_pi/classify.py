@@ -18,8 +18,9 @@ import sys
 import time
 
 import cv2
-from image_classifier import ImageClassifier
-from image_classifier import ImageClassifierOptions
+from tflite_support.task import core
+from tflite_support.task import processor
+from tflite_support.task import vision
 
 # Visualization parameters
 _ROW_SIZE = 20  # pixels
@@ -30,13 +31,14 @@ _FONT_THICKNESS = 1
 _FPS_AVERAGE_FRAME_COUNT = 10
 
 
-def run(model: str, max_results: int, num_threads: int, enable_edgetpu: bool,
-        camera_id: int, width: int, height: int) -> None:
+def run(model: str, max_results: int, score_threshold: float, num_threads: int,
+        enable_edgetpu: bool, camera_id: int, width: int, height: int) -> None:
   """Continuously run inference on images acquired from the camera.
 
   Args:
       model: Name of the TFLite image classification model.
       max_results: Max of classification results.
+      score_threshold: The score threshold of classification results.
       num_threads: Number of CPU threads to run the model.
       enable_edgetpu: Whether to run the model on EdgeTPU.
       camera_id: The camera id to be passed to OpenCV.
@@ -45,11 +47,16 @@ def run(model: str, max_results: int, num_threads: int, enable_edgetpu: bool,
   """
 
   # Initialize the image classification model
-  options = ImageClassifierOptions(
-      num_threads=num_threads,
-      max_results=max_results,
-      enable_edgetpu=enable_edgetpu)
-  classifier = ImageClassifier(model, options)
+  base_options = core.BaseOptions(
+      file_name=model, use_coral=enable_edgetpu, num_threads=num_threads)
+
+  # Enable Coral by this setting
+  classification_options = processor.ClassificationOptions(
+      max_results=max_results, score_threshold=score_threshold)
+  options = vision.ImageClassifierOptions(
+      base_options=base_options, classification_options=classification_options)
+
+  classifier = vision.ImageClassifier.create_from_options(options)
 
   # Variables to calculate FPS
   counter, fps = 0, 0
@@ -70,11 +77,18 @@ def run(model: str, max_results: int, num_threads: int, enable_edgetpu: bool,
 
     counter += 1
     image = cv2.flip(image, 1)
+
+    # Convert the image from BGR to RGB as required by the TFLite model.
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # Create TensorImage from the RGB image
+    tensor_image = vision.TensorImage.create_from_array(rgb_image)
     # List classification results
-    categories = classifier.classify(image)
+    categories = classifier.classify(tensor_image)
+
     # Show classification results on the image
-    for idx, category in enumerate(categories):
-      class_name = category.label
+    for idx, category in enumerate(categories.classifications[0].classes):
+      class_name = category.class_name
       score = round(category.score, 2)
       result_text = class_name + ' (' + str(score) + ')'
       text_location = (_LEFT_MARGIN, (idx + 2) * _ROW_SIZE)
@@ -116,6 +130,12 @@ def main():
       required=False,
       default=3)
   parser.add_argument(
+      '--scoreThreshold',
+      help='The score threshold of classification results.',
+      required=False,
+      type=float,
+      default=0.0)
+  parser.add_argument(
       '--numThreads',
       help='Number of CPU threads to run the model.',
       required=False,
@@ -140,9 +160,9 @@ def main():
       default=480)
   args = parser.parse_args()
 
-  run(args.model, int(args.maxResults), int(args.numThreads),
-      bool(args.enableEdgeTPU), int(args.cameraId), args.frameWidth,
-      args.frameHeight)
+  run(args.model, int(args.maxResults),
+      args.scoreThreshold, int(args.numThreads), bool(args.enableEdgeTPU),
+      int(args.cameraId), args.frameWidth, args.frameHeight)
 
 
 if __name__ == '__main__':

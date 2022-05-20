@@ -21,7 +21,7 @@ fi
 FILE=${DATA_DIR}/efficientnet_lite0_edgetpu.tflite
 if [ ! -f "$FILE" ]; then
   curl \
-    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/edgetpu/efficientnet-edgetpu-M_quant_edgetpu.tflite' \
+    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/edgetpu/efficientnet_lite0_edgetpu.tflite' \
     -o ${FILE}
 fi
 echo -e "Downloaded files are in ${DATA_DIR}"
