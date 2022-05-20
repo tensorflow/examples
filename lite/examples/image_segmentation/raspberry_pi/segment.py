@@ -122,7 +122,7 @@ def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
 
 def visualize(input_image: np.ndarray, segmentation_map_image: np.ndarray,
               display_mode: str, fps: float,
-              colored_labels: List) -> np.ndarray:
+              colored_labels: List[processor.Segmentation.ColoredLabel]) -> np.ndarray:
   """Visualize segmentation result on image.
   Args:
       input_image: The [height, width, 3] RGB input image.

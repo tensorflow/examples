@@ -15,12 +15,13 @@
 
 from typing import List
 
-from tflite_support.task import processor
+from tflite_support.task.processor import Segmentation
+from tflite_support.task.processor import SegmentationResult
 import numpy as np
 
 
 def segmentation_map_to_image(
-    segmentation: processor.SegmentationResult) -> (np.ndarray, List):
+    segmentation: SegmentationResult) -> (np.ndarray, List[Segmentation.ColoredLabel]):
   """Convert the SegmentationResult into a RGB image.
   Args:
       segmentation: An output of a image segmentation model.
