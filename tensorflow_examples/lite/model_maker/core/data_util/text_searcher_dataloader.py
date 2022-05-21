@@ -107,7 +107,7 @@ class DataLoader(searcher_dataloader.DataLoader):
         text, metadata = line[text_column], line[metadata_column]
         try:
           embedding = self._embedder.embed(
-              text).embeddings[0].feature_vector.value_float
+              text).embeddings[0].feature_vector.value
         except (ValueError, RuntimeError) as e:
           logging.warning("Can't get the embedding of %s with the error %s",
                           text, e)

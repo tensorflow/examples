@@ -117,7 +117,7 @@ class DataLoader(searcher_dataloader.DataLoader):
         image = tensor_image.TensorImage.create_from_file(image_path)
         try:
           embedding = self._embedder.embed(
-              image).embeddings[0].feature_vector.value_float
+              image).embeddings[0].feature_vector.value
         except (RuntimeError, ValueError) as e:
           logging.warning("Can't get the embedding of %s with the error %s",
                           image_path, e)
