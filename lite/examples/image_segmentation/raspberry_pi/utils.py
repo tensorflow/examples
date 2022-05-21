@@ -15,30 +15,27 @@
 
 from typing import List
 
-from image_segmenter import ColoredLabel
-from image_segmenter import OutputType
-from image_segmenter import Segmentation
 import numpy as np
+from tflite_support.task import processor
 
 
 def segmentation_map_to_image(
-    segmentation: Segmentation) -> (np.ndarray, List[ColoredLabel]):
-  """Convert the segmentation result into a RGB image.
+    segmentation: processor.SegmentationResult
+) -> (np.ndarray, List[processor.Segmentation.ColoredLabel]):
+  """Convert the SegmentationResult into a RGB image.
 
   Args:
-      segmentation: An output of a image segmentation model.
+    segmentation: An output of a image segmentation model.
 
   Returns:
-      seg_map_img: The visualized segmentation result as an RGB image.
-      found_colored_labels: The list of ColoredLabels found in the image.
+    seg_map_img: The visualized segmentation result as an RGB image.
+    found_colored_labels: The list of ColoredLabels found in the image.
   """
-  if segmentation.output_type != OutputType.CATEGORY_MASK:
-    raise ValueError(
-        'Unsupported output type. Only OutputType.CATEGORY_MASK is supported.')
-
+  segmentation = segmentation.segmentation[0]
   # Get the list of unique labels from the model output.
+  masks = np.frombuffer(segmentation.category_mask, dtype=np.uint8)
   found_label_indices, inverse_map, counts = np.unique(
-      segmentation.masks, return_inverse=True, return_counts=True)
+      masks, return_inverse=True, return_counts=True)
   count_dict = dict(zip(found_label_indices, counts))
 
   # Sort the list of unique label so that the class with the most pixel comes
@@ -53,9 +50,10 @@ def segmentation_map_to_image(
   # Note: We use the inverse map to avoid running the heavy loop in Python and
   # pass it over to Numpy's C++ implementation to improve performance.
   found_colors = [
-      segmentation.colored_labels[idx].color for idx in found_label_indices
+      (segmentation.colored_labels[idx].r, segmentation.colored_labels[idx].g,
+       segmentation.colored_labels[idx].b) for idx in found_label_indices
   ]
-  output_shape = [segmentation.masks.shape[0], segmentation.masks.shape[1], 3]
+  output_shape = [segmentation.width, segmentation.height, 3]
   seg_map_img = np.array(found_colors)[inverse_map].reshape(
       output_shape).astype(np.uint8)
 
