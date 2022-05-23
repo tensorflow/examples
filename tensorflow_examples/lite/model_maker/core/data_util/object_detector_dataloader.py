@@ -92,6 +92,8 @@ def _group_csv_lines(csv_file: str,
           lines_list[i].append(line)
 
       label = line[2].strip()
+      if(label ==""):
+        continue
       # Updates label_map if it's a new label.
       if label not in label_map.values():
         label_map[len(label_map) + 1] = label
