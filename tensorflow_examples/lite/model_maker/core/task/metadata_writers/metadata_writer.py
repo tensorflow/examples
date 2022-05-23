@@ -57,7 +57,7 @@ class MetadataWriter(abc.ABC):
   def _get_subgraph(self):
     """Gets the input / output tensor names into lists."""
 
-    with open(self.model_file, "rb") as f:
+    with tf.io.gfile.GFile(self.model_file, "rb") as f:
       model_buf = f.read()
 
     model = _schema_fb.Model.GetRootAsModel(model_buf, 0)
@@ -136,7 +136,7 @@ class MetadataWriter(abc.ABC):
         self.export_directory,
         os.path.splitext(model_basename)[0] + ".json")
     if export_metadata_json_file:
-      with open(export_json_path, "w") as f:
+      with tf.io.gfile.GFile(export_json_path, "w") as f:
         f.write(displayer.get_metadata_json())
 
     logging = tf.compat.v1.logging
