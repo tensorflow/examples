@@ -334,6 +334,8 @@ def _get_xml_dict_from_csv_lines(images_dir: str, image_filename: str,
 
   for line in lines:
     label = line[2].strip()
+    if(label==""):
+      break
     xmin, ymin = float(line[3]) * width, float(line[4]) * height
     xmax, ymax = float(line[7]) * width, float(line[8]) * height
     obj = {
@@ -350,7 +352,8 @@ def _get_xml_dict_from_csv_lines(images_dir: str, image_filename: str,
         'pose': 'Unspecified',
     }
     xml_dict['object'].append(obj)
-
+  if(len(xml_dict['object'])==0):
+    xml_dict.pop('object')
   return xml_dict
 
 
