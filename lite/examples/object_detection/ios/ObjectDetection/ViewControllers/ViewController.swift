@@ -118,8 +118,6 @@ class ViewController: UIViewController {
         return
       }
       inferenceViewController = segue.destination as? InferenceViewController
-      inferenceViewController?.wantedInputHeight = tempModelDataHandler.inputHeight
-      inferenceViewController?.wantedInputWidth = tempModelDataHandler.inputWidth
       inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
       inferenceViewController?.currentThreadCount = tempModelDataHandler.threadCount
       inferenceViewController?.delegate = self
