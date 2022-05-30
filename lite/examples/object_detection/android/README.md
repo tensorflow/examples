@@ -59,7 +59,7 @@ This object detection Android reference app demonstrates two implementation
 solutions:
 
 (1)
-[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
+[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/object_detection/android/lib_task_api)
 that leverages the out-of-box API from the
 [TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/object_detector);
 
