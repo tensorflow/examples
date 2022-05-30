@@ -41,7 +41,7 @@ enum MobileNetSSD {
 }
 
 /// This class handles all data preprocessing and makes calls to run inference on a given frame
-/// by invoking the `Interpreter`. It then formats the inferences obtained and returns the top N
+/// by invoking the `ObjectDetector`. It then formats the inferences obtained and returns the top N
 /// results for a successful inference.
 class ModelDataHandler: NSObject {
 
@@ -58,8 +58,6 @@ class ModelDataHandler: NSObject {
   /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
   private var detector: ObjectDetector
 
-  private let bgraPixel = (channels: 4, alphaComponent: 3, lastBgrComponent: 2)
-  private let rgbPixelChannels = 3
   private let colorStrideValue = 10
   private let colors = [
     UIColor.red,

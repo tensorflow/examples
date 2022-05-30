@@ -21,7 +21,6 @@
 		AA9AC5A9212D39FD000B4E9D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA9AC5A7212D39FD000B4E9D /* LaunchScreen.storyboard */; };
 		AA9AC5D7212D43E0000B4E9D /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5D5212D43E0000B4E9D /* PreviewView.swift */; };
 		AA9AC5E2212D4520000B4E9D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5E1212D4520000B4E9D /* ViewController.swift */; };
-		AAAB09702189838A0015A1F2 /* CVPixelBufferExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAB096F2189838A0015A1F2 /* CVPixelBufferExtension.swift */; };
 		AAC58495214797E800FB532F /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC58494214797E800FB532F /* StringExtension.swift */; };
 		AAEF3D8D21A2BE2B0073AE1C /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */; };
 		BF8B650E28338E7A00BC3968 /* ssd_mobilenet_v2.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF8B650D28338E1600BC3968 /* ssd_mobilenet_v2.tflite */; };
@@ -46,7 +45,6 @@
 		AA9AC5AA212D39FD000B4E9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA9AC5D5212D43E0000B4E9D /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		AA9AC5E1212D4520000B4E9D /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		AAAB096F2189838A0015A1F2 /* CVPixelBufferExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CVPixelBufferExtension.swift; sourceTree = "<group>"; };
 		AAC58494214797E800FB532F /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		BF8B650D28338E1600BC3968 /* ssd_mobilenet_v2.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = ssd_mobilenet_v2.tflite; sourceTree = "<group>"; };
@@ -92,7 +90,6 @@
 		AA756E672150CD7C004BB0BC /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				AAAB096F2189838A0015A1F2 /* CVPixelBufferExtension.swift */,
 				AAC58494214797E800FB532F /* StringExtension.swift */,
 				AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */,
 			);
@@ -303,7 +300,6 @@
 				AA119EA2217F337300DE46CF /* ModelDataHandler.swift in Sources */,
 				AAC58495214797E800FB532F /* StringExtension.swift in Sources */,
 				AA756E652150C996004BB0BC /* CameraFeedManager.swift in Sources */,
-				AAAB09702189838A0015A1F2 /* CVPixelBufferExtension.swift in Sources */,
 				AAEF3D8D21A2BE2B0073AE1C /* UIColorExtension.swift in Sources */,
 				AA9AC59F212D39FC000B4E9D /* AppDelegate.swift in Sources */,
 				AA9AC5D7212D43E0000B4E9D /* PreviewView.swift in Sources */,
