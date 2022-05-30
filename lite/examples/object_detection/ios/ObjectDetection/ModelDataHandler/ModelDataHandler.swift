@@ -36,7 +36,7 @@ typealias FileInfo = (name: String, extension: String)
 
 /// Information about the MobileNet SSD model.
 enum MobileNetSSD {
-  static let modelInfo: FileInfo = (name: "ssd_mobilenet_v2", extension: "tflite")
+  static let modelInfo: FileInfo = (name: "detect", extension: "tflite")
   static let labelsInfo: FileInfo = (name: "labelmap", extension: "txt")
 }
 
@@ -101,9 +101,6 @@ class ModelDataHandler: NSObject {
     }
 
     super.init()
-
-    // Load the classes listed in the labels file.
-    loadLabels(fileInfo: labelsFileInfo)
   }
 
   /// This class handles all data preprocessing and makes calls to run inference on a given frame
@@ -125,32 +122,4 @@ class ModelDataHandler: NSObject {
       return nil
     }
   }
-
-  /// Filters out all the results with confidence score < threshold and returns the results
-  /// sorted in descending order.
-  ///
-  func formatResults(detectionResult: DetectionResult) -> [Inference] {
-    var resultsArray: [Inference] = []
-    for detection in detectionResult.detections {
-      guard let category = detection.categories.first, category.score > threshold else { continue }
-      // Gets the output class names for detected classes from labels list.
-      let outputClassIndex = category.index
-      let outputClass = labels[outputClassIndex + 1]
-
-      var rect: CGRect = CGRect.zero
-
-      // Translates the detected bounding box to CGRect.
-      rect.origin.y = detection.boundingBox.minY
-      rect.origin.x = detection.boundingBox.minX
-      rect.size.height = detection.boundingBox.height
-      rect.size.width = detection.boundingBox.width
-
-      let colorToAssign = colorForClass(withIndex: outputClassIndex + 1)
-      let inference = Inference(confidence: category.score,
-                                className: outputClass,
-                                rect: rect,
-                                displayColor: colorToAssign)
-      resultsArray.append(inference)
-    }
-    return resultsArray
-  }
+}

@@ -17,33 +17,22 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODELS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/coco_ssd_mobilenet_v1_1.0_quant_2018_06_29.zip"
+MODELS_URL="https://tfhub.dev/tensorflow/lite-model/efficientdet/lite0/detection/metadata/1?lite-format=tflite"
 DOWNLOADS_DIR=$(mktemp -d)
 
 cd "$SCRIPT_DIR"
 
-download_and_extract() {
+download() {
   local usage="Usage: download_and_extract URL DIR"
   local url="${1:?${usage}}"
   local dir="${2:?${usage}}"
   echo "downloading ${url}" >&2
   mkdir -p "${dir}"
   tempdir=$(mktemp -d)
-  tempdir2=$(mktemp -d)
 
-  curl -L ${url} > ${tempdir}/zipped.zip
-  unzip ${tempdir}/zipped.zip -d ${tempdir2}
-
-  # If the zip file contains nested directories, extract the files from the
-  # inner directory.
-  if ls ${tempdir2}/*/* 1> /dev/null 2>&1; then
-    # unzip has no strip components, so unzip to a temp dir, and move the
-    # files we want from the tempdir to destination.
-    cp -R ${tempdir2}/*/* ${dir}/
-  else
-    cp -R ${tempdir2}/* ${dir}/
-  fi
-  rm -rf ${tempdir2} ${tempdir}
+  curl -L ${url} > ${tempdir}/detect.tflite
+  cp -R ${tempdir}/* ${dir}/
+  rm -rf ${tempdir}
 }
 
 if [ -f ../ObjectDetection/Model/detect.tflite ]
@@ -52,9 +41,11 @@ echo "File exists. Exiting..."
 exit 0
 fi
 
-download_and_extract "${MODELS_URL}" "${DOWNLOADS_DIR}/models"
+download "${MODELS_URL}" "${DOWNLOADS_DIR}/models"
 
 file ${DOWNLOADS_DIR}/models
 
 cp ${DOWNLOADS_DIR}/models/* ../ObjectDetection/Model
+
+rm -rf ${DOWNLOADS_DIR}
 

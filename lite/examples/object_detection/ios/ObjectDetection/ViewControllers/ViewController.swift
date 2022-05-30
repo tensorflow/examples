@@ -73,7 +73,7 @@ class ViewController: UIViewController {
     }
     cameraFeedManager.delegate = self
     overlayView.clearsContextBeforeDrawing = true
-
+    loadLabels(fileInfo: MobileNetSSD.labelsInfo)
     addPanGesture()
   }
 

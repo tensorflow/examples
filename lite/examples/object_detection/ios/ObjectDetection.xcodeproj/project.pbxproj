@@ -22,7 +22,6 @@
 		AA9AC5E2212D4520000B4E9D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5E1212D4520000B4E9D /* ViewController.swift */; };
 		AAC58495214797E800FB532F /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC58494214797E800FB532F /* StringExtension.swift */; };
 		AAEF3D8D21A2BE2B0073AE1C /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */; };
-		BF8B650E28338E7A00BC3968 /* ssd_mobilenet_v2.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF8B650D28338E1600BC3968 /* ssd_mobilenet_v2.tflite */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,7 +44,7 @@
 		AA9AC5E1212D4520000B4E9D /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AAC58494214797E800FB532F /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
-		BF8B650D28338E1600BC3968 /* ssd_mobilenet_v2.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = ssd_mobilenet_v2.tflite; sourceTree = "<group>"; };
+		BF1FBCA8284481D100E05940 /* detect.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = detect.tflite; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,7 +70,7 @@
 		AA09263B212D730700D5890F /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				BF8B650D28338E1600BC3968 /* ssd_mobilenet_v2.tflite */,
+				BF1FBCA8284481D100E05940 /* detect.tflite */,
 				AA055D8821622F3E00B25948 /* labelmap.txt */,
 			);
 			path = Model;
@@ -235,7 +234,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF8B650E28338E7A00BC3968 /* ssd_mobilenet_v2.tflite in Resources */,
 				AA9AC5A9212D39FD000B4E9D /* LaunchScreen.storyboard in Resources */,
 				AA9AC5A6212D39FD000B4E9D /* Assets.xcassets in Resources */,
 				AA9AC5A4212D39FC000B4E9D /* Main.storyboard in Resources */,
