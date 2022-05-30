@@ -20,7 +20,7 @@ import TensorFlowLiteTaskVision
 /// Stores results for a particular frame that was successfully run through the `Interpreter`.
 struct Result {
   let inferenceTime: Double
-  let inferences: [Inference]
+  let detections: [Detection]
 }
 
 /// Stores one formatted inference.
@@ -117,11 +117,9 @@ class ModelDataHandler: NSObject {
       let startDate = Date()
       let detectionResult = try detector.detect(gmlImage: mlImage)
       let interval = Date().timeIntervalSince(startDate) * 1000
-      let inferences = formatResults(detectionResult: detectionResult)
 
-      // Returns the inference time and inferences
-      let result = Result(inferenceTime: interval, inferences: inferences)
-      return result
+      // Returns the detection time and detections
+      return  Result(inferenceTime: interval, detections: detectionResult.detections)
     } catch let error {
       print("Failed to invoke the interpreter with error: \(error.localizedDescription)")
       return nil
@@ -156,39 +154,3 @@ class ModelDataHandler: NSObject {
     }
     return resultsArray
   }
-
-  /// Loads the labels from the labels file and stores them in the `labels` property.
-  private func loadLabels(fileInfo: FileInfo) {
-    let filename = fileInfo.name
-    let fileExtension = fileInfo.extension
-    guard let fileURL = Bundle.main.url(forResource: filename, withExtension: fileExtension) else {
-      fatalError("Labels file not found in bundle. Please add a labels file with name " +
-                 "\(filename).\(fileExtension) and try again.")
-    }
-    do {
-      let contents = try String(contentsOf: fileURL, encoding: .utf8)
-      labels = contents.components(separatedBy: .newlines)
-    } catch {
-      fatalError("Labels file named \(filename).\(fileExtension) cannot be read. Please add a " +
-                 "valid labels file and try again.")
-    }
-  }
-
-  /// This assigns color for a particular class.
-  private func colorForClass(withIndex index: Int) -> UIColor {
-
-    // We have a set of colors and the depending upon a stride, it assigns variations to of the base
-    // colors to each object based on its index.
-    let baseColor = colors[index % colors.count]
-
-    var colorToAssign = baseColor
-
-    let percentage = CGFloat((colorStrideValue / 2 - index / colors.count) * colorStrideValue)
-
-    if let modifiedColor = baseColor.getModified(byPercentage: percentage) {
-      colorToAssign = modifiedColor
-    }
-
-    return colorToAssign
-  }
-}

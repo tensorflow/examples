@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import UIKit
+import TensorFlowLiteTaskVision
 
 class ViewController: UIViewController {
 
@@ -34,6 +35,21 @@ class ViewController: UIViewController {
   private let collapseTransitionThreshold: CGFloat = -30.0
   private let expandTransitionThreshold: CGFloat = 30.0
   private let delayBetweenInferencesMs: Double = 200
+  private let threshold: Float = 0.5
+  private var labels: [String] = []
+  private let colorStrideValue = 10
+  private let colors = [
+    UIColor.red,
+    UIColor(displayP3Red: 90.0/255.0, green: 200.0/255.0, blue: 250.0/255.0, alpha: 1.0),
+    UIColor.green,
+    UIColor.orange,
+    UIColor.blue,
+    UIColor.purple,
+    UIColor.magenta,
+    UIColor.yellow,
+    UIColor.cyan,
+    UIColor.brown
+  ]
 
   // MARK: Instance Variables
   private var initialBottomSpace: CGFloat = 0.0
@@ -243,28 +259,30 @@ extension ViewController: CameraFeedManagerDelegate {
       self.inferenceViewController?.tableView.reloadData()
 
       // Draws the bounding boxes and displays class names and confidence scores.
-      self.drawAfterPerformingCalculations(onInferences: displayResult.inferences, withImageSize: CGSize(width: CGFloat(width), height: CGFloat(height)))
+      self.drawAfterPerformingCalculations(onDetections: displayResult.detections, withImageSize: CGSize(width: CGFloat(width), height: CGFloat(height)))
     }
   }
 
   /**
    This method takes the results, translates the bounding box rects to the current view, draws the bounding boxes, classNames and confidence scores of inferences.
    */
-  func drawAfterPerformingCalculations(onInferences inferences: [Inference], withImageSize imageSize:CGSize) {
+  func drawAfterPerformingCalculations(onDetections detections: [Detection], withImageSize imageSize:CGSize) {
 
     self.overlayView.objectOverlays = []
     self.overlayView.setNeedsDisplay()
 
-    guard !inferences.isEmpty else {
+    guard !detections.isEmpty else {
       return
     }
 
     var objectOverlays: [ObjectOverlay] = []
 
-    for inference in inferences {
+    for detection in detections {
+
+      guard let category = detection.categories.first, category.score > threshold else { continue }
 
       // Translates bounding box rect to current view.
-      var convertedRect = inference.rect.applying(CGAffineTransform(scaleX: self.overlayView.bounds.size.width / imageSize.width, y: self.overlayView.bounds.size.height / imageSize.height))
+      var convertedRect = detection.boundingBox.applying(CGAffineTransform(scaleX: self.overlayView.bounds.size.width / imageSize.width, y: self.overlayView.bounds.size.height / imageSize.height))
 
       if convertedRect.origin.x < 0 {
         convertedRect.origin.x = self.edgeOffset
@@ -282,12 +300,17 @@ extension ViewController: CameraFeedManagerDelegate {
         convertedRect.size.width = self.overlayView.bounds.maxX - convertedRect.origin.x - self.edgeOffset
       }
 
-      let confidenceValue = Int(inference.confidence * 100.0)
-      let string = "\(inference.className)  (\(confidenceValue)%)"
+      // if index = 0 class name is unknow
+      let className = labels[category.index + 1]
+
+      let confidenceValue = Int(category.score * 100.0)
+      let string = "\(className)  (\(confidenceValue)%)"
+
+      let displayColor = colorForClass(withIndex: category.index)
 
       let size = string.size(usingFont: self.displayFont)
 
-      let objectOverlay = ObjectOverlay(name: string, borderRect: convertedRect, nameStringSize: size, color: inference.displayColor, font: self.displayFont)
+      let objectOverlay = ObjectOverlay(name: string, borderRect: convertedRect, nameStringSize: size, color: displayColor, font: self.displayFont)
 
       objectOverlays.append(objectOverlay)
     }
@@ -296,6 +319,28 @@ extension ViewController: CameraFeedManagerDelegate {
     self.draw(objectOverlays: objectOverlays)
 
   }
+
+  /*
+   guard let category = detection.categories.first, category.score > threshold else { continue }
+   // Gets the output class names for detected classes from labels list.
+   let outputClassIndex = category.index
+   let outputClass = labels[outputClassIndex + 1]
+
+   var rect: CGRect = CGRect.zero
+
+   // Translates the detected bounding box to CGRect.
+   rect.origin.y = detection.boundingBox.minY
+   rect.origin.x = detection.boundingBox.minX
+   rect.size.height = detection.boundingBox.height
+   rect.size.width = detection.boundingBox.width
+
+   let colorToAssign = colorForClass(withIndex: outputClassIndex + 1)
+   let inference = Inference(confidence: category.score,
+                             className: outputClass,
+                             rect: rect,
+                             displayColor: colorToAssign)
+   resultsArray.append(inference)
+   */
 
   /** Calls methods to update overlay view with detected bounding boxes and class names.
    */
@@ -439,4 +484,43 @@ extension ViewController {
     view.setNeedsLayout()
   }
 
+}
+
+// MARK: - Display handler function
+extension ViewController {
+
+  /// Loads the labels from the labels file and stores them in the `labels` property.
+  private func loadLabels(fileInfo: FileInfo) {
+    let filename = fileInfo.name
+    let fileExtension = fileInfo.extension
+    guard let fileURL = Bundle.main.url(forResource: filename, withExtension: fileExtension) else {
+      fatalError("Labels file not found in bundle. Please add a labels file with name " +
+                 "\(filename).\(fileExtension) and try again.")
+    }
+    do {
+      let contents = try String(contentsOf: fileURL, encoding: .utf8)
+      labels = contents.components(separatedBy: .newlines)
+    } catch {
+      fatalError("Labels file named \(filename).\(fileExtension) cannot be read. Please add a " +
+                 "valid labels file and try again.")
+    }
+  }
+
+  /// This assigns color for a particular class.
+  private func colorForClass(withIndex index: Int) -> UIColor {
+
+    // We have a set of colors and the depending upon a stride, it assigns variations to of the base
+    // colors to each object based on its index.
+    let baseColor = colors[index % colors.count]
+
+    var colorToAssign = baseColor
+
+    let percentage = CGFloat((colorStrideValue / 2 - index / colors.count) * colorStrideValue)
+
+    if let modifiedColor = baseColor.getModified(byPercentage: percentage) {
+      colorToAssign = modifiedColor
+    }
+
+    return colorToAssign
+  }
 }
