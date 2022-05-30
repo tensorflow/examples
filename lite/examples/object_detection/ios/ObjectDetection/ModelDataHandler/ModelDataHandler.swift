@@ -34,12 +34,6 @@ struct Inference {
 /// Information about a model file or labels file.
 typealias FileInfo = (name: String, extension: String)
 
-/// Information about the MobileNet SSD model.
-enum MobileNetSSD {
-  static let modelInfo: FileInfo = (name: "detect", extension: "tflite")
-  static let labelsInfo: FileInfo = (name: "labelmap", extension: "txt")
-}
-
 /// This class handles all data preprocessing and makes calls to run inference on a given frame
 /// by invoking the `ObjectDetector`. It then formats the inferences obtained and returns the top N
 /// results for a successful inference.
@@ -76,7 +70,7 @@ class ModelDataHandler: NSObject {
 
   /// A failable initializer for `ModelDataHandler`. A new instance is created if the model and
   /// labels files are successfully loaded from the app's main bundle. Default `threadCount` is 1.
-  init?(modelFileInfo: FileInfo, labelsFileInfo: FileInfo, threadCount: Int = 1) {
+  init?(modelFileInfo: FileInfo, threadCount: Int = 1) {
     let modelFilename = modelFileInfo.name
 
     // Construct the path to the model file.

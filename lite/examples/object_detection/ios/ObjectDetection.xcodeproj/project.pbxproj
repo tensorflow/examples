@@ -44,7 +44,10 @@
 		AA9AC5E1212D4520000B4E9D /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AAC58494214797E800FB532F /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
-		BF1FBCA8284481D100E05940 /* detect.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = detect.tflite; sourceTree = "<group>"; };
+		BF1FBCA92844A35100E05940 /* efficientdet_lite0.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = efficientdet_lite0.tflite; sourceTree = "<group>"; };
+		BF1FBCAA2844A35100E05940 /* efficientdet_lite2.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = efficientdet_lite2.tflite; sourceTree = "<group>"; };
+		BF1FBCAB2844A35100E05940 /* efficientdet_lite1.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = efficientdet_lite1.tflite; sourceTree = "<group>"; };
+		BF1FBCAC2844A35100E05940 /* ssd_mobilenet_v1.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = ssd_mobilenet_v1.tflite; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,7 +73,10 @@
 		AA09263B212D730700D5890F /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				BF1FBCA8284481D100E05940 /* detect.tflite */,
+				BF1FBCA92844A35100E05940 /* efficientdet_lite0.tflite */,
+				BF1FBCAB2844A35100E05940 /* efficientdet_lite1.tflite */,
+				BF1FBCAA2844A35100E05940 /* efficientdet_lite2.tflite */,
+				BF1FBCAC2844A35100E05940 /* ssd_mobilenet_v1.tflite */,
 				AA055D8821622F3E00B25948 /* labelmap.txt */,
 			);
 			path = Model;
