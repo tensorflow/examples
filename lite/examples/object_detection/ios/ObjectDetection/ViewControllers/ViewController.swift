@@ -51,9 +51,9 @@ class ViewController: UIViewController {
 
   // MARK: Model config variables
   private var threadCount: Int = 1
-  private var detectionModel: ModelType = ContractsDefault.modelType
-  private var scoreThreshold: Float = ContractsDefault.scoreThreshold
-  private var maxResults: Int = ContractsDefault.maxResults
+  private var detectionModel: ModelType = ConstantsDefault.modelType
+  private var scoreThreshold: Float = ConstantsDefault.scoreThreshold
+  private var maxResults: Int = ConstantsDefault.maxResults
 
   // MARK: Instance Variables
   private var initialBottomSpace: CGFloat = 0.0
@@ -65,9 +65,9 @@ class ViewController: UIViewController {
   // MARK: Controllers that manage functionality
   private lazy var cameraFeedManager = CameraFeedManager(previewView: previewView)
   private var modelDataHandler: ModelDataHandler? = ModelDataHandler(
-    modelFileInfo: ContractsDefault.modelType.modelFileInfo,
-    scoreThreshold: ContractsDefault.scoreThreshold,
-    maxResults: ContractsDefault.maxResults
+    modelFileInfo: ConstantsDefault.modelType.modelFileInfo,
+    scoreThreshold: ConstantsDefault.scoreThreshold,
+    maxResults: ConstantsDefault.maxResults
   )
   private var inferenceViewController: InferenceViewController?
 
@@ -537,7 +537,7 @@ enum ModelType: CaseIterable{
 
 // Default Contracts
 
-struct ContractsDefault {
+struct ConstantsDefault {
   static let modelType: ModelType = .ssdMobilenetV1
   static let threadCount = 1
   static let scoreThreshold: Float = 0.5
