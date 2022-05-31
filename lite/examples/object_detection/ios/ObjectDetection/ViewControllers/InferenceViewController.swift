@@ -18,12 +18,19 @@ import UIKit
 protocol InferenceViewControllerDelegate {
 
   /**
-   This method is called when the user changes the stepper value to update number of threads used for inference.
+   This method is called when the user changes the value to update model used for inference.
    */
-  func didChangeThreadCount(to count: Int)
+  func viewController(_ viewController: InferenceViewController, needPerformActions action: InferenceViewController.Action)
 }
 
 class InferenceViewController: UIViewController {
+
+  enum Action {
+    case changeThreadCount(Int)
+    case changeScoreThreshold(Float)
+    case changeMaxResults(Int)
+    case changeModel(ModelType)
+  }
 
   // MARK: Sections and Information to display
   private enum InferenceSections: Int, CaseIterable {
@@ -32,7 +39,6 @@ class InferenceViewController: UIViewController {
 
   private enum InferenceInfo: Int, CaseIterable {
     case Resolution
-    case Crop
     case InferenceTime
 
     func displayString() -> String {
@@ -42,8 +48,6 @@ class InferenceViewController: UIViewController {
       switch self {
       case .Resolution:
         toReturn = "Resolution"
-      case .Crop:
-        toReturn = "Crop"
       case .InferenceTime:
         toReturn = "Inference Time"
 
@@ -55,13 +59,17 @@ class InferenceViewController: UIViewController {
   // MARK: Storyboard Outlets
   @IBOutlet weak var tableView: UITableView!
   @IBOutlet weak var threadStepper: UIStepper!
-  @IBOutlet weak var stepperValueLabel: UILabel!
+  @IBOutlet weak var threadValueLabel: UILabel!
+  @IBOutlet weak var maxResultStepper: UIStepper!
+  @IBOutlet weak var maxResultLabel: UILabel!
+  @IBOutlet weak var thresholdStepper: UIStepper!
+  @IBOutlet weak var thresholdLabel: UILabel!
+  @IBOutlet weak var modelTextField: UITextField!
 
   // MARK: Constants
   private let normalCellHeight: CGFloat = 27.0
   private let separatorCellHeight: CGFloat = 42.0
   private let bottomSpacing: CGFloat = 21.0
-  private let minThreadCount = 1
   private let bottomSheetButtonDisplayHeight: CGFloat = 60.0
   private let infoTextColor = UIColor.black
   private let lightTextInfoColor = UIColor(displayP3Red: 117.0/255.0, green: 117.0/255.0, blue: 117.0/255.0, alpha: 1.0)
@@ -70,11 +78,19 @@ class InferenceViewController: UIViewController {
 
   // MARK: Instance Variables
   var inferenceTime: Double = 0
-  var wantedInputWidth: Int = 0
-  var wantedInputHeight: Int = 0
   var resolution: CGSize = CGSize.zero
-  var threadCountLimit: Int = 0
   var currentThreadCount: Int = 0
+  var scoreThreshold: Float = 0.5
+  var maxResults: Int = 3
+  var modelSelectIndex: Int = 0
+
+  private var modelSelect: ModelType {
+    if modelSelectIndex < ModelType.allCases.count {
+      return ModelType.allCases[modelSelectIndex]
+    } else {
+      return .ssdMobilenetV1
+    }
+  }
 
   // MARK: Delegate
   var delegate: InferenceViewControllerDelegate?
@@ -87,26 +103,75 @@ class InferenceViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    setupUI()
+  }
+  // MARK: private func
+  private func setupUI() {
 
-    // Set up stepper
-    threadStepper.isUserInteractionEnabled = true
-    threadStepper.maximumValue = Double(threadCountLimit)
-    threadStepper.minimumValue = Double(minThreadCount)
     threadStepper.value = Double(currentThreadCount)
+    threadValueLabel.text = "\(currentThreadCount)"
 
+    maxResultStepper.value = Double(maxResults)
+    maxResultLabel.text = "\(maxResults)"
+
+    thresholdStepper.value = Double(scoreThreshold)
+    thresholdLabel.text = "\(scoreThreshold)"
+
+    modelTextField.text = modelSelect.title
+
+    let picker = UIPickerView()
+    picker.delegate = self
+    picker.dataSource = self
+    modelTextField.inputView = picker
+
+    let doneButton = UIButton(frame: CGRect(x: 0,
+                                            y: 0,
+                                            width: 60,
+                                            height: 44))
+    doneButton.setTitle("Done", for: .normal)
+    doneButton.setTitleColor(.blue, for: .normal)
+    doneButton.addTarget(self, action: #selector(choseModelDoneButtonTouchUpInside(_:)), for: .touchUpInside)
+    let inputAccessoryView  = UIView(frame: CGRect(x: 0,
+                                                   y: 0,
+                                                   width: UIScreen.main.bounds.size.width,
+                                                   height: 44))
+    inputAccessoryView.backgroundColor = .gray
+    inputAccessoryView.addSubview(doneButton)
+    modelTextField.inputAccessoryView = inputAccessoryView
   }
 
   // MARK: Button Actions
   /**
    Delegate the change of number of threads to View Controller and change the stepper display.
    */
-  @IBAction func onClickThreadStepper(_ sender: Any) {
-
-    delegate?.didChangeThreadCount(to: Int(threadStepper.value))
-    currentThreadCount = Int(threadStepper.value)
-    stepperValueLabel.text = "\(currentThreadCount)"
+  @IBAction func threadStepperValueChanged(_ sender: UIStepper) {
+    currentThreadCount = Int(sender.value)
+    delegate?.viewController(self, needPerformActions: .changeThreadCount(currentThreadCount))
+    threadValueLabel.text = "\(currentThreadCount)"
   }
+
+  @IBAction func thresholdStepperValueChanged(_ sender: UIStepper) {
+    scoreThreshold = Float(sender.value)
+    delegate?.viewController(self, needPerformActions: .changeScoreThreshold(scoreThreshold))
+    thresholdLabel.text = "\(scoreThreshold)"
+  }
+
+  @IBAction func maxResultStepperValueChanged(_ sender: UIStepper) {
+    maxResults = Int(sender.value)
+    delegate?.viewController(self, needPerformActions: .changeMaxResults(maxResults))
+    maxResultLabel.text = "\(maxResults)"
+  }
+
+  @objc
+  func choseModelDoneButtonTouchUpInside(_ sender: UIButton) {
+    delegate?.viewController(self, needPerformActions: .changeModel(modelSelect))
+    modelTextField.text = modelSelect.title
+    modelTextField.resignFirstResponder()
+  }
+
 }
+
+
 
 // MARK: UITableView Data Source
 extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
@@ -193,8 +258,6 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
     switch inferenceInfo {
     case .Resolution:
       info = "\(Int(resolution.width))x\(Int(resolution.height))"
-    case .Crop:
-      info = "\(wantedInputWidth)x\(wantedInputHeight)"
     case .InferenceTime:
 
       info = String(format: "%.2fms", inferenceTime)
@@ -202,4 +265,31 @@ extension InferenceViewController: UITableViewDelegate, UITableViewDataSource {
 
     return(fieldName, info)
   }
+}
+
+extension InferenceViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+  func numberOfComponents(in pickerView: UIPickerView) -> Int {
+    return 1
+  }
+
+  func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    return ModelType.allCases.count
+  }
+
+  func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    if row < ModelType.allCases.count {
+      return ModelType.allCases[row].title
+    } else {
+      return nil
+    }
+  }
+
+  func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    modelSelectIndex = row
+  }
+}
+
+class InfoCell: UITableViewCell {
+  @IBOutlet weak var fieldNameLabel: UILabel!
+  @IBOutlet weak var infoLabel: UILabel!
 }

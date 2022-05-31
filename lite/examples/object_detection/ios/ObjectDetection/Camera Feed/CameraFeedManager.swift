@@ -16,7 +16,7 @@ import UIKit
 import AVFoundation
 
 // MARK: CameraFeedManagerDelegate Declaration
-protocol CameraFeedManagerDelegate: class {
+protocol CameraFeedManagerDelegate: AnyObject {
 
   /**
    This method delivers the pixel buffer of the current frame seen by the device's camera.
@@ -54,7 +54,6 @@ protocol CameraFeedManagerDelegate: class {
  This enum holds the state of the camera initialization.
  */
 enum CameraConfiguration {
-
   case success
   case failed
   case permissionDenied
@@ -68,7 +67,7 @@ class CameraFeedManager: NSObject {
   // MARK: Camera Related Instance Variables
   private let session: AVCaptureSession = AVCaptureSession()
   private let previewView: PreviewView
-  private let sessionQueue = DispatchQueue(label: "sessionQueue")
+  private let sessionQueue = DispatchQueue(label: "org.tensorflow.lite.sessionQueue")
   private var cameraConfiguration: CameraConfiguration = .failed
   private lazy var videoDataOutput = AVCaptureVideoDataOutput()
   private var isSessionRunning = false

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import UIKit
+import TensorFlowLiteTaskVision
 
 class ViewController: UIViewController {
 
@@ -33,31 +34,49 @@ class ViewController: UIViewController {
   private let animationDuration = 0.5
   private let collapseTransitionThreshold: CGFloat = -30.0
   private let expandTransitionThreshold: CGFloat = 30.0
-  private let delayBetweenInferencesMs: Double = 200
+  private let colors = [
+    UIColor.red,
+    UIColor(displayP3Red: 90.0/255.0, green: 200.0/255.0, blue: 250.0/255.0, alpha: 1.0),
+    UIColor.green,
+    UIColor.orange,
+    UIColor.blue,
+    UIColor.purple,
+    UIColor.magenta,
+    UIColor.yellow,
+    UIColor.cyan,
+    UIColor.brown
+  ]
+
+  // MARK: Model config variables
+  private var threadCount: Int = 1
+  private var detectionModel: ModelType = ConstantsDefault.modelType
+  private var scoreThreshold: Float = ConstantsDefault.scoreThreshold
+  private var maxResults: Int = ConstantsDefault.maxResults
 
   // MARK: Instance Variables
   private var initialBottomSpace: CGFloat = 0.0
 
   // Holds the results at any time
   private var result: Result?
-  private var previousInferenceTimeMs: TimeInterval = Date.distantPast.timeIntervalSince1970 * 1000
+  private let inferenceQueue = DispatchQueue(label: "org.tensorflow.lite.inferencequeue")
 
   // MARK: Controllers that manage functionality
   private lazy var cameraFeedManager = CameraFeedManager(previewView: previewView)
-  private var modelDataHandler: ModelDataHandler? =
-    ModelDataHandler(modelFileInfo: MobileNetSSD.modelInfo, labelsFileInfo: MobileNetSSD.labelsInfo)
+  private var objectDetecionHelper: ObjectDetectionHelper? = ObjectDetectionHelper(
+    modelFileInfo: ConstantsDefault.modelType.modelFileInfo,
+    scoreThreshold: ConstantsDefault.scoreThreshold,
+    maxResults: ConstantsDefault.maxResults
+  )
   private var inferenceViewController: InferenceViewController?
 
   // MARK: View Handling Methods
   override func viewDidLoad() {
     super.viewDidLoad()
-
-    guard modelDataHandler != nil else {
+    guard objectDetecionHelper != nil else {
       fatalError("Failed to load model")
     }
     cameraFeedManager.delegate = self
     overlayView.clearsContextBeforeDrawing = true
-
     addPanGesture()
   }
 
@@ -113,45 +132,57 @@ class ViewController: UIViewController {
     super.prepare(for: segue, sender: sender)
 
     if segue.identifier == "EMBED" {
-
-      guard let tempModelDataHandler = modelDataHandler else {
-        return
-      }
       inferenceViewController = segue.destination as? InferenceViewController
-      inferenceViewController?.wantedInputHeight = tempModelDataHandler.inputHeight
-      inferenceViewController?.wantedInputWidth = tempModelDataHandler.inputWidth
-      inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
-      inferenceViewController?.currentThreadCount = tempModelDataHandler.threadCount
+
+      inferenceViewController?.currentThreadCount = threadCount
+      inferenceViewController?.maxResults = maxResults
+      inferenceViewController?.scoreThreshold = scoreThreshold
+      inferenceViewController?.modelSelectIndex = ModelType.allCases.firstIndex(where: {$0 == detectionModel}) ?? 0
       inferenceViewController?.delegate = self
 
       guard let tempResult = result else {
         return
       }
       inferenceViewController?.inferenceTime = tempResult.inferenceTime
-
     }
   }
 }
 
 // MARK: InferenceViewControllerDelegate Methods
 extension ViewController: InferenceViewControllerDelegate {
-
-  func didChangeThreadCount(to count: Int) {
-    if modelDataHandler?.threadCount == count { return }
-    modelDataHandler = ModelDataHandler(
-      modelFileInfo: MobileNetSSD.modelInfo,
-      labelsFileInfo: MobileNetSSD.labelsInfo,
-      threadCount: count
-    )
+  func viewController(_ viewController: InferenceViewController, needPerformActions action: InferenceViewController.Action) {
+    switch action {
+    case .changeThreadCount(let threadCount):
+      if self.threadCount == threadCount { return }
+      self.threadCount = threadCount
+    case .changeMaxResults(let maxResults):
+      if self.maxResults == maxResults { return }
+      self.maxResults = maxResults
+    case .changeModel(let detectionModel):
+      if self.detectionModel == detectionModel { return }
+      self.detectionModel = detectionModel
+    case .changeScoreThreshold(let scoreRgreshold):
+      if self.scoreThreshold == scoreRgreshold { return }
+      self.scoreThreshold = scoreRgreshold
+    }
+    inferenceQueue.async {
+      self.objectDetecionHelper = ObjectDetectionHelper(
+        modelFileInfo: self.detectionModel.modelFileInfo,
+        threadCount: self.threadCount,
+        scoreThreshold: self.scoreThreshold,
+        maxResults: self.maxResults
+      )
+    }
   }
-
 }
 
 // MARK: CameraFeedManagerDelegate Methods
 extension ViewController: CameraFeedManagerDelegate {
 
   func didOutput(pixelBuffer: CVPixelBuffer) {
-    runModel(onPixelBuffer: pixelBuffer)
+    inferenceQueue.async {
+      self.detect(pixelBuffer: pixelBuffer)
+    }
   }
 
   // MARK: Session Handling Alerts
@@ -212,18 +243,8 @@ extension ViewController: CameraFeedManagerDelegate {
 
   /** This method runs the live camera pixelBuffer through tensorFlow to get the result.
    */
-  @objc  func runModel(onPixelBuffer pixelBuffer: CVPixelBuffer) {
-
-    // Run the live camera pixelBuffer through tensorFlow to get the result
-
-    let currentTimeMs = Date().timeIntervalSince1970 * 1000
-
-    guard  (currentTimeMs - previousInferenceTimeMs) >= delayBetweenInferencesMs else {
-      return
-    }
-
-    previousInferenceTimeMs = currentTimeMs
-    result = self.modelDataHandler?.runModel(onFrame: pixelBuffer)
+  func detect(pixelBuffer: CVPixelBuffer) {
+    result = self.objectDetecionHelper?.detect(frame: pixelBuffer)
 
     guard let displayResult = result else {
       return
@@ -245,28 +266,30 @@ extension ViewController: CameraFeedManagerDelegate {
       self.inferenceViewController?.tableView.reloadData()
 
       // Draws the bounding boxes and displays class names and confidence scores.
-      self.drawAfterPerformingCalculations(onInferences: displayResult.inferences, withImageSize: CGSize(width: CGFloat(width), height: CGFloat(height)))
+      self.drawAfterPerformingCalculations(onDetections: displayResult.detections, withImageSize: CGSize(width: CGFloat(width), height: CGFloat(height)))
     }
   }
 
   /**
    This method takes the results, translates the bounding box rects to the current view, draws the bounding boxes, classNames and confidence scores of inferences.
    */
-  func drawAfterPerformingCalculations(onInferences inferences: [Inference], withImageSize imageSize:CGSize) {
+  func drawAfterPerformingCalculations(onDetections detections: [Detection], withImageSize imageSize:CGSize) {
 
     self.overlayView.objectOverlays = []
     self.overlayView.setNeedsDisplay()
 
-    guard !inferences.isEmpty else {
+    guard !detections.isEmpty else {
       return
     }
 
     var objectOverlays: [ObjectOverlay] = []
 
-    for inference in inferences {
+    for detection in detections {
+
+      guard let category = detection.categories.first else { continue }
 
       // Translates bounding box rect to current view.
-      var convertedRect = inference.rect.applying(CGAffineTransform(scaleX: self.overlayView.bounds.size.width / imageSize.width, y: self.overlayView.bounds.size.height / imageSize.height))
+      var convertedRect = detection.boundingBox.applying(CGAffineTransform(scaleX: self.overlayView.bounds.size.width / imageSize.width, y: self.overlayView.bounds.size.height / imageSize.height))
 
       if convertedRect.origin.x < 0 {
         convertedRect.origin.x = self.edgeOffset
@@ -284,12 +307,16 @@ extension ViewController: CameraFeedManagerDelegate {
         convertedRect.size.width = self.overlayView.bounds.maxX - convertedRect.origin.x - self.edgeOffset
       }
 
-      let confidenceValue = Int(inference.confidence * 100.0)
-      let string = "\(inference.className)  (\(confidenceValue)%)"
+      // if index = 0 class name is unknow
 
-      let size = string.size(usingFont: self.displayFont)
+      let confidenceValue = Int(category.score * 100.0)
+      let string = "\(category.label ?? "Unknow")  (\(confidenceValue)%)"
 
-      let objectOverlay = ObjectOverlay(name: string, borderRect: convertedRect, nameStringSize: size, color: inference.displayColor, font: self.displayFont)
+      let displayColor = colors[category.index % colors.count]
+
+      let size = string.size(withAttributes: [.font: self.displayFont])
+
+      let objectOverlay = ObjectOverlay(name: string, borderRect: convertedRect, nameStringSize: size, color: displayColor, font: self.displayFont)
 
       objectOverlays.append(objectOverlay)
     }
@@ -441,4 +468,49 @@ extension ViewController {
     view.setNeedsLayout()
   }
 
+}
+
+// MARK: - Display handler function
+
+/// TFLite model types
+enum ModelType: CaseIterable{
+  case efficientdetLite0
+  case efficientdetLite1
+  case efficientdetLite2
+  case ssdMobilenetV1
+
+  var modelFileInfo: FileInfo {
+    switch self {
+    case .ssdMobilenetV1:
+      return FileInfo("ssd_mobilenet_v1", "tflite")
+    case .efficientdetLite0:
+      return FileInfo("efficientdet_lite0", "tflite")
+    case .efficientdetLite1:
+      return FileInfo("efficientdet_lite1", "tflite")
+    case .efficientdetLite2:
+      return FileInfo("efficientdet_lite2", "tflite")
+    }
+  }
+
+  var title: String {
+    switch self {
+    case .ssdMobilenetV1:
+      return "SSD-MobileNetV1"
+    case .efficientdetLite0:
+      return "EfficientDet-Lite0"
+    case .efficientdetLite1:
+      return "EfficientDet-Lite1"
+    case .efficientdetLite2:
+      return "EfficientDet-Lite2"
+    }
+  }
+}
+
+/// Default configuration
+struct ConstantsDefault {
+  static let modelType: ModelType = .efficientdetLite0
+  static let threadCount = 1
+  static let scoreThreshold: Float = 0.5
+  static let maxResults: Int = 3
+  static let theadCountLimit = 10
 }
