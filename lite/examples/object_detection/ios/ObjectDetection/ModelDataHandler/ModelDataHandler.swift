@@ -39,13 +39,6 @@ typealias FileInfo = (name: String, extension: String)
 /// results for a successful inference.
 class ModelDataHandler: NSObject {
 
-  // MARK: - Internal Properties
-  /// The current thread count used by the TensorFlow Lite Interpreter.
-  let threadCount: Int
-  let threadCountLimit = 10
-
-  let threshold: Float = 0.5
-
   // MARK: Private properties
   private var labels: [String] = []
 
@@ -70,7 +63,7 @@ class ModelDataHandler: NSObject {
 
   /// A failable initializer for `ModelDataHandler`. A new instance is created if the model and
   /// labels files are successfully loaded from the app's main bundle. Default `threadCount` is 1.
-  init?(modelFileInfo: FileInfo, threadCount: Int = 1) {
+  init?(modelFileInfo: FileInfo, threadCount: Int = 1, scoreThreshold: Float, maxResults: Int) {
     let modelFilename = modelFileInfo.name
 
     // Construct the path to the model file.
@@ -82,12 +75,13 @@ class ModelDataHandler: NSObject {
       return nil
     }
 
-    // Specify the options for the `Interpreter`.
-    self.threadCount = threadCount
+    // Specify the options for the `Detector`.
     let options = ObjectDetectorOptions(modelPath: modelPath)
+    options.classificationOptions.scoreThreshold = scoreThreshold
+    options.classificationOptions.maxResults = maxResults
     options.baseOptions.computeSettings.cpuSettings.numThreads = Int32(threadCount)
     do {
-      // Create the `detector`.
+      // Create the `Detector`.
       detector = try ObjectDetector.objectDetector(options: options)
     } catch let error {
       print("Failed to create the interpreter with error: \(error.localizedDescription)")
@@ -98,7 +92,7 @@ class ModelDataHandler: NSObject {
   }
 
   /// This class handles all data preprocessing and makes calls to run inference on a given frame
-  /// through the `detector`. It then formats the inferences obtained and returns results
+  /// through the `Detector`. It then formats the inferences obtained and returns results
   /// for a successful inference.
   func runModel(onFrame pixelBuffer: CVPixelBuffer) -> Result? {
 

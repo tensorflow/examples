@@ -22,6 +22,10 @@
 		AA9AC5E2212D4520000B4E9D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9AC5E1212D4520000B4E9D /* ViewController.swift */; };
 		AAC58495214797E800FB532F /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC58494214797E800FB532F /* StringExtension.swift */; };
 		AAEF3D8D21A2BE2B0073AE1C /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEF3D8C21A2BE2B0073AE1C /* UIColorExtension.swift */; };
+		BF43FFBA2845ABFD00D8FB74 /* efficientdet_lite0.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF1FBCA92844A35100E05940 /* efficientdet_lite0.tflite */; };
+		BF43FFBB2845ABFD00D8FB74 /* efficientdet_lite1.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF1FBCAB2844A35100E05940 /* efficientdet_lite1.tflite */; };
+		BF43FFBC2845ABFD00D8FB74 /* efficientdet_lite2.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF1FBCAA2844A35100E05940 /* efficientdet_lite2.tflite */; };
+		BF43FFBD2845ABFD00D8FB74 /* ssd_mobilenet_v1.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF1FBCAC2844A35100E05940 /* ssd_mobilenet_v1.tflite */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -240,6 +244,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF43FFBA2845ABFD00D8FB74 /* efficientdet_lite0.tflite in Resources */,
+				BF43FFBB2845ABFD00D8FB74 /* efficientdet_lite1.tflite in Resources */,
+				BF43FFBC2845ABFD00D8FB74 /* efficientdet_lite2.tflite in Resources */,
+				BF43FFBD2845ABFD00D8FB74 /* ssd_mobilenet_v1.tflite in Resources */,
 				AA9AC5A9212D39FD000B4E9D /* LaunchScreen.storyboard in Resources */,
 				AA9AC5A6212D39FD000B4E9D /* Assets.xcassets in Resources */,
 				AA9AC5A4212D39FC000B4E9D /* Main.storyboard in Resources */,

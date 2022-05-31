@@ -51,8 +51,9 @@ class ViewController: UIViewController {
 
   // MARK: Model config variables
   private var threadCount: Int = 1
-  private var detectionModel: ModelType = .ssdMobilenetV1
-  private var threshold: Float = 0.5
+  private var detectionModel: ModelType = ContractsDefault.modelType
+  private var scoreThreshold: Float = ContractsDefault.scoreThreshold
+  private var maxResults: Int = ContractsDefault.maxResults
 
   // MARK: Instance Variables
   private var initialBottomSpace: CGFloat = 0.0
@@ -63,13 +64,16 @@ class ViewController: UIViewController {
 
   // MARK: Controllers that manage functionality
   private lazy var cameraFeedManager = CameraFeedManager(previewView: previewView)
-  private var modelDataHandler: ModelDataHandler?
+  private var modelDataHandler: ModelDataHandler? = ModelDataHandler(
+    modelFileInfo: ContractsDefault.modelType.modelFileInfo,
+    scoreThreshold: ContractsDefault.scoreThreshold,
+    maxResults: ContractsDefault.maxResults
+  )
   private var inferenceViewController: InferenceViewController?
 
   // MARK: View Handling Methods
   override func viewDidLoad() {
     super.viewDidLoad()
-    modelDataHandler = ModelDataHandler(modelFileInfo: detectionModel.modelFileInfo)
     guard modelDataHandler != nil else {
       fatalError("Failed to load model")
     }
@@ -130,35 +134,46 @@ class ViewController: UIViewController {
     super.prepare(for: segue, sender: sender)
 
     if segue.identifier == "EMBED" {
-
-      guard let tempModelDataHandler = modelDataHandler else {
-        return
-      }
       inferenceViewController = segue.destination as? InferenceViewController
-      inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
-      inferenceViewController?.currentThreadCount = tempModelDataHandler.threadCount
+
+      inferenceViewController?.currentThreadCount = threadCount
+      inferenceViewController?.maxResults = maxResults
+      inferenceViewController?.scoreThreshold = scoreThreshold
+      inferenceViewController?.modelSelectIndex = ModelType.allCases.firstIndex(where: {$0 == detectionModel}) ?? 0
       inferenceViewController?.delegate = self
 
       guard let tempResult = result else {
         return
       }
       inferenceViewController?.inferenceTime = tempResult.inferenceTime
-
     }
   }
 }
 
 // MARK: InferenceViewControllerDelegate Methods
 extension ViewController: InferenceViewControllerDelegate {
-
-  func didChangeThreadCount(to count: Int) {
-    if modelDataHandler?.threadCount == count { return }
+  func viewController(_ viewController: InferenceViewController, needPerformActions action: InferenceViewController.Action) {
+    switch action {
+    case .changeThreadCount(let threadCount):
+      if self.threadCount == threadCount { return }
+      self.threadCount = threadCount
+    case .changeMaxResults(let maxResults):
+      if self.maxResults == maxResults { return }
+      self.maxResults = maxResults
+    case .changeModel(let detectionModel):
+      if self.detectionModel == detectionModel { return }
+      self.detectionModel = detectionModel
+    case .changeScoreThreshold(let scoreRgreshold):
+      if self.scoreThreshold == scoreRgreshold { return }
+      self.scoreThreshold = scoreRgreshold
+    }
     modelDataHandler = ModelDataHandler(
       modelFileInfo: detectionModel.modelFileInfo,
-      threadCount: count
+      threadCount: threadCount,
+      scoreThreshold: scoreThreshold,
+      maxResults: maxResults
     )
   }
-
 }
 
 // MARK: CameraFeedManagerDelegate Methods
@@ -279,7 +294,7 @@ extension ViewController: CameraFeedManagerDelegate {
 
     for detection in detections {
 
-      guard let category = detection.categories.first, category.score > threshold else { continue }
+      guard let category = detection.categories.first else { continue }
 
       // Translates bounding box rect to current view.
       var convertedRect = detection.boundingBox.applying(CGAffineTransform(scaleX: self.overlayView.bounds.size.width / imageSize.width, y: self.overlayView.bounds.size.height / imageSize.height))
@@ -303,7 +318,7 @@ extension ViewController: CameraFeedManagerDelegate {
       // if index = 0 class name is unknow
 
       let confidenceValue = Int(category.score * 100.0)
-      let string = "\(category.displayName ?? "Unknow")  (\(confidenceValue)%)"
+      let string = "\(category.label ?? "Unknow")  (\(confidenceValue)%)"
 
       let displayColor = colorForClass(withIndex: category.index)
 
@@ -518,4 +533,14 @@ enum ModelType: CaseIterable{
       return "Efficientdet lite 2"
     }
   }
+}
+
+// Default Contracts
+
+struct ContractsDefault {
+  static let modelType: ModelType = .ssdMobilenetV1
+  static let threadCount = 1
+  static let scoreThreshold: Float = 0.5
+  static let maxResults: Int = 3
+  static let theadCountLimit = 10
 }
