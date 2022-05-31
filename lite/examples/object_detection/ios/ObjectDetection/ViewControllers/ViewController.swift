@@ -34,8 +34,6 @@ class ViewController: UIViewController {
   private let animationDuration = 0.5
   private let collapseTransitionThreshold: CGFloat = -30.0
   private let expandTransitionThreshold: CGFloat = 30.0
-  private let delayBetweenInferencesMs: Double = 200
-  private let colorStrideValue = 10
   private let colors = [
     UIColor.red,
     UIColor(displayP3Red: 90.0/255.0, green: 200.0/255.0, blue: 250.0/255.0, alpha: 1.0),
@@ -60,11 +58,11 @@ class ViewController: UIViewController {
 
   // Holds the results at any time
   private var result: Result?
-  private var previousInferenceTimeMs: TimeInterval = Date.distantPast.timeIntervalSince1970 * 1000
+  private let inferenceQueue = DispatchQueue(label: "org.tensorflow.lite.inferencequeue")
 
   // MARK: Controllers that manage functionality
   private lazy var cameraFeedManager = CameraFeedManager(previewView: previewView)
-  private var modelDataHandler: ModelDataHandler? = ModelDataHandler(
+  private var objectDetecionHelper: ObjectDetectionHelper? = ObjectDetectionHelper(
     modelFileInfo: ConstantsDefault.modelType.modelFileInfo,
     scoreThreshold: ConstantsDefault.scoreThreshold,
     maxResults: ConstantsDefault.maxResults
@@ -74,7 +72,7 @@ class ViewController: UIViewController {
   // MARK: View Handling Methods
   override func viewDidLoad() {
     super.viewDidLoad()
-    guard modelDataHandler != nil else {
+    guard objectDetecionHelper != nil else {
       fatalError("Failed to load model")
     }
     cameraFeedManager.delegate = self
@@ -167,12 +165,14 @@ extension ViewController: InferenceViewControllerDelegate {
       if self.scoreThreshold == scoreRgreshold { return }
       self.scoreThreshold = scoreRgreshold
     }
-    modelDataHandler = ModelDataHandler(
-      modelFileInfo: detectionModel.modelFileInfo,
-      threadCount: threadCount,
-      scoreThreshold: scoreThreshold,
-      maxResults: maxResults
-    )
+    inferenceQueue.async {
+      self.objectDetecionHelper = ObjectDetectionHelper(
+        modelFileInfo: self.detectionModel.modelFileInfo,
+        threadCount: self.threadCount,
+        scoreThreshold: self.scoreThreshold,
+        maxResults: self.maxResults
+      )
+    }
   }
 }
 
@@ -180,7 +180,9 @@ extension ViewController: InferenceViewControllerDelegate {
 extension ViewController: CameraFeedManagerDelegate {
 
   func didOutput(pixelBuffer: CVPixelBuffer) {
-    runModel(onPixelBuffer: pixelBuffer)
+    inferenceQueue.async {
+      self.detect(pixelBuffer: pixelBuffer)
+    }
   }
 
   // MARK: Session Handling Alerts
@@ -241,18 +243,8 @@ extension ViewController: CameraFeedManagerDelegate {
 
   /** This method runs the live camera pixelBuffer through tensorFlow to get the result.
    */
-  @objc  func runModel(onPixelBuffer pixelBuffer: CVPixelBuffer) {
-
-    // Run the live camera pixelBuffer through tensorFlow to get the result
-
-    let currentTimeMs = Date().timeIntervalSince1970 * 1000
-
-    guard  (currentTimeMs - previousInferenceTimeMs) >= delayBetweenInferencesMs else {
-      return
-    }
-
-    previousInferenceTimeMs = currentTimeMs
-    result = self.modelDataHandler?.runModel(onFrame: pixelBuffer)
+  func detect(pixelBuffer: CVPixelBuffer) {
+    result = self.objectDetecionHelper?.detect(frame: pixelBuffer)
 
     guard let displayResult = result else {
       return
@@ -320,9 +312,9 @@ extension ViewController: CameraFeedManagerDelegate {
       let confidenceValue = Int(category.score * 100.0)
       let string = "\(category.label ?? "Unknow")  (\(confidenceValue)%)"
 
-      let displayColor = colorForClass(withIndex: category.index)
+      let displayColor = colors[category.index % colors.count]
 
-      let size = string.size(usingFont: self.displayFont)
+      let size = string.size(withAttributes: [.font: self.displayFont])
 
       let objectOverlay = ObjectOverlay(name: string, borderRect: convertedRect, nameStringSize: size, color: displayColor, font: self.displayFont)
 
@@ -479,34 +471,13 @@ extension ViewController {
 }
 
 // MARK: - Display handler function
-extension ViewController {
 
-  /// This assigns color for a particular class.
-  private func colorForClass(withIndex index: Int) -> UIColor {
-
-    // We have a set of colors and the depending upon a stride, it assigns variations to of the base
-    // colors to each object based on its index.
-    let baseColor = colors[index % colors.count]
-
-    var colorToAssign = baseColor
-
-    let percentage = CGFloat((colorStrideValue / 2 - index / colors.count) * colorStrideValue)
-
-    if let modifiedColor = baseColor.getModified(byPercentage: percentage) {
-      colorToAssign = modifiedColor
-    }
-
-    return colorToAssign
-  }
-}
-
-// Define model type
-
+/// TFLite model types
 enum ModelType: CaseIterable{
-  case ssdMobilenetV1
   case efficientdetLite0
   case efficientdetLite1
   case efficientdetLite2
+  case ssdMobilenetV1
 
   var modelFileInfo: FileInfo {
     switch self {
@@ -524,21 +495,20 @@ enum ModelType: CaseIterable{
   var title: String {
     switch self {
     case .ssdMobilenetV1:
-      return "SSD Mobilenet V1"
+      return "SSD-MobileNetV1"
     case .efficientdetLite0:
-      return "Efficientdet lite 0"
+      return "EfficientDet-Lite0"
     case .efficientdetLite1:
-      return "Efficientdet lite 1"
+      return "EfficientDet-Lite1"
     case .efficientdetLite2:
-      return "Efficientdet lite 2"
+      return "EfficientDet-Lite2"
     }
   }
 }
 
-// Default Contracts
-
+/// Default configuration
 struct ConstantsDefault {
-  static let modelType: ModelType = .ssdMobilenetV1
+  static let modelType: ModelType = .efficientdetLite0
   static let threadCount = 1
   static let scoreThreshold: Float = 0.5
   static let maxResults: Int = 3

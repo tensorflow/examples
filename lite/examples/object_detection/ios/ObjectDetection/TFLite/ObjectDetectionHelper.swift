@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CoreImage
-import UIKit
-import Accelerate
 import TensorFlowLiteTaskVision
 
 /// Stores results for a particular frame that was successfully run through the `Interpreter`.
@@ -23,40 +20,33 @@ struct Result {
   let detections: [Detection]
 }
 
-/// Stores one formatted inference.
-struct Inference {
-  let confidence: Float
-  let className: String
-  let rect: CGRect
-  let displayColor: UIColor
-}
-
 /// Information about a model file or labels file.
 typealias FileInfo = (name: String, extension: String)
 
 /// This class handles all data preprocessing and makes calls to run inference on a given frame
-/// by invoking the `ObjectDetector`. It then formats the inferences obtained and returns the top N
-/// results for a successful inference.
-class ModelDataHandler: NSObject {
+/// by invoking the `ObjectDetector`.
+class ObjectDetectionHelper: NSObject {
 
   // MARK: Private properties
-  private var labels: [String] = []
-
-  /// TensorFlow Lite `Interpreter` object for performing inference on a given model.
+  
+  /// TensorFlow Lite `ObjectDetector` object for performing object detection using a given model.
   private var detector: ObjectDetector
 
-  private let colorStrideValue = 10
   private let colors = [
-    UIColor.red,
-    UIColor(displayP3Red: 90.0/255.0, green: 200.0/255.0, blue: 250.0/255.0, alpha: 1.0),
-    UIColor.green,
-    UIColor.orange,
-    UIColor.blue,
-    UIColor.purple,
-    UIColor.magenta,
-    UIColor.yellow,
-    UIColor.cyan,
-    UIColor.brown
+    UIColor.black, // 0.0 white
+    UIColor.darkGray, // 0.333 white
+    UIColor.lightGray, // 0.667 white
+    UIColor.white, // 1.0 white
+    UIColor.gray, // 0.5 white
+    UIColor.red, // 1.0, 0.0, 0.0 RGB
+    UIColor.green, // 0.0, 1.0, 0.0 RGB
+    UIColor.blue, // 0.0, 0.0, 1.0 RGB
+    UIColor.cyan, // 0.0, 1.0, 1.0 RGB
+    UIColor.yellow, // 1.0, 1.0, 0.0 RGB
+    UIColor.magenta, // 1.0, 0.0, 1.0 RGB
+    UIColor.orange, // 1.0, 0.5, 0.0 RGB
+    UIColor.purple, // 0.5, 0.0, 0.5 RGB
+    UIColor.brown, // 0.6, 0.4, 0.2 RGB
   ]
 
   // MARK: - Initialization
@@ -68,7 +58,7 @@ class ModelDataHandler: NSObject {
 
     // Construct the path to the model file.
     guard let modelPath = Bundle.main.path(
-      forResource: modelFilename,
+      forResource: modelFileInfo.name,
       ofType: modelFileInfo.extension
     ) else {
       print("Failed to load the model file with name: \(modelFilename).")
@@ -94,7 +84,7 @@ class ModelDataHandler: NSObject {
   /// This class handles all data preprocessing and makes calls to run inference on a given frame
   /// through the `Detector`. It then formats the inferences obtained and returns results
   /// for a successful inference.
-  func runModel(onFrame pixelBuffer: CVPixelBuffer) -> Result? {
+  func detect(frame pixelBuffer: CVPixelBuffer) -> Result? {
 
     guard let mlImage = MLImage(pixelBuffer: pixelBuffer) else { return nil }
     // Run inference

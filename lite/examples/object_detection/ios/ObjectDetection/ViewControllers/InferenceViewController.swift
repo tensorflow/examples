@@ -287,5 +287,9 @@ extension InferenceViewController: UIPickerViewDelegate, UIPickerViewDataSource 
   func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
     modelSelectIndex = row
   }
+}
 
+class InfoCell: UITableViewCell {
+  @IBOutlet weak var fieldNameLabel: UILabel!
+  @IBOutlet weak var infoLabel: UILabel!
 }

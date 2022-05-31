@@ -47,7 +47,7 @@ download() {
 
 has_download=false
 
-if [ -f ../ObjectDetection/Model/${MOBILENETV1_SSD_NAME} ]
+if [ -f ../ObjectDetection/TFLite/${MOBILENETV1_SSD_NAME} ]
 then
 echo "File ${MOBILENETV1_SSD_NAME} exists."
 else
@@ -56,7 +56,7 @@ download "${MOBILENETV1_SSD_URL}" "${DOWNLOADS_DIR}/models" "${MOBILENETV1_SSD_N
 file ${DOWNLOADS_DIR}/models
 fi
 
-if [ -f ../ObjectDetection/Model/${EFFICIENTDET_LITE0_NAME} ]
+if [ -f ../ObjectDetection/TFLite/${EFFICIENTDET_LITE0_NAME} ]
 then
 echo "File ${EFFICIENTDET_LITE0_NAME} exists."
 else
@@ -65,7 +65,7 @@ download "${EFFICIENTDET_LITE0_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTDET_L
 file ${DOWNLOADS_DIR}/models
 fi
 
-if [ -f ../ObjectDetection/Model/${EFFICIENTDET_LITE1_NAME} ]
+if [ -f ../ObjectDetection/TFLite/${EFFICIENTDET_LITE1_NAME} ]
 then
 echo "File ${EFFICIENTDET_LITE1_NAME} exists."
 else
@@ -74,7 +74,7 @@ download "${EFFICIENTDET_LITE1_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTDET_L
 file ${DOWNLOADS_DIR}/models
 fi
 
-if [ -f ../ObjectDetection/Model/${EFFICIENTDET_LITE2_NAME} ]
+if [ -f ../ObjectDetection/TFLite/${EFFICIENTDET_LITE2_NAME} ]
 then
 echo "File ${EFFICIENTDET_LITE2_NAME} exists."
 else
@@ -85,7 +85,7 @@ fi
 
 if ${has_download}
 then
-cp ${DOWNLOADS_DIR}/models/* ../ObjectDetection/Model
+cp ${DOWNLOADS_DIR}/models/* ../ObjectDetection/TFLite
 rm -rf ${DOWNLOADS_DIR}
 fi
 
