@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1E80B32721521BCC7B34949C /* Pods_ObjectDetection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7188819D4ABCA5FEB2A57A /* Pods_ObjectDetection.framework */; };
-		AA055D8921622F3E00B25948 /* labelmap.txt in Resources */ = {isa = PBXBuildFile; fileRef = AA055D8821622F3E00B25948 /* labelmap.txt */; };
 		AA119EA2217F337300DE46CF /* ModelDataHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA119EA1217F337300DE46CF /* ModelDataHandler.swift */; };
 		AA16E59B21807BAC00D9E153 /* InfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA16E59921807A7000D9E153 /* InfoCell.swift */; };
 		AA16E59D218081AA00D9E153 /* InferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA16E59C218081AA00D9E153 /* InferenceViewController.swift */; };
@@ -32,7 +31,6 @@
 		2B7188819D4ABCA5FEB2A57A /* Pods_ObjectDetection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ObjectDetection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5461A9602A0A3561DB9D597D /* Pods-ObjectDetection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjectDetection.debug.xcconfig"; path = "Target Support Files/Pods-ObjectDetection/Pods-ObjectDetection.debug.xcconfig"; sourceTree = "<group>"; };
 		661EBCB319BEACFB38192437 /* Pods-ObjectDetection.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ObjectDetection.release.xcconfig"; path = "Target Support Files/Pods-ObjectDetection/Pods-ObjectDetection.release.xcconfig"; sourceTree = "<group>"; };
-		AA055D8821622F3E00B25948 /* labelmap.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = labelmap.txt; sourceTree = "<group>"; };
 		AA119EA1217F337300DE46CF /* ModelDataHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelDataHandler.swift; sourceTree = "<group>"; };
 		AA16E59921807A7000D9E153 /* InfoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoCell.swift; sourceTree = "<group>"; };
 		AA16E59C218081AA00D9E153 /* InferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InferenceViewController.swift; sourceTree = "<group>"; };
@@ -81,7 +79,6 @@
 				BF1FBCAB2844A35100E05940 /* efficientdet_lite1.tflite */,
 				BF1FBCAA2844A35100E05940 /* efficientdet_lite2.tflite */,
 				BF1FBCAC2844A35100E05940 /* ssd_mobilenet_v1.tflite */,
-				AA055D8821622F3E00B25948 /* labelmap.txt */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -251,7 +248,6 @@
 				AA9AC5A9212D39FD000B4E9D /* LaunchScreen.storyboard in Resources */,
 				AA9AC5A6212D39FD000B4E9D /* Assets.xcassets in Resources */,
 				AA9AC5A4212D39FC000B4E9D /* Main.storyboard in Resources */,
-				AA055D8921622F3E00B25948 /* labelmap.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
