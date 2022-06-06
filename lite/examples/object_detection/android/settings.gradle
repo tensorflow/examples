@@ -1,2 +1,0 @@
-rootProject.name = 'TFLite Object Detection Demo App'
-include ':app', ':lib_interpreter', ':lib_task_api'
