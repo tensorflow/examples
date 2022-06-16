@@ -18,6 +18,7 @@ import UIKit
 extension UIImage {
 
   /// Helper function to center-crop image.
+  ///
   /// - Returns: Center-cropped copy of this image
   func cropCenter() -> UIImage? {
     let isPortrait = size.height > size.width
@@ -40,32 +41,60 @@ extension UIImage {
     return croppedImage
   }
 
-  /// Overlay an image on top of current image with alpha component
+  /// Create an `UIImage` from the given pixel array.
+  ///
   /// - Parameters
-  ///   - alpha: Alpha component of the image to be drawn on the top of current image
-  /// - Returns: The overlayed image or `nil` if the image could not be drawn.
-  func overlayWithImage(image: UIImage, alpha: Float) -> UIImage? {
-    let areaSize = CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height)
+  ///   - pixels: The pixel array to create an image from.
+  ///   - size: The target image's size.
+  ///
+  /// - Returns: The `UIImage` object or `nil` if the image could not be drawn.
+  static func fromSRGBColorArray(pixels: [UInt32], size: CGSize) -> UIImage? {
+    guard size.width > 0 && size.height > 0 else {
+      print("ERROR: The target image size must be positive.")
+      return nil
+    }
 
-    UIGraphicsBeginImageContext(self.size)
-    self.draw(in: areaSize)
-    image.draw(in: areaSize, blendMode: .normal, alpha: CGFloat(alpha))
-    let newImage: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
+    // Fails if the size of the target doesn't match with the total pixels in the SRGB array.
+    guard pixels.count == Int(size.width * size.height) else {
+      print(
+        "ERROR: The size of the target image (\(size)) doesn't match with the total number of ",
+        "pixels (\(pixels.count)) in the SRGB array."
+      )
+      return nil
+    }
 
-    return newImage
+    // Make a mutable copy.
+    var data = pixels
+
+    // Convert array of pixels to a `CGImage` instance.
+    let cgImage = data.withUnsafeMutableBytes { (ptr) -> CGImage in
+      let ctx = CGContext(
+        data: ptr.baseAddress,
+        width: Int(size.width),
+        height: Int(size.height),
+        bitsPerComponent: 8,
+        bytesPerRow: MemoryLayout<UInt32>.size * Int(size.width),
+        space: CGColorSpace(name: CGColorSpace.sRGB)!,
+        bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue
+          + CGImageAlphaInfo.premultipliedFirst.rawValue
+      )!
+      return ctx.makeImage()!
+    }
+
+    // Convert the `CGImage` instance to an `UIImage` instance.
+    return UIImage(cgImage: cgImage)
   }
 }
 
-/// Helper functions for the UIKit class that is useful for this sample app.
+/// Helper functions for the `UIKit` class that is useful for this sample app.
 extension UIColor {
 
   // Check if the color is light or dark, as defined by the injected lightness threshold.
-  // A nil value is returned if the lightness couldn't be determined.
+  // A `nil` value is returned if the lightness couldn't be determined.
   func isLight(threshold: Float = 0.5) -> Bool? {
     let originalCGColor = self.cgColor
 
-    // Convert the color to the RGB colorspace as some color such as UIColor.white and .black
+    // Convert the color to the RGB colorspace as some color such as `UIColor.white` and `.black`
     // are grayscale.
     let RGBCGColor = originalCGColor.converted(
       to: CGColorSpaceCreateDeviceRGB(), intent: .defaultIntent, options: nil)

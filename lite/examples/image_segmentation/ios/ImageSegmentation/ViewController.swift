@@ -20,7 +20,7 @@ class ViewController: UIViewController {
   private var imagePicker = UIImagePickerController()
 
   /// Image segmentator instance that runs image segmentation.
-  private var imageSegmentator: ImageSegmentator?
+  private var imageSegmentationHelper: ImageSegmentationHelper?
 
   /// Target image to run image segmentation on.
   private var targetImage: UIImage?
@@ -29,10 +29,11 @@ class ViewController: UIViewController {
   private var segmentationInput: UIImage?
 
   /// Image segmentation result.
-  private var segmentationResult: SegmentationResult?
+  private var segmentationResult: ImageSegmentationResult?
 
   /// UI elements
-  @IBOutlet weak var imageView: UIImageView!
+  @IBOutlet weak var inputImageView: UIImageView!
+  @IBOutlet weak var resultImageView: UIImageView!
 
   @IBOutlet weak var photoCameraButton: UIButton!
   @IBOutlet weak var segmentedControl: UISegmentedControl!
@@ -48,22 +49,23 @@ class ViewController: UIViewController {
     imagePicker.sourceType = .photoLibrary
 
     // Enable camera option only if current device has camera.
-    let isCameraAvailable = UIImagePickerController.isCameraDeviceAvailable(.front)
+    let isCameraAvailable =
+      UIImagePickerController.isCameraDeviceAvailable(.front)
       || UIImagePickerController.isCameraDeviceAvailable(.rear)
     if isCameraAvailable {
       photoCameraButton.isEnabled = true
     }
 
     // Initialize an image segmentator instance.
-    ImageSegmentator.newInstance { result in
+    ImageSegmentationHelper.newInstance { result in
       switch result {
-      case let .success(segmentator):
+      case let .success(segmentationHelper):
         // Store the initialized instance for use.
-        self.imageSegmentator = segmentator
+        self.imageSegmentationHelper = segmentationHelper
 
         // Run image segmentation on a demo image.
         self.showDemoSegmentation()
-      case .error(_):
+      case .failure(_):
         print("Failed to initialize.")
       }
     }
@@ -90,16 +92,19 @@ class ViewController: UIViewController {
 
   /// Handle tapping on different display mode: Input, Segmentation, Overlay
   @IBAction func onSegmentChanged(_ sender: Any) {
+    // `resultImageView` is placed on top of the `inputImageView`. The visibility (alpha value) of
+    // `resultImageView` is adjusted depending on the display mode to show/hide/overlay the
+    // underlying `inputImageView`.
     switch segmentedControl.selectedSegmentIndex {
     case 0:
       // Mode 0: Show input image
-      imageView.image = segmentationInput
+      resultImageView.alpha = 0
     case 1:
       // Mode 1: Show visualization of segmentation result.
-      imageView.image = segmentationResult?.resultImage
+      resultImageView.alpha = 1
     case 2:
-      // Mode 2; Show overlay of segmentation result on input image.
-      imageView.image = segmentationResult?.overlayImage
+      // Mode 2: Show overlay of segmentation result on input image.
+      resultImageView.alpha = 0.5
     default:
       break
     }
@@ -109,7 +114,7 @@ class ViewController: UIViewController {
   @IBAction func onCropSwitchValueChanged(_ sender: Any) {
     // Make sure that cached segmentation target image is available.
     guard targetImage != nil else {
-      self.inferenceStatusLabel.text = "Error: Input image is nil."
+      self.inferenceStatusLabel.text = "ERROR: Input image is nil."
       return
     }
 
@@ -133,7 +138,7 @@ extension ViewController {
     }
 
     // Make sure that image segmentator is initialized.
-    guard imageSegmentator != nil else {
+    guard let imageSegmentator = imageSegmentationHelper else {
       inferenceStatusLabel.text = "ERROR: Image Segmentator is not ready."
       return
     }
@@ -143,26 +148,23 @@ extension ViewController {
 
     // Center-crop the target image if the user has enabled the option.
     let willCenterCrop = cropSwitch.isOn
-    let image = willCenterCrop ? targetImage.cropCenter() : targetImage
-
-    // Cache the potentially cropped image as input to the segmentation model.
-    segmentationInput = image
-
-    // Show the potentially cropped image on screen.
-    imageView.image = image
-
-    // Make sure that the image is ready before running segmentation.
-    guard image != nil else {
+    guard let inputImage = willCenterCrop ? targetImage.cropCenter() : targetImage else {
       inferenceStatusLabel.text = "ERROR: Image could not be cropped."
       return
     }
+
+    // Cache the potentially cropped image as input to the segmentation model.
+    segmentationInput = inputImage
+
+    // Show the potentially cropped image on screen.
+    inputImageView.image = inputImage
 
     // Lock the crop switch while segmentation is running.
     cropSwitch.isEnabled = false
 
     // Run image segmentation.
-    imageSegmentator?.runSegmentation(
-      image!,
+    imageSegmentator.runSegmentation(
+      inputImage,
       completion: { result in
         // Unlock the crop switch
         self.cropSwitch.isEnabled = true
@@ -180,9 +182,12 @@ extension ViewController {
           self.showInferenceTime(segmentationResult)
           self.showClassLegend(segmentationResult)
 
+          // Show segmentation result
+          self.resultImageView.image = segmentationResult.resultImage
+
           // Enable switching between different display mode: input, segmentation, overlay
           self.segmentedControl.isEnabled = true
-        case let .error(error):
+        case let .failure(error):
           self.inferenceStatusLabel.text = error.localizedDescription
         }
       })
@@ -206,17 +211,16 @@ extension ViewController {
   }
 
   /// Show segmentation latency on screen.
-  private func showInferenceTime(_ segmentationResult: SegmentationResult) {
-    let timeString = "Preprocessing: \(Int(segmentationResult.preprocessingTime * 1000))ms.\n"
-      + "Model inference: \(Int(segmentationResult.inferenceTime * 1000))ms.\n"
+  private func showInferenceTime(_ segmentationResult: ImageSegmentationResult) {
+    let timeString =
+      "Model inference: \(Int(segmentationResult.inferenceTime * 1000))ms.\n"
       + "Postprocessing: \(Int(segmentationResult.postProcessingTime * 1000))ms.\n"
-      + "Visualization: \(Int(segmentationResult.visualizationTime * 1000))ms.\n"
 
     inferenceStatusLabel.text = timeString
   }
 
   /// Show color legend of each class found in the image.
-  private func showClassLegend(_ segmentationResult: SegmentationResult) {
+  private func showClassLegend(_ segmentationResult: ImageSegmentationResult) {
     let legendText = NSMutableAttributedString()
 
     // Loop through the classes founded in the image.

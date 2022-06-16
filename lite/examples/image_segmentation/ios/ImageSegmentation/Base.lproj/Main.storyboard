@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ImageSegmentation" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="TFL_Segmentation" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="UhJ-jg-kFY"/>
                         <viewControllerLayoutGuide type="bottom" id="TqK-8z-fNG"/>
@@ -25,6 +26,9 @@
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="8lT-sf-xuk" secondAttribute="height" multiplier="1:1" id="8XK-Qi-m6A"/>
                                 </constraints>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="gBp-Cq-H5A">
+                                <rect key="frame" x="0.0" y="94" width="414" height="414"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Yg9-nM-9J0">
                                 <rect key="frame" x="0.0" y="44" width="414" height="50"/>
@@ -44,7 +48,7 @@
                                         </connections>
                                     </button>
                                 </subviews>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstItem="qim-4p-Nop" firstAttribute="leading" secondItem="Yg9-nM-9J0" secondAttribute="leading" constant="80" id="6RE-N1-q5w"/>
                                     <constraint firstAttribute="trailing" secondItem="2ym-n6-JSB" secondAttribute="trailing" constant="80" id="8c9-0O-Xow"/>
@@ -77,7 +81,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Crop To Square" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tis-0d-4Zb">
-                                                <rect key="frame" x="8" y="52" width="119" height="21"/>
+                                                <rect key="frame" x="8" y="52" width="118" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -95,7 +99,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                         </subviews>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstItem="j88-xS-beZ" firstAttribute="top" secondItem="5dC-eb-FHY" secondAttribute="top" constant="8" id="3rz-j2-W5a"/>
                                             <constraint firstItem="kaC-2f-KHe" firstAttribute="top" secondItem="jhc-xp-ef8" secondAttribute="bottom" constant="8" id="9J3-58-w55"/>
@@ -123,7 +127,7 @@
                                 </constraints>
                             </scrollView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="Yg9-nM-9J0" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="4am-fJ-WFG"/>
                             <constraint firstItem="Dy2-B8-THR" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="5Uw-2Z-NVX"/>
@@ -132,19 +136,24 @@
                             <constraint firstItem="8lT-sf-xuk" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="IVR-CW-0dc"/>
                             <constraint firstItem="Yg9-nM-9J0" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="LGc-SG-v5K"/>
                             <constraint firstItem="Yg9-nM-9J0" firstAttribute="top" secondItem="UhJ-jg-kFY" secondAttribute="bottom" id="Qz8-jA-3YQ"/>
+                            <constraint firstItem="gBp-Cq-H5A" firstAttribute="width" secondItem="8lT-sf-xuk" secondAttribute="width" id="SJn-jT-j54"/>
                             <constraint firstItem="Dy2-B8-THR" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailing" id="VW3-nz-Wcv"/>
+                            <constraint firstItem="gBp-Cq-H5A" firstAttribute="height" secondItem="8lT-sf-xuk" secondAttribute="height" id="h17-0N-foh"/>
                             <constraint firstItem="Yg9-nM-9J0" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailing" id="jid-Zu-De7"/>
                             <constraint firstItem="Dy2-B8-THR" firstAttribute="top" secondItem="8lT-sf-xuk" secondAttribute="bottom" id="pVj-cm-G2G"/>
+                            <constraint firstItem="gBp-Cq-H5A" firstAttribute="top" secondItem="8lT-sf-xuk" secondAttribute="top" id="q9O-kq-Wwo"/>
+                            <constraint firstItem="gBp-Cq-H5A" firstAttribute="leading" secondItem="8lT-sf-xuk" secondAttribute="leading" id="wqY-gr-RFs"/>
                             <constraint firstItem="8lT-sf-xuk" firstAttribute="top" secondItem="Yg9-nM-9J0" secondAttribute="bottom" id="zzN-vb-ut1"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="iE9-Ll-efq"/>
                     <connections>
                         <outlet property="cropSwitch" destination="jhc-xp-ef8" id="ndw-B2-Vj9"/>
-                        <outlet property="imageView" destination="8lT-sf-xuk" id="BtB-ts-BTv"/>
                         <outlet property="inferenceStatusLabel" destination="kaC-2f-KHe" id="e71-zS-dky"/>
+                        <outlet property="inputImageView" destination="8lT-sf-xuk" id="BtB-ts-BTv"/>
                         <outlet property="legendLabel" destination="bLI-a1-79J" id="GT7-Zl-dKO"/>
                         <outlet property="photoCameraButton" destination="qim-4p-Nop" id="y1o-Th-yVd"/>
+                        <outlet property="resultImageView" destination="gBp-Cq-H5A" id="sbE-J0-sVD"/>
                         <outlet property="segmentedControl" destination="j88-xS-beZ" id="lHG-1F-UD5"/>
                     </connections>
                 </viewController>
@@ -156,5 +165,8 @@
     <resources>
         <image name="photo_camera" width="36" height="36"/>
         <image name="photo_library" width="36" height="36"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>

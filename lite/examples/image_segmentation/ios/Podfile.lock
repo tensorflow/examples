@@ -1,20 +1,16 @@
 PODS:
-  - TensorFlowLiteC (0.0.1-nightly.20200510)
-  - TensorFlowLiteSwift (0.0.1-nightly.20200507):
-    - TensorFlowLiteC (~> 0.0.1-nightly)
+  - TensorFlowLiteTaskVision (0.4.1)
 
 DEPENDENCIES:
-  - TensorFlowLiteSwift (~> 0.0.1-nightly)
+  - TensorFlowLiteTaskVision
 
 SPEC REPOS:
   trunk:
-    - TensorFlowLiteC
-    - TensorFlowLiteSwift
+    - TensorFlowLiteTaskVision
 
 SPEC CHECKSUMS:
-  TensorFlowLiteC: ea621b416610813f5240e791680e179350d8a8a2
-  TensorFlowLiteSwift: d3497cd5705ec6eab636928f60ae11ad61b359af
+  TensorFlowLiteTaskVision: 3eca550fd6d3dd815569e3f0cba8ae9c71a90d2e
 
-PODFILE CHECKSUM: d52f7c105e79e584431e11c526aa46796135343e
+PODFILE CHECKSUM: 7cdb3c03421ac904de61d2bbefe40c51dc8c2c33
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.11.3
