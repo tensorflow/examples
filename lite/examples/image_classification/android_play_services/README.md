@@ -15,7 +15,7 @@ It performs the following operations:
 
 This app uses EfficientNet-Lite model for demonstration. For details of the
 model used, visit
-[Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
+[Image classification](https://www.tensorflow.org/lite/examples/image_classification/overview).
 
 Downloading, extracting, and placing the model in the assets folder is managed
 automatically by download.gradle.
