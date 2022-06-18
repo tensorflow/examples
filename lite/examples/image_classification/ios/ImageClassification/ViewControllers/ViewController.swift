@@ -115,7 +115,7 @@ class ViewController: UIViewController {
       inferenceViewController?.maxResults = tempModelDataHandler.resultCount
       inferenceViewController?.threadCountLimit = tempModelDataHandler.threadCountLimit
       inferenceViewController?.delegate = self
-
+      inferenceViewController?.threadCount = tempModelDataHandler.threadCount
     }
   }
 
