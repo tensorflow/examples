@@ -133,7 +133,7 @@ def hub_train_model(model, hparams, train_ds, validation_ds, steps_per_epoch):
       label_smoothing=hparams.label_smoothing)
   model.compile(
       optimizer=tf.keras.optimizers.SGD(
-          lr=hparams.learning_rate, momentum=hparams.momentum),
+          learning_rate=hparams.learning_rate, momentum=hparams.momentum),
       loss=loss,
       metrics=["accuracy"])
 
