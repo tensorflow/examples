@@ -17,44 +17,86 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODELS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_224_android_quant_2017_11_08.zip"
+EFFICIENTNET_LITE0_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite0/uint8/2?lite-format=tflite"
+EFFICIENTNET_LITE1_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite1/uint8/2?lite-format=tflite"
+EFFICIENTNET_LITE2_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite2/uint8/2?lite-format=tflite"
+EFFICIENTNET_LITE3_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite3/uint8/2?lite-format=tflite"
+EFFICIENTNET_LITE4_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite4/uint8/2?lite-format=tflite"
+
+EFFICIENTNET_LITE0_NAME="efficientnet_lite0.tflite"
+EFFICIENTNET_LITE1_NAME="efficientnet_lite1.tflite"
+EFFICIENTNET_LITE2_NAME="efficientnet_lite2.tflite"
+EFFICIENTNET_LITE3_NAME="efficientnet_lite3.tflite"
+EFFICIENTNET_LITE4_NAME="efficientnet_lite4.tflite"
+
 DOWNLOADS_DIR=$(mktemp -d)
 
 cd "$SCRIPT_DIR"
 
-download_and_extract() {
+download() {
   local usage="Usage: download_and_extract URL DIR"
   local url="${1:?${usage}}"
   local dir="${2:?${usage}}"
+  local name="${3:?${usage}}"
   echo "downloading ${url}" >&2
   mkdir -p "${dir}"
   tempdir=$(mktemp -d)
-  tempdir2=$(mktemp -d)
 
-  curl -L ${url} > ${tempdir}/zipped.zip
-  unzip ${tempdir}/zipped.zip -d ${tempdir2}
-
-  # If the zip file contains nested directories, extract the files from the
-  # inner directory.
-  if ls ${tempdir2}/*/* 1> /dev/null 2>&1; then
-    # unzip has no strip components, so unzip to a temp dir, and move the
-    # files we want from the tempdir to destination.
-    cp -R ${tempdir2}/*/* ${dir}/
-  else
-    cp -R ${tempdir2}/* ${dir}/
-  fi
-  rm -rf ${tempdir2} ${tempdir}
+  curl -L ${url} > ${tempdir}/${name}
+  cp -R ${tempdir}/* ${dir}/
+  rm -rf ${tempdir}
 }
 
-if [ -f ../ImageClassification/Model/mobilenet_quant_v1_224.tflite ]
+has_download=false
+
+if [ -f ../ImageClassification/TFLite/${EFFICIENTNET_LITE0_NAME} ]
 then
-echo "File exists. Exiting..."
-exit 0
+echo "File ${EFFICIENTNET_LITE0_NAME} exists."
+else
+has_download=true
+download "${EFFICIENTNET_LITE0_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTNET_LITE0_NAME}"
+file ${DOWNLOADS_DIR}/models
 fi
 
-download_and_extract "${MODELS_URL}" "${DOWNLOADS_DIR}/models"
-
+if [ -f ../ImageClassification/TFLite/${EFFICIENTNET_LITE1_NAME} ]
+then
+echo "File ${EFFICIENTNET_LITE1_NAME} exists."
+else
+has_download=true
+download "${EFFICIENTNET_LITE1_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTNET_LITE1_NAME}"
 file ${DOWNLOADS_DIR}/models
+fi
 
-cp ${DOWNLOADS_DIR}/models/* ../ImageClassification/Model
+if [ -f ../ImageClassification/TFLite/${EFFICIENTNET_LITE2_NAME} ]
+then
+echo "File ${EFFICIENTNET_LITE2_NAME} exists."
+else
+has_download=true
+download "${EFFICIENTNET_LITE2_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTNET_LITE2_NAME}"
+file ${DOWNLOADS_DIR}/models
+fi
+
+if [ -f ../ImageClassification/TFLite/${EFFICIENTNET_LITE3_NAME} ]
+then
+echo "File ${EFFICIENTNET_LITE3_NAME} exists."
+else
+has_download=true
+download "${EFFICIENTNET_LITE3_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTNET_LITE3_NAME}"
+file ${DOWNLOADS_DIR}/models
+fi
+
+if [ -f ../ImageClassification/TFLite/${EFFICIENTNET_LITE4_NAME} ]
+then
+echo "File ${EFFICIENTNET_LITE4_NAME} exists."
+else
+has_download=true
+download "${EFFICIENTNET_LITE4_URL}" "${DOWNLOADS_DIR}/models" "${EFFICIENTNET_LITE4_NAME}"
+file ${DOWNLOADS_DIR}/models
+fi
+
+if ${has_download}
+then
+cp ${DOWNLOADS_DIR}/models/* ../ImageClassification/TFLite
+rm -rf ${DOWNLOADS_DIR}
+fi
 

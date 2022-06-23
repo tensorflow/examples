@@ -8,30 +8,30 @@ to continuously classify whatever it sees from the device's back camera, using
 a quantized MobileNet model. The application must be run on device.
 
 These instructions walk you through building and
-running the demo on an iOS device. For an explanation of the source, see
-[TensorFlow Lite iOS image classification example](https://github.com/tensorflow/examples/blob/master/lite/examples/image_classification/ios/EXPLORE_THE_CODE.md).
+running the demo on an iOS device.
 
 <!-- TODO(b/124116863): Add app screenshot. -->
 
 ### Model
+
 For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
 
 The model will be downloaded as part of the build process.
 
 ### iOS app details
 
-The app is written entirely in Swift and uses the TensorFlow Lite
-[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/swift)
+The app is written entirely in Swift and uses the TensorFlow Lite Task Library's
+ImageClassifier(https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier#run_inference_in_ios)
 for performing image classification.
 
-Note: Objective-C developers should use the TensorFlow Lite
-[Objective-C library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/objc).
+Note: Objective-C developers should use the TensorFlow Lite Task Library's
+[Objective-C API](https://www.tensorflow.org/lite/inference_with_metadata/task_library/image_classifier#objective_c).
 
 ## Requirements
 
 *   Device with iOS 12.0 or above
 
-*   Xcode 10.0 or above
+*   Xcode 13.0 or above
 
 *   Valid Apple Developer ID
 
@@ -80,10 +80,11 @@ You'll have to grant permissions for the app to use the device's camera. Point
 the camera at various objects and enjoy seeing how the model classifies things!
 
 ## Model references
-_Do not delete the empty references_ to the .tflite and .txt files after you
+
+_Do not delete the empty references_ to the .tflite files after you
 clone the repo and open the project. These references will be fulfilled once the
-model and label files are downloaded when the application is built and run for
+model files are downloaded when the application is built and run for
 the first time. If you delete the references to them, you can still find that
-the .tflite and .txt files are downloaded to the Model folder, the next time you
+the .tflite files are downloaded to the `TFLite` folder, the next time you
 build the application. You will have to add the references to these files in the
 bundle separately in that case.
