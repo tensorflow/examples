@@ -2,6 +2,6 @@ flax==0.3.3
 jax==0.2.13
 jaxlib==0.1.66
 tensorboard==2.6.0
-tensorflow==2.6.3
+tensorflow==2.7.2
 numpy==1.21.0
 gym==0.18.0
