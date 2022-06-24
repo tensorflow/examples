@@ -1,5 +1,9 @@
 # Release 0.4
 
+## 0.4.1
+
+*   Fix the version of scann to 1.2.6 to solve the import failure.
+
 ## 0.4.0
 
 *   Add one new task: Searcher that support Image / Text as the inputs.
