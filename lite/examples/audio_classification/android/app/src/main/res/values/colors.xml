@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ~ Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+    ~
+    ~ Licensed under the Apache License, Version 2.0 (the "License");
+    ~ you may not use this file except in compliance with the License.
+    ~ You may obtain a copy of the License at
+    ~
+    ~       http://www.apache.org/licenses/LICENSE-2.0
+    ~
+    ~ Unless required by applicable law or agreed to in writing, software
+    ~ distributed under the License is distributed on an "AS IS" BASIS,
+    ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    ~ See the License for the specific language governing permissions and
+    ~ limitations under the License.
+-->
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="bottom_sheet_background">#EEEEEE</color>
+
+    <color name="toolbar_background">#EEEEEE</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+
+    <color name="progress_bar_tint">#d97c2e</color>
+    <color name="progress_bar_background_tint">#f9e7e4</color>
+
+    <!-- Using material palette #500 -->
+    <color name="progress_red">#f44336</color>
+    <color name="progress_pink">#e91e63</color>
+    <color name="progress_purple">#9c27b0</color>
+    <color name="progress_indigo">#3f51b5</color>
+    <color name="progress_blue">#2196f3</color>
+    <color name="progress_cyan">#00bcd4</color>
+    <color name="progress_teal">#009688</color>
+    <color name="progress_green">#4caf50</color>
+    <color name="progress_yellow">#ffeb3b</color>
+    <color name="progress_amber">#ffc107</color>
+    <color name="progress_orange">#ff9800</color>
+
+    <color name="background_red">#44ff7961</color>
+    <color name="background_pink">#44ff6090</color>
+    <color name="background_purple">#44d05ce3</color>
+    <color name="background_indigo">#44757de8</color>
+    <color name="background_blue">#446ec6ff</color>
+    <color name="background_cyan">#62efff</color>
+    <color name="background_teal">#4452c7b8</color>
+    <color name="background_green">#4480e27e</color>
+    <color name="background_yellow">#44ffff72</color>
+    <color name="background_amber">#44fff350</color>
+    <color name="background_orange">#44ffc947</color>
+
+    <integer-array name="colors_progress_primary">
+        <item>@color/progress_red</item>
+        <item>@color/progress_pink</item>
+        <item>@color/progress_purple</item>
+        <item>@color/progress_indigo</item>
+        <item>@color/progress_blue</item>
+        <item>@color/progress_cyan</item>
+        <item>@color/progress_teal</item>
+        <item>@color/progress_green</item>
+        <item>@color/progress_yellow</item>
+        <item>@color/progress_amber</item>
+        <item>@color/progress_orange</item>
+    </integer-array>
+
+    <integer-array name="colors_progress_background">
+        <item>@color/background_red</item>
+        <item>@color/background_pink</item>
+        <item>@color/background_purple</item>
+        <item>@color/background_indigo</item>
+        <item>@color/background_blue</item>
+        <item>@color/background_cyan</item>
+        <item>@color/background_teal</item>
+        <item>@color/background_green</item>
+        <item>@color/background_yellow</item>
+        <item>@color/background_amber</item>
+        <item>@color/background_orange</item>
+    </integer-array>
+</resources>

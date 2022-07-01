@@ -1,0 +1,16 @@
+task downloadAudioClassifierModel(type: Download) {
+    src 'https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/yamnet.tflite'
+    overwrite false
+}
+
+task downloadSpeechClassifierModel(type: Download) {
+    // This model is custom made using Model Maker. A detailed guide can be found here:
+    // https://www.tensorflow.org/lite/models/modify/model_maker/speech_recognition
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/speech_commands.tflite'
+    dest project.ext.ASSET_DIR + '/speech.tflite'
+    overwrite false
+}
+
+preBuild.dependsOn downloadAudioClassifierModel, downloadSpeechClassifierModel
+
