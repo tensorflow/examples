@@ -10,7 +10,7 @@ for various tasks and models.
 Pre-requisites:
 
 - [Android Studio](https://developer.android.com/studio).
-- [Python 3.5+](https://www.python.org/downloads/).
+- [Python 3.7+](https://www.python.org/downloads/).
 - [`virtualenv`](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv)
   (usually comes preinstalled with Python).
 - Physical Android device with camera.
@@ -18,7 +18,7 @@ Pre-requisites:
 ### Prepare the TfLite model
 
 For the following workflow, a Python virtual environment setup is optional but
-recommended. We assume Python 3.5+ by default.
+recommended. We assume Python 3.7+ by default.
 
 ```shell
 pushd transfer_learning
