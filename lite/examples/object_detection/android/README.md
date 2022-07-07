@@ -19,9 +19,9 @@ explicitly.
 
 This application should be run on a physical Android device.
 
-![App example showing UI controls. Highlights a cat, a book, and a couch.](screenshot1.jpg?raw=true "Screenshot with controls")
+![App example showing UI controls. Highlights a cat, a book, and a couch.](screenshot1.png)
 
-![App example without UI controls. Highlights a book, a cup, and a potted plant.](screenshot2.jpg?raw=true "Screenshot without controls")
+![App example without UI controls. Highlights a book, a cup, and a potted plant.](screenshot2.png)
 
 
 ## Build the demo using Android Studio
