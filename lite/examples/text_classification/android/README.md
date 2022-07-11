@@ -14,7 +14,7 @@ mobile app.
 ## Model
 
 See
-[Text Classification with Movie Reviews](https://www.tensorflow.org/tutorials/keras/basic_text_classification)
+[Text Classification with Movie Reviews](https://www.tensorflow.org/tutorials/keras/text_classification)
 for a step-by-step instruction of building a simple text classification model.
 
 ## Android app
@@ -59,9 +59,9 @@ This Text Classification Android reference app demonstrates two implementation
 solutions:
 
 (1)
-[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/nl_classification/android/lib_task_api)
+[`lib_task_api`](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_task_api)
 that leverages the out-of-box API from the
-[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/text_classifier);
+[TensorFlow Lite Task Library](https://www.tensorflow.org/lite/inference_with_metadata/task_library/nl_classifier);
 
 (2)
 [`lib_interpreter`](https://github.com/tensorflow/examples/tree/master/lite/examples/text_classification/android/lib_interpreter)
