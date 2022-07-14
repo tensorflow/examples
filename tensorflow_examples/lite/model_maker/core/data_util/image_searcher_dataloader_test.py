@@ -17,6 +17,7 @@ from absl.testing import parameterized
 
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.data_util import image_searcher_dataloader
+from tensorflow_examples.lite.model_maker.core.data_util import metadata_loader
 from tensorflow_examples.lite.model_maker.core import test_util
 
 
@@ -45,6 +46,19 @@ class ImageSearcherDataloaderTest(parameterized.TestCase, tf.test.TestCase):
     # The order of file may be different.
     self.assertEqual(set(data_loader.metadata),
                      set(["burger", "sparrow", "cats_and_dogs"]))
+
+  def test_from_folder_binary_metadata(self,):
+    image_dir = test_util.get_test_data_path("images_with_binary_metadata")
+    data_loader = image_searcher_dataloader.DataLoader.create(
+        self.tflite_path,
+        metadata_type=metadata_loader.MetadataType.FROM_DAT_FILE)
+
+    # Loads from binary metadata.
+    data_loader.load_from_folder(image_dir, mode="rb")
+    self.assertLen(data_loader, 2)
+    self.assertEqual(data_loader.dataset.shape, (2, 1280))
+    # The order of file may be different.
+    self.assertEqual(set(data_loader.metadata), set([b"\x11\x33", b"\x00\x44"]))
 
 
 if __name__ == "__main__":

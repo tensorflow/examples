@@ -49,6 +49,7 @@ class DataLoader(searcher_dataloader.DataLoader):
     super().__init__(embedder_path=embedder.options.base_options.file_name)
 
     # Creates the metadata loader.
+    self.metadata_type = metadata_type
     if metadata_type is _MetadataType.FROM_FILE_NAME:
       self._metadata_loader = metadata_loader.MetadataLoader.from_file_name()
     elif metadata_type is _MetadataType.FROM_DAT_FILE:
@@ -87,7 +88,7 @@ class DataLoader(searcher_dataloader.DataLoader):
 
     return cls(embedder, metadata_type)
 
-  def load_from_folder(self, path: str) -> None:
+  def load_from_folder(self, path: str, mode: str = "r") -> None:
     """Loads image data from folder.
 
     Users can load images from different folders one by one. For instance,
@@ -102,6 +103,9 @@ class DataLoader(searcher_dataloader.DataLoader):
 
     Args:
       path: image directory to be loaded.
+      mode: mode in which the file is opened, Used when metadata_type is
+        FROM_DAT_FILE. Only 'r' and 'rb' are supported. 'r' means opening for
+        reading, 'rb' means opening for reading binary.
     """
     embedding_list = []
     metadata_list = []
@@ -124,7 +128,10 @@ class DataLoader(searcher_dataloader.DataLoader):
           continue
 
         embedding_list.append(embedding)
-        metadata = self._metadata_loader.load(image_path)
+        if self.metadata_type == _MetadataType.FROM_DAT_FILE:
+          metadata = self._metadata_loader.load(image_path, mode=mode)
+        else:
+          metadata = self._metadata_loader.load(image_path)
         metadata_list.append(metadata)
 
         i += 1
