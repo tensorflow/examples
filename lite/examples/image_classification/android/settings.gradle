@@ -1,2 +1,0 @@
-rootProject.name = 'TFLite Image Classification Demo App'
-include ':app', ':lib_support', ':lib_task_api', ':models'
