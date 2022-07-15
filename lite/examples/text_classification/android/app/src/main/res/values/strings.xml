@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">TFLite Text Classification</string>
+
+    <string name="classify_btn_text">Classify</string>
+    <string name="default_edit_text">Google has released 24 versions of the Android operating
+        system since 2008 and continues to make substantial investments to develop, grow,
+        and improve the OS.</string>
+    <string name="alt_bottom_sheet_chevron">Bottom sheet expandable indicator</string>
+
+    <string name="label_interence_time">Inference Time</string>
+    <string name="label_delegate">Delegate</string>
+    <string name="label_models">ML Model</string>
+
+    <string-array name="delegate_spinner_titles">
+        <item>CPU</item>
+        <item>NNAPI</item>
+    </string-array>
+
+    <string name="model_wordvec">AverageWordVec</string>
+    <string name="model_mobilebert">MobileBERT</string>
+
+    <string name="result_display_text">%1$s (%2$f)</string>
+</resources>

@@ -1,0 +1,16 @@
+<resources>
+    <!-- Bottom Sheet -->
+    <dimen name="default_margin">16dp</dimen>
+    <dimen name="bottom_sheet_text_size">20sp</dimen>
+    <dimen name="bottom_sheet_padding">16dp</dimen>
+    <dimen name="bottom_sheet_peek_height">50dp</dimen>
+    <dimen name="bottom_sheet_control_btn_size">48dp</dimen>
+    <dimen name="bottom_sheet_control_text_side_margin">10dp</dimen>
+    <dimen name="bottom_sheet_spinner_delegate_min_width">160dp</dimen>
+    <dimen name="bottom_sheet_spinner_model_min_width">240dp</dimen>
+
+    <integer name="bottom_sheet_control_text_min_ems">3</integer>
+
+    <dimen name="default_text_size">20sp</dimen>
+    <dimen name="text_input_height">240dp</dimen>
+</resources>
