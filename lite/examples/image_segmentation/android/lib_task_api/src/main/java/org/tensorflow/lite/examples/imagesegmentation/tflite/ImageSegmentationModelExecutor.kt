@@ -141,12 +141,12 @@ class ImageSegmentationModelExecutor(context: Context, private var useGPU: Boole
     return Pair(Bitmap.createScaledBitmap(maskBitmap, inputWidth, inputHeight, true), itemsFound)
   }
 
-  private fun stackTwoBitmaps(foregrand: Bitmap, background: Bitmap): Bitmap {
+  private fun stackTwoBitmaps(foreground: Bitmap, background: Bitmap): Bitmap {
     val mergedBitmap =
-      Bitmap.createBitmap(foregrand.getWidth(), foregrand.getHeight(), foregrand.getConfig())
+      Bitmap.createBitmap(foreground.getWidth(), foreground.getHeight(), foreground.getConfig())
     val canvas = Canvas(mergedBitmap)
     canvas.drawBitmap(background, 0.0f, 0.0f, null)
-    canvas.drawBitmap(foregrand, 0.0f, 0.0f, null)
+    canvas.drawBitmap(foreground, 0.0f, 0.0f, null)
     return mergedBitmap
   }
 
