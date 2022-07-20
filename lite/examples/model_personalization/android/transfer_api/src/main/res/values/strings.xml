@@ -1,7 +1,0 @@
-<resources>
-  <string
-      name="app_name"
-      description="Name of the transfer API library [CHAR_LIMIT=30]">
-    TFLite Transfer Learning API
-  </string>
-</resources>

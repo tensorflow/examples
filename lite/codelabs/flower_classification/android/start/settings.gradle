@@ -1,2 +1,0 @@
-rootProject.name = 'TFLite Flower Classification Codelab (start) App'
-include ':app'

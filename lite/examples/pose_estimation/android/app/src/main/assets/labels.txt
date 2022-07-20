@@ -1,5 +1,0 @@
-chair
-cobra
-dog
-tree
-warrior

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <dimen name="tfe_qa_standard_margin">16dp</dimen>
-  <dimen name="tfe_qa_bottom_sheet_elevation">16dp</dimen>
-</resources>

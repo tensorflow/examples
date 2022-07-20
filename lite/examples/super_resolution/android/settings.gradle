@@ -1,2 +1,0 @@
-rootProject.name = 'TFLite Super Resolution Demo App'
-include ':app'
