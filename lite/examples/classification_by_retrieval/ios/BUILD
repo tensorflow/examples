@@ -50,14 +50,12 @@ objc_library(
     data = [
         "@imagenet-mobilenet_v3_small_100_224-feature_vector//file",
     ],
-    sdk_frameworks = [
-        "Accelerate",
-        "CoreGraphics",
-        "CoreVideo",
-        "Foundation",
-        "UIKit",
-    ],
     deps = [
+        "//third_party/apple_frameworks:Accelerate",
+        "//third_party/apple_frameworks:CoreGraphics",
+        "//third_party/apple_frameworks:CoreVideo",
+        "//third_party/apple_frameworks:Foundation",
+        "//third_party/apple_frameworks:UIKit",
         "//lib:model_builder",
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/status",
