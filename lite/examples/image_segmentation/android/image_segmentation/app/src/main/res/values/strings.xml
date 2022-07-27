@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+        ~ Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+        ~
+        ~ Licensed under the Apache License, Version 2.0 (the "License");
+        ~ you may not use this file except in compliance with the License.
+        ~ You may obtain a copy of the License at
+        ~
+        ~       http://www.apache.org/licenses/LICENSE-2.0
+        ~
+        ~ Unless required by applicable law or agreed to in writing, software
+        ~ distributed under the License is distributed on an "AS IS" BASIS,
+        ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        ~ See the License for the specific language governing permissions and
+        ~ limitations under the License.
+    -->
+<resources>
+    <string name="app_name">TFLite Image Segmentation Demo</string>
+
+    <string name="alt_bottom_sheet_chevron">Bottom sheet expandable indicator</string>
+
+    <string name="alt_bottom_sheet_thread_button_minus">Decrease the number of threads used</string>
+    <string name="alt_bottom_sheet_thread_button_plus">Increase the number of threads used</string>
+
+    <string name="label_interence_time">Inference Time</string>
+    <string name="label_fps">Frames per Second</string>
+    <string name="label_confidence_threshold">Threshold</string>
+    <string name="label_max_results">Max Results</string>
+    <string name="label_threads">Number of Threads</string>
+    <string name="label_delegate">Delegate</string>
+    <string name="label_models">ML Model</string>
+    <string name="tv_default_inference_time">0ms</string>
+    <string name="tv_default_threads_value">2</string>
+
+    <string-array name="delegate_spinner_titles">
+        <item>CPU</item>
+        <item>GPU</item>
+        <item>NNAPI</item>
+    </string-array>
+</resources>

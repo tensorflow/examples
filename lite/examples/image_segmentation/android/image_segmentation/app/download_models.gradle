@@ -1,0 +1,13 @@
+task downloadTestFile(type: Download) {
+    src 'https://tfhub.dev/tensorflow/lite-model/deeplabv3/1/metadata/2?lite-format=tflite'
+    dest project.ext.TEST_ASSETS_DIR + '/deeplabv3.tflite'
+    overwrite false
+}
+
+task downloadModelFile(type: Download) {
+    src 'https://tfhub.dev/tensorflow/lite-model/deeplabv3/1/metadata/2?lite-format=tflite'
+    dest project.ext.ASSET_DIR + '/deeplabv3.tflite'
+    overwrite false
+}
+
+preBuild.dependsOn downloadModelFile, downloadTestFile
