@@ -20,7 +20,7 @@ Those notebooks can be opened in Colab from
 This is the TensorFlow example repo.  It has several classes of material:
 
 * Showcase examples and documentation for our fantastic [TensorFlow Community](https://tensorflow.org/community)
-* Provide examples mentioned on TensorFlow.org
+* Provide examples mentioned on [`TensorFlow.org`](https://www.tensorflow.org/)
 * Publish material supporting official TensorFlow courses
 * Publish supporting material for the [TensorFlow Blog](https://blog.tensorflow.org) and [TensorFlow YouTube Channel](https://youtube.com/tensorflow)
 
