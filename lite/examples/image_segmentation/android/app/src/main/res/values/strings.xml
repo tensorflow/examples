@@ -1,7 +1,0 @@
-<resources>
-    <string name="tfe_is_app_name" translatable="false">TFL Image Segmentation</string>
-    <string name="tfe_is_gpu" translatable="false">GPU</string>
-    <string name="tfe_is_re_run_model" translatable="false">Re-run model</string>
-    <string name="tfe_is_labels_found" translatable="false">Labels Found</string>
-    <string name="tfe_is_no_labels_found" translatable="false">No Labels Found</string>
-</resources>
