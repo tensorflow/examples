@@ -3,7 +3,7 @@
 ## Overview
 
 This is an example application for [TensorFlow Lite](https://tensorflow.org/lite)
-on iOS. It uses [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview)
+on iOS. It uses [Image classification](https://www.tensorflow.org/lite/examples/image_classification/overview)
 to continuously classify whatever it sees from the device's back camera, using
 a quantized MobileNet model. The application must be run on device.
 
@@ -14,7 +14,7 @@ running the demo on an iOS device.
 
 ### Model
 
-For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/models/image_classification/overview).
+For details of the model used, visit [Image classification](https://www.tensorflow.org/lite/examples/image_classification/overview).
 
 The model will be downloaded as part of the build process.
 
