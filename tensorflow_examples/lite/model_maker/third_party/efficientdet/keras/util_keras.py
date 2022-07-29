@@ -113,7 +113,7 @@ def load_from_hub_checkpoint(model, ckpt_path_or_file):
           cpt_var_name = cpt_var_name.replace(':0', '')
         break
 
-    return cpt_var_name + '/.ATTRIBUTES/VARIABLE_VALUE'
+    return cpt_var_name + '/.ATTRIBUTES/VARIABLE_VALUE'  # pytype: disable=name-error  # py310-upgrade
 
   for var in model.weights:
     cpt_var_name = _get_cpt_var_name(var.name)
