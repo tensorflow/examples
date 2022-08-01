@@ -22,6 +22,7 @@ class ViewController: UIViewController {
   private var threadCount: Int = 2
 
   private var timer: Timer?
+  private let processQueue = DispatchQueue(label: "processQueue")
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -85,7 +86,9 @@ class ViewController: UIViewController {
         timer?.invalidate()
         print(interval)
         timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true, block: { _ in
-          process()
+          self.processQueue.async {
+            process()
+          }
         })
       } catch { print(error) }
     } catch {

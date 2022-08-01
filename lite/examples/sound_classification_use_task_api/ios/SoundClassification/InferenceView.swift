@@ -62,7 +62,7 @@ class InferenceView: UIView {
   }
 
   @IBAction func overlapStepperValueChanged(_ sender: UIStepper) {
-    overlabLabel.text = "\(Int(sender.value * 100))%"
+    overlabLabel.text = String(format: "%.0f", sender.value * 100) + "%"
     delegate?.view(self, needPerformActions: .changeOverlap(Float(sender.value)))
   }
 
