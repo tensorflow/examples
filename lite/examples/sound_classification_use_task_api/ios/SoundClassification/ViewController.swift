@@ -124,9 +124,9 @@ enum ModelType: String {
   var fileName: String {
     switch self {
     case .Yamnet:
-      return "lite-model_yamnet"
+      return "yamnet"
     case .speechCommandModel:
-      return "speech"
+      return "speech_commands"
     }
   }
 }
