@@ -15,6 +15,11 @@ class ResultTableViewCell: UITableViewCell {
 
   func setData(_ data: ClassificationCategory) {
     nameLabel.text = data.label
-    scoreWidthLayoutConstraint.constant = UIScreen.main.bounds.width/4*CGFloat(data.score)
+    print(data.score)
+    if !data.score.isNaN {
+      scoreWidthLayoutConstraint.constant = UIScreen.main.bounds.width/4*CGFloat(data.score)
+    } else {
+      scoreWidthLayoutConstraint.constant = 0
+    }
   }
 }

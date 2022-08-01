@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		921E5E7C1AECB066AD2AFD54 /* Pods_SoundClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2109A5E9A08D8AE450D02691 /* Pods_SoundClassification.framework */; };
+		BF98E0AF28978DA0009A2B30 /* InferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF98E0AE28978DA0009A2B30 /* InferenceView.swift */; };
+		BF98E0B12897B9E7009A2B30 /* speech.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF98E0B02897B9E6009A2B30 /* speech.tflite */; };
 		BFE22020289383300071A597 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE2201F289383300071A597 /* AppDelegate.swift */; };
 		BFE22024289383300071A597 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE22023289383300071A597 /* ViewController.swift */; };
 		BFE22027289383300071A597 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFE22025289383300071A597 /* Main.storyboard */; };
@@ -21,6 +23,8 @@
 		2109A5E9A08D8AE450D02691 /* Pods_SoundClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SoundClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C1B65C90F37CC99A5F9163F /* Pods-SoundClassification.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.debug.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.debug.xcconfig"; sourceTree = "<group>"; };
 		A54B1AFE3B39830845FC13CD /* Pods-SoundClassification.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.release.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.release.xcconfig"; sourceTree = "<group>"; };
+		BF98E0AE28978DA0009A2B30 /* InferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceView.swift; sourceTree = "<group>"; };
+		BF98E0B02897B9E6009A2B30 /* speech.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = speech.tflite; sourceTree = "<group>"; };
 		BFE2201C289383300071A597 /* SoundClassification.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SoundClassification.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE2201F289383300071A597 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BFE22023289383300071A597 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -83,7 +87,9 @@
 			isa = PBXGroup;
 			children = (
 				BFE22033289387A10071A597 /* lite-model_yamnet.tflite */,
+				BF98E0B02897B9E6009A2B30 /* speech.tflite */,
 				BFE2201F289383300071A597 /* AppDelegate.swift */,
+				BF98E0AE28978DA0009A2B30 /* InferenceView.swift */,
 				BFE22023289383300071A597 /* ViewController.swift */,
 				BFE220352893CAE20071A597 /* ResultTableViewCell.swift */,
 				BFE22025289383300071A597 /* Main.storyboard */,
@@ -157,6 +163,7 @@
 				BFE22034289387A10071A597 /* lite-model_yamnet.tflite in Resources */,
 				BFE22029289383320071A597 /* Assets.xcassets in Resources */,
 				BFE22027289383300071A597 /* Main.storyboard in Resources */,
+				BF98E0B12897B9E7009A2B30 /* speech.tflite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -192,6 +199,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF98E0AF28978DA0009A2B30 /* InferenceView.swift in Sources */,
 				BFE22024289383300071A597 /* ViewController.swift in Sources */,
 				BFE220362893CAE20071A597 /* ResultTableViewCell.swift in Sources */,
 				BFE22020289383300071A597 /* AppDelegate.swift in Sources */,
