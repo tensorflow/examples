@@ -8,14 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		921E5E7C1AECB066AD2AFD54 /* Pods_SoundClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2109A5E9A08D8AE450D02691 /* Pods_SoundClassification.framework */; };
+		BF646A642897D5CC006741D8 /* yamnet.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF646A622897D5CC006741D8 /* yamnet.tflite */; };
+		BF646A652897D5CC006741D8 /* speech_commands.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF646A632897D5CC006741D8 /* speech_commands.tflite */; };
 		BF98E0AF28978DA0009A2B30 /* InferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF98E0AE28978DA0009A2B30 /* InferenceView.swift */; };
-		BF98E0B12897B9E7009A2B30 /* speech.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BF98E0B02897B9E6009A2B30 /* speech.tflite */; };
 		BFE22020289383300071A597 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE2201F289383300071A597 /* AppDelegate.swift */; };
 		BFE22024289383300071A597 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE22023289383300071A597 /* ViewController.swift */; };
 		BFE22027289383300071A597 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFE22025289383300071A597 /* Main.storyboard */; };
 		BFE22029289383320071A597 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE22028289383320071A597 /* Assets.xcassets */; };
 		BFE2202C289383320071A597 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BFE2202A289383320071A597 /* LaunchScreen.storyboard */; };
-		BFE22034289387A10071A597 /* lite-model_yamnet.tflite in Resources */ = {isa = PBXBuildFile; fileRef = BFE22033289387A10071A597 /* lite-model_yamnet.tflite */; };
 		BFE220362893CAE20071A597 /* ResultTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE220352893CAE20071A597 /* ResultTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,8 +23,9 @@
 		2109A5E9A08D8AE450D02691 /* Pods_SoundClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SoundClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C1B65C90F37CC99A5F9163F /* Pods-SoundClassification.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.debug.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.debug.xcconfig"; sourceTree = "<group>"; };
 		A54B1AFE3B39830845FC13CD /* Pods-SoundClassification.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.release.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.release.xcconfig"; sourceTree = "<group>"; };
+		BF646A622897D5CC006741D8 /* yamnet.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = yamnet.tflite; sourceTree = "<group>"; };
+		BF646A632897D5CC006741D8 /* speech_commands.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = speech_commands.tflite; sourceTree = "<group>"; };
 		BF98E0AE28978DA0009A2B30 /* InferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceView.swift; sourceTree = "<group>"; };
-		BF98E0B02897B9E6009A2B30 /* speech.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = speech.tflite; sourceTree = "<group>"; };
 		BFE2201C289383300071A597 /* SoundClassification.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SoundClassification.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE2201F289383300071A597 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BFE22023289383300071A597 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -32,7 +33,6 @@
 		BFE22028289383320071A597 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFE2202B289383320071A597 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BFE2202D289383320071A597 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BFE22033289387A10071A597 /* lite-model_yamnet.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = "lite-model_yamnet.tflite"; sourceTree = "<group>"; };
 		BFE220352893CAE20071A597 /* ResultTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,6 +65,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		BF646A612897D5CC006741D8 /* TFlite */ = {
+			isa = PBXGroup;
+			children = (
+				BF646A622897D5CC006741D8 /* yamnet.tflite */,
+				BF646A632897D5CC006741D8 /* speech_commands.tflite */,
+			);
+			path = TFlite;
+			sourceTree = "<group>";
+		};
 		BFE22013289383300071A597 = {
 			isa = PBXGroup;
 			children = (
@@ -86,8 +95,7 @@
 		BFE2201E289383300071A597 /* SoundClassification */ = {
 			isa = PBXGroup;
 			children = (
-				BFE22033289387A10071A597 /* lite-model_yamnet.tflite */,
-				BF98E0B02897B9E6009A2B30 /* speech.tflite */,
+				BF646A612897D5CC006741D8 /* TFlite */,
 				BFE2201F289383300071A597 /* AppDelegate.swift */,
 				BF98E0AE28978DA0009A2B30 /* InferenceView.swift */,
 				BFE22023289383300071A597 /* ViewController.swift */,
@@ -160,10 +168,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BFE2202C289383320071A597 /* LaunchScreen.storyboard in Resources */,
-				BFE22034289387A10071A597 /* lite-model_yamnet.tflite in Resources */,
+				BF646A652897D5CC006741D8 /* speech_commands.tflite in Resources */,
+				BF646A642897D5CC006741D8 /* yamnet.tflite in Resources */,
 				BFE22029289383320071A597 /* Assets.xcassets in Resources */,
 				BFE22027289383300071A597 /* Main.storyboard in Resources */,
-				BF98E0B12897B9E7009A2B30 /* speech.tflite in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
