@@ -15,9 +15,7 @@
 import UIKit
 
 protocol InferenceViewDelegate {
-  /**
-   This method is called when the user changes the value to update model used for inference.
-   */
+  /// This method is called when the user changes the value to update model used for inference.
   func view(_ view: InferenceView, needPerformActions action: InferenceView.Action)
 }
 
@@ -46,6 +44,7 @@ class InferenceView: UIView {
   @IBOutlet weak var showHidenButtonLayoutConstraint: NSLayoutConstraint!
   @IBOutlet weak var showHidenButton: UIButton!
 
+  /// Set default setting
   func setDefault(model: ModelType, overLab: Float, maxResult: Int, threshold: Float, threads: Int) {
     modelSegmentedControl.selectedSegmentIndex = model == .Yamnet ? 0 : 1
     overlabLabel.text = "\(Int(overLab * 100))%"
@@ -82,6 +81,7 @@ class InferenceView: UIView {
     threadsLabel.text = "\(Int(sender.value))"
     delegate?.view(self, needPerformActions: .changeThreadCount(Int(sender.value)))
   }
+
   @IBAction func showHidenButtonTouchUpInside(_ sender: UIButton) {
     sender.isSelected.toggle()
     showHidenButtonLayoutConstraint.constant = sender.isSelected ? 300 : 40
