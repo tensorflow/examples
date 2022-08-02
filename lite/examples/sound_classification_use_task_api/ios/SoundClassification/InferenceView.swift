@@ -1,9 +1,16 @@
+// Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 //
-//  InferenceView.swift
-//  SoundClassification
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  Created by MBA0077 on 8/1/22.
+// http://www.apache.org/licenses/LICENSE-2.0
 //
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import UIKit
 
@@ -37,12 +44,7 @@ class InferenceView: UIView {
   @IBOutlet weak var threadsStepper: UIStepper!
   @IBOutlet weak var modelSegmentedControl: UISegmentedControl!
   @IBOutlet weak var showHidenButtonLayoutConstraint: NSLayoutConstraint!
-  @IBOutlet weak var showHidenButton: UIButton! {
-    didSet {
-      showHidenButton.setImage(UIImage(named: "icn_chevron_up"), for: .normal)
-      showHidenButton.setImage(UIImage(named: "icn_chevron_down"), for: .selected)
-    }
-  }
+  @IBOutlet weak var showHidenButton: UIButton!
 
   func setDefault(model: ModelType, overLab: Float, maxResult: Int, threshold: Float, threads: Int) {
     modelSegmentedControl.selectedSegmentIndex = model == .Yamnet ? 0 : 1

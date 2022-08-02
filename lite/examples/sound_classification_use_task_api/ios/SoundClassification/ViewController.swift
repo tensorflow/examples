@@ -1,15 +1,24 @@
+// Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 //
-//  ViewController.swift
-//  SoundClassification
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  Created by MBA0077 on 7/29/22.
+// http://www.apache.org/licenses/LICENSE-2.0
 //
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import UIKit
 import AVFoundation
 import TensorFlowLiteTaskAudio
 
 class ViewController: UIViewController {
+
+  // MARK: - Variables
   @IBOutlet weak var tableView: UITableView!
   @IBOutlet weak var inferenceView: InferenceView!
 
@@ -24,6 +33,7 @@ class ViewController: UIViewController {
   private var timer: Timer?
   private let processQueue = DispatchQueue(label: "processQueue")
 
+  // MARK: - View controller lifecycle methods
   override func viewDidLoad() {
     super.viewDidLoad()
     inferenceView.setDefault(model: modelType, overLab: overLap, maxResult: maxResults, threshold: threshold, threads: threadCount)
@@ -31,6 +41,8 @@ class ViewController: UIViewController {
     startAudioRecognition()
   }
 
+  // MARK: - Private Methods
+  /// Request permission and start audio classification if granted
   private func startAudioRecognition() {
     AVAudioSession.sharedInstance().requestRecordPermission { granted in
       if granted {
@@ -41,6 +53,7 @@ class ViewController: UIViewController {
     }
   }
 
+  /// Check permission and show error if user denied permission
   private func checkPermissions() {
     switch AVAudioSession.sharedInstance().recordPermission {
     case .granted, .undetermined:
@@ -52,6 +65,7 @@ class ViewController: UIViewController {
     }
   }
 
+  /// Run audio classification
   private func classification() {
     guard let path = Bundle.main.path(forResource: modelType.fileName, ofType: "tflite") else { return }
     let classifierOptions = AudioClassifierOptions(modelPath: path)
@@ -63,8 +77,6 @@ class ViewController: UIViewController {
       let inputAudioTensor = classifier.createInputAudioTensor()
       let audioFormat = inputAudioTensor.audioFormat
       let audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: inputAudioTensor.bufferSize)
-      let lengthInMilliSeconds = Double(inputAudioTensor.bufferSize) / Double(audioFormat.sampleRate)
-      let interval = lengthInMilliSeconds * Double(1 - overLap)
       do {
         let audioRecord = try classifier.createAudioRecord()
         func process() {
@@ -74,6 +86,7 @@ class ViewController: UIViewController {
             let classifier = try classifier.classify(audioTensor: audioTensor)
             let processTime = Date().timeIntervalSince1970 - startTime
             DispatchQueue.main.async {
+              // Update UI
               self.inferenceView.inferenceTimeLabel.text = "\(Int(processTime * 1000)) ms"
               self.datas = classifier.classifications[0].categories
               self.tableView.reloadData()
@@ -83,16 +96,19 @@ class ViewController: UIViewController {
           }
         }
         try audioRecord.startRecording()
+        // Calculate interval between sampling based on overlap
+        let lengthInMilliSeconds = Double(inputAudioTensor.bufferSize) / Double(audioFormat.sampleRate)
+        let interval = lengthInMilliSeconds * Double(1 - overLap)
         timer?.invalidate()
-        print(interval)
+        // Run the process after every fixed interval
         timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true, block: { _ in
           self.processQueue.async {
             process()
           }
         })
-      } catch { print(error) }
+      } catch { print(error.localizedDescription) }
     } catch {
-      print(error)
+      print(error.localizedDescription)
     }
   }
 }

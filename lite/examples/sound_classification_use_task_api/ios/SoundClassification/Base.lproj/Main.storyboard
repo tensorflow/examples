@@ -184,13 +184,9 @@
                                         <constraints>
                                             <constraint firstAttribute="height" constant="40" id="uNv-tI-gd6"/>
                                         </constraints>
-                                        <state key="normal" title="Button"/>
-                                        <buttonConfiguration key="configuration" style="plain">
-                                            <backgroundConfiguration key="background">
-                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <color key="strokeColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            </backgroundConfiguration>
-                                        </buttonConfiguration>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" image="icn_chevron_up"/>
+                                        <state key="selected" image="icn_chevron_down"/>
                                         <connections>
                                             <action selector="showHidenButtonTouchUpInside:" destination="iph-Fi-onr" eventType="touchUpInside" id="46E-6m-MbN"/>
                                         </connections>
@@ -283,6 +279,8 @@
         </scene>
     </scenes>
     <resources>
+        <image name="icn_chevron_down" width="30" height="9"/>
+        <image name="icn_chevron_up" width="30" height="9"/>
         <image name="tfl_logo" width="266.66665649414062" height="42.666667938232422"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
