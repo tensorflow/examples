@@ -72,7 +72,7 @@ class ViewController: UIViewController {
       scoreThreshold: threshold,
       maxResults: maxResults) else { return }
     soundClassificationHelper.delegate = self
-    soundClassificationHelper.runClassifier(overLap: Double(overLap))
+    soundClassificationHelper.runClassifier(overLap: overLap)
   }
 }
 
