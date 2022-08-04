@@ -23,7 +23,7 @@ class InferenceView: UIView {
 
   enum Action {
     case changeModel(ModelType)
-    case changeOverlap(Float)
+    case changeOverlap(Double)
     case changeMaxResults(Int)
     case changeScoreThreshold(Float)
     case changeThreadCount(Int)
@@ -45,10 +45,10 @@ class InferenceView: UIView {
   @IBOutlet weak var showHidenButton: UIButton!
 
   /// Set default setting
-  func setDefault(model: ModelType, overLab: Float, maxResult: Int, threshold: Float, threads: Int) {
+  func setDefault(model: ModelType, overLab: Double, maxResult: Int, threshold: Float, threads: Int) {
     modelSegmentedControl.selectedSegmentIndex = model == .Yamnet ? 0 : 1
     overlabLabel.text = "\(Int(overLab * 100))%"
-    overLapStepper.value = Double(overLab)
+    overLapStepper.value = overLab
     maxResulteLabel.text = "\(maxResult)"
     maxResultsStepper.value = Double(maxResult)
     thresholdLabel.text = String(format: "%.1f", threshold)
@@ -64,7 +64,7 @@ class InferenceView: UIView {
 
   @IBAction func overlapStepperValueChanged(_ sender: UIStepper) {
     overlabLabel.text = String(format: "%.0f", sender.value * 100) + "%"
-    delegate?.view(self, needPerformActions: .changeOverlap(Float(sender.value)))
+    delegate?.view(self, needPerformActions: .changeOverlap(sender.value))
   }
 
   @IBAction func maxResultsStepperValueChanged(_ sender: UIStepper) {

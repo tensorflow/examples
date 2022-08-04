@@ -77,7 +77,7 @@
                                 </connections>
                             </tableView>
                             <view autoresizesSubviews="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iph-Fi-onr" customClass="InferenceView" customModule="SoundClassification" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="738" width="375" height="40"/>
+                                <rect key="frame" x="0.0" y="478" width="375" height="300"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Inference Time:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AnK-Ht-EgW">
                                         <rect key="frame" x="12" y="60" width="127" height="21"/>
@@ -225,7 +225,7 @@
                                     <constraint firstItem="sIf-44-PZi" firstAttribute="leading" secondItem="irD-Zw-BdY" secondAttribute="trailing" constant="4" id="k7n-dX-whY"/>
                                     <constraint firstItem="PwS-Q3-V2E" firstAttribute="centerY" secondItem="0aJ-B4-Rqn" secondAttribute="centerY" id="nI2-Jh-m7J"/>
                                     <constraint firstItem="6H2-kM-cpc" firstAttribute="leading" secondItem="iph-Fi-onr" secondAttribute="leading" constant="12" id="rb6-eT-BSo"/>
-                                    <constraint firstAttribute="height" constant="40" id="uSc-8S-3eG"/>
+                                    <constraint firstAttribute="height" constant="300" id="uSc-8S-3eG"/>
                                     <constraint firstAttribute="trailing" secondItem="rQE-Ag-amu" secondAttribute="trailing" constant="20" id="yDl-Ub-FN7"/>
                                     <constraint firstItem="EUU-kO-GvP" firstAttribute="top" secondItem="AnK-Ht-EgW" secondAttribute="bottom" constant="20" id="yZw-zw-Oej"/>
                                     <constraint firstItem="sIf-44-PZi" firstAttribute="centerY" secondItem="6H2-kM-cpc" secondAttribute="centerY" id="zQh-Jt-p9t"/>

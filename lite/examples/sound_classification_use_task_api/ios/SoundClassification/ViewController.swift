@@ -25,13 +25,12 @@ class ViewController: UIViewController {
   private var datas: [ClassificationCategory] = []
 
   private var modelType: ModelType = .Yamnet
-  private var overLap: Float = 0.5
+  private var overLap: Double = 0.5
   private var maxResults: Int = 3
   private var threshold: Float = 0.3
   private var threadCount: Int = 2
 
   private var timer: Timer?
-  private let processQueue = DispatchQueue(label: "processQueue")
 
   // MARK: - View controller lifecycle methods
   override func viewDidLoad() {
@@ -67,49 +66,13 @@ class ViewController: UIViewController {
 
   /// Run audio classification
   private func classification() {
-    guard let path = Bundle.main.path(forResource: modelType.fileName, ofType: "tflite") else { return }
-    let classifierOptions = AudioClassifierOptions(modelPath: path)
-    classifierOptions.baseOptions.computeSettings.cpuSettings.numThreads = threadCount
-    classifierOptions.classificationOptions.maxResults = maxResults
-    classifierOptions.classificationOptions.scoreThreshold = threshold
-    do {
-      let classifier = try AudioClassifier.classifier(options: classifierOptions)
-      let inputAudioTensor = classifier.createInputAudioTensor()
-      let audioFormat = inputAudioTensor.audioFormat
-      let audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: inputAudioTensor.bufferSize)
-      do {
-        let audioRecord = try classifier.createAudioRecord()
-        func process() {
-          let startTime = Date().timeIntervalSince1970
-          do {
-            try audioTensor.load(audioRecord: audioRecord)
-            let classifier = try classifier.classify(audioTensor: audioTensor)
-            let processTime = Date().timeIntervalSince1970 - startTime
-            DispatchQueue.main.async {
-              // Update UI
-              self.inferenceView.inferenceTimeLabel.text = "\(Int(processTime * 1000)) ms"
-              self.datas = classifier.classifications[0].categories
-              self.tableView.reloadData()
-            }
-          } catch {
-            print(error.localizedDescription)
-          }
-        }
-        try audioRecord.startRecording()
-        // Calculate interval between sampling based on overlap
-        let lengthInMilliSeconds = Double(inputAudioTensor.bufferSize) / Double(audioFormat.sampleRate)
-        let interval = lengthInMilliSeconds * Double(1 - overLap)
-        timer?.invalidate()
-        // Run the process after every fixed interval
-        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true, block: { _ in
-          self.processQueue.async {
-            process()
-          }
-        })
-      } catch { print(error.localizedDescription) }
-    } catch {
-      print(error.localizedDescription)
-    }
+    guard let soundClassificationHelper = SoundClassificationHelper(
+      modelType: modelType,
+      threadCount: threadCount,
+      scoreThreshold: threshold,
+      maxResults: maxResults) else { return }
+    soundClassificationHelper.delegate = self
+    soundClassificationHelper.runClassifier(overLap: Double(overLap))
   }
 }
 
@@ -160,6 +123,14 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return datas.count
+  }
+}
+
+extension ViewController: SoundClassificationHelperDelegate {
+  func sendResult(_ result: Result) {
+    datas = result.categories
+    tableView.reloadData()
+    inferenceView.inferenceTimeLabel.text = "\(Int(result.inferenceTime * 1000)) ms"
   }
 }
 
