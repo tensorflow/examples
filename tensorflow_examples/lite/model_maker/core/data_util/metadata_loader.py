@@ -17,6 +17,7 @@ import enum
 import os
 from typing import AnyStr, Callable
 
+import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
 
 
@@ -67,7 +68,7 @@ class MetadataLoader(object):
             "`mode` must be \"r\" or \"rb\" to read text or binary metadata.")
 
       metadata_file_path = os.path.splitext(path)[0] + ".dat"
-      with open(metadata_file_path, mode) as f:
+      with tf.io.gfile.GFile(metadata_file_path, mode) as f:
         return f.read()
 
     return cls(_load_metadata)
