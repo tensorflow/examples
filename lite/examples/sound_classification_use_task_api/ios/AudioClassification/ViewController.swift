@@ -66,7 +66,7 @@ class ViewController: UIViewController {
 
   /// Run audio classification
   private func classification() {
-    guard let soundClassificationHelper = SoundClassificationHelper(
+    guard let soundClassificationHelper = AudioClassificationHelper(
       modelType: modelType,
       threadCount: threadCount,
       scoreThreshold: threshold,
@@ -126,7 +126,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
   }
 }
 
-extension ViewController: SoundClassificationHelperDelegate {
+extension ViewController: AudioClassificationHelperDelegate {
   func sendResult(_ result: Result) {
     datas = result.categories
     tableView.reloadData()

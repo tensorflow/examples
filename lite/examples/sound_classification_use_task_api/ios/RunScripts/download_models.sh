@@ -43,7 +43,7 @@ download() {
 
 has_download=false
 
-if [ -f ../SoundClassification/TFLite/${YAMNET_NAME} ]
+if [ -f ../AudioClassification/TFLite/${YAMNET_NAME} ]
 then
 echo "File ${YAMNET_NAME} exists."
 else
@@ -52,7 +52,7 @@ download "${YAMNET_URL}" "${DOWNLOADS_DIR}/models" "${YAMNET_NAME}"
 file ${DOWNLOADS_DIR}/models
 fi
 
-if [ -f ../SoundClassification/TFLite/${SPEECH_COMMANDS_NAME} ]
+if [ -f ../AudioClassification/TFLite/${SPEECH_COMMANDS_NAME} ]
 then
 echo "File ${SPEECH_COMMANDS_NAME} exists."
 else
@@ -63,7 +63,7 @@ fi
 
 if ${has_download}
 then
-cp ${DOWNLOADS_DIR}/models/* ../SoundClassification/TFLite
+cp ${DOWNLOADS_DIR}/models/* ../AudioClassification/TFLite
 rm -rf ${DOWNLOADS_DIR}
 fi
 

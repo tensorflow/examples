@@ -14,7 +14,7 @@
 
 import TensorFlowLiteTaskAudio
 
-protocol SoundClassificationHelperDelegate {
+protocol AudioClassificationHelperDelegate {
   func sendResult(_ result: Result)
 }
 
@@ -29,14 +29,15 @@ typealias FileInfo = (name: String, extension: String)
 
 /// This class handles all data preprocessing and makes calls to run inference on a record
 /// by invoking the `AudioClassifier`.
-class SoundClassificationHelper {
+class AudioClassificationHelper {
 
   // MARK: Public properties
-  var delegate: SoundClassificationHelperDelegate?
+  var delegate: AudioClassificationHelperDelegate?
 
   // MARK: Private properties
   /// TensorFlow Lite `AudioClassifier` object for performing object detection using a given model.
   private var classifier: AudioClassifier
+  private var audioRecord: AudioRecord
   private var timer: Timer?
   private let processQueue = DispatchQueue(label: "processQueue")
 
@@ -64,10 +65,15 @@ class SoundClassificationHelper {
     do {
       // Create the `Classifier`.
       classifier = try AudioClassifier.classifier(options: classifierOptions)
+      audioRecord = try classifier.createAudioRecord()
     } catch let error {
       print("Failed to create the interpreter with error: \(error.localizedDescription)")
       return nil
     }
+  }
+
+  deinit {
+    audioRecord.stop()
   }
 
   /// This class handles all data preprocessing and delegate results to Controller when classtifi is done
@@ -76,7 +82,6 @@ class SoundClassificationHelper {
     let audioFormat = inputAudioTensor.audioFormat
     let audioTensor = AudioTensor(audioFormat: audioFormat, sampleCount: inputAudioTensor.bufferSize)
     do {
-      let audioRecord = try classifier.createAudioRecord()
       func processing() {
         let startTime = Date().timeIntervalSince1970
         do {
@@ -101,8 +106,8 @@ class SoundClassificationHelper {
       let interval = lengthInMilliSeconds * Double(1 - overLap)
       timer?.invalidate()
       // Run the process after every fixed interval
-      timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true, block: { _ in
-        self.processQueue.async {
+      timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true, block: { [weak self] _ in
+        self?.processQueue.async {
           processing()
         }
       })

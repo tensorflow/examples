@@ -11,7 +11,7 @@
         <!--AAAAA-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController title="AAAAA" id="BYZ-38-t0r" customClass="ViewController" customModule="SoundClassification" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="AAAAA" id="BYZ-38-t0r" customClass="ViewController" customModule="AudioClassification" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -20,7 +20,7 @@
                                 <rect key="frame" x="0.0" y="88" width="375" height="690"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ResultCell" rowHeight="60" id="asY-eb-7fX" customClass="ResultTableViewCell" customModule="SoundClassification" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ResultCell" rowHeight="60" id="asY-eb-7fX" customClass="ResultTableViewCell" customModule="AudioClassification" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="44.666666030883789" width="375" height="60"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="asY-eb-7fX" id="Abw-lR-8BG">
@@ -76,7 +76,7 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="erB-MO-070"/>
                                 </connections>
                             </tableView>
-                            <view autoresizesSubviews="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iph-Fi-onr" customClass="InferenceView" customModule="SoundClassification" customModuleProvider="target">
+                            <view autoresizesSubviews="NO" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iph-Fi-onr" customClass="InferenceView" customModule="AudioClassification" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="738" width="375" height="40"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Inference Time:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AnK-Ht-EgW">
