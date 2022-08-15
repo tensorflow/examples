@@ -87,8 +87,8 @@ def run(model: str, max_results: int, score_threshold: float, num_threads: int,
     categories = classifier.classify(tensor_image)
 
     # Show classification results on the image
-    for idx, category in enumerate(categories.classifications[0].classes):
-      class_name = category.class_name
+    for idx, category in enumerate(categories.classifications[0].categories):
+      class_name = category.category_name
       score = round(category.score, 2)
       result_text = class_name + ' (' + str(score) + ')'
       text_location = (_LEFT_MARGIN, (idx + 2) * _ROW_SIZE)
