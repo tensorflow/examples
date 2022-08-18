@@ -1,0 +1,122 @@
+<!--
+    ~ Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+    ~
+    ~ Licensed under the Apache License, Version 2.0 (the "License");
+    ~ you may not use this file except in compliance with the License.
+    ~ You may obtain a copy of the License at
+    ~
+    ~       http://www.apache.org/licenses/LICENSE-2.0
+    ~
+    ~ Unless required by applicable law or agreed to in writing, software
+    ~ distributed under the License is distributed on an "AS IS" BASIS,
+    ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    ~ See the License for the specific language governing permissions and
+    ~ limitations under the License.
+-->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:background="@color/bottom_sheet_background"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="@dimen/bottom_view_padding"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="@dimen/bottom_sheet_peek_height"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Chevron indicating that the bottom sheet is expandable -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/alt_bottom_sheet_chevron"
+                android:src="@drawable/icn_chevron_up" />
+        </RelativeLayout>
+
+        <!-- Number of threads adjustment row -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/bottom_sheet_default_row_margin"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/bottom_sheet_label_threads"
+                android:textSize="@dimen/bottom_sheet_text_size" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/threads_minus"
+                    android:layout_width="@dimen/bottom_sheet_control_btn_size"
+                    android:layout_height="@dimen/bottom_sheet_control_btn_size"
+                    android:contentDescription="@string/alt_bottom_sheet_thread_button_minus"
+                    android:src="@drawable/ic_minus" />
+
+                <TextView
+                    android:id="@+id/threads_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/bottom_sheet_control_text_side_margin"
+                    android:layout_marginRight="@dimen/bottom_sheet_control_text_side_margin"
+                    android:gravity="center"
+                    android:minEms="@integer/bottom_sheet_control_text_min_ems"
+                    android:text="@string/bottom_sheet_default_num_thread"
+                    android:textSize="@dimen/bottom_sheet_text_size" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/threads_plus"
+                    android:layout_width="@dimen/bottom_sheet_control_btn_size"
+                    android:layout_height="@dimen/bottom_sheet_control_btn_size"
+                    android:contentDescription="@string/alt_bottom_sheet_thread_button_plus"
+                    android:src="@drawable/ic_plus" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Delegate selection row -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/bottom_sheet_default_row_margin">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bottom_sheet_label_delegate"
+                android:textSize="@dimen/bottom_sheet_text_size" />
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/spinner_delegate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:entries="@array/delegate_spinner_titles"
+                android:minWidth="@dimen/bottom_sheet_spinner_delegate_min_width"
+                android:spinnerMode="dropdown"
+                android:theme="@style/BottomSheetSpinnerItemStyle" />
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.core.widget.NestedScrollView>
