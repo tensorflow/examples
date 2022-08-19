@@ -14,9 +14,7 @@
 # ==============================================================================
 """Util for setup."""
 import os
-import pathlib
 import shutil
-import subprocess
 import sys
 
 from setuptools import find_namespace_packages
@@ -160,10 +158,6 @@ class PackageGen:
     package_data = {
         '': ['*.txt', '*.md', '*.json'],
     }
-    if self.nightly:
-      # For nightly, proceeed with addtional preparation.
-      extra_package_data = self._prepare_nightly()
-      package_data.update(extra_package_data)
 
     # Return package.
     namespace_packages = find_namespace_packages(where=self.build_dir)
@@ -172,37 +166,3 @@ class PackageGen:
         'packages': namespace_packages,
         'package_data': package_data,
     }
-
-  def _prepare_nightly(self):
-    """Prepares nightly and gets extra setup config.
-
-    For nightly, tflite-model-maker will pack `tensorflowjs` python source code.
-
-    TODO(tianlin): tensorflowjs pip requires stable tensorflow instead of
-    nightly,
-    which conflicts with tflite-model-maker-nightly. Thus, we include its python
-    code directly.
-
-    Returns:
-      dict: extra package_data.
-    """
-    tfjs_git = 'https://github.com/tensorflow/tfjs'
-    tfjs_path = pathlib.Path(__file__).with_name('tfjs')
-
-    # Remove existing tfjs and git clone.
-    if tfjs_path.exists():
-      shutil.rmtree(str(tfjs_path), ignore_errors=True)
-    cmd = ['git', 'clone', tfjs_git, str(tfjs_path)]
-    print('Running git clone: {}'.format(cmd))
-    subprocess.check_call(cmd)
-
-    # Copy `tensorflowjs` python code, and release with tflite-model-maker
-    src_folder = str(
-        tfjs_path.joinpath('tfjs-converter', 'python', 'tensorflowjs'))
-    dst_folder = str(self.build_dir.joinpath('tensorflowjs'))
-    shutil.copytree(
-        src_folder,
-        dst_folder,
-        ignore=lambda _, names: set(s for s in names if s.endswith('_test.py')))
-
-    return {'tensorflowjs/op_list': ['*.json']}
