@@ -50,7 +50,7 @@ def segmentation_map_to_image(
   # Note: We use the inverse map to avoid running the heavy loop in Python and
   # pass it over to Numpy's C++ implementation to improve performance.
   found_colors = [
-      item.color for item in found_label_indices
+      item.color for item in found_colored_labels
   ]
   output_shape = [segmentation.width, segmentation.height, 3]
   seg_map_img = np.array(found_colors)[inverse_map].reshape(
