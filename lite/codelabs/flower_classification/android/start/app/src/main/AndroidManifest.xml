@@ -18,7 +18,8 @@
         <activity
             android:name=".ClassifierActivity"
             android:label="@string/tfe_ic_app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
