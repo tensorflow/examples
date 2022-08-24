@@ -1,5 +1,10 @@
 # Release 0.4
 
+## 0.4.2
+
+*   Fix the version of tflite-support and flatbuffers to be consistent with
+    other packages.
+
 ## 0.4.1
 
 *   Fix the version of scann to 1.2.6 to solve the import failure.
