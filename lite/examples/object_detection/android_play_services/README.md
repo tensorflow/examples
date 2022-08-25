@@ -17,7 +17,7 @@ The model files are downloaded via Gradle scripts when you build and run the
 app. You don't need to do any steps to download TFLite models into the project
 explicitly.
 
-**Terms:** By accessing or using TensorFlow Lite in Google Play services,
+**Terms:** By accessing or using TensorFlow Lite in Google Play services APIs,
 you agree to the [Terms of Service](https://www.tensorflow.org/lite/android/play_services#tos).
 Please read and understand all applicable terms and policies before accessing
 the APIs.
@@ -47,7 +47,8 @@ This application should be run on a physical Android device.
     Android Studio project.
 
 *   From the Open File or Project window that appears, navigate to and select
-    the tensorflow-lite/examples/object_detection/android directory. Click OK.
+    the tensorflow-lite/examples/object_detection/android_play_services
+    directory. Click OK.
 
 *   If it asks you to do a Gradle Sync, click OK.
 
