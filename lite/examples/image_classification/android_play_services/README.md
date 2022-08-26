@@ -11,6 +11,13 @@ It performs the following operations:
 3.  Performs inference on the transformed frames
 4.  Reports the image recognized on the screen
 
+**Terms:**
+By accessing or using TensorFlow Lite in Google Play services, you agree
+to the
+[Terms of Service](https://www.tensorflow.org/lite/android/play_services#tos).
+Please read and understand all applicable terms and policies before accessing
+the APIs.
+
 ### Model
 
 This app uses EfficientNet-Lite model for demonstration. For details of the

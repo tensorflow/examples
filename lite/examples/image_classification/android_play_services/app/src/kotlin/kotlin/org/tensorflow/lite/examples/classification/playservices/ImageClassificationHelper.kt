@@ -26,6 +26,7 @@ import kotlin.math.min
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.InterpreterApi
 import org.tensorflow.lite.InterpreterApi.Options.TfLiteRuntime
+import org.tensorflow.lite.gpu.GpuDelegateFactory
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.TensorProcessor
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -38,7 +39,7 @@ import org.tensorflow.lite.support.label.TensorLabel
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 
 /** Helper class used to communicate between our app and the TF image classification model */
-class ImageClassificationHelper(context: Context, private val maxResult: Int) : Closeable {
+class ImageClassificationHelper(context: Context, private val maxResult: Int, private val useGpu: Boolean) : Closeable {
 
   /** Abstraction object that wraps a classification output in an easy to parse way */
   data class Recognition(val id: String, val title: String, val confidence: Float)
@@ -54,8 +55,15 @@ class ImageClassificationHelper(context: Context, private val maxResult: Int) : 
 
   // Use TFLite in Play Services runtime by setting the option to FROM_SYSTEM_ONLY
   private val interpreterInitializer = lazy {
-    val interpreterOption = InterpreterApi.Options().setRuntime(TfLiteRuntime.FROM_SYSTEM_ONLY)
+    val interpreterOption = InterpreterApi.Options()
+      .setRuntime(TfLiteRuntime.FROM_SYSTEM_ONLY)
+
+    if (useGpu) {
+      interpreterOption.addDelegateFactory(GpuDelegateFactory())
+    }
+
     InterpreterApi.create(FileUtil.loadMappedFile(context, MODEL_PATH), interpreterOption)
+
   }
   // Only use interpreter after initialization finished in CameraActivity
   private val interpreter: InterpreterApi by interpreterInitializer

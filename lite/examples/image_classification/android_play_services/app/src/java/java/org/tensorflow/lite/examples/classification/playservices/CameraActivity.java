@@ -39,6 +39,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.gms.tflite.client.TfLiteInitializationOptions;
 import com.google.android.gms.tflite.java.TfLite;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
@@ -47,7 +48,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.tensorflow.lite.examples.classification.playservices.ImageClassificationHelper.Recognition;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.tensorflow.lite.examples.classification.playservices.ImageClassificationHelper
+        .Recognition;
 import org.tensorflow.lite.examples.classification.playservices.databinding.ActivityCameraBinding;
 
 /** Activity that displays the camera and performs object detection on the incoming frames. */
@@ -76,29 +79,57 @@ public final class CameraActivity extends AppCompatActivity {
     activityCameraBinding = ActivityCameraBinding.inflate(this.getLayoutInflater());
     setContentView(activityCameraBinding.getRoot());
 
+    AtomicBoolean isGpuInitialized = new AtomicBoolean(false);
+
     if (initializeTask == null) {
-      // Initialize TFLite asynchronously
-      initializeTask = TfLite.initialize(this);
-    }
-    initializeTask
-        .onSuccessTask(
-            unused -> {
-              Log.d(TAG, "TFLite in Play Services initialized successfully.");
-              // Create ImageClassificationHelper AFTER TfLite.initialize() succeeded. This
-              // guarantees that all the interactions with TFLite happens after initialization.
-              classifier = ImageClassificationHelper.create(this, MAX_REPORT);
-              return Tasks.forResult(null);
-            })
-        .addOnSuccessListener(
-            unused -> Log.d(TAG, "ImageClassificationHelper created successfully."))
-        .addOnFailureListener(e -> Log.e(TAG, "Failed to initialize the classifier.", e));
+          // Initialize TFLite asynchronously
+          initializeTask = TfLite.initialize(
+                          this,
+                          TfLiteInitializationOptions
+                                  .builder()
+                                  .setEnableGpuDelegateSupport(true)
+                                  .build())
+                  .continueWithTask(task -> {
+                      if (task.isSuccessful()) {
+                          isGpuInitialized.set(true);
+                          return Tasks.forResult(null);
+                      } else {
+                          // Fallback to initialize interpreter without GPU
+                          isGpuInitialized.set(false);
+                          return TfLite.initialize(CameraActivity.this);
+                      }
+                  })
+                  .addOnSuccessListener(unused -> {
+                      startInitialization(isGpuInitialized.get());
+                  })
+                  .addOnFailureListener(err -> {
+                      Log.e(TAG, "Failed to initialize the classifier.", err);
+                  });
+      }
 
     // Request for permission
     requestPermissionLauncher = requestPermission();
 
     // Set up camera
     activityCameraBinding.cameraCaptureButton.setOnClickListener(setUpCameraCaptureButton());
+
   }
+
+  private void startInitialization(boolean isGpuInitialized) {
+    Log.d(TAG, "TFLite in Play Services initialized successfully.");
+    // Create ImageClassificationHelper AFTER TfLite.initialize() succeeded. This
+    // guarantees that all the interactions with TFLite happens after initialization.
+    try {
+      classifier = ImageClassificationHelper.create(
+              CameraActivity.this,
+              MAX_REPORT,
+              isGpuInitialized
+      );
+    } catch (Exception e) {
+      Log.d(TAG, "ImageClassificationHelper initialization error");
+    }
+  }
+
 
   @Override
   protected void onDestroy() {
@@ -135,50 +166,68 @@ public final class CameraActivity extends AppCompatActivity {
   @SuppressLint("UnsafeExperimentalUsageError")
   private void bindCameraUseCases() {
     activityCameraBinding.viewFinder.post(
-        () -> {
-          ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
-              ProcessCameraProvider.getInstance(this);
-          cameraProviderFuture.addListener(
-              () -> {
-                // Camera provider is now guaranteed to be available
-                ProcessCameraProvider cameraProvider;
-                try {
-                  cameraProvider = cameraProviderFuture.get();
-                } catch (ExecutionException | InterruptedException e) {
-                  Log.e(TAG, "Failed to get Camera.", e);
-                  return;
-                }
+            () -> {
+              ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
+                      ProcessCameraProvider.getInstance(this);
+              cameraProviderFuture.addListener(
+                      () -> {
+                        // Camera provider is now guaranteed to be available
+                        ProcessCameraProvider cameraProvider;
+                        try {
+                          cameraProvider = cameraProviderFuture.get();
+                        } catch (ExecutionException | InterruptedException e) {
+                          Log.e(TAG, "Failed to get Camera.", e);
+                          return;
+                        }
 
-                // Set up the view finder use case to display camera preview
-                Preview preview =
-                    new Preview.Builder()
-                        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                        .setTargetRotation(
-                            activityCameraBinding.viewFinder.getDisplay().getRotation())
-                        .build();
+                        // Set up the view finder use case to display camera preview
+                        Preview preview =
+                                new Preview.Builder()
+                                        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                                        .setTargetRotation(
+                                                activityCameraBinding
+                                                        .viewFinder
+                                                        .getDisplay()
+                                                        .getRotation())
+                                        .build();
 
-                // Set up the image analysis use case which will process frames in real time
-                ImageAnalysis imageAnalysis =
-                    new ImageAnalysis.Builder()
-                        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                        .setTargetRotation(
-                            activityCameraBinding.viewFinder.getDisplay().getRotation())
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                        .build();
+                        // Set up the image analysis use case which will process frames in real time
+                        ImageAnalysis imageAnalysis =
+                                new ImageAnalysis.Builder()
+                                        .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+                                        .setTargetRotation(
+                                                activityCameraBinding.viewFinder
+                                                        .getDisplay()
+                                                        .getRotation()
+                                        )
+                                        .setBackpressureStrategy(
+                                                ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+                                        )
+                                        .setOutputImageFormat(
+                                                ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888
+                                        )
+                                        .build();
 
-                imageAnalysis.setAnalyzer(executor, new ClassificationAnalyzer());
+                        imageAnalysis.setAnalyzer(executor, new ClassificationAnalyzer());
 
-                // Apply declared configs to CameraX using the same lifecycle owner
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(
-                    this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageAnalysis);
+                        // Apply declared configs to CameraX using the same lifecycle owner
+                        cameraProvider.unbindAll();
+                        cameraProvider.bindToLifecycle(
+                                this,
+                                CameraSelector.DEFAULT_BACK_CAMERA,
+                                preview,
+                                imageAnalysis
+                        );
 
-                // Use the camera object to link our preview use case with the view
-                preview.setSurfaceProvider(activityCameraBinding.viewFinder.getSurfaceProvider());
-              },
-              ContextCompat.getMainExecutor(this));
-        });
+                        // Use the camera object to link our preview use case with the view
+                        preview.setSurfaceProvider(
+                                activityCameraBinding
+                                        .viewFinder
+                                        .getSurfaceProvider()
+                        );
+                      },
+                      ContextCompat.getMainExecutor(this));
+            });
   }
 
   /** Image Analyzer used for classifying image. */
@@ -193,7 +242,7 @@ public final class CameraActivity extends AppCompatActivity {
         // started running
         imageRotationDegrees = image.getImageInfo().getRotationDegrees();
         bitmapBuffer =
-            Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
+                Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
       }
 
       // Early exit: image analysis is in paused state, or TFLite initialization has not finished
@@ -227,28 +276,28 @@ public final class CameraActivity extends AppCompatActivity {
   /** Displays recognition results on screen. */
   private void reportRecognition(List<Recognition> recognitions) {
     activityCameraBinding.viewFinder.post(
-        () -> {
-          // Early exit: if recognition is empty
-          if (recognitions.isEmpty()) {
-            activityCameraBinding.textPrediction.setVisibility(View.GONE);
-            return;
-          }
+            () -> {
+              // Early exit: if recognition is empty
+              if (recognitions.isEmpty()) {
+                activityCameraBinding.textPrediction.setVisibility(View.GONE);
+                return;
+              }
 
-          // Update the text and UI
-          StringBuilder text = new StringBuilder();
-          for (Recognition recognition : recognitions) {
-            text.append(
-                String.format(
-                    Locale.getDefault(),
-                    "%.2f %s\n",
-                    recognition.getConfidence(),
-                    recognition.getTitle()));
-          }
-          activityCameraBinding.textPrediction.setText(text);
+              // Update the text and UI
+              StringBuilder text = new StringBuilder();
+              for (Recognition recognition : recognitions) {
+                text.append(
+                        String.format(
+                                Locale.getDefault(),
+                                "%.2f %s\n",
+                                recognition.getConfidence(),
+                                recognition.getTitle()));
+              }
+              activityCameraBinding.textPrediction.setText(text);
 
-          // Make sure all UI elements are visible
-          activityCameraBinding.textPrediction.setVisibility(View.VISIBLE);
-        });
+              // Make sure all UI elements are visible
+              activityCameraBinding.textPrediction.setVisibility(View.VISIBLE);
+            });
   }
 
   /** Returns the callback used when clicking the camera capture button. */
@@ -266,14 +315,14 @@ public final class CameraActivity extends AppCompatActivity {
         Matrix matrix = new Matrix();
         matrix.postRotate(imageRotationDegrees);
         Bitmap uprightImage =
-            Bitmap.createBitmap(
-                bitmapBuffer,
-                0,
-                0,
-                bitmapBuffer.getWidth(),
-                bitmapBuffer.getHeight(),
-                matrix,
-                true);
+                Bitmap.createBitmap(
+                        bitmapBuffer,
+                        0,
+                        0,
+                        bitmapBuffer.getWidth(),
+                        bitmapBuffer.getHeight(),
+                        matrix,
+                        true);
         activityCameraBinding.imagePredicted.setImageBitmap(uprightImage);
         activityCameraBinding.imagePredicted.setVisibility(View.VISIBLE);
       }
@@ -286,19 +335,19 @@ public final class CameraActivity extends AppCompatActivity {
   /** Registers request permission callback. */
   private ActivityResultLauncher<String> requestPermission() {
     return registerForActivityResult(
-        new RequestPermission(),
-        isGranted -> {
-          if (isGranted) {
-            bindCameraUseCases();
-          } else {
-            finish(); // If we don't have the required permissions, we can't run
-          }
-        });
+            new RequestPermission(),
+            isGranted -> {
+              if (isGranted) {
+                bindCameraUseCases();
+              } else {
+                finish(); // If we don't have the required permissions, we can't run
+              }
+            });
   }
 
   /** Convenience method used to check if all permissions required by this app are granted. */
   private boolean hasPermission(Context context) {
     return ContextCompat.checkSelfPermission(context, PERMISSION)
-        == PackageManager.PERMISSION_GRANTED;
+            == PackageManager.PERMISSION_GRANTED;
   }
 }

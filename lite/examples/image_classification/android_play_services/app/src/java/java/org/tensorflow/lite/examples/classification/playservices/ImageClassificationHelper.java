@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The TensorFlow Authors
+ * Copyright 2022 The TensorFlow Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.InterpreterApi;
 import org.tensorflow.lite.InterpreterApi.Options.TfLiteRuntime;
 import org.tensorflow.lite.Tensor;
+import org.tensorflow.lite.gpu.GpuDelegateFactory;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.common.TensorOperator;
 import org.tensorflow.lite.support.common.TensorProcessor;
@@ -59,12 +60,12 @@ class ImageClassificationHelper implements Closeable {
   private static final float IMAGE_MEAN = 127.0f;
   private static final float IMAGE_STD = 128.0f;
   private static final TensorOperator PREPROCESS_NORMALIZE_OP =
-      new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
+          new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
   private static final TensorOperator POSTPROCESS_NORMALIZE_OP =
-      new NormalizeOp(PROBABILITY_MEAN, PROBABILITY_STD);
+          new NormalizeOp(PROBABILITY_MEAN, PROBABILITY_STD);
   /** Processor to apply post processing of the output probability. */
   private static final TensorProcessor PROBABILITY_PROCESSOR =
-      new TensorProcessor.Builder().add(POSTPROCESS_NORMALIZE_OP).build();
+          new TensorProcessor.Builder().add(POSTPROCESS_NORMALIZE_OP).build();
 
   /** Abstraction object that wraps a classification output in an easy to parse way. */
   public static class Recognition {
@@ -90,27 +91,37 @@ class ImageClassificationHelper implements Closeable {
    *
    * @param maxResults the number of {@link Recognition} that will be returned when classifying
    */
-  public static ImageClassificationHelper create(Context context, int maxResults)
-      throws IOException {
+  public static ImageClassificationHelper create(
+          Context context,
+          int maxResults,
+          boolean isGpuInitialized
+  )
+          throws IOException {
     // Use TFLite in Play Services runtime by setting the option to FROM_SYSTEM_ONLY
-    InterpreterApi.Options options =
-        new InterpreterApi.Options().setRuntime(TfLiteRuntime.FROM_SYSTEM_ONLY);
+    InterpreterApi.Options options = new InterpreterApi
+            .Options()
+            .setRuntime(TfLiteRuntime.FROM_SYSTEM_ONLY);
+
+    if (isGpuInitialized) {
+      options.addDelegateFactory(new GpuDelegateFactory());
+    }
+
     InterpreterApi interpreter =
-        InterpreterApi.create(FileUtil.loadMappedFile(context, MODEL_PATH), options);
+            InterpreterApi.create(FileUtil.loadMappedFile(context, MODEL_PATH), options);
 
     int[] inputShape = interpreter.getInputTensor(/* inputIndex */ 0).shape();
     Size tfInputSize =
-        new Size(inputShape[2], inputShape[1]); // Order of axis is: {1, height, width, 3}
+            new Size(inputShape[2], inputShape[1]); // Order of axis is: {1, height, width, 3}
 
     Tensor outputTensor = interpreter.getOutputTensor(/* probabilityTensorIndex */ 0);
     TensorBuffer outputProbabilityBuffer =
-        TensorBuffer.createFixedSize(outputTensor.shape(), outputTensor.dataType());
+            TensorBuffer.createFixedSize(outputTensor.shape(), outputTensor.dataType());
 
     // Read labels from file
     List<String> labels = FileUtil.loadLabels(context, LABELS_PATH);
 
     return new ImageClassificationHelper(
-        maxResults, labels, interpreter, tfInputSize, outputProbabilityBuffer);
+            maxResults, labels, interpreter, tfInputSize, outputProbabilityBuffer);
   }
 
   // Return the top maxResults classification result
@@ -124,11 +135,11 @@ class ImageClassificationHelper implements Closeable {
   private TensorImage tfInputBuffer = new TensorImage(DataType.UINT8);
 
   private ImageClassificationHelper(
-      int maxResults,
-      List<String> labels,
-      InterpreterApi interpreter,
-      Size tfInputSize,
-      TensorBuffer outputProbabilityBuffer) {
+          int maxResults,
+          List<String> labels,
+          InterpreterApi interpreter,
+          Size tfInputSize,
+          TensorBuffer outputProbabilityBuffer) {
     this.maxResults = maxResults;
     this.labels = labels;
     this.interpreter = interpreter;
@@ -147,8 +158,8 @@ class ImageClassificationHelper implements Closeable {
 
     // Gets the map of label and probability
     Map<String, Float> labeledProbability =
-        new TensorLabel(labels, PROBABILITY_PROCESSOR.process(outputProbabilityBuffer))
-            .getMapWithFloatValue();
+            new TensorLabel(labels, PROBABILITY_PROCESSOR.process(outputProbabilityBuffer))
+                    .getMapWithFloatValue();
 
     return getTopKProbability(labeledProbability, maxResults);
   }
@@ -165,16 +176,16 @@ class ImageClassificationHelper implements Closeable {
     if (tfImageProcessor == null) {
       int cropSize = min(bitmapBuffer.getWidth(), bitmapBuffer.getHeight());
       tfImageProcessor =
-          new ImageProcessor.Builder()
-              .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-              .add(
-                  new ResizeOp(
-                      tfInputSize.getHeight(),
-                      tfInputSize.getWidth(),
-                      ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
-              .add(new Rot90Op(-imageRotationDegrees / 90))
-              .add(PREPROCESS_NORMALIZE_OP)
-              .build();
+              new ImageProcessor.Builder()
+                      .add(new ResizeWithCropOrPadOp(cropSize, cropSize))
+                      .add(
+                              new ResizeOp(
+                                      tfInputSize.getHeight(),
+                                      tfInputSize.getWidth(),
+                                      ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))
+                      .add(new Rot90Op(-imageRotationDegrees / 90))
+                      .add(PREPROCESS_NORMALIZE_OP)
+                      .build();
       Log.d(TAG, "tfImageProcessor initialized successfully. imageSize: " + cropSize);
     }
     tfInputBuffer.load(bitmapBuffer);
@@ -183,12 +194,14 @@ class ImageClassificationHelper implements Closeable {
 
   /** Gets the top {@code maxResults} results. */
   private static List<Recognition> getTopKProbability(
-      Map<String, Float> labelProb, int maxResults) {
+          Map<String, Float> labelProb, int maxResults) {
     // Sorts the recognition by confidence from HIGH to LOW
     PriorityQueue<Recognition> priorityQueue =
-        new PriorityQueue<>(
-            maxResults,
-            (Recognition a, Recognition b) -> Float.compare(b.getConfidence(), a.getConfidence()));
+            new PriorityQueue<>(
+                    maxResults,
+                    (Recognition a, Recognition b) -> Float
+                            .compare(b.getConfidence(), a.getConfidence())
+            );
 
     for (Entry<String, Float> entry : labelProb.entrySet()) {
       priorityQueue.add(new Recognition(entry.getKey(), entry.getValue()));

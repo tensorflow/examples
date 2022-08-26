@@ -35,6 +35,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.tflite.client.TfLiteInitializationOptions
 import com.google.android.gms.tflite.java.TfLite
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -58,9 +60,28 @@ class CameraActivity : AppCompatActivity() {
 
   private var pauseAnalysis = false
   private var imageRotationDegrees: Int = 0
+  private var useGpu = false;
 
   // Initialize TFLite once. Must be called before creating the classifier
-  private val initializeTask: Task<Void> by lazy { TfLite.initialize(this) }
+  private val initializeTask: Task<Void> by lazy {
+    TfLite.initialize(
+      this,
+      TfLiteInitializationOptions.builder()
+        .setEnableGpuDelegateSupport(true)
+        .build()
+    ).continueWithTask { task ->
+        if (task.isSuccessful) {
+          useGpu = true;
+          return@continueWithTask Tasks.forResult(null)
+        } else {
+          // Fallback to initialize interpreter without GPU
+          return@continueWithTask TfLite.initialize(this)
+        }
+      }
+      .addOnFailureListener {
+        Log.e(TAG, "TFLite in Play Services failed to initialize.", it)
+      }
+  }
   private var classifier: ImageClassificationHelper? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,9 +93,8 @@ class CameraActivity : AppCompatActivity() {
     initializeTask
       .addOnSuccessListener {
         Log.d(TAG, "TFLite in Play Services initialized successfully.")
-        classifier = ImageClassificationHelper(this, MAX_REPORT)
+        classifier = ImageClassificationHelper(this, MAX_REPORT, useGpu)
       }
-      .addOnFailureListener { e -> Log.e(TAG, "TFLite in Play Services failed to initialize.", e) }
 
     activityCameraBinding.cameraCaptureButton.setOnClickListener {
       // Disable all camera controls
