@@ -19,9 +19,9 @@ explicitly.
 
 This application should be run on a physical Android device.
 
-![App example showing UI controls. Highlights a cat, a book, and a couch.](screenshot1.png)
+![App example showing UI controls. Highlights a cat](https://storage.googleapis.com/download.tensorflow.org/tflite/examples/obj_detection_cat.gif)
 
-![App example without UI controls. Highlights a book, a cup, and a potted plant.](screenshot2.png)
+![App example showing UI controls. Highlights a cat, a book, and a couch.](screenshot1.png)
 
 
 ## Build the demo using Android Studio
