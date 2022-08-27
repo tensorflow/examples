@@ -57,7 +57,7 @@ def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
   base_options = core.BaseOptions(
       file_name=model, use_coral=enable_edgetpu, num_threads=num_threads)
   segmentation_options = processor.SegmentationOptions(
-      output_type=processor.SegmentationOptions.OutputType.CATEGORY_MASK)
+      output_type=processor.OutputType.CATEGORY_MASK)
   options = vision.ImageSegmenterOptions(
       base_options=base_options, segmentation_options=segmentation_options)
 
@@ -120,10 +120,9 @@ def run(model: str, display_mode: str, num_threads: int, enable_edgetpu: bool,
   cv2.destroyAllWindows()
 
 
-def visualize(
-    input_image: np.ndarray, segmentation_map_image: np.ndarray,
-    display_mode: str, fps: float,
-    colored_labels: List[processor.Segmentation.ColoredLabel]) -> np.ndarray:
+def visualize(input_image: np.ndarray, segmentation_map_image: np.ndarray,
+              display_mode: str, fps: float,
+              colored_labels: List[processor.ColoredLabel]) -> np.ndarray:
   """Visualize segmentation result on image.
 
   Args:
@@ -165,14 +164,14 @@ def visualize(
 
   # Show the label on right-side frame.
   for colored_label in colored_labels:
-    rect_color = (colored_label.r, colored_label.g, colored_label.b)
+    rect_color = colored_label.color
     start_point = (legend_x, legend_y)
     end_point = (legend_x + _LEGEND_RECT_SIZE, legend_y + _LEGEND_RECT_SIZE)
     cv2.rectangle(overlay, start_point, end_point, rect_color,
                   -_LEGEND_FONT_THICKNESS)
 
     label_location = legend_x + _LEGEND_RECT_SIZE + _LABEL_MARGIN, legend_y + _LABEL_MARGIN
-    cv2.putText(overlay, colored_label.class_name, label_location,
+    cv2.putText(overlay, colored_label.category_name, label_location,
                 cv2.FONT_HERSHEY_PLAIN, _LEGEND_FONT_SIZE, _LEGEND_TEXT_COLOR,
                 _LEGEND_FONT_THICKNESS)
     legend_y += (_LEGEND_RECT_SIZE + _LABEL_MARGIN)

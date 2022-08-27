@@ -21,7 +21,7 @@ from tflite_support.task import processor
 
 def segmentation_map_to_image(
     segmentation: processor.SegmentationResult
-) -> (np.ndarray, List[processor.Segmentation.ColoredLabel]):
+) -> (np.ndarray, List[processor.ColoredLabel]):
   """Convert the SegmentationResult into a RGB image.
 
   Args:
@@ -31,7 +31,7 @@ def segmentation_map_to_image(
     seg_map_img: The visualized segmentation result as an RGB image.
     found_colored_labels: The list of ColoredLabels found in the image.
   """
-  segmentation = segmentation.segmentation[0]
+  segmentation = segmentation.segmentations[0]
   # Get the list of unique labels from the model output.
   masks = np.frombuffer(segmentation.category_mask, dtype=np.uint8)
   found_label_indices, inverse_map, counts = np.unique(
@@ -49,10 +49,7 @@ def segmentation_map_to_image(
   # Convert segmentation map into RGB image of the same size as the input image.
   # Note: We use the inverse map to avoid running the heavy loop in Python and
   # pass it over to Numpy's C++ implementation to improve performance.
-  found_colors = [
-      (segmentation.colored_labels[idx].r, segmentation.colored_labels[idx].g,
-       segmentation.colored_labels[idx].b) for idx in found_label_indices
-  ]
+  found_colors = [item.color for item in found_colored_labels]
   output_shape = [segmentation.width, segmentation.height, 3]
   seg_map_img = np.array(found_colors)[inverse_map].reshape(
       output_shape).astype(np.uint8)
