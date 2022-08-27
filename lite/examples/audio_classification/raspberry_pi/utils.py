@@ -61,8 +61,10 @@ class Plotter(object):
 
     # Plot the results so that the most probable category comes at the top.
     classification = result.classifications[0]
-    label_list = [category.class_name for category in classification.classes]
-    score_list = [category.score for category in classification.classes]
+    label_list = [
+        category.category_name for category in classification.categories
+    ]
+    score_list = [category.score for category in classification.categories]
     self._axes.barh(label_list[::-1], score_list[::-1])
 
     # Wait for the UI event.
