@@ -20,5 +20,5 @@ import android.content.Context
 
 // Create the classifier with Java implementation.
 internal fun createClassifier(context: Context, maxResult: Int): ImageClassificationHelper {
-  return ImageClassificationHelper.create(context, maxResult)
+  return ImageClassificationHelper.create(context, maxResult, /*useGpu=*/ false)
 }
