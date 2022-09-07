@@ -19,8 +19,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.SystemClock
 import android.util.Log
-import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.tflite.client.TfLiteInitializationOptions
+import com.google.android.gms.tflite.gpu.support.TfLiteGpu
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.Rot90Op
@@ -48,17 +48,13 @@ class ObjectDetectorHelper(
 
     init {
 
-        val options = TfLiteInitializationOptions.builder()
-            .setEnableGpuDelegateSupport(true)
-            .build()
-
-        TfLiteVision.initialize(context, options).continueWith { task ->
-            if (task.isSuccessful) {
-                gpuSupported = true
-                Tasks.forResult(null)
-            } else {
-                TfLiteVision.initialize(context)
+        TfLiteGpu.isGpuDelegateAvailable(context).onSuccessTask { gpuAvailable: Boolean ->
+            val optionsBuilder =
+                TfLiteInitializationOptions.builder()
+            if (gpuAvailable) {
+                optionsBuilder.setEnableGpuDelegateSupport(true)
             }
+            TfLiteVision.initialize(context, optionsBuilder.build())
         }.addOnSuccessListener {
             objectDetectorListener.onInitialized()
         }.addOnFailureListener{
