@@ -784,7 +784,8 @@ class EfficientDetNetTrain(efficientdet_keras.EfficientDetNet):
         scaled_loss = total_loss
         optimizer = self.optimizer
     loss_vals['loss'] = total_loss
-    if isinstance(optimizer, tf.keras.optimizers.experimental.Optimizer):
+    if hasattr(tf.keras.optimizers, 'experimental') and isinstance(
+        optimizer, tf.keras.optimizers.experimental.Optimizer):
       loss_vals['learning_rate'] = optimizer.learning_rate
     else:
       loss_vals['learning_rate'] = optimizer.learning_rate(optimizer.iterations)
