@@ -14,7 +14,7 @@
 # ==============================================================================
 """Hparams for model architecture and trainer."""
 import ast
-import collections
+from collections import abc
 import copy
 from typing import Any, Dict, Text
 import six
@@ -145,7 +145,7 @@ class Config(object):
           """Recursively merge two nested dictionary."""
           for k in src.keys():
             if ((k in target and isinstance(target[k], dict) and
-                 isinstance(src[k], collections.Mapping))):
+                 isinstance(src[k], abc.Mapping))):
               merge_dict_recursive(target[k], src[k])
             else:
               target[k] = src[k]
