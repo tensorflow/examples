@@ -56,6 +56,7 @@ def play_game(predict_fn):
   action_result_log = []
   while True:
     probs = predict_fn(np.expand_dims(observation, 0))[0]
+    probs = np.array(probs)
     probs = [
         p * (index not in predicted_action_log) for index, p in enumerate(probs)
     ]

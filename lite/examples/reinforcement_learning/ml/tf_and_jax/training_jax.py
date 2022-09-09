@@ -17,18 +17,18 @@ import os
 from typing import Sequence
 from absl import app
 from flax import linen as nn
-from flax import optim
 from flax.metrics import tensorboard
 import jax
 from jax import random
 from jax.experimental import jax2tf
 import jax.numpy as jnp
-import numpy as np
+import optax
 import tensorflow as tf
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import common
+from tqdm import tqdm
 
 ITERATIONS = 500000
 LEARNING_RATE = 0.005
@@ -54,18 +54,8 @@ class PolicyGradient(nn.Module):
     return policy_probabilities
 
 
-@functools.partial(jax.jit, static_argnums=1)
-def get_initial_params(key: np.ndarray, module: PolicyGradient):
-  input_dims = (1, common.BOARD_SIZE, common.BOARD_SIZE)
-  init_shape = jnp.ones(input_dims, jnp.float32)
-  initial_params = module.init(key, init_shape)['params']
-  return initial_params
-
-
-def create_optimizer(model_params, learning_rate: float):
-  optimizer_def = optim.GradientDescent(learning_rate)
-  model_optimizer = optimizer_def.create(model_params)
-  return model_optimizer
+def create_optimizer(learning_rate: float):
+  return optax.sgd(learning_rate=learning_rate)
 
 
 def compute_loss(logits, labels, rewards):
@@ -75,20 +65,22 @@ def compute_loss(logits, labels, rewards):
   return loss
 
 
-@jax.jit
-def train_step(model_optimizer, game_board_log, predicted_action_log,
-               action_result_log):
+def train_step(model_optimizer, params, opt_state, game_board_log,
+               predicted_action_log, action_result_log):
   """Run one training step."""
 
   def loss_fn(model_params):
-    logits = PolicyGradient().apply({'params': model_params}, game_board_log)
+    logits = run_inference(model_params, game_board_log)
     loss = compute_loss(logits, predicted_action_log, action_result_log)
     return loss
 
-  grad_fn = jax.grad(loss_fn)
-  grads = grad_fn(model_optimizer.target)
-  model_optimizer = model_optimizer.apply_gradient(grads)
-  return model_optimizer
+  def compute_grads(params):
+    return jax.grad(loss_fn)(params)
+
+  grads = compute_grads(params)
+  updates, opt_state = model_optimizer.update(grads, opt_state)
+  params = optax.apply_updates(params, updates)
+  return model_optimizer, params, opt_state
 
 
 @jax.jit
@@ -106,26 +98,25 @@ def train_agent(iterations, modeldir, logdir):
   policygradient = PolicyGradient()
   params = policygradient.init(
       init_rng, jnp.ones([1, common.BOARD_SIZE, common.BOARD_SIZE]))['params']
-  optimizer = create_optimizer(model_params=params, learning_rate=LEARNING_RATE)
+  optimizer = create_optimizer(learning_rate=LEARNING_RATE)
+  opt_state = optimizer.init(params)
 
   # Main training loop
-  progress_bar = tf.keras.utils.Progbar(iterations)
-  for i in range(iterations):
-    predict_fn = functools.partial(run_inference, optimizer.target)
+  for i in tqdm(range(iterations)):
+    predict_fn = functools.partial(run_inference, params)
     board_log, action_log, result_log = common.play_game(predict_fn)
     rewards = common.compute_rewards(result_log)
     summary_writer.scalar('game_length', len(board_log), i)
-    optimizer = train_step(optimizer, board_log, action_log, rewards)
+    optimizer, params, opt_state = train_step(optimizer, params, opt_state,
+                                              board_log, action_log, rewards)
 
     summary_writer.flush()
-    progress_bar.add(1)
 
   summary_writer.close()
 
   # Convert to tflite model
   model = PolicyGradient()
-  jax_predict_fn = lambda input: model.apply({'params': optimizer.target}, input
-                                            )
+  jax_predict_fn = lambda input: model.apply({'params': params}, input)
 
   tf_predict = tf.function(
       jax2tf.convert(jax_predict_fn, enable_xla=False),
@@ -135,7 +126,8 @@ def train_agent(iterations, modeldir, logdir):
               dtype=tf.float32,
               name='input')
       ],
-      autograph=False)
+      autograph=False,
+  )
 
   converter = tf.lite.TFLiteConverter.from_concrete_functions(
       [tf_predict.get_concrete_function()], tf_predict)

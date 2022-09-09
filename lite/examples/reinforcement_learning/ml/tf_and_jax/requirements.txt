@@ -1,7 +1,8 @@
-flax==0.3.3
-jax==0.2.13
-jaxlib==0.1.66
-tensorboard==2.6.0
-tensorflow==2.7.2
-numpy==1.21.0
+flax==0.6.0
+jax==0.3.17
+jaxlib==0.3.15
+tensorboard==2.9.1
+tensorflow==2.9.1
+numpy==1.23.2
 gym==0.18.0
+tqdm==4.64.0

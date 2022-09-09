@@ -41,8 +41,8 @@ To train the agent, we have implemented different ways:
 *Note that the JAX implementation is highly experimental
 
 You can choose one of the 3 training paths to train the model by yourself. It's
-possible to make training faster or more effective by taking advantage
-of the board symmetry, better reward shaping, parallel runs and etc.
+possible to make training faster or more effective by taking advantage of the
+board symmetry, better reward shaping, parallel runs and etc.
 
 ## Requirements
 
@@ -114,8 +114,10 @@ as training progresses.
 
 ![TRAINING_PROGRESS](tf_and_jax/tf_training.png)
 
-After training, you will get a `planestrike_tf.tflite` file, which you can then
-integrate into the Android app we provide in the `android` folder.
+After training, you will get a `planestrike.tflite` file, which you can then
+integrate into the Android app we provide in the `android` folder (rename it to
+`planestrike_tf.tflite` and replace the existing one in the `asset` folder of
+the Android project).
 
 ## References
 

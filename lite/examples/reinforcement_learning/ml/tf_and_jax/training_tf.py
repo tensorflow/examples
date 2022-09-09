@@ -45,7 +45,7 @@ def train_agent(iterations, modeldir, logdir):
   summary_writer = tf.summary.create_file_writer(logdir)
 
   def predict_fn(board):
-    return model.predict(board)
+    return model.predict(board, verbose=0)
 
   # Main training loop
   progress_bar = tf.keras.utils.Progbar(iterations)
