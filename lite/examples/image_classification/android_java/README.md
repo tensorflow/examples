@@ -22,9 +22,9 @@ This application should be run on a physical Android device.
 
 ![App example without UI controls. Result is espresso.](screenshot2.jpg?raw=true "Screenshot without controls")
 
-This sample demonstrates how to use TensorFlow Lite with Kotlin. If
-you would like to see an example using Java, please go to the
-[android_java sample directory](../android_java).
+This sample demonstrates how to use TensorFlow Lite with Java. If
+you would like to see an example using Kotlin, please go to the
+[android sample directory](../android).
 
 
 ## Build the demo using Android Studio
