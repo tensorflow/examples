@@ -100,7 +100,7 @@ dependencies {
     implementation "androidx.camera:camera-view:1.0.0-alpha32"
 
     // Tensorflow Lite in Play Services dependencies
-    def tflite_version = "16.0.0-beta03"
+    def tflite_version = "16.0.0"
     implementation "com.google.android.gms:play-services-tflite-java:${tflite_version}"
     implementation "com.google.android.gms:play-services-tflite-support:${tflite_version}"
     implementation "com.google.android.gms:play-services-tflite-gpu:${tflite_version}"
