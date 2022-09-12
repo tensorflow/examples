@@ -87,9 +87,12 @@ def create_optimizer(init_lr, num_decay_steps, num_warmup_steps):
         initial_learning_rate=init_lr,
         decay_schedule_fn=learning_rate_fn,
         warmup_steps=num_warmup_steps)
-  optimizer = tf.keras.optimizers.RMSprop(
-      learning_rate=learning_rate_fn, rho=0.9, momentum=0.9, epsilon=0.001)
-
+  if hasattr(tf.keras.optimizers, "legacy"):
+    optimizer = tf.keras.optimizers.legacy.RMSprop(
+        learning_rate=learning_rate_fn, rho=0.9, momentum=0.9, epsilon=0.001)
+  else:
+    optimizer = tf.keras.optimizers.RMSprop(
+        learning_rate=learning_rate_fn, rho=0.9, momentum=0.9, epsilon=0.001)
   return optimizer
 
 
@@ -131,11 +134,13 @@ def hub_train_model(model, hparams, train_ds, validation_ds, steps_per_epoch):
   """
   loss = tf.keras.losses.CategoricalCrossentropy(
       label_smoothing=hparams.label_smoothing)
-  model.compile(
-      optimizer=tf.keras.optimizers.SGD(
-          learning_rate=hparams.learning_rate, momentum=hparams.momentum),
-      loss=loss,
-      metrics=["accuracy"])
+  if hasattr(tf.keras.optimizers, "legacy"):
+    optimizer = tf.keras.optimizers.legacy.SGD(
+        learning_rate=hparams.learning_rate, momentum=hparams.momentum)
+  else:
+    optimizer = tf.keras.optimizers.SGD(
+        learning_rate=hparams.learning_rate, momentum=hparams.momentum)
+  model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
 
   return model.fit(
       train_ds,
