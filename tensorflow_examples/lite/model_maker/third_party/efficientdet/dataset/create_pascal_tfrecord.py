@@ -185,7 +185,11 @@ def dict_to_tf_example(data,
         truncated.append(0)
       else:
         truncated.append(int(truncated_raw))
-      poses.append(obj['pose'].encode('utf8'))
+      raw_pose = obj.get('pose')
+      if raw_pose is None:
+        poses.append(b'')
+      else:
+        poses.append(raw_pose.encode('utf8'))
 
       if ann_json_dict:
         abs_xmin = round(xmin)
