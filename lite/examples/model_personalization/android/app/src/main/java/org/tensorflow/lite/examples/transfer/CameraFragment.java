@@ -190,7 +190,13 @@ public class CameraFragment extends Fragment {
           // We don't perform inference when adding samples, since we should be in capture mode
           // at the time, so the inference results are not actually displayed.
           inferenceBenchmark.startStage(imageId, "predict");
-          Prediction[] predictions = tlModel.predict(rgbImage);
+          Prediction[] predictions = null;
+          try {
+            predictions = tlModel.predict(rgbImage, modelImageSize, modelImageSize);
+          }
+          catch (NullPointerException e){
+            return;
+          }
           if (predictions == null) {
             return;
           }
