@@ -1,5 +1,5 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
-load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+load("//tools/build_defs/swift:swift_library.bzl", "swift_library")
 
 package(default_visibility = ["//visibility:private"])
 
