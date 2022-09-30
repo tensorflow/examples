@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ~ Copyright 2022 The TensorFlow Authors. All Rights Reserved.
+    ~
+    ~ Licensed under the Apache License, Version 2.0 (the "License");
+    ~ you may not use this file except in compliance with the License.
+    ~ You may obtain a copy of the License at
+    ~
+    ~       http://www.apache.org/licenses/LICENSE-2.0
+    ~
+    ~ Unless required by applicable law or agreed to in writing, software
+    ~ distributed under the License is distributed on an "AS IS" BASIS,
+    ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    ~ See the License for the specific language governing permissions and
+    ~ limitations under the License.
+-->
+<resources>
+    <string name="app_name">TFLite Model Personalization Demo App</string>
+    <string name="control_dialog_thread_button_minus">Decrease the number of threads used</string>
+    <string name="control_dialog_thread_button_plus">Increase the number of threads used</string>
+    <string name="label_inference_time">Inference Time</string>
+    <string name="label_threads">Number of Threads</string>
+    <string name="helper_dialog_title">How to use the app</string>
+    <string name="helper_dialog_content">
+        1. There are 4 classes in the app represented by the 4 numbers
+        (1..4)\n\n
+        2. Each number can be associated with a category of an object(e.g.
+        car, fruit, etc…)\n\n
+        3. Take at least 1 image to enable training. For the intended usage,
+        please take at least 100 images per category before training.\n\n
+        4. Use the number button while pointing the camera at an object to
+        collect the image.\n\n
+        If you click the number button once, it will collect a sample of the
+        object and save it. If you long-press the shape button, it will
+        continuously collect samples until you release it.\n\n
+        5. Press the train button to start training. Once the loss becomes
+        small enough (e.g. \uFE641.0), press the pause button. If the loss
+        does not converge to a small number, then press the pause button, add
+        more images for each category, and press the resume button.\n\n
+        6. Switch to the inference mode and point the camera to some object.
+        Each class button will display the probability of which the object
+        falls into that category and highlight the most probable one.\n\n
+        If training has been done well, the correct category will be
+        highlighted. If the object does not fall into any of the four
+        categories trained, then the app will still try to highlight any one
+        of the closest categories with its best guess.\n\n
+        7. You can always switch back to the training mode and capture more
+        images.
+    </string>
+    <string name="tv_number_of_threads_default">2</string>
+    <string name="btn_setting_dialog_cancel">Cancel</string>
+    <string name="btn_setting_dialog_confirm">Confirm</string>
+    <string name="radio_btn_training_mode">Training</string>
+    <string name="radio_btn_inference_mode">Inference</string>
+    <string name="tv_class_one">1</string>
+    <string name="tv_class_two">2</string>
+    <string name="tv_class_three">3</string>
+    <string name="tv_class_four">4</string>
+    <string name="tv_start_training">Train</string>
+    <string name="tv_pause_training">Pause</string>
+    <string name="tv_resume_training">Resume</string>
+    <string name="tv_collect_sample">Collect sample</string>
+    <string name="tv_icon_helper">\?</string>
+</resources>
