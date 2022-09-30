@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Controller UI -->
+    <dimen name="controller_text_size">14sp</dimen>
+    <dimen name="controller_padding">16dp</dimen>
+    <dimen name="controller_default_row_margin">10dp</dimen>
+    <dimen name="controller_control_btn_size">48dp</dimen>
+    <dimen name="controller_control_text_side_margin">10dp</dimen>
+    <dimen name="controller_spinner_delegate_min_width">160dp</dimen>
+    <dimen name="fr_camera_btn_take_picture_margin">16dp</dimen>
+    <dimen name="item_style_width">76dp</dimen>
+    <integer name="controller_control_text_min_ems">3</integer>
+</resources>

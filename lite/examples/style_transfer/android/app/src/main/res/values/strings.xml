@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">TFLite Style Transfer Demo App</string>
+
+    <string name="alt_bottom_sheet_thread_button_minus">Decrease the number of threads used</string>
+    <string name="alt_bottom_sheet_thread_button_plus">Increase the number of threads used</string>
+    <string name="label_inference_time">Inference Time</string>
+    <string name="label_fps">Frames per Second</string>
+    <string name="label_threads">Number of Threads</string>
+    <string name="label_delegate">Delegate</string>
+    <string name="label_models">ML Model</string>
+    <string name="default_threshold">0.50</string>
+    <string name="default_inference_time">0ms</string>
+    <string name="default_max_results">3</string>
+    <string name="fr_camera_btn_take_picture">Take Picture</string>
+    <string name="btn_transfer">Run</string>
+
+    <string-array name="delegate_spinner_titles">
+        <item>CPU</item>
+        <item>GPU</item>
+        <item>NNAPI</item>
+    </string-array>
+
+    <string-array name="models_spinner_titles">
+        <item>INT8 Quantized</item>
+        <item>F16 Quantized</item>
+    </string-array>
+</resources>
