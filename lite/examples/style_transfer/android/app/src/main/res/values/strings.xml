@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name" translatable="false">TFL Style Transfer</string>
-    <string name="gpu" translatable="false">GPU</string>
-    <string name="re_run_model" translatable="false">Re-run model</string>
-    <string name="choose_a_style" translatable="false">Choose a Style</string>
-</resources>

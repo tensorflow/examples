@@ -1,2 +1,0 @@
-rootProject.name = 'TFLite Style Transfer Demo App'
-include ':app'
