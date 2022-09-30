@@ -1,2 +1,0 @@
-rootProject.name = 'TFLite Model Personalization Demo App'
-include ':app', ':transfer_api'
