@@ -43,7 +43,7 @@ Then use our script to install a couple Python packages, and download the TFLite
 model:
 
 ```
-cd lite/examples/sound_classification/raspberry_pi
+cd lite/examples/audio_classification/raspberry_pi
 
 # Run this script to install the required dependencies and download the TFLite models.
 sh setup.sh

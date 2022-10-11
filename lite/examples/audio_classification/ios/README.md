@@ -46,7 +46,7 @@ raise a exception while initializing TensorFlow Lite runtime.
     https://github.com/tensorflow/examples.git`
 
 2.  Install the pod to generate the workspace file: `cd
-    examples/lite/examples/sound_classification/ios && pod install`
+    examples/lite/examples/audio_classification/ios && pod install`
 
 Note: If you have installed this pod before and that command doesn't work, try
 `pod update`.
