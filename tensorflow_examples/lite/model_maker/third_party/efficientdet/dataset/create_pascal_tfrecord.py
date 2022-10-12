@@ -192,10 +192,10 @@ def dict_to_tf_example(data,
         poses.append(raw_pose.encode('utf8'))
 
       if ann_json_dict:
-        abs_xmin = round(xmin)
-        abs_ymin = round(ymin)
-        abs_xmax = round(xmax)
-        abs_ymax = round(ymax)
+        abs_xmin = int(round(xmin))
+        abs_ymin = int(round(ymin))
+        abs_xmax = int(round(xmax))
+        abs_ymax = int(round(ymax))
         abs_width = abs_xmax - abs_xmin
         abs_height = abs_ymax - abs_ymin
         ann = {
