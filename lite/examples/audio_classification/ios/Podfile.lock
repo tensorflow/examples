@@ -1,0 +1,16 @@
+PODS:
+  - TensorFlowLiteTaskAudio (0.0.1-nightly.20220817)
+
+DEPENDENCIES:
+  - TensorFlowLiteTaskAudio (~> 0.0.1-nightly)
+
+SPEC REPOS:
+  trunk:
+    - TensorFlowLiteTaskAudio
+
+SPEC CHECKSUMS:
+  TensorFlowLiteTaskAudio: 010c83b84d0372c1ee462e444b8c607a4d6a9792
+
+PODFILE CHECKSUM: 92c4e31e5749883e935f57fc3f120305e17e9421
+
+COCOAPODS: 1.11.3
