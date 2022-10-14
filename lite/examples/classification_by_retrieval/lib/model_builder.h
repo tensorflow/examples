@@ -43,7 +43,7 @@ class ModelBuilder {
       std::unique_ptr<::tflite::task::vision::ImageEmbedder> image_embedder,
       std::unique_ptr<::tflite::FlatBufferModel> model,
       std::unique_ptr<TfLiteCbRBuilder> tflite_cbr_builder =
-          absl::make_unique<TfLiteCbRBuilder>());
+          std::make_unique<TfLiteCbRBuilder>());
 
   // Initializes the ModelBuilder from the provided ImageEmbedderOptions.
   static tflite::support::StatusOr<std::unique_ptr<ModelBuilder>>

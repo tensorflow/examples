@@ -1,5 +1,7 @@
 #include "lib/model_builder.h"
 
+#include <memory>
+
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
@@ -61,8 +63,8 @@ ModelBuilder::CreateFromImageEmbedderOptions(
     return absl::InvalidArgumentError("Failed to build model from file: " +
                                       model_file);
   }
-  return absl::make_unique<ModelBuilder>(std::move(image_embedder),
-                                         std::move(model));
+  return std::make_unique<ModelBuilder>(std::move(image_embedder),
+                                        std::move(model));
 }
 
 void ModelBuilder::SetMetadata(
