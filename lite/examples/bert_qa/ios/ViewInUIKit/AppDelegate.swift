@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import UIKit
+import TensorFlowLiteTaskText
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -23,11 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    // Set default value of the application options.
-    UserDefaults.standard.register(defaults: [
-      InterpreterOptions.threadCount.id: InterpreterOptions.threadCount.defaultValue,
-    ])
-
+    // Override point for customization after application launch.
     return true
   }
 }

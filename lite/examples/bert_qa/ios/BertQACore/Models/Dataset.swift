@@ -16,30 +16,30 @@ import UIKit
 
 /// Data set to run the TensorFlow Lite model.
 struct Dataset: Decodable {
-  let title: String
-  let content: String
-  let questions: [String]
-
-  /// Wrapper to decode json file into `Decodable` struct.
-  static func load<T: Decodable>(_ file: File = MobileBERT.dataset) -> T {
-    let data: Data
-
-    guard let fileUrl = Bundle.main.url(forResource: file.name, withExtension: file.ext)
-    else {
-      fatalError("Couldn't find \(file.description) in main bundle.")
+    let title: String
+    let content: String
+    let questions: [String]
+    
+    /// Wrapper to decode json file into `Decodable` struct.
+    static func load<T: Decodable>(_ file: File = MobileBERT.dataset) -> T {
+        let data: Data
+        
+        guard let fileUrl = Bundle.main.url(forResource: file.name, withExtension: file.ext)
+        else {
+            fatalError("Couldn't find \(file.description) in main bundle.")
+        }
+        
+        do {
+            data = try Data(contentsOf: fileUrl)
+        } catch {
+            fatalError("Couldn't load \(file.description) from main bundle:\n\(error)")
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            fatalError("Couldn't parse \(file.description) as \(T.self):\n\(error)")
+        }
     }
-
-    do {
-      data = try Data(contentsOf: fileUrl)
-    } catch {
-      fatalError("Couldn't load \(file.description) from main bundle:\n\(error)")
-    }
-
-    do {
-      let decoder = JSONDecoder()
-      return try decoder.decode(T.self, from: data)
-    } catch {
-      fatalError("Couldn't parse \(file.description) as \(T.self):\n\(error)")
-    }
-  }
 }
