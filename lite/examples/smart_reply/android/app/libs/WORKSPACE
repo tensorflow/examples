@@ -38,8 +38,8 @@ http_archive(
     ],
 )
 
-load("@org_tensorflow//tensorflow:version_check.bzl", "check_bazel_version_at_least")
-check_bazel_version_at_least("1.0.0")
+load("@bazel_skylib//lib:versions.bzl", "versions")
+versions.check("1.0.0")
 load("@org_tensorflow//tensorflow:workspace.bzl", "tf_repositories")
 tf_repositories(path_prefix="", tf_repo_name="org_tensorflow")
 
