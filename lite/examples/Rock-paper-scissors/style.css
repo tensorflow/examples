@@ -1,0 +1,124 @@
+button {
+  background-color: rgb(0, 123, 255);
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+}
+
+main {
+  position: relative;
+}
+
+#result {
+  position: absolute;
+  left: 50%; 
+  top: 50%;
+  margin-left: -150px; 
+  margin-top: -30px; 
+  z-index: 1; 
+  text-align: center; 
+  width: 300px; 
+  background-color: rgb(236, 199, 199); 
+  font-size: 60px; 
+  display: none;
+}
+
+#next_round {
+  position: absolute; 
+  left: 50%; 
+  top: 80%; 
+  margin-left: -250px; 
+  z-index: 1; 
+  text-align: center; 
+  width: 500px; 
+  background-color: rgb(236, 199, 199); 
+  font-size: 30px;
+  display: none;
+}
+.column {
+  display: flex;
+  width: 100%;
+  text-align: center;
+  margin: auto;
+}
+.input_video {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.result {
+  flex-wrap: nowrap;
+  flex-direction: column;
+  display: flex;
+  font-size:28px;
+  position: absolute;
+}
+
+ul {
+  list-style-type: none;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.showHand {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  margin-top: -30px;
+  text-align: center;
+  margin-left: -100px;
+  display: none;
+}
+.waiting {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  margin-top: -50px;
+  margin-left: -50px;
+  width: 100px;
+  height: 100px;
+  font-size: 40px;
+  color: rosybrown;
+  text-align: center;
+}
+
+.loader {
+  position: absolute;
+  z-index: 1;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 80px;
+  height: 80px;
+  left: 50%;
+  top: 50%;
+  margin-left: -55px;
+  margin-top: -40px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
