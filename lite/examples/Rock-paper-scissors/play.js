@@ -1,18 +1,17 @@
-function restart() {
-  document.getElementById("computer_video").play()
-  camera.start()
-}
-const videoElement = document.getElementsByClassName('input_video')[0];
-const canvasElement = document.getElementsByClassName('output_canvas')[0];
+// Element
+const videoElement = document.getElementsByClassName('input-video')[0];
+const canvasElement = document.getElementsByClassName('output-canvas')[0];
 const canvasCtx = canvasElement.getContext('2d');
-const vid = document.getElementById("computer_video");
+const vid = document.getElementById("computer-video");
 const restartButton = document.getElementById("restart")
-const showHandView = document.getElementById("showHand")
-const uResult = document.getElementById("you_result")
-const cResult = document.getElementById("computer_result")
-const videoContent = document.getElementById("video_content")
+const showHandView = document.getElementById("show-hand")
+const uResult = document.getElementById("you-result")
+const cResult = document.getElementById("computer-result")
+const videoContent = document.getElementById("video-content")
 const resultLb = document.getElementById("result")
-const nexRound = document.getElementById("next_round")
+const nexRound = document.getElementById("next-round")
+
+// Gane state
 const loadModel = 0
 const waitHands = 1
 const ready = 2
@@ -23,6 +22,8 @@ const finishRound = 5
 const showResult = 6
 
 var state = loadModel
+
+// Variable
 var comWins = 0
 var youWins = 0
 var isStart = false
@@ -37,6 +38,9 @@ var finish = false
 var isStop = false
 var comReult = 0
 
+var youResult = -1
+var lastImageGetResult = null
+
 async function loadTfliteModel() {
   tfliteModel = await tflite.loadTFLiteModel('src/hand_classifier.tflite');
   console.log("finish load model")
@@ -44,44 +48,6 @@ async function loadTfliteModel() {
 
 loadTfliteModel()
 
-function startRound() {
-  if (state == videoPlay) { return }
-  state = videoPlay
-  comReult = Math.floor(Math.random() * 3);
-  switch (comReult) {
-    case 0:
-      videoContent.innerHTML = '<video id="computer_video"><source src="src/paper1.mp4" type="video/mp4" /></video>'
-      break
-    case 1:
-    videoContent.innerHTML = '<video id="computer_video"><source src="src/rock1.mp4" type="video/mp4" /></video>'
-      break
-    case 2:
-    videoContent.innerHTML = '<video id="computer_video"><source src="src/scissor1.mp4" type="video/mp4" /></video>'
-      break
-  }
-  const vid = document.getElementById("computer_video")
-  vid.play()
-  vid.onplaying = function() {
-    setTimeout(function(){
-      state = checkResult
-      setTimeout(function() {
-        state = finishRound
-      }, 400)
-    }, 2600);
-  }
-}
-
-function restart_click() {
-  youWins = 0
-  comWins = 0
-  frameNoHands = 0
-  cResult.innerText = comWins.toString() + " wins"
-  uResult.innerText = youWins.toString() + " wins"
-  state = waitHands
-  showHandView.style.display = "initial"
-  restartButton.style.display = "none"
-
-}
 function startGame() {
   if (state == countDown) { return }
   state = countDown
@@ -103,8 +69,60 @@ function startGame() {
   }
   }, 500);
 }
-var youResult = -1
-var lastImageGetResult = null
+
+function startRound() {
+  if (state == videoPlay) { return }
+  state = videoPlay
+  comReult = Math.floor(Math.random() * 3);
+  switch (comReult) {
+    case 0:
+      videoContent.innerHTML = '<video id="computer-video"><source src="src/paper1.mp4" type="video/mp4" /></video>'
+      break
+    case 1:
+    videoContent.innerHTML = '<video id="computer-video"><source src="src/rock1.mp4" type="video/mp4" /></video>'
+      break
+    case 2:
+    videoContent.innerHTML = '<video id="computer-video"><source src="src/scissor1.mp4" type="video/mp4" /></video>'
+      break
+  }
+
+  const vid = document.getElementById("computer-video")
+  vid.play()
+  vid.onplaying = function() {
+    setTimeout(function(){
+      state = checkResult
+      setTimeout(function() {
+        state = finishRound
+      }, 400)
+    }, 2600);
+  }
+}
+
+function restart() {
+  youWins = 0
+  comWins = 0
+  frameNoHands = 0
+  cResult.innerText = comWins.toString() + " wins"
+  uResult.innerText = youWins.toString() + " wins"
+  state = waitHands
+  showHandView.style.display = "initial"
+  restartButton.style.display = "none"
+
+}
+
+const hands = new Hands({locateFile: (file) => {
+  console.log(file)
+  console.log(Date())
+  return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+}});
+hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5
+});
+hands.onResults(onResults);
+
 function onResults(results) {
   if (state == showResult) { return }
   if (state == finishRound) {
@@ -196,19 +214,6 @@ function onResults(results) {
   }
   canvasCtx.restore();
 }
-
-const hands = new Hands({locateFile: (file) => {
-  console.log(file)
-  console.log(Date())
-  return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-}});
-hands.setOptions({
-  maxNumHands: 1,
-  modelComplexity: 1,
-  minDetectionConfidence: 0.5,
-  minTrackingConfidence: 0.5
-});
-hands.onResults(onResults);
 
 const camera = new Camera(videoElement, {
   onFrame: async () => {
