@@ -27,7 +27,7 @@ main {
   display: none;
 }
 
-#next-round {
+#next_round {
   position: absolute; 
   left: 50%; 
   top: 80%; 
@@ -45,7 +45,7 @@ main {
   text-align: center;
   margin: auto;
 }
-.input-video {
+.input_video {
   display: none;
   position: absolute;
   top: 0;

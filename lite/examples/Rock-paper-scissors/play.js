@@ -1,15 +1,15 @@
 // Element
-const videoElement = document.getElementsByClassName('input-video')[0];
-const canvasElement = document.getElementsByClassName('output-canvas')[0];
+const videoElement = document.getElementsByClassName('input_video')[0];
+const canvasElement = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElement.getContext('2d');
-const vid = document.getElementById("computer-video");
+const vid = document.getElementById("computer_video");
 const restartButton = document.getElementById("restart")
-const showHandView = document.getElementById("show-hand")
-const uResult = document.getElementById("you-result")
-const cResult = document.getElementById("computer-result")
-const videoContent = document.getElementById("video-content")
+const showHandView = document.getElementById("show_hand")
+const uResult = document.getElementById("you_result")
+const cResult = document.getElementById("computer_result")
+const videoContent = document.getElementById("video_content")
 const resultLb = document.getElementById("result")
-const nexRound = document.getElementById("next-round")
+const nexRound = document.getElementById("next_round")
 
 // Gane state
 const loadModel = 0

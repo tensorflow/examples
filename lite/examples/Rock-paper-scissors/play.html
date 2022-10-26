@@ -13,28 +13,28 @@
   <body>
     <main id="main">
       <div id="result"> You Win</div>
-      <div id="next-round"> Ready for the next round? </div>
+      <div id="next_round"> Ready for the next round? </div>
       <div class="column" style="height: 100%; position: relative;">
         <div class="row" style="width: 50vw;">
           <ul class="result">  
             <li>Computer</li>
-            <li id="computer-result">0 wins</li>
+            <li id="computer_result">0 wins</li>
           </ul>
-          <div id="video-content" style="width: 100%;">
+          <div id="video_content" style="width: 100%;">
             <p style="font-size: 200px;">?</p>
           </div>
         </div>
         <div style="background-color: gray; width: 2px;"></div>
         <div class="row" style="padding: 0px; text-align: center; position: relative; width: 50vw;">
           <h1 id="waiting" class="waiting"></h1>
-          <h2 id="show-hand" class="showhand">Show your hand in front<br>of the camera to get<br>start.</h2>
+          <h2 id="show_hand" class="showhand">Show your hand in front<br>of the camera to get<br>start.</h2>
           <ul class="result" style="right: 10px; margin-right: 20px;">  
             <li>You</li>
-            <li id="you-result">0 wins</li>
+            <li id="you_result">0 wins</li>
           </ul>
           <div class="container" style="margin: 0px; width: 100%; height: 100%;">
-            <video class="input-video"></video>
-            <canvas class="output-canvas" style="display: block; height: 100%; width: 100%;"></canvas>
+            <video class="input_video"></video>
+            <canvas class="output_canvas" style="display: block; height: 100%; width: 100%;"></canvas>
           </div>
           <button id="restart" onclick=restart() style="margin-top: -80px; display: none;"> Restart </button>
         </div>
