@@ -12,9 +12,9 @@ if [[ -f "$PREDICT_INT8_MODEL" &&
   echo "INFO: TF Lite model already exists. Skip downloading and use the local model."
 else
   mkdir -p ${MODEL_FOLDER}
-  curl -o ${PREDICT_INT8_MODEL} -L https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite
-  curl -o ${TRANSFORM_INT8_MODEL} -L https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite
-  curl -o ${PREDICT_F16_MODEL} -L https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/prediction/1?lite-format=tflite
-  curl -o ${TRANSFORM_F16_MODEL} -L https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/transfer/1?lite-format=tflite
+  curl -o ${PREDICT_INT8_MODEL} -L https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/ios/magenta_arbitrary-image-stylization-v1-256_int8_prediction_1.tflite
+  curl -o ${TRANSFORM_INT8_MODEL} -L https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/ios/magenta_arbitrary-image-stylization-v1-256_int8_transfer_1.tflite
+  curl -o ${PREDICT_F16_MODEL} -L https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/ios/magenta_arbitrary-image-stylization-v1-256_fp16_prediction_1.tflite
+  curl -o ${TRANSFORM_F16_MODEL} -L https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/ios/magenta_arbitrary-image-stylization-v1-256_fp16_transfer_1.tflite
   echo "INFO: Downloaded TensorFlow Lite model to $MODEL_FOLDER ."
 fi

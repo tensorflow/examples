@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-task downloadTestModelFile(type: Download) {
-    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite'
-    dest project.ext.TEST_ASSETS_DIR + '/predict_int8.tflite'
-    overwrite false
-}
-
-task downloadTestModelFile0(type: Download) {
-    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite'
-    dest project.ext.TEST_ASSETS_DIR + '/transfer_int8.tflite'
-    overwrite false
-}
-
 task downloadModelFile(type: Download) {
-    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/prediction/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/android/magenta_arbitrary-image-stylization-v1-256_int8_prediction_1.tflite'
     dest project.ext.ASSET_DIR + '/predict_int8.tflite'
     overwrite false
 }
 
 task downloadModelFile0(type: Download) {
-    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/int8/transfer/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/android/magenta_arbitrary-image-stylization-v1-256_int8_transfer_1.tflite'
     dest project.ext.ASSET_DIR + '/transfer_int8.tflite'
     overwrite false
 }
 
 task downloadModelFile1(type: Download) {
-    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/prediction/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/android/magenta_arbitrary-image-stylization-v1-256_fp16_prediction_1.tflite'
     dest project.ext.ASSET_DIR + '/predict_float16.tflite'
     overwrite false
 }
 
 task downloadModelFile2(type: Download) {
-    src 'https://tfhub.dev/google/lite-model/magenta/arbitrary-image-stylization-v1-256/fp16/transfer/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/style_transfer/android/magenta_arbitrary-image-stylization-v1-256_fp16_transfer_1.tflite'
     dest project.ext.ASSET_DIR + '/transfer_float16.tflite'
     overwrite false
 }
 
-preBuild.dependsOn downloadTestModelFile, downloadTestModelFile0,
+task copyTestModel(type: Copy, dependsOn: downloadModelFile) {
+    from project.ext.ASSET_DIR + '/predict_int8.tflite'
+    into project.ext.TEST_ASSETS_DIR
+}
+
+task copyTestModel0(type: Copy, dependsOn: downloadModelFile) {
+    from project.ext.ASSET_DIR + '/transfer_int8.tflite'
+    into project.ext.TEST_ASSETS_DIR
+}
+
+preBuild.dependsOn
         downloadModelFile, downloadModelFile0, downloadModelFile1,
-        downloadModelFile2
+        downloadModelFile2, copyTestModel, copyTestModel0

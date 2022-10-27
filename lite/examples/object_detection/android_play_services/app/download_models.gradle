@@ -1,32 +1,31 @@
-task downloadTestFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/ssd_mobilenet_v1/1/metadata/2?lite-format=tflite'
-    dest project.ext.TEST_ASSETS_DIR + '/mobilenetv1.tflite'
-    overwrite false
-}
-
 task downloadModelFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/ssd_mobilenet_v1/1/metadata/2?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android_play_services/lite-model_ssd_mobilenet_v1_1_metadata_2.tflite'
     dest project.ext.ASSET_DIR + '/mobilenetv1.tflite'
     overwrite false
 }
 
 task downloadModelFile0(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/efficientdet/lite0/detection/metadata/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android_play_services/lite-model_efficientdet_lite0_detection_metadata_1.tflite'
     dest project.ext.ASSET_DIR + '/efficientdet-lite0.tflite'
     overwrite false
 }
 
 task downloadModelFile1(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/efficientdet/lite1/detection/metadata/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android_play_services/lite-model_efficientdet_lite1_detection_metadata_1.tflite'
     dest project.ext.ASSET_DIR + '/efficientdet-lite1.tflite'
     overwrite false
 }
 
 task downloadModelFile2(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/efficientdet/lite2/detection/metadata/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android_play_services/lite-model_efficientdet_lite2_detection_metadata_1.tflite'
     dest project.ext.ASSET_DIR + '/efficientdet-lite2.tflite'
     overwrite false
 }
 
+task copyTestModel(type: Copy, dependsOn: downloadModelFile) {
+    from project.ext.ASSET_DIR + '/mobilenetv1.tflite'
+    into project.ext.TEST_ASSETS_DIR
+}
+
 preBuild.dependsOn downloadModelFile, downloadModelFile0, downloadModelFile1, downloadModelFile2,
-        downloadTestFile
+        copyTestModel

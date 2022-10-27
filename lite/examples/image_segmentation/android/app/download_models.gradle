@@ -1,11 +1,11 @@
 task downloadTestFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/deeplabv3/1/metadata/2?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_segmentation/android/lite-model_deeplabv3_1_metadata_2.tflite'
     dest project.ext.TEST_ASSETS_DIR + '/deeplabv3.tflite'
     overwrite false
 }
 
 task downloadModelFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/deeplabv3/1/metadata/2?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_segmentation/android/lite-model_deeplabv3_1_metadata_2.tflite'
     dest project.ext.ASSET_DIR + '/deeplabv3.tflite'
     overwrite false
 }

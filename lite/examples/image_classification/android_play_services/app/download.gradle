@@ -1,4 +1,4 @@
-def modelEfficientNetFloatDownloadUrl = "https://tfhub.dev/tensorflow/lite-model/efficientnet/lite0/fp32/2?lite-format=tflite"
+def modelEfficientNetFloatDownloadUrl = "https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/android_play_services/efficientnet_lite0_fp32_2.tflite"
 def modelEfficientNetFloatFile = "efficientnet-lite0-fp32.tflite"
 
 task downloadEfficientNetFloat(type: Download) {

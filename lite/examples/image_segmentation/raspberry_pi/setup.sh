@@ -14,14 +14,14 @@ python3 -m pip install -r requirements.txt
 FILE=${DATA_DIR}/deeplabv3.tflite
 if [ ! -f "$FILE" ]; then
   curl \
-    -L 'https://tfhub.dev/tensorflow/lite-model/deeplabv3/1/metadata/2?lite-format=tflite' \
+    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_segmentation/rpi/lite-model_deeplabv3_1_metadata_2.tflite' \
     -o ${FILE}
 fi
 
 FILE=${DATA_DIR}/deeplabv3_edgetpu.tflite
 if [ ! -f "$FILE" ]; then
   curl \
-    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/edgetpu/deeplabv3_edgetpu.tflite' \
+    -L 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_segmentation/rpi/deeplabv3_edgetpu.tflite' \
     -o ${FILE}
 fi
 

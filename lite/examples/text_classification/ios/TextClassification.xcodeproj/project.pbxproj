@@ -200,7 +200,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Download mnist.tflite from the internet if it's not exist.\nTFLITE_FILE=${SRCROOT}/TextClassification/text_classification.tflite\nif test -f \"$TFLITE_FILE\"; then\n    echo \"INFO: text_classification.tflite existed. Skip downloading and use the local model.\"\nelse\n    curl -o ${TFLITE_FILE} https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification_v2.tflite\n    echo \"INFO: Downloaded text_classification.tflite to $TFLITE_FILE .\"\nfi\n\n";
+			shellScript = "# Download mnist.tflite from the internet if it's not exist.\nTFLITE_FILE=${SRCROOT}/TextClassification/text_classification.tflite\nif test -f \"$TFLITE_FILE\"; then\n    echo \"INFO: text_classification.tflite existed. Skip downloading and use the local model.\"\nelse\n    curl -o ${TFLITE_FILE} https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/text_classification/ios/text_classification_v2.tflite\n    echo \"INFO: Downloaded text_classification.tflite to $TFLITE_FILE .\"\nfi\n\n";
 		};
 		ACA70D4179FEEDAAF7830155 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

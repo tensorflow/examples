@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 task downloadModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/public_sample_apps/model_personalization/android/model.tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/model_personalization/android/model.tflite'
     dest project.ext.ASSET_DIR + '/model.tflite'
     overwrite false
 }

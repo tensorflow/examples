@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-task downloadTestFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224_quantized/1/metadata/1?lite-format=tflite'
-    dest project.ext.TEST_ASSETS_DIR + '/mobilenetv1.tflite'
-    overwrite false
-}
-
 task downloadModelFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224_quantized/1/metadata/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/android/mobilenet_v1_1.0_224_quantized_1_metadata_1.tflite'
     dest project.ext.ASSET_DIR + '/mobilenetv1.tflite'
     overwrite false
 }
 
 task downloadModelFile0(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/efficientnet/lite0/int8/2?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/android/efficientnet_lite0_int8_2.tflite'
     dest project.ext.ASSET_DIR + '/efficientnet-lite0.tflite'
     overwrite false
 }
 
 task downloadModelFile1(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/efficientnet/lite1/int8/2?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/android/efficientnet_lite1_int8_2.tflite'
     dest project.ext.ASSET_DIR + '/efficientnet-lite1.tflite'
     overwrite false
 }
 
 task downloadModelFile2(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/efficientnet/lite2/int8/2?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/android/efficientnet_lite2_int8_2.tflite'
     dest project.ext.ASSET_DIR + '/efficientnet-lite2.tflite'
     overwrite false
 }
 
+task copyTestModel(type: Copy, dependsOn: downloadModelFile) {
+    from project.ext.ASSET_DIR + '/mobilenetv1.tflite'
+    into project.ext.TEST_ASSETS_DIR
+}
+
 preBuild.dependsOn downloadModelFile, downloadModelFile0, downloadModelFile1, downloadModelFile2,
-        downloadTestFile
+        copyTestModel

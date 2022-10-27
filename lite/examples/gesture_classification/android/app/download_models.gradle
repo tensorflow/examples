@@ -15,13 +15,13 @@
  */
 
 task downloadTestFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/gesture_classification/android/model_metadata.tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/gesture_classification/android/model_metadata.tflite'
     dest project.ext.TEST_ASSETS_DIR + '/model_metadata.tflite'
     overwrite false
 }
 
 task downloadModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/gesture_classification/android/model_metadata.tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/gesture_classification/android/model_metadata.tflite'
     dest project.ext.ASSET_DIR + '/model_metadata.tflite'
     overwrite false
 }

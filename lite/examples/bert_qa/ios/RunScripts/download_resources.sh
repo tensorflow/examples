@@ -23,6 +23,8 @@ TFLITE_DIC="contents_from_squad_dict_format.json"
 
 TFLITE_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/bert_qa"
 
+TFLITE_MODEL_REMOTE_PATH="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/bert_qa/ios/models_tflite_bert_qa_mobilebert_float_20191023.tflite"
+
 RESOURCES_DIR="BertQACore/Resources"
 RESOURCES_ZIP_PATH="${RESOURCES_DIR}/${TFLITE_RESOURCES}"
 MODEL_PATH="${RESOURCES_DIR}/${TFLITE_MODEL}"
@@ -50,6 +52,12 @@ if [ "${tf_resource_exists}" = "false" ]; then
     curl --create-dirs -o "${RESOURCES_ZIP_PATH}" "${TFLITE_URL}/${TFLITE_RESOURCES}"
     unzip -n "${RESOURCES_ZIP_PATH}" -d "${RESOURCES_DIR}"
     rm "${RESOURCES_ZIP_PATH}"
+    
+    # Remove old tflite model.
+    rm "${MODEL_PATH}"
+    
+    # Download new tflite model.
+    curl --create-dirs -o "${MODEL_PATH}" "${TFLITE_MODEL_REMOTE_PATH}"
     echo "INFO: Downloaded TensorFlow Lite resources to ${RESOURCES_DIR}."
 fi
 

@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-task downloadTestFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/digit_classifier/mnist_metadata.tflite'
-    dest project.ext.TEST_ASSETS_DIR + '/mnist.tflite'
-    overwrite false
-}
-
 task downloadModelFile(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/digit_classifier/mnist_metadata.tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/digit_classifier/android/mnist_metadata.tflite'
     dest project.ext.ASSET_DIR + '/mnist.tflite'
     overwrite false
 }
 
-preBuild.dependsOn downloadModelFile, downloadTestFile
+task copyTestModel(type: Copy, dependsOn: downloadModelFile) {
+    from project.ext.ASSET_DIR + '/mnist.tflite'
+    into project.ext.TEST_ASSETS_DIR
+}
+
+preBuild.dependsOn downloadModelFile, copyTestModel

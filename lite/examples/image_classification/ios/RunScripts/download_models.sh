@@ -17,11 +17,11 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EFFICIENTNET_LITE0_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite0/uint8/2?lite-format=tflite"
-EFFICIENTNET_LITE1_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite1/uint8/2?lite-format=tflite"
-EFFICIENTNET_LITE2_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite2/uint8/2?lite-format=tflite"
-EFFICIENTNET_LITE3_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite3/uint8/2?lite-format=tflite"
-EFFICIENTNET_LITE4_URL="https://tfhub.dev/tensorflow/lite-model/efficientnet/lite4/uint8/2?lite-format=tflite"
+EFFICIENTNET_LITE0_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/ios/lite-model_efficientnet_lite0_uint8_2.tflite"
+EFFICIENTNET_LITE1_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/ios/lite-model_efficientnet_lite1_uint8_2.tflite"
+EFFICIENTNET_LITE2_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/ios/lite-model_efficientnet_lite2_uint8_2.tflite"
+EFFICIENTNET_LITE3_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/ios/lite-model_efficientnet_lite3_uint8_2.tflite"
+EFFICIENTNET_LITE4_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/image_classification/ios/lite-model_efficientnet_lite4_uint8_2.tflite"
 
 EFFICIENTNET_LITE0_NAME="efficientnet_lite0.tflite"
 EFFICIENTNET_LITE1_NAME="efficientnet_lite1.tflite"

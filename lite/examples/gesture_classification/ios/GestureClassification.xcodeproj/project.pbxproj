@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		AA0F2AF0219408430077CDCB /* model.tflite in Resources */ = {isa = PBXBuildFile; fileRef = AA0F2AEE219408430077CDCB /* model.tflite */; };
-		AA0F2AF1219408430077CDCB /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = AA0F2AEF219408430077CDCB /* labels.txt */; };
 		AA84742A2183A31D0097B995 /* InfoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8474292183A31D0097B995 /* InfoCell.swift */; };
 		AAA8CE4C21839F720049BD23 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA8CE4B21839F720049BD23 /* AppDelegate.swift */; };
 		AAA8CE5121839F720049BD23 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AAA8CE4F21839F720049BD23 /* Main.storyboard */; };
@@ -23,11 +22,11 @@
 		AAA8CE7A2183A10A0049BD23 /* InferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA8CE782183A10A0049BD23 /* InferenceViewController.swift */; };
 		AAA8CE7D2183A1120049BD23 /* CurvedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA8CE7C2183A1120049BD23 /* CurvedView.swift */; };
 		AAEA2D2F218746C800930A1D /* display_labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = AAEA2D2E218746C800930A1D /* display_labels.txt */; };
+		AC92C1DF2907968200593767 /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = AC92C1DE2907968200593767 /* labels.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AA0F2AEE219408430077CDCB /* model.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; name = model.tflite; path = ../../../../../../../../Downloads/model.tflite; sourceTree = "<group>"; };
-		AA0F2AEF219408430077CDCB /* labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = labels.txt; path = ../../../../../../../../Downloads/labels.txt; sourceTree = "<group>"; };
+		AA0F2AEE219408430077CDCB /* model.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = model.tflite; sourceTree = "<group>"; };
 		AA8474292183A31D0097B995 /* InfoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfoCell.swift; sourceTree = "<group>"; };
 		AAA8CE4821839F720049BD23 /* GestureClassification.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GestureClassification.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAA8CE4B21839F720049BD23 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -44,6 +43,8 @@
 		AAA8CE782183A10A0049BD23 /* InferenceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InferenceViewController.swift; sourceTree = "<group>"; };
 		AAA8CE7C2183A1120049BD23 /* CurvedView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurvedView.swift; sourceTree = "<group>"; };
 		AAEA2D2E218746C800930A1D /* display_labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_labels.txt; sourceTree = "<group>"; };
+		AC92C1D32907918E00593767 /* download_model.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = download_model.sh; path = RunScripts/download_model.sh; sourceTree = SOURCE_ROOT; };
+		AC92C1DE2907968200593767 /* labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = labels.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +89,7 @@
 				AAA8CE5221839F740049BD23 /* Assets.xcassets */,
 				AAA8CE5421839F740049BD23 /* LaunchScreen.storyboard */,
 				AAA8CE5721839F740049BD23 /* Info.plist */,
+				AC92C1D32907918E00593767 /* download_model.sh */,
 			);
 			path = GestureClassification;
 			sourceTree = "<group>";
@@ -121,7 +123,7 @@
 		AAA8CE6C2183A0FB0049BD23 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				AA0F2AEF219408430077CDCB /* labels.txt */,
+				AC92C1DE2907968200593767 /* labels.txt */,
 				AA0F2AEE219408430077CDCB /* model.tflite */,
 				AAEA2D2E218746C800930A1D /* display_labels.txt */,
 			);
@@ -160,6 +162,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AAA8CE5A21839F740049BD23 /* Build configuration list for PBXNativeTarget "GestureClassification" */;
 			buildPhases = (
+				AC92C1D4290791C800593767 /* ShellScript */,
 				AAA8CE4421839F720049BD23 /* Sources */,
 				AAA8CE4521839F720049BD23 /* Frameworks */,
 				AAA8CE4621839F720049BD23 /* Resources */,
@@ -213,7 +216,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0F2AF0219408430077CDCB /* model.tflite in Resources */,
-				AA0F2AF1219408430077CDCB /* labels.txt in Resources */,
+				AC92C1DF2907968200593767 /* labels.txt in Resources */,
 				AAA8CE5621839F740049BD23 /* LaunchScreen.storyboard in Resources */,
 				AAA8CE5321839F740049BD23 /* Assets.xcassets in Resources */,
 				AAA8CE5121839F720049BD23 /* Main.storyboard in Resources */,
@@ -222,6 +225,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AC92C1D4290791C800593767 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SRCROOT}/RunScripts/download_model.sh\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AAA8CE4421839F720049BD23 /* Sources */ = {

@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-task downloadTestFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/mobilebert/1/metadata/1?lite-format=tflite'
-    dest project.ext.TEST_ASSETS_DIR + '/mobilebert.tflite'
-    overwrite false
-}
-
 task downloadModelFile(type: Download) {
-    src 'https://tfhub.dev/tensorflow/lite-model/mobilebert/1/metadata/1?lite-format=tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/bert_qa/android/models_tflite_task_library_bert_qa_lite-model_mobilebert_1_metadata_1.tflite'
     dest project.ext.ASSET_DIR + '/mobilebert.tflite'
     overwrite false
 }
@@ -32,4 +26,9 @@ task downloadQAJson(type: Download) {
     overwrite false
 }
 
-preBuild.dependsOn downloadTestFile, downloadModelFile, downloadQAJson
+task copyTestModel(type: Copy, dependsOn: downloadModelFile) {
+    from project.ext.ASSET_DIR + '/mobilebert.tflite'
+    into project.ext.TEST_ASSETS_DIR
+}
+
+preBuild.dependsOn downloadModelFile, downloadQAJson, copyTestModel

@@ -17,10 +17,10 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MOBILENETV1_SSD_URL="https://tfhub.dev/tensorflow/lite-model/ssd_mobilenet_v1/1/metadata/2?lite-format=tflite"
-EFFICIENTDET_LITE0_URL="https://tfhub.dev/tensorflow/lite-model/efficientdet/lite0/detection/metadata/1?lite-format=tflite"
-EFFICIENTDET_LITE1_URL="https://tfhub.dev/tensorflow/lite-model/efficientdet/lite1/detection/metadata/1?lite-format=tflite"
-EFFICIENTDET_LITE2_URL="https://tfhub.dev/tensorflow/lite-model/efficientdet/lite2/detection/metadata/1?lite-format=tflite"
+MOBILENETV1_SSD_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/ios/lite-model_ssd_mobilenet_v1_1_metadata_2.tflite"
+EFFICIENTDET_LITE0_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/ios/lite-model_efficientdet_lite0_detection_metadata_1.tflite"
+EFFICIENTDET_LITE1_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/ios/lite-model_efficientdet_lite1_detection_metadata_1.tflite"
+EFFICIENTDET_LITE2_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/ios/lite-model_efficientdet_lite2_detection_metadata_1.tflite"
 
 MOBILENETV1_SSD_NAME="ssd_mobilenet_v1.tflite"
 EFFICIENTDET_LITE0_NAME="efficientdet_lite0.tflite"
