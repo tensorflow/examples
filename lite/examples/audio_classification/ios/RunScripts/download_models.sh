@@ -17,8 +17,8 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-YAMNET_URL="https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite"
-SPEECH_COMMANDS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/speech_commands.tflite"
+YAMNET_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/audio_classification/ios/lite-model_yamnet_classification_tflite_1.tflite"
+SPEECH_COMMANDS_URL="https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/audio_classification/ios/speech_commands.tflite"
 
 YAMNET_NAME="yamnet.tflite"
 SPEECH_COMMANDS_NAME="speech_commands.tflite"
