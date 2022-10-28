@@ -48,6 +48,5 @@ task copyTestModel0(type: Copy, dependsOn: downloadModelFile) {
     into project.ext.TEST_ASSETS_DIR
 }
 
-preBuild.dependsOn
-        downloadModelFile, downloadModelFile0, downloadModelFile1,
+preBuild.dependsOn downloadModelFile, downloadModelFile0, downloadModelFile1,
         downloadModelFile2, copyTestModel, copyTestModel0
