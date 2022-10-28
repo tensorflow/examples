@@ -155,7 +155,7 @@ def main(_):
   pbar = tf.keras.utils.Progbar((eval_samples + batch_size - 1) // batch_size)
   for i, (images, labels) in enumerate(ds):
     if not FLAGS.only_network:
-      nms_boxes_bs, nms_classes_bs, nms_scores_bs, _ = lite_runner.run(images)
+      _, nms_scores_bs, nms_classes_bs, nms_boxes_bs = lite_runner.run(images)
       nms_classes_bs += postprocess.CLASS_OFFSET
 
       height, width = utils.parse_image_size(config.image_size)
