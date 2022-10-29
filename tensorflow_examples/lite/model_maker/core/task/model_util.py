@@ -115,8 +115,13 @@ def export_saved_model(model,
   if filepath is None:
     raise ValueError(
         "SavedModel filepath couldn't be None when exporting to SavedModel.")
-  model.save(filepath, overwrite, include_optimizer, save_format, signatures,
-             options)
+  model.save(
+      filepath,
+      overwrite=overwrite,
+      include_optimizer=include_optimizer,
+      save_format=save_format,
+      signatures=signatures,
+      options=options)
 
 
 def export_tflite(model,
