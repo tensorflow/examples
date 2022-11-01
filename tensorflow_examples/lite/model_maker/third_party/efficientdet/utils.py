@@ -176,10 +176,10 @@ class TpuBatchNormalization(tf.keras.layers.BatchNormalization):
       raise ValueError('TpuBatchNormalization does not support fused=True.')
     super().__init__(fused=fused, **kwargs)
 
-  def _moments(self, inputs, reduction_axes, keep_dims):
+  def _moments(self, inputs, reduction_axes, keep_dims, mask=None):
     """Compute the mean and variance: it overrides the original _moments."""
     shard_mean, shard_variance = super()._moments(
-        inputs, reduction_axes, keep_dims=keep_dims)
+        inputs, reduction_axes, keep_dims=keep_dims, mask=mask)
 
     num_shards = tpu_function.get_tpu_context().number_of_shards or 1
     num_shards_per_group = min(32, num_shards)  # aggregate up to 32 cores.
@@ -197,8 +197,8 @@ class TpuBatchNormalization(tf.keras.layers.BatchNormalization):
     else:
       return (shard_mean, shard_variance)
 
-  def call(self, inputs, training=None):
-    outputs = super().call(inputs, training)
+  def call(self, inputs, mask=None, training=None):
+    outputs = super().call(inputs, mask=mask, training=training)
     # A temporary hack for tf1 compatibility with keras batch norm.
     for u in self.updates:
       tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, u)
@@ -215,10 +215,10 @@ class SyncBatchNormalization(tf.keras.layers.BatchNormalization):
       raise ValueError('SyncBatchNormalization does not support fused=True.')
     super().__init__(fused=fused, **kwargs)
 
-  def _moments(self, inputs, reduction_axes, keep_dims):
+  def _moments(self, inputs, reduction_axes, keep_dims, mask=None):
     """Compute the mean and variance: it overrides the original _moments."""
     shard_mean, shard_variance = super()._moments(
-        inputs, reduction_axes, keep_dims=keep_dims)
+        inputs, reduction_axes, keep_dims=keep_dims, mask=mask)
 
     replica_context = tf.distribute.get_replica_context()
     num_shards = replica_context.num_replicas_in_sync or 1
@@ -236,8 +236,8 @@ class SyncBatchNormalization(tf.keras.layers.BatchNormalization):
     else:
       return (shard_mean, shard_variance)
 
-  def call(self, inputs, training=None):
-    outputs = super().call(inputs, training)
+  def call(self, inputs, mask=None, training=None):
+    outputs = super().call(inputs, mask=mask, training=training)
     # A temporary hack for tf1 compatibility with keras batch norm.
     for u in self.updates:
       tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, u)
@@ -252,8 +252,8 @@ class BatchNormalization(tf.keras.layers.BatchNormalization):
       kwargs['name'] = 'tpu_batch_normalization'
     super().__init__(**kwargs)
 
-  def call(self, inputs, training=None):
-    outputs = super().call(inputs, training)
+  def call(self, inputs, mask=None, training=None):
+    outputs = super().call(inputs, mask=mask, training=training)
     # A temporary hack for tf1 compatibility with keras batch norm.
     for u in self.updates:
       tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, u)
