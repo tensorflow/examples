@@ -452,7 +452,7 @@ class YAMNetSpec(BaseSpec):
       strategy: An instance of TF distribute strategy. If none, it will use the
         default strategy (either SingleDeviceStrategy or the current scoped
         strategy.
-      yamnet_model_handle: Path of the TFHub model for retrining.
+      yamnet_model_handle: Path of the TFHub model for retraining.
       frame_length: The number of samples in each audio frame. If the audio file
         is shorter than `frame_length`, then the audio file will be ignored.
       frame_step: The number of samples between two audio frames. This value
