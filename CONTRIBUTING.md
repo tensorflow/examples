@@ -5,7 +5,8 @@ impact on TensorFlow documentation and examples-—just a
 [GitHub account](https://github.com/). 
 
 Questions about TensorFlow usage are best addressed on
-[StackOverflow](https://stackoverflow.com/questions/tagged/tensorflow) or the
+[StackOverflow](https://stackoverflow.com/questions/tagged/tensorflow) or
+[TensorFlow Forum](https://discuss.tensorflow.org/) or the
 [discuss@tensorflow.org](https://groups.google.com/a/tensorflow.org/forum/#!forum/discuss)
 mailing list.
 
