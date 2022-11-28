@@ -10,7 +10,7 @@ for various tasks and models.
 Pre-requisites:
 
 - [Android Studio](https://developer.android.com/studio).
-- [Python 3.5+](https://www.python.org/downloads/).
+- [Python 3.7+](https://www.python.org/downloads/).
 - [`virtualenv`](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv)
   (usually comes preinstalled with Python).
 - Physical Android device with camera.
