@@ -107,7 +107,7 @@ dependencies {
     testImplementation 'androidx.test:rules:1.4.0'
     testImplementation 'androidx.test:runner:1.4.0'
     testImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'org.robolectric:robolectric:4.9'
 
     // Instrumented testing
     androidTestImplementation "androidx.test.ext:junit:1.1.3"
