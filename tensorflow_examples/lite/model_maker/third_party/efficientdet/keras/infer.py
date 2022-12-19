@@ -91,7 +91,7 @@ def main(_):
     img = inference.visualize_image(
         img,
         boxes[i].numpy()[:length],
-        classes[i].numpy().astype(np.int)[:length],
+        classes[i].numpy().astype(int)[:length],
         scores[i].numpy()[:length],
         label_map=config.label_map,
         min_score_thresh=config.nms_configs.score_thresh,

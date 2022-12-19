@@ -86,7 +86,7 @@ class RecordInspect:
         classes = gt[:boxes.shape[0], -1].numpy()
         try:
           category_index = {idx: {'id': idx, 'name': self.cls_to_label[idx]}
-                            for idx in np.asarray(classes, dtype=np.int)}
+                            for idx in np.asarray(classes, dtype=int)}
         except Exception:  # pylint: disable=broad-except
           category_index = {}
 

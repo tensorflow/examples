@@ -395,7 +395,7 @@ class DisplayCallback(tf.keras.callbacks.Callback):
     image = inference.visualize_image(
         self.sample_image[0],
         boxes[0][:length],
-        classes[0].astype(np.int)[:length],
+        classes[0].astype(int)[:length],
         scores[0][:length],
         label_map=self.model.config.label_map,
         min_score_thresh=self.min_score_thresh,
