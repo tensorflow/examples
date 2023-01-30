@@ -100,9 +100,9 @@ dependencies {
     implementation "androidx.camera:camera-view:1.0.0-alpha32"
 
     // Tensorflow Lite in Play Services dependencies
-    implementation "com.google.android.gms:play-services-tflite-gpu:16.1.1-eap01"
-    implementation "com.google.android.gms:play-services-tflite-java:16.0.2-eap01"
-    implementation "com.google.android.gms:play-services-tflite-support:16.0.2-eap01"
+    implementation "com.google.android.gms:play-services-tflite-gpu:16.1.1-eap03"
+    implementation "com.google.android.gms:play-services-tflite-java:16.0.2-eap03"
+    implementation "com.google.android.gms:play-services-tflite-support:16.0.2-eap03"
 
     // Testing-only dependencies
     testImplementation 'org.robolectric:robolectric:4.4'
