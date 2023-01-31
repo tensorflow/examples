@@ -10,3 +10,6 @@
 # TF Lite
 /lite/ @khanhlvg @lu-wang-g
 /tensorflow_examples/lite/ @ziyeqinghan @khanhlvg @lu-wang-g
+
+# TensorFlow Examples
+/tensorflow_examples/probability/ @JannisZeller
