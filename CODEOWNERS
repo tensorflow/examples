@@ -2,7 +2,7 @@
 # Last matching pattern takes preecedence.
 
 # Default owners for everything in repo.
-*  @MarkDaoust @wolffg @yashk2810
+*  @tensorflow/docs-team
 
 # Courses
 /courses/ @josbecker @MarkDaoust
