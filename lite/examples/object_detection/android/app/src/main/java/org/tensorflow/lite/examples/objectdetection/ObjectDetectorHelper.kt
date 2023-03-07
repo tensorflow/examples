@@ -85,10 +85,7 @@ class ObjectDetectorHelper(
         val modelName =
             when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
-                MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
-                MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
-                MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
-                MODEL_MODEL_UNQUANT -> "model_unquant.tflite"
+                MODEL_WEAPONDETECTION -> "model_unquant.tflite"
                 else -> "mobilenetv1.tflite"
             }
 
@@ -147,9 +144,6 @@ class ObjectDetectorHelper(
         const val DELEGATE_GPU = 1
         const val DELEGATE_NNAPI = 2
         const val MODEL_MOBILENETV1 = 0
-        const val MODEL_EFFICIENTDETV0 = 1
-        const val MODEL_EFFICIENTDETV1 = 2
-        const val MODEL_EFFICIENTDETV2 = 3
-        const val MODEL_MODEL_UNQUANT = 4
+        const val MODEL_WEAPONDETECTION = 1
     }
 }

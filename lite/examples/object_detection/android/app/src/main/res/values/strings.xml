@@ -19,9 +19,9 @@
 
     <string name="alt_bottom_sheet_chevron">Bottom sheet expandable indicator</string>
 
-    <string name="alt_bottom_sheet_max_results_button_minus">Decreasing maxium detected results
+    <string name="alt_bottom_sheet_max_results_button_minus">Decreasing maximum detected results
         button</string>
-    <string name="alt_bottom_sheet_max_results_button_plus">Increasing maxium detected results
+    <string name="alt_bottom_sheet_max_results_button_plus">Increasing maximum detected results
         button</string>
     <string name="alt_bottom_sheet_threshold_button_minus">Decreasing threshold of detected object
         results button</string>
@@ -46,9 +46,6 @@
 
     <string-array name="models_spinner_titles">
         <item>MobileNet V1</item>
-        <item>EfficientDet Lite0</item>
-        <item>EfficientDet Lite1</item>
-        <item>EfficientDet Lite2</item>
-        <item>MODEL_UNQUANT</item>
+        <item>Weapon Detection</item>
     </string-array>
 </resources>
