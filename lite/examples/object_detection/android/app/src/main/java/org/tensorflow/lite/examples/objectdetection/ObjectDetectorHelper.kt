@@ -88,6 +88,7 @@ class ObjectDetectorHelper(
                 MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
+                MODEL_MODEL_UNQUANT -> "model_unquant.tflite"
                 else -> "mobilenetv1.tflite"
             }
 
@@ -149,5 +150,6 @@ class ObjectDetectorHelper(
         const val MODEL_EFFICIENTDETV0 = 1
         const val MODEL_EFFICIENTDETV1 = 2
         const val MODEL_EFFICIENTDETV2 = 3
+        const val MODEL_MODEL_UNQUANT = 4
     }
 }

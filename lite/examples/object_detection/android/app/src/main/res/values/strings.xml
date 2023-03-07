@@ -49,5 +49,6 @@
         <item>EfficientDet Lite0</item>
         <item>EfficientDet Lite1</item>
         <item>EfficientDet Lite2</item>
+        <item>MODEL_UNQUANT</item>
     </string-array>
 </resources>
