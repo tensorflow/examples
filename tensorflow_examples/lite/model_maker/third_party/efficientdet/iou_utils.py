@@ -185,7 +185,7 @@ def iou_loss(pred_boxes: FloatType,
     target_boxes = [b * mask for b in target_boxes]
     iou_loss_list.append(
         mask *
-        (1 - tf.squeeze(_iou_per_anchor(pred_boxes, target_boxes, iou_type))))
+        (1 - tf.squeeze(_iou_per_anchor(pred_boxes, target_boxes, iou_type))))  # pytype: disable=wrong-arg-types  # numpy-scalars
   if len(iou_loss_list) == 1:
     return iou_loss_list[0]
   return tf.reduce_sum(tf.stack(iou_loss_list), 0)
