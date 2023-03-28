@@ -3,11 +3,29 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		66049BD7077F73C9210873F2 /* Pods_SoundClassification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */; };
+		AA3CB36E281D805200A51A6A /* TFLAudioTensor.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB349281D805200A51A6A /* TFLAudioTensor.m */; };
+		AA3CB370281D805200A51A6A /* TFLAudioFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB34B281D805200A51A6A /* TFLAudioFormat.m */; };
+		AA3CB371281D805200A51A6A /* TFLRingBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB34C281D805200A51A6A /* TFLRingBuffer.m */; };
+		AA3CB372281D805200A51A6A /* TFLFloatBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB352281D805200A51A6A /* TFLFloatBuffer.m */; };
+		AA3CB373281D805200A51A6A /* TFLBaseOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB358281D805200A51A6A /* TFLBaseOptions.m */; };
+		AA3CB374281D805200A51A6A /* TFLBaseOptions+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB35B281D805200A51A6A /* TFLBaseOptions+Helpers.m */; };
+		AA3CB375281D805200A51A6A /* TFLClassificationOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB35F281D805200A51A6A /* TFLClassificationOptions.m */; };
+		AA3CB376281D805200A51A6A /* TFLClassificationResult.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB360281D805200A51A6A /* TFLClassificationResult.m */; };
+		AA3CB377281D805200A51A6A /* TFLClassificationResult+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB362281D805200A51A6A /* TFLClassificationResult+Helpers.m */; };
+		AA3CB378281D805200A51A6A /* TFLClassificationOptions+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB365281D805200A51A6A /* TFLClassificationOptions+Helpers.m */; };
+		AA3CB379281D805200A51A6A /* TFLCategory+Helpers.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB367281D805200A51A6A /* TFLCategory+Helpers.m */; };
+		AA3CB37A281D805200A51A6A /* TFLCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB369281D805200A51A6A /* TFLCategory.m */; };
+		AA3CB37B281D805200A51A6A /* TFLAudioClassifier.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB36A281D805200A51A6A /* TFLAudioClassifier.m */; };
+		AA3CB37C281D805200A51A6A /* TFLAudioTensor+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB36B281D805200A51A6A /* TFLAudioTensor+Utils.m */; };
+		AA3CB37D281D805200A51A6A /* TFLCommonUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = AA3CB36C281D805200A51A6A /* TFLCommonUtils.m */; };
+		AA3CB37F281D80AB00A51A6A /* TensorFlowLiteTaskAudioC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3CB37E281D80AB00A51A6A /* TensorFlowLiteTaskAudioC.framework */; platformFilter = ios; };
+		AA3CB381281D80ED00A51A6A /* yamnet_audio_classifier_with_metadata.tflite in Resources */ = {isa = PBXBuildFile; fileRef = AA3CB380281D80ED00A51A6A /* yamnet_audio_classifier_with_metadata.tflite */; };
+		AA8E503D28141C4400883004 /* TFLAudioRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = AA8E503C28141C4400883004 /* TFLAudioRecord.m */; };
 		C83580DC253929A7007E9603 /* labels.txt in Resources */ = {isa = PBXBuildFile; fileRef = C83580DA253929A7007E9603 /* labels.txt */; };
 		C83580DD253929A7007E9603 /* sound_classification.tflite in Resources */ = {isa = PBXBuildFile; fileRef = C83580DB253929A7007E9603 /* sound_classification.tflite */; };
 		C83B9C82256BB4C000EA2282 /* AudioInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */; };
@@ -40,7 +58,43 @@
 /* Begin PBXFileReference section */
 		5AFAE9051D797536BC360191 /* Pods-SoundClassification.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.release.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.release.xcconfig"; sourceTree = "<group>"; };
 		8D3C72E2E6452206717A5F8A /* Pods-SoundClassification.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SoundClassification.debug.xcconfig"; path = "Target Support Files/Pods-SoundClassification/Pods-SoundClassification.debug.xcconfig"; sourceTree = "<group>"; };
+		AA2587C0280EF9D30056CC58 /* SoundClassification-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SoundClassification-Bridging-Header.h"; sourceTree = "<group>"; };
+		AA3CB349281D805200A51A6A /* TFLAudioTensor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLAudioTensor.m; sourceTree = "<group>"; };
+		AA3CB34B281D805200A51A6A /* TFLAudioFormat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLAudioFormat.m; sourceTree = "<group>"; };
+		AA3CB34C281D805200A51A6A /* TFLRingBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLRingBuffer.m; sourceTree = "<group>"; };
+		AA3CB34D281D805200A51A6A /* TFLFloatBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLFloatBuffer.h; sourceTree = "<group>"; };
+		AA3CB34F281D805200A51A6A /* TFLAudioTensor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLAudioTensor.h; sourceTree = "<group>"; };
+		AA3CB350281D805200A51A6A /* TFLRingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLRingBuffer.h; sourceTree = "<group>"; };
+		AA3CB351281D805200A51A6A /* TFLAudioFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLAudioFormat.h; sourceTree = "<group>"; };
+		AA3CB352281D805200A51A6A /* TFLFloatBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLFloatBuffer.m; sourceTree = "<group>"; };
+		AA3CB355281D805200A51A6A /* TFLAudioTensor+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TFLAudioTensor+Utils.h"; sourceTree = "<group>"; };
+		AA3CB356281D805200A51A6A /* TFLAudioClassifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLAudioClassifier.h; sourceTree = "<group>"; };
+		AA3CB358281D805200A51A6A /* TFLBaseOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLBaseOptions.m; sourceTree = "<group>"; };
+		AA3CB359281D805200A51A6A /* TFLBaseOptions+Helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TFLBaseOptions+Helpers.h"; sourceTree = "<group>"; };
+		AA3CB35A281D805200A51A6A /* TFLBaseOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLBaseOptions.h; sourceTree = "<group>"; };
+		AA3CB35B281D805200A51A6A /* TFLBaseOptions+Helpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TFLBaseOptions+Helpers.m"; sourceTree = "<group>"; };
+		AA3CB35C281D805200A51A6A /* TFLCommonUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLCommonUtils.h; sourceTree = "<group>"; };
+		AA3CB35E281D805200A51A6A /* TFLClassificationOptions+Helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TFLClassificationOptions+Helpers.h"; sourceTree = "<group>"; };
+		AA3CB35F281D805200A51A6A /* TFLClassificationOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLClassificationOptions.m; sourceTree = "<group>"; };
+		AA3CB360281D805200A51A6A /* TFLClassificationResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLClassificationResult.m; sourceTree = "<group>"; };
+		AA3CB361281D805200A51A6A /* TFLCategory+Helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TFLCategory+Helpers.h"; sourceTree = "<group>"; };
+		AA3CB362281D805200A51A6A /* TFLClassificationResult+Helpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TFLClassificationResult+Helpers.m"; sourceTree = "<group>"; };
+		AA3CB363281D805200A51A6A /* TFLCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLCategory.h; sourceTree = "<group>"; };
+		AA3CB364281D805200A51A6A /* TFLClassificationOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLClassificationOptions.h; sourceTree = "<group>"; };
+		AA3CB365281D805200A51A6A /* TFLClassificationOptions+Helpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TFLClassificationOptions+Helpers.m"; sourceTree = "<group>"; };
+		AA3CB366281D805200A51A6A /* TFLClassificationResult+Helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TFLClassificationResult+Helpers.h"; sourceTree = "<group>"; };
+		AA3CB367281D805200A51A6A /* TFLCategory+Helpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TFLCategory+Helpers.m"; sourceTree = "<group>"; };
+		AA3CB368281D805200A51A6A /* TFLClassificationResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLClassificationResult.h; sourceTree = "<group>"; };
+		AA3CB369281D805200A51A6A /* TFLCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLCategory.m; sourceTree = "<group>"; };
+		AA3CB36A281D805200A51A6A /* TFLAudioClassifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLAudioClassifier.m; sourceTree = "<group>"; };
+		AA3CB36B281D805200A51A6A /* TFLAudioTensor+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TFLAudioTensor+Utils.m"; sourceTree = "<group>"; };
+		AA3CB36C281D805200A51A6A /* TFLCommonUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLCommonUtils.m; sourceTree = "<group>"; };
+		AA3CB36D281D805200A51A6A /* TFLCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLCommon.h; sourceTree = "<group>"; };
+		AA3CB37E281D80AB00A51A6A /* TensorFlowLiteTaskAudioC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TensorFlowLiteTaskAudioC.framework; sourceTree = "<group>"; };
+		AA3CB380281D80ED00A51A6A /* yamnet_audio_classifier_with_metadata.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = yamnet_audio_classifier_with_metadata.tflite; sourceTree = "<group>"; };
 		AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SoundClassification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA8E503B28141C4300883004 /* TFLAudioRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TFLAudioRecord.h; sourceTree = "<group>"; };
+		AA8E503C28141C4400883004 /* TFLAudioRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TFLAudioRecord.m; sourceTree = "<group>"; };
 		C83580DA253929A7007E9603 /* labels.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = labels.txt; sourceTree = "<group>"; };
 		C83580DB253929A7007E9603 /* sound_classification.tflite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sound_classification.tflite; sourceTree = "<group>"; };
 		C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputManager.swift; sourceTree = "<group>"; };
@@ -63,6 +117,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				66049BD7077F73C9210873F2 /* Pods_SoundClassification.framework in Frameworks */,
+				AA3CB37F281D80AB00A51A6A /* TensorFlowLiteTaskAudioC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,10 +147,118 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		AA36040E2814550B00F312E4 /* TFLAudioRecord */ = {
+			isa = PBXGroup;
+			children = (
+				AA8E503B28141C4300883004 /* TFLAudioRecord.h */,
+				AA8E503C28141C4400883004 /* TFLAudioRecord.m */,
+			);
+			path = TFLAudioRecord;
+			sourceTree = "<group>";
+		};
+		AA3CB348281D805200A51A6A /* TFLAudioTensor */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB355281D805200A51A6A /* TFLAudioTensor+Utils.h */,
+				AA3CB36B281D805200A51A6A /* TFLAudioTensor+Utils.m */,
+				AA3CB349281D805200A51A6A /* TFLAudioTensor.m */,
+				AA3CB34B281D805200A51A6A /* TFLAudioFormat.m */,
+				AA3CB34C281D805200A51A6A /* TFLRingBuffer.m */,
+				AA3CB34D281D805200A51A6A /* TFLFloatBuffer.h */,
+				AA3CB34F281D805200A51A6A /* TFLAudioTensor.h */,
+				AA3CB350281D805200A51A6A /* TFLRingBuffer.h */,
+				AA3CB351281D805200A51A6A /* TFLAudioFormat.h */,
+				AA3CB352281D805200A51A6A /* TFLFloatBuffer.m */,
+			);
+			path = TFLAudioTensor;
+			sourceTree = "<group>";
+		};
+		AA3CB354281D805200A51A6A /* TFLAudioClassifier */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB348281D805200A51A6A /* TFLAudioTensor */,
+				AA3CB356281D805200A51A6A /* TFLAudioClassifier.h */,
+				AA3CB36A281D805200A51A6A /* TFLAudioClassifier.m */,
+			);
+			path = TFLAudioClassifier;
+			sourceTree = "<group>";
+		};
+		AA3CB357281D805200A51A6A /* core */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB358281D805200A51A6A /* TFLBaseOptions.m */,
+				AA3CB35A281D805200A51A6A /* TFLBaseOptions.h */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		AA3CB35D281D805200A51A6A /* processor */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB35E281D805200A51A6A /* TFLClassificationOptions+Helpers.h */,
+				AA3CB35F281D805200A51A6A /* TFLClassificationOptions.m */,
+				AA3CB361281D805200A51A6A /* TFLCategory+Helpers.h */,
+				AA3CB363281D805200A51A6A /* TFLCategory.h */,
+				AA3CB364281D805200A51A6A /* TFLClassificationOptions.h */,
+				AA3CB365281D805200A51A6A /* TFLClassificationOptions+Helpers.m */,
+				AA3CB367281D805200A51A6A /* TFLCategory+Helpers.m */,
+				AA3CB369281D805200A51A6A /* TFLCategory.m */,
+			);
+			path = processor;
+			sourceTree = "<group>";
+		};
+		AAA02928281EC40A0077BB51 /* changed */ = {
+			isa = PBXGroup;
+			children = (
+				AAA0292C281EC5000077BB51 /* common */,
+				AAA0292A281EC4950077BB51 /* core */,
+				AAA02929281EC4190077BB51 /* processor */,
+			);
+			path = changed;
+			sourceTree = "<group>";
+		};
+		AAA02929281EC4190077BB51 /* processor */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB360281D805200A51A6A /* TFLClassificationResult.m */,
+				AA3CB362281D805200A51A6A /* TFLClassificationResult+Helpers.m */,
+				AA3CB366281D805200A51A6A /* TFLClassificationResult+Helpers.h */,
+				AA3CB368281D805200A51A6A /* TFLClassificationResult.h */,
+			);
+			path = processor;
+			sourceTree = "<group>";
+		};
+		AAA0292A281EC4950077BB51 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB359281D805200A51A6A /* TFLBaseOptions+Helpers.h */,
+				AA3CB35B281D805200A51A6A /* TFLBaseOptions+Helpers.m */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		AAA0292B281EC4E40077BB51 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB35C281D805200A51A6A /* TFLCommonUtils.h */,
+				AA3CB36C281D805200A51A6A /* TFLCommonUtils.m */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		AAA0292C281EC5000077BB51 /* common */ = {
+			isa = PBXGroup;
+			children = (
+				AA3CB36D281D805200A51A6A /* TFLCommon.h */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
 		C83580D925392981007E9603 /* Model */ = {
 			isa = PBXGroup;
 			children = (
 				C83580DA253929A7007E9603 /* labels.txt */,
+				AA3CB380281D80ED00A51A6A /* yamnet_audio_classifier_with_metadata.tflite */,
 				C83580DB253929A7007E9603 /* sound_classification.tflite */,
 			);
 			path = Model;
@@ -124,8 +287,14 @@
 		C86E5C9D2525DB8400F53BEA /* SoundClassification */ = {
 			isa = PBXGroup;
 			children = (
+				AAA0292B281EC4E40077BB51 /* common */,
+				AA3CB357281D805200A51A6A /* core */,
+				AA3CB35D281D805200A51A6A /* processor */,
+				AAA02928281EC40A0077BB51 /* changed */,
+				AA3CB354281D805200A51A6A /* TFLAudioClassifier */,
 				C83580D925392981007E9603 /* Model */,
 				C86E5C9E2525DB8400F53BEA /* AppDelegate.swift */,
+				AA36040E2814550B00F312E4 /* TFLAudioRecord */,
 				C86E5CA22525DB8400F53BEA /* ViewController.swift */,
 				C86E5CA42525DB8400F53BEA /* Main.storyboard */,
 				C86E5CA72525DB8600F53BEA /* Assets.xcassets */,
@@ -134,6 +303,7 @@
 				C83B9C81256BB4C000EA2282 /* AudioInputManager.swift */,
 				C83B9C8C256D38DB00EA2282 /* SoundClassifier.swift */,
 				C8FF9D322577CFB2004ED628 /* ProbabilityTableViewCell.swift */,
+				AA2587C0280EF9D30056CC58 /* SoundClassification-Bridging-Header.h */,
 			);
 			path = SoundClassification;
 			sourceTree = "<group>";
@@ -141,6 +311,7 @@
 		E1567F2DAE1E99ED1CCE7C9E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AA3CB37E281D80AB00A51A6A /* TensorFlowLiteTaskAudioC.framework */,
 				AA70AA685F986DCEB5D61176 /* Pods_SoundClassification.framework */,
 			);
 			name = Frameworks;
@@ -216,6 +387,7 @@
 				TargetAttributes = {
 					C86E5C9A2525DB8400F53BEA = {
 						CreatedOnToolsVersion = 11.7;
+						LastSwiftMigration = 1320;
 					};
 					C86E5CB02525DB8700F53BEA = {
 						CreatedOnToolsVersion = 11.7;
@@ -252,6 +424,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA3CB381281D80ED00A51A6A /* yamnet_audio_classifier_with_metadata.tflite in Resources */,
 				C86E5CAB2525DB8600F53BEA /* LaunchScreen.storyboard in Resources */,
 				C83580DD253929A7007E9603 /* sound_classification.tflite in Resources */,
 				C86E5CA82525DB8600F53BEA /* Assets.xcassets in Resources */,
@@ -324,11 +497,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA3CB370281D805200A51A6A /* TFLAudioFormat.m in Sources */,
+				AA3CB377281D805200A51A6A /* TFLClassificationResult+Helpers.m in Sources */,
+				AA8E503D28141C4400883004 /* TFLAudioRecord.m in Sources */,
+				AA3CB374281D805200A51A6A /* TFLBaseOptions+Helpers.m in Sources */,
+				AA3CB379281D805200A51A6A /* TFLCategory+Helpers.m in Sources */,
+				AA3CB37D281D805200A51A6A /* TFLCommonUtils.m in Sources */,
+				AA3CB376281D805200A51A6A /* TFLClassificationResult.m in Sources */,
 				C86E5CA32525DB8400F53BEA /* ViewController.swift in Sources */,
+				AA3CB372281D805200A51A6A /* TFLFloatBuffer.m in Sources */,
+				AA3CB373281D805200A51A6A /* TFLBaseOptions.m in Sources */,
 				C86E5C9F2525DB8400F53BEA /* AppDelegate.swift in Sources */,
 				C8FF9D332577CFB2004ED628 /* ProbabilityTableViewCell.swift in Sources */,
+				AA3CB36E281D805200A51A6A /* TFLAudioTensor.m in Sources */,
+				AA3CB378281D805200A51A6A /* TFLClassificationOptions+Helpers.m in Sources */,
 				C83B9C8D256D38DB00EA2282 /* SoundClassifier.swift in Sources */,
+				AA3CB375281D805200A51A6A /* TFLClassificationOptions.m in Sources */,
+				AA3CB37B281D805200A51A6A /* TFLAudioClassifier.m in Sources */,
+				AA3CB371281D805200A51A6A /* TFLRingBuffer.m in Sources */,
+				AA3CB37A281D805200A51A6A /* TFLCategory.m in Sources */,
 				C83B9C82256BB4C000EA2282 /* AudioInputManager.swift in Sources */,
+				AA3CB37C281D805200A51A6A /* TFLAudioTensor+Utils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,9 +693,19 @@
 			baseConfigurationReference = 8D3C72E2E6452206717A5F8A /* Pods-SoundClassification.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = EQHXZ8M8AV;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteSwift/TensorFlowLite.framework/Headers\"",
+					"/Users/priankakariat/Documents/Projects/TensorFlow/examples/lite/examples/sound_classification/ios/**",
+				);
 				INFOPLIST_FILE = SoundClassification/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -516,20 +715,12 @@
 					"$(inherited)",
 					"-ObjC",
 					"-l\"c++\"",
-					"-framework",
-					"\"TensorFlowLite\"",
-					"-framework",
-					"\"TensorFlowLiteC\"",
-					"-framework",
-					"\"TensorFlowLiteSelectTfOps\"",
-					"-weak_framework",
-					"\"CoreML\"",
-					"-force_load",
-					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.tensorflow.SoundClassification;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "Google Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SoundClassification/SoundClassification-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -540,9 +731,14 @@
 			baseConfigurationReference = 5AFAE9051D797536BC360191 /* Pods-SoundClassification.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = EQHXZ8M8AV;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = SoundClassification/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -552,20 +748,11 @@
 					"$(inherited)",
 					"-ObjC",
 					"-l\"c++\"",
-					"-framework",
-					"\"TensorFlowLite\"",
-					"-framework",
-					"\"TensorFlowLiteC\"",
-					"-framework",
-					"\"TensorFlowLiteSelectTfOps\"",
-					"-weak_framework",
-					"\"CoreML\"",
-					"-force_load",
-					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.tensorflow.SoundClassification;
+				PRODUCT_BUNDLE_IDENTIFIER = org.tensorflow.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "Google Development";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "SoundClassification/SoundClassification-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

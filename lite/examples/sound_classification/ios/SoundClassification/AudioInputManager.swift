@@ -107,6 +107,7 @@ public class AudioInputManager {
           ).map { channelDataValue[$0] }
 
           // Converted pcm 16 values are delegated to the controller.
+          print(channelDataValueArray.count)
           self.delegate?.audioInputManager(self, didCaptureChannelData: channelDataValueArray)
         }
       }

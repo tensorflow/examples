@@ -18,43 +18,28 @@ class ViewController: UIViewController {
   // MARK: - Variables
   @IBOutlet weak var tableView: UITableView!
 
-  private var audioInputManager: AudioInputManager!
   private var soundClassifier: SoundClassifier!
-  private var bufferSize: Int = 0
-  private var probabilities: [Float32] = []
+  private var categories: [ClassificationCategory] = []
 
   // MARK: - View controller lifecycle methods
 
   override func viewDidLoad() {
     super.viewDidLoad()
 
+
     tableView.dataSource = self
     tableView.backgroundColor = .white
     tableView.tableFooterView = UIView()
 
-    soundClassifier = SoundClassifier(modelFileName: "sound_classification", delegate: self)
-
-    startAudioRecognition()
+    soundClassifier = SoundClassifier(modelFileName: "yamnet_audio_classifier_with_metadata", delegate: self)
+    soundClassifier.startAudioClassificationOnMicInput()
   }
 
   // MARK: - Private Methods
-
-  /// Initializes the AudioInputManager and starts recognizing on the output buffers.
-  private func startAudioRecognition() {
-    audioInputManager = AudioInputManager(sampleRate: soundClassifier.sampleRate)
-    audioInputManager.delegate = self
-
-    bufferSize = audioInputManager.bufferSize
-
-    audioInputManager.checkPermissionsAndStartTappingMicrophone()
-  }
-
-  private func runModel(inputBuffer: [Int16]) {
-    soundClassifier.start(inputBuffer: inputBuffer)
-  }
 }
 
-extension ViewController: AudioInputManagerDelegate {
+
+extension ViewController {
   func audioInputManagerDidFailToAchievePermission(_ audioInputManager: AudioInputManager) {
     let alertController = UIAlertController(
       title: "Microphone Permissions Denied",
@@ -75,33 +60,22 @@ extension ViewController: AudioInputManagerDelegate {
 
     present(alertController, animated: true, completion: nil)
   }
-
-  func audioInputManager(
-    _ audioInputManager: AudioInputManager,
-    didCaptureChannelData channelData: [Int16]
-  ) {
-    let sampleRate = soundClassifier.sampleRate
-    self.runModel(inputBuffer: Array(channelData[0..<sampleRate]))
-    self.runModel(inputBuffer: Array(channelData[sampleRate..<bufferSize]))
-  }
 }
 
 extension ViewController: SoundClassifierDelegate {
-  func soundClassifier(
-    _ soundClassifier: SoundClassifier,
-    didInterpreteProbabilities probabilities: [Float32]
-  ) {
-    self.probabilities = probabilities
-    DispatchQueue.main.async {
-      self.tableView.reloadData()
+  
+  func soundClassifier(_ soundClassifier: SoundClassifier, didClassifyWithCategories categories: [ClassificationCategory]) {
+    guard let label = categories[0].label else {
+      return
     }
+    print("Label: \(label), Score: \(categories[0].score)");
   }
 }
 
 // MARK: - UITableViewDataSource
 extension ViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return probabilities.count
+    return categories.count
   }
 
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -110,9 +84,9 @@ extension ViewController: UITableViewDataSource {
       for: indexPath
     ) as? ProbabilityTableViewCell else { return UITableViewCell() }
 
-    cell.label.text = soundClassifier.labelNames[indexPath.row]
+//    cell.label.text = soundClassifier.labelNames[indexPath.row]
     UIView.animate(withDuration: 0.4) {
-      cell.progressView.setProgress(self.probabilities[indexPath.row], animated: true)
+      cell.progressView.setProgress(self.categories[indexPath.row].score, animated: true)
     }
     return cell
   }
