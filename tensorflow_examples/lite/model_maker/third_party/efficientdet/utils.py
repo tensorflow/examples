@@ -22,7 +22,7 @@ import gin
 import numpy as np
 import tensorflow.compat.v1 as tf
 import tensorflow.compat.v2 as tf2
-from tensorflow.python.eager import tape as tape_lib  # pylint:disable=g-direct-tensorflow-import
+from tensorflow.python.eager import record  # pylint:disable=g-direct-tensorflow-import
 from tensorflow.python.tpu import tpu_function  # pylint:disable=g-direct-tensorflow-import
 # pylint: disable=logging-format-interpolation
 
@@ -708,7 +708,7 @@ def _recompute_grad(f):
   def inner(*args, **kwargs):
     """Inner function closure for calculating gradients."""
     current_var_scope = tf.get_variable_scope()
-    with tape_lib.stop_recording():
+    with record.stop_recording():
       result = f(*args, **kwargs)
 
     def grad_wrapper(*wrapper_args, **grad_kwargs):
