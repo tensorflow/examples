@@ -1,0 +1,61 @@
+diff --git a/WORKSPACE b/WORKSPACE
+index 28b7ee5..5ad0b55 100644
+--- a/WORKSPACE
++++ b/WORKSPACE
+@@ -116,3 +116,10 @@ load("@org_tensorflow//third_party/android:android_configure.bzl", "android_conf
+ android_configure(name="local_config_android")
+ load("@local_config_android//:android.bzl", "android_workspace")
+ android_workspace()
++
++android_sdk_repository(name = "androidsdk")
++
++android_ndk_repository(
++    name = "androidndk",
++    api_level = 21,
++)
+diff --git a/tensorflow_text/BUILD b/tensorflow_text/BUILD
+index 9b5ee5b..880c7c5 100644
+--- a/tensorflow_text/BUILD
++++ b/tensorflow_text/BUILD
+@@ -2,6 +2,8 @@ load("//tensorflow_text:tftext.bzl", "py_tf_text_library")
+ 
+ # [internal] load build_test.bzl
+ load("@org_tensorflow//tensorflow/lite:build_def.bzl", "tflite_cc_shared_object")
++load("@org_tensorflow//tensorflow/lite/delegates/flex:build_def.bzl", "tflite_flex_android_library")
++load("@org_tensorflow//tensorflow/lite/java:aar_with_jni.bzl", "aar_with_jni")
+ 
+ # Visibility rules
+ package(
+@@ -61,6 +63,20 @@ tflite_cc_shared_object(
+     deps = [":ops_lib"],
+ )
+ 
++tflite_flex_android_library(
++    name = "tftext_ops",
++    additional_deps = [
++        "@org_tensorflow//tensorflow/lite/delegates/flex:delegate",
++        ":ops_lib",
++    ],
++    visibility = ["//visibility:public"],
++)
++
++aar_with_jni(
++    name = "tftext_tflite_flex",
++    android_library = ":tftext_ops",
++)
++
+ py_library(
+     name = "ops",
+     srcs = [
+diff --git a/tensorflow_text/tftext.bzl b/tensorflow_text/tftext.bzl
+index 65430ca..04f68d8 100644
+--- a/tensorflow_text/tftext.bzl
++++ b/tensorflow_text/tftext.bzl
+@@ -140,6 +140,7 @@ def tf_cc_library(
+     deps += select({
+         "@org_tensorflow//tensorflow:mobile": [
+             "@org_tensorflow//tensorflow/core:portable_tensorflow_lib_lite",
++            "@org_tensorflow//tensorflow/lite/kernels/shim:tf_op_shim",
+         ],
+         "//conditions:default": [
+             "@local_config_tf//:libtensorflow_framework",

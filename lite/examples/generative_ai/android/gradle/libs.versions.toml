@@ -1,0 +1,32 @@
+[versions]
+compose = "1.3.2"
+lifecycle = "2.6.0-beta01"
+koin = "3.4.0"
+
+[libraries]
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version = "1.3.1" }
+compose-material = { module = "androidx.compose.material3:material3", version = "1.0.1" }
+compose-material-icons = { module = "androidx.compose.material:material-icons-extended", version = "1.4.0" }
+compose-activity = { module = "androidx.activity:activity-compose", version = "1.6.1" }
+
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version = "0.30.0" }
+
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+
+lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+
+napier = { module = "io.github.aakira:napier", version = "2.6.1" }
+
+wordfilter = { module = "com.github.mediamonks:AndroidWordFilter", version = "1.0.3" }
+
+tflite = { module = "org.tensorflow:tensorflow-lite", version = "2.12.0" }
+
+junit = { module = "junit:junit", version = "4.13.2" }
