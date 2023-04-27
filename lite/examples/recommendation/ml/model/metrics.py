@@ -78,7 +78,7 @@ class BatchMeanRank(tf.keras.metrics.Mean):
   def __init__(self, name='batch_mean_rank', **kwargs):
     super().__init__(name=name, **kwargs)
 
-  def update_state(self, y_true, y_pred, sample_weight=None):
+  def update_state(self, y_true, y_pred, sample_weight=None):  # pytype: disable=signature-mismatch  # overriding-parameter-count-checks
     """Update state of the metric.
 
     Args:
@@ -110,7 +110,7 @@ class GlobalMeanRank(tf.keras.metrics.Mean):
   def __init__(self, name='global_mean_rank', **kwargs):
     super().__init__(name=name, **kwargs)
 
-  def update_state(self, y_true, y_pred, sample_weight=None):
+  def update_state(self, y_true, y_pred, sample_weight=None):  # pytype: disable=signature-mismatch  # overriding-parameter-count-checks
     """Update state of the metric.
 
     Args:

@@ -46,7 +46,7 @@ class RecommendationModel(tf.keras.Model):
         input_config=self._input_config)
     self._dotproduct_layer = dotproduct_similarity.DotProductSimilarity()
 
-  def call(self, inputs):
+  def call(self, inputs):  # pytype: disable=signature-mismatch  # overriding-parameter-count-checks
     """Compute outputs by passing inputs through the model.
 
     Computes the dotproduct similarity between the context embeddings with
