@@ -22,7 +22,13 @@ import gin
 import numpy as np
 import tensorflow.compat.v1 as tf
 import tensorflow.compat.v2 as tf2
-from tensorflow.python.eager import record  # pylint:disable=g-direct-tensorflow-import
+
+# pylint: disable=g-import-not-at-top
+try:
+  from tensorflow.python.eager import record  # pylint:disable=g-direct-tensorflow-import
+except ImportError:
+  from tensorflow.python.eager import tape as record  # pylint:disable=g-direct-tensorflow-import
+
 from tensorflow.python.tpu import tpu_function  # pylint:disable=g-direct-tensorflow-import
 # pylint: disable=logging-format-interpolation
 
