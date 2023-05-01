@@ -31,8 +31,10 @@ if '--nightly' in sys.argv:
   sys.argv.remove('--nightly')
 
 project_name = 'tensorflow-examples'
-# Get the current commit hash
-version = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8')
+# Get the current commit hash and timestamp
+commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+commit_timestamp = subprocess.check_output(['git', 'show', '-s', '--format=%ct', 'HEAD']).decode('utf-8').strip()
+version = f"0.{commit_timestamp}.{int(commit_hash, 16)}"
 
 if nightly:
   project_name = 'tensorflow-examples-nightly'
