@@ -32,9 +32,12 @@ if '--nightly' in sys.argv:
 
 project_name = 'tensorflow-examples'
 # Get the current commit hash and timestamp
-commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+# The timestamp is used so that newer commits have a higher version number
+# The hash is used so that the specific commit can be identified
+# The hash integer can be converted back to the hash string with: '%032x' % commit_hash_int
+commit_hash_int = int(subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip(), 16)
 commit_timestamp = subprocess.check_output(['git', 'show', '-s', '--format=%ct', 'HEAD']).decode('utf-8').strip()
-version = f"0.{commit_timestamp}.{int(commit_hash, 16)}"
+version = f"0.{commit_timestamp}.{commit_hash_int}"
 
 if nightly:
   project_name = 'tensorflow-examples-nightly'
