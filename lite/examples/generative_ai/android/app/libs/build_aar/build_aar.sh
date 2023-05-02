@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 # Clone TensorFlow Text repo
 git clone https://github.com/tensorflow/text.git tensorflow_text
 
@@ -21,4 +23,6 @@ bazel build -c opt --cxxopt='--std=c++14' --config=monolithic --config=android_x
 if [ $? -eq 0 ]; then
     # Print a message
     echo "Please find the aar file: tensorflow_text/bazel-bin/tensorflow_text/tftext_tflite_flex.aar"
+else
+    echo "build_aar.sh has failed. Please find the error message above and address it before proceeding."
 fi

@@ -23,5 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Google Tensorflow Demo"
+rootProject.name = "Google TensorFlow Demo"
 include(":app")

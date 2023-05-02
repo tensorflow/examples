@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.tensorflowdemo.R
-import com.google.tensorflowdemo.data.autocomplete.AutoCompleteInputConfiguration
+import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService.AutoCompleteInputConfiguration
 import com.google.tensorflowdemo.ui.theme.LightGrey
 import com.google.tensorflowdemo.ui.theme.TensorFlowDemoTheme
 

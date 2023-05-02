@@ -78,14 +78,6 @@ fun AutoCompleteTextField(
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
         ),
-/*
-        visualTransformation = { currentText ->
-            TransformedText(
-                annotatePreviousSuggestions(currentText, previousSuggestions, colorScheme, onSuggestionsRemoved),
-                OffsetMapping.Identity
-            )
-        },
-*/
         modifier = modifier
             .focusRequester(focusRequester)
     )
