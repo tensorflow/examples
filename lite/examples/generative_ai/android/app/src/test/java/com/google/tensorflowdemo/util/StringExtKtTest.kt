@@ -4,43 +4,37 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class StringExtKtTest {
-    @Test
-    fun `Test that short text is left unharmed`() {
+    @Test fun TestThatShortTextIsLeftUnharmed() {
         val input = "Mary had a little lamb!"
         val output = input.trimToMaxWordCount(20)
         assertEquals(input, output)
     }
 
-    @Test
-    fun `Test that a text with more words than allowed is trimmed properly`() {
+    @Test fun TestThatATextWithMoreWordsThanAllowedIsTrimmedProperly() {
         val input = "Mary had a little, lamb"
         val output = input.trimToMaxWordCount(2)
         assertTrue(output.length < input.length)
     }
 
-    @Test
-    fun `Test that an empty text is trimmed properly`() {
+    @Test fun TestThatAnEmptyTextIsTrimmedProperly() {
         val input = ""
         val output = input.trimToMaxWordCount(5)
         assertTrue(output.isEmpty())
     }
 
-    @Test
-    fun `Test that a sentence is split into words properly`() {
+    @Test fun TestThatASentenceIsSplitIntoWordsProperly() {
         val input = "Mary had a little lamb!"
         val output = input.splitToWords()
         assertEquals(5, output.size)
     }
 
-    @Test
-    fun `Test that an empty string is split into words properly`() {
+    @Test fun TestThatAnEmptyStringIsSplitIntoWordsProperly() {
         val input = ""
         val output = input.splitToWords()
         assertEquals(0, output.size)
     }
 
-    @Test
-    fun `Test that non-words at start are kept as is`() {
+    @Test fun TestThatNonWordsAtStartAreKeptAsIs() {
         val input = ". A few of us, a couple of guys"
         val output = input.splitToWords()
         assertEquals(8, output.size)

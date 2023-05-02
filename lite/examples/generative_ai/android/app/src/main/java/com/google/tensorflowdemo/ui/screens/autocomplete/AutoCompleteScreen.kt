@@ -39,8 +39,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.tensorflowdemo.R
-import com.google.tensorflowdemo.data.autocomplete.AutoCompleteInputConfiguration
-import com.google.tensorflowdemo.data.autocomplete.AutoCompleteServiceError
+import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService.AutoCompleteInputConfiguration
+import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService.AutoCompleteServiceError
 import com.google.tensorflowdemo.ui.screens.autocomplete.components.AutoCompleteInfo
 import com.google.tensorflowdemo.ui.screens.autocomplete.components.AutoCompleteTextField
 import com.google.tensorflowdemo.ui.screens.autocomplete.components.TextControlBar

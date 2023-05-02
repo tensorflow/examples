@@ -3,10 +3,10 @@ package com.google.tensorflowdemo.ui.screens.autocomplete
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.tensorflowdemo.data.autocomplete.AutoCompleteResult
 import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService
-import com.google.tensorflowdemo.data.autocomplete.AutoCompleteServiceError
-import com.google.tensorflowdemo.data.autocomplete.InitModelResult
+import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService.AutoCompleteResult
+import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService.AutoCompleteServiceError
+import com.google.tensorflowdemo.data.autocomplete.AutoCompleteService.InitModelResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
