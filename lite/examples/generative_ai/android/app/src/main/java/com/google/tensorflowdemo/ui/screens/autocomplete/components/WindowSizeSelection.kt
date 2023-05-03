@@ -82,7 +82,7 @@ fun WindowSizeSelection(
 fun PreviewWindowSizeSelection() {
     TensorFlowDemoTheme {
         WindowSizeSelection(
-            inputConfiguration = AutoCompleteInputConfiguration(5, 50, 20),
+            inputConfiguration = AutoCompleteInputConfiguration(),
             onWindowValueChange = {}
         )
     }

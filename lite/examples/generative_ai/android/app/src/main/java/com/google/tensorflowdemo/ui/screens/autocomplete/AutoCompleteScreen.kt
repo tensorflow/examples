@@ -253,7 +253,7 @@ fun PreviewAutoCompleteScreen() {
             inputValue = inputValue,
             onInputValueChange = {},
             inputEnabled = true,
-            inputConfiguration = AutoCompleteInputConfiguration(5, 50, 20),
+            inputConfiguration = AutoCompleteInputConfiguration(),
             previousSuggestions = listOf(),
             onClear = {},
             onCopy = {},
