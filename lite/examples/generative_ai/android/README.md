@@ -21,10 +21,9 @@ gpt2_preprocessor = keras_nlp.models.GPT2CausalLMPreprocessor.from_preset(
   add_end_token=True,
 )
 
-gpt2_lm = 
-keras_nlp.models.GPT2CausalLM.from_preset(
-"gpt2_base_en", 
-preprocessor=gpt2_preprocessor
+gpt2_lm = keras_nlp.models.GPT2CausalLM.from_preset(
+  "gpt2_base_en", 
+  preprocessor=gpt2_preprocessor,
 )
 ```
 
