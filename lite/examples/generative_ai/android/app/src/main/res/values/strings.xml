@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Keras to TFL</string>
+
+    <string name="header_background_desc">Header background</string>
+    <string name="header_autocomplete">Autocomplete</string>
+
+    <string name="text_copied">Text copied</string>
+    <string name="input_hint">Tap to begin typing your story…</string>
+    <string name="clear_cta">Clear</string>
+    <string name="generate_cta">Generate</string>
+    <string name="copy_cta">Copy</string>
+    <string name="reject_suggestion_cta">New suggestion</string>
+    <string name="accept_suggestion_cta">Accept</string>
+
+    <string name="window_size_slider_label">Apply context window</string>
+    <string name="window_size_wordcount">{count} words</string>
+
+    <string name="about_title">Powered by KerasNLP and TensorFlow Lite</string>
+
+    <!--  Errors  -->
+    <string name="error_model_not_initialized">Model not initialized</string>
+    <string name="error_no_suggestion_found">No suggestions found</string>
+    <string name="error_model_not_found">The autocomplete.tflite model is missing</string>
+    <string name="error_input_contains_bad_language">Mind your language!</string>
+</resources>
