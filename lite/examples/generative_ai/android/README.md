@@ -3,7 +3,21 @@
 ## Introduction
 Large language models (LLMs) are types of machine learning models that are created based on large bodies of text data to generate various outputs for natural language processing (NLP) tasks, including text generation, question answering, and machine translation. They are based on Transformer architecture and are trained on massive amounts of text data, often involving billions of words. Even LLMs of a smaller scale, such as GPT-2, can perform impressively. Converting TensorFlow models to a lighter, faster, and low-power model allows for us to run generative AI models on-device, with benefits of better user security because data will never leave your device.
 
- This example shows you how to build an Android app with TensorFlow Lite to run a Keras  LLM  and provides suggestions for model optimization using quantizing techniques l, which otherwise would require a much larger amount of memory and greater computational power to run.
+ This example shows you how to build an Android app with TensorFlow Lite to run a Keras  LLM  and provides suggestions for model optimization using quantizing techniques, which otherwise would require a much larger amount of memory and greater computational power to run.
+
+This example open sourced an Android app framework that any compatible TFLite LLMs can plug into. Here are two demos: 
+* In Figure 1, we used a Keras GPT-2 model to perform text completion tasks on device. 
+* In Figure 2, we converted a version of instruction-tuned [PaLM model](https://ai.googleblog.com/2022/04/pathways-language-model-palm-scaling-to.html) (1.5 billion parameters) to TFLite and executed through TFLite runtime. 
+
+<p align="center">
+  <img src="figures/demo.gif" width="300">
+</p>
+Figure 1: Example of running the Keras GPT-2 model (converted from this Codelab) on device to perform text completion on Pixel 7. Demo shows the real latency with no speedup.
+<p align="center">
+  <img src="figures/demo.gif" width="300">
+</p>
+Figure 2: Example of running a version of [PaLM model](https://ai.googleblog.com/2022/04/pathways-language-model-palm-scaling-to.html) with 1.5 billion parameters. Demo is recorded on Pixel 7 Pro without playback speedup.
+
 
 
 
