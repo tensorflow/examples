@@ -1,7 +1,0 @@
-task downloadAAR {
-    download {
-        src project.ext.AAR_URL
-        dest project.ext.AAR_PATH
-        overwrite false
-    }
-}
