@@ -10,11 +10,11 @@ This example open sourced an Android app framework that any compatible TFLite LL
 * In Figure 2, we converted a version of instruction-tuned [PaLM model](https://ai.googleblog.com/2022/04/pathways-language-model-palm-scaling-to.html) (1.5 billion parameters) to TFLite and executed through TFLite runtime. 
 
 <p align="center">
-  <img src="figures/demo.gif" width="300">
+  <img src="figures/autocomplete_fig1.gif" width="300">
 </p>
 Figure 1: Example of running the Keras GPT-2 model (converted from this Codelab) on device to perform text completion on Pixel 7. Demo shows the real latency with no speedup.
 <p align="center">
-  <img src="figures/demo.gif" width="300">
+  <img src="figures/auto_complete_2.gif" width="300">
 </p>
 Figure 2: Example of running a version of [PaLM model](https://ai.googleblog.com/2022/04/pathways-language-model-palm-scaling-to.html) with 1.5 billion parameters. Demo is recorded on Pixel 7 Pro without playback speedup.
 
