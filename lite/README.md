@@ -48,8 +48,6 @@ is highlighted.
 
 ### Samples
 
-[Android speech commands](examples/speech_commands/android/README.md)
-
 [iOS speech commands](examples/speech_commands/ios/README.md)
 
 
