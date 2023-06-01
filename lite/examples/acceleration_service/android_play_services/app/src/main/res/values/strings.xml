@@ -1,0 +1,7 @@
+<resources>
+  <string name="app_name" translatable="false">Acceleration Service Test Application</string>
+  <string name="cpu_validation_plain_addition_model">Run CPU Validation on Plain Addition model</string>
+  <string name="gpu_validation_plain_addition_model">Run GPU Validation on Plain Addition model</string>
+  <string name="cpu_validation_mobilenet_model">Run CPU Validation on MobileNet model</string>
+  <string name="gpu_validation_mobilenet_model">Run GPU Validation on MobileNet model</string>
+</resources>

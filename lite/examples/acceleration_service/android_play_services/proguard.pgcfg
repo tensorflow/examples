@@ -1,0 +1,18 @@
+-keep,allowshrinking public class com.google.android.gms.tflite.acceleration.MainActivity {
+  <methods>; # Needed for runScenario()
+}
+
+-keep,allowshrinking public class com.google.android.gms.tflite.java.TfLiteJavaInitializer {
+  <methods>; # Needed for initialize()
+}
+
+-keep public class com.google.android.gms.tasks.* {
+  public static <methods>;
+  public <methods>;
+}
+
+-keep public class org.tensorflow.lite.* {
+  public static <methods>;
+  public static <fields>; # Needed for the Runtime enum
+  public <methods>;
+}
