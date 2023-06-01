@@ -6,7 +6,7 @@
 
 <h2>Most important links!</h2>
 
-* [Community examples](./community)
+* [Community examples](https://devlibrary.withgoogle.com)
 * [Course materials](./courses/udacity_deep_learning) for the [Deep Learning](https://www.udacity.com/course/deep-learning--ud730) class on Udacity
 
 If you are looking to learn TensorFlow, don't miss the
