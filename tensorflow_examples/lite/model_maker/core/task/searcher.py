@@ -20,9 +20,9 @@ import os
 import tempfile
 from typing import AnyStr, List, Optional
 
+import flatbuffers
 import tensorflow as tf
 from tensorflow_examples.lite.model_maker.core.api.api_util import mm_export
-import flatbuffers
 from tensorflow_lite_support.metadata import metadata_schema_py_generated as _metadata_fb
 from tensorflow_lite_support.metadata import schema_py_generated as _schema_fb
 from tensorflow_lite_support.metadata.python import metadata as _metadata
