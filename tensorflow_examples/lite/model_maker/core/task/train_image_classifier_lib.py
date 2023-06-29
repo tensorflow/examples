@@ -24,8 +24,8 @@ import tempfile
 
 import tensorflow.compat.v2 as tf
 from tensorflow_examples.lite.model_maker.core.optimization import warmup
+from tensorflow_examples.lite.model_maker.core.task import make_image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_util
-from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
 
 DEFAULT_DECAY_SAMPLES = 10000 * 256
 DEFAULT_WARMUP_EPOCHS = 2
@@ -39,7 +39,10 @@ def add_params(hparams, **kwargs):
 
 class HParams(
     collections.namedtuple(
-        "HParams", hub_lib.HParams._fields + ("warmup_steps", "model_dir"))):
+        "HParams",
+        make_image_classifier.HParams._fields + ("warmup_steps", "model_dir"),
+    )
+):
   """The hyperparameters for make_image_classifier.
 
   train_epochs: Training will do this many iterations over the dataset.
@@ -62,7 +65,7 @@ class HParams(
 
 def get_default_hparams():
   """Returns a fresh HParams object initialized to default values."""
-  default_hub_hparams = hub_lib.get_default_hparams()
+  default_hub_hparams = make_image_classifier.get_default_hparams()
   as_dict = default_hub_hparams._asdict()
   as_dict.update(
       train_epochs=10,

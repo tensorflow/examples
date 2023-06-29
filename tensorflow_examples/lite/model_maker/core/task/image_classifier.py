@@ -21,25 +21,22 @@ import os
 import tempfile
 
 import tensorflow.compat.v2 as tf
-
 from tensorflow_examples.lite.model_maker.core.task import metadata_writer_for_image_classifier as metadata_writer
-
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.task import classification_model
 from tensorflow_examples.lite.model_maker.core.task import hub_loader
 from tensorflow_examples.lite.model_maker.core.task import image_preprocessing
+from tensorflow_examples.lite.model_maker.core.task import make_image_classifier
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 from tensorflow_examples.lite.model_maker.core.task import model_util
 from tensorflow_examples.lite.model_maker.core.task import train_image_classifier_lib
 from tensorflow_examples.lite.model_maker.core.task.model_spec import image_spec
 
-from tensorflow_hub.tools.make_image_classifier import make_image_classifier_lib as hub_lib
-
 
 def get_hub_lib_hparams(**kwargs):
   """Gets the hyperparameters for the tensorflow hub's library."""
-  hparams = hub_lib.get_default_hparams()
+  hparams = make_image_classifier.get_default_hparams()
   return train_image_classifier_lib.add_params(hparams, **kwargs)
 
 
@@ -82,13 +79,15 @@ def _get_model_info(model_spec,
 class ImageClassifier(classification_model.ClassificationModel):
   """ImageClassifier class for inference and exporting to tflite."""
 
-  def __init__(self,
-               model_spec,
-               index_to_label,
-               shuffle=True,
-               hparams=hub_lib.get_default_hparams(),
-               use_augmentation=False,
-               representative_data=None):
+  def __init__(
+      self,
+      model_spec,
+      index_to_label,
+      shuffle=True,
+      hparams=make_image_classifier.get_default_hparams(),
+      use_augmentation=False,
+      representative_data=None,
+  ):
     """Init function for ImageClassifier class.
 
     Args:
@@ -128,9 +127,12 @@ class ImageClassifier(classification_model.ClassificationModel):
 
     module_layer = hub_loader.HubKerasLayerV1V2(
         self.model_spec.uri, trainable=hparams.do_fine_tuning)
-    self.model = hub_lib.build_model(module_layer, hparams,
-                                     self.model_spec.input_image_shape,
-                                     self.num_classes)
+    self.model = make_image_classifier.build_model(
+        module_layer,
+        hparams,
+        self.model_spec.input_image_shape,
+        self.num_classes,
+    )
     if with_loss_and_metrics:
       # Adds loss and metrics in the keras model.
       self.model.compile(
@@ -147,7 +149,7 @@ class ImageClassifier(classification_model.ClassificationModel):
     Args:
       train_data: Training data.
       validation_data: Validation data. If None, skips validation process.
-      hparams: An instance of hub_lib.HParams or
+      hparams: An instance of make_image_classifier.HParams or
         train_image_classifier_lib.HParams. Anamedtuple of hyperparameters.
       steps_per_epoch: Integer or None. Total number of steps (batches of
         samples) before declaring one epoch finished and starting the next
