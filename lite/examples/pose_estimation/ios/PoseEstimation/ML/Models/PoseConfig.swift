@@ -36,5 +36,6 @@ enum ModelType: String, CaseIterable {
   case posenet = "Posenet"
   case movenetLighting = "Lightning"  // Movenet lightning
   case movenetThunder = "Thunder"  // Movenet thunder
+  case movenetMultiPose = "MovenetMultiPose"
 }
 

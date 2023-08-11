@@ -85,7 +85,7 @@ final class PoseNet: PoseEstimator {
   ///   - from: Range of input image to run the model.
   ///   - to: Size of view to render the result.
   /// - Returns: Result of the inference and the times consumed in every steps.
-  func estimateSinglePose(on pixelBuffer: CVPixelBuffer) throws -> (Person, Times) {
+  func estimatePoses(on pixelBuffer: CVPixelBuffer) throws -> ([Person], Times) {
     // Start times of each process.
     let preprocessingStartTime: Date
     let inferenceStartTime: Date
@@ -134,7 +134,7 @@ final class PoseNet: PoseEstimator {
       preprocessing: preprocessingTime,
       inference: inferenceTime,
       postprocessing: postprocessingTime)
-    return (result, times)
+    return ([result], times)
   }
 
   // MARK: - Private functions to run model

@@ -1,23 +1,23 @@
 PODS:
-  - TensorFlowLiteC (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/Core (= 0.0.1-nightly.20230405)
-  - TensorFlowLiteC/Core (0.0.1-nightly.20230405)
-  - TensorFlowLiteC/CoreML (0.0.1-nightly.20230405):
+  - TensorFlowLiteC (2.13.0):
+    - TensorFlowLiteC/Core (= 2.13.0)
+  - TensorFlowLiteC/Core (2.13.0)
+  - TensorFlowLiteC/CoreML (2.13.0):
     - TensorFlowLiteC/Core
-  - TensorFlowLiteC/Metal (0.0.1-nightly.20230405):
+  - TensorFlowLiteC/Metal (2.13.0):
     - TensorFlowLiteC/Core
-  - TensorFlowLiteSwift/Core (0.0.1-nightly.20230405):
-    - TensorFlowLiteC (= 0.0.1-nightly.20230405)
-  - TensorFlowLiteSwift/CoreML (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/CoreML (= 0.0.1-nightly.20230405)
-    - TensorFlowLiteSwift/Core (= 0.0.1-nightly.20230405)
-  - TensorFlowLiteSwift/Metal (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/Metal (= 0.0.1-nightly.20230405)
-    - TensorFlowLiteSwift/Core (= 0.0.1-nightly.20230405)
+  - TensorFlowLiteSwift/Core (2.13.0):
+    - TensorFlowLiteC (= 2.13.0)
+  - TensorFlowLiteSwift/CoreML (2.13.0):
+    - TensorFlowLiteC/CoreML (= 2.13.0)
+    - TensorFlowLiteSwift/Core (= 2.13.0)
+  - TensorFlowLiteSwift/Metal (2.13.0):
+    - TensorFlowLiteC/Metal (= 2.13.0)
+    - TensorFlowLiteSwift/Core (= 2.13.0)
 
 DEPENDENCIES:
-  - TensorFlowLiteSwift/CoreML (~> 0.0.1-nightly)
-  - TensorFlowLiteSwift/Metal (~> 0.0.1-nightly)
+  - TensorFlowLiteSwift/CoreML (~> 2.13.0)
+  - TensorFlowLiteSwift/Metal (~> 2.13.0)
 
 SPEC REPOS:
   trunk:
@@ -25,9 +25,9 @@ SPEC REPOS:
     - TensorFlowLiteSwift
 
 SPEC CHECKSUMS:
-  TensorFlowLiteC: 3deccb9fc6560cf521735fffb1ff438f07435e42
-  TensorFlowLiteSwift: f82f3d45b76bf3611727a731b000c6e93a1d9e9a
+  TensorFlowLiteC: ac3334fa9dbc90e4744b4497312a393fd02b5408
+  TensorFlowLiteSwift: 1d8320fbf292054eb50ef0b347a4b17a92b49731
 
-PODFILE CHECKSUM: f3f637925dcc74131c03aa9b456dc3074e3dfd3d
+PODFILE CHECKSUM: b3c3b091bc7fe63c833f7a68840949801966058d
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

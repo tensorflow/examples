@@ -17,8 +17,9 @@ import UIKit
 
 /// Protocol to  run a pose estimator.
 protocol PoseEstimator {
-  func estimateSinglePose(on pixelbuffer: CVPixelBuffer) throws -> (Person, Times)
+  func estimatePoses(on pixelBuffer: CVPixelBuffer) throws -> ([Person], Times)
 }
+
 
 // MARK: - Custom Errors
 enum PoseEstimationError: Error {

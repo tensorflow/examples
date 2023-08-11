@@ -67,6 +67,31 @@ class OverlayView: UIImageView {
     guard let newImage = UIGraphicsGetImageFromCurrentImageContext() else { fatalError() }
     self.image = newImage
   }
+    func draw(at image: UIImage, persons: [Person]) {
+      if context == nil {
+        UIGraphicsBeginImageContext(image.size)
+        guard let context = UIGraphicsGetCurrentContext() else {
+          fatalError("set current context faild")
+        }
+        self.context = context
+      }
+        var count = 0
+        for person in persons {
+            if let strokes = strokes(from: person) {
+                if count == 0 {
+                    image.draw(at: .zero)
+                }
+                context.setLineWidth(Config.dot.radius)
+                drawDots(at: context, dots: strokes.dots)
+                drawLines(at: context, lines: strokes.lines)
+                context.setStrokeColor(UIColor.blue.cgColor)
+                context.strokePath()
+                count += 1
+            }
+        }
+        guard let newImage = UIGraphicsGetImageFromCurrentImageContext() else { fatalError() }
+        self.image = newImage
+    }
 
   /// Draw the dots (i.e. keypoints).
   ///

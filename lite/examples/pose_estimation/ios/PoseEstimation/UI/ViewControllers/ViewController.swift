@@ -43,6 +43,7 @@ final class ViewController: UIViewController {
   // MARK: Controllers that manage functionality
   // Handles all data preprocessing and makes calls to run inference.
   private var poseEstimator: PoseEstimator?
+  private var lastPoseEstimator: PoseEstimator?
   private var cameraFeedManager: CameraFeedManager!
 
   // Serial queue to control all tasks related to the TFLite model.
@@ -137,6 +138,7 @@ final class ViewController: UIViewController {
     // Update the model in the same serial queue with the inference logic to avoid race condition
     queue.async {
       do {
+        self.lastPoseEstimator = self.poseEstimator
         switch self.modelType {
         case .posenet:
           self.poseEstimator = try PoseNet(
@@ -147,9 +149,12 @@ final class ViewController: UIViewController {
             threadCount: self.threadCount,
             delegate: self.delegate,
             modelType: self.modelType)
+        case .movenetMultiPose:
+            self.poseEstimator = try MoveNetMultiPose(threadCount: self.threadCount, delegate: self.delegate, modelType: .dynamic)
         }
       } catch let error {
         os_log("Error: %@", log: .default, type: .error, String(describing: error))
+        self.poseEstimator = nil
       }
     }
   }
@@ -193,27 +198,34 @@ extension ViewController: CameraFeedManagerDelegate {
 
       // Run pose estimation
       do {
-        let (result, times) = try estimator.estimateSinglePose(
-            on: pixelBuffer)
-
-        // Return to main thread to show detection results on the app UI.
-        DispatchQueue.main.async {
-          self.totalTimeLabel.text = String(format: "%.2fms",
-                                            times.total * 1000)
-          self.scoreLabel.text = String(format: "%.3f", result.score)
-
-          // Allowed to set image and overlay
-          let image = UIImage(ciImage: CIImage(cvPixelBuffer: pixelBuffer))
-
-          // If score is too low, clear result remaining in the overlayView.
-          if result.score < self.minimumScore {
-            self.overlayView.image = image
-            return
+          let (results, times) = try estimator.estimatePoses(on: pixelBuffer)
+          // Return to main thread to show detection results on the app UI.
+          let filterResults = results.filter {
+              $0.score > self.minimumScore
           }
+          var score: Float = 0.0
+          if filterResults.count > 0 {
+              score = filterResults.reduce(0.0) { partialResult, person in
+                  partialResult + Float(person.score)
+              } / Float(filterResults.count)
+          }
+          
+          DispatchQueue.main.async {
+              self.totalTimeLabel.text = String(format: "%.2fms",
+                                                times.total * 1000)
+              self.scoreLabel.text = String(format: "%.3f", score)
 
-          // Visualize the pose estimation result.
-          self.overlayView.draw(at: image, person: result)
-        }
+              // Allowed to set image and overlay
+              let image = UIImage(ciImage: CIImage(cvPixelBuffer: pixelBuffer))
+
+              // If score is too low, clear result remaining in the overlayView.
+              if filterResults.count > 0 {
+                  self.overlayView.draw(at: image, persons: filterResults)
+              } else {
+                  self.overlayView.image = image
+              }
+              // Visualize the pose estimation result.
+          }
       } catch {
         os_log("Error running pose estimation.", type: .error)
         return
@@ -229,5 +241,5 @@ enum Constants {
   static let defaultModelType: ModelType = .movenetThunder
 
   // Minimum score to render the result.
-  static let minimumScore: Float32 = 0.2
+  static let minimumScore: Float32 = 0.11
 }

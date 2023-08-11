@@ -54,7 +54,8 @@ final class MoveNet: PoseEstimator {
       fileInfo = movenetThunderFile
     case .movenetLighting:
       fileInfo = movenetLightningFile
-    case .posenet: fatalError("Failed to use MoveNet")
+    case .posenet, .movenetMultiPose:
+        fatalError("Failed to use MoveNet")
     }
     guard
       let modelPath = Bundle.main.path(
@@ -98,7 +99,7 @@ final class MoveNet: PoseEstimator {
   /// - Parameters:
   ///   - on: Input image to run the model.
   /// - Returns: Result of the inference and the times consumed in every steps.
-  func estimateSinglePose(on pixelBuffer: CVPixelBuffer) throws -> (Person, Times) {
+  func estimatePoses(on pixelBuffer: CVPixelBuffer) throws -> ([Person], Times) {
     // Check if this MoveNet instance is already processing a video frame.
     // Return an empty detection result if it's currently busy.
     guard !isProcessing else {
@@ -155,7 +156,7 @@ final class MoveNet: PoseEstimator {
       preprocessing: preprocessingTime,
       inference: inferenceTime,
       postprocessing: postprocessingTime)
-    return (result, times)
+    return ([result], times)
   }
 
   // MARK: - Private functions to run the model

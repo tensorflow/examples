@@ -23,7 +23,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>This app will use camera to continuously estimate the pose the user shows.</string>
 	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
+	<string>Launch Screen.storyboard</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>

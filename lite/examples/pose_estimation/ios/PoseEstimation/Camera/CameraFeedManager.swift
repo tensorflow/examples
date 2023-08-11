@@ -33,6 +33,7 @@ final class CameraFeedManager: NSObject, AVCaptureVideoDataOutputSampleBufferDel
 
   /// Delegate to receive the frames captured by the device's camera.
   var delegate: CameraFeedManagerDelegate?
+  private let sessionQueue = DispatchQueue(label: "CameraFeedManagerQueue", qos: .background)
 
   override init() {
     super.init()
@@ -41,12 +42,22 @@ final class CameraFeedManager: NSObject, AVCaptureVideoDataOutputSampleBufferDel
 
   /// Start capturing frames from the camera.
   func startRunning() {
-    captureSession.startRunning()
+      guard !captureSession.isRunning else {
+          return
+      }
+      sessionQueue.async { [weak self] in
+          self?.captureSession.startRunning()
+      }
   }
 
   /// Stop capturing frames from the camera.
   func stopRunning() {
-    captureSession.stopRunning()
+      guard captureSession.isRunning else {
+          return
+      }
+      sessionQueue.async { [weak self] in
+          self?.captureSession.stopRunning()
+      }
   }
 
   let captureSession = AVCaptureSession()
@@ -81,7 +92,9 @@ final class CameraFeedManager: NSObject, AVCaptureVideoDataOutputSampleBufferDel
     if captureSession.canAddOutput(videoOutput) {
       captureSession.addOutput(videoOutput)
       videoOutput.connection(with: .video)?.videoOrientation = .portrait
-      captureSession.startRunning()
+      sessionQueue.async { [weak self] in
+        self?.captureSession.startRunning()
+      }
     }
     videoOutput.setSampleBufferDelegate(self, queue: dataOutputQueue)
   }

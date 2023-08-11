@@ -39,6 +39,13 @@ if [ ! -f "$FILE" ]; then
     -o ${FILE}
 fi
 
+FILE=${MODEL_DIR}/movenet_multipose_fp16.tflite
+if [ ! -f "$FILE" ]; then
+  curl \
+    -L 'https://tfhub.dev/google/lite-model/movenet/multipose/lightning/tflite/float16/1?lite-format=tflite' \
+    -o ${FILE}
+fi
+
 echo -e "Downloaded files are in ${MODEL_DIR}"
 
 
