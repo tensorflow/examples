@@ -70,8 +70,7 @@ This launches Xcode and opens the `SoundClassification` project.
 
 3.  With an iOS device connected, build and run the app in Xcode.
 
-You'll have to grant permissions for the app to use the device's camera. Point
-the camera at various objects and enjoy seeing how the model classifies things!
+You'll have to grant permissions for the app to use the device's microphone. The sounds defined in `SoundClassification/Model/labels.txt` will be classified by the model.
 
 ## Model references
 _Do not delete the empty references_ to the .tflite and .txt files after you
