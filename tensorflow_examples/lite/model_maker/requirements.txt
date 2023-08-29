@@ -15,7 +15,7 @@ tensorflowjs>=2.4.0,<3.19.0
 tensorflow>=2.6.0
 # b/196287362: This Numba + Librosa combination works for numpy 1.19, introduced
 # by TensorFlow 2.6.0.
-numba==0.53
+numba>=0.53
 librosa==0.8.1
 lxml>=4.6.1
 PyYAML>=5.1
