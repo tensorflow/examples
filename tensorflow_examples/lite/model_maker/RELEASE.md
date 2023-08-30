@@ -1,4 +1,7 @@
 # Release 0.4
+## 0.4.3
+
+*   Fix the requirement deps issues.
 
 ## 0.4.2
 
