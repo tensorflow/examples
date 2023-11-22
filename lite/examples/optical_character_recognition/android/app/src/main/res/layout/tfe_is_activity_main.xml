@@ -64,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/tfe_using_first_image" />
-        <include layout="@layout/tfe_is_bottom_sheet_layout" />
+
         <ImageView
             android:id="@+id/result_imageview"
             android:layout_width="@dimen/tfe_is_preview_size"
@@ -72,7 +72,7 @@
             android:contentDescription="@string/tfe_result_image_description"
             android:padding="8dp" />
 
-
+        <include layout="@layout/tfe_is_bottom_sheet_layout" />
     </LinearLayout>
 
 
