@@ -30,7 +30,7 @@ from tensorflow_examples.lite.model_maker.core.api import mm_export
 from tensorflow_examples.lite.model_maker.core.data_util import dataloader
 from tensorflow_examples.lite.model_maker.core.task import model_spec as ms
 
-from official.nlp.bert import input_pipeline
+from official.legacy.bert import input_pipeline
 from official.nlp.data import classifier_data_lib
 from official.nlp.data import squad_lib
 
