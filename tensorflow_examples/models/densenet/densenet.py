@@ -188,7 +188,7 @@ class TransitionBlock(tf.keras.Model):
                                        data_format=data_format,
                                        kernel_initializer="he_normal",
                                        kernel_regularizer=l2(weight_decay))
-    self.avg_pool = tf.keras.layers.AveragePooling2D(data_format=data_format)
+    self.avg_pool = tf.keras.layers.AveragePooling2D(pool_size(2,2),data_format=data_format)
 
   def call(self, x, training=True):
     output = self.batchnorm(x, training=training)
