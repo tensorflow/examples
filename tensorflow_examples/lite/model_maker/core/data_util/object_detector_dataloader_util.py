@@ -334,6 +334,8 @@ def _get_xml_dict_from_csv_lines(images_dir: str, image_filename: str,
 
   for line in lines:
     label = line[2].strip()
+    if label =='':
+      continue
     xmin, ymin = float(line[3]) * width, float(line[4]) * height
     xmax, ymax = float(line[7]) * width, float(line[8]) * height
     obj = {
