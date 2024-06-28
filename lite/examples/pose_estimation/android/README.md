@@ -28,7 +28,7 @@ for a comparison between these models.
 ### Prerequisites
 
 * If you don't have it already, install **[Android Studio](
- https://developer.android.com/studio/index.html)** 4.2 or
+ https://developer.android.com/studio/index.html)** Jellyfish | 2023.3.1 or
  above, following the instructions on the website.
 
 * Android device and Android development environment with minimum API 21.
