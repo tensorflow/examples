@@ -2,8 +2,9 @@
 buildscript {
     ext {
         agp_version = '8.5.0'
+        kotlin_version = '2.0.0'
     }
-    ext.kotlin_version = "2.0.0"
+
     repositories {
         google()
         mavenCentral()
