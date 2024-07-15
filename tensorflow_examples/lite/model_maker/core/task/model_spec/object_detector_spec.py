@@ -491,26 +491,48 @@ class EfficientDetModelSpec(object):
       tflite_filepath: File path to save tflite model.
       quantization_config: Configuration for post-training quantization.
     """
-    with tempfile.TemporaryDirectory() as temp_dir:
-      self.export_saved_model(
-          model, temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
-      converter = tf.lite.TFLiteConverter.from_saved_model(temp_dir)
+    
+    # self.export_saved_model(
+    #     model, temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
-      if quantization_config:
+    if quantization_config:
         converter = quantization_config.get_converter_with_quantization(
             converter, model_spec=self)
 
         # TFLITE_BUILTINS is needed for TFLite's custom NMS op for integer only
         # quantization.
-        if tf.lite.OpsSet.TFLITE_BUILTINS not in converter.target_spec.supported_ops:
-          converter.target_spec.supported_ops += [
-              tf.lite.OpsSet.TFLITE_BUILTINS
-          ]
+    if tf.lite.OpsSet.TFLITE_BUILTINS not in converter.target_spec.supported_ops:
+        converter.target_spec.supported_ops += [
+            tf.lite.OpsSet.TFLITE_BUILTINS
+        ]
 
-      tflite_model = converter.convert()
+    tflite_model = converter.convert()
 
-      with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
+    with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
         f.write(tflite_model)
+
+          
+    # with tempfile.TemporaryDirectory() as temp_dir:
+    #   self.export_saved_model(
+    #       model, temp_dir, batch_size=1, pre_mode=None, post_mode='tflite')
+    #   converter = tf.lite.TFLiteConverter.from_saved_model(temp_dir)
+
+    #   if quantization_config:
+    #     converter = quantization_config.get_converter_with_quantization(
+    #         converter, model_spec=self)
+
+    #     # TFLITE_BUILTINS is needed for TFLite's custom NMS op for integer only
+    #     # quantization.
+    #     if tf.lite.OpsSet.TFLITE_BUILTINS not in converter.target_spec.supported_ops:
+    #       converter.target_spec.supported_ops += [
+    #           tf.lite.OpsSet.TFLITE_BUILTINS
+    #       ]
+
+    #   tflite_model = converter.convert()
+
+    #   with tf.io.gfile.GFile(tflite_filepath, 'wb') as f:
+    #     f.write(tflite_model)
 
 
 efficientdet_lite0_spec = functools.partial(
