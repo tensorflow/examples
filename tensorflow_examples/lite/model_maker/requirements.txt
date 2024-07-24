@@ -1,3 +1,4 @@
+kaggle==1.6.14
 tf-models-official==2.3.0
 # tensorflow-hub is to load Hub model. Specific version is required by TFJS.
 tensorflow-hub>=0.7.0,<0.10; python_version < "3"
