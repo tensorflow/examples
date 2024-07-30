@@ -108,6 +108,8 @@ def get(spec_or_str, *args, **kwargs):
 
   if inspect.isclass(model_spec) or inspect.isfunction(
       model_spec) or isinstance(model_spec, functools.partial):
+    print(args)
+    print(kwargs)
     return model_spec(*args, **kwargs)
   else:
     return model_spec
