@@ -262,6 +262,7 @@ class EfficientDetModelSpec(object):
             batch_size=batch_size))
     train.setup_model(model, config)
     train.init_experimental(config)
+    print("yep this is the one!!")
     model.fit(
         train_dataset,
         epochs=epochs,
