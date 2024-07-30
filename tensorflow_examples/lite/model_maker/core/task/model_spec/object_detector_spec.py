@@ -131,7 +131,9 @@ class EfficientDetModelSpec(object):
                profile: bool = False,
                debug: bool = False,
                tf_random_seed: int = 111111,
-               verbose: int = 0) -> None:
+               verbose: int = 0,
+               test: str = "") -> None:
+
     """Initialze an instance with model paramaters.
 
     Args:
@@ -170,6 +172,7 @@ class EfficientDetModelSpec(object):
         for debugging.
       verbose: verbosity mode for `tf.keras.callbacks.ModelCheckpoint`, 0 or 1.
     """
+    self.test_string = test
     self.model_name = model_name
     self.uri = uri
     self.batch_size = batch_size
@@ -262,7 +265,7 @@ class EfficientDetModelSpec(object):
             batch_size=batch_size))
     train.setup_model(model, config)
     train.init_experimental(config)
-    print("yep this is the one!!")
+    print(f"yep this is the one!! {self.test_string}")
     model.fit(
         train_dataset,
         epochs=epochs,
