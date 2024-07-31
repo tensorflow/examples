@@ -17,7 +17,7 @@ import collections
 import functools
 import os
 import tempfile
-from typing import Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict
 
 from absl import logging
 import tensorflow as tf
@@ -248,7 +248,9 @@ class EfficientDetModelSpec(object):
             validation_steps: int,
             epochs: Optional[int] = None,
             batch_size: Optional[int] = None,
-            val_json_file: Optional[str] = None) -> tf.keras.Model:
+            val_json_file: Optional[str] = None,
+            callbacks: Optional[List[tf.keras.callbacks.Callback]] = []
+            ) -> tf.keras.Model:
     """Run EfficientDet training."""
     config = self.config
     if not epochs:
@@ -266,11 +268,23 @@ class EfficientDetModelSpec(object):
     train.setup_model(model, config)
     train.init_experimental(config)
     print(f"yep this is the one!! {self.test_string}")
+
+    config_callbacks = train_lib.get_callbacks(config.as_dict(), val_dataset)
+    callbacks = config_callbacks + callbacks
+
+    tb_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=self.params['model_dir'],
+        update_freq=self.params['steps_per_execution'],
+        profile_batch=2 if self.params['profile'] else 0)
+    
+    callbacks.append(tb_callback)
+    print(f"Our callbacks are {callbacks}")
+    
     model.fit(
         train_dataset,
         epochs=epochs,
         steps_per_epoch=steps_per_epoch,
-        callbacks=train_lib.get_callbacks(config.as_dict(), val_dataset),
+        callbacks=callbacks,
         validation_data=val_dataset,
         validation_steps=validation_steps)
     return model
