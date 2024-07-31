@@ -27,7 +27,7 @@ class EfficientDetModelSpecTest(tf.test.TestCase):
   @classmethod
   def setUpClass(cls):
     super(EfficientDetModelSpecTest, cls).setUpClass()
-    hub_path = test_util.get_test_data_path('fake_effdet_lite0_hub')
+    hub_path = test_util.get_test_data_path('./testdata/fake_effdet_lite0_hub')
     cls._spec = object_detector_spec.EfficientDetModelSpec(
         model_name='efficientdet-lite0', uri=hub_path, hparams=dict(map_freq=1))
     with cls._spec.ds_strategy.scope():
