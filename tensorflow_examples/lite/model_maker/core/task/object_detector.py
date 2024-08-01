@@ -226,7 +226,9 @@ class ObjectDetector(custom_model.CustomModel):
              epochs: Optional[object_detector_dataloader.DataLoader] = None,
              batch_size: Optional[int] = None,
              train_whole_model: bool = False,
-             do_train: bool = True) -> T:
+             do_train: bool = True,
+             callbacks: Optional[List[tf.keras.callbacks.Callback]] = []
+             ) -> T:
     """Loads data and train the model for object detection.
 
     Args:
@@ -258,7 +260,7 @@ class ObjectDetector(custom_model.CustomModel):
 
     if do_train:
       tf.compat.v1.logging.info('Retraining the models...')
-      object_detector.train(train_data, validation_data, epochs, batch_size)
+      object_detector.train(train_data, validation_data, epochs, batch_size, callbacks)
     else:
       object_detector.create_model()
 
