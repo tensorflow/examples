@@ -273,9 +273,9 @@ class EfficientDetModelSpec(object):
     callbacks = config_callbacks + callbacks
 
     tb_callback = tf.keras.callbacks.TensorBoard(
-        log_dir=self.params['model_dir'],
-        update_freq=self.params['steps_per_execution'],
-        profile_batch=2 if self.params['profile'] else 0)
+        log_dir=self.config['model_dir'] or './',
+        update_freq=self.config['steps_per_execution'] or '24',
+        profile_batch=2 if self.config['profile'] else 0)
     
     callbacks.append(tb_callback)
     print(f"Our callbacks are {callbacks}")
