@@ -172,7 +172,6 @@ class EfficientDetModelSpec(object):
         for debugging.
       verbose: verbosity mode for `tf.keras.callbacks.ModelCheckpoint`, 0 or 1.
     """
-    self.test_string = test
     self.model_name = model_name
     self.uri = uri
     self.batch_size = batch_size
@@ -267,7 +266,6 @@ class EfficientDetModelSpec(object):
             batch_size=batch_size))
     train.setup_model(model, config)
     train.init_experimental(config)
-    print(f"yep this is the one!! {self.test_string}")
 
     config_callbacks = train_lib.get_callbacks(config.as_dict(), val_dataset)
     callbacks = config_callbacks + callbacks
