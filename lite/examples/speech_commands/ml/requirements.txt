@@ -1,4 +1,4 @@
-Keras==2.2.0
+Keras==2.13.1
 pandas==0.22.0
 pandas-ml==0.5.0
 tensorflow>=1.14.0
