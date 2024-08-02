@@ -131,8 +131,7 @@ class EfficientDetModelSpec(object):
                profile: bool = False,
                debug: bool = False,
                tf_random_seed: int = 111111,
-               verbose: int = 0,
-               test: str = "") -> None:
+               verbose: int = 0 ) -> None:
 
     """Initialze an instance with model paramaters.
 
