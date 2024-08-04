@@ -269,12 +269,6 @@ class EfficientDetModelSpec(object):
     config_callbacks = train_lib.get_callbacks(config.as_dict(), val_dataset)
     callbacks = config_callbacks + callbacks
 
-    tb_callback = tf.keras.callbacks.TensorBoard(
-        log_dir=self.config['model_dir'] or '/tmp/tensorboard/',
-        update_freq=self.config['steps_per_execution'] or '24',
-        profile_batch=2 if self.config['profile'] else 0)
-    
-    callbacks.append(tb_callback)
     print(f"Our callbacks are {callbacks}")
     
     model.fit(
