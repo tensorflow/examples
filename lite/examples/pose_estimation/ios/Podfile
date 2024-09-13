@@ -9,6 +9,6 @@ target 'PoseEstimation' do
   use_frameworks!
 
   # Pods for PoseEstimation
-  pod 'TensorFlowLiteSwift', '~> 0.0.1-nightly', :subspecs => ['CoreML', 'Metal']
+  pod 'LiteRTSwift', '~> 0.0.1-nightly', :subspecs => ['CoreML', 'Metal']
 
 end

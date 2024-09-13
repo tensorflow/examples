@@ -95,9 +95,8 @@ class BaseTest(tf.test.TestCase):
     dataset = _gen_dataset(
         spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
     model = spec.create_model(num_classes)
-    epochs = 1 if training else 0
-    spec.run_classifier(
-        model, epochs=epochs, train_ds=dataset, validation_ds=None)
+    if training:
+      spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
 
     tflite_filepath = os.path.join(self.get_temp_dir(), filename)
     spec.export_tflite(

@@ -1,33 +1,37 @@
 PODS:
-  - TensorFlowLiteC (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/Core (= 0.0.1-nightly.20230405)
-  - TensorFlowLiteC/Core (0.0.1-nightly.20230405)
-  - TensorFlowLiteC/CoreML (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/Core
-  - TensorFlowLiteC/Metal (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/Core
-  - TensorFlowLiteSwift/Core (0.0.1-nightly.20230405):
-    - TensorFlowLiteC (= 0.0.1-nightly.20230405)
-  - TensorFlowLiteSwift/CoreML (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/CoreML (= 0.0.1-nightly.20230405)
-    - TensorFlowLiteSwift/Core (= 0.0.1-nightly.20230405)
-  - TensorFlowLiteSwift/Metal (0.0.1-nightly.20230405):
-    - TensorFlowLiteC/Metal (= 0.0.1-nightly.20230405)
-    - TensorFlowLiteSwift/Core (= 0.0.1-nightly.20230405)
+  - LiteRTC (0.0.1-nightly.20240911):
+    - LiteRTC/Core (= 0.0.1-nightly.20240911)
+  - LiteRTC/Core (0.0.1-nightly.20240911)
+  - LiteRTC/CoreML (0.0.1-nightly.20240911):
+    - LiteRTC/Core
+  - LiteRTC/Metal (0.0.1-nightly.20240911):
+    - LiteRTC/Core
+  - LiteRTSwift/Core (0.0.1-nightly.20240911):
+    - LiteRTC (= 0.0.1-nightly.20240911)
+    - LiteRTSwift/Privacy (= 0.0.1-nightly.20240911)
+  - LiteRTSwift/CoreML (0.0.1-nightly.20240911):
+    - LiteRTC/CoreML (= 0.0.1-nightly.20240911)
+    - LiteRTSwift/Core (= 0.0.1-nightly.20240911)
+    - LiteRTSwift/Privacy (= 0.0.1-nightly.20240911)
+  - LiteRTSwift/Metal (0.0.1-nightly.20240911):
+    - LiteRTC/Metal (= 0.0.1-nightly.20240911)
+    - LiteRTSwift/Core (= 0.0.1-nightly.20240911)
+    - LiteRTSwift/Privacy (= 0.0.1-nightly.20240911)
+  - LiteRTSwift/Privacy (0.0.1-nightly.20240911)
 
 DEPENDENCIES:
-  - TensorFlowLiteSwift/CoreML (~> 0.0.1-nightly)
-  - TensorFlowLiteSwift/Metal (~> 0.0.1-nightly)
+  - LiteRTSwift/CoreML (~> 0.0.1-nightly)
+  - LiteRTSwift/Metal (~> 0.0.1-nightly)
 
 SPEC REPOS:
   trunk:
-    - TensorFlowLiteC
-    - TensorFlowLiteSwift
+    - LiteRTC
+    - LiteRTSwift
 
 SPEC CHECKSUMS:
-  TensorFlowLiteC: 3deccb9fc6560cf521735fffb1ff438f07435e42
-  TensorFlowLiteSwift: f82f3d45b76bf3611727a731b000c6e93a1d9e9a
+  LiteRTC: 676f1c8bf8e899d62ecae0a69a84dbd9140b7b33
+  LiteRTSwift: 90309f466b6069a59a002ac17bc1cd78c08647f2
 
-PODFILE CHECKSUM: f3f637925dcc74131c03aa9b456dc3074e3dfd3d
+PODFILE CHECKSUM: 9caef2423c92bf4529f3804317105e9ef7b6b228
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.15.2

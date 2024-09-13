@@ -1,11 +1,3 @@
-package(
-    default_applicable_licenses = ["//third_party/py/tensorflow_examples:license"],
-    default_visibility = ["//visibility:public"],
-)
-
-licenses(["notice"])
-
-load("@build_bazel_rules_android//android:rules.bzl", "android_library")
 load("@org_tensorflow//tensorflow:tensorflow.bzl", "tf_cc_test")
 load(
     "@org_tensorflow//tensorflow/lite:build_def.bzl",
@@ -14,6 +6,14 @@ load(
     "tflite_jni_binary",
 )
 load("@org_tensorflow//tensorflow/lite/java:aar_with_jni.bzl", "aar_with_jni")
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+package(
+    default_applicable_licenses = ["//third_party/py/tensorflow_examples:license"],
+    default_visibility = ["//visibility:public"],
+)
+
+licenses(["notice"])
 
 gen_selected_ops(
     name = "smartreply_ops",

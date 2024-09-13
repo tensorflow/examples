@@ -17,6 +17,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    namespace "org.tensorflow.lite.examples.poseestimation"
+
     buildTypes {
         release {
             minifyEnabled false
@@ -44,7 +46,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "androidx.activity:activity-ktx:1.2.3"
     implementation 'androidx.fragment:fragment-ktx:1.3.5'
-    implementation 'org.tensorflow:tensorflow-lite:2.5.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.14.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.5.0'
     implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'
 
