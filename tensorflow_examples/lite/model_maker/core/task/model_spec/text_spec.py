@@ -36,11 +36,11 @@ from tensorflow_examples.lite.model_maker.core.task.model_spec import util
 import tensorflow_hub as hub
 from tensorflow_hub import registry
 from official.nlp import optimization
-from official.nlp.bert import configs as bert_configs
-from official.nlp.bert import run_squad_helper
-from official.nlp.bert import squad_evaluate_v1_1
-from official.nlp.bert import squad_evaluate_v2_0
-from official.nlp.bert import tokenization
+from official.legacy.bert import configs as bert_configs
+from official.legacy.bert import run_squad_helper
+from official.nlp.tools import squad_evaluate_v1_1
+from official.nlp.tools import squad_evaluate_v2_0
+from official.nlp.tools import tokenization
 from official.nlp.data import classifier_data_lib
 from official.nlp.data import squad_lib
 from official.nlp.modeling import models

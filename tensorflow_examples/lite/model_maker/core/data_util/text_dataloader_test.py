@@ -27,7 +27,7 @@ import tensorflow.compat.v2 as tf
 
 from tensorflow_examples.lite.model_maker.core import test_util
 from tensorflow_examples.lite.model_maker.core.data_util import text_dataloader
-from official.nlp.bert import tokenization
+from official.nlp.tools import tokenization
 from official.nlp.data import squad_lib
 
 
