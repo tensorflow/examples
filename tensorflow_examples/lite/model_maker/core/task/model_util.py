@@ -26,6 +26,9 @@ import tensorflow as tf
 
 from tensorflow_examples.lite.model_maker.core import compat
 from tensorflowjs.converters import converter as tfjs_converter
+# pylint: disable=g-direct-tensorflow-import
+from ai_edge_litert import interpreter as tfl_interpreter
+# pylint: enable=g-direct-tensorflow-import
 from tflite_support import metadata as _metadata
 
 DEFAULT_SCALE, DEFAULT_ZERO_POINT = 0, 0
@@ -222,7 +225,7 @@ class LiteRunner(object):
     """
     with tf.io.gfile.GFile(tflite_filepath, 'rb') as f:
       tflite_model = f.read()
-    self.interpreter = tf.lite.Interpreter(model_content=tflite_model)
+    self.interpreter = tfl_interpreter.Interpreter(model_content=tflite_model)
     self.interpreter.allocate_tensors()
 
     # Gets the indexed of the input tensors.

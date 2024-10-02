@@ -18,6 +18,9 @@ import tensorflow as tf
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import input_pipeline
 from tensorflow_examples.lite.model_maker.third_party.recommendation.ml.model import recommendation_model_launcher as launcher
 from google.protobuf import text_format
+# pylint: disable=g-direct-tensorflow-import
+from ai_edge_litert import interpreter as tfl_interpreter
+# pylint: enable=g-direct-tensorflow-import
 
 FLAGS = flags.FLAGS
 
@@ -192,7 +195,7 @@ class RecommendationModelLauncherTest(tf.test.TestCase):
     tflite_model_path = os.path.join(export_dir, 'model.tflite')
     self.assertTrue(os.path.exists(tflite_model_path))
     f = open(tflite_model_path, 'rb')
-    interpreter = tf.lite.Interpreter(model_content=f.read())
+    interpreter = tfl_interpreter.Interpreter(model_content=f.read())
     interpreter.allocate_tensors()
     inference_signature = interpreter.get_signature_list()['serving_default']
     self.assertAllEqual(
