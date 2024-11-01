@@ -329,10 +329,11 @@ def build_backbone(features, config):
     }
     if 'b0' in backbone_name:
       override_params['survival_prob'] = 0.0
-    if config.backbone_config is not None:
+    backbone_config = config.backbone_config
+    if backbone_config is not None:
       override_params['blocks_args'] = (
           efficientnet_builder.BlockDecoder().encode(
-              config.backbone_config.blocks))
+              backbone_config.blocks))
     override_params['data_format'] = config.data_format
     model_builder = backbone_factory.get_model_builder(backbone_name)
     _, endpoints = model_builder.build_model_base(
