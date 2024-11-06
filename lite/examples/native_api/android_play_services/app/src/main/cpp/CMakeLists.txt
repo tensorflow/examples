@@ -8,10 +8,14 @@ include(FetchContent)
 FetchContent_Declare(
         flatbuffers
         GIT_REPOSITORY https://github.com/google/flatbuffers.git
-        # Keep in sync with //third_party/tensorflow/third_party/flatbuffers/workspace.bzl
-        # and //third_party/tensorflow/lite/tools/cmake/modules/flatbuffers.cmake
-        # GIT_TAG v24.3.25
-        GIT_TAG e6463926479bd6b330cbcf673f7e917803fd5831
+        # Keep in sync with the FlatBuffers version in the most recent version
+        # of TF Lite (Lite RT) for Play services published on maven.google.com
+        # <https://maven.google.com/web/index.html#com.google.android.gms:play-services-tflite-java>
+        # and in particular as determined by the `static_assert` in the file
+        # `tensorflow/lite/acceleration/configuration/configuration_generated.h`
+        # in the `prefab/modules/tensorflowlite_jni_gms_client/include/` directory
+        # of the `play-services-tflite-java-<version>.aar` file there.
+        GIT_TAG v23.5.26
 )
 set(FLATBUFFERS_BUILD_FLATC OFF)
 set(FLATBUFFERS_BUILD_TESTS OFF)
