@@ -88,7 +88,8 @@ public class MainActivity extends Activity {
               jni.loadModel(getAssets(), "add.tflite");
               logEvent("Model loaded");
               float[] output = jni.runInference(new float[] {1.f, 3.f});
-              logEvent("Ran inference, expected: [3, 9], got output: " + Arrays.toString(output));
+              logEvent(
+                  "Ran inference, expected: [3.0, 9.0], got output: " + Arrays.toString(output));
               jni.destroy();
               logEvent("TfLiteJni destroyed");
               return Tasks.forResult(output);
