@@ -21,12 +21,13 @@ apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'de.undercouch.download'
 
 android {
-    compileSdkVersion 32
+    namespace 'org.tensorflow.lite.examples.objectdetection'
+    compileSdkVersion 34
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         applicationId "org.tensorflow.lite.examples.objectdetection"
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0.0"
     }
