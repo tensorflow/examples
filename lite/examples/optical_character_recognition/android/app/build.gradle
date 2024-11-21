@@ -20,12 +20,17 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildFeatures {
+        viewBinding = true
+    }
+    compileSdk 34
+    namespace = "org.tensorflow.lite.examples.ocr"
+    testNamespace = "org.tensorflow.lite.examples.ocr.test"
     defaultConfig {
         applicationId "org.tensorflow.lite.examples.ocr"
         minSdkVersion 21
-        targetSdkVersion 29
+        multiDexEnabled true
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -86,3 +91,4 @@ dependencies {
 
     implementation 'com.quickbirdstudios:opencv:4.5.3.0'
 }
+

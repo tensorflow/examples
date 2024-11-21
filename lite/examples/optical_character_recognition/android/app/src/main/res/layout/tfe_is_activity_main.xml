@@ -72,8 +72,8 @@
             android:contentDescription="@string/tfe_result_image_description"
             android:padding="8dp" />
 
+        <include layout="@layout/tfe_is_bottom_sheet_layout" />
     </LinearLayout>
 
-    <include layout="@layout/tfe_is_bottom_sheet_layout" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
