@@ -15,7 +15,12 @@ FetchContent_Declare(
         # `tensorflow/lite/acceleration/configuration/configuration_generated.h`
         # in the `prefab/modules/tensorflowlite_jni_gms_client/include/` directory
         # of the `play-services-tflite-java-<version>.aar` file there.
-        GIT_TAG v23.5.26
+        #
+        # That version is currently "GIT_TAG v24.3.25",
+        # but due to a build error in v24.3.25, we use a snapshot that is three PRs
+        # later (all bug fixes), which fixes the build error.
+        # See <https://github.com/google/flatbuffers/commit/e6463926479bd6b330cbcf673f7e917803fd5831>.
+        GIT_TAG e6463926479bd6b330cbcf673f7e917803fd5831
 )
 set(FLATBUFFERS_BUILD_FLATC OFF)
 set(FLATBUFFERS_BUILD_TESTS OFF)
