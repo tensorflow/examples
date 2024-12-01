@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef LOGGING_ASSERT_H_  // NOLINT(build/header_guard)
 #define LOGGING_ASSERT_H_
 
+#include <android/log.h>
 #include <stdio.h>
 
 // We use an extra level of macro indirection here to ensure that the
