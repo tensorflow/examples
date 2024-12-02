@@ -31,12 +31,12 @@ add_compile_definitions(TFLITE_IN_GMSCORE)
 add_compile_definitions(TFLITE_WITH_STABLE_ABI)
 add_compile_definitions(TFLITE_USE_OPAQUE_DELEGATE)
 
-add_library(tflite-jni SHARED
+add_library(tflite-c-sample-jni SHARED
         com_google_samples_gms_tflite_c_TfLiteJni.cc
         logging_assert.h
         java_interop.h)
 
-target_link_libraries(tflite-jni
+target_link_libraries(tflite-c-sample-jni
         tensorflowlite_jni_gms_client::tensorflowlite_jni_gms_client
         flatbuffers
         android

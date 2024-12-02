@@ -31,7 +31,7 @@ public class TfLiteJni {
   }
 
   static {
-    System.loadLibrary("tflite-jni");
+    System.loadLibrary("tflite-c-sample-jni");
   }
 
   public TfLiteJni(LoggingCallback loggingCallback) {
