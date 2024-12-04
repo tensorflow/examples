@@ -96,7 +96,7 @@ class ImageClassifierDataLoader(dataloader.ClassificationDataLoader):
     label_ds = tf.data.Dataset.from_tensor_slices(
         tf.cast(all_image_labels, tf.int64))
 
-    # Creates  a dataset if (image, label) pairs.
+    # Creates a dataset if (image, label) pairs.
     image_label_ds = tf.data.Dataset.zip((image_ds, label_ds))
 
     tf.compat.v1.logging.info(
