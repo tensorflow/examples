@@ -153,6 +153,9 @@ def create_dataset(path_to_file, num_examples, buffer_size, batch_size):
   input_tensor, target_tensor, inp_lang, targ_lang = load_dataset(
       path_to_file, num_examples)
 
+  max_length_targ, max_length_inp = \
+      max_length(target_tensor), max_length(input_tensor)
+
   # Creating training and validation sets using an 80-20 split
   inp_train, inp_val, target_train, target_val = train_test_split(
       input_tensor, target_tensor, test_size=0.2)
@@ -165,7 +168,8 @@ def create_dataset(path_to_file, num_examples, buffer_size, batch_size):
   test_dataset = tf.data.Dataset.from_tensor_slices((inp_val, target_val))
   test_dataset = test_dataset.batch(batch_size, drop_remainder=True)
 
-  return train_dataset, test_dataset, inp_lang, targ_lang
+  return train_dataset, test_dataset, inp_lang, targ_lang, \
+         max_length_targ, max_length_inp
 
 
 def get_common_kwargs():
