@@ -37,11 +37,11 @@ android {
 
 
 dependencies {
-    implementation "com.google.android.gms:play-services-tflite-acceleration-service:16.3.0-beta01"
+    implementation "com.google.android.gms:play-services-tflite-acceleration-service:16.4.0-beta01"
 
-    implementation "com.google.android.gms:play-services-tflite-java:16.3.0"
-    implementation "com.google.android.gms:play-services-tflite-support:16.3.0"
-    implementation "com.google.android.gms:play-services-tflite-gpu:16.3.0"
+    implementation "com.google.android.gms:play-services-tflite-java:16.4.0"
+    implementation "com.google.android.gms:play-services-tflite-support:16.4.0"
+    implementation "com.google.android.gms:play-services-tflite-gpu:16.4.0"
 
     implementation "com.google.android.gms:play-services-tasks:18.0.2"
     implementation "androidx.appcompat:appcompat:1.4.1"
