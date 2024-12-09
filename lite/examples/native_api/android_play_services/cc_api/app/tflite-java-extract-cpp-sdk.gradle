@@ -1,0 +1,47 @@
+configurations {
+    tfliteCplusplusSdkDependency {
+        extendsFrom implementation
+        canBeResolved = true
+    }
+}
+
+def LIBRARY_NAME = "play-services-tflite-java"
+
+task copyAarToBuildDir(type: Copy) {
+    from configurations.tfliteCplusplusSdkDependency
+    include "**/$LIBRARY_NAME*.aar"
+    // Drop version suffix.
+    rename "($LIBRARY_NAME.*)(-\\d+.\\d+.\\d+.*)(.aar)", '$1$3'
+    into "$buildDir/$LIBRARY_NAME"
+    doLast {
+        println("copyAarToBuildDir: copied AAR to $buildDir/$LIBRARY_NAME")
+    }
+}
+
+task extractAarContent(dependsOn: copyAarToBuildDir, type: Copy) {
+    from zipTree("$buildDir/$LIBRARY_NAME/${LIBRARY_NAME}.aar")
+    into "$buildDir/$LIBRARY_NAME/content"
+    doLast {
+        println("extractAarContent: extracted AAR to $buildDir/$LIBRARY_NAME/content")
+    }
+}
+
+task copySdkSourcesToProjectDir(dependsOn: extractAarContent, type: Copy) {
+    from "$buildDir/$LIBRARY_NAME/content/cc_sdk"
+    into "$projectDir/src/main/cpp/tflite_cc_sdk"
+    doLast {
+        println("copySdkSourcesToProjectDir: copied sdk to $projectDir/src/main/cpp/tflite_cc_sdk")
+    }
+}
+
+task addTfLiteNativeDeps(dependsOn: ["copySdkSourcesToProjectDir"]) {
+    doLast {
+        println("addTfLiteNativeDeps: completed")
+    }
+}
+
+preBuild.dependsOn addTfLiteNativeDeps
+
+clean {
+    delete "$projectDir/src/main/cpp/tflite_cc_sdk"
+}
