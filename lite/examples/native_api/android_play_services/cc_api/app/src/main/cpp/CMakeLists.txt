@@ -47,12 +47,11 @@ find_package(tensorflowlite_jni_gms_client REQUIRED CONFIG)
 #-----------------------------------------------------------------------------
 # Set up TFLite in Play services C++ API (tflite_cc_api) dependency.
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Modules" ${CMAKE_MODULE_PATH})
-set(tflite_cc_api_DIR "${CMAKE_SOURCE_DIR}/tflite_cc_sdk")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 
 find_package(tflite_cc_api REQUIRED MODULE)
 include_directories(${tflite_cc_api_INCLUDE_DIR})
-add_subdirectory(${tflite_cc_api_INCLUDE_DIR} tflite_cc_api_build)
+add_subdirectory(${tflite_cc_api_DIR} tflite_cc_api_build)
 
 #-----------------------------------------------------------------------------
 # Set up compile definitions to enable use of TFLite in Play services
