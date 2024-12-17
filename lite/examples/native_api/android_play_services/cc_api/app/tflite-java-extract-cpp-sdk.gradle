@@ -26,22 +26,16 @@ task extractAarContent(dependsOn: copyAarToBuildDir, type: Copy) {
     }
 }
 
-task copySdkSourcesToProjectDir(dependsOn: extractAarContent, type: Copy) {
+task copySdkSourcesToProjectBuildDir(dependsOn: extractAarContent, type: Copy) {
     from "$buildDir/$LIBRARY_NAME/content/cc_sdk"
-    into "$projectDir/src/main/cpp/tflite_cc_sdk"
+    into "$projectDir/build/tflite_cc_sdk"
     doLast {
-        println("copySdkSourcesToProjectDir: copied sdk to $projectDir/src/main/cpp/tflite_cc_sdk")
+        println("copySdkSourcesToProjectBuildDir: copied sdk to $projectDir/build/tflite_cc_sdk")
     }
 }
 
-task addTfLiteNativeDeps(dependsOn: ["copySdkSourcesToProjectDir"]) {
-    doLast {
-        println("addTfLiteNativeDeps: completed")
-    }
-}
-
-preBuild.dependsOn addTfLiteNativeDeps
+preBuild.dependsOn copySdkSourcesToProjectBuildDir
 
 clean {
-    delete "$projectDir/src/main/cpp/tflite_cc_sdk"
+    delete "$projectDir/build/tflite_cc_sdk"
 }
