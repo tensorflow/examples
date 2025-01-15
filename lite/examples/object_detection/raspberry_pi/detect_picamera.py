@@ -14,6 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Example using TF Lite to detect objects with the Raspberry Pi camera."""
+# GPIO setup
+BUZZER_PIN = 23
+LED_PIN = 18
+
+GPIO.setmode(GPIO.BCM)  # Use Broadcom pin numbering
+GPIO.setup(BUZZER_PIN, GPIO.OUT)  # Set buzzer pin as output
+GPIO.setup(LED_PIN, GPIO.OUT)  # Set LED pin as output
 
 from __future__ import absolute_import
 from __future__ import division
@@ -103,6 +110,16 @@ def annotate_objects(annotator, results, labels):
     annotator.text([xmin, ymin],
                    '%s\n%.2f' % (labels[obj['class_id']], obj['score']))
 
+def handle_signals(results):
+    """Activates the buzzer and LED if objects are detected."""
+    if results:
+        GPIO.output(BUZZER_PIN, GPIO.HIGH)  # Turn on the buzzer
+        GPIO.output(LED_PIN, GPIO.HIGH)  # Turn on the LED
+    else:
+        GPIO.output(BUZZER_PIN, GPIO.LOW)  # Turn off the buzzer
+        GPIO.output(LED_PIN, GPIO.LOW)  # Turn off the LED
+
+
 
 def main():
   parser = argparse.ArgumentParser(
@@ -138,7 +155,7 @@ def main():
         start_time = time.monotonic()
         results = detect_objects(interpreter, image, args.threshold)
         elapsed_ms = (time.monotonic() - start_time) * 1000
-
+        handle_signals(results)  # Trigger buzzer and LED based on detection
         annotator.clear()
         annotate_objects(annotator, results, labels)
         annotator.text([5, 0], '%.1fms' % (elapsed_ms))
@@ -149,6 +166,7 @@ def main():
 
     finally:
       camera.stop_preview()
+      GPIO.cleanup()  # Reset GPIO states
 
 
 if __name__ == '__main__':
