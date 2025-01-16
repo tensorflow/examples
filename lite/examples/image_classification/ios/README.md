@@ -54,8 +54,10 @@ You can build it and run with the iPhone Simulator, but the app will raise a
 2.  Install the pod to generate the workspace file: `cd
     examples/lite/examples/image_classification/ios && pod install`
 
-Note: If you have installed this pod before and that command doesn't work, try
+Notes: 
+* If you have installed this pod before and that command doesn't work, try
 `pod update`.
+* If you are using an M1 Mac and run into errors with `pod install`, you may be able to get around the errors by overriding the system version of Ruby. Some useful tips can be found in [this](https://stackoverflow.com/a/66556339) and related answers on Stack Overflow.
 
 At the end of this step you should have a directory called
 `ImageClassification.xcworkspace`.
@@ -66,11 +68,11 @@ At the end of this step you should have a directory called
 This launches Xcode and opens the `ImageClassification` project.
 
 1.  Select the `ImageClassification` project in the left hand navigation to open
-    the project configuration. In the **Signing** section of the **General**
+    the project configuration. In the **Signing** section of the **Signing & Capabilities**
     tab, select your development team from the dropdown.
 
 2.  In order to build the project, you must modify the **Bundle Identifier** in
-    the **Identity** section so that it is unique across all Xcode projects. To
+    the **Identity** section of the **General** tab so that it is unique across all Xcode projects. To
     create a unique identifier, try adding your initials and a number to the end
     of the string.
 
