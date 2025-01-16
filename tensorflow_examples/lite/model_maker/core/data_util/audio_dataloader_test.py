@@ -150,13 +150,13 @@ class LoadFromESC50Test(Base):
       self.assertEqual(expected_results[filename], label)
 
     # fitlered dataset
-    with self.assertRaisesRegexp(ValueError, 'No audio files found'):
+    with self.assertRaisesRegex(ValueError, 'No audio files found'):
       loader = audio_dataloader.DataLoader.from_esc50(
           spec, folder_path, folds=[
               3,
           ])
 
-    with self.assertRaisesRegexp(ValueError, 'No audio files found'):
+    with self.assertRaisesRegex(ValueError, 'No audio files found'):
       loader = audio_dataloader.DataLoader.from_esc50(
           spec, folder_path, categories=['unknown'])
 
@@ -230,7 +230,7 @@ class LoadFromFolderTest(Base):
   def test_no_audio_files_found(self):
     folder_path = self._get_folder_path('test_no_audio_files_found')
     write_sample(folder_path, 'unknown', '2s.bak', 44100, 2, value=1)
-    with self.assertRaisesRegexp(ValueError, 'No audio files found'):
+    with self.assertRaisesRegex(ValueError, 'No audio files found'):
       spec = MockSpec(model_dir=folder_path)
       audio_dataloader.DataLoader.from_folder(spec, folder_path)
 
@@ -259,8 +259,9 @@ class LoadFromFolderTest(Base):
       spec = MockSpec(model_dir=folder_path)
       loader = audio_dataloader.DataLoader.from_folder(spec, folder_path)
       self.assertEqual(len(loader), 2)
-      with self.assertRaisesRegexp(tf.errors.UnknownError,
-                                   'sudo apt-get install libsndfile1'):
+      with self.assertRaisesRegex(
+          tf.errors.UnknownError, 'sudo apt-get install libsndfile1'
+      ):
         _ = list(loader.gen_dataset())
 
     finally:

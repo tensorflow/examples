@@ -77,7 +77,7 @@ class BaseSpecTest(tf.test.TestCase):
 
       for valid_version in invalid_versions:
         audio_spec._get_tf_version = lambda: valid_version  # pylint: disable=cell-var-from-loop
-        with self.assertRaisesRegexp(RuntimeError, '2.5.0'):
+        with self.assertRaisesRegex(RuntimeError, '2.5.0'):
           spec()
 
     audio_spec._get_tf_version = tmp_version_fn
