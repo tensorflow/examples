@@ -116,7 +116,7 @@ def calc_from_integer(depth, num_blocks, layers_per_block):
 class ConvBlock(tf.keras.Model):
   """Convolutional Block consisting of (batchnorm->relu->conv).
 
-  Arguments:
+  Args:
     num_filters: number of filters passed to a convolutional layer.
     data_format: "channels_first" or "channels_last"
     bottleneck: if True, then a 1x1 Conv is performed followed by 3x3 Conv.
@@ -168,7 +168,7 @@ class ConvBlock(tf.keras.Model):
 class TransitionBlock(tf.keras.Model):
   """Transition Block to reduce the number of features.
 
-  Arguments:
+  Args:
     num_filters: number of filters passed to a convolutional layer.
     data_format: "channels_first" or "channels_last"
     weight_decay: weight decay
@@ -203,7 +203,7 @@ class DenseBlock(tf.keras.Model):
   It consists of ConvBlocks where each block's output is concatenated
   with its input.
 
-  Arguments:
+  Args:
     num_layers: Number of layers in each block.
     growth_rate: number of filters to add per conv block.
     data_format: "channels_first" or "channels_last"
@@ -237,7 +237,7 @@ class DenseBlock(tf.keras.Model):
 class DenseNet(tf.keras.Model):
   """Creating the Densenet Architecture.
 
-  Arguments:
+  Args:
     mode: mode could be:
         - from_depth: num_layers_in_each_block will be calculated from the depth
                       and number of blocks.
