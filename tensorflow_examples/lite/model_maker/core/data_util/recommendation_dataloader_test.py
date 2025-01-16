@@ -31,7 +31,7 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
     with _testutil.patch_download_and_extract_data(self.dataset_dir) as fn:
       out_dir = _dl.RecommendationDataLoader.download_and_extract_movielens(
           self.download_dir)
-      fn.called_once_with(self.download_dir)
+      fn.assert_called_once_with(self.download_dir)
       self.assertEqual(out_dir, self.dataset_dir)
 
   def test_generate_movielens_dataset(self):
