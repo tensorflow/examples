@@ -40,17 +40,16 @@ class RecommendationDataLoaderTest(tf.test.TestCase):
     stats = loader.generate_movielens_dataset(self.dataset_dir, gen_dir,
                                               'train.tfrecord', 'test.tfrecord',
                                               'movie_vocab.json', 'meta.json')
-    self.assertDictContainsSubset(
-        {
-            'train_file': os.path.join(gen_dir, 'train.tfrecord'),
-            'test_file': os.path.join(gen_dir, 'test.tfrecord'),
-            'vocab_file': os.path.join(gen_dir, 'movie_vocab.json'),
-            'train_size': _testutil.TRAIN_SIZE,
-            'test_size': _testutil.TEST_SIZE,
-            'vocab_size': _testutil.VOCAB_SIZE,
-            'vocab_max_id': _testutil.MAX_ITEM_ID,
-        }, stats)
-
+    expected = {
+        'train_file': os.path.join(gen_dir, 'train.tfrecord'),
+        'test_file': os.path.join(gen_dir, 'test.tfrecord'),
+        'vocab_file': os.path.join(gen_dir, 'movie_vocab.json'),
+        'train_size': _testutil.TRAIN_SIZE,
+        'test_size': _testutil.TEST_SIZE,
+        'vocab_size': _testutil.VOCAB_SIZE,
+        'vocab_max_id': _testutil.MAX_ITEM_ID,
+    }
+    self.assertEqual(stats, {**stats, **expected})
     self.assertTrue(os.path.exists(gen_dir))
     self.assertGreater(len(os.listdir(gen_dir)), 0)
 
