@@ -23,6 +23,9 @@ pip install tflite-model-maker
 Typical usage of Model Maker is to create a model in a few lines of code, e.g.:
 
 ```python
+from tflite_model_maker import image_classifier
+from tflite_model_maker.image_classifier import DataLoader
+
 # Load input data specific to an on-device ML app.
 data = DataLoader.from_folder('flower_photos/')
 train_data, test_data = data.split(0.9)
