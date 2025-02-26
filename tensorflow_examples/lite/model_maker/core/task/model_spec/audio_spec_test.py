@@ -38,7 +38,7 @@ def _gen_dataset(spec, total_samples, num_classes, batch_size, seed):
 
     return fn
 
-  wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
+  wav_ds = tf.data.Dataset.random(seed=seed).take(total_samples)
   wav_ds = wav_ds.map(fill_shape([
       spec.target_sample_rate,
   ]))
