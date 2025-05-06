@@ -22,6 +22,7 @@ plugins {
 }
 
 android {
+    namespace "org.tensorflow.lite.examples.gestureclassification"
     compileSdk 32
 
     defaultConfig {
