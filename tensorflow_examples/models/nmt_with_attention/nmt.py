@@ -32,7 +32,7 @@ class Encoder(tf.keras.Model):
     batch_sz: Batch size.
   """
 
-  def __init__(self, vocab_size, embedding_dim, enc_units, batch_sz):
+  def __init__(self, vocab_size, embedding_dim, enc_units, batch_sz=64):
     super(Encoder, self).__init__()
     self.batch_sz = batch_sz
     self.enc_units = enc_units
