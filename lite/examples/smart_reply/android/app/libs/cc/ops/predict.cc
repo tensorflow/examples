@@ -28,12 +28,15 @@ limitations under the License.
 //
 
 #include <algorithm>
-#include <cstdlib>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
-#include "tensorflow/lite/context.h"
+#include "tensorflow/lite/c/c_api_types.h"
+#include "tensorflow/lite/c/common.h"
 
 namespace tflite {
 namespace ops {
