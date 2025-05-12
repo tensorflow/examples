@@ -262,11 +262,11 @@
                 android:id="@+id/spinner_model"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:entries="@array/models_spinner_titles"
                 android:minWidth="@dimen/bottom_sheet_spinner_model_min_width"
                 android:spinnerMode="dropdown"
-                android:theme="@style/BottomSheetSpinnerItemStyle"
-                android:layout_alignParentRight="true"
-                android:entries="@array/models_spinner_titles"/>
+                android:theme="@style/BottomSheetSpinnerItemStyle" />
 
         </RelativeLayout>
     </androidx.appcompat.widget.LinearLayoutCompat>
