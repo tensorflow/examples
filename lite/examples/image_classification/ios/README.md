@@ -37,7 +37,7 @@ Note: Objective-C developers should use the TensorFlow Lite Task Library's
 
 *   Xcode command-line tools (run `xcode-select --install`)
 
-*   [CocoaPods](https://cocoapods.org/) (run `sudo gem install cocoapods`)
+*   [CocoaPods](https://cocoapods.org/) (run `brew install cocoapods`)
 
 If this is a new install, you will need to run the Xcode application once to
 agree to the license before continuing.
