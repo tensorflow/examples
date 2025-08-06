@@ -27,8 +27,8 @@ android {
         applicationId 'org.tensorflow.lite.examples.classification.playservices'
         // ImageClassificationHelper class uses android.util.Size(), which is
         // available from SDK 21.
-        minSdkVersion 21
-        targetSdkVersion 33
+        minSdkVersion 23
+        targetSdkVersion 36
         versionCode 1
         versionName "0.0.1"
 
