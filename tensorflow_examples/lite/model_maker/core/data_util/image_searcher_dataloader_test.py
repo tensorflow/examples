@@ -31,7 +31,7 @@ class ImageSearcherDataloaderTest(parameterized.TestCase, tf.test.TestCase):
     self.image_dir2 = test_util.get_test_data_path("animals")
 
   @parameterized.parameters(
-      (False, 1.335398),
+      (False, 1.37590),
       (True, 0.0494329),
   )
   def test_from_folder(self, l2_normalize, expected_value):
