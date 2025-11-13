@@ -11,7 +11,7 @@ FetchContent_Declare(
         flatbuffers
         GIT_REPOSITORY https://github.com/google/flatbuffers.git
         # Keep in sync with the FlatBuffers version in the most recent version
-        # of TF Lite (Lite RT) for Play services published on maven.google.com
+        # of LiteRT (TF Lite) for Play services published on maven.google.com
         # <https://maven.google.com/web/index.html#com.google.android.gms:play-services-tflite-java>
         # and in particular as determined by the `static_assert` in the file
         # `tensorflow/lite/acceleration/configuration/configuration_generated.h`
@@ -40,12 +40,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(absl)
 
 #-----------------------------------------------------------------------------
-# Set up TFLite in Play services C API (tensorflowlite_jni_gms_client) dependency.
+# Set up LiteRT in Play services C API (tensorflowlite_jni_gms_client) dependency.
 
 find_package(tensorflowlite_jni_gms_client REQUIRED CONFIG)
 
 #-----------------------------------------------------------------------------
-# Set up TFLite in Play services C++ API (tflite_cc_api) dependency.
+# Set up LiteRT in Play services C++ API (tflite_cc_api) dependency.
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 
@@ -54,8 +54,8 @@ include_directories(${tflite_cc_api_INCLUDE_DIR})
 add_subdirectory(${tflite_cc_api_DIR} tflite_cc_api_build)
 
 #-----------------------------------------------------------------------------
-# Set up compile definitions to enable use of TFLite in Play services
-# (rather than regular TFLite bundled with the app).
+# Set up compile definitions to enable use of LiteRT in Play services
+# (rather than regular LiteRT bundled with the app).
 
 add_compile_definitions(TFLITE_IN_GMSCORE)
 add_compile_definitions(TFLITE_WITH_STABLE_ABI)
