@@ -154,8 +154,8 @@ class Train(object):
     template = 'Epoch: {}, Train Loss: {}, Test Loss: {}'
 
     for epoch in range(self.epochs):
-      self.train_loss_metric.reset_states()
-      self.test_loss_metric.reset_states()
+      self.train_loss_metric.reset_state()
+      self.test_loss_metric.reset_state()
 
       for inp, targ in train_ds:
         self.train_step((inp, targ))
