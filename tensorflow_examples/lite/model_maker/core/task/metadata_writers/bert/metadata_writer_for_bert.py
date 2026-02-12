@@ -22,9 +22,9 @@ import abc
 import enum
 import os
 
+import flatbuffers
 from tensorflow_examples.lite.model_maker.core.task.metadata_writers import metadata_writer
 
-import flatbuffers
 from tflite_support import metadata_schema_py_generated as _metadata_fb
 from tflite_support import metadata as _metadata
 

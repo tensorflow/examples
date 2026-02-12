@@ -93,6 +93,9 @@ class OndeviceScannBuilderTest(tf.test.TestCase):
             min_cluster_size: 100.0
             lookup_type: INT8
             use_residual_quantization: false
+            fixed_point_lut_conversion_options {
+              float_to_int_conversion_method: ROUND
+            }
             noise_shaping_threshold: 0.2
             expected_sample_size: 100000
             use_global_topn: false

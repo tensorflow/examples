@@ -68,8 +68,8 @@ apply from: 'download_models.gradle'
 dependencies {
 
     // Kotlin lang
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation "androidx.fragment:fragment-ktx:1.4.1"
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation "androidx.fragment:fragment-ktx:1.8.5"
 
     // App compat and UI things
     implementation 'androidx.appcompat:appcompat:1.5.0'

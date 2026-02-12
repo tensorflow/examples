@@ -38,7 +38,7 @@ def _gen_dataset(spec, total_samples, num_classes, batch_size, seed):
 
     return fn
 
-  wav_ds = tf.data.experimental.RandomDataset(seed=seed).take(total_samples)
+  wav_ds = tf.data.Dataset.random(seed=seed).take(total_samples)
   wav_ds = wav_ds.map(fill_shape([
       spec.target_sample_rate,
   ]))
@@ -77,7 +77,7 @@ class BaseSpecTest(tf.test.TestCase):
 
       for valid_version in invalid_versions:
         audio_spec._get_tf_version = lambda: valid_version  # pylint: disable=cell-var-from-loop
-        with self.assertRaisesRegexp(RuntimeError, '2.5.0'):
+        with self.assertRaisesRegex(RuntimeError, '2.5.0'):
           spec()
 
     audio_spec._get_tf_version = tmp_version_fn
@@ -95,9 +95,8 @@ class BaseTest(tf.test.TestCase):
     dataset = _gen_dataset(
         spec, total_samples=10, num_classes=num_classes, batch_size=2, seed=100)
     model = spec.create_model(num_classes)
-    epochs = 1 if training else 0
-    spec.run_classifier(
-        model, epochs=epochs, train_ds=dataset, validation_ds=None)
+    if training:
+      spec.run_classifier(model, epochs=1, train_ds=dataset, validation_ds=None)
 
     tflite_filepath = os.path.join(self.get_temp_dir(), filename)
     spec.export_tflite(

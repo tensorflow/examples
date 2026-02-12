@@ -1,10 +1,5 @@
-package(
-    default_visibility = ["//visibility:public"],
-)
-
-licenses(["notice"])
-
-load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+load("//third_party/bazel_rules/rules_cc/cc:cc_library.bzl", "cc_library")
+load("//third_party/bazel_rules/rules_cc/cc:cc_test.bzl", "cc_test")
 load("@org_tensorflow//tensorflow:tensorflow.bzl", "tf_cc_test")
 load(
     "@org_tensorflow//tensorflow/lite:build_def.bzl",
@@ -13,6 +8,14 @@ load(
     "tflite_jni_binary",
 )
 load("@org_tensorflow//tensorflow/lite/java:aar_with_jni.bzl", "aar_with_jni")
+load("@build_bazel_rules_android//android:rules.bzl", "android_library")
+
+package(
+    default_applicable_licenses = ["//third_party/py/tensorflow_examples:license"],
+    default_visibility = ["//visibility:public"],
+)
+
+licenses(["notice"])
 
 gen_selected_ops(
     name = "smartreply_ops",
@@ -31,6 +34,8 @@ cc_library(
     deps = [
         "@org_tensorflow//tensorflow/lite:framework",
         "@org_tensorflow//tensorflow/lite:string_util",
+        "@org_tensorflow//tensorflow/lite/c:c_api_types",
+        "@org_tensorflow//tensorflow/lite/c:common",
         "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
         "@org_tensorflow//tensorflow/lite/kernels:kernel_util",
         "@com_google_absl//absl/strings",

@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity
     implements MovieFragment.OnListFragmentInteractionListener,
         RecommendationFragment.OnListFragmentInteractionListener {
   private static final String TAG = "OnDeviceRecommendationDemo";
-  private static final String CONFIG_PATH = "config.json";  // Default config path in assets.
+  private static final String CONFIG_PATH = "config.json"; // Default config path in assets.
 
   private Config config;
   private RecommendationClient client;
@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().findFragmentById(R.id.recommendation_fragment);
   }
 
-  @SuppressWarnings("AndroidJdkLibsChecker")
   @Override
   protected void onStart() {
     super.onStart();

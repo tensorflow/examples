@@ -109,12 +109,21 @@ def _iou_per_anchor(pred_boxes: FloatType,
   assert iou_type in ('diou', 'ciou')
   p_center = tf.stack([(p_ymin + p_ymax) / 2, (p_xmin + p_xmax) / 2], axis=-1)
   t_center = tf.stack([(t_ymin + t_ymax) / 2, (t_xmin + t_xmax) / 2], axis=-1)
-  euclidean = tf.linalg.norm(t_center - p_center, axis=-1)
-  diag_length = tf.linalg.norm(
-      tf.stack([enclose_ymax - enclose_ymin, enclose_xmax - enclose_xmin],
-               axis=-1),
-      axis=-1)
-  diou_v = iou_v - tf.math.divide_no_nan(euclidean**2, diag_length**2)
+  # Compute squared norms directly, avoiding a sqrt call and a singularity
+  # at zero in the gradient.
+  euclidean_squared = tf.math.reduce_sum(
+      tf.math.squared_difference(t_center, p_center), axis=-1
+  )
+  diag_length_squared = tf.math.reduce_sum(
+      tf.math.square(
+          tf.stack(
+              [enclose_ymax - enclose_ymin, enclose_xmax - enclose_xmin],
+              axis=-1,
+          )
+      ),
+      axis=-1,
+  )
+  diou_v = iou_v - tf.math.divide_no_nan(euclidean_squared, diag_length_squared)
   if iou_type == 'diou':  # diou is the distance iou.
     return diou_v
 
@@ -185,7 +194,7 @@ def iou_loss(pred_boxes: FloatType,
     target_boxes = [b * mask for b in target_boxes]
     iou_loss_list.append(
         mask *
-        (1 - tf.squeeze(_iou_per_anchor(pred_boxes, target_boxes, iou_type))))
+        (1 - tf.squeeze(_iou_per_anchor(pred_boxes, target_boxes, iou_type))))  # pytype: disable=wrong-arg-types  # numpy-scalars
   if len(iou_loss_list) == 1:
     return iou_loss_list[0]
   return tf.reduce_sum(tf.stack(iou_loss_list), 0)

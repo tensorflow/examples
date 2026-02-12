@@ -15,13 +15,12 @@
   ~ limitations under the License.
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="org.tensorflow.lite.examples.classification.playservices">
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- ImageClassificationHelper class uses android.util.Size(), which is available from SDK 21.
     -->
     <uses-sdk
-        android:minSdkVersion="21"
-        android:targetSdkVersion="31" />
+        android:minSdkVersion="23"
+        android:targetSdkVersion="36" />
     <!-- Declare features -->
     <uses-feature android:name="android.hardware.camera" />
 

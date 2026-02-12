@@ -63,9 +63,9 @@ Downloading, extraction and placement in assets folder has been managed
 If you explicitly want to download the model, you can download it from here:
 
 * [Posenet](https://storage.googleapis.com/download.tensorflow.org/models/tflite/posenet_mobilenet_v1_100_257x257_multi_kpt_stripped.tflite)
-* [Movenet Lightning](https://tfhub.dev/google/movenet/singlepose/lightning/)
-* [Movenet Thunder](https://tfhub.dev/google/movenet/singlepose/thunder/)
-* [Movenet MultiPose](https://tfhub.dev/google/movenet/multipose/lightning/)
+* [Movenet Lightning](https://kaggle.com/models/google/movenet/frameworks/tfLite/variations/singlepose-lightning)
+* [Movenet Thunder](https://www.kaggle.com/models/google/movenet/frameworks/tfLite/variations/singlepose-thunder)
+* [Movenet MultiPose](https://www.kaggle.com/models/google/movenet/frameworks/tfLite/variations/multipose-lightning-tflite-float16)
 
 ### Additional Note
 _Please do not delete the assets folder content_. If you explicitly deleted the

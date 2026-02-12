@@ -22,9 +22,9 @@ import os
 
 from absl import app
 from absl import flags
+import flatbuffers
 import tensorflow as tf
 
-import flatbuffers
 # pylint: disable=g-direct-tensorflow-import
 from tflite_support import metadata_schema_py_generated as _metadata_fb
 from tflite_support import metadata as _metadata

@@ -525,7 +525,7 @@
 					"-weak_framework",
 					"\"CoreML\"",
 					"-force_load",
-					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
+					"$(SRCROOT)/Pods/TensorFlowLiteSelectTfOps/Frameworks/TensorFlowLiteSelectTfOps.xcframework/ios-arm64/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.tensorflow.SoundClassification;
 				PRODUCT_NAME = "$(TARGET_NAME)";

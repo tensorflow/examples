@@ -57,14 +57,14 @@ classifiers = [
 # Set package version.
 if nightly:
   project_name = '{}-nightly'.format(project_name)
-  version = '0.4.3'  # Version prefix, usually major.minor.micro.
+  version = '0.4.4'  # Version prefix, usually major.minor.micro.
   version = '{:s}.dev{:s}'.format(version, datestring)
   classifiers += [
       'Development Status :: 4 - Beta',
   ]
 else:
   # LINT.IfChange(model_maker_pip_version)
-  version = '0.4.2'
+  version = '0.4.3'
   # LINT.ThenChange(../public/__init__.py, ../RELEASE.md)
 
 # Path to model_maker dir: <repo>/tensorflow_examples/lite/model_maker

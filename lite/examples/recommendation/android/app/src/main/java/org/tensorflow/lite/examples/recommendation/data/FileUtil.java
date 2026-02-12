@@ -78,7 +78,6 @@ public class FileUtil {
   }
 
   /** Load file content from asset file. */
-  @SuppressWarnings("AndroidJdkLibsChecker")
   private static String loadFileContent(AssetManager assetManager, String path) throws IOException {
     try (InputStream ins = assetManager.open(path);
         BufferedReader reader = new BufferedReader(new InputStreamReader(ins, UTF_8))) {

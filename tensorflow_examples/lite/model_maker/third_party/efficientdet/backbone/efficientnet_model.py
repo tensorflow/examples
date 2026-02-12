@@ -708,7 +708,7 @@ class Model(tf.keras.Model):
     # Head part.
     self._head = Head(self._global_params)
 
-  def call(self,
+  def call(self,  # pytype: disable=signature-mismatch  # overriding-parameter-count-checks
            inputs,
            training,
            features_only=None,

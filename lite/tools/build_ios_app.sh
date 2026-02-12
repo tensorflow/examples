@@ -29,6 +29,11 @@ gesture_classification/ios
 classification_by_retrieval/ios
 "
 
+INSTALL_LATEST_NIGHTLY_VERSION="${2:-false}"
+
+echo "Example path: $1"
+echo "Install latest nightly version: $2"
+
 function build_ios_example {
   # Check if this directory appears in the skipped builds list.
   RELATIVE_DIR="${1#"${EXAMPLES_DIR}/"}"
@@ -48,9 +53,16 @@ function build_ios_example {
   for i in $(seq 1 ${MAX_RETRY})
   do
     echo "Trying to install dependencies... (trial $i)"
-    if pod install --verbose --repo-update --clean-install; then
-      INSTALLED=true
-      break
+    if "$INSTALL_LATEST_NIGHTLY_VERSION"; then
+      if pod update --verbose --repo-update --clean-install; then
+        INSTALLED=true
+        break
+      fi
+    else
+      if pod install --verbose --repo-update --clean-install; then
+        INSTALLED=true
+        break
+      fi
     fi
   done
 
