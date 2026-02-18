@@ -2,7 +2,10 @@ load("//third_party/bazel_rules/rules_cc/cc:objc_library.bzl", "objc_library")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
 load("//tools/build_defs/swift:swift_library.bzl", "swift_library")
 
-package(default_visibility = ["//visibility:private"])
+package(
+    default_applicable_licenses = ["//third_party/py/tensorflow_examples:license"],
+    default_visibility = ["//visibility:private"],
+)
 
 licenses(["notice"])
 
