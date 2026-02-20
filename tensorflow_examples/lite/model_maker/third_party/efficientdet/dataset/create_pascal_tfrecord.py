@@ -159,33 +159,43 @@ def dict_to_tf_example(data,
   difficult_obj = []
   if 'object' in data:
     for obj in data['object']:
-      if obj['difficult'] == 'Unspecified':
+      difficult_raw = obj.get('difficult')
+      if ((difficult_raw is None) or (difficult_raw == 'Unspecified')):
         difficult = False
       else:
-        difficult = bool(int(obj['difficult']))
+        difficult = bool(int(difficult_raw))
       if ignore_difficult_instances and difficult:
         continue
 
       difficult_obj.append(int(difficult))
 
-      xmin.append(float(obj['bndbox']['xmin']) / width)
-      ymin.append(float(obj['bndbox']['ymin']) / height)
-      xmax.append(float(obj['bndbox']['xmax']) / width)
-      ymax.append(float(obj['bndbox']['ymax']) / height)
+      xmin = float(obj['bndbox']['xmin'])
+      ymin = float(obj['bndbox']['ymin'])
+      xmax = float(obj['bndbox']['xmax'])
+      ymax = float(obj['bndbox']['ymax'])
+      xmin.append(xmin / width)
+      ymin.append(ymin / height)
+      xmax.append(xmax / width)
+      ymax.append(ymax / height)
       area.append((xmax[-1] - xmin[-1]) * (ymax[-1] - ymin[-1]))
       classes_text.append(obj['name'].encode('utf8'))
       classes.append(label_map_dict[obj['name']])
-      if obj['truncated'] == 'Unspecified':
+      truncated_raw = obj.get('truncated')
+      if ((truncated_raw is None) or (truncated_raw == 'Unspecified')):
         truncated.append(0)
       else:
-        truncated.append(int(obj['truncated']))
-      poses.append(obj['pose'].encode('utf8'))
+        truncated.append(int(truncated_raw))
+      raw_pose = obj.get('pose')
+      if raw_pose is None:
+        poses.append(b'')
+      else:
+        poses.append(raw_pose.encode('utf8'))
 
       if ann_json_dict:
-        abs_xmin = int(obj['bndbox']['xmin'])
-        abs_ymin = int(obj['bndbox']['ymin'])
-        abs_xmax = int(obj['bndbox']['xmax'])
-        abs_ymax = int(obj['bndbox']['ymax'])
+        abs_xmin = int(round(xmin))
+        abs_ymin = int(round(ymin))
+        abs_xmax = int(round(xmax))
+        abs_ymax = int(round(ymax))
         abs_width = abs_xmax - abs_xmin
         abs_height = abs_ymax - abs_ymin
         ann = {
