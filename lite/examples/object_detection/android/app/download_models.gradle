@@ -5,20 +5,8 @@ task downloadModelFile(type: Download) {
 }
 
 task downloadModelFile0(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android/lite-model_efficientdet_lite0_detection_metadata_1.tflite'
-    dest project.ext.ASSET_DIR + '/efficientdet-lite0.tflite'
-    overwrite false
-}
-
-task downloadModelFile1(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android/lite-model_efficientdet_lite1_detection_metadata_1.tflite'
-    dest project.ext.ASSET_DIR + '/efficientdet-lite1.tflite'
-    overwrite false
-}
-
-task downloadModelFile2(type: Download) {
-    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android/lite-model_efficientdet_lite2_detection_metadata_1.tflite'
-    dest project.ext.ASSET_DIR + '/efficientdet-lite2.tflite'
+    src 'https://storage.googleapis.com/download.tensorflow.org/models/tflite/task_library/object_detection/android/lite-model_model_unquant.tflite_metadata_1.tflite'
+    dest project.ext.ASSET_DIR + '/model_unquant.tflite'
     overwrite false
 }
 
@@ -27,5 +15,5 @@ task copyTestModel(type: Copy, dependsOn: downloadModelFile) {
     into project.ext.TEST_ASSETS_DIR
 }
 
-preBuild.dependsOn downloadModelFile, downloadModelFile0, downloadModelFile1, downloadModelFile2,
+preBuild.dependsOn downloadModelFile, downloadModelFile0,
         copyTestModel
