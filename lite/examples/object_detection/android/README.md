@@ -41,7 +41,7 @@ This application should be run on a physical Android device.
     Android Studio project.
 
 *   From the Open File or Project window that appears, navigate to and select
-    the tensorflow-lite/examples/object_detection/android directory. Click OK.
+    the [`tensorflow-lite/examples/object_detection/android`](https://github.com/tensorflow/examples/tree/master/lite/examples/object_detection/android) directory. Click OK.
 
 *   If it asks you to do a Gradle Sync, click OK.
 
