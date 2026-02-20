@@ -9,10 +9,10 @@ The game rule for Plane Strike is very simple. It is a turn-based board game and
 is very similar to the
 [Battleship game](https://en.wikipedia.org/wiki/Battleship_\(game\)). The only
 difference is that Battleship allows you to place battleships (2–5 cells in a
-row or a column as 'battleships'); you can place multple ships. Plane Strike
+row or a column as 'battleships'); you can place multiple ships. Plane Strike
 instead allows you to place a ‘plane’ on the board at the beginning of the game.
-In the animation we can see 2 boards (the top one is the agent's board and the
-bottom one is yours), each of which has a plane on the board. Of course you have
+In the animation, we can see 2 boards (the top one is the agent's board and the
+bottom one is yours), each of which has a plane on the board. Of course, you have
 no visibility on the agent’s plane location when the game starts. In a live
 game, the agent’s plane is hidden at the beginning; you need to guess out all
 the plane cells before the agent does to your plane cells. Whoever finds out all
@@ -20,7 +20,7 @@ of the opponent's plane cells first wins. Then the game restarts.
 
 At the beginning of the game, the app will randomly place the planes for the
 agent and the player. You can see the plane as 8 blue cells in your board. If
-you are not happy with the placement, just reset the game so that the plane
+you are unhappy with the placement, just reset the game so that the plane
 placement will be changed.
 
 During the gameplay, if you, as the player, tap a cell in the agent's board at
