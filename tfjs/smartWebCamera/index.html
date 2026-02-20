@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--
+  Reference codelab: 
+  https://codelabs.developers.google.com/codelabs/tensorflowjs-object-detection?hl=en&continue=https%3A%2F%2Fcodelabs.developers.google.com%2F#0
+-->
+<!--
+All prototypes require some basic HTML scaffolding. You will use this to render the output of the machine learning model later. Let's set that up now:
+
+ - A title for the page
+ - Some descriptive text
+ - A button to enable the webcam
+ - A video tag to render the webcam stream to
+-->
+<html lang="en">
+  <head>
+    <title>Multiple object detection using pre trained model in TensorFlow.js</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Import the webpage's stylesheet -->
+    <link rel="stylesheet" href="style.css">
+  </head>  
+  <body>
+    <h1>Multiple object detection using pre trained model in TensorFlow.js</h1>
+
+    <p>Wait for the model to load before clicking the button to enable the webcam 
+        - at which point it will become visible to use.</p>
+
+    <section id="demos" class="invisible">
+        <p>Hold some objects up close to your webcam to get a real-time 
+            classification! When ready click "enable webcam" below and accept 
+            access to the webcam when the browser asks (check the top left of 
+            your window)</p>
+        <div id="liveView" class="camView">
+            <button id="webcamButton">Enable Webcam</button>
+            <video id="webcam" autoplay width="640" height="480"></video>
+        </div>
+    </section>
+
+    <!-- <h1>TensorFlow.js Hello World</h1>
+    
+    <p id="status">Awaiting TF.js load</p>
+ -->
+
+    <!-- Import TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js" type="text/javascript"></script>
+    <!-- *** Import tfjs-vis - optional *** -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis/dist/tfjs-vis.umd.min.js"></script>
+    <!-- Import the page's JavaScript to do some stuff -->
+
+    <!-- Import TensorFlow.js library
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js" type="text/javascript"></script> -->
+    <!-- Load the coco-ssd model to use to recognize things in images -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    
+    <script src="script.js" defer></script>
+  </body>
+</html>
