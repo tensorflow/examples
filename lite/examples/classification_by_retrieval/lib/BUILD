@@ -3,7 +3,10 @@
 
 load("//third_party/bazel_rules/rules_cc/cc:cc_library.bzl", "cc_library")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_applicable_licenses = ["//third_party/py/tensorflow_examples:license"],
+    default_visibility = ["//visibility:public"],
+)
 
 licenses(["notice"])
 
