@@ -96,7 +96,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
     }
 
     int64_t feature_id =
-        ::util::Fingerprint64(strref.str, strref.len) % kMaxDimension;
+        ::util::Fingerprint64(absl::string_view(strref.str, strref.len)) %
+        kMaxDimension;
     label->data.i32[i] = static_cast<int32_t>(feature_id);
     weight->data.f[i] =
         std::count(strref.str, strref.str + strref.len, ' ') + 1;
