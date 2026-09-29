@@ -17,6 +17,7 @@
 #ifndef NATIVE_LIBS_SUPERRESOLUTION_H
 #define NATIVE_LIBS_SUPERRESOLUTION_H
 
+#include <memory>
 #include <string>
 
 #include "tensorflow/lite/c/c_api.h"
