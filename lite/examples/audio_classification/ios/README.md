@@ -23,7 +23,7 @@ Also, you can use your own model generated on
 ### iOS app details
 
 The app is written entirely in Swift and uses the TensorFlow Lite
-[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/experimental/swift)
+[Swift library](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/lite/swift)
 for performing sound classification.
 
 ## Requirements
