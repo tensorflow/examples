@@ -22,13 +22,17 @@ public protocol AudioInputManagerDelegate: class {
 
 public class AudioInputManager {
   // MARK: - Constants
-  public let bufferSize: Int
 
   private let sampleRate: Int
+  private let recordingLength: Int
+  private let audioUpdatePerSecond: Int
   private let conversionQueue = DispatchQueue(label: "conversionQueue")
 
   // MARK: - Variables
   public weak var delegate: AudioInputManagerDelegate?
+  
+  private var modelInputArray:Array<Int16>;
+  private var modelInputArrayStartIndex = 0;
 
   private var audioEngine = AVAudioEngine()
 
@@ -36,7 +40,12 @@ public class AudioInputManager {
 
   public init(sampleRate: Int) {
     self.sampleRate = sampleRate
-    self.bufferSize = sampleRate * 2
+    self.recordingLength = sampleRate
+    // Number of times the audio buffer should be updated per second
+    // This value should be such that the audio engine bufferSize is in the range of [100, 400] ms as required by iOS audio engine
+    // Updating audio 10 times per second will result in bufferSize of 100 ms
+    self.audioUpdatePerSecond = 10
+    self.modelInputArray = Array(repeating: 0, count: self.recordingLength)
   }
 
   public func checkPermissionsAndStartTappingMicrophone() {
@@ -75,7 +84,9 @@ public class AudioInputManager {
     ), let formatConverter = AVAudioConverter(from:inputFormat, to: recordingFormat) else { return }
 
     // installs a tap on the audio engine and specifying the buffer size and the input format.
-    inputNode.installTap(onBus: 0, bufferSize: AVAudioFrameCount(bufferSize), format: inputFormat) {
+    // The tap is triggered by the audio engine when the buffer is filled up.
+    // It is required that the buffer size should be in the range of [100, 400] ms.
+    inputNode.installTap(onBus: 0, bufferSize: AVAudioFrameCount(Int(inputFormat.sampleRate / self.audioUpdatePerSecond)), format: inputFormat) {
       buffer, _ in
 
       self.conversionQueue.async {
@@ -83,7 +94,7 @@ public class AudioInputManager {
         // for the model.(pcm 16)
         guard let pcmBuffer = AVAudioPCMBuffer(
           pcmFormat: recordingFormat,
-          frameCapacity: AVAudioFrameCount(recordingFormat.sampleRate * 2.0)
+          frameCapacity: AVAudioFrameCount(recordingFormat.sampleRate * buffer.frameLength / AVAudioFrameCount(buffer.format.sampleRate)) // frameCapacity should be scaled appropriate to the recording format sample rate and audio engine's sample rate
         ) else { return }
 
         var error: NSError?
@@ -106,8 +117,22 @@ public class AudioInputManager {
             by: buffer.stride
           ).map { channelDataValue[$0] }
 
+          // Find end index upto which audio data can be written in modelInputArray
+          var modelInputArrayEndIndex = min(self.modelInputArrayStartIndex+Int(pcmBuffer!.frameLength), self.modelInputArray.count)
+          // Update modelInputArray with the new channelDataValueArray in a round robin fashion
+          self.modelInputArray[self.modelInputArrayStartIndex..<modelInputArrayEndIndex] = channelDataValueArray[0..<modelInputArrayEndIndex-self.modelInputArrayStartIndex];
+          if self.modelInputArrayStartIndex+Int(pcmBuffer!.frameLength) > modelInputArrayEndIndex {
+            self.modelInputArray[0..<self.modelInputArrayStartIndex+Int(pcmBuffer!.frameLength)-modelInputArrayEndIndex] = channelDataValueArray[modelInputArrayEndIndex-self.modelInputArrayStartIndex..<channelDataValueArray.count];
+          }
+          // Update the start index for the next iteration
+          self.modelInputArrayStartIndex = (self.modelInputArrayStartIndex + Int(pcmBuffer!.frameLength)) % self.modelInputArray.count;
+          
+          // Copy audio data from modelInputArray such that the oldest audio sample is written at index 0 in timeCorrectedInputArray
+          var timeCorrectedInputArray:[Int16] = Array(self.modelInputArray[self.modelInputArrayStartIndex..<self.modelInputArray.count])
+          timeCorrectedInputArray.append(contentsOf: self.modelInputArray[0..<self.modelInputArrayStartIndex])
+
           // Converted pcm 16 values are delegated to the controller.
-          self.delegate?.audioInputManager(self, didCaptureChannelData: channelDataValueArray)
+          self.delegate?.audioInputManager(self, didCaptureChannelData: timeCorrectedInputArray)
         }
       }
     }

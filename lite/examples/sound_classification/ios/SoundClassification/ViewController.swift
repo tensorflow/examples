@@ -20,7 +20,7 @@ class ViewController: UIViewController {
 
   private var audioInputManager: AudioInputManager!
   private var soundClassifier: SoundClassifier!
-  private var bufferSize: Int = 0
+  private var recordingLength: Int = 0
   private var probabilities: [Float32] = []
 
   // MARK: - View controller lifecycle methods
@@ -44,7 +44,7 @@ class ViewController: UIViewController {
     audioInputManager = AudioInputManager(sampleRate: soundClassifier.sampleRate)
     audioInputManager.delegate = self
 
-    bufferSize = audioInputManager.bufferSize
+    recordingLength = audioInputManager.recordingLength
 
     audioInputManager.checkPermissionsAndStartTappingMicrophone()
   }
@@ -80,9 +80,7 @@ extension ViewController: AudioInputManagerDelegate {
     _ audioInputManager: AudioInputManager,
     didCaptureChannelData channelData: [Int16]
   ) {
-    let sampleRate = soundClassifier.sampleRate
-    self.runModel(inputBuffer: Array(channelData[0..<sampleRate]))
-    self.runModel(inputBuffer: Array(channelData[sampleRate..<bufferSize]))
+    self.runModel(inputBuffer: Array(channelData[0..<recordingLength]))
   }
 }
 
