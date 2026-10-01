@@ -172,7 +172,7 @@ def iou_loss(pred_boxes: FloatType,
         'Unknown loss_type {}, not iou/ciou/diou/giou'.format(iou_type))
 
   pred_boxes = tf.convert_to_tensor(pred_boxes)
-  target_boxes = tf.cast(target_boxes, pred_boxes.dtype)
+  target_boxes = tf.cast(target_boxes, pred_boxes.dtype)  # pyrefly: ignore[missing-attribute]
 
   # t_ denotes target boxes and p_ denotes predicted boxes: (y, x, y_max, x_max)
   pred_boxes_list = tf.unstack(pred_boxes, None, axis=-1)
@@ -186,12 +186,12 @@ def iou_loss(pred_boxes: FloatType,
     target_boxes = target_boxes_list[i:i + 4]
 
     # Compute mask.
-    t_ymin, t_xmin, t_ymax, t_xmax = target_boxes
+    t_ymin, t_xmin, t_ymax, t_xmax = target_boxes  # pyrefly: ignore[not-iterable]
     mask = tf.math.logical_and(t_ymax > t_ymin, t_xmax > t_xmin)
     mask = tf.cast(mask, t_ymin.dtype)
     # Loss should be mask * (1 - iou) = mask - masked_iou.
-    pred_boxes = [b * mask for b in pred_boxes]  # pyrefly: ignore[bad-assignment]
-    target_boxes = [b * mask for b in target_boxes]  # pyrefly: ignore[bad-assignment]
+    pred_boxes = [b * mask for b in pred_boxes]  # pyrefly: ignore[bad-assignment, not-iterable]
+    target_boxes = [b * mask for b in target_boxes]  # pyrefly: ignore[bad-assignment, not-iterable]
     iou_loss_list.append(
         mask *
         (1 - tf.squeeze(_iou_per_anchor(pred_boxes, target_boxes, iou_type))))  # pytype: disable=wrong-arg-types  # numpy-scalars
