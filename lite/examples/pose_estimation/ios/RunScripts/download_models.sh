@@ -26,17 +26,25 @@ if [ ! -f "$FILE" ]; then
 fi
 
 FILE=${MODEL_DIR}/movenet_lightning.tflite
+GZ_FILE=${MODEL_DIR}/movenet_lightning.tar.gz
 if [ ! -f "$FILE" ]; then
   curl \
-    -L 'https://tfhub.dev/google/lite-model/movenet/singlepose/lightning/tflite/float16/4?lite-format=tflite' \
-    -o ${FILE}
+    -L 'https://www.kaggle.com/api/v1/models/google/movenet/tfLite/multipose-lightning-tflite-float16/1/download' \
+    -o ${GZ_FILE}
+  tar -xzf ${GZ_FILE} -C ${MODEL_DIR}
+  rm ${GZ_FILE}
+  mv ${MODEL_DIR}/1.tflite ${FILE}
 fi
 
 FILE=${MODEL_DIR}/movenet_thunder.tflite
+GZ_FILE=${MODEL_DIR}/movenet_thunder.tar.gz
 if [ ! -f "$FILE" ]; then
   curl \
-    -L 'https://tfhub.dev/google/lite-model/movenet/singlepose/thunder/tflite/float16/4?lite-format=tflite' \
-    -o ${FILE}
+    -L 'https://www.kaggle.com/api/v1/models/google/movenet/tfLite/singlepose-thunder-tflite-float16/1/download' \
+    -o ${GZ_FILE}
+  tar -xzf ${GZ_FILE} -C ${MODEL_DIR}
+  rm ${GZ_FILE}
+  mv ${MODEL_DIR}/4.tflite ${FILE}
 fi
 
 echo -e "Downloaded files are in ${MODEL_DIR}"
