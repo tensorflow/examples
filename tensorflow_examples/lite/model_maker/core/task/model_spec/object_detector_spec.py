@@ -96,7 +96,7 @@ class ExportModel(efficientdet_keras.EfficientDetModel):
                                          config.mean_rgb, config.stddev_rgb,
                                          self.pre_mode)
     # Network.
-    outputs = self.model(inputs, training=False)  # pyrefly: ignore[not-callable]
+    outputs = self.model(inputs, training=False)
 
     # Postprocess for detection.
     det_outputs = self._postprocess(outputs[0], outputs[1], scales,
@@ -325,7 +325,7 @@ class EfficientDetModelSpec(object):
 
     @tf.function
     def _get_detections(images, labels):
-      cls_outputs, box_outputs = model(images, training=False)  # pyrefly: ignore[not-callable]
+      cls_outputs, box_outputs = model(images, training=False)
       detections = postprocess.generate_detections(self.config, cls_outputs,
                                                    box_outputs,
                                                    labels['image_scales'],
@@ -374,7 +374,7 @@ class EfficientDetModelSpec(object):
     progbar = tf.keras.utils.Progbar(steps)
     for i, (images, labels) in enumerate(dataset):
       # Get the output result after post-processing NMS op.
-      _, nms_scores, nms_classes, nms_boxes = lite_runner.run(images)  # pytype: disable=bad-unpacking
+      _, nms_scores, nms_classes, nms_boxes = lite_runner.run(images)
 
       # CLASS_OFFSET is used since label_id for `background` is 0 in label_map
       # while it's not actually included the model. We don't need to add the
