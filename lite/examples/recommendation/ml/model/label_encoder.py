@@ -68,7 +68,7 @@ class LabelEncoder(tf.keras.layers.Layer):
     """
     if isinstance(input_label, tf.SparseTensor):
       input_label = tf.sparse.to_dense(input_label)
-    label_embedding = self._label_embedding_layer(input_label)  # pyrefly: ignore[not-callable]
+    label_embedding = self._label_embedding_layer(input_label)
     if tf.keras.backend.ndim(label_embedding) == 3:
       label_embedding = tf.squeeze(label_embedding)
     return label_embedding
