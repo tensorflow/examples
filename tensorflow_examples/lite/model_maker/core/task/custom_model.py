@@ -63,7 +63,12 @@ class CustomModel(abc.ABC):
     return
 
   def summary(self):
-    self.model.summary()
+    # Cannot print summary if inherited class's create_model() is not called
+    try:
+      self.model.summary()
+    except:
+      print("The model has not been created")
+      
 
   @abc.abstractmethod
   def evaluate(self, data, **kwargs):
