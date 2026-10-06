@@ -45,8 +45,8 @@ def visualize(
     cv2.rectangle(image, start_point, end_point, _TEXT_COLOR, 3)
 
     # Draw label and score
-    category = detection.categories[0]
-    category_name = category.category_name
+    category = detection.classes[0]
+    category_name = category.class_name
     probability = round(category.score, 2)
     result_text = category_name + ' (' + str(probability) + ')'
     text_location = (_MARGIN + bbox.origin_x,
