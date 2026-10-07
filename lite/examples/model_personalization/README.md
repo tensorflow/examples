@@ -35,8 +35,8 @@ pip install -r requirements.txt
 python generate_training_model.py
 popd
 
-# Copy over the flatbuffer file to the `android` assets directory.
-cp transfer_learning/model.tflite android/app/src/main/assets/model/model.tflite
+# Create the `android` assets directory and copy over the flatbuffer file to it.
+mkdir -p android/app/src/main/assets/model/ && cp transfer_learning/model.tflite android/app/src/main/assets/model/model.tflite
 ```
 
 ### Install and run the application
