@@ -186,7 +186,7 @@ def _flip(image):
 def preprocess_for_train(image,
                          image_size=IMAGE_SIZE,
                          resize_method=tf.image.ResizeMethod.BILINEAR):
-  """Preprocesses the given image for evaluation.
+  """Preprocesses the given image for training.
 
   Args:
     image: 4-D Tensor of shape [batch, height, width, channels] or 3-D Tensor
