@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2022 The TensorFlow Authors. All Rights Reserved.
  *
@@ -13,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.tensorflow.lite.examples.objectdetection
 
 import android.content.Context
@@ -28,126 +30,197 @@ import org.tensorflow.lite.task.vision.detector.Detection
 import org.tensorflow.lite.task.vision.detector.ObjectDetector
 
 class ObjectDetectorHelper(
-  var threshold: Float = 0.5f,
-  var numThreads: Int = 2,
-  var maxResults: Int = 3,
-  var currentDelegate: Int = 0,
-  var currentModel: Int = 0,
-  val context: Context,
-  val objectDetectorListener: DetectorListener?
+    var threshold: Float = DEFAULT_THRESHOLD,
+    var numThreads: Int = DEFAULT_NUM_THREADS,
+    var maxResults: Int = DEFAULT_MAX_RESULTS,
+    var currentDelegate: Int = DELEGATE_CPU,
+    var currentModel: Int = MODEL_EFFICIENTDETV0,
+    val context: Context,
+    val objectDetectorListener: DetectorListener?
 ) {
 
-    // For this example this needs to be a var so it can be reset on changes. If the ObjectDetector
-    // will not change, a lazy val would be preferable.
+    companion object {
+        private const val TAG = "ObjectDetectorHelper"
+
+        // Detection configuration
+        const val DEFAULT_THRESHOLD = 0.45f
+        const val DEFAULT_NUM_THREADS = 4
+        const val DEFAULT_MAX_RESULTS = 5
+
+        // Hardware delegates
+        const val DELEGATE_CPU = 0
+        const val DELEGATE_GPU = 1
+        const val DELEGATE_NNAPI = 2
+
+        // Model identifiers
+        const val MODEL_MOBILENETV1 = 0
+        const val MODEL_EFFICIENTDETV0 = 1
+        const val MODEL_EFFICIENTDETV1 = 2
+        const val MODEL_EFFICIENTDETV2 = 3
+    }
+
     private var objectDetector: ObjectDetector? = null
 
     init {
         setupObjectDetector()
     }
 
+    /**
+     * Releases the current detector reference.
+     * Call setupObjectDetector() afterwards to initialize it again.
+     */
     fun clearObjectDetector() {
         objectDetector = null
     }
 
-    // Initialize the object detector using current settings on the
-    // thread that is using it. CPU and NNAPI delegates can be used with detectors
-    // that are created on the main thread and used on a background thread, but
-    // the GPU delegate needs to be used on the thread that initialized the detector
+    /**
+     * Creates the detector using the selected model, confidence threshold,
+     * result limit, thread count and hardware delegate.
+     */
+    @Synchronized
     fun setupObjectDetector() {
-        // Create the base options for the detector using specifies max results and score threshold
-        val optionsBuilder =
-            ObjectDetector.ObjectDetectorOptions.builder()
-                .setScoreThreshold(threshold)
-                .setMaxResults(maxResults)
+        // Release the previous detector reference before changing configuration.
+        objectDetector = null
 
-        // Set general detection options, including number of used threads
-        val baseOptionsBuilder = BaseOptions.builder().setNumThreads(numThreads)
+        try {
+            val optionsBuilder =
+                ObjectDetector.ObjectDetectorOptions.builder()
+                    .setScoreThreshold(threshold.coerceIn(0.0f, 1.0f))
+                    .setMaxResults(maxResults.coerceAtLeast(1))
 
-        // Use the specified hardware for running the model. Default to CPU
-        when (currentDelegate) {
-            DELEGATE_CPU -> {
-                // Default
-            }
-            DELEGATE_GPU -> {
-                if (CompatibilityList().isDelegateSupportedOnThisDevice) {
-                    baseOptionsBuilder.useGpu()
-                } else {
-                    objectDetectorListener?.onError("GPU is not supported on this device")
+            val baseOptionsBuilder =
+                BaseOptions.builder()
+                    .setNumThreads(numThreads.coerceAtLeast(1))
+
+            when (currentDelegate) {
+                DELEGATE_CPU -> {
+                    // CPU is the default and most compatible option.
+                }
+
+                DELEGATE_GPU -> {
+                    val compatibilityList = CompatibilityList()
+
+                    if (compatibilityList.isDelegateSupportedOnThisDevice) {
+                        baseOptionsBuilder.useGpu()
+                    } else {
+                        objectDetectorListener?.onError(
+                            "GPU is not supported on this device. Using CPU instead."
+                        )
+                        Log.w(TAG, "GPU delegate unsupported; using CPU.")
+                    }
+                }
+
+                DELEGATE_NNAPI -> {
+                    baseOptionsBuilder.useNnapi()
+                }
+
+                else -> {
+                    Log.w(TAG, "Unknown delegate $currentDelegate; using CPU.")
                 }
             }
-            DELEGATE_NNAPI -> {
-                baseOptionsBuilder.useNnapi()
-            }
-        }
 
-        optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
+            optionsBuilder.setBaseOptions(baseOptionsBuilder.build())
 
-        val modelName =
-            when (currentModel) {
+            val modelName = when (currentModel) {
                 MODEL_MOBILENETV1 -> "mobilenetv1.tflite"
                 MODEL_EFFICIENTDETV0 -> "efficientdet-lite0.tflite"
                 MODEL_EFFICIENTDETV1 -> "efficientdet-lite1.tflite"
                 MODEL_EFFICIENTDETV2 -> "efficientdet-lite2.tflite"
-                else -> "mobilenetv1.tflite"
+                else -> {
+                    Log.w(TAG, "Unknown model $currentModel; using MobileNet V1.")
+                    "mobilenetv1.tflite"
+                }
             }
 
-        try {
             objectDetector =
-                ObjectDetector.createFromFileAndOptions(context, modelName, optionsBuilder.build())
-        } catch (e: IllegalStateException) {
-            objectDetectorListener?.onError(
-                "Object detector failed to initialize. See error logs for details"
+                ObjectDetector.createFromFileAndOptions(
+                    context,
+                    modelName,
+                    optionsBuilder.build()
+                )
+
+            Log.i(
+                TAG,
+                "Detector initialized: model=$modelName, " +
+                    "threshold=$threshold, threads=$numThreads, " +
+                    "maxResults=$maxResults, delegate=$currentDelegate"
             )
-            Log.e("Test", "TFLite failed to load model with error: " + e.message)
+        } catch (e: Exception) {
+            objectDetector = null
+
+            Log.e(
+                TAG,
+                "Failed to initialize object detector.",
+                e
+            )
+
+            objectDetectorListener?.onError(
+                "Could not initialize the object detector. " +
+                    "Check the model file and device configuration."
+            )
         }
     }
 
+    /**
+     * Runs object detection on a bitmap.
+     *
+     * imageRotation should be the camera rotation in degrees, normally
+     * 0, 90, 180 or 270, as supplied by the existing camera pipeline.
+     */
     fun detect(image: Bitmap, imageRotation: Int) {
-        if (objectDetector == null) {
+        val detector = objectDetector ?: run {
             setupObjectDetector()
+            objectDetector
         }
 
-        // Inference time is the difference between the system time at the start and finish of the
-        // process
-        var inferenceTime = SystemClock.uptimeMillis()
+        if (detector == null) {
+            Log.e(TAG, "Detection skipped because the detector is unavailable.")
+            return
+        }
 
-        // Create preprocessor for the image.
-        // See https://www.tensorflow.org/lite/inference_with_metadata/
-        //            lite_support#imageprocessor_architecture
-        val imageProcessor =
-            ImageProcessor.Builder()
-                .add(Rot90Op(-imageRotation / 90))
-                .build()
+        val startTime = SystemClock.elapsedRealtime()
 
-        // Preprocess the image and convert it into a TensorImage for detection.
-        val tensorImage = imageProcessor.process(TensorImage.fromBitmap(image))
+        try {
+            val rotation = ((imageRotation % 360) + 360) % 360
 
-        val results = objectDetector?.detect(tensorImage)
-        inferenceTime = SystemClock.uptimeMillis() - inferenceTime
-        objectDetectorListener?.onResults(
-            results,
-            inferenceTime,
-            tensorImage.height,
-            tensorImage.width)
+            val imageProcessor =
+                ImageProcessor.Builder()
+                    .add(Rot90Op(-rotation / 90))
+                    .build()
+
+            val tensorImage =
+                imageProcessor.process(
+                    TensorImage.fromBitmap(image)
+                )
+
+            val results = detector.detect(tensorImage)
+
+            val inferenceTime =
+                SystemClock.elapsedRealtime() - startTime
+
+            objectDetectorListener?.onResults(
+                results,
+                inferenceTime,
+                tensorImage.height,
+                tensorImage.width
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Object detection failed.", e)
+
+            objectDetectorListener?.onError(
+                "Object detection failed. Please try again."
+            )
+        }
     }
 
     interface DetectorListener {
         fun onError(error: String)
-        fun onResults(
-          results: MutableList<Detection>?,
-          inferenceTime: Long,
-          imageHeight: Int,
-          imageWidth: Int
-        )
-    }
 
-    companion object {
-        const val DELEGATE_CPU = 0
-        const val DELEGATE_GPU = 1
-        const val DELEGATE_NNAPI = 2
-        const val MODEL_MOBILENETV1 = 0
-        const val MODEL_EFFICIENTDETV0 = 1
-        const val MODEL_EFFICIENTDETV1 = 2
-        const val MODEL_EFFICIENTDETV2 = 3
+        fun onResults(
+            results: MutableList<Detection>?,
+            inferenceTime: Long,
+            imageHeight: Int,
+            imageWidth: Int
+        )
     }
 }
