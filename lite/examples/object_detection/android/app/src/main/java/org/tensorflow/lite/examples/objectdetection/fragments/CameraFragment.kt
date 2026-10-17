@@ -2,17 +2,8 @@
 /*
  * Copyright 2022 The TensorFlow Authors. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Licensed under the Apache License, Version 2.0.
+ * See https://www.apache.org/licenses/LICENSE-2.0
  */
 
 package org.tensorflow.lite.examples.objectdetection.fragments
@@ -23,6 +14,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.SystemClock
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -40,30 +32,39 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
-import java.util.LinkedList
-import java.util.Locale
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import org.tensorflow.lite.examples.objectdetection.ObjectDetectorHelper
 import org.tensorflow.lite.examples.objectdetection.R
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
 import org.tensorflow.lite.task.vision.detector.Detection
+import java.io.DataOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.net.InetSocketAddress
+import java.net.Socket
+import java.util.LinkedList
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
+class CameraFragment :
+    Fragment(),
+    ObjectDetectorHelper.DetectorListener {
 
     companion object {
         private const val TAG = "ObjectDetection"
 
-        // A label must appear in this many consecutive analyzed frames.
+        // Raspberry Pi connection settings
+        private const val PI_HOST = "10.242.215.42"
+        private const val PI_PORT = 5001
+        private const val CONNECT_TIMEOUT_MS = 3000
+        private const val SOCKET_TIMEOUT_MS = 5000
+        private const val MAX_AUDIO_SIZE = 10 * 1024 * 1024
+
+        // Detection speech settings
         private const val REQUIRED_STABLE_FRAMES = 3
-
-        // Minimum time between any two announcements.
         private const val MIN_ANNOUNCEMENT_GAP_MS = 2000L
-
-        // Minimum delay before announcing the same label again.
         private const val SAME_LABEL_REPEAT_DELAY_MS = 6000L
-
-        // Minimum confidence required before a detection can be spoken.
         private const val SPEECH_CONFIDENCE_THRESHOLD = 0.60f
     }
 
@@ -75,6 +76,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private lateinit var objectDetectorHelper: ObjectDetectorHelper
     private lateinit var bitmapBuffer: Bitmap
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var audioExecutor: ExecutorService
 
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -84,6 +86,10 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     // Text-to-Speech
     private var textToSpeech: TextToSpeech? = null
     private var ttsReady = false
+    private var speechPending = false
+
+    // Synthesized audio files, indexed by utterance ID
+    private val audioFiles = ConcurrentHashMap<String, File>()
 
     // Stable detection tracking
     private var candidateLabel = ""
@@ -92,6 +98,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     // Announcement tracking
     private var lastSpokenLabel = ""
     private var lastAnnouncementTime = 0L
+    private var utteranceCounter = 0
 
     override fun onResume() {
         super.onResume()
@@ -107,13 +114,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     override fun onDestroyView() {
-        // Stop speech and release the TTS engine.
-        textToSpeech?.stop()
-        textToSpeech?.shutdown()
-        textToSpeech = null
-        ttsReady = false
-
-        // Stop camera analysis.
+        // Stop camera analysis before releasing the view.
         imageAnalyzer?.clearAnalyzer()
         cameraProvider?.unbindAll()
 
@@ -122,9 +123,25 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         camera = null
         cameraProvider = null
 
-        // Release the background executor.
+        // Stop TTS and release the engine.
+        textToSpeech?.stop()
+        textToSpeech?.shutdown()
+        textToSpeech = null
+        ttsReady = false
+        speechPending = false
+
+        // Release generated files.
+        audioFiles.values.forEach { file ->
+            runCatching { file.delete() }
+        }
+        audioFiles.clear()
+
         if (::cameraExecutor.isInitialized) {
             cameraExecutor.shutdown()
+        }
+
+        if (::audioExecutor.isInitialized) {
+            audioExecutor.shutdownNow()
         }
 
         _fragmentCameraBinding = null
@@ -143,10 +160,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     @SuppressLint("MissingPermission")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+        audioExecutor = Executors.newSingleThreadExecutor()
 
         initializeTextToSpeech()
 
@@ -169,40 +190,220 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         ttsReady = false
 
         textToSpeech = TextToSpeech(requireContext()) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                val result = textToSpeech?.setLanguage(Locale.US)
-
-                ttsReady = result != null &&
-                    result != TextToSpeech.LANG_MISSING_DATA &&
-                    result != TextToSpeech.LANG_NOT_SUPPORTED
-
-                Log.d(TAG, "Text-to-Speech ready: $ttsReady")
-            } else {
-                ttsReady = false
-                Log.e(TAG, "Text-to-Speech initialization failed")
+            if (status != TextToSpeech.SUCCESS) {
+                Log.e(TAG, "TTS initialization failed")
+                showToast("Text-to-Speech initialization failed.")
+                return@TextToSpeech
             }
+
+            val engine = textToSpeech ?: return@TextToSpeech
+            val languageResult = engine.setLanguage(Locale.US)
+
+            ttsReady =
+                languageResult != TextToSpeech.LANG_MISSING_DATA &&
+                languageResult != TextToSpeech.LANG_NOT_SUPPORTED
+
+            if (!ttsReady) {
+                Log.e(TAG, "TTS language is unavailable")
+                showToast("English speech is unavailable.")
+                return@TextToSpeech
+            }
+
+            engine.setOnUtteranceProgressListener(
+                object : UtteranceProgressListener() {
+
+                    override fun onStart(utteranceId: String?) {
+                        Log.d(TAG, "Speech synthesis started: $utteranceId")
+                    }
+
+                    override fun onDone(utteranceId: String?) {
+                        if (utteranceId == null) return
+
+                        val file = audioFiles[utteranceId] ?: return
+
+                        if (!::audioExecutor.isInitialized ||
+                            audioExecutor.isShutdown
+                        ) {
+                            audioFiles.remove(utteranceId)
+                            file.delete()
+                            return
+                        }
+
+                        try {
+                            audioExecutor.execute {
+                                try {
+                                    sendAudioToPi(file)
+                                } catch (e: Exception) {
+                                    Log.e(
+                                        TAG,
+                                        "Failed to transmit synthesized audio",
+                                        e
+                                    )
+                                    showToast(
+                                        "Could not send audio to Raspberry Pi."
+                                    )
+                                } finally {
+                                    audioFiles.remove(utteranceId)
+                                    file.delete()
+
+                                    activity?.runOnUiThread {
+                                        speechPending = false
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            audioFiles.remove(utteranceId)
+                            file.delete()
+                            Log.e(TAG, "Audio executor unavailable", e)
+                        }
+                    }
+
+                    @Deprecated("Deprecated in Android API")
+                    override fun onError(utteranceId: String?) {
+                        handleSynthesisError(utteranceId)
+                    }
+
+                    override fun onError(
+                        utteranceId: String?,
+                        errorCode: Int
+                    ) {
+                        Log.e(
+                            TAG,
+                            "Speech synthesis error: $errorCode"
+                        )
+                        handleSynthesisError(utteranceId)
+                    }
+                }
+            )
+
+            Log.d(TAG, "TTS ready: $ttsReady")
+        }
+    }
+
+    private fun handleSynthesisError(utteranceId: String?) {
+        if (utteranceId != null) {
+            audioFiles.remove(utteranceId)?.delete()
+        }
+
+        activity?.runOnUiThread {
+            speechPending = false
         }
     }
 
     /**
-     * Selects the highest-confidence label for the current frame.
-     * The label must remain stable for several frames before it is spoken.
+     * Generate a WAV file locally, then send it to the Raspberry Pi.
+     * This function should be called on the main thread.
+     */
+    private fun synthesizeAndSend(text: String) {
+        val engine = textToSpeech
+
+        if (!ttsReady || engine == null || speechPending) {
+            return
+        }
+
+        if (!::audioExecutor.isInitialized || audioExecutor.isShutdown) {
+            return
+        }
+
+        val utteranceId = "blind_assist_${++utteranceCounter}"
+        val outputFile = File(
+            requireContext().cacheDir,
+            "$utteranceId.wav"
+        )
+
+        speechPending = true
+        audioFiles[utteranceId] = outputFile
+
+        val result = engine.synthesizeToFile(
+            text,
+            Bundle(),
+            outputFile,
+            utteranceId
+        )
+
+        if (result != TextToSpeech.SUCCESS) {
+            audioFiles.remove(utteranceId)
+            outputFile.delete()
+            speechPending = false
+            Log.e(TAG, "Could not start WAV synthesis")
+        }
+    }
+
+    /**
+     * Protocol expected by audio_receiver.py:
+     * 4-byte big-endian WAV length, followed by WAV bytes.
+     *
+     * Network work runs on audioExecutor, never on the UI thread.
+     */
+    private fun sendAudioToPi(file: File) {
+        if (!file.exists()) {
+            throw IllegalStateException("Synthesized WAV file is missing")
+        }
+
+        val audioLength = file.length()
+
+        if (audioLength <= 0 || audioLength > MAX_AUDIO_SIZE) {
+            throw IllegalStateException(
+                "Invalid audio file size: $audioLength"
+            )
+        }
+
+        Socket().use { socket ->
+            socket.connect(
+                InetSocketAddress(PI_HOST, PI_PORT),
+                CONNECT_TIMEOUT_MS
+            )
+            socket.soTimeout = SOCKET_TIMEOUT_MS
+            socket.tcpNoDelay = true
+
+            DataOutputStream(socket.getOutputStream()).use { output ->
+                // DataOutputStream writes integers in big-endian order.
+                output.writeInt(audioLength.toInt())
+
+                FileInputStream(file).use { input ->
+                    val buffer = ByteArray(8192)
+                    var totalSent = 0L
+
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count == -1) break
+
+                        output.write(buffer, 0, count)
+                        totalSent += count
+                    }
+
+                    output.flush()
+
+                    if (totalSent != audioLength) {
+                        throw IllegalStateException(
+                            "Audio transmission was incomplete"
+                        )
+                    }
+                }
+            }
+        }
+
+        Log.i(TAG, "Audio sent to Raspberry Pi ($audioLength bytes)")
+    }
+
+    /**
+     * Select the highest-confidence label, require stable frames,
+     * then synthesize speech and transmit it to the Pi.
      */
     private fun announceDetection(results: MutableList<Detection>?) {
-        if (!ttsReady || textToSpeech == null) return
+        if (!ttsReady || speechPending) return
 
         val bestCategory = results
             ?.asSequence()
             ?.mapNotNull { detection ->
                 detection.categories.maxByOrNull { it.score }
             }
-            ?.filter { category ->
-                category.score >= SPEECH_CONFIDENCE_THRESHOLD &&
-                    category.label.isNotBlank()
+            ?.filter {
+                it.score >= SPEECH_CONFIDENCE_THRESHOLD &&
+                    it.label.isNotBlank()
             }
             ?.maxByOrNull { it.score }
 
-        // No sufficiently confident detection in this frame.
         if (bestCategory == null) {
             candidateLabel = ""
             candidateCount = 0
@@ -211,7 +412,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         val label = bestCategory.label
 
-        // Require the same label in consecutive frames.
         if (label == candidateLabel) {
             candidateCount++
         } else {
@@ -219,18 +419,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             candidateCount = 1
         }
 
-        if (candidateCount < REQUIRED_STABLE_FRAMES) {
-            return
-        }
+        if (candidateCount < REQUIRED_STABLE_FRAMES) return
 
         val now = SystemClock.elapsedRealtime()
 
-        // Avoid speaking too frequently, even when different objects appear.
         if (now - lastAnnouncementTime < MIN_ANNOUNCEMENT_GAP_MS) {
             return
         }
 
-        // Avoid repeating the same label too often.
         if (
             label == lastSpokenLabel &&
             now - lastAnnouncementTime < SAME_LABEL_REPEAT_DELAY_MS
@@ -238,23 +434,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             return
         }
 
-        val result = textToSpeech?.speak(
-            "$label detected",
-            TextToSpeech.QUEUE_FLUSH,
-            null,
-            "object_warning"
-        )
+        // Reserve the speech slot before starting synthesis.
+        lastSpokenLabel = label
+        lastAnnouncementTime = now
+        candidateLabel = ""
+        candidateCount = 0
 
-        if (result == TextToSpeech.SUCCESS) {
-            lastSpokenLabel = label
-            lastAnnouncementTime = now
-
-            // Require fresh stable frames before the next announcement.
-            candidateLabel = ""
-            candidateCount = 0
-
-            Log.d(TAG, "Announced object: $label")
-        }
+        Log.i(TAG, "Announcing detected object: $label")
+        synthesizeAndSend("$label detected")
     }
 
     private fun initBottomSheetControls() {
@@ -264,7 +451,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     objectDetectorHelper.threshold =
                         (objectDetectorHelper.threshold - 0.1f)
                             .coerceAtLeast(0.1f)
-
                     updateControlsUi()
                 }
             }
@@ -275,7 +461,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     objectDetectorHelper.threshold =
                         (objectDetectorHelper.threshold + 0.1f)
                             .coerceAtMost(0.9f)
-
                     updateControlsUi()
                 }
             }
@@ -331,9 +516,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     }
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    // No action required.
-                }
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
             }
 
         fragmentCameraBinding.bottomSheetLayout.spinnerModel
@@ -355,9 +538,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                     }
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    // No action required.
-                }
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
             }
     }
 
@@ -377,7 +558,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         binding.bottomSheetLayout.threadsValue.text =
             objectDetectorHelper.numThreads.toString()
 
-        // Reset speech stability when detector settings change.
         candidateLabel = ""
         candidateCount = 0
 
@@ -386,10 +566,10 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     private fun setUpCamera() {
-        val context = context ?: return
+        val safeContext = context ?: return
 
         val cameraProviderFuture =
-            ProcessCameraProvider.getInstance(context)
+            ProcessCameraProvider.getInstance(safeContext)
 
         cameraProviderFuture.addListener(
             {
@@ -398,22 +578,21 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 try {
                     cameraProvider = cameraProviderFuture.get()
                     bindCameraUseCases()
-                } catch (exc: Exception) {
-                    Log.e(TAG, "Camera initialization failed", exc)
-                    onError("Unable to initialize the camera.")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Camera initialization failed", e)
+                    showToast("Unable to initialize the camera.")
                 }
             },
-            ContextCompat.getMainExecutor(context)
+            ContextCompat.getMainExecutor(safeContext)
         )
     }
 
     @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraUseCases() {
-        val provider = cameraProvider
-            ?: run {
-                onError("Camera provider is unavailable.")
-                return
-            }
+        val provider = cameraProvider ?: run {
+            showToast("Camera provider is unavailable.")
+            return
+        }
 
         val binding = _fragmentCameraBinding ?: return
 
@@ -454,8 +633,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                         }
 
                         detectObjects(image)
-                    } catch (exc: Exception) {
-                        Log.e(TAG, "Object detection failed", exc)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Object detection failed", e)
                     } finally {
                         image.close()
                     }
@@ -472,12 +651,10 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 imageAnalyzer
             )
 
-            preview?.setSurfaceProvider(
-                binding.viewFinder.surfaceProvider
-            )
-        } catch (exc: Exception) {
-            Log.e(TAG, "Use case binding failed", exc)
-            onError("Unable to start the camera preview.")
+            preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+        } catch (e: Exception) {
+            Log.e(TAG, "Use case binding failed", e)
+            showToast("Unable to start the camera preview.")
         }
     }
 
@@ -486,11 +663,9 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer)
 
-        val imageRotation = image.imageInfo.rotationDegrees
-
         objectDetectorHelper.detect(
             bitmapBuffer,
-            imageRotation
+            image.imageInfo.rotationDegrees
         )
     }
 
@@ -517,23 +692,26 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
                 String.format(Locale.US, "%d ms", inferenceTime)
 
             binding.overlay.setResults(
-                results ?: LinkedList<Detection>(),
+                results ?: LinkedList(),
                 imageHeight,
                 imageWidth
             )
 
             binding.overlay.invalidate()
-
             announceDetection(results)
         }
     }
 
     override fun onError(error: String) {
+        showToast(error)
+    }
+
+    private fun showToast(message: String) {
         activity?.runOnUiThread {
             context?.let { safeContext ->
                 Toast.makeText(
                     safeContext,
-                    error,
+                    message,
                     Toast.LENGTH_SHORT
                 ).show()
             }
