@@ -1,5 +1,4 @@
 
-<?xml version="1.0" encoding="utf-8"?>
 <!--
     Copyright 2022 The TensorFlow Authors. All Rights Reserved.
     Licensed under the Apache License, Version 2.0.
@@ -13,16 +12,13 @@
 
     <dist:module dist:instant="true" />
 
-    <!-- Required hardware -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
 
-    <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Allow the app to discover Android Text-to-Speech engines -->
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
