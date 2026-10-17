@@ -2,7 +2,17 @@
 /*
  * Copyright 2022 The TensorFlow Authors. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *             http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.tensorflow.lite.examples.objectdetection.fragments
@@ -11,6 +21,7 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.SystemClock
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,7 +51,21 @@ import org.tensorflow.lite.task.vision.detector.Detection
 
 class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
-    private val TAG = "ObjectDetection"
+    companion object {
+        private const val TAG = "ObjectDetection"
+
+        // A label must appear in this many consecutive analyzed frames.
+        private const val REQUIRED_STABLE_FRAMES = 3
+
+        // Minimum time between any two announcements.
+        private const val MIN_ANNOUNCEMENT_GAP_MS = 2000L
+
+        // Minimum delay before announcing the same label again.
+        private const val SAME_LABEL_REPEAT_DELAY_MS = 6000L
+
+        // Minimum confidence required before a detection can be spoken.
+        private const val SPEECH_CONFIDENCE_THRESHOLD = 0.60f
+    }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
 
@@ -59,8 +84,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     // Text-to-Speech
     private var textToSpeech: TextToSpeech? = null
     private var ttsReady = false
+
+    // Stable detection tracking
+    private var candidateLabel = ""
+    private var candidateCount = 0
+
+    // Announcement tracking
     private var lastSpokenLabel = ""
-    private var lastSpokenTime = 0L
+    private var lastAnnouncementTime = 0L
 
     override fun onResume() {
         super.onResume()
@@ -69,19 +100,29 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             Navigation.findNavController(
                 requireActivity(),
                 R.id.fragment_container
-            ).navigate(CameraFragmentDirections.actionCameraToPermissions())
+            ).navigate(
+                CameraFragmentDirections.actionCameraToPermissions()
+            )
         }
     }
 
     override fun onDestroyView() {
+        // Stop speech and release the TTS engine.
         textToSpeech?.stop()
         textToSpeech?.shutdown()
         textToSpeech = null
         ttsReady = false
 
+        // Stop camera analysis.
+        imageAnalyzer?.clearAnalyzer()
         cameraProvider?.unbindAll()
+
+        imageAnalyzer = null
+        preview = null
+        camera = null
         cameraProvider = null
 
+        // Release the background executor.
         if (::cameraExecutor.isInitialized) {
             cameraExecutor.shutdown()
         }
@@ -105,6 +146,8 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
         initializeTextToSpeech()
 
         objectDetectorHelper = ObjectDetectorHelper(
@@ -112,14 +155,14 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             objectDetectorListener = this
         )
 
-        // Initialize the camera background executor.
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
         fragmentCameraBinding.viewFinder.post {
-            setUpCamera()
+            if (_fragmentCameraBinding != null) {
+                setUpCamera()
+            }
         }
 
         initBottomSheetControls()
+        updateControlsUi()
     }
 
     private fun initializeTextToSpeech() {
@@ -135,63 +178,104 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
                 Log.d(TAG, "Text-to-Speech ready: $ttsReady")
             } else {
+                ttsReady = false
                 Log.e(TAG, "Text-to-Speech initialization failed")
             }
         }
     }
 
+    /**
+     * Selects the highest-confidence label for the current frame.
+     * The label must remain stable for several frames before it is spoken.
+     */
     private fun announceDetection(results: MutableList<Detection>?) {
-        if (!ttsReady || results.isNullOrEmpty()) return
+        if (!ttsReady || textToSpeech == null) return
 
         val bestCategory = results
-            .asSequence()
-            .mapNotNull { detection ->
+            ?.asSequence()
+            ?.mapNotNull { detection ->
                 detection.categories.maxByOrNull { it.score }
             }
-            .filter { it.score >= 0.60f }
-            .maxByOrNull { it.score }
-            ?: return
+            ?.filter { category ->
+                category.score >= SPEECH_CONFIDENCE_THRESHOLD &&
+                    category.label.isNotBlank()
+            }
+            ?.maxByOrNull { it.score }
+
+        // No sufficiently confident detection in this frame.
+        if (bestCategory == null) {
+            candidateLabel = ""
+            candidateCount = 0
+            return
+        }
 
         val label = bestCategory.label
-        if (label.isBlank()) return
 
-        val now = System.currentTimeMillis()
+        // Require the same label in consecutive frames.
+        if (label == candidateLabel) {
+            candidateCount++
+        } else {
+            candidateLabel = label
+            candidateCount = 1
+        }
 
-        // Announce a new label immediately.
-        // Repeat the same label at most once every three seconds.
+        if (candidateCount < REQUIRED_STABLE_FRAMES) {
+            return
+        }
+
+        val now = SystemClock.elapsedRealtime()
+
+        // Avoid speaking too frequently, even when different objects appear.
+        if (now - lastAnnouncementTime < MIN_ANNOUNCEMENT_GAP_MS) {
+            return
+        }
+
+        // Avoid repeating the same label too often.
         if (
             label == lastSpokenLabel &&
-            now - lastSpokenTime < 3000L
+            now - lastAnnouncementTime < SAME_LABEL_REPEAT_DELAY_MS
         ) {
             return
         }
 
-        val accepted = textToSpeech?.speak(
-            "$label ahead",
+        val result = textToSpeech?.speak(
+            "$label detected",
             TextToSpeech.QUEUE_FLUSH,
             null,
             "object_warning"
         )
 
-        if (accepted == TextToSpeech.SUCCESS) {
+        if (result == TextToSpeech.SUCCESS) {
             lastSpokenLabel = label
-            lastSpokenTime = now
+            lastAnnouncementTime = now
+
+            // Require fresh stable frames before the next announcement.
+            candidateLabel = ""
+            candidateCount = 0
+
+            Log.d(TAG, "Announced object: $label")
         }
     }
 
     private fun initBottomSheetControls() {
         fragmentCameraBinding.bottomSheetLayout.thresholdMinus
             .setOnClickListener {
-                if (objectDetectorHelper.threshold >= 0.1f) {
-                    objectDetectorHelper.threshold -= 0.1f
+                if (objectDetectorHelper.threshold > 0.1f) {
+                    objectDetectorHelper.threshold =
+                        (objectDetectorHelper.threshold - 0.1f)
+                            .coerceAtLeast(0.1f)
+
                     updateControlsUi()
                 }
             }
 
         fragmentCameraBinding.bottomSheetLayout.thresholdPlus
             .setOnClickListener {
-                if (objectDetectorHelper.threshold <= 0.8f) {
-                    objectDetectorHelper.threshold += 0.1f
+                if (objectDetectorHelper.threshold < 0.9f) {
+                    objectDetectorHelper.threshold =
+                        (objectDetectorHelper.threshold + 0.1f)
+                            .coerceAtMost(0.9f)
+
                     updateControlsUi()
                 }
             }
@@ -234,14 +318,17 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         fragmentCameraBinding.bottomSheetLayout.spinnerDelegate
             .onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
+
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
                     view: View?,
                     position: Int,
                     id: Long
                 ) {
-                    objectDetectorHelper.currentDelegate = position
-                    updateControlsUi()
+                    if (objectDetectorHelper.currentDelegate != position) {
+                        objectDetectorHelper.currentDelegate = position
+                        updateControlsUi()
+                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -255,14 +342,17 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         fragmentCameraBinding.bottomSheetLayout.spinnerModel
             .onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
+
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
                     view: View?,
                     position: Int,
                     id: Long
                 ) {
-                    objectDetectorHelper.currentModel = position
-                    updateControlsUi()
+                    if (objectDetectorHelper.currentModel != position) {
+                        objectDetectorHelper.currentModel = position
+                        updateControlsUi()
+                    }
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -272,36 +362,60 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     private fun updateControlsUi() {
-        fragmentCameraBinding.bottomSheetLayout.maxResultsValue.text =
+        val binding = _fragmentCameraBinding ?: return
+
+        binding.bottomSheetLayout.maxResultsValue.text =
             objectDetectorHelper.maxResults.toString()
 
-        fragmentCameraBinding.bottomSheetLayout.thresholdValue.text =
-            String.format("%.2f", objectDetectorHelper.threshold)
+        binding.bottomSheetLayout.thresholdValue.text =
+            String.format(
+                Locale.US,
+                "%.2f",
+                objectDetectorHelper.threshold
+            )
 
-        fragmentCameraBinding.bottomSheetLayout.threadsValue.text =
+        binding.bottomSheetLayout.threadsValue.text =
             objectDetectorHelper.numThreads.toString()
 
+        // Reset speech stability when detector settings change.
+        candidateLabel = ""
+        candidateCount = 0
+
         objectDetectorHelper.clearObjectDetector()
-        fragmentCameraBinding.overlay.clear()
+        binding.overlay.clear()
     }
 
     private fun setUpCamera() {
+        val context = context ?: return
+
         val cameraProviderFuture =
-            ProcessCameraProvider.getInstance(requireContext())
+            ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener(
             {
-                cameraProvider = cameraProviderFuture.get()
-                bindCameraUseCases()
+                if (_fragmentCameraBinding == null) return@addListener
+
+                try {
+                    cameraProvider = cameraProviderFuture.get()
+                    bindCameraUseCases()
+                } catch (exc: Exception) {
+                    Log.e(TAG, "Camera initialization failed", exc)
+                    onError("Unable to initialize the camera.")
+                }
             },
-            ContextCompat.getMainExecutor(requireContext())
+            ContextCompat.getMainExecutor(context)
         )
     }
 
     @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraUseCases() {
         val provider = cameraProvider
-            ?: throw IllegalStateException("Camera initialization failed.")
+            ?: run {
+                onError("Camera provider is unavailable.")
+                return
+            }
+
+        val binding = _fragmentCameraBinding ?: return
 
         val cameraSelector = CameraSelector.Builder()
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
@@ -309,12 +423,12 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         preview = Preview.Builder()
             .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
+            .setTargetRotation(binding.viewFinder.display.rotation)
             .build()
 
         imageAnalyzer = ImageAnalysis.Builder()
             .setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
+            .setTargetRotation(binding.viewFinder.display.rotation)
             .setBackpressureStrategy(
                 ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
             )
@@ -323,7 +437,15 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             .also { analyzer ->
                 analyzer.setAnalyzer(cameraExecutor) { image ->
                     try {
-                        if (!::bitmapBuffer.isInitialized) {
+                        if (_fragmentCameraBinding == null) {
+                            return@setAnalyzer
+                        }
+
+                        if (
+                            !::bitmapBuffer.isInitialized ||
+                            bitmapBuffer.width != image.width ||
+                            bitmapBuffer.height != image.height
+                        ) {
                             bitmapBuffer = Bitmap.createBitmap(
                                 image.width,
                                 image.height,
@@ -351,24 +473,34 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             )
 
             preview?.setSurfaceProvider(
-                fragmentCameraBinding.viewFinder.surfaceProvider
+                binding.viewFinder.surfaceProvider
             )
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
+            onError("Unable to start the camera preview.")
         }
     }
 
     private fun detectObjects(image: ImageProxy) {
+        if (!::bitmapBuffer.isInitialized) return
+
         bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer)
 
         val imageRotation = image.imageInfo.rotationDegrees
-        objectDetectorHelper.detect(bitmapBuffer, imageRotation)
+
+        objectDetectorHelper.detect(
+            bitmapBuffer,
+            imageRotation
+        )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        imageAnalyzer?.targetRotation =
-            fragmentCameraBinding.viewFinder.display.rotation
+
+        _fragmentCameraBinding?.let { binding ->
+            imageAnalyzer?.targetRotation =
+                binding.viewFinder.display.rotation
+        }
     }
 
     override fun onResults(
@@ -378,10 +510,11 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         imageWidth: Int
     ) {
         activity?.runOnUiThread {
-            val binding = _fragmentCameraBinding ?: return@runOnUiThread
+            val binding = _fragmentCameraBinding
+                ?: return@runOnUiThread
 
             binding.bottomSheetLayout.inferenceTimeVal.text =
-                String.format("%d ms", inferenceTime)
+                String.format(Locale.US, "%d ms", inferenceTime)
 
             binding.overlay.setResults(
                 results ?: LinkedList<Detection>(),
@@ -391,7 +524,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
             binding.overlay.invalidate()
 
-            // Speak the best detection above the confidence threshold.
             announceDetection(results)
         }
     }
