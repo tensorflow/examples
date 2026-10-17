@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2022 The TensorFlow Authors. All Rights Reserved.
  *
@@ -26,96 +27,196 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import java.util.LinkedList
+import java.util.Locale
 import kotlin.math.max
+import kotlin.math.min
 import org.tensorflow.lite.task.vision.detector.Detection
 
-class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+class OverlayView(
+    context: Context?,
+    attrs: AttributeSet?
+) : View(context, attrs) {
 
-    private var results: List<Detection> = LinkedList<Detection>()
-    private var boxPaint = Paint()
-    private var textBackgroundPaint = Paint()
-    private var textPaint = Paint()
+    private var results: List<Detection> = LinkedList()
+
+    private val boxPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val textBackgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private var scaleFactor: Float = 1f
+    private val bounds = Rect()
 
-    private var bounds = Rect()
+    // Layout settings
+    private val boxStrokeWidth = 5f
+    private val textSizeSp = 14f
+    private val textPadding = 8f
+    private val cornerRadius = 8f
 
     init {
         initPaints()
     }
 
-    fun clear() {
-        textPaint.reset()
-        textBackgroundPaint.reset()
-        boxPaint.reset()
-        invalidate()
-        initPaints()
-    }
-
     private fun initPaints() {
-        textBackgroundPaint.color = Color.BLACK
-        textBackgroundPaint.style = Paint.Style.FILL
-        textBackgroundPaint.textSize = 50f
+        val density = resources.displayMetrics.density
+        val scaledTextSize = textSizeSp * density
 
-        textPaint.color = Color.WHITE
-        textPaint.style = Paint.Style.FILL
-        textPaint.textSize = 50f
-
-        boxPaint.color = ContextCompat.getColor(context!!, R.color.bounding_box_color)
-        boxPaint.strokeWidth = 8F
-        boxPaint.style = Paint.Style.STROKE
-    }
-
-    override fun draw(canvas: Canvas) {
-        super.draw(canvas)
-
-        for (result in results) {
-            val boundingBox = result.boundingBox
-
-            val top = boundingBox.top * scaleFactor
-            val bottom = boundingBox.bottom * scaleFactor
-            val left = boundingBox.left * scaleFactor
-            val right = boundingBox.right * scaleFactor
-
-            // Draw bounding box around detected objects
-            val drawableRect = RectF(left, top, right, bottom)
-            canvas.drawRect(drawableRect, boxPaint)
-
-            // Create text to display alongside detected objects
-            val drawableText =
-                result.categories[0].label + " " +
-                        String.format("%.2f", result.categories[0].score)
-
-            // Draw rect behind display text
-            textBackgroundPaint.getTextBounds(drawableText, 0, drawableText.length, bounds)
-            val textWidth = bounds.width()
-            val textHeight = bounds.height()
-            canvas.drawRect(
-                left,
-                top,
-                left + textWidth + Companion.BOUNDING_RECT_TEXT_PADDING,
-                top + textHeight + Companion.BOUNDING_RECT_TEXT_PADDING,
-                textBackgroundPaint
+        boxPaint.apply {
+            color = ContextCompat.getColor(
+                context ?: return@apply,
+                R.color.bounding_box_color
             )
+            style = Paint.Style.STROKE
+            strokeWidth = boxStrokeWidth * density
+        }
 
-            // Draw text for detected object
-            canvas.drawText(drawableText, left, top + bounds.height(), textPaint)
+        textBackgroundPaint.apply {
+            color = Color.BLACK
+            alpha = 220
+            style = Paint.Style.FILL
+        }
+
+        textPaint.apply {
+            color = Color.WHITE
+            style = Paint.Style.FILL
+            textSize = scaledTextSize
+            typeface = android.graphics.Typeface.create(
+                android.graphics.Typeface.DEFAULT,
+                android.graphics.Typeface.BOLD
+            )
         }
     }
 
-    fun setResults(
-      detectionResults: MutableList<Detection>,
-      imageHeight: Int,
-      imageWidth: Int,
-    ) {
-        results = detectionResults
-
-        // PreviewView is in FILL_START mode. So we need to scale up the bounding box to match with
-        // the size that the captured images will be displayed.
-        scaleFactor = max(width * 1f / imageWidth, height * 1f / imageHeight)
+    /**
+     * Clears all displayed detections.
+     */
+    fun clear() {
+        results = emptyList()
+        invalidate()
     }
 
-    companion object {
-        private const val BOUNDING_RECT_TEXT_PADDING = 8
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+
+        if (results.isEmpty() || width <= 0 || height <= 0) {
+            return
+        }
+
+        for (result in results) {
+            val category = result.categories.maxByOrNull { it.score }
+                ?: continue
+
+            val label = category.label.ifBlank { "Unknown object" }
+            val confidence = (category.score * 100f)
+                .coerceIn(0f, 100f)
+
+            val boundingBox = result.boundingBox
+
+            val left = boundingBox.left * scaleFactor
+            val top = boundingBox.top * scaleFactor
+            val right = boundingBox.right * scaleFactor
+            val bottom = boundingBox.bottom * scaleFactor
+
+            val drawableRect = RectF(
+                left,
+                top,
+                right,
+                bottom
+            )
+
+            // Draw the bounding box.
+            canvas.drawRoundRect(
+                drawableRect,
+                cornerRadius,
+                cornerRadius,
+                boxPaint
+            )
+
+            // Display label and confidence as a percentage.
+            val drawableText = String.format(
+                Locale.US,
+                "%s %.0f%%",
+                label,
+                confidence
+            )
+
+            textPaint.getTextBounds(
+                drawableText,
+                0,
+                drawableText.length,
+                bounds
+            )
+
+            val textWidth = textPaint.measureText(drawableText)
+            val textHeight = bounds.height().toFloat()
+
+            val backgroundWidth = textWidth + textPadding * 2
+            val backgroundHeight = textHeight + textPadding * 2
+
+            // Prefer placing the label above the bounding box.
+            // If there is insufficient room, place it inside the box.
+            val backgroundTop = if (top >= backgroundHeight) {
+                top - backgroundHeight
+            } else {
+                top
+            }
+
+            val backgroundLeft = left.coerceAtLeast(0f)
+
+            val backgroundRect = RectF(
+                backgroundLeft,
+                backgroundTop,
+                min(backgroundLeft + backgroundWidth, width.toFloat()),
+                min(backgroundTop + backgroundHeight, height.toFloat())
+            )
+
+            canvas.drawRoundRect(
+                backgroundRect,
+                cornerRadius,
+                cornerRadius,
+                textBackgroundPaint
+            )
+
+            // Keep the text inside the visible canvas.
+            val textX = backgroundRect.left + textPadding
+            val textBaseline = min(
+                backgroundRect.bottom - textPadding,
+                backgroundRect.top + textPadding + textHeight
+            )
+
+            canvas.drawText(
+                drawableText,
+                textX,
+                textBaseline,
+                textPaint
+            )
+        }
+    }
+
+    /**
+     * Updates detections and scales bounding boxes to match the preview.
+     */
+    fun setResults(
+        detectionResults: MutableList<Detection>,
+        imageHeight: Int,
+        imageWidth: Int
+    ) {
+        results = detectionResults.toList()
+
+        if (
+            imageWidth <= 0 ||
+            imageHeight <= 0 ||
+            width <= 0 ||
+            height <= 0
+        ) {
+            scaleFactor = 1f
+        } else {
+            // Match the PreviewView's FILL_START scaling behavior.
+            scaleFactor = max(
+                width.toFloat() / imageWidth,
+                height.toFloat() / imageHeight
+            )
+        }
+
+        invalidate()
     }
 }
