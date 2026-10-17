@@ -1,0 +1,41 @@
+
+name: Build Android Object Detection Demo
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "lite/examples/object_detection/android/**"
+      - ".github/workflows/android-build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "11"
+
+      - name: Build debug APK
+        working-directory: lite/examples/object_detection/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blind-assist-debug-apk
+          path: lite/examples/object_detection/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
