@@ -49,6 +49,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     private lateinit var objectDetectorHelper: ObjectDetectorHelper
     private lateinit var bitmapBuffer: Bitmap
+    private lateinit var cameraExecutor: ExecutorService
 
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -60,10 +61,6 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var ttsReady = false
     private var lastSpokenLabel = ""
     private var lastSpokenTime = 0L
-
-    private val cameraExecutor: ExecutorService by lazy {
-        Executors.newSingleThreadExecutor()
-    }
 
     override fun onResume() {
         super.onResume()
@@ -116,7 +113,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         )
 
         // Initialize the camera background executor.
-        cameraExecutor
+        cameraExecutor = Executors.newSingleThreadExecutor()
 
         fragmentCameraBinding.viewFinder.post {
             setUpCamera()
@@ -160,9 +157,10 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
         val now = System.currentTimeMillis()
 
-        // Announce a new label immediately. Repeat the same label
-        // no more frequently than once every three seconds.
-        if (label == lastSpokenLabel &&
+        // Announce a new label immediately.
+        // Repeat the same label at most once every three seconds.
+        if (
+            label == lastSpokenLabel &&
             now - lastSpokenTime < 3000L
         ) {
             return
@@ -324,15 +322,21 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             .build()
             .also { analyzer ->
                 analyzer.setAnalyzer(cameraExecutor) { image ->
-                    if (!::bitmapBuffer.isInitialized) {
-                        bitmapBuffer = Bitmap.createBitmap(
-                            image.width,
-                            image.height,
-                            Bitmap.Config.ARGB_8888
-                        )
-                    }
+                    try {
+                        if (!::bitmapBuffer.isInitialized) {
+                            bitmapBuffer = Bitmap.createBitmap(
+                                image.width,
+                                image.height,
+                                Bitmap.Config.ARGB_8888
+                            )
+                        }
 
-                    detectObjects(image)
+                        detectObjects(image)
+                    } catch (exc: Exception) {
+                        Log.e(TAG, "Object detection failed", exc)
+                    } finally {
+                        image.close()
+                    }
                 }
             }
 
@@ -355,9 +359,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     private fun detectObjects(image: ImageProxy) {
-        image.use {
-            bitmapBuffer.copyPixelsFromBuffer(it.planes[0].buffer)
-        }
+        bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer)
 
         val imageRotation = image.imageInfo.rotationDegrees
         objectDetectorHelper.detect(bitmapBuffer, imageRotation)
@@ -376,29 +378,33 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         imageWidth: Int
     ) {
         activity?.runOnUiThread {
-            fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
+            val binding = _fragmentCameraBinding ?: return@runOnUiThread
+
+            binding.bottomSheetLayout.inferenceTimeVal.text =
                 String.format("%d ms", inferenceTime)
 
-            fragmentCameraBinding.overlay.setResults(
+            binding.overlay.setResults(
                 results ?: LinkedList<Detection>(),
                 imageHeight,
                 imageWidth
             )
 
-            fragmentCameraBinding.overlay.invalidate()
+            binding.overlay.invalidate()
 
-            // Announce the best qualifying detection.
+            // Speak the best detection above the confidence threshold.
             announceDetection(results)
         }
     }
 
     override fun onError(error: String) {
         activity?.runOnUiThread {
-            Toast.makeText(
-                requireContext(),
-                error,
-                Toast.LENGTH_SHORT
-            ).show()
+            context?.let { safeContext ->
+                Toast.makeText(
+                    safeContext,
+                    error,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 }
