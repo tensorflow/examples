@@ -169,6 +169,10 @@ class CameraFragment :
         cameraExecutor = Executors.newSingleThreadExecutor()
         audioExecutor = Executors.newSingleThreadExecutor()
 
+        // Hide bounding boxes and object labels for the demonstration.
+        // Detection still runs; only the visual overlay is hidden.
+        fragmentCameraBinding.overlay.visibility = View.GONE
+
         initializeTextToSpeech()
 
         objectDetectorHelper = ObjectDetectorHelper(
@@ -443,8 +447,11 @@ class CameraFragment :
         candidateLabel = ""
         candidateCount = 0
 
-        Log.i(TAG, "Announcing detected object: $label")
-        synthesizeAndSend("$label detected")
+        val spokenLabel = label.replaceFirstChar { it.titlecase(Locale.US) }
+        val message = "$spokenLabel is detected."
+
+        Log.i(TAG, "Announcing detected object: $message")
+        synthesizeAndSend(message)
     }
 
     private fun initBottomSheetControls() {
