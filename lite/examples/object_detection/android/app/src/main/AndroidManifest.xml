@@ -16,9 +16,11 @@
         android:name="android.hardware.camera"
         android:required="true" />
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Allow Android to discover Text-to-Speech engines -->
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
