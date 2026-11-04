@@ -45,7 +45,8 @@ abstract class ImageUtils {
 
       // Apply transformation corresponding to declared EXIF orientation
       when (orientation) {
-        ExifInterface.ORIENTATION_NORMAL, ExifInterface.ORIENTATION_UNDEFINED -> Unit
+        ExifInterface.ORIENTATION_NORMAL,
+        ExifInterface.ORIENTATION_UNDEFINED -> Unit
         ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90F)
         ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180F)
         ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270F)
@@ -74,6 +75,7 @@ abstract class ImageUtils {
      *
      * @param filePath
      * - The image file to change
+     *
      * @param value
      * - the orientation of the file
      */
@@ -84,7 +86,7 @@ abstract class ImageUtils {
     }
 
     /** Transforms rotation and mirroring information into one of the [ExifInterface] constants */
-    fun computeExifOrientation(rotationDegrees: Int, mirrored: Boolean) =
+    fun computeExifOrientation(rotationDegrees: Int, mirrored: Boolean): Int =
       when {
         rotationDegrees == 0 && !mirrored -> ExifInterface.ORIENTATION_NORMAL
         rotationDegrees == 0 && mirrored -> ExifInterface.ORIENTATION_FLIP_HORIZONTAL
@@ -122,7 +124,7 @@ abstract class ImageUtils {
         bitmap.width,
         bitmap.height,
         transformation,
-        true
+        true,
       )
     }
 
@@ -132,12 +134,16 @@ abstract class ImageUtils {
      *
      * @param bitmapIn
      * - the bitmap to convert
+     *
      * @param width
      * - target width of the converted TensorImage
+     *
      * @param height
      * - target height of the converted TensorImage
+     *
      * @param means
      * - means of the images
+     *
      * @param stds
      * - stds of the images
      */
@@ -146,7 +152,7 @@ abstract class ImageUtils {
       width: Int,
       height: Int,
       mean: Float,
-      std: Float
+      std: Float,
     ): TensorImage {
       val imageProcessor =
         ImageProcessor.Builder()
@@ -167,12 +173,16 @@ abstract class ImageUtils {
      *
      * @param bitmapIn
      * - the bitmap to convert
+     *
      * @param width
      * - target width of the converted TensorImage
+     *
      * @param height
      * - target height of the converted TensorImage
+     *
      * @param means
      * - means of the images
+     *
      * @param stds
      * - stds of the images
      */
@@ -181,7 +191,7 @@ abstract class ImageUtils {
       width: Int,
       height: Int,
       means: FloatArray,
-      stds: FloatArray
+      stds: FloatArray,
     ): TensorImage {
       val imageProcessor =
         ImageProcessor.Builder()
@@ -200,7 +210,7 @@ abstract class ImageUtils {
       imageWidth: Int,
       imageHeigth: Int,
       color: Int = 0,
-      imageConfig: Bitmap.Config = Bitmap.Config.RGB_565
+      imageConfig: Bitmap.Config = Bitmap.Config.RGB_565,
     ): Bitmap {
       val ret = Bitmap.createBitmap(imageWidth, imageHeigth, imageConfig)
       if (color != 0) {
