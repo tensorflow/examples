@@ -39,13 +39,13 @@ def _get_label_map(label_map):
   if isinstance(label_map, list):
     label_map_dict = {}
     for i, label in enumerate(label_map):
-      # 0 is resevered for background.
+      # 0 is reserved for background.
       label_map_dict[i + 1] = label
     label_map = label_map_dict
   label_map = label_util.get_label_map(label_map)
 
   if 0 in label_map and label_map[0] != 'background':
-    raise ValueError('0 must be resevered for background.')
+    raise ValueError('0 must be reserved for background.')
   label_map.pop(0, None)
   name_set = set()
   for idx, name in label_map.items():
@@ -104,25 +104,26 @@ class DataLoader(dataloader.DataLoader):
   """DataLoader for object detector."""
 
   def __init__(self,
-               tfrecord_file_patten,
+               tfrecord_file_pattern,
                size,
                label_map,
                annotations_json_file=None):
     """Initialize DataLoader for object detector.
 
     Args:
-      tfrecord_file_patten: Glob for tfrecord files. e.g. "/tmp/coco*.tfrecord".
+      tfrecord_file_pattern: Glob for tfrecord files. e.g. "/tmp/coco*.tfrecord".
       size: The size of the dataset.
       label_map: Variable shows mapping label integers ids to string label
         names. 0 is the reserved key for `background` and doesn't need to be
         included in label_map. Label names can't be duplicated. Supported
         formats are:
         1. Dict, map label integers ids to string label names, such as {1:
-          'person', 2: 'notperson'}. 2. List, a list of label names such as
-            ['person', 'notperson'] which is
+          'person', 2: 'notperson'}. 
+        2. List, a list of label names such as ['person', 'notperson'] which is
            the same as setting label_map={1: 'person', 2: 'notperson'}.
         3. String, name for certain dataset. Accepted values are: 'coco', 'voc'
-          and 'waymo'. 4. String, yaml filename that stores label_map.
+          and 'waymo'. 
+        4. String, yaml filename that stores label_map.
       annotations_json_file: JSON with COCO data format containing golden
         bounding boxes. Used for validation. If None, use the ground truth from
         the dataloader. Refer to
@@ -130,7 +131,7 @@ class DataLoader(dataloader.DataLoader):
           for the description of COCO data format.
     """
     super(DataLoader, self).__init__(dataset=None, size=size)
-    self.tfrecord_file_patten = tfrecord_file_patten
+    self.tfrecord_file_pattern = tfrecord_file_pattern
     self.label_map = _get_label_map(label_map)
     self.annotations_json_file = annotations_json_file
 
@@ -316,8 +317,8 @@ class DataLoader(dataloader.DataLoader):
       ObjectDetectorDataLoader object.
     """
     # Gets TFRecord files.
-    tfrecord_file_patten = cache_prefix + '*.tfrecord'
-    if not tf.io.gfile.glob(tfrecord_file_patten):
+    tfrecord_file_pattern = cache_prefix + '*.tfrecord'
+    if not tf.io.gfile.glob(tfrecord_file_pattern):
       raise ValueError('TFRecord files are empty.')
 
     # Loads meta_data.
@@ -332,7 +333,7 @@ class DataLoader(dataloader.DataLoader):
     if not tf.io.gfile.exists(ann_json_file):
       ann_json_file = None
 
-    return DataLoader(tfrecord_file_patten, meta_data['size'],
+    return DataLoader(tfrecord_file_pattern, meta_data['size'],
                       meta_data['label_map'], ann_json_file)
 
   def gen_dataset(self,
@@ -353,7 +354,7 @@ class DataLoader(dataloader.DataLoader):
       A TF dataset ready to be consumed by Keras model.
     """
     reader = det_dataloader.InputReader(
-        self.tfrecord_file_patten,
+        self.tfrecord_file_pattern,
         is_training=is_training,
         use_fake_data=use_fake_data,
         max_instances_per_image=model_spec.config.max_instances_per_image,
