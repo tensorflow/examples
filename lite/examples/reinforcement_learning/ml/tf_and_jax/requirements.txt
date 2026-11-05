@@ -5,4 +5,4 @@ tensorboard==2.9.1
 tensorflow==2.9.1
 numpy==1.23.2
 gym==0.18.0
-tqdm==4.64.0
+tqdm==4.66.3
