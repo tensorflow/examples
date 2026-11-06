@@ -92,7 +92,7 @@ answer tasks. Meanwhile, we provide demo code for each of them in demo folder.
 
 *   [Overview for TensorFlow Lite Model Maker](https://www.tensorflow.org/lite/guide/model_maker)
 *   [Python API Reference](https://www.tensorflow.org/lite/api_docs/python/tflite_model_maker)
-*   [Colab for image classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_image_classification.ipynb)
-*   [Colab for text classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_text_classification.ipynb)
-*   [Colab for BERT question answer](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/tutorials/model_maker_question_answer.ipynb)
-*   [Colab for object detection](https://www.tensorflow.org/lite/tutorials/model_maker_object_detection)
+*   [Colab for image classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/models/modify/model_maker/image_classification.ipynb)
+*   [Colab for text classification](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/models/modify/model_maker/text_classification.ipynb)
+*   [Colab for BERT question answer](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/models/modify/model_maker/question_answer.ipynb)
+*   [Colab for object detection](https://colab.research.google.com/github/tensorflow/tensorflow/blob/master/tensorflow/lite/g3doc/models/modify/model_maker/object_detection.ipynb)
