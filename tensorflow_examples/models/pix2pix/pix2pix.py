@@ -294,7 +294,7 @@ def unet_generator(output_channels, norm_type='batchnorm'):
 
   concat = tf.keras.layers.Concatenate()
 
-  inputs = tf.keras.layers.Input(shape=[None, None, 3])
+  inputs = tf.keras.layers.Input(shape=[None, None, output_channels])
   x = inputs
 
   # Downsampling through the model
@@ -315,7 +315,7 @@ def unet_generator(output_channels, norm_type='batchnorm'):
   return tf.keras.Model(inputs=inputs, outputs=x)
 
 
-def discriminator(norm_type='batchnorm', target=True):
+def discriminator(norm_type='batchnorm', target=True, output_channels=3):
   """PatchGan discriminator model (https://arxiv.org/abs/1611.07004).
 
   Args:
@@ -328,11 +328,11 @@ def discriminator(norm_type='batchnorm', target=True):
 
   initializer = tf.random_normal_initializer(0., 0.02)
 
-  inp = tf.keras.layers.Input(shape=[None, None, 3], name='input_image')
+  inp = tf.keras.layers.Input(shape=[None, None, output_channels], name='input_image')
   x = inp
 
   if target:
-    tar = tf.keras.layers.Input(shape=[None, None, 3], name='target_image')
+    tar = tf.keras.layers.Input(shape=[None, None, output_channels], name='target_image')
     x = tf.keras.layers.concatenate([inp, tar])  # (bs, 256, 256, channels*2)
 
   down1 = downsample(64, 4, norm_type, False)(x)  # (bs, 128, 128, 64)
