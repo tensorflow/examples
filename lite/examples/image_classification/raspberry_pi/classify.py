@@ -75,6 +75,9 @@ def run(model: str, max_results: int, score_threshold: float, num_threads: int,
           'ERROR: Unable to read from webcam. Please verify your webcam settings.'
       )
 
+
+
+
     counter += 1
     image = cv2.flip(image, 1)
 
