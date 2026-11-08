@@ -18,7 +18,7 @@ Pre-requisites:
 ### Prepare the TfLite model
 
 For the following workflow, a Python virtual environment setup is optional but
-recommended. We assume Python 3.5+ by default.
+recommended. We assume Python 3.7+ by default.
 
 ```shell
 pushd transfer_learning
