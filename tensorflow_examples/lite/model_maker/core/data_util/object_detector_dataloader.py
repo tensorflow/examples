@@ -156,7 +156,7 @@ class DataLoader(dataloader.DataLoader):
     and save annotations as XML files in PASCAL VOC data format.
 
     Annotations are in the folder: `annotations_dir`.
-    Raw images are in the foloder: `images_dir`.
+    Raw images are in the folder: `images_dir`.
 
     Args:
       images_dir: Path to directory that store raw images.
@@ -177,7 +177,7 @@ class DataLoader(dataloader.DataLoader):
       ignore_difficult_instances: Whether to ignore difficult instances.
         `difficult` can be set inside `object` item in the annotation xml file.
       num_shards: Number of shards for output file.
-      max_num_images: Max number of imags to process.
+      max_num_images: Max number of images to process.
       cache_dir: The cache directory to save TFRecord, metadata and json file.
         When cache_dir is not set, a temporary folder will be created and will
         not be removed automatically after training which makes it can be used
