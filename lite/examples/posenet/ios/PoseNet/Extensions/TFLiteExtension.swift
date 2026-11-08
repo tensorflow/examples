@@ -32,9 +32,13 @@ extension Data {
 
   /// Convert a Data instance to Array representation.
   func toArray<T>(type: T.Type) -> [T] where T: AdditiveArithmetic {
-    var array = [T](repeating: T.zero, count: self.count / MemoryLayout<T>.stride)
-    _ = array.withUnsafeMutableBytes { self.copyBytes(to: $0) }
-    return array
+    [T].init(unsafeUninitializedCapacity: self.count / MemoryLayout<T>.stride) {
+      bufPtr, initializedCount in
+      bufPtr.withMemoryRebound(to: UInt8.self) { reboundBufPtr in
+        self.withUnsafeBytes { _ = reboundBufPtr.initialize(from: $0) }
+      }
+      initializedCount = bufPtr.count
+    }
   }
 }
 
@@ -55,7 +59,7 @@ struct FlatArray<Element: AdditiveArithmetic> {
     }
 
     var result = 0
-    for i in 0..<dimensions.count {
+    for i in dimensions.indices {
       guard dimensions[i] > index[i] else {
         fatalError("Invalid index: \(index[i]) is bigger than \(dimensions[i])")
       }
