@@ -85,7 +85,6 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   TfLiteTensor* weight = GetOutput(context, node, 1);
   TF_LITE_ENSURE(context, weight != nullptr);
 
-  std::map<int64_t, int> feature_id_counts;
   for (int i = 0; i < num_strings; i++) {
     // Use fingerprint of feature name as id.
     auto strref = tflite::GetString(input, i);
